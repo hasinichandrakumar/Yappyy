@@ -79,10 +79,10 @@ export default function LiveTranscript() {
 
   return (
     <Card className="h-full flex flex-col shadow-lg border-0 bg-white">
-      <CardHeader className="pb-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-t-lg border-b border-gray-100">
+      <CardHeader className="pb-4 bg-gradient-to-r from-cyan-50 to-blue-50 rounded-t-lg border-b border-gray-100">
         <div className="flex items-center justify-between">
           <CardTitle className="text-xl font-semibold flex items-center gap-3 text-gray-900">
-            <MessageSquareText className="w-6 h-6 text-blue-600" />
+            <MessageSquareText className="w-6 h-6 text-cyan-600" />
             Live Transcript
           </CardTitle>
           <div className="flex items-center gap-2">

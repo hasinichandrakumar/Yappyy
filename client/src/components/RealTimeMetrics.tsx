@@ -93,7 +93,7 @@ export default function RealTimeMetrics() {
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center space-x-2">
-            <Icon className="w-4 h-4 text-blue-600" />
+            <Icon className="w-4 h-4 text-cyan-600" />
             <h3 className="text-sm font-medium text-gray-700">{title}</h3>
           </div>
           {status && (
@@ -124,10 +124,10 @@ export default function RealTimeMetrics() {
 
   return (
     <Card className="shadow-lg border-0 bg-white">
-      <CardHeader className="pb-6 bg-gradient-to-r from-purple-50 to-blue-50 rounded-t-lg border-b border-gray-100">
+      <CardHeader className="pb-6 bg-gradient-to-r from-cyan-50 to-blue-50 rounded-t-lg border-b border-gray-100">
         <CardTitle className="text-xl font-semibold text-gray-900 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Activity className="w-6 h-6 text-purple-600" />
+            <Activity className="w-6 h-6 text-cyan-600" />
             <span>Live Performance Feedback</span>
           </div>
           <div className={`w-4 h-4 rounded-full ${isListening ? 'bg-green-500 animate-pulse' : 'bg-gray-300'}`} />
