@@ -360,6 +360,126 @@ Provide detailed, actionable feedback focusing on advanced speaking techniques.`
     }
   });
 
+  // Generate personalized improvement plan
+  app.post("/api/generate-improvement-plan", async (req, res) => {
+    try {
+      const { metrics, sessionData } = req.body;
+      
+      if (!metrics) {
+        return res.status(400).json({ message: "Metrics are required" });
+      }
+
+      // Build comprehensive analysis prompt
+      const analysisPrompt = `As an expert executive speaking coach, analyze these presentation metrics and create a detailed, personalized improvement plan:
+
+CURRENT PERFORMANCE METRICS:
+Voice & Speech:
+- Speaking Pace: ${metrics.voice.speakingPace} WPM (optimal: 120-160)
+- Voice Clarity: ${metrics.voice.voiceClarity}%
+- Confidence Score: ${metrics.voice.confidenceScore}%
+- Volume Level: ${metrics.voice.volumeLevel}%
+
+Speech Content:
+- Word Count: ${metrics.speech.wordCount}
+- Session Duration: ${metrics.speech.sessionTime} seconds
+- Recent Transcript: "${metrics.speech.transcript}"
+
+Body Language:
+- Posture: ${metrics.bodyLanguage.posture}
+- Gestures: ${metrics.bodyLanguage.gesture}  
+- Eye Contact: ${metrics.bodyLanguage.eyeContact}
+
+ANALYSIS REQUIREMENTS:
+1. Identify the TOP 3 specific areas needing improvement (prioritize by impact)
+2. For each area, provide:
+   - Specific issue description
+   - Current vs target performance levels
+   - Detailed step-by-step improvement methods
+   - Progressive practice exercises (beginner to advanced)
+   - Realistic timeline for improvement
+   - Measurable success indicators
+
+3. Identify strengths to maintain and leverage
+4. Provide 5 immediate actionable tips (quick wins)
+5. Suggest 4 long-term development goals
+
+COACHING APPROACH:
+- Give specific, non-generic advice tailored to current performance
+- Include advanced techniques for experienced speakers
+- Provide progressive skill-building exercises
+- Focus on measurable improvements
+- Consider psychological aspects of confidence building
+
+Respond with detailed analysis in JSON format:
+{
+  "overallAssessment": "comprehensive assessment text",
+  "topPriorities": [
+    {
+      "category": "area name",
+      "priority": "high/medium/low", 
+      "currentScore": number,
+      "targetScore": number,
+      "issue": "specific problem description",
+      "howToImprove": ["detailed step 1", "detailed step 2", "detailed step 3"],
+      "timeToImprove": "realistic timeframe",
+      "practiceExercises": ["specific exercise 1", "specific exercise 2"]
+    }
+  ],
+  "strengthsToMaintain": ["strength 1", "strength 2"],
+  "quickWins": ["immediate tip 1", "immediate tip 2"],
+  "longTermGoals": ["goal 1", "goal 2"]
+}`;
+
+      const response = await fetch('https://api.perplexity.ai/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.PERPLEXITY_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: "llama-3.1-sonar-small-128k-online",
+          messages: [
+            {
+              role: "system",
+              content: "You are a world-class executive speaking coach with expertise in performance psychology, vocal training, and presentation mastery. Provide detailed, specific, and progressively challenging improvement plans."
+            },
+            {
+              role: "user",
+              content: analysisPrompt
+            }
+          ],
+          temperature: 0.3,
+          stream: false
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Perplexity API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      let analysisResult;
+      
+      try {
+        analysisResult = JSON.parse(data.choices[0].message.content);
+      } catch (parseError) {
+        // If JSON parsing fails, create structured response from text
+        const textResponse = data.choices[0].message.content;
+        analysisResult = {
+          overallAssessment: textResponse.substring(0, 300) + "...",
+          topPriorities: [],
+          strengthsToMaintain: ["Continue current practice routine"],
+          quickWins: ["Focus on breathing", "Practice with recordings", "Maintain good posture"],
+          longTermGoals: ["Develop advanced speaking techniques", "Build presentation confidence"]
+        };
+      }
+
+      res.json(analysisResult);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to generate improvement plan", error: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

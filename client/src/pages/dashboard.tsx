@@ -11,6 +11,7 @@ import SessionHistory from "@/components/SessionHistory";
 import DetailedAnalysis from "@/components/DetailedAnalysis";
 import BodyLanguageAnalyzer from "@/components/BodyLanguageAnalyzer";
 import AdvancedSpeechAnalysis from "@/components/AdvancedSpeechAnalysis";
+import ImprovementSummary from "@/components/ImprovementSummary";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -41,10 +42,14 @@ export default function Dashboard() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-6">
+          <TabsList className="grid w-full grid-cols-5 mb-6">
             <TabsTrigger value="overview" className="flex items-center space-x-2">
               <BarChart3 className="w-4 h-4" />
               <span>Overview</span>
+            </TabsTrigger>
+            <TabsTrigger value="improvement" className="flex items-center space-x-2">
+              <Brain className="w-4 h-4" />
+              <span>AI Coach</span>
             </TabsTrigger>
             <TabsTrigger value="detailed" className="flex items-center space-x-2">
               <Brain className="w-4 h-4" />
@@ -79,6 +84,10 @@ export default function Dashboard() {
             <div className="mt-8">
               <SessionHistory />
             </div>
+          </TabsContent>
+
+          <TabsContent value="improvement" className="space-y-6">
+            <ImprovementSummary />
           </TabsContent>
 
           <TabsContent value="detailed" className="space-y-6">
