@@ -1,7 +1,9 @@
 import { useRef, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Play, Square, Pause, Eye, Volume2 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Play, Square, Pause, Eye, Volume2, Brain, Zap } from "lucide-react";
 import { useMediaPipe } from "@/hooks/useMediaPipe";
 import { useVoiceAnalysis } from "@/hooks/useVoiceAnalysis";
 
@@ -12,6 +14,8 @@ export default function VideoFeed() {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState<string>("");
   const [demoMode, setDemoMode] = useState<boolean>(false);
+  const [realTimeFeedback, setRealTimeFeedback] = useState<boolean>(false);
+  const [feedbackMessages, setFeedbackMessages] = useState<string[]>([]);
 
   const { 
     posture, 
@@ -21,7 +25,7 @@ export default function VideoFeed() {
     processFrame 
   } = useMediaPipe();
   
-  const { volumeLevel, startVoiceAnalysis, stopVoiceAnalysis } = useVoiceAnalysis();
+  const { volumeLevel, startVoiceAnalysis, stopVoiceAnalysis, speakingPace, voiceClarity } = useVoiceAnalysis();
 
   useEffect(() => {
     startCamera();
@@ -33,6 +37,66 @@ export default function VideoFeed() {
       }
     };
   }, []);
+
+  // Real-time feedback system
+  useEffect(() => {
+    if (!realTimeFeedback || !isRecording) return;
+
+    const feedbackInterval = setInterval(() => {
+      const messages: string[] = [];
+
+      // Analyze posture
+      if (posture === 'needs_improvement') {
+        messages.push("Keep your shoulders back and maintain good posture");
+      }
+
+      // Analyze gestures
+      if (gesture === 'closed') {
+        messages.push("Use more open hand gestures to appear welcoming");
+      }
+
+      // Analyze eye contact
+      if (eyeContact === 'poor') {
+        messages.push("Look directly at the camera more often");
+      }
+
+      // Analyze speaking pace
+      if (speakingPace < 100) {
+        messages.push("You're speaking slowly - try to pick up the pace");
+      } else if (speakingPace > 180) {
+        messages.push("Slow down your speaking pace for better clarity");
+      }
+
+      // Analyze voice clarity
+      if (voiceClarity < 70) {
+        messages.push("Speak more clearly and enunciate your words");
+      }
+
+      // Analyze volume
+      if (volumeLevel < 30) {
+        messages.push("Speak louder to project your voice better");
+      }
+
+      if (messages.length > 0) {
+        setFeedbackMessages(prev => {
+          const newMessages = [...prev, ...messages].slice(-3); // Keep only last 3 messages
+          return newMessages;
+        });
+      }
+    }, 3000); // Check every 3 seconds
+
+    return () => clearInterval(feedbackInterval);
+  }, [realTimeFeedback, isRecording, posture, gesture, eyeContact, speakingPace, voiceClarity, volumeLevel]);
+
+  // Clear feedback messages after 8 seconds
+  useEffect(() => {
+    if (feedbackMessages.length > 0) {
+      const timeout = setTimeout(() => {
+        setFeedbackMessages([]);
+      }, 8000);
+      return () => clearTimeout(timeout);
+    }
+  }, [feedbackMessages]);
 
   const startCamera = async () => {
     try {
@@ -171,7 +235,20 @@ export default function VideoFeed() {
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-900">Live Practice Session</h2>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-4">
+            {/* Real-time AI Feedback Toggle */}
+            <div className="flex items-center space-x-2">
+              <Label htmlFor="real-time-feedback" className="text-sm font-medium text-gray-700">
+                <Brain className="w-4 h-4 inline mr-1" />
+                Real-time AI Feedback
+              </Label>
+              <Switch
+                id="real-time-feedback"
+                checked={realTimeFeedback}
+                onCheckedChange={setRealTimeFeedback}
+                className="data-[state=checked]:bg-purple-600"
+              />
+            </div>
             {isRecording && (
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                 <span className="w-2 h-2 bg-red-400 rounded-full mr-1.5 animate-pulse"></span>
