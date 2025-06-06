@@ -123,17 +123,19 @@ export default function RealTimeMetrics() {
   );
 
   return (
-    <Card className="border border-gray-200">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center space-x-2">
-          <Activity className="w-5 h-5 text-blue-600" />
-          <span>Live Performance Feedback</span>
-          <div className={`w-3 h-3 rounded-full ${isListening ? 'bg-green-500 animate-pulse' : 'bg-gray-300'}`} />
+    <Card className="shadow-lg border-0 bg-white">
+      <CardHeader className="pb-6 bg-gradient-to-r from-purple-50 to-blue-50 rounded-t-lg border-b border-gray-100">
+        <CardTitle className="text-xl font-semibold text-gray-900 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Activity className="w-6 h-6 text-purple-600" />
+            <span>Live Performance Feedback</span>
+          </div>
+          <div className={`w-4 h-4 rounded-full ${isListening ? 'bg-green-500 animate-pulse' : 'bg-gray-300'}`} />
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6 p-6">
         {/* Primary Metrics Row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <MetricCard
             title="Speaking Pace"
             value={wpm}

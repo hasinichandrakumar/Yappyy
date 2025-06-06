@@ -231,10 +231,15 @@ export default function VideoFeed() {
   }
 
   return (
-    <Card className="bg-surface rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-      <CardContent className="p-6">
+    <Card className="shadow-lg border-0 bg-white overflow-hidden">
+      <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 border-b border-gray-100">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Live Practice Session</h2>
+          <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-3">
+            <div className="p-2 bg-green-100 rounded-lg">
+              <Play className="w-5 h-5 text-green-600" />
+            </div>
+            Live Practice Session
+          </h2>
           <div className="flex items-center space-x-4">
             {/* Real-time AI Feedback Toggle */}
             <div className="flex items-center space-x-2">
@@ -257,7 +262,9 @@ export default function VideoFeed() {
             )}
           </div>
         </div>
-        
+      </div>
+      
+      <CardContent className="p-6">
         {/* Video Feed Area */}
         <div className="relative bg-gray-900 rounded-lg overflow-hidden aspect-video">
           {demoMode ? (
@@ -397,6 +404,7 @@ export default function VideoFeed() {
             <Play className="w-4 h-4" />
             <span>New Session</span>
           </Button>
+        </div>
         </div>
       </CardContent>
     </Card>
