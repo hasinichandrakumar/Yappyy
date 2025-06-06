@@ -51,7 +51,7 @@ interface CharacterPersona {
 }
 
 export default function SpeechDNA() {
-  const { transcript, wordCount, sessionTime } = useSpeechRecognition();
+  const { transcript, wordCount } = useSpeechRecognition();
   const { speakingPace, voiceClarity, confidenceScore } = useVoiceAnalysis();
 
   const [speechDNA, setSpeechDNA] = useState<SpeechDNAProfile | null>(null);
@@ -90,7 +90,7 @@ export default function SpeechDNA() {
       signature: "You get a... You get a...",
       difficulty: "intermediate",
       avatar: "💫",
-      color: "bg-purple-600"
+      color: "bg-cyan-600"
     },
     {
       id: "watson",
@@ -101,7 +101,7 @@ export default function SpeechDNA() {
       signature: "We need to change...",
       difficulty: "intermediate",
       avatar: "📚",
-      color: "bg-green-600"
+      color: "bg-cyan-600"
     },
     {
       id: "musk",
@@ -112,7 +112,7 @@ export default function SpeechDNA() {
       signature: "This is going to be insane...",
       difficulty: "beginner",
       avatar: "🚀",
-      color: "bg-red-600"
+      color: "bg-cyan-600"
     },
     {
       id: "branson",
@@ -123,7 +123,7 @@ export default function SpeechDNA() {
       signature: "Screw it, let's do it!",
       difficulty: "beginner",
       avatar: "🎈",
-      color: "bg-orange-600"
+      color: "bg-cyan-600"
     },
     {
       id: "tony-robbins",
@@ -134,7 +134,7 @@ export default function SpeechDNA() {
       signature: "Are you ready to take MASSIVE ACTION?",
       difficulty: "advanced",
       avatar: "⚡",
-      color: "bg-yellow-500"
+      color: "bg-cyan-600"
     },
     {
       id: "simon-sinek",
@@ -334,7 +334,7 @@ export default function SpeechDNA() {
           <Card className="gradient-card purple-border">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <Dna className="w-6 h-6 text-purple-600" />
+                <Dna className="w-6 h-6 text-cyan-600" />
                 <span className="gradient-text font-heading">Your Speech DNA</span>
               </CardTitle>
             </CardHeader>
@@ -460,7 +460,7 @@ export default function SpeechDNA() {
           <Card className="gradient-card purple-border">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <Users className="w-6 h-6 text-purple-600" />
+                <Users className="w-6 h-6 text-cyan-600" />
                 <span className="gradient-text font-heading">Choose Your Speaking Style</span>
               </CardTitle>
             </CardHeader>
