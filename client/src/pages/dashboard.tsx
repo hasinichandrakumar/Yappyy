@@ -19,21 +19,21 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation Header */}
-      <nav className="bg-surface shadow-sm border-b border-gray-200 sticky top-0 z-50">
+      <nav className="gradient-card shadow-lg purple-border sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 gradient-bg rounded-lg flex items-center justify-center purple-glow">
                 <MicOff className="text-white w-4 h-4" />
               </div>
-              <h1 className="text-xl font-semibold text-gray-900">AI Speaking Coach</h1>
+              <h1 className="text-xl font-semibold gradient-text">AI Speaking Coach</h1>
             </div>
             <div className="flex items-center space-x-4">
-              <button className="text-gray-500 hover:text-gray-700 transition-colors">
+              <button className="text-purple-600 hover:text-purple-700 transition-colors">
                 <Bell className="w-5 h-5" />
               </button>
-              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                <User className="text-gray-600 w-4 h-4" />
+              <div className="w-8 h-8 gradient-bg rounded-full flex items-center justify-center purple-glow">
+                <User className="text-white w-4 h-4" />
               </div>
             </div>
           </div>
@@ -42,24 +42,24 @@ export default function Dashboard() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5 mb-6">
-            <TabsTrigger value="overview" className="flex items-center space-x-2">
+          <TabsList className="grid w-full grid-cols-5 mb-6 gradient-card purple-border">
+            <TabsTrigger value="overview" className="flex items-center space-x-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
               <BarChart3 className="w-4 h-4" />
               <span>Overview</span>
             </TabsTrigger>
-            <TabsTrigger value="improvement" className="flex items-center space-x-2">
+            <TabsTrigger value="improvement" className="flex items-center space-x-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
               <Brain className="w-4 h-4" />
               <span>AI Coach</span>
             </TabsTrigger>
-            <TabsTrigger value="detailed" className="flex items-center space-x-2">
+            <TabsTrigger value="detailed" className="flex items-center space-x-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
               <Brain className="w-4 h-4" />
               <span>Detailed Analysis</span>
             </TabsTrigger>
-            <TabsTrigger value="body-language" className="flex items-center space-x-2">
+            <TabsTrigger value="body-language" className="flex items-center space-x-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
               <Eye className="w-4 h-4" />
               <span>Body Language</span>
             </TabsTrigger>
-            <TabsTrigger value="speech-deep" className="flex items-center space-x-2">
+            <TabsTrigger value="speech-deep" className="flex items-center space-x-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
               <MicOff className="w-4 h-4" />
               <span>Speech Deep Dive</span>
             </TabsTrigger>
