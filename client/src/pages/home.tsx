@@ -119,7 +119,14 @@ export default function Home() {
                 }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
-                <Mic className="text-white w-5 h-5" />
+                <motion.div
+                  animate={{ rotate: [0, 360] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                  style={{ transformOrigin: "center" }}
+                  className="flex items-center justify-center"
+                >
+                  <Mic className="text-white w-5 h-5" />
+                </motion.div>
               </motion.div>
               <h1 className="text-xl font-bold yapup-gradient">
                 YapUp
