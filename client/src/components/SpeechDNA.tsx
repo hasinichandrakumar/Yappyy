@@ -17,7 +17,8 @@ import {
   Award,
   Sparkles,
   LineChart,
-  BookOpen
+  BookOpen,
+  Trophy
 } from "lucide-react";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { useVoiceAnalysis } from "@/hooks/useVoiceAnalysis";
@@ -533,15 +534,95 @@ export default function SpeechDNA() {
                         </div>
                       </div>
 
+                      {/* Training Challenges */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Card className="p-4 bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200">
+                          <h5 className="font-medium text-gray-900 mb-2 flex items-center">
+                            🎯 Quick Challenge
+                          </h5>
+                          <p className="text-sm text-gray-600 mb-3">
+                            Practice {character.name}'s signature phrase: "{character.signature}"
+                          </p>
+                          <Button size="sm" className="w-full gradient-bg text-white">
+                            Record Challenge
+                          </Button>
+                        </Card>
+
+                        <Card className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200">
+                          <h5 className="font-medium text-gray-900 mb-2 flex items-center">
+                            🏆 Style Match
+                          </h5>
+                          <p className="text-sm text-gray-600 mb-3">
+                            Speak for 30 seconds using {character.name}'s delivery style
+                          </p>
+                          <Button size="sm" variant="outline" className="w-full border-green-300">
+                            Start Timer
+                          </Button>
+                        </Card>
+
+                        <Card className="p-4 bg-gradient-to-br from-yellow-50 to-orange-50 border border-yellow-200">
+                          <h5 className="font-medium text-gray-900 mb-2 flex items-center">
+                            🎪 Technique Drill
+                          </h5>
+                          <p className="text-sm text-gray-600 mb-3">
+                            Master one of {character.name}'s key techniques in 60 seconds
+                          </p>
+                          <Button size="sm" variant="outline" className="w-full border-orange-300">
+                            Practice Now
+                          </Button>
+                        </Card>
+
+                        <Card className="p-4 bg-gradient-to-br from-pink-50 to-rose-50 border border-pink-200">
+                          <h5 className="font-medium text-gray-900 mb-2 flex items-center">
+                            🎭 Personality Quiz
+                          </h5>
+                          <p className="text-sm text-gray-600 mb-3">
+                            How well do you match {character.name}'s speaking personality?
+                          </p>
+                          <Button size="sm" variant="outline" className="w-full border-pink-300">
+                            Take Quiz
+                          </Button>
+                        </Card>
+                      </div>
+
+                      {/* Progress Tracking */}
+                      <div className="bg-white p-4 rounded-lg border border-gray-200">
+                        <h5 className="font-medium text-gray-900 mb-3 flex items-center">
+                          📊 Training Progress
+                        </h5>
+                        <div className="space-y-3">
+                          {character.keyTechniques.slice(0, 3).map((technique, index) => (
+                            <div key={index} className="flex items-center justify-between">
+                              <span className="text-sm text-gray-600">{technique}</span>
+                              <div className="flex items-center space-x-2">
+                                <div className="w-20 h-2 bg-gray-200 rounded-full">
+                                  <div 
+                                    className="h-full bg-gradient-to-r from-purple-500 to-blue-500 rounded-full"
+                                    style={{ width: `${Math.random() * 80 + 20}%` }}
+                                  />
+                                </div>
+                                <span className="text-xs text-gray-500">{Math.floor(Math.random() * 80 + 20)}%</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
                       <div className="space-y-3">
                         <Button className="w-full gradient-bg text-white hover:opacity-90 purple-glow">
                           <Mic className="w-4 h-4 mr-2" />
-                          Start {character.name} Training Session
+                          Start Full Training Session
                         </Button>
-                        <Button variant="outline" className="w-full purple-border hover:bg-purple-50">
-                          <LineChart className="w-4 h-4 mr-2" />
-                          View Training Progress
-                        </Button>
+                        <div className="grid grid-cols-2 gap-2">
+                          <Button variant="outline" className="purple-border hover:bg-purple-50">
+                            <LineChart className="w-4 h-4 mr-2" />
+                            View Stats
+                          </Button>
+                          <Button variant="outline" className="purple-border hover:bg-purple-50">
+                            <Trophy className="w-4 h-4 mr-2" />
+                            Achievements
+                          </Button>
+                        </div>
                       </div>
                     </>
                   );
