@@ -199,13 +199,15 @@ export default function SmartAIFeedback() {
 
   if (!currentFeedback) {
     return (
-      <div className="flex items-center justify-center p-4 text-gray-500 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
-        <div className="text-center">
-          <Brain className="w-6 h-6 mx-auto mb-2 text-gray-400" />
-          <p className="text-sm">AI Coach is listening...</p>
-          <p className="text-xs text-gray-400 mt-1">Real-time feedback will appear here</p>
-        </div>
-      </div>
+      <Card className="shadow-lg border-0 bg-white">
+        <CardContent className="flex items-center justify-center p-8 text-gray-500 bg-gradient-to-br from-gray-50 to-blue-50 rounded-lg">
+          <div className="text-center">
+            <Brain className="w-8 h-8 mx-auto mb-3 text-blue-400" />
+            <p className="text-base font-medium text-gray-700">AI Coach is listening...</p>
+            <p className="text-sm text-gray-500 mt-2">Real-time feedback will appear here</p>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 

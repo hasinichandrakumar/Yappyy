@@ -50,9 +50,9 @@ export default function Dashboard() {
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-9 mb-6 gradient-card purple-border">
+          <TabsList className="grid w-full grid-cols-9 mb-8 gradient-card purple-border shadow-lg">
             <TabsTrigger value="overview" className="flex items-center space-x-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
               <BarChart3 className="w-4 h-4" />
               <span>Practice</span>
@@ -91,11 +91,11 @@ export default function Dashboard() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" className="space-y-6">
+          <TabsContent value="overview" className="space-y-8">
             {/* Practice Focus Tabs */}
-            <div className="bg-white rounded-lg border border-gray-200 p-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Practice Focus Areas</h3>
-              <div className="flex flex-wrap gap-3">
+            <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+              <h3 className="text-xl font-semibold text-gray-900 mb-6">Practice Focus Areas</h3>
+              <div className="flex flex-wrap gap-4">
                 <Button variant="outline" className="flex items-center space-x-2 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100">
                   <Eye className="w-4 h-4" />
                   <span>Maintain Eye Contact</span>
@@ -119,15 +119,15 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
               {/* Left Column - Video Feed */}
-              <div className="lg:col-span-2 space-y-6">
+              <div className="lg:col-span-2 space-y-8">
                 <VideoFeed />
                 <LiveTranscript />
               </div>
               
               {/* Right Column - Live Feedback Sidebar */}
-              <div className="lg:col-span-2 space-y-6">
+              <div className="lg:col-span-2 space-y-8">
                 <RealTimeMetrics />
                 <SmartAIFeedback />
               </div>

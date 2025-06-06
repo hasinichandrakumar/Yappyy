@@ -78,11 +78,11 @@ export default function LiveTranscript() {
   const wpmStatus = getWPMStatus(wpm);
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader className="pb-3">
+    <Card className="h-full flex flex-col shadow-lg border-0 bg-white">
+      <CardHeader className="pb-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-t-lg border-b border-gray-100">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <MessageSquareText className="w-5 h-5" />
+          <CardTitle className="text-xl font-semibold flex items-center gap-3 text-gray-900">
+            <MessageSquareText className="w-6 h-6 text-blue-600" />
             Live Transcript
           </CardTitle>
           <div className="flex items-center gap-2">
@@ -100,24 +100,24 @@ export default function LiveTranscript() {
         </div>
         
         {/* Metrics Row */}
-        <div className="grid grid-cols-3 gap-3 pt-2">
-          <div className="text-center">
-            <div className="text-sm text-gray-500">Words</div>
-            <div className="text-lg font-bold text-gray-900">{wordCount}</div>
+        <div className="grid grid-cols-3 gap-6 pt-4">
+          <div className="text-center bg-gray-50 rounded-lg p-3">
+            <div className="text-sm font-medium text-gray-600 mb-1">Words</div>
+            <div className="text-2xl font-bold text-gray-900">{wordCount}</div>
           </div>
-          <div className="text-center">
-            <div className="text-sm text-gray-500">WPM</div>
-            <div className="flex items-center justify-center gap-1">
-              <div className="text-lg font-bold text-gray-900">{wpm}</div>
+          <div className="text-center bg-gray-50 rounded-lg p-3">
+            <div className="text-sm font-medium text-gray-600 mb-1">WPM</div>
+            <div className="flex items-center justify-center gap-2">
+              <div className="text-2xl font-bold text-gray-900">{wpm}</div>
               <Badge className={`text-xs ${wpmStatus.color}`}>
                 {wpmStatus.label}
               </Badge>
             </div>
           </div>
-          <div className="text-center">
-            <div className="text-sm text-gray-500">Fillers</div>
-            <div className="flex items-center justify-center gap-1">
-              <div className="text-lg font-bold text-gray-900">{fillerWords.length}</div>
+          <div className="text-center bg-gray-50 rounded-lg p-3">
+            <div className="text-sm font-medium text-gray-600 mb-1">Fillers</div>
+            <div className="flex items-center justify-center gap-2">
+              <div className="text-2xl font-bold text-gray-900">{fillerWords.length}</div>
               {fillerWords.length > 3 && (
                 <AlertTriangle className="w-4 h-4 text-yellow-600" />
               )}
@@ -126,9 +126,9 @@ export default function LiveTranscript() {
         </div>
       </CardHeader>
 
-      <CardContent className="flex-1 flex flex-col gap-3">
+      <CardContent className="flex-1 flex flex-col gap-6 p-6">
         {/* Controls */}
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           {!isListening ? (
             <Button 
               onClick={startListening}
