@@ -100,7 +100,7 @@ export default function Home() {
               </h1>
             </div>
             <Link href="/dashboard">
-              <Button className="gradient-bg text-white hover:opacity-90 shadow-lg purple-glow">
+              <Button className="gradient-button text-white hover:opacity-90 shadow-lg">
                 Start Practicing
                 <PlayCircle className="w-4 h-4 ml-2" />
               </Button>
@@ -183,10 +183,10 @@ export default function Home() {
       <section className="py-20 bg-gray-900/30 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl font-bold text-white mb-4">
               Advanced AI-Powered Features
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
               Our intelligent coaching system provides comprehensive feedback across every aspect of your presentation.
             </p>
           </div>
@@ -201,17 +201,17 @@ export default function Home() {
                 onMouseEnter={() => setIsHovered(feature.title)}
                 onMouseLeave={() => setIsHovered(null)}
               >
-                <CardContent className="p-8 relative">
-                  <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-5 group-hover:opacity-10 transition-opacity duration-500`} />
+                <CardContent className="p-8 relative bg-gray-900/80 backdrop-blur-sm border border-cyan-500/30">
+                  <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-10 group-hover:opacity-20 transition-opacity duration-500`} />
                   <div className={`w-16 h-16 mb-6 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center shadow-lg`}>
                     <feature.icon className="w-8 h-8 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">{feature.title}</h3>
-                  <p className="text-gray-600 leading-relaxed mb-4">{feature.description}</p>
+                  <h3 className="text-2xl font-bold text-white mb-4">{feature.title}</h3>
+                  <p className="text-gray-300 leading-relaxed mb-4">{feature.description}</p>
                   <div className="space-y-2">
                     {feature.details.map((detail, detailIndex) => (
-                      <div key={detailIndex} className="flex items-center text-sm text-gray-500">
-                        <div className="w-1 h-1 bg-blue-500 rounded-full mr-2"></div>
+                      <div key={detailIndex} className="flex items-center text-sm text-gray-400">
+                        <div className="w-1 h-1 bg-cyan-500 rounded-full mr-2"></div>
                         {detail}
                       </div>
                     ))}

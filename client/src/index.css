@@ -245,23 +245,23 @@
 
   .gradient-card-hover {
     background: linear-gradient(135deg, 
-      hsl(210, 100%, 99%) 0%, 
-      hsl(200, 100%, 97%) 25%,
-      hsl(190, 100%, 95%) 50%,
-      hsl(180, 100%, 97%) 75%,
-      hsl(210, 100%, 99%) 100%);
+      hsl(210, 25%, 10%) 0%, 
+      hsl(200, 30%, 12%) 25%,
+      hsl(190, 35%, 14%) 50%,
+      hsl(180, 30%, 12%) 75%,
+      hsl(210, 25%, 10%) 100%);
     transition: all 0.3s ease;
   }
 
   .gradient-card-hover:hover {
     background: linear-gradient(135deg, 
-      hsl(210, 100%, 96%) 0%, 
-      hsl(200, 100%, 94%) 25%,
-      hsl(190, 100%, 92%) 50%,
-      hsl(180, 100%, 94%) 75%,
-      hsl(210, 100%, 96%) 100%);
+      hsl(210, 30%, 15%) 0%, 
+      hsl(200, 35%, 17%) 25%,
+      hsl(190, 40%, 19%) 50%,
+      hsl(180, 35%, 17%) 75%,
+      hsl(210, 30%, 15%) 100%);
     transform: translateY(-5px);
-    box-shadow: 0 20px 40px hsla(180, 100%, 50%, 0.15);
+    box-shadow: 0 20px 40px hsla(180, 100%, 50%, 0.25);
   }
 
   .animated-gradient {
