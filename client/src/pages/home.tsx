@@ -117,7 +117,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto text-center">
           <Badge className="mb-6 bg-purple-100 text-purple-800 border-purple-200 px-4 py-2">
             <Sparkles className="w-4 h-4 mr-2" />
-            Powered by Advanced AI
+            Powered by GPT-4 Turbo & MediaPipe Neural Networks
           </Badge>
           
           <h1 className="text-5xl md:text-7xl font-display text-gray-900 mb-8 tracking-tight text-balance">

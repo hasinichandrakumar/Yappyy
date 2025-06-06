@@ -17,6 +17,11 @@ import SpeechROIAnalyzer from "@/components/SpeechROIAnalyzer";
 import ScriptTemplates from "@/components/ScriptTemplates";
 import BadgeSystem from "@/components/BadgeSystem";
 import AIPracticeRoleplay from "@/components/AIPracticeRoleplay";
+import BodyCueTimeline from "@/components/BodyCueTimeline";
+import SpeechFingerprintGenerator from "@/components/SpeechFingerprintGenerator";
+import VibeTracker from "@/components/VibeTracker";
+import AdaptiveFeedbackEngine from "@/components/AdaptiveFeedbackEngine";
+import EnhancedTemplateMarketplace from "@/components/EnhancedTemplateMarketplace";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -109,11 +114,47 @@ export default function Dashboard() {
           </TabsContent>
 
           <TabsContent value="improvement" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <AdaptiveFeedbackEngine 
+                userProfile={{
+                  userId: 'demo-user',
+                  sessionCount: 15,
+                  masteredSkills: ['voice_pacing', 'basic_gestures', 'eye_contact'],
+                  currentWeaknesses: ['advanced_rhetoric', 'emotional_intelligence'],
+                  feedbackHistory: ['gesture timing', 'voice clarity', 'posture'],
+                  adaptiveLevel: 6,
+                  learningVelocity: 0.85,
+                  personalityTraits: ['analytical', 'detail_oriented'],
+                  preferredFeedbackStyle: 'analytical'
+                }}
+                currentPerformance={{
+                  voiceClarity: 72,
+                  bodyLanguage: 78,
+                  contentStructure: 83,
+                  engagement: 75
+                }}
+              />
+              <VibeTracker 
+                emotionalData={[]}
+                insights={[]}
+                userLearningProfile={{
+                  sessionCount: 15,
+                  adaptiveLevel: 6,
+                  previousPatterns: ['strategic pausing', 'data storytelling', 'confident openings'],
+                  improvementAreas: ['energy_dip', 'persuasion_peak']
+                }}
+              />
+            </div>
             <ImprovementSummary />
           </TabsContent>
 
           <TabsContent value="speech-dna" className="space-y-6">
-            <SpeechDNA />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <SpeechFingerprintGenerator 
+                sessionCount={15}
+              />
+              <SpeechDNA />
+            </div>
           </TabsContent>
 
           <TabsContent value="detailed" className="space-y-6">
@@ -121,7 +162,13 @@ export default function Dashboard() {
           </TabsContent>
 
           <TabsContent value="body-language" className="space-y-6">
-            <BodyLanguageAnalyzer />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <BodyLanguageAnalyzer />
+              <BodyCueTimeline 
+                cues={[]}
+                totalDuration={300}
+              />
+            </div>
           </TabsContent>
 
           <TabsContent value="speech-deep" className="space-y-6">
