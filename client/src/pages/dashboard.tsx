@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bell, MicOff, User, BarChart3, Eye, Brain } from "lucide-react";
+import { Bell, MicOff, User, BarChart3, Eye, Brain, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import VideoFeed from "@/components/VideoFeed";
@@ -12,6 +12,7 @@ import DetailedAnalysis from "@/components/DetailedAnalysis";
 import BodyLanguageAnalyzer from "@/components/BodyLanguageAnalyzer";
 import AdvancedSpeechAnalysis from "@/components/AdvancedSpeechAnalysis";
 import ImprovementSummary from "@/components/ImprovementSummary";
+import SpeechDNA from "@/components/SpeechDNA";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -42,7 +43,7 @@ export default function Dashboard() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5 mb-6 gradient-card purple-border">
+          <TabsList className="grid w-full grid-cols-6 mb-6 gradient-card purple-border">
             <TabsTrigger value="overview" className="flex items-center space-x-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
               <BarChart3 className="w-4 h-4" />
               <span>Overview</span>
@@ -50,6 +51,10 @@ export default function Dashboard() {
             <TabsTrigger value="improvement" className="flex items-center space-x-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
               <Brain className="w-4 h-4" />
               <span>AI Coach</span>
+            </TabsTrigger>
+            <TabsTrigger value="speech-dna" className="flex items-center space-x-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
+              <Star className="w-4 h-4" />
+              <span>Speech DNA</span>
             </TabsTrigger>
             <TabsTrigger value="detailed" className="flex items-center space-x-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
               <Brain className="w-4 h-4" />
@@ -88,6 +93,10 @@ export default function Dashboard() {
 
           <TabsContent value="improvement" className="space-y-6">
             <ImprovementSummary />
+          </TabsContent>
+
+          <TabsContent value="speech-dna" className="space-y-6">
+            <SpeechDNA />
           </TabsContent>
 
           <TabsContent value="detailed" className="space-y-6">

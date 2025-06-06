@@ -105,10 +105,18 @@ export default function Home() {
             </span>
           </h1>
           
-          <p className="text-xl font-body text-gray-600 mb-12 max-w-3xl mx-auto text-balance">
+          <p className="text-xl font-body text-gray-600 mb-8 max-w-3xl mx-auto text-balance">
             Transform your presentation skills with AI-powered real-time feedback, intelligent coaching, 
             and personalized improvement plans tailored to your speaking goals.
           </p>
+          
+          <div className="mb-12 p-6 bg-white/80 backdrop-blur-sm rounded-2xl border border-purple-200 max-w-2xl mx-auto">
+            <div className="text-center">
+              <div className="text-4xl font-display gradient-text mb-2">55%</div>
+              <p className="text-lg font-medium text-gray-800 mb-1">Communication is 55% non-verbal.</p>
+              <p className="text-lg font-semibold gradient-text">We coach 100% of you.</p>
+            </div>
+          </div>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
             <Link href="/dashboard">
