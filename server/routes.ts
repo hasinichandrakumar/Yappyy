@@ -172,7 +172,7 @@ Provide specific, actionable coaching tips to improve this presentation. Respond
         return res.status(400).json({ message: "Transcript and purpose are required" });
       }
 
-      const purposeContext = {
+      const purposeContext: Record<string, string> = {
         school_presentation: "academic presentation with clear structure, educational content, and student-appropriate language",
         ted_talk: "inspirational talk with storytelling, clear message, and engaging delivery",
         business_pitch: "persuasive presentation with problem-solution format, data-driven arguments, and call to action",
@@ -201,10 +201,10 @@ Provide specific, actionable coaching tips to improve this presentation. Respond
             },
             {
               role: "user",
-              content: `Analyze this ${purposeContext[purpose] || 'speech'} transcript and provide detailed feedback on format and structure:
+              content: `Analyze this ${purposeContext[purpose] || purposeContext['other']} transcript and provide detailed feedback on format and structure:
 
 Speech Type: ${purpose.replace('_', ' ').toUpperCase()}
-Expected Format: ${purposeContext[purpose]}
+Expected Format: ${purposeContext[purpose] || purposeContext['other']}
 
 Transcript: "${transcript}"
 
@@ -243,7 +243,7 @@ Keep feedback constructive and actionable.`
         return res.status(400).json({ message: "Message is required" });
       }
 
-      const purposeContext = {
+      const purposeContext: Record<string, string> = {
         school_presentation: "academic presentation",
         ted_talk: "TED Talk",
         business_pitch: "business pitch",
@@ -257,7 +257,7 @@ Keep feedback constructive and actionable.`
         other: "general speech"
       };
 
-      let contextMessage = `You are an expert speech coach helping with a ${purposeContext[purpose] || 'speech'}.`;
+      let contextMessage = `You are an expert speech coach helping with a ${purposeContext[purpose] || purposeContext['other']}.`;
       
       if (transcript) {
         contextMessage += ` The speaker's current transcript is: "${transcript.slice(-500)}"`;
