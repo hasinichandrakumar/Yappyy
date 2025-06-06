@@ -36,6 +36,8 @@ export default function AIPracticeRoleplay() {
   const [latestResponse, setLatestResponse] = useState<string>("");
   const [useCustomAudience, setUseCustomAudience] = useState<boolean>(false);
   const [customAudiencePrompt, setCustomAudiencePrompt] = useState<string>("");
+  const [useCustomPurpose, setUseCustomPurpose] = useState<boolean>(false);
+  const [customPurposePrompt, setCustomPurposePrompt] = useState<string>("");
 
   const audienceRoles: AudienceRole[] = [
     {
