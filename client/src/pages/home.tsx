@@ -127,8 +127,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="border-t border-purple-200 pt-4">
-                <p className="text-lg font-semibold gradient-text mb-1">Communication is 93% non-verbal.</p>
-                <p className="text-xl font-display text-gray-800">We coach 100% of you.</p>
+                <p className="text-xl font-display gradient-text">We coach 100% of you.</p>
               </div>
             </div>
           </div>
