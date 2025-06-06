@@ -461,7 +461,22 @@ Respond with detailed analysis in JSON format:
       let analysisResult;
       
       try {
-        analysisResult = JSON.parse(data.choices[0].message.content);
+        let content = data.choices[0].message.content;
+        
+        // Clean up markdown code blocks and other formatting
+        content = content.replace(/```json\s*/g, '').replace(/```\s*$/g, '');
+        content = content.replace(/^```\s*/g, '').replace(/```\s*$/g, '');
+        content = content.trim();
+        
+        // If content doesn't start with {, try to find the JSON part
+        if (!content.startsWith('{')) {
+          const jsonMatch = content.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            content = jsonMatch[0];
+          }
+        }
+        
+        analysisResult = JSON.parse(content);
       } catch (parseError) {
         // If JSON parsing fails, create structured response from text
         const textResponse = data.choices[0].message.content;
