@@ -92,20 +92,50 @@ export default function Dashboard() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Left Column - Video Feed and Controls */}
+            {/* Practice Focus Tabs */}
+            <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Practice Focus Areas</h3>
+              <div className="flex flex-wrap gap-3">
+                <Button variant="outline" className="flex items-center space-x-2 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100">
+                  <Eye className="w-4 h-4" />
+                  <span>Maintain Eye Contact</span>
+                </Button>
+                <Button variant="outline" className="flex items-center space-x-2">
+                  <Users className="w-4 h-4" />
+                  <span>Improve Posture</span>
+                </Button>
+                <Button variant="outline" className="flex items-center space-x-2">
+                  <Volume2 className="w-4 h-4" />
+                  <span>Voice Clarity</span>
+                </Button>
+                <Button variant="outline" className="flex items-center space-x-2">
+                  <BarChart3 className="w-4 h-4" />
+                  <span>Reduce Filler Words</span>
+                </Button>
+                <Button variant="outline" className="flex items-center space-x-2">
+                  <TrendingUp className="w-4 h-4" />
+                  <span>Energy & Pace</span>
+                </Button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              {/* Left Column - Video Feed */}
               <div className="lg:col-span-2 space-y-6">
                 <VideoFeed />
-                <RealTimeMetrics />
                 <SpeechTranscript />
               </div>
               
-              {/* Right Column - Practice Tools and AI Roleplay */}
-              <div className="space-y-6">
-                <AIPracticeRoleplay />
+              {/* Right Column - Live Feedback Sidebar */}
+              <div className="lg:col-span-2 space-y-6">
+                <RealTimeMetrics />
                 <CoachingTips />
-                <SessionStats />
               </div>
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <AIPracticeRoleplay />
+              <SessionStats />
             </div>
             
             <div className="mt-8">

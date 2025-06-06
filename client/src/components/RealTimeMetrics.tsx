@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useVoiceAnalysis } from "@/hooks/useVoiceAnalysis";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,8 +28,8 @@ export default function RealTimeMetrics() {
   
   const { isListening } = useSpeechRecognition();
 
-  // Mock real-time data for demonstration
-  const liveMetrics = {
+  // Live updating metrics with real-time simulation
+  const [liveMetrics, setLiveMetrics] = useState({
     eyeContact: 78,
     posture: 85,
     gestureFrequency: 6,
@@ -37,7 +38,25 @@ export default function RealTimeMetrics() {
     pauseQuality: 82,
     volume: 75,
     articulation: 88
-  };
+  });
+
+  // Update metrics in real-time
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setLiveMetrics(prev => ({
+        eyeContact: Math.max(40, Math.min(95, prev.eyeContact + (Math.random() - 0.5) * 3)),
+        posture: Math.max(60, Math.min(98, prev.posture + (Math.random() - 0.5) * 2)),
+        gestureFrequency: Math.max(2, Math.min(12, prev.gestureFrequency + (Math.random() - 0.5) * 0.5)),
+        energyLevel: Math.max(45, Math.min(95, prev.energyLevel + (Math.random() - 0.5) * 4)),
+        fillerWords: Math.max(0, Math.min(8, prev.fillerWords + (Math.random() - 0.5) * 0.3)),
+        pauseQuality: Math.max(50, Math.min(95, prev.pauseQuality + (Math.random() - 0.5) * 2)),
+        volume: Math.max(40, Math.min(90, prev.volume + (Math.random() - 0.5) * 3)),
+        articulation: Math.max(65, Math.min(98, prev.articulation + (Math.random() - 0.5) * 2))
+      }));
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const getStatusBadge = (value: number, thresholds: { good: number, excellent: number }) => {
     if (value >= thresholds.excellent) return { label: "Excellent", color: "bg-green-100 text-green-800" };
@@ -77,13 +96,14 @@ export default function RealTimeMetrics() {
         </div>
         
         <div className="text-2xl font-bold text-gray-900 mb-2">
-          {value}{unit && <span className="text-sm text-gray-500 ml-1">{unit}</span>}
+          {typeof value === 'number' ? Math.round(value) : value}
+          {unit && <span className="text-sm text-gray-500 ml-1">{unit}</span>}
         </div>
         
         {progress !== undefined && (
           <div className="space-y-2">
-            <Progress value={progress} className="h-2" />
-            <p className="text-xs text-gray-500">{progress}% optimal</p>
+            <Progress value={Math.round(progress)} className="h-2" />
+            <p className="text-xs text-gray-500">{Math.round(progress)}% optimal</p>
           </div>
         )}
         
@@ -171,7 +191,7 @@ export default function RealTimeMetrics() {
           
           <MetricCard
             title="Filler Words"
-            value={liveMetrics.fillerWords}
+            value={liveMetrics.fillerWords.toFixed(1)}
             unit="/min"
             icon={AlertCircle}
             status={liveMetrics.fillerWords <= 2 ? 
@@ -185,7 +205,7 @@ export default function RealTimeMetrics() {
           
           <MetricCard
             title="Gesture Rate"
-            value={liveMetrics.gestureFrequency}
+            value={liveMetrics.gestureFrequency.toFixed(1)}
             unit="/min"
             icon={BarChart3}
             status={getStatusBadge(liveMetrics.gestureFrequency, { good: 4, excellent: 6 })}
@@ -207,54 +227,5 @@ export default function RealTimeMetrics() {
         </div>
       </CardContent>
     </Card>
-      
-      {/* Voice Clarity */}
-      <Card className="bg-surface rounded-lg shadow-sm border border-gray-200">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-gray-700">Voice Clarity</h3>
-            <Mic className="w-4 h-4 text-gray-400" />
-          </div>
-          <div className="text-2xl font-bold text-gray-900">{voiceClarity}%</div>
-          <div className={`text-sm mt-1 ${
-            voiceClarity >= 80 ? 'text-secondary' : voiceClarity >= 60 ? 'text-accent' : 'text-error'
-          }`}>
-            {voiceClarity >= 80 ? 'Excellent' : voiceClarity >= 60 ? 'Good' : 'Needs Improvement'}
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-            <div 
-              className={`h-2 rounded-full transition-all duration-300 ${
-                voiceClarity >= 80 ? 'bg-secondary' : voiceClarity >= 60 ? 'bg-accent' : 'bg-error'
-              }`}
-              style={{ width: `${voiceClarity}%` }}
-            />
-          </div>
-        </CardContent>
-      </Card>
-      
-      {/* Confidence Score */}
-      <Card className="bg-surface rounded-lg shadow-sm border border-gray-200">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-gray-700">Confidence</h3>
-            <TrendingUp className="w-4 h-4 text-gray-400" />
-          </div>
-          <div className="text-2xl font-bold text-gray-900">{confidenceScore}%</div>
-          <div className={`text-sm mt-1 ${
-            confidenceScore >= 80 ? 'text-secondary' : confidenceScore >= 60 ? 'text-accent' : 'text-warning'
-          }`}>
-            {confidenceScore >= 80 ? 'Strong' : confidenceScore >= 60 ? 'Growing' : 'Room for Growth'}
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-            <div 
-              className={`h-2 rounded-full transition-all duration-300 ${
-                confidenceScore >= 80 ? 'bg-secondary' : confidenceScore >= 60 ? 'bg-accent' : 'bg-warning'
-              }`}
-              style={{ width: `${confidenceScore}%` }}
-            />
-          </div>
-        </CardContent>
-      </Card>
-    </div>
   );
 }
