@@ -341,8 +341,37 @@ export default function VideoFeed() {
               </div>
             </div>
           </div>
+
+          {/* Real-time AI Feedback Messages */}
+          {realTimeFeedback && feedbackMessages.length > 0 && (
+            <div className="absolute top-16 left-4 right-4 space-y-2 z-10">
+              {feedbackMessages.map((message, index) => (
+                <div
+                  key={index}
+                  className="bg-purple-600 bg-opacity-95 text-white px-4 py-3 rounded-lg shadow-lg animate-in slide-in-from-top-2 duration-300"
+                >
+                  <div className="flex items-start space-x-2">
+                    <Zap className="w-4 h-4 text-yellow-300 mt-0.5 flex-shrink-0" />
+                    <p className="text-sm font-medium">{message}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         
+        {/* Real-time Feedback Status */}
+        {realTimeFeedback && (
+          <div className="mt-4 p-3 bg-purple-50 border border-purple-200 rounded-lg">
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-purple-600 rounded-full animate-pulse"></div>
+              <span className="text-sm font-medium text-purple-800">
+                Real-time AI feedback is active - You'll receive live coaching tips during your presentation
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Recording Controls */}
         <div className="flex items-center justify-center space-x-4 mt-6">
           <Button
