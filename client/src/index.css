@@ -199,6 +199,88 @@
     box-shadow: 0 0 30px hsla(180, 90%, 70%, 0.2);
   }
 
+  /* Additional gradient utilities */
+  .gradient-border {
+    border: 2px solid;
+    border-image: linear-gradient(135deg, 
+      hsl(200, 85%, 60%), 
+      hsl(180, 100%, 50%), 
+      hsl(160, 80%, 50%)) 1;
+  }
+
+  .gradient-shadow {
+    box-shadow: 0 20px 40px hsla(180, 100%, 50%, 0.1),
+                0 10px 20px hsla(200, 85%, 60%, 0.1),
+                0 5px 10px hsla(160, 80%, 50%, 0.1);
+  }
+
+  .gradient-text-secondary {
+    background: linear-gradient(45deg, 
+      #06b6d4 0%, 
+      #14b8a6 50%, 
+      #10b981 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .gradient-button {
+    background: linear-gradient(135deg, 
+      #0ea5e9 0%, 
+      #06b6d4 25%, 
+      #14b8a6 75%, 
+      #10b981 100%);
+    transition: all 0.3s ease;
+  }
+
+  .gradient-button:hover {
+    background: linear-gradient(135deg, 
+      #0284c7 0%, 
+      #0891b2 25%, 
+      #0f766e 75%, 
+      #059669 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px hsla(180, 100%, 50%, 0.3);
+  }
+
+  .gradient-card-hover {
+    background: linear-gradient(135deg, 
+      hsl(210, 100%, 99%) 0%, 
+      hsl(200, 100%, 97%) 25%,
+      hsl(190, 100%, 95%) 50%,
+      hsl(180, 100%, 97%) 75%,
+      hsl(210, 100%, 99%) 100%);
+    transition: all 0.3s ease;
+  }
+
+  .gradient-card-hover:hover {
+    background: linear-gradient(135deg, 
+      hsl(210, 100%, 96%) 0%, 
+      hsl(200, 100%, 94%) 25%,
+      hsl(190, 100%, 92%) 50%,
+      hsl(180, 100%, 94%) 75%,
+      hsl(210, 100%, 96%) 100%);
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px hsla(180, 100%, 50%, 0.15);
+  }
+
+  .animated-gradient {
+    background: linear-gradient(-45deg, 
+      #0ea5e9, 
+      #06b6d4, 
+      #14b8a6, 
+      #10b981, 
+      #22d3ee);
+    background-size: 400% 400%;
+    animation: gradientShift 8s ease infinite;
+  }
+
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
   /* Typography utilities */
   .font-display {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;

@@ -86,9 +86,9 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen gradient-bg-light">
+    <div className="min-h-screen bg-black dark">
       {/* Navigation */}
-      <nav className="gradient-card backdrop-blur-md shadow-lg purple-border sticky top-0 z-50">
+      <nav className="bg-black/90 backdrop-blur-md shadow-lg border-b border-cyan-500/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
@@ -117,16 +117,16 @@ export default function Home() {
             Powered by GPT-4 Turbo & MediaPipe Neural Networks
           </Badge>
           
-          <h1 className="text-5xl md:text-7xl font-display text-gray-900 mb-8 tracking-tight text-balance">
+          <h1 className="text-5xl md:text-7xl font-display text-white mb-8 tracking-tight text-balance">
             <span className="block yapup-gradient font-display">
               YapUp
             </span>
-            <span className="text-4xl md:text-5xl block mt-4">
+            <span className="text-4xl md:text-5xl block mt-4 gradient-text-secondary">
               Master Your Public Speaking
             </span>
           </h1>
           
-          <p className="text-xl font-body text-gray-600 mb-8 max-w-3xl mx-auto text-balance">
+          <p className="text-xl font-body text-gray-300 mb-8 max-w-3xl mx-auto text-balance">
             Transform your presentation skills with AI-powered real-time feedback, intelligent coaching, 
             and personalized improvement plans tailored to your speaking goals.
           </p>
