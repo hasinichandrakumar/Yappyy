@@ -132,17 +132,13 @@ export default function Home() {
             </div>
           </div>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+          <div className="flex justify-center mb-16">
             <Link href="/dashboard">
               <Button size="lg" className="gradient-bg text-white hover:opacity-90 shadow-xl px-8 py-4 text-lg font-semibold tracking-wide purple-glow">
                 Start Your Free Session
                 <PlayCircle className="w-5 h-5 ml-3" />
               </Button>
             </Link>
-            <Button size="lg" variant="outline" className="border-2 border-gray-300 hover:border-blue-500 px-8 py-4 text-lg">
-              Watch Demo
-              <Video className="w-5 h-5 ml-3" />
-            </Button>
           </div>
 
           {/* Real-time Metrics Preview */}

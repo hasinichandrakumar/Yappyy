@@ -57,20 +57,20 @@ export default function BadgeSystem() {
         icon: <Trophy className="w-6 h-6" />,
         color: "from-yellow-400 to-yellow-600",
         criteria: [
-          "High audience engagement score (85%+)",
-          "Strong argument structure (AI-analyzed logic)",
-          "Effective emotional appeal through voice and words",
-          "Complete 3 persuasive speeches"
+          "Exceptional audience engagement score (95%+)",
+          "Flawless argument structure (AI-analyzed logic)",
+          "Masterful emotional appeal through voice and words",
+          "Complete 10 persuasive speeches with 90%+ success rate"
         ],
         benefits: [
           "Unlocks advanced persuasion missions",
           "Shareable badge for LinkedIn/resume",
           "Bonus coaching session on negotiation"
         ],
-        isUnlocked: Math.random() > 0.7,
-        progress: Math.floor(Math.random() * 100),
+        isUnlocked: Math.random() > 0.95,
+        progress: Math.floor(Math.random() * 15),
         rarity: "legendary",
-        dateEarned: Math.random() > 0.7 ? new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000) : undefined
+        dateEarned: Math.random() > 0.95 ? new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000) : undefined
       },
       {
         id: "best-voice-modulation",
@@ -80,18 +80,18 @@ export default function BadgeSystem() {
         icon: <Mic className="w-6 h-6" />,
         color: "from-blue-400 to-blue-600",
         criteria: [
-          "Varied pitch and tone throughout speech",
-          "Strategic pauses at appropriate moments",
-          "Avoids monotone delivery",
-          "Real-time waveform stability analysis"
+          "Perfect pitch and tone variation across 8+ vocal ranges",
+          "Masterful strategic pauses with 95%+ effectiveness",
+          "Zero monotone delivery across 15+ sessions",
+          "Exceptional real-time waveform stability (98%+ consistency)"
         ],
         benefits: [
           "Unlocks Expressive Delivery Masterclass",
           "Voice-over challenge access",
           "Custom voice evolution visualization"
         ],
-        isUnlocked: Math.random() > 0.6,
-        progress: Math.floor(Math.random() * 100),
+        isUnlocked: Math.random() > 0.90,
+        progress: Math.floor(Math.random() * 20),
         rarity: "epic"
       },
       {
@@ -102,10 +102,10 @@ export default function BadgeSystem() {
         icon: <Target className="w-6 h-6" />,
         color: "from-green-400 to-green-600",
         criteria: [
-          "90-100% reduction of filler words",
-          "Maintain natural speaking flow",
-          "Consistent performance over 3+ sessions",
-          "No use of 'um,' 'like,' 'you know'"
+          "100% elimination of filler words for 10+ consecutive sessions",
+          "Maintain natural speaking flow (95%+ fluency score)",
+          "Consistent performance over 20+ sessions",
+          "Zero instances of 'um,' 'like,' 'you know,' 'so,' 'actually'"
         ],
         benefits: [
           "Featured on app leaderboard",
@@ -124,10 +124,10 @@ export default function BadgeSystem() {
         icon: <Zap className="w-6 h-6" />,
         color: "from-purple-400 to-purple-600",
         criteria: [
-          "Complete pitch within 60 seconds",
-          "Perfect pacing and clarity",
-          "Compelling message delivery",
-          "High engagement metrics"
+          "Complete 25 pitches within exactly 58-60 seconds",
+          "Perfect pacing and clarity (98%+ score)",
+          "Compelling message delivery with 90%+ impact rating",
+          "Exceptional engagement metrics across all attempts"
         ],
         benefits: [
           "Elevator pitch mastery badge",
