@@ -359,7 +359,7 @@ export default function Home() {
             <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
               <Mic className="text-white w-4 h-4" />
             </div>
-            <h3 className="text-xl font-bold">YapUp</h3>
+            <h3 className="text-xl font-bold yapup-gradient">YapUp</h3>
           </div>
           <p className="text-gray-400 mb-6">
             Empowering speakers worldwide with intelligent feedback and coaching.
