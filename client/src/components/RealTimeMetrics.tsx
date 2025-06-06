@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useVoiceAnalysis } from "@/hooks/useVoiceAnalysis";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -21,12 +20,11 @@ import {
 
 export default function RealTimeMetrics() {
   const { 
-    speakingPace, 
-    voiceClarity, 
-    confidenceScore 
-  } = useVoiceAnalysis();
-  
-  const { isListening } = useSpeechRecognition();
+    wpm,
+    wordCount,
+    fillerWords,
+    isListening 
+  } = useSpeechRecognition();
 
   // Live updating metrics with real-time simulation
   const [liveMetrics, setLiveMetrics] = useState({
