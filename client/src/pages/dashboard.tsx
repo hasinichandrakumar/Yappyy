@@ -180,7 +180,7 @@ export default function Dashboard() {
           </TabsContent>
 
           <TabsContent value="templates" className="space-y-6">
-            <ScriptTemplates />
+            <EnhancedTemplateMarketplace />
           </TabsContent>
 
           <TabsContent value="badges" className="space-y-6">
