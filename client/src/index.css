@@ -3,62 +3,62 @@
 @tailwind utilities;
 
 :root {
-  --background: 0 0% 98%; /* #FAFAFA */
-  --foreground: 20 14.3% 4.1%;
-  --muted: 60 4.8% 95.9%;
-  --muted-foreground: 25 5.3% 44.7%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 20 14.3% 4.1%;
-  --card: 0 0% 100%; /* #FFFFFF - surface */
-  --card-foreground: 20 14.3% 4.1%;
-  --border: 20 5.9% 90%;
-  --input: 20 5.9% 90%;
-  --primary: 207 90% 54%; /* #1976D2 */
-  --primary-foreground: 211 100% 99%;
-  --secondary: 122 39% 49%; /* #388E3C */
-  --secondary-foreground: 60 9.1% 97.8%;
-  --accent: 33 100% 50%; /* #FF6F00 */
-  --accent-foreground: 60 9.1% 97.8%;
-  --warning: 39 100% 47%; /* #F57C00 */
+  --background: 250 100% 98%; /* Light purple-blue background */
+  --foreground: 260 15% 15%; /* Dark purple-blue text */
+  --muted: 250 50% 95%; /* Muted purple */
+  --muted-foreground: 260 10% 50%;
+  --popover: 255 100% 99%;
+  --popover-foreground: 260 15% 15%;
+  --card: 255 100% 99%; /* Pure white with slight purple tint */
+  --card-foreground: 260 15% 15%;
+  --border: 250 30% 88%; /* Purple-tinted border */
+  --input: 250 30% 90%; /* Purple-tinted input */
+  --primary: 260 85% 60%; /* Rich purple */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 240 100% 70%; /* Blue-purple */
+  --secondary-foreground: 0 0% 100%;
+  --accent: 280 100% 70%; /* Pink-purple */
+  --accent-foreground: 0 0% 100%;
+  --warning: 39 100% 47%; /* Keep warning orange */
   --warning-foreground: 60 9.1% 97.8%;
-  --error: 4 90% 58%; /* #D32F2F */
+  --error: 4 90% 58%; /* Keep error red */
   --error-foreground: 60 9.1% 97.8%;
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 60 9.1% 97.8%;
-  --ring: 20 14.3% 4.1%;
-  --radius: 0.5rem;
+  --ring: 260 85% 60%; /* Purple ring */
+  --radius: 0.75rem;
   
   /* Custom colors from design */
-  --surface: 0 0% 100%; /* #FFFFFF */
+  --surface: 255 100% 99%; /* Pure white with purple tint */
 }
 
 .dark {
-  --background: 240 10% 3.9%;
-  --foreground: 0 0% 98%;
-  --muted: 240 3.7% 15.9%;
-  --muted-foreground: 240 5% 64.9%;
-  --popover: 240 10% 3.9%;
-  --popover-foreground: 0 0% 98%;
-  --card: 240 10% 3.9%;
-  --card-foreground: 0 0% 98%;
-  --border: 240 3.7% 15.9%;
-  --input: 240 3.7% 15.9%;
-  --primary: 207 90% 54%;
-  --primary-foreground: 211 100% 99%;
-  --secondary: 122 39% 49%;
-  --secondary-foreground: 0 0% 98%;
-  --accent: 33 100% 50%;
-  --accent-foreground: 0 0% 98%;
-  --warning: 39 100% 47%;
-  --warning-foreground: 0 0% 98%;
-  --error: 4 90% 58%;
-  --error-foreground: 0 0% 98%;
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 0 0% 98%;
-  --ring: 240 4.9% 83.9%;
-  --radius: 0.5rem;
+  --background: 260 20% 8%; /* Dark purple background */
+  --foreground: 250 100% 95%; /* Light purple-white text */
+  --muted: 260 15% 18%; /* Dark purple muted */
+  --muted-foreground: 250 20% 70%; /* Light purple-gray text */
+  --popover: 260 25% 12%; /* Dark purple popover */
+  --popover-foreground: 250 100% 95%;
+  --card: 260 25% 12%; /* Dark purple card */
+  --card-foreground: 250 100% 95%;
+  --border: 260 15% 18%; /* Dark purple border */
+  --input: 260 15% 18%; /* Dark purple input */
+  --primary: 270 90% 70%; /* Bright purple primary */
+  --primary-foreground: 260 20% 8%;
+  --secondary: 240 80% 60%; /* Blue-purple secondary */
+  --secondary-foreground: 260 20% 8%;
+  --accent: 280 80% 60%; /* Pink-purple accent */
+  --accent-foreground: 260 20% 8%;
+  --warning: 39 100% 47%; /* Orange warning */
+  --warning-foreground: 260 20% 8%;
+  --error: 4 90% 58%; /* Red error */
+  --error-foreground: 260 20% 8%;
+  --destructive: 0 62.8% 50%;
+  --destructive-foreground: 250 100% 95%;
+  --ring: 270 90% 70%; /* Bright purple ring */
+  --radius: 0.75rem;
   
-  --surface: 240 10% 3.9%;
+  --surface: 260 25% 12%; /* Dark purple surface */
 }
 
 @layer base {
@@ -67,8 +67,24 @@
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply font-sans antialiased text-foreground;
     font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, 
+      hsl(250, 100%, 98%) 0%, 
+      hsl(240, 100%, 95%) 25%, 
+      hsl(260, 85%, 94%) 50%, 
+      hsl(280, 100%, 95%) 75%, 
+      hsl(270, 100%, 98%) 100%);
+    min-height: 100vh;
+  }
+  
+  .dark body {
+    background: linear-gradient(135deg, 
+      hsl(260, 20%, 8%) 0%, 
+      hsl(250, 25%, 10%) 25%, 
+      hsl(270, 30%, 12%) 50%, 
+      hsl(240, 25%, 10%) 75%, 
+      hsl(280, 20%, 8%) 100%);
   }
 }
 
