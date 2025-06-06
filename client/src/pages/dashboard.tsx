@@ -39,7 +39,7 @@ export default function Dashboard() {
               <h1 className="text-xl font-heading yapup-gradient tracking-tight">YapUp</h1>
             </div>
             <div className="flex items-center space-x-4">
-              <button className="text-purple-600 hover:text-purple-700 transition-colors">
+              <button className="text-cyan-600 hover:text-cyan-700 transition-colors">
                 <Bell className="w-5 h-5" />
               </button>
               <div className="w-8 h-8 gradient-bg rounded-full flex items-center justify-center purple-glow">
@@ -96,7 +96,7 @@ export default function Dashboard() {
             <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
               <h3 className="text-xl font-semibold text-gray-900 mb-6">Practice Focus Areas</h3>
               <div className="flex flex-wrap gap-4">
-                <Button variant="outline" className="flex items-center space-x-2 bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100">
+                <Button variant="outline" className="flex items-center space-x-2 bg-cyan-50 border-cyan-200 text-cyan-700 hover:bg-cyan-100">
                   <Eye className="w-4 h-4" />
                   <span>Maintain Eye Contact</span>
                 </Button>

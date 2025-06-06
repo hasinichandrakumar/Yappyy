@@ -116,7 +116,9 @@ export default function VideoFeed() {
           const ctx = canvas.getContext('2d');
           if (ctx) {
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            processFrame(canvas);
+            // Process frame for MediaPipe analysis
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            processFrame(imageData);
           }
         }
         
@@ -140,11 +142,11 @@ export default function VideoFeed() {
 
   return (
     <Card className="shadow-lg border-0">
-      <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 border-b border-gray-100">
+      <div className="bg-gradient-to-r from-cyan-50 to-blue-50 p-6 border-b border-gray-100">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-3">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <Play className="w-5 h-5 text-green-600" />
+            <div className="p-2 bg-cyan-100 rounded-lg">
+              <Play className="w-5 h-5 text-cyan-600" />
             </div>
             Live Practice Session
           </h2>
@@ -157,7 +159,7 @@ export default function VideoFeed() {
                 id="demo-mode"
                 checked={demoMode}
                 onCheckedChange={setDemoMode}
-                className="data-[state=checked]:bg-green-600"
+                className="data-[state=checked]:bg-cyan-600"
               />
             </div>
             <div className="flex items-center space-x-2">
@@ -168,7 +170,7 @@ export default function VideoFeed() {
                 id="real-time-feedback"
                 checked={realTimeFeedback}
                 onCheckedChange={setRealTimeFeedback}
-                className="data-[state=checked]:bg-purple-600"
+                className="data-[state=checked]:bg-cyan-600"
               />
             </div>
             {isRecording && (
@@ -279,10 +281,10 @@ export default function VideoFeed() {
         
         {/* Real-time Feedback Status */}
         {realTimeFeedback && (
-          <div className="mt-4 p-3 bg-purple-50 border border-purple-200 rounded-lg">
+          <div className="mt-4 p-3 bg-cyan-50 border border-cyan-200 rounded-lg">
             <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-purple-600 rounded-full animate-pulse"></div>
-              <span className="text-sm font-medium text-purple-800">
+              <div className="w-2 h-2 bg-cyan-600 rounded-full animate-pulse"></div>
+              <span className="text-sm font-medium text-cyan-800">
                 Real-time AI feedback is active - You'll receive live coaching tips during your presentation
               </span>
             </div>
