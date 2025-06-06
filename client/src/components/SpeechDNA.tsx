@@ -522,12 +522,12 @@ export default function SpeechDNA() {
                   
                   return (
                     <>
-                      <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-lg">
+                      <div className="bg-gradient-to-r from-cyan-50 to-blue-50 p-4 rounded-lg">
                         <h4 className="font-heading text-gray-900 mb-2">Master These Techniques:</h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                           {character.keyTechniques.map((technique, index) => (
                             <div key={index} className="flex items-center space-x-2">
-                              <BookOpen className="w-4 h-4 text-purple-600" />
+                              <BookOpen className="w-4 h-4 text-cyan-600" />
                               <span className="text-sm text-gray-700">{technique}</span>
                             </div>
                           ))}
@@ -597,7 +597,7 @@ export default function SpeechDNA() {
                               <div className="flex items-center space-x-2">
                                 <div className="w-20 h-2 bg-gray-200 rounded-full">
                                   <div 
-                                    className="h-full bg-gradient-to-r from-purple-500 to-blue-500 rounded-full"
+                                    className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full"
                                     style={{ width: `${Math.random() * 80 + 20}%` }}
                                   />
                                 </div>
@@ -614,11 +614,11 @@ export default function SpeechDNA() {
                           Start Full Training Session
                         </Button>
                         <div className="grid grid-cols-2 gap-2">
-                          <Button variant="outline" className="purple-border hover:bg-purple-50">
+                          <Button variant="outline" className="border-cyan-300 hover:bg-cyan-50">
                             <LineChart className="w-4 h-4 mr-2" />
                             View Stats
                           </Button>
-                          <Button variant="outline" className="purple-border hover:bg-purple-50">
+                          <Button variant="outline" className="border-cyan-300 hover:bg-cyan-50">
                             <Trophy className="w-4 h-4 mr-2" />
                             Achievements
                           </Button>
