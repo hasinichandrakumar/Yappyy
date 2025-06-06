@@ -86,9 +86,9 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-black dark">
+    <div className="min-h-screen gradient-bg-light">
       {/* Navigation */}
-      <nav className="bg-black/90 backdrop-blur-md shadow-lg border-b border-cyan-500/20 sticky top-0 z-50">
+      <nav className="gradient-card backdrop-blur-md shadow-lg purple-border sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
@@ -100,7 +100,7 @@ export default function Home() {
               </h1>
             </div>
             <Link href="/dashboard">
-              <Button className="gradient-button text-white hover:opacity-90 shadow-lg">
+              <Button className="gradient-bg text-white hover:opacity-90 shadow-lg purple-glow">
                 Start Practicing
                 <PlayCircle className="w-4 h-4 ml-2" />
               </Button>
@@ -117,45 +117,45 @@ export default function Home() {
             Powered by GPT-4 Turbo & MediaPipe Neural Networks
           </Badge>
           
-          <h1 className="text-5xl md:text-7xl font-display text-white mb-8 tracking-tight text-balance">
+          <h1 className="text-5xl md:text-7xl font-display text-gray-900 mb-8 tracking-tight text-balance">
             <span className="block yapup-gradient font-display">
               YapUp
             </span>
-            <span className="text-4xl md:text-5xl block mt-4 gradient-text-secondary">
+            <span className="text-4xl md:text-5xl block mt-4">
               Master Your Public Speaking
             </span>
           </h1>
           
-          <p className="text-xl font-body text-gray-300 mb-8 max-w-3xl mx-auto text-balance">
+          <p className="text-xl font-body text-gray-600 mb-8 max-w-3xl mx-auto text-balance">
             Transform your presentation skills with AI-powered real-time feedback, intelligent coaching, 
             and personalized improvement plans tailored to your speaking goals.
           </p>
           
-          <div className="mb-12 p-8 bg-gradient-to-br from-gray-900/95 to-black/95 backdrop-blur-sm rounded-2xl border border-cyan-500/30 max-w-3xl mx-auto gradient-shadow">
+          <div className="mb-12 p-8 bg-white/90 backdrop-blur-sm rounded-2xl border border-purple-200 max-w-3xl mx-auto purple-glow">
             <div className="text-center">
               <div className="grid grid-cols-3 gap-8 mb-4">
                 <div>
-                  <div className="text-3xl font-display gradient-text-secondary mb-1">55%</div>
-                  <p className="text-sm font-medium text-gray-300">Body Language</p>
+                  <div className="text-3xl font-display gradient-text mb-1">55%</div>
+                  <p className="text-sm font-medium text-gray-700">Body Language</p>
                 </div>
                 <div>
-                  <div className="text-3xl font-display gradient-text-secondary mb-1">38%</div>
-                  <p className="text-sm font-medium text-gray-300">Tone of Voice</p>
+                  <div className="text-3xl font-display gradient-text mb-1">38%</div>
+                  <p className="text-sm font-medium text-gray-700">Tone of Voice</p>
                 </div>
                 <div>
-                  <div className="text-3xl font-display gradient-text-secondary mb-1">7%</div>
-                  <p className="text-sm font-medium text-gray-300">Words</p>
+                  <div className="text-3xl font-display gradient-text mb-1">7%</div>
+                  <p className="text-sm font-medium text-gray-700">Words</p>
                 </div>
               </div>
-              <div className="border-t border-cyan-500/30 pt-6">
-                <h2 className="text-4xl md:text-5xl font-display gradient-text-secondary tracking-tight">We coach 100% of you.</h2>
+              <div className="border-t border-purple-200 pt-6">
+                <h2 className="text-4xl md:text-5xl font-display gradient-text tracking-tight">We coach 100% of you.</h2>
               </div>
             </div>
           </div>
           
           <div className="flex justify-center mb-16">
             <Link href="/dashboard">
-              <Button size="lg" className="gradient-button text-white hover:opacity-90 shadow-xl px-8 py-4 text-lg font-semibold tracking-wide">
+              <Button size="lg" className="gradient-bg text-white hover:opacity-90 shadow-xl px-8 py-4 text-lg font-semibold tracking-wide purple-glow">
                 Start Your Free Session
                 <PlayCircle className="w-5 h-5 ml-3" />
               </Button>
@@ -165,13 +165,13 @@ export default function Home() {
           {/* Real-time Metrics Preview */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
             {metrics.map((metric, index) => (
-              <Card key={index} className="bg-gray-900/80 backdrop-blur-sm border border-cyan-500/30 shadow-lg hover:shadow-xl transition-all duration-300 gradient-card-hover">
+              <Card key={index} className="bg-white/70 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
                 <CardContent className="p-6 text-center">
-                  <div className="w-12 h-12 mx-auto mb-4 bg-gradient-to-br from-cyan-500 to-teal-500 rounded-full flex items-center justify-center">
+                  <div className="w-12 h-12 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                     <metric.icon className="w-6 h-6 text-white" />
                   </div>
-                  <h3 className="font-semibold text-white mb-1">{metric.label}</h3>
-                  <p className="text-sm text-gray-300">{metric.value}</p>
+                  <h3 className="font-semibold text-gray-900 mb-1">{metric.label}</h3>
+                  <p className="text-sm text-gray-600">{metric.value}</p>
                 </CardContent>
               </Card>
             ))}
@@ -180,13 +180,13 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-gray-900/30 backdrop-blur-sm">
+      <section className="py-20 bg-white/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
               Advanced AI-Powered Features
             </h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Our intelligent coaching system provides comprehensive feedback across every aspect of your presentation.
             </p>
           </div>
