@@ -1,67 +1,149 @@
-import { sessions, coachingFeedback, type Session, type InsertSession, type CoachingFeedback, type InsertCoachingFeedback } from "@shared/schema";
+import { 
+  users,
+  practiceSessions, 
+  coachingFeedback, 
+  userProgress,
+  aiInsights,
+  type User, 
+  type UpsertUser,
+  type PracticeSession,
+  type InsertPracticeSession, 
+  type CoachingFeedback, 
+  type InsertCoachingFeedback,
+  type UserProgress,
+  type InsertUserProgress,
+  type AiInsight,
+  type InsertAiInsight
+} from "@shared/schema";
+import { db } from "./db";
+import { eq, desc } from "drizzle-orm";
 
 export interface IStorage {
-  createSession(session: InsertSession): Promise<Session>;
-  getSession(id: number): Promise<Session | undefined>;
-  getAllSessions(): Promise<Session[]>;
+  // User operations (required for authentication)
+  getUser(id: string): Promise<User | undefined>;
+  upsertUser(user: UpsertUser): Promise<User>;
+  
+  // Practice session operations
+  createPracticeSession(session: InsertPracticeSession): Promise<PracticeSession>;
+  getPracticeSession(id: number): Promise<PracticeSession | undefined>;
+  getUserPracticeSessions(userId: string): Promise<PracticeSession[]>;
+  
+  // Coaching feedback operations
   addCoachingFeedback(feedback: InsertCoachingFeedback): Promise<CoachingFeedback>;
   getSessionFeedback(sessionId: number): Promise<CoachingFeedback[]>;
+  
+  // User progress operations
+  getUserProgress(userId: string): Promise<UserProgress[]>;
+  updateUserProgress(progress: InsertUserProgress): Promise<UserProgress>;
+  
+  // AI insights operations
+  createAiInsight(insight: InsertAiInsight): Promise<AiInsight>;
+  getUserAiInsights(userId: string): Promise<AiInsight[]>;
 }
 
-export class MemStorage implements IStorage {
-  private sessions: Map<number, Session>;
-  private coachingFeedback: Map<number, CoachingFeedback>;
-  private currentSessionId: number;
-  private currentFeedbackId: number;
-
-  constructor() {
-    this.sessions = new Map();
-    this.coachingFeedback = new Map();
-    this.currentSessionId = 1;
-    this.currentFeedbackId = 1;
+export class DatabaseStorage implements IStorage {
+  // User operations
+  async getUser(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
   }
 
-  async createSession(insertSession: InsertSession): Promise<Session> {
-    const id = this.currentSessionId++;
-    const session: Session = {
-      ...insertSession,
-      id,
-      createdAt: new Date(),
-      videoBlob: insertSession.videoBlob || null,
-    };
-    this.sessions.set(id, session);
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return user;
+  }
+
+  // Practice session operations
+  async createPracticeSession(sessionData: InsertPracticeSession): Promise<PracticeSession> {
+    const [session] = await db
+      .insert(practiceSessions)
+      .values(sessionData)
+      .returning();
     return session;
   }
 
-  async getSession(id: number): Promise<Session | undefined> {
-    return this.sessions.get(id);
+  async getPracticeSession(id: number): Promise<PracticeSession | undefined> {
+    const [session] = await db.select().from(practiceSessions).where(eq(practiceSessions.id, id));
+    return session;
   }
 
-  async getAllSessions(): Promise<Session[]> {
-    return Array.from(this.sessions.values()).sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+  async getUserPracticeSessions(userId: string): Promise<PracticeSession[]> {
+    return await db
+      .select()
+      .from(practiceSessions)
+      .where(eq(practiceSessions.userId, userId))
+      .orderBy(desc(practiceSessions.createdAt));
   }
 
-  async addCoachingFeedback(insertFeedback: InsertCoachingFeedback): Promise<CoachingFeedback> {
-    const id = this.currentFeedbackId++;
-    const feedback: CoachingFeedback = {
-      type: insertFeedback.type,
-      message: insertFeedback.message,
-      severity: insertFeedback.severity,
-      sessionId: insertFeedback.sessionId || null,
-      id,
-      timestamp: new Date(),
-    };
-    this.coachingFeedback.set(id, feedback);
+  // Coaching feedback operations
+  async addCoachingFeedback(feedbackData: InsertCoachingFeedback): Promise<CoachingFeedback> {
+    const [feedback] = await db
+      .insert(coachingFeedback)
+      .values(feedbackData)
+      .returning();
     return feedback;
   }
 
   async getSessionFeedback(sessionId: number): Promise<CoachingFeedback[]> {
-    return Array.from(this.coachingFeedback.values())
-      .filter(feedback => feedback.sessionId === sessionId)
-      .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+    return await db
+      .select()
+      .from(coachingFeedback)
+      .where(eq(coachingFeedback.sessionId, sessionId))
+      .orderBy(desc(coachingFeedback.timestamp));
+  }
+
+  // User progress operations
+  async getUserProgress(userId: string): Promise<UserProgress[]> {
+    return await db
+      .select()
+      .from(userProgress)
+      .where(eq(userProgress.userId, userId));
+  }
+
+  async updateUserProgress(progressData: InsertUserProgress): Promise<UserProgress> {
+    const [progress] = await db
+      .insert(userProgress)
+      .values({
+        ...progressData,
+        updatedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: [userProgress.userId, userProgress.skillArea],
+        set: {
+          ...progressData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return progress;
+  }
+
+  // AI insights operations
+  async createAiInsight(insightData: InsertAiInsight): Promise<AiInsight> {
+    const [insight] = await db
+      .insert(aiInsights)
+      .values(insightData)
+      .returning();
+    return insight;
+  }
+
+  async getUserAiInsights(userId: string): Promise<AiInsight[]> {
+    return await db
+      .select()
+      .from(aiInsights)
+      .where(eq(aiInsights.userId, userId))
+      .orderBy(desc(aiInsights.createdAt));
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
