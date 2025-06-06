@@ -167,7 +167,7 @@ export default function Home() {
             {metrics.map((metric, index) => (
               <Card key={index} className="bg-white/70 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
                 <CardContent className="p-6 text-center">
-                  <div className="w-12 h-12 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                  <div className="w-12 h-12 mx-auto mb-4 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center">
                     <metric.icon className="w-6 h-6 text-white" />
                   </div>
                   <h3 className="font-semibold text-gray-900 mb-1">{metric.label}</h3>
@@ -267,7 +267,7 @@ export default function Home() {
               </div>
 
               <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
                   <Target className="w-6 h-6 text-white" />
                 </div>
                 <div>
@@ -283,7 +283,7 @@ export default function Home() {
             <div className="relative">
               <div className="bg-white rounded-2xl shadow-2xl p-8 border border-gray-100">
                 <div className="text-center mb-6">
-                  <Globe className="w-16 h-16 mx-auto text-blue-600 mb-4" />
+                  <Globe className="w-16 h-16 mx-auto text-cyan-600 mb-4" />
                   <h4 className="text-2xl font-bold text-gray-900 mb-2">Our Vision</h4>
                 </div>
                 <blockquote className="text-lg text-gray-700 italic leading-relaxed text-center">
@@ -320,10 +320,10 @@ export default function Home() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {speechTypes.map((type, index) => (
-              <Card key={index} className="group hover:shadow-lg transition-all duration-300 border-2 border-gray-100 hover:border-blue-200">
+              <Card key={index} className="group hover:shadow-lg transition-all duration-300 border-2 border-gray-100 hover:border-cyan-200">
                 <CardContent className="p-6 text-center">
-                  <div className="w-12 h-12 mx-auto mb-4 bg-gradient-to-br from-gray-100 to-gray-200 group-hover:from-blue-100 group-hover:to-purple-100 rounded-full flex items-center justify-center transition-all duration-300">
-                    <Users className="w-6 h-6 text-gray-600 group-hover:text-blue-600" />
+                  <div className="w-12 h-12 mx-auto mb-4 bg-gradient-to-br from-gray-100 to-gray-200 group-hover:from-cyan-100 group-hover:to-blue-100 rounded-full flex items-center justify-center transition-all duration-300">
+                    <Users className="w-6 h-6 text-gray-600 group-hover:text-cyan-600" />
                   </div>
                   <h3 className="font-semibold text-gray-900 text-sm">{type}</h3>
                 </CardContent>
@@ -334,7 +334,7 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600">
+      <section className="py-20 bg-gradient-to-r from-cyan-600 via-blue-600 to-teal-600">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <Award className="w-16 h-16 mx-auto mb-8 text-white/80" />
           <h2 className="text-4xl font-bold text-white mb-6">
@@ -344,7 +344,7 @@ export default function Home() {
             Join thousands of speakers who have improved their presentation skills with our AI-powered coaching platform.
           </p>
           <Link href="/dashboard">
-            <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 shadow-xl px-12 py-4 text-lg font-semibold">
+            <Button size="lg" className="bg-white text-cyan-600 hover:bg-gray-100 shadow-xl px-12 py-4 text-lg font-semibold">
               Start Your Journey
               <PlayCircle className="w-5 h-5 ml-3" />
             </Button>

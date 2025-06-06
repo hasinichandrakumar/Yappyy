@@ -254,7 +254,7 @@ export default function VideoFeed() {
                     <span>{speakingPace} WPM</span>
                   </div>
                   <div className="flex items-center space-x-1">
-                    <span className="text-blue-300">Clarity: {Math.round(voiceClarity * 100)}%</span>
+                    <span className="text-cyan-300">Clarity: {Math.round(voiceClarity * 100)}%</span>
                   </div>
                 </div>
               </div>
