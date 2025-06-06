@@ -90,21 +90,21 @@ export default function AIPracticeRoleplay() {
   };
 
   return (
-    <Card className="gradient-card purple-border">
+    <Card className="bg-gradient-to-br from-cyan-50 to-blue-50 border border-cyan-200 shadow-sm">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center space-x-2 text-lg">
-          <Bot className="w-5 h-5 text-purple-600" />
+          <Bot className="w-5 h-5 text-cyan-600" />
           <span>AI Practice</span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-5">
         {!isSessionActive ? (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {/* Custom Audience Toggle */}
-            <div className="flex items-center justify-between p-2 bg-gradient-to-r from-purple-50 to-blue-50 rounded border border-purple-200">
-              <div>
-                <Label className="text-xs font-medium">Custom Audience</Label>
-                <p className="text-xs text-gray-600">Describe your own audience</p>
+            <div className="flex items-center justify-between p-3 bg-gradient-to-r from-cyan-50 to-blue-50 rounded-lg border border-cyan-200">
+              <div className="flex-1">
+                <Label className="text-sm font-medium">Custom Audience</Label>
+                <p className="text-xs text-gray-600 mt-0.5">Describe your own audience</p>
               </div>
               <Switch
                 checked={useCustomAudience}
@@ -112,36 +112,39 @@ export default function AIPracticeRoleplay() {
               />
             </div>
 
-            {useCustomAudience ? (
-              <div>
-                <Label className="text-sm font-medium">Describe Your Audience</Label>
-                <Textarea
-                  placeholder="E.g., Board of directors at a tech company, focused on quarterly results and innovation. They're analytical, time-conscious, and looking for data-driven insights..."
-                  value={customAudiencePrompt}
-                  onChange={(e) => setCustomAudiencePrompt(e.target.value)}
-                  className="mt-1 h-20 text-xs"
-                />
-              </div>
-            ) : (
-              <div>
-                <Label className="text-sm font-medium">Audience Type</Label>
-                <Select value={selectedRole} onValueChange={setSelectedRole}>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Choose audience" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {audienceRoles.map((role) => (
-                      <SelectItem key={role.id} value={role.id}>
-                        <div className="flex items-center space-x-2">
-                          {role.icon}
-                          <span>{role.name}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+            {/* Conditional Content with proper spacing */}
+            <div className="min-h-[80px]">
+              {useCustomAudience ? (
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Describe Your Audience</Label>
+                  <Textarea
+                    placeholder="E.g., Board of directors at a tech company, focused on quarterly results and innovation. They're analytical, time-conscious, and looking for data-driven insights..."
+                    value={customAudiencePrompt}
+                    onChange={(e) => setCustomAudiencePrompt(e.target.value)}
+                    className="h-20 text-xs resize-none"
+                  />
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Audience Type</Label>
+                  <Select value={selectedRole} onValueChange={setSelectedRole}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose audience" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {audienceRoles.map((role) => (
+                        <SelectItem key={role.id} value={role.id}>
+                          <div className="flex items-center space-x-2">
+                            {role.icon}
+                            <span>{role.name}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
 
             <div>
               <Label htmlFor="speech-topic" className="text-sm">Topic (Optional)</Label>
