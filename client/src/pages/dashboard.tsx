@@ -16,6 +16,7 @@ import SpeechDNA from "@/components/SpeechDNA";
 import SpeechROIAnalyzer from "@/components/SpeechROIAnalyzer";
 import ScriptTemplates from "@/components/ScriptTemplates";
 import BadgeSystem from "@/components/BadgeSystem";
+import AIPracticeRoleplay from "@/components/AIPracticeRoleplay";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -49,7 +50,7 @@ export default function Dashboard() {
           <TabsList className="grid w-full grid-cols-9 mb-6 gradient-card purple-border">
             <TabsTrigger value="overview" className="flex items-center space-x-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
               <BarChart3 className="w-4 h-4" />
-              <span>Overview</span>
+              <span>Practice</span>
             </TabsTrigger>
             <TabsTrigger value="improvement" className="flex items-center space-x-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
               <Brain className="w-4 h-4" />
@@ -86,19 +87,24 @@ export default function Dashboard() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Left Column - Video Feed and Controls */}
-              <div className="lg:col-span-2 space-y-6">
-                <VideoFeed />
-                <RealTimeMetrics />
-                <SpeechTranscript />
+            <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+              {/* Left Column - AI Practice Roleplay */}
+              <div className="xl:col-span-3">
+                <AIPracticeRoleplay />
               </div>
               
-              {/* Right Column - Coaching Panel */}
+              {/* Right Column - Practice Tools */}
               <div className="space-y-6">
+                <VideoFeed />
+                <RealTimeMetrics />
                 <CoachingTips />
-                <SessionStats />
               </div>
+            </div>
+            
+            {/* Bottom Section - Additional Practice Features */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+              <SpeechTranscript />
+              <SessionStats />
             </div>
             
             <div className="mt-8">
