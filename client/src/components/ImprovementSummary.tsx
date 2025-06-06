@@ -280,8 +280,8 @@ export default function ImprovementSummary() {
         {aiAnalysis.overallAssessment && (
           <CardContent>
             <div className="p-4 bg-white/70 rounded-lg border border-purple-200">
-              <h4 className="font-semibold text-purple-900 mb-2">Overall Assessment</h4>
-              <p className="text-purple-800">{aiAnalysis.overallAssessment}</p>
+              <h4 className="font-heading text-purple-900 mb-2">Overall Assessment</h4>
+              <p className="font-body text-purple-800">{aiAnalysis.overallAssessment}</p>
             </div>
           </CardContent>
         )}
@@ -304,7 +304,7 @@ export default function ImprovementSummary() {
                   <div className="flex items-start justify-between">
                     <div className="flex items-center space-x-3">
                       <PriorityIcon className="w-5 h-5 text-gray-600" />
-                      <h3 className="text-lg font-semibold text-gray-900">{area.category}</h3>
+                      <h3 className="text-lg font-heading text-gray-900 tracking-tight">{area.category}</h3>
                     </div>
                     <Badge className={getPriorityColor(area.priority)}>
                       {area.priority.toUpperCase()} PRIORITY
@@ -313,7 +313,7 @@ export default function ImprovementSummary() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <h4 className="font-medium text-gray-900 mb-2">Current vs Target</h4>
+                      <h4 className="font-medium font-heading text-gray-900 mb-2">Current vs Target</h4>
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
                           <span>Current: {area.currentScore}%</span>
