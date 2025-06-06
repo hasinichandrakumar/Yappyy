@@ -297,6 +297,69 @@ Keep feedback constructive and actionable.`
     }
   });
 
+  // Deep speech analysis endpoint
+  app.post("/api/analyze-speech-deep", async (req, res) => {
+    try {
+      const { transcript, metrics } = req.body;
+      
+      if (!transcript || !metrics) {
+        return res.status(400).json({ message: "Transcript and metrics are required" });
+      }
+
+      const response = await fetch('https://api.perplexity.ai/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.PERPLEXITY_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: "llama-3.1-sonar-small-128k-online",
+          messages: [
+            {
+              role: "system",
+              content: "You are an expert speech analysis coach specializing in deep linguistic and rhetorical analysis. Provide comprehensive feedback on speech patterns, vocal dynamics, content structure, and persuasive techniques."
+            },
+            {
+              role: "user",
+              content: `Perform a deep analysis of this speech transcript:
+
+Transcript: "${transcript}"
+
+Current Metrics:
+- Speaking Pace: ${metrics.speakingPace} WPM
+- Voice Clarity: ${metrics.voiceClarity}%
+- Confidence Score: ${metrics.confidenceScore}%
+- Word Count: ${metrics.wordCount}
+- Session Duration: ${metrics.sessionTime} seconds
+
+Please analyze:
+1. Pause patterns and timing effectiveness
+2. Vocal variety and intonation patterns
+3. Rhetorical device usage (repetition, questions, metaphors)
+4. Content structure and flow
+5. Persuasive elements and argument strength
+6. Areas for vocal dynamic improvement
+7. Specific recommendations for enhancement
+
+Provide detailed, actionable feedback focusing on advanced speaking techniques.`
+            }
+          ],
+          temperature: 0.3,
+          stream: false
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Perplexity API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      res.json({ analysis: data.choices[0].message.content });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to perform deep speech analysis", error: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
