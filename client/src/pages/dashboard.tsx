@@ -45,7 +45,7 @@ export default function Dashboard() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6 mb-6 gradient-card purple-border">
+          <TabsList className="grid w-full grid-cols-8 mb-6 gradient-card purple-border">
             <TabsTrigger value="overview" className="flex items-center space-x-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
               <BarChart3 className="w-4 h-4" />
               <span>Overview</span>
@@ -70,13 +70,13 @@ export default function Dashboard() {
               <MicOff className="w-4 h-4" />
               <span>Speech Deep Dive</span>
             </TabsTrigger>
-            <TabsTrigger value="roi-analyzer" className="flex items-center space-x-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
+            <TabsTrigger value="roi-analyzer" className="flex items-center space-x-1 data-[state=active]:gradient-bg data-[state=active]:text-white">
               <TrendingUp className="w-4 h-4" />
-              <span>Impact Analyzer</span>
+              <span className="hidden sm:inline">Impact</span>
             </TabsTrigger>
-            <TabsTrigger value="templates" className="flex items-center space-x-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
+            <TabsTrigger value="templates" className="flex items-center space-x-1 data-[state=active]:gradient-bg data-[state=active]:text-white">
               <FileText className="w-4 h-4" />
-              <span>Script Templates</span>
+              <span className="hidden sm:inline">Templates</span>
             </TabsTrigger>
           </TabsList>
 
