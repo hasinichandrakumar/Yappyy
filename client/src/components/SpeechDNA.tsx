@@ -123,6 +123,94 @@ export default function SpeechDNA() {
       difficulty: "beginner",
       avatar: "🎈",
       color: "bg-orange-600"
+    },
+    {
+      id: "tony-robbins",
+      name: "Tony Robbins",
+      title: "The Peak Performance Coach",
+      style: "High-Energy, Transformational, Commanding",
+      keyTechniques: ["Audience participation", "Physical movement", "State changes", "Peak experiences"],
+      signature: "Are you ready to take MASSIVE ACTION?",
+      difficulty: "advanced",
+      avatar: "⚡",
+      color: "bg-yellow-500"
+    },
+    {
+      id: "simon-sinek",
+      name: "Simon Sinek",
+      title: "The Purpose-Driven Leader",
+      style: "Thoughtful, WHY-focused, Inspiring",
+      keyTechniques: ["Golden Circle framework", "Simple analogies", "Repetitive messaging", "Biological examples"],
+      signature: "Start with WHY",
+      difficulty: "intermediate",
+      avatar: "🎯",
+      color: "bg-teal-600"
+    },
+    {
+      id: "amy-cuddy",
+      name: "Amy Cuddy",
+      title: "The Confidence Expert",
+      style: "Scientific, Empowering, Vulnerable",
+      keyTechniques: ["Power poses", "Research backing", "Personal vulnerability", "Physical demonstrations"],
+      signature: "Fake it till you become it",
+      difficulty: "intermediate",
+      avatar: "💪",
+      color: "bg-purple-500"
+    },
+    {
+      id: "brene-brown",
+      name: "Brené Brown",
+      title: "The Vulnerability Researcher",
+      style: "Authentic, Research-based, Courageous",
+      keyTechniques: ["Vulnerability stories", "Shame resilience", "Research integration", "Courage building"],
+      signature: "Dare Greatly",
+      difficulty: "intermediate",
+      avatar: "💝",
+      color: "bg-rose-500"
+    },
+    {
+      id: "gary-vee",
+      name: "Gary Vaynerchuk",
+      title: "The Hustle Evangelist",
+      style: "Raw, Authentic, High-Energy",
+      keyTechniques: ["Real talk", "F-bomb emphasis", "Social media savvy", "Practical advice"],
+      signature: "Hustle and patience",
+      difficulty: "beginner",
+      avatar: "🔥",
+      color: "bg-red-500"
+    },
+    {
+      id: "ellen",
+      name: "Ellen DeGeneres",
+      title: "The Joyful Entertainer",
+      style: "Humorous, Kind, Relatable",
+      keyTechniques: ["Self-deprecating humor", "Audience interaction", "Dance breaks", "Kindness focus"],
+      signature: "Be kind to one another",
+      difficulty: "beginner",
+      avatar: "💃",
+      color: "bg-pink-400"
+    },
+    {
+      id: "michelle-obama",
+      name: "Michelle Obama",
+      title: "The Graceful Advocate",
+      style: "Graceful, Authentic, Inspiring",
+      keyTechniques: ["Personal anecdotes", "Educational focus", "Community building", "Grace under pressure"],
+      signature: "When they go low, we go high",
+      difficulty: "intermediate",
+      avatar: "✨",
+      color: "bg-emerald-500"
+    },
+    {
+      id: "gordon-ramsay",
+      name: "Gordon Ramsay",
+      title: "The Passionate Perfectionist",
+      style: "Intense, Passionate, Direct",
+      keyTechniques: ["Passionate outbursts", "High standards", "Tough love", "Excellence focus"],
+      signature: "This is absolutely brilliant!",
+      difficulty: "advanced",
+      avatar: "👨‍🍳",
+      color: "bg-orange-500"
     }
   ];
 

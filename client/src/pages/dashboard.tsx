@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bell, MicOff, User, BarChart3, Eye, Brain, Star, TrendingUp } from "lucide-react";
+import { Bell, MicOff, User, BarChart3, Eye, Brain, Star, TrendingUp, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import VideoFeed from "@/components/VideoFeed";
@@ -14,6 +14,7 @@ import AdvancedSpeechAnalysis from "@/components/AdvancedSpeechAnalysis";
 import ImprovementSummary from "@/components/ImprovementSummary";
 import SpeechDNA from "@/components/SpeechDNA";
 import SpeechROIAnalyzer from "@/components/SpeechROIAnalyzer";
+import ScriptTemplates from "@/components/ScriptTemplates";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -69,6 +70,14 @@ export default function Dashboard() {
               <MicOff className="w-4 h-4" />
               <span>Speech Deep Dive</span>
             </TabsTrigger>
+            <TabsTrigger value="roi-analyzer" className="flex items-center space-x-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
+              <TrendingUp className="w-4 h-4" />
+              <span>Impact Analyzer</span>
+            </TabsTrigger>
+            <TabsTrigger value="templates" className="flex items-center space-x-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
+              <FileText className="w-4 h-4" />
+              <span>Script Templates</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
@@ -110,6 +119,14 @@ export default function Dashboard() {
 
           <TabsContent value="speech-deep" className="space-y-6">
             <AdvancedSpeechAnalysis />
+          </TabsContent>
+
+          <TabsContent value="roi-analyzer" className="space-y-6">
+            <SpeechROIAnalyzer />
+          </TabsContent>
+
+          <TabsContent value="templates" className="space-y-6">
+            <ScriptTemplates />
           </TabsContent>
         </Tabs>
       </div>
