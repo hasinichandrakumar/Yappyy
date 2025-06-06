@@ -609,8 +609,23 @@ export default function ScriptTemplates() {
   const [showAIGenerator, setShowAIGenerator] = useState<boolean>(false);
   const [aiPrompt, setAiPrompt] = useState<string>("");
   const [isGeneratingAI, setIsGeneratingAI] = useState<boolean>(false);
+  const [useRoleplay, setUseRoleplay] = useState<boolean>(false);
+  const [selectedRole, setSelectedRole] = useState<string>("");
 
   const categories = ["all", "Business", "Personal", "Professional"];
+
+  const roleplayOptions = [
+    { id: "steve-jobs", name: "Steve Jobs", description: "Visionary, passionate, product-focused with dramatic pauses" },
+    { id: "oprah", name: "Oprah Winfrey", description: "Warm, empathetic, audience-connecting storyteller" },
+    { id: "obama", name: "Barack Obama", description: "Eloquent, measured, inspiring with presidential gravitas" },
+    { id: "tony-robbins", name: "Tony Robbins", description: "High-energy, motivational, audience-activating coach" },
+    { id: "ted-speaker", name: "TED Speaker", description: "Thought-provoking, insight-driven, idea-focused presenter" },
+    { id: "entrepreneur", name: "Silicon Valley Entrepreneur", description: "Innovation-focused, disruptive, future-thinking leader" },
+    { id: "coach", name: "Sports Coach", description: "Motivational, team-building, performance-driven communicator" },
+    { id: "professor", name: "University Professor", description: "Educational, research-backed, intellectually stimulating" },
+    { id: "comedian", name: "Stand-up Comedian", description: "Humorous, relatable, timing-focused entertainer" },
+    { id: "ceo", name: "Fortune 500 CEO", description: "Strategic, results-oriented, leadership-focused executive" }
+  ];
 
   const filteredTemplates = selectedCategory === "all" 
     ? scriptTemplates 
@@ -661,7 +676,9 @@ export default function ScriptTemplates() {
 
     setIsGeneratingAI(true);
     try {
-      const prompt = `Create a professional speech script template based on this request: "${aiPrompt}"
+      const selectedRoleData = roleplayOptions.find(role => role.id === selectedRole);
+      
+      let prompt = `Create a professional speech script template based on this request: "${aiPrompt}"
 
 Please provide:
 1. A complete speech template with placeholder variables in [BRACKET] format
@@ -670,7 +687,17 @@ Please provide:
 4. Make it adaptable for different audiences and occasions
 5. Length should be appropriate for the speech type (5-15 minutes typically)
 
-Format the response as a ready-to-use speech template with [PLACEHOLDER_VARIABLES] that users can customize.
+Format the response as a ready-to-use speech template with [PLACEHOLDER_VARIABLES] that users can customize.`;
+
+      if (useRoleplay && selectedRoleData) {
+        prompt += `
+
+ROLEPLAY INSTRUCTION: Write this template in the speaking style and persona of ${selectedRoleData.name}. 
+Style characteristics: ${selectedRoleData.description}
+Adopt their tone, phrasing patterns, signature techniques, and communication approach while maintaining the professional template format.`;
+      }
+
+      prompt += `
 
 Template Request: ${aiPrompt}`;
 
@@ -685,7 +712,7 @@ Template Request: ${aiPrompt}`;
           messages: [
             {
               role: "system",
-              content: "You are an expert speechwriter and communication coach. Create professional, engaging speech templates with clear structure and placeholder variables for customization."
+              content: `You are an expert speechwriter and communication coach. Create professional, engaging speech templates with clear structure and placeholder variables for customization.${useRoleplay && selectedRoleData ? ` When roleplay is requested, fully embody the speaking style and persona of the specified character while maintaining professional template format.` : ''}`
             },
             {
               role: "user",

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bell, MicOff, User, BarChart3, Eye, Brain, Star, TrendingUp, FileText } from "lucide-react";
+import { Bell, MicOff, User, BarChart3, Eye, Brain, Star, TrendingUp, FileText, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import VideoFeed from "@/components/VideoFeed";
@@ -15,6 +15,7 @@ import ImprovementSummary from "@/components/ImprovementSummary";
 import SpeechDNA from "@/components/SpeechDNA";
 import SpeechROIAnalyzer from "@/components/SpeechROIAnalyzer";
 import ScriptTemplates from "@/components/ScriptTemplates";
+import BadgeSystem from "@/components/BadgeSystem";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -45,7 +46,7 @@ export default function Dashboard() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-8 mb-6 gradient-card purple-border">
+          <TabsList className="grid w-full grid-cols-9 mb-6 gradient-card purple-border">
             <TabsTrigger value="overview" className="flex items-center space-x-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
               <BarChart3 className="w-4 h-4" />
               <span>Overview</span>
@@ -77,6 +78,10 @@ export default function Dashboard() {
             <TabsTrigger value="templates" className="flex items-center space-x-1 data-[state=active]:gradient-bg data-[state=active]:text-white">
               <FileText className="w-4 h-4" />
               <span className="hidden sm:inline">Templates</span>
+            </TabsTrigger>
+            <TabsTrigger value="badges" className="flex items-center space-x-1 data-[state=active]:gradient-bg data-[state=active]:text-white">
+              <Trophy className="w-4 h-4" />
+              <span className="hidden sm:inline">Badges</span>
             </TabsTrigger>
           </TabsList>
 
@@ -127,6 +132,10 @@ export default function Dashboard() {
 
           <TabsContent value="templates" className="space-y-6">
             <ScriptTemplates />
+          </TabsContent>
+
+          <TabsContent value="badges" className="space-y-6">
+            <BadgeSystem />
           </TabsContent>
         </Tabs>
       </div>
