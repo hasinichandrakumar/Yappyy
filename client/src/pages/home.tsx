@@ -32,11 +32,8 @@ export default function Home() {
   const { isAuthenticated, isLoading } = useAuth();
 
   const handleStartPracticing = () => {
-    if (isAuthenticated) {
-      window.location.href = "/dashboard";
-    } else {
-      window.location.href = "/api/auth/google";
-    }
+    // Since we're in demo mode, always redirect to dashboard
+    window.location.href = "/dashboard";
   };
 
   const advancedFeatures = [
