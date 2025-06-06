@@ -68,7 +68,7 @@ interface VocalDynamics {
 }
 
 export default function AdvancedSpeechAnalysis() {
-  const { transcript, wordCount, sessionTime } = useSpeechRecognition();
+  const { transcript, wordCount } = useSpeechRecognition();
   const { speakingPace, voiceClarity, confidenceScore, volumeLevel } = useVoiceAnalysis();
 
   const [speechPatterns, setSpeechPatterns] = useState<SpeechPatterns>({
@@ -132,8 +132,7 @@ export default function AdvancedSpeechAnalysis() {
           speakingPace,
           voiceClarity,
           confidenceScore,
-          wordCount,
-          sessionTime
+          wordCount
         }
       });
       const result = await response.json();
@@ -189,13 +188,13 @@ export default function AdvancedSpeechAnalysis() {
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return "text-green-600";
-    if (score >= 60) return "text-yellow-600";
+    if (score >= 60) return "text-cyan-600";
     return "text-red-600";
   };
 
   const getScoreBg = (score: number) => {
     if (score >= 80) return "bg-green-100";
-    if (score >= 60) return "bg-yellow-100";
+    if (score >= 60) return "bg-cyan-100";
     return "bg-red-100";
   };
 
@@ -249,7 +248,7 @@ export default function AdvancedSpeechAnalysis() {
         <Card className="bg-surface rounded-xl shadow-sm border border-gray-200">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <Clock className="w-5 h-5 text-blue-600" />
+              <Clock className="w-5 h-5 text-cyan-600" />
               <span>Pause & Timing Patterns</span>
             </CardTitle>
           </CardHeader>

@@ -147,8 +147,8 @@ export default function AdaptiveFeedbackEngine({ userProfile, currentPerformance
 
   const getTypeColor = (type: string) => {
     const colors = {
-      breakthrough: "border-purple-200 bg-purple-50 text-purple-800",
-      refinement: "border-blue-200 bg-blue-50 text-blue-800",
+      breakthrough: "border-cyan-200 bg-cyan-50 text-cyan-800",
+      refinement: "border-cyan-200 bg-cyan-50 text-cyan-800",
       challenge: "border-orange-200 bg-orange-50 text-orange-800",
       celebration: "border-green-200 bg-green-50 text-green-800"
     };
