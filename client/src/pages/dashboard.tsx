@@ -87,24 +87,20 @@ export default function Dashboard() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-              {/* Left Column - AI Practice Roleplay */}
-              <div className="xl:col-span-3">
-                <AIPracticeRoleplay />
-              </div>
-              
-              {/* Right Column - Practice Tools */}
-              <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Left Column - Video Feed and Controls */}
+              <div className="lg:col-span-2 space-y-6">
                 <VideoFeed />
                 <RealTimeMetrics />
-                <CoachingTips />
+                <SpeechTranscript />
               </div>
-            </div>
-            
-            {/* Bottom Section - Additional Practice Features */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-              <SpeechTranscript />
-              <SessionStats />
+              
+              {/* Right Column - Practice Tools and AI Roleplay */}
+              <div className="space-y-6">
+                <AIPracticeRoleplay />
+                <CoachingTips />
+                <SessionStats />
+              </div>
             </div>
             
             <div className="mt-8">
