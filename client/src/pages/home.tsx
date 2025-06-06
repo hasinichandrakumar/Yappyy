@@ -26,25 +26,25 @@ export default function Home() {
       icon: Video,
       title: "Real-time Video Analysis",
       description: "AI-powered posture and gesture detection with live feedback on your body language and presence.",
-      gradient: "from-blue-500 to-purple-600"
+      gradient: "from-purple-500 to-blue-600"
     },
     {
       icon: Mic,
       title: "Voice & Speech Analysis",
       description: "Advanced voice metrics including pace, clarity, confidence scoring, and filler word detection.",
-      gradient: "from-green-500 to-teal-600"
+      gradient: "from-blue-500 to-indigo-600"
     },
     {
       icon: MessageCircle,
       title: "Intelligent Coaching Chat",
       description: "Purpose-driven AI coaching tailored to your speech type - from TED talks to business pitches.",
-      gradient: "from-orange-500 to-red-600"
+      gradient: "from-indigo-500 to-purple-600"
     },
     {
       icon: BarChart3,
       title: "Performance Analytics",
       description: "Detailed session tracking with improvement suggestions and historical progress monitoring.",
-      gradient: "from-indigo-500 to-blue-600"
+      gradient: "from-purple-600 to-blue-500"
     }
   ];
 
@@ -67,21 +67,21 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <div className="min-h-screen gradient-bg-light">
       {/* Navigation */}
-      <nav className="bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-200 sticky top-0 z-50">
+      <nav className="gradient-card backdrop-blur-md shadow-lg purple-border sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center purple-glow">
                 <Mic className="text-white w-5 h-5" />
               </div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-xl font-bold gradient-text">
                 AI Speaking Coach
               </h1>
             </div>
             <Link href="/dashboard">
-              <Button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-lg">
+              <Button className="gradient-bg text-white hover:opacity-90 shadow-lg purple-glow">
                 Start Practicing
                 <PlayCircle className="w-4 h-4 ml-2" />
               </Button>
@@ -93,7 +93,7 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
-          <Badge className="mb-6 bg-blue-100 text-blue-800 border-blue-200 px-4 py-2">
+          <Badge className="mb-6 bg-purple-100 text-purple-800 border-purple-200 px-4 py-2">
             <Sparkles className="w-4 h-4 mr-2" />
             Powered by Advanced AI
           </Badge>

@@ -132,4 +132,53 @@
   .bg-error {
     background-color: hsl(var(--error));
   }
+
+  /* Gradient utilities */
+  .gradient-bg {
+    background: linear-gradient(135deg, 
+      hsl(260, 85%, 60%) 0%, 
+      hsl(240, 100%, 70%) 50%, 
+      hsl(280, 100%, 70%) 100%);
+  }
+
+  .gradient-bg-light {
+    background: linear-gradient(135deg, 
+      hsl(250, 100%, 98%) 0%, 
+      hsl(240, 100%, 95%) 50%, 
+      hsl(270, 100%, 90%) 100%);
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, 
+      hsl(260, 85%, 60%) 0%, 
+      hsl(240, 100%, 70%) 50%, 
+      hsl(280, 100%, 70%) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .gradient-card {
+    background: linear-gradient(135deg, 
+      hsl(255, 100%, 99%) 0%, 
+      hsl(250, 100%, 97%) 50%, 
+      hsl(245, 100%, 95%) 100%);
+    border: 1px solid hsl(250, 30%, 88%);
+  }
+
+  .dark .gradient-card {
+    background: linear-gradient(135deg, 
+      hsl(260, 25%, 12%) 0%, 
+      hsl(250, 20%, 15%) 50%, 
+      hsl(270, 25%, 18%) 100%);
+    border: 1px solid hsl(260, 15%, 18%);
+  }
+
+  .purple-glow {
+    box-shadow: 0 0 30px hsla(270, 85%, 60%, 0.3);
+  }
+
+  .dark .purple-glow {
+    box-shadow: 0 0 30px hsla(270, 90%, 70%, 0.2);
+  }
 }
