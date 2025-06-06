@@ -146,10 +146,10 @@ export default function DetailedAnalysis() {
                   <p className="text-xs text-red-600">Straighten your back and engage core muscles</p>
                 )}
                 {key === 'shoulderLevel' && value < 70 && (
-                  <p className="text-xs text-yellow-600">Balance shoulders - avoid hunching</p>
+                  <p className="text-xs text-cyan-600">Balance shoulders - avoid hunching</p>
                 )}
                 {key === 'headPosition' && value < 70 && (
-                  <p className="text-xs text-orange-600">Keep head level, chin parallel to floor</p>
+                  <p className="text-xs text-cyan-600">Keep head level, chin parallel to floor</p>
                 )}
               </div>
             );

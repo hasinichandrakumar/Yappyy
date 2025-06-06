@@ -149,7 +149,7 @@ export default function AdaptiveFeedbackEngine({ userProfile, currentPerformance
     const colors = {
       breakthrough: "border-cyan-200 bg-cyan-50 text-cyan-800",
       refinement: "border-cyan-200 bg-cyan-50 text-cyan-800",
-      challenge: "border-orange-200 bg-orange-50 text-orange-800",
+      challenge: "border-cyan-200 bg-cyan-50 text-cyan-800",
       celebration: "border-green-200 bg-green-50 text-green-800"
     };
     return colors[type as keyof typeof colors] || colors.refinement;

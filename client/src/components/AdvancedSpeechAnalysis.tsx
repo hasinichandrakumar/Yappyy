@@ -315,10 +315,10 @@ export default function AdvancedSpeechAnalysis() {
                   </div>
                   <Progress value={value} className="h-2" />
                   {key === 'emotionalRange' && value < 70 && (
-                    <p className="text-xs text-blue-600">Vary your vocal emotion to engage audience</p>
+                    <p className="text-xs text-cyan-600">Vary your vocal emotion to engage audience</p>
                   )}
                   {key === 'breathControl' && value < 70 && (
-                    <p className="text-xs text-orange-600">Practice breathing exercises for better control</p>
+                    <p className="text-xs text-cyan-600">Practice breathing exercises for better control</p>
                   )}
                 </div>
               );
@@ -330,7 +330,7 @@ export default function AdvancedSpeechAnalysis() {
         <Card className="bg-surface rounded-xl shadow-sm border border-gray-200">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <Volume2 className="w-5 h-5 text-orange-600" />
+              <Volume2 className="w-5 h-5 text-cyan-600" />
               <span>Intonation & Expression</span>
             </CardTitle>
           </CardHeader>

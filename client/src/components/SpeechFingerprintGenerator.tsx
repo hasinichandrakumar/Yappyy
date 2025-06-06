@@ -101,7 +101,7 @@ export default function SpeechFingerprintGenerator({ fingerprint, sessionCount }
     const colors: Record<string, string> = {
       blue: "text-cyan-600 bg-cyan-50",
       purple: "text-cyan-600 bg-cyan-50",
-      orange: "text-orange-600 bg-orange-50",
+      orange: "text-cyan-600 bg-cyan-50",
       green: "text-green-600 bg-green-50",
       indigo: "text-cyan-600 bg-cyan-50",
       pink: "text-pink-600 bg-pink-50"
