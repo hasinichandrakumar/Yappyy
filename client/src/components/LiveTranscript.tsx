@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useMutation } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
 import { 
   Mic, 
   MicOff, 
@@ -28,7 +30,35 @@ export default function LiveTranscript() {
   } = useSpeechRecognition();
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const [analysis, setAnalysis] = useState<any>(null);
+  const [lastAnalyzedLength, setLastAnalyzedLength] = useState(0);
+
+  // Real-time transcription analysis
+  const transcriptionMutation = useMutation({
+    mutationFn: async (data: { transcript: string; isPartial: boolean }) => {
+      const response = await fetch('/api/transcribe', {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: { 'Content-Type': 'application/json' }
+      });
+      return await response.json();
+    },
+    onSuccess: (result) => {
+      setAnalysis(result.analysis);
+    }
+  });
   const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null);
+
+  // Trigger analysis when transcript changes significantly
+  useEffect(() => {
+    if (transcript.length > lastAnalyzedLength + 20) { // Analyze every 20 characters
+      transcriptionMutation.mutate({
+        transcript,
+        isPartial: isListening
+      });
+      setLastAnalyzedLength(transcript.length);
+    }
+  }, [transcript, isListening, lastAnalyzedLength]);
 
   useEffect(() => {
     if (isListening && !sessionStartTime) {
@@ -117,7 +147,7 @@ export default function LiveTranscript() {
           <div className="text-center bg-gray-50 rounded-lg p-3">
             <div className="text-sm font-medium text-gray-600 mb-1">Fillers</div>
             <div className="flex items-center justify-center gap-2">
-              <div className="text-2xl font-bold text-gray-900">{fillerWords.length}</div>
+              <div className="text-2xl font-bold text-gray-900">{analysis?.fillerWords || fillerWords.length}</div>
               {fillerWords.length > 3 && (
                 <AlertTriangle className="w-4 h-4 text-yellow-600" />
               )}

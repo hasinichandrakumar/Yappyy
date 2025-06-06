@@ -46,6 +46,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // If no sessions exist, create sample sessions for demo
       if (sessions.length === 0) {
+        // First ensure the demo user exists
+        await storage.upsertUser({
+          id: userId,
+          email: 'demo@example.com',
+          firstName: 'Demo',
+          lastName: 'User',
+          profileImageUrl: 'https://via.placeholder.com/150'
+        });
         const sampleSessions = [
           {
             userId,
