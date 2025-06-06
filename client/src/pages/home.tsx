@@ -126,8 +126,8 @@ export default function Home() {
                   <p className="text-sm font-medium text-gray-700">Words</p>
                 </div>
               </div>
-              <div className="border-t border-purple-200 pt-4">
-                <p className="text-xl font-display gradient-text">We coach 100% of you.</p>
+              <div className="border-t border-purple-200 pt-6">
+                <h2 className="text-4xl md:text-5xl font-display gradient-text tracking-tight">We coach 100% of you.</h2>
               </div>
             </div>
           </div>
