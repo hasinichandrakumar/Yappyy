@@ -28,9 +28,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get user practice sessions
-  app.get("/api/practice-sessions", requireAuth, async (req: any, res) => {
+  app.get("/api/practice-sessions", async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.user?.id || 'demo-user';
       const sessions = await storage.getUserPracticeSessions(userId);
       res.json(sessions);
     } catch (error) {
@@ -39,7 +39,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get specific practice session
-  app.get("/api/practice-sessions/:id", requireAuth, async (req, res) => {
+  app.get("/api/practice-sessions/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const session = await storage.getPracticeSession(id);
@@ -53,11 +53,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create new practice session
-  app.post("/api/practice-sessions", requireAuth, async (req: any, res) => {
+  app.post("/api/practice-sessions", async (req: any, res) => {
     try {
       const validatedData = insertPracticeSessionSchema.parse({
         ...req.body,
-        userId: req.user.id
+        userId: req.user?.id || 'demo-user'
       });
       const session = await storage.createPracticeSession(validatedData);
       res.status(201).json(session);

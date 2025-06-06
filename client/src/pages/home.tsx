@@ -208,7 +208,15 @@ export default function Home() {
                     <feature.icon className="w-8 h-8 text-white" />
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900 mb-4">{feature.title}</h3>
-                  <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+                  <p className="text-gray-600 leading-relaxed mb-4">{feature.description}</p>
+                  <div className="space-y-2">
+                    {feature.details.map((detail, detailIndex) => (
+                      <div key={detailIndex} className="flex items-center text-sm text-gray-500">
+                        <div className="w-1 h-1 bg-blue-500 rounded-full mr-2"></div>
+                        {detail}
+                      </div>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
             ))}
