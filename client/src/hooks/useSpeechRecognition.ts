@@ -59,9 +59,12 @@ export function useSpeechRecognition(): SpeechRecognitionHook {
 
   const startListening = useCallback(() => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      console.warn('Speech recognition not supported');
+      console.error('Speech recognition not supported in this browser');
+      alert('Speech recognition is not supported in this browser. Please use Chrome, Edge, or Safari.');
       return;
     }
+
+    console.log('Starting speech recognition...');
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     recognitionRef.current = new SpeechRecognition();
@@ -83,6 +86,7 @@ export function useSpeechRecognition(): SpeechRecognitionHook {
       let fullTranscriptRef = '';
 
       recognitionRef.current.onresult = (event: any) => {
+        console.log('Speech recognition result received');
         let interimTranscript = '';
         let finalTranscript = '';
 
@@ -94,6 +98,9 @@ export function useSpeechRecognition(): SpeechRecognitionHook {
             interimTranscript += result[0].transcript;
           }
         }
+
+        console.log('Final transcript:', finalTranscript);
+        console.log('Interim transcript:', interimTranscript);
 
         // Update the full transcript reference
         if (finalTranscript) {

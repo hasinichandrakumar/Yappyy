@@ -38,6 +38,115 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Alias for sessions endpoint
+  app.get("/api/sessions", async (req: any, res) => {
+    try {
+      const userId = req.user?.id || 'demo-user';
+      let sessions = await storage.getUserPracticeSessions(userId);
+      
+      // If no sessions exist, create sample sessions for demo
+      if (sessions.length === 0) {
+        const sampleSessions = [
+          {
+            userId,
+            duration: 420,
+            averageWPM: 145,
+            confidenceScore: 87.5,
+            voiceClarity: 92.3,
+            fillerWords: 8,
+            pauseCount: 12,
+            eyeContactScore: "Good",
+            transcript: "Good morning everyone. Today I'm excited to share our revolutionary new product that will transform how we approach customer engagement. Our team has spent the last eighteen months developing this groundbreaking solution that addresses the core challenges facing modern businesses.",
+            coachingTips: ["Maintain steady eye contact", "Reduce filler words", "Use strategic pauses for emphasis"],
+            aiAnalysis: {
+              overallScore: 87,
+              strengths: ["Clear voice projection", "Confident delivery", "Strong opening"],
+              improvements: ["Eye contact consistency", "Gesture coordination", "Conclusion impact"]
+            },
+            speechPatterns: {
+              paceVariation: 0.75,
+              intonationRange: 0.68,
+              pauseEffectiveness: 0.82
+            },
+            bodyLanguageMetrics: {
+              postureScore: 83,
+              gestureNaturalness: 78,
+              facialExpression: 89
+            },
+            persuasivenessScore: 85.2
+          },
+          {
+            userId,
+            duration: 840,
+            averageWPM: 132,
+            confidenceScore: 79.1,
+            voiceClarity: 85.7,
+            fillerWords: 15,
+            pauseCount: 28,
+            eyeContactScore: "Fair",
+            transcript: "Imagine a world where every person has the tools to turn their wildest ideas into reality. This isn't science fiction - it's the future we're building today. Innovation has always been the driving force behind human progress, but we're on the cusp of a revolution that will democratize creativity like never before.",
+            coachingTips: ["Increase vocal variety", "Strengthen eye contact", "Reduce hesitation words"],
+            aiAnalysis: {
+              overallScore: 79,
+              strengths: ["Compelling narrative", "Strong message clarity", "Good pacing"],
+              improvements: ["Vocal confidence", "Body language presence", "Audience engagement"]
+            },
+            speechPatterns: {
+              paceVariation: 0.65,
+              intonationRange: 0.72,
+              pauseEffectiveness: 0.76
+            },
+            bodyLanguageMetrics: {
+              postureScore: 74,
+              gestureNaturalness: 82,
+              facialExpression: 71
+            },
+            persuasivenessScore: 81.4
+          },
+          {
+            userId,
+            duration: 180,
+            averageWPM: 128,
+            confidenceScore: 94.3,
+            voiceClarity: 96.1,
+            fillerWords: 2,
+            pauseCount: 6,
+            eyeContactScore: "Excellent",
+            transcript: "I've known Tom for fifteen years, and I can honestly say I've never seen him as happy as he is with Sarah. When he first told me about her, his whole face lit up in a way I'd never seen before. Today, as we celebrate their union, I'm reminded that true love really does exist.",
+            coachingTips: ["Perfect delivery", "Natural gestures", "Excellent emotional connection"],
+            aiAnalysis: {
+              overallScore: 94,
+              strengths: ["Authentic emotion", "Perfect pacing", "Natural delivery", "Strong audience connection"],
+              improvements: ["Maintain this level", "Consider longer pauses for impact"]
+            },
+            speechPatterns: {
+              paceVariation: 0.88,
+              intonationRange: 0.91,
+              pauseEffectiveness: 0.95
+            },
+            bodyLanguageMetrics: {
+              postureScore: 91,
+              gestureNaturalness: 95,
+              facialExpression: 97
+            },
+            persuasivenessScore: 92.8
+          }
+        ];
+        
+        for (const sessionData of sampleSessions) {
+          await storage.createPracticeSession(sessionData);
+        }
+        
+        sessions = await storage.getUserPracticeSessions(userId);
+      }
+      
+      res.json(sessions);
+    } catch (error) {
+      console.error("Failed to fetch sessions:", error);
+      res.status(500).json({ message: "Failed to fetch sessions" });
+    }
+  });
+
   // Get specific practice session
   app.get("/api/practice-sessions/:id", async (req, res) => {
     try {
@@ -85,6 +194,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(feedback);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch feedback" });
+    }
+  });
+
+  // Real-time transcription endpoint
+  app.post("/api/transcribe", async (req, res) => {
+    try {
+      const { transcript, isPartial } = req.body;
+      
+      if (!transcript) {
+        return res.status(400).json({ message: "Transcript is required" });
+      }
+
+      // Simple analysis for real-time feedback
+      const wordCount = transcript.split(' ').length;
+      const fillerWords = (transcript.match(/\b(um|uh|like|you know|so|actually)\b/gi) || []).length;
+      const wpm = isPartial ? 0 : Math.round(wordCount / 1); // Estimate WPM
+      
+      const analysis = {
+        wordCount,
+        fillerWords,
+        wpm,
+        clarity: Math.max(0, 100 - (fillerWords * 5)),
+        suggestions: fillerWords > 2 ? ["Reduce filler words", "Speak more deliberately"] : ["Good clarity"]
+      };
+
+      res.json({ analysis, transcript });
+    } catch (error) {
+      console.error("Transcription analysis error:", error);
+      res.status(500).json({ message: "Analysis failed" });
     }
   });
 
