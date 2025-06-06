@@ -224,6 +224,89 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Mission/About Us Section */}
+      <section className="py-20 bg-gradient-to-br from-slate-50 to-blue-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <Badge className="mb-4 bg-blue-100 text-blue-700 px-4 py-2">Our Mission</Badge>
+            <h2 className="text-4xl font-bold text-gray-900 mb-6">
+              Unlock Your True Potential Through Masterful Communication
+            </h2>
+            <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+              Public speaking is the ultimate multiplier of human influence. It shapes careers, builds movements, 
+              and transforms ideas into reality. Yet for millions, fear and lack of skill in communication becomes 
+              the invisible barrier that keeps their true potential locked away.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="space-y-8">
+              <div className="flex items-start space-x-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-orange-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Shield className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">The Hidden Cost of Poor Communication</h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    Studies show that 75% of people fear public speaking more than death itself. This fear doesn't just affect presentations—it limits career advancement, 
+                    reduces leadership opportunities, and prevents brilliant ideas from reaching the world.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Lightbulb className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">The Power of Influential Speaking</h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    Great speakers don't just communicate—they inspire action, change minds, and create lasting impact. 
+                    From boardroom presentations to wedding toasts, masterful communication opens doors that talent alone cannot.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Target className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">Breaking Through the Barrier</h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    We believe every person has something valuable to share with the world. Our AI-powered platform doesn't just 
+                    teach speaking skills—it systematically dismantles the barriers between your potential and your impact.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="relative">
+              <div className="bg-white rounded-2xl shadow-2xl p-8 border border-gray-100">
+                <div className="text-center mb-6">
+                  <Globe className="w-16 h-16 mx-auto text-blue-600 mb-4" />
+                  <h4 className="text-2xl font-bold text-gray-900 mb-2">Our Vision</h4>
+                </div>
+                <blockquote className="text-lg text-gray-700 italic leading-relaxed text-center">
+                  "A world where every person can confidently share their ideas, influence positive change, 
+                  and unlock opportunities through the power of masterful communication."
+                </blockquote>
+                <div className="mt-8 grid grid-cols-2 gap-4 text-center">
+                  <div className="bg-blue-50 rounded-lg p-4">
+                    <div className="text-2xl font-bold text-blue-600">10M+</div>
+                    <div className="text-sm text-gray-600">Lives Transformed</div>
+                  </div>
+                  <div className="bg-purple-50 rounded-lg p-4">
+                    <div className="text-2xl font-bold text-purple-600">95%</div>
+                    <div className="text-sm text-gray-600">Confidence Boost</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Speech Types Section */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
