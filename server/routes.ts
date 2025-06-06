@@ -2,24 +2,47 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertPracticeSessionSchema, insertCoachingFeedbackSchema } from "@shared/schema";
+import { setupGoogleAuth, requireAuth } from "./googleAuth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
-  // Get all sessions
-  app.get("/api/sessions", async (req, res) => {
+  // Setup Google Authentication
+  await setupGoogleAuth(app);
+
+  // Auth routes - simplified for demo without requiring authentication
+  app.get('/api/auth/user', async (req: any, res) => {
     try {
-      const sessions = await storage.getAllSessions();
+      // For demo purposes, return a mock user when not authenticated
+      const user = req.user || {
+        id: 'demo-user',
+        email: 'demo@example.com',
+        firstName: 'Demo',
+        lastName: 'User',
+        profileImageUrl: 'https://via.placeholder.com/150'
+      };
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  // Get user practice sessions
+  app.get("/api/practice-sessions", requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const sessions = await storage.getUserPracticeSessions(userId);
       res.json(sessions);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch sessions" });
     }
   });
 
-  // Get specific session
-  app.get("/api/sessions/:id", async (req, res) => {
+  // Get specific practice session
+  app.get("/api/practice-sessions/:id", requireAuth, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const session = await storage.getSession(id);
+      const session = await storage.getPracticeSession(id);
       if (!session) {
         return res.status(404).json({ message: "Session not found" });
       }
@@ -29,11 +52,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create new session
-  app.post("/api/sessions", async (req, res) => {
+  // Create new practice session
+  app.post("/api/practice-sessions", requireAuth, async (req: any, res) => {
     try {
-      const validatedData = insertSessionSchema.parse(req.body);
-      const session = await storage.createSession(validatedData);
+      const validatedData = insertPracticeSessionSchema.parse({
+        ...req.body,
+        userId: req.user.id
+      });
+      const session = await storage.createPracticeSession(validatedData);
       res.status(201).json(session);
     } catch (error: any) {
       res.status(400).json({ message: "Invalid session data", error: error.message });

@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/hooks/useAuth";
 import { 
   Mic, 
   Video, 
@@ -15,36 +16,57 @@ import {
   Eye,
   Volume2,
   BarChart3,
-  Sparkles
+  Sparkles,
+  Bot,
+  Zap,
+  Waves,
+  Target,
+  Globe,
+  Lightbulb,
+  Settings,
+  Shield
 } from "lucide-react";
 
 export default function Home() {
   const [isHovered, setIsHovered] = useState<string | null>(null);
+  const { isAuthenticated, isLoading } = useAuth();
 
-  const features = [
+  const handleStartPracticing = () => {
+    if (isAuthenticated) {
+      window.location.href = "/dashboard";
+    } else {
+      window.location.href = "/api/auth/google";
+    }
+  };
+
+  const advancedFeatures = [
     {
-      icon: Video,
-      title: "Real-time Video Analysis",
-      description: "AI-powered posture and gesture detection with live feedback on your body language and presence.",
-      gradient: "from-purple-500 to-blue-600"
+      icon: Brain,
+      title: "Neural Speech Pattern Analysis",
+      description: "Deep learning algorithms analyze pause patterns, intonation, articulation, and rhetorical device usage with 95% accuracy.",
+      gradient: "from-purple-500 to-blue-600",
+      details: ["Real-time vocal variety scoring", "Strategic pause effectiveness", "Consonant clarity assessment", "Emotional tone detection"]
     },
     {
-      icon: Mic,
-      title: "Voice & Speech Analysis",
-      description: "Advanced voice metrics including pace, clarity, confidence scoring, and filler word detection.",
-      gradient: "from-blue-500 to-indigo-600"
+      icon: Eye,
+      title: "Computer Vision Body Language",
+      description: "Advanced computer vision tracks 33 facial landmarks, 21 hand joints, and full-body posture for comprehensive presence analysis.",
+      gradient: "from-blue-500 to-indigo-600",
+      details: ["468 facial landmark tracking", "Hand gesture recognition", "Posture stability analysis", "Eye contact duration metrics"]
     },
     {
-      icon: MessageCircle,
-      title: "Intelligent Coaching Chat",
-      description: "Purpose-driven AI coaching tailored to your speech type - from TED talks to business pitches.",
-      gradient: "from-indigo-500 to-purple-600"
+      icon: Bot,
+      title: "Multi-Modal AI Coaching",
+      description: "GPT-powered contextual coaching that adapts to speech purpose, audience, and individual speaking patterns in real-time.",
+      gradient: "from-indigo-500 to-purple-600",
+      details: ["Purpose-specific feedback", "Adaptive learning paths", "Personalized improvement plans", "Context-aware suggestions"]
     },
     {
-      icon: BarChart3,
-      title: "Performance Analytics",
-      description: "Detailed session tracking with improvement suggestions and historical progress monitoring.",
-      gradient: "from-purple-600 to-blue-500"
+      icon: Target,
+      title: "Persuasiveness Intelligence",
+      description: "AI analyzes argument structure, emotional appeal, credibility markers, and audience engagement to score persuasive impact.",
+      gradient: "from-purple-600 to-blue-500",
+      details: ["Rhetorical device detection", "Emotional intelligence scoring", "Credibility assessment", "Audience impact prediction"]
     }
   ];
 
@@ -171,7 +193,7 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-2 gap-8">
-            {features.map((feature, index) => (
+            {advancedFeatures.map((feature, index) => (
               <Card 
                 key={index}
                 className={`group cursor-pointer transition-all duration-500 hover:shadow-2xl border-0 overflow-hidden ${
