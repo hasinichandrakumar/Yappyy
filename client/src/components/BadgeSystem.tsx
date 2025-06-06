@@ -216,18 +216,18 @@ export default function BadgeSystem() {
         icon: <TrendingUp className="w-6 h-6" />,
         color: "from-emerald-400 to-emerald-600",
         criteria: [
-          "Improve 3+ metrics over 5 sessions",
-          "Consistent upward trend",
-          "Demonstrable skill development",
-          "Performance analytics improvement"
+          "Improve 8+ metrics over 25+ sessions with measurable gains",
+          "Consistent upward trend with zero regression periods",
+          "Exceptional skill development across all categories",
+          "Top 5% performance analytics improvement"
         ],
         benefits: [
           "Progress tracking dashboard",
           "Personalized improvement plans",
           "Advanced analytics access"
         ],
-        isUnlocked: Math.random() > 0.3,
-        progress: Math.floor(Math.random() * 100),
+        isUnlocked: Math.random() > 0.85,
+        progress: Math.floor(Math.random() * 20),
         rarity: "common"
       },
       {
@@ -238,18 +238,18 @@ export default function BadgeSystem() {
         icon: <Flame className="w-6 h-6" />,
         color: "from-orange-400 to-red-500",
         criteria: [
-          "Practice public speaking 7 days in a row",
-          "Complete daily challenges",
-          "Maintain engagement streak",
-          "Regular skill development"
+          "Practice public speaking 30 days in a row without missing a single day",
+          "Complete all daily challenges with 95%+ success rate",
+          "Maintain perfect engagement streak with measurable improvement",
+          "Demonstrate consistent skill development across all metrics"
         ],
         benefits: [
           "Streak bonus multipliers",
           "Exclusive daily challenges",
           "Habit-building tools"
         ],
-        isUnlocked: Math.random() > 0.8,
-        progress: Math.floor(Math.random() * 100),
+        isUnlocked: Math.random() > 0.93,
+        progress: Math.floor(Math.random() * 12),
         rarity: "epic"
       },
 
@@ -262,18 +262,18 @@ export default function BadgeSystem() {
         icon: <Users className="w-6 h-6" />,
         color: "from-teal-400 to-teal-600",
         criteria: [
-          "Highest peer rating in mock contest",
-          "Exceptional audience engagement",
-          "Outstanding presentation delivery",
-          "Community recognition"
+          "Achieve #1 peer rating in 5+ competitive contests",
+          "Maintain 98%+ audience engagement across all presentations",
+          "Deliver flawless presentation with zero technical errors",
+          "Earn unanimous community recognition and endorsement"
         ],
         benefits: [
           "Featured speaker spotlight",
           "Community challenges access",
           "Peer mentorship opportunities"
         ],
-        isUnlocked: Math.random() > 0.9,
-        progress: Math.floor(Math.random() * 100),
+        isUnlocked: Math.random() > 0.98,
+        progress: Math.floor(Math.random() * 8),
         rarity: "legendary"
       },
 
@@ -309,18 +309,18 @@ export default function BadgeSystem() {
         icon: <Star className="w-6 h-6" />,
         color: "from-violet-400 to-purple-600",
         criteria: [
-          "Score above 90% across all metrics",
-          "Single session perfection",
-          "Exceptional performance in all areas",
-          "Demonstrate complete mastery"
+          "Score above 98% across ALL metrics in a single session",
+          "Achieve perfect scores in voice, body language, and content",
+          "Flawless performance with zero detected errors",
+          "Demonstrate absolute mastery across every dimension"
         ],
         benefits: [
           "Master speaker certification",
           "Advanced technique access",
           "Speaking wizard title"
         ],
-        isUnlocked: Math.random() > 0.95,
-        progress: Math.floor(Math.random() * 100),
+        isUnlocked: Math.random() > 0.99,
+        progress: Math.floor(Math.random() * 5),
         rarity: "legendary"
       }
     ];
