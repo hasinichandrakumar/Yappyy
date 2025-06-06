@@ -24,26 +24,7 @@ import {
   FileText
 } from "lucide-react";
 
-// Helper function to replace template variables
-const replaceTemplateVariables = (
-  text: string, 
-  customInputs: { [key: string]: string }, 
-  defaultValues: { [key: string]: string }
-): string => {
-  let result = text;
-  
-  // Replace all [VARIABLE] patterns
-  const variables = text.match(/\[([^\]]+)\]/g);
-  if (variables) {
-    variables.forEach(variable => {
-      const key = variable.slice(1, -1); // Remove brackets
-      const value = customInputs[key] || defaultValues[key] || key;
-      result = result.replace(variable, value);
-    });
-  }
-  
-  return result;
-};
+
 
 interface SpeechTemplate {
   id: string;
@@ -902,19 +883,19 @@ export default function EnhancedTemplateMarketplace() {
               <div className="space-y-4 text-sm">
                 <div className="p-3 bg-white rounded border-l-4 border-blue-500">
                   <strong className="text-blue-700">Hook:</strong>
-                  <p className="mt-1">{replaceTemplateVariables(selectedTemplate.structure.hook, customInputs, selectedTemplate.fillInBlanks)}</p>
+                  <p className="mt-1">{selectedTemplate.structure.hook.replace(/\[([^\]]+)\]/g, (match, key) => customInputs[key] || selectedTemplate.fillInBlanks[key] || key)}</p>
                 </div>
                 <div className="p-3 bg-white rounded border-l-4 border-green-500">
                   <strong className="text-green-700">Body Structure:</strong>
                   <ul className="list-disc list-inside ml-4 mt-2 space-y-1">
                     {selectedTemplate.structure.body.map((point, index) => (
-                      <li key={index}>{replaceTemplateVariables(point, customInputs, selectedTemplate.fillInBlanks)}</li>
+                      <li key={index}>{point.replace(/\[([^\]]+)\]/g, (match, key) => customInputs[key] || selectedTemplate.fillInBlanks[key] || key)}</li>
                     ))}
                   </ul>
                 </div>
                 <div className="p-3 bg-white rounded border-l-4 border-purple-500">
                   <strong className="text-purple-700">Call to Action:</strong>
-                  <p className="mt-1">{replaceTemplateVariables(selectedTemplate.structure.cta, customInputs, selectedTemplate.fillInBlanks)}</p>
+                  <p className="mt-1">{selectedTemplate.structure.cta.replace(/\[([^\]]+)\]/g, (match, key) => customInputs[key] || selectedTemplate.fillInBlanks[key] || key)}</p>
                 </div>
               </div>
             </div>
@@ -927,15 +908,15 @@ export default function EnhancedTemplateMarketplace() {
               </h3>
               <div className="prose prose-sm max-w-none">
                 <p className="mb-4 text-gray-800 leading-relaxed">
-                  {replaceTemplateVariables(selectedTemplate.structure.hook, customInputs, selectedTemplate.fillInBlanks)}
+                  {selectedTemplate.structure.hook.replace(/\[([^\]]+)\]/g, (match, key) => customInputs[key] || selectedTemplate.fillInBlanks[key] || key)}
                 </p>
                 {selectedTemplate.structure.body.map((point, index) => (
                   <p key={index} className="mb-3 text-gray-700 leading-relaxed">
-                    {replaceTemplateVariables(point, customInputs, selectedTemplate.fillInBlanks)}
+                    {point.replace(/\[([^\]]+)\]/g, (match, key) => customInputs[key] || selectedTemplate.fillInBlanks[key] || key)}
                   </p>
                 ))}
                 <p className="mt-4 text-gray-800 font-medium">
-                  {replaceTemplateVariables(selectedTemplate.structure.cta, customInputs, selectedTemplate.fillInBlanks)}
+                  {selectedTemplate.structure.cta.replace(/\[([^\]]+)\]/g, (match, key) => customInputs[key] || selectedTemplate.fillInBlanks[key] || key)}
                 </p>
               </div>
             </div>

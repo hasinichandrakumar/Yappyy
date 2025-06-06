@@ -26,7 +26,9 @@ import {
   Globe,
   Lightbulb,
   Settings,
-  Shield
+  Shield,
+  Activity,
+  FileText
 } from "lucide-react";
 
 export default function Home() {
@@ -540,6 +542,132 @@ export default function Home() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Core Features Showcase */}
+      <section className="py-20 bg-gradient-to-br from-gray-50 to-cyan-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="feature-title mb-4">
+              Complete <span className="highlight-word">AI-Powered</span> Speaking Assistant
+            </h2>
+            <p className="creative-text max-w-3xl mx-auto">
+              Everything you need to master public speaking in one intelligent platform.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 mb-16">
+            {/* Real-Time Analysis */}
+            <Card className="group hover:shadow-xl transition-all duration-500 border-0 bg-white/80 backdrop-blur-sm">
+              <CardContent className="p-8">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <Activity className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Real-Time Speech Analysis</h3>
+                <p className="text-gray-600 mb-4">Live monitoring of voice clarity, pace, volume, and confidence with instant feedback</p>
+                <div className="space-y-2 text-sm text-gray-500">
+                  <div className="flex items-center">
+                    <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                    Words per minute tracking
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+                    Voice clarity analysis
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
+                    Confidence scoring
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Body Language Detection */}
+            <Card className="group hover:shadow-xl transition-all duration-500 border-0 bg-white/80 backdrop-blur-sm">
+              <CardContent className="p-8">
+                <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-teal-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <Eye className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Advanced Body Language AI</h3>
+                <p className="text-gray-600 mb-4">MediaPipe-powered analysis of posture, gestures, and eye contact patterns</p>
+                <div className="space-y-2 text-sm text-gray-500">
+                  <div className="flex items-center">
+                    <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                    Posture monitoring
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+                    Gesture analysis
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
+                    Eye contact tracking
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Smart Templates */}
+            <Card className="group hover:shadow-xl transition-all duration-500 border-0 bg-white/80 backdrop-blur-sm">
+              <CardContent className="p-8">
+                <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                  <FileText className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Professional Speech Templates</h3>
+                <p className="text-gray-600 mb-4">12+ free templates for every scenario with AI-powered customization</p>
+                <div className="space-y-2 text-sm text-gray-500">
+                  <div className="flex items-center">
+                    <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                    TED Talks & Keynotes
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+                    Business Presentations
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
+                    Wedding & Social Speeches
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Advanced Features Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card className="text-center p-6 hover:shadow-lg transition-all duration-300 bg-white/70 backdrop-blur-sm">
+              <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-red-500 rounded-lg mx-auto mb-4 flex items-center justify-center">
+                <Zap className="w-6 h-6 text-white" />
+              </div>
+              <h4 className="font-semibold text-gray-900 mb-2">Vibe Tracker</h4>
+              <p className="text-sm text-gray-600">Emotional engagement and energy level monitoring</p>
+            </Card>
+
+            <Card className="text-center p-6 hover:shadow-lg transition-all duration-300 bg-white/70 backdrop-blur-sm">
+              <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg mx-auto mb-4 flex items-center justify-center">
+                <Target className="w-6 h-6 text-white" />
+              </div>
+              <h4 className="font-semibold text-gray-900 mb-2">ROI Analyzer</h4>
+              <p className="text-sm text-gray-600">Measure speech impact and persuasiveness</p>
+            </Card>
+
+            <Card className="text-center p-6 hover:shadow-lg transition-all duration-300 bg-white/70 backdrop-blur-sm">
+              <div className="w-12 h-12 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-lg mx-auto mb-4 flex items-center justify-center">
+                <Brain className="w-6 h-6 text-white" />
+              </div>
+              <h4 className="font-semibold text-gray-900 mb-2">Speech DNA</h4>
+              <p className="text-sm text-gray-600">Discover your unique speaking personality</p>
+            </Card>
+
+            <Card className="text-center p-6 hover:shadow-lg transition-all duration-300 bg-white/70 backdrop-blur-sm">
+              <div className="w-12 h-12 bg-gradient-to-br from-pink-400 to-purple-500 rounded-lg mx-auto mb-4 flex items-center justify-center">
+                <Award className="w-6 h-6 text-white" />
+              </div>
+              <h4 className="font-semibold text-gray-900 mb-2">Badge System</h4>
+              <p className="text-sm text-gray-600">Earn achievements as you master skills</p>
+            </Card>
           </div>
         </div>
       </section>
