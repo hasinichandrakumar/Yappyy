@@ -67,8 +67,7 @@ export default function ImprovementSummary() {
         },
         speech: {
           transcript: transcript?.slice(-500) || "",
-          wordCount,
-          sessionTime
+          wordCount
         },
         bodyLanguage: {
           posture: posture || "unknown",
@@ -80,7 +79,7 @@ export default function ImprovementSummary() {
       const response = await apiRequest('POST', '/api/generate-improvement-plan', {
         metrics: allMetrics,
         sessionData: {
-          duration: sessionTime,
+          duration: 0,
           wordCount
         }
       });
