@@ -3,21 +3,21 @@
 @tailwind utilities;
 
 :root {
-  --background: 250 100% 98%; /* Light purple-blue background */
-  --foreground: 260 15% 15%; /* Dark purple-blue text */
-  --muted: 250 50% 95%; /* Muted purple */
-  --muted-foreground: 260 10% 50%;
-  --popover: 255 100% 99%;
-  --popover-foreground: 260 15% 15%;
-  --card: 255 100% 99%; /* Pure white with slight purple tint */
-  --card-foreground: 260 15% 15%;
-  --border: 250 30% 88%; /* Purple-tinted border */
-  --input: 250 30% 90%; /* Purple-tinted input */
-  --primary: 260 85% 60%; /* Rich purple */
+  --background: 210 40% 98%; /* Light blue-aqua background */
+  --foreground: 210 15% 15%; /* Dark blue-gray text */
+  --muted: 190 50% 95%; /* Muted aqua */
+  --muted-foreground: 200 10% 50%;
+  --popover: 210 100% 99%;
+  --popover-foreground: 210 15% 15%;
+  --card: 210 100% 99%; /* Pure white with slight blue tint */
+  --card-foreground: 210 15% 15%;
+  --border: 200 30% 88%; /* Blue-aqua border */
+  --input: 200 30% 90%; /* Blue-aqua input */
+  --primary: 200 85% 60%; /* Rich aqua-blue */
   --primary-foreground: 0 0% 100%;
-  --secondary: 240 100% 70%; /* Blue-purple */
+  --secondary: 160 80% 50%; /* Green-aqua */
   --secondary-foreground: 0 0% 100%;
-  --accent: 280 100% 70%; /* Pink-purple */
+  --accent: 180 100% 60%; /* Bright aqua */
   --accent-foreground: 0 0% 100%;
   --warning: 39 100% 47%; /* Keep warning orange */
   --warning-foreground: 60 9.1% 97.8%;
@@ -25,30 +25,30 @@
   --error-foreground: 60 9.1% 97.8%;
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 60 9.1% 97.8%;
-  --ring: 260 85% 60%; /* Purple ring */
+  --ring: 200 85% 60%; /* Aqua ring */
   --radius: 0.75rem;
   
   /* Custom colors from design */
-  --surface: 255 100% 99%; /* Pure white with purple tint */
+  --surface: 210 100% 99%; /* Pure white with blue tint */
 }
 
 .dark {
-  --background: 260 20% 8%; /* Dark purple background */
-  --foreground: 250 100% 95%; /* Light purple-white text */
-  --muted: 260 15% 18%; /* Dark purple muted */
-  --muted-foreground: 250 20% 70%; /* Light purple-gray text */
-  --popover: 260 25% 12%; /* Dark purple popover */
-  --popover-foreground: 250 100% 95%;
-  --card: 260 25% 12%; /* Dark purple card */
-  --card-foreground: 250 100% 95%;
-  --border: 260 15% 18%; /* Dark purple border */
-  --input: 260 15% 18%; /* Dark purple input */
-  --primary: 270 90% 70%; /* Bright purple primary */
-  --primary-foreground: 260 20% 8%;
-  --secondary: 240 80% 60%; /* Blue-purple secondary */
-  --secondary-foreground: 260 20% 8%;
-  --accent: 280 80% 60%; /* Pink-purple accent */
-  --accent-foreground: 260 20% 8%;
+  --background: 210 20% 8%; /* Dark blue background */
+  --foreground: 190 100% 95%; /* Light aqua-white text */
+  --muted: 200 15% 18%; /* Dark blue muted */
+  --muted-foreground: 190 20% 70%; /* Light blue-gray text */
+  --popover: 210 25% 12%; /* Dark blue popover */
+  --popover-foreground: 190 100% 95%;
+  --card: 210 25% 12%; /* Dark blue card */
+  --card-foreground: 190 100% 95%;
+  --border: 200 15% 18%; /* Dark blue border */
+  --input: 200 15% 18%; /* Dark blue input */
+  --primary: 180 90% 70%; /* Bright aqua primary */
+  --primary-foreground: 210 20% 8%;
+  --secondary: 160 80% 60%; /* Green-aqua secondary */
+  --secondary-foreground: 210 20% 8%;
+  --accent: 200 80% 60%; /* Blue-aqua accent */
+  --accent-foreground: 210 20% 8%;
   --warning: 39 100% 47%; /* Orange warning */
   --warning-foreground: 260 20% 8%;
   --error: 4 90% 58%; /* Red error */
@@ -139,23 +139,23 @@
   /* Gradient utilities */
   .gradient-bg {
     background: linear-gradient(135deg, 
-      hsl(260, 85%, 60%) 0%, 
-      hsl(240, 100%, 70%) 50%, 
-      hsl(280, 100%, 70%) 100%);
+      hsl(200, 85%, 60%) 0%, 
+      hsl(180, 100%, 50%) 50%, 
+      hsl(160, 80%, 50%) 100%);
   }
 
   .gradient-bg-light {
     background: linear-gradient(135deg, 
-      hsl(250, 100%, 98%) 0%, 
-      hsl(240, 100%, 95%) 50%, 
-      hsl(270, 100%, 90%) 100%);
+      hsl(200, 100%, 98%) 0%, 
+      hsl(180, 100%, 95%) 50%, 
+      hsl(160, 100%, 90%) 100%);
   }
 
   .gradient-text {
     background: linear-gradient(135deg, 
-      hsl(260, 85%, 60%) 0%, 
-      hsl(240, 100%, 70%) 50%, 
-      hsl(280, 100%, 70%) 100%);
+      hsl(200, 85%, 60%) 0%, 
+      hsl(180, 100%, 50%) 50%, 
+      hsl(160, 80%, 50%) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -163,11 +163,11 @@
 
   .yapup-gradient {
     background: linear-gradient(135deg, 
-      #6366f1 0%, 
-      #8b5cf6 25%, 
-      #a855f7 50%, 
-      #c084fc 75%, 
-      #e879f9 100%);
+      #0ea5e9 0%, 
+      #06b6d4 25%, 
+      #14b8a6 50%, 
+      #10b981 75%, 
+      #22d3ee 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -177,26 +177,26 @@
 
   .gradient-card {
     background: linear-gradient(135deg, 
-      hsl(255, 100%, 99%) 0%, 
-      hsl(250, 100%, 97%) 50%, 
-      hsl(245, 100%, 95%) 100%);
-    border: 1px solid hsl(250, 30%, 88%);
+      hsl(210, 100%, 99%) 0%, 
+      hsl(200, 100%, 97%) 50%, 
+      hsl(190, 100%, 95%) 100%);
+    border: 1px solid hsl(200, 30%, 88%);
   }
 
   .dark .gradient-card {
     background: linear-gradient(135deg, 
-      hsl(260, 25%, 12%) 0%, 
-      hsl(250, 20%, 15%) 50%, 
-      hsl(270, 25%, 18%) 100%);
-    border: 1px solid hsl(260, 15%, 18%);
+      hsl(210, 25%, 12%) 0%, 
+      hsl(200, 20%, 15%) 50%, 
+      hsl(180, 25%, 18%) 100%);
+    border: 1px solid hsl(200, 15%, 18%);
   }
 
   .purple-glow {
-    box-shadow: 0 0 30px hsla(270, 85%, 60%, 0.3);
+    box-shadow: 0 0 30px hsla(180, 85%, 60%, 0.3);
   }
 
   .dark .purple-glow {
-    box-shadow: 0 0 30px hsla(270, 90%, 70%, 0.2);
+    box-shadow: 0 0 30px hsla(180, 90%, 70%, 0.2);
   }
 
   /* Typography utilities */
