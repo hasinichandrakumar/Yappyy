@@ -87,7 +87,7 @@ export default function EnhancedTemplateMarketplace() {
       rating: 4.9,
       downloads: 2847,
       author: "Dr. Sarah Chen",
-      price: 29,
+      price: 0,
       isUserGenerated: true,
       toneProfile: {
         humor: 30,
@@ -132,7 +132,7 @@ export default function EnhancedTemplateMarketplace() {
       rating: 4.8,
       downloads: 3921,
       author: "Marcus Williams",
-      price: 19,
+      price: 0,
       isUserGenerated: true,
       toneProfile: {
         humor: 60,
@@ -176,7 +176,7 @@ export default function EnhancedTemplateMarketplace() {
       rating: 4.7,
       downloads: 1653,
       author: "AI Speech Coach",
-      price: 39,
+      price: 0,
       isUserGenerated: false,
       toneProfile: {
         humor: 20,
@@ -211,6 +211,408 @@ export default function EnhancedTemplateMarketplace() {
         persuasive: "Lead with customer pain point and urgency of solution",
         emotional: "Share founder story about discovering this problem",
         humorous: "Start with: 'We're solving a problem so obvious, we're surprised no one fixed it yet...'"
+      }
+    },
+    {
+      id: '4',
+      title: "Wedding Toast: Best Man Speech",
+      description: "Heartfelt and memorable wedding toast that balances humor with sentiment",
+      category: "Wedding",
+      genre: 'celebratory',
+      difficulty: 'beginner',
+      duration: "3-5 minutes",
+      rating: 4.9,
+      downloads: 8247,
+      author: "Wedding Speech Pro",
+      price: 0,
+      isUserGenerated: false,
+      toneProfile: {
+        humor: 70,
+        formality: 30,
+        emotion: 85,
+        urgency: 20
+      },
+      structure: {
+        hook: "I've known [GROOM_NAME] for [YEARS] years, and I've never seen him as happy as he is with [BRIDE_NAME].",
+        body: [
+          "How we met: [FRIENDSHIP_STORY]",
+          "The moment I knew [BRIDE_NAME] was special: [REALIZATION_MOMENT]",
+          "What makes them perfect together: [COUPLE_QUALITIES]",
+          "My wish for your future: [BLESSING]"
+        ],
+        cta: "Please join me in raising a toast to [COUPLE_NAMES] - may your love story continue to inspire us all."
+      },
+      fillInBlanks: {
+        GROOM_NAME: "Mike",
+        BRIDE_NAME: "Sarah",
+        YEARS: "15",
+        FRIENDSHIP_STORY: "we met in college during a terrible karaoke performance",
+        REALIZATION_MOMENT: "he started wearing matching socks",
+        COUPLE_QUALITIES: "they both laugh at terrible jokes",
+        BLESSING: "endless laughter and adventure",
+        COUPLE_NAMES: "Mike and Sarah"
+      },
+      smartRewrites: {
+        persuasive: "Add specific examples of their positive impact on others",
+        emotional: "Include a touching moment about their relationship",
+        humorous: "Start with: 'Mike asked me to keep this short, so I'll try to finish before their first anniversary...'"
+      }
+    },
+    {
+      id: '5',
+      title: "Job Interview: Executive Position",
+      description: "Structured approach to showcase leadership experience and vision",
+      category: "Interview",
+      genre: 'persuasive',
+      difficulty: 'advanced',
+      duration: "15-20 minutes",
+      rating: 4.6,
+      downloads: 3421,
+      author: "Career Coach AI",
+      price: 0,
+      isUserGenerated: false,
+      toneProfile: {
+        humor: 25,
+        formality: 85,
+        emotion: 40,
+        urgency: 60
+      },
+      structure: {
+        hook: "In my [YEARS] years of leadership, I've learned that [KEY_INSIGHT] is what separates good leaders from great ones.",
+        body: [
+          "My leadership philosophy: [PHILOSOPHY]",
+          "Key achievement: How I [MAJOR_ACCOMPLISHMENT]",
+          "Challenge overcome: [DIFFICULT_SITUATION] and its resolution",
+          "My vision for this role: [FUTURE_PLANS]"
+        ],
+        cta: "I'm excited to bring this experience and vision to drive [COMPANY_NAME]'s next phase of growth."
+      },
+      fillInBlanks: {
+        YEARS: "12",
+        KEY_INSIGHT: "empowering teams to exceed their own expectations",
+        PHILOSOPHY: "servant leadership with clear accountability",
+        MAJOR_ACCOMPLISHMENT: "turned around a failing division to 150% growth",
+        DIFFICULT_SITUATION: "managing through the 2020 downturn",
+        FUTURE_PLANS: "expanding market presence while building team culture",
+        COMPANY_NAME: "TechCorp"
+      },
+      smartRewrites: {
+        persuasive: "Lead with quantifiable business impact and ROI",
+        emotional: "Share personal motivation for joining this specific company",
+        humorous: "Open with: 'My kids think I'm the CEO of bedtime negotiations...'"
+      }
+    },
+    {
+      id: '6',
+      title: "Academic Conference: Research Presentation",
+      description: "Professional template for presenting research findings to academic peers",
+      category: "Academic",
+      genre: 'analytical',
+      difficulty: 'advanced',
+      duration: "18-22 minutes",
+      rating: 4.7,
+      downloads: 2156,
+      author: "Dr. Research Expert",
+      price: 0,
+      isUserGenerated: true,
+      toneProfile: {
+        humor: 15,
+        formality: 95,
+        emotion: 30,
+        urgency: 50
+      },
+      structure: {
+        hook: "Current [FIELD] research faces a critical gap: [RESEARCH_GAP] that impacts [STAKEHOLDERS].",
+        body: [
+          "Literature review and methodology: [APPROACH]",
+          "Key findings: [MAIN_RESULTS]",
+          "Statistical significance: [DATA_ANALYSIS]",
+          "Implications for the field: [BROADER_IMPACT]"
+        ],
+        cta: "This research opens new avenues for [FUTURE_RESEARCH] and practical applications in [APPLICATION_AREA]."
+      },
+      fillInBlanks: {
+        FIELD: "sustainable energy",
+        RESEARCH_GAP: "efficient battery storage at scale",
+        STAKEHOLDERS: "renewable energy adoption",
+        APPROACH: "machine learning optimization models",
+        MAIN_RESULTS: "23% efficiency improvement",
+        DATA_ANALYSIS: "p<0.001 across all test conditions",
+        BROADER_IMPACT: "accelerating clean energy transition",
+        FUTURE_RESEARCH: "commercial implementation studies",
+        APPLICATION_AREA: "grid-scale energy storage"
+      },
+      smartRewrites: {
+        persuasive: "Emphasize urgency of climate action and research impact",
+        emotional: "Connect to personal motivation for sustainability research",
+        humorous: "Start with: 'After 3 years of data collection, I can confirm that spreadsheets don't actually solve climate change...'"
+      }
+    },
+    {
+      id: '7',
+      title: "Sales Presentation: Enterprise Software",
+      description: "Compelling business case for B2B software solution with ROI focus",
+      category: "Sales",
+      genre: 'persuasive',
+      difficulty: 'intermediate',
+      duration: "25-30 minutes",
+      rating: 4.8,
+      downloads: 4762,
+      author: "Sales Mastery Inc",
+      price: 0,
+      isUserGenerated: true,
+      toneProfile: {
+        humor: 40,
+        formality: 70,
+        emotion: 60,
+        urgency: 80
+      },
+      structure: {
+        hook: "What if I told you that [CURRENT_PROCESS] is costing your company [COST_IMPACT] annually?",
+        body: [
+          "The hidden costs of [STATUS_QUO]",
+          "Our solution: [PRODUCT_BENEFITS]",
+          "ROI demonstration: [CASE_STUDY]",
+          "Implementation roadmap: [TIMELINE]"
+        ],
+        cta: "Let's schedule a pilot program to demonstrate [SPECIFIC_BENEFIT] within [TIMEFRAME]."
+      },
+      fillInBlanks: {
+        CURRENT_PROCESS: "manual data entry",
+        COST_IMPACT: "$2.3 million in lost productivity",
+        STATUS_QUO: "outdated workflow systems",
+        PRODUCT_BENEFITS: "AI-powered automation reducing manual work by 75%",
+        CASE_STUDY: "TechCorp saved $500K in first 6 months",
+        TIMELINE: "90-day implementation with immediate benefits",
+        SPECIFIC_BENEFIT: "30% productivity increase",
+        TIMEFRAME: "30 days"
+      },
+      smartRewrites: {
+        persuasive: "Lead with competitor analysis and market urgency",
+        emotional: "Share customer success story about transformed work-life balance",
+        humorous: "Open with: 'Raise your hand if you love spending Friday nights with Excel spreadsheets...'"
+      }
+    },
+    {
+      id: '8',
+      title: "Graduation Speech: University Commencement",
+      description: "Inspirational address for graduates entering the workforce",
+      category: "Commencement",
+      genre: 'motivational',
+      difficulty: 'intermediate',
+      duration: "12-15 minutes",
+      rating: 4.9,
+      downloads: 5683,
+      author: "Education Leader",
+      price: 0,
+      isUserGenerated: false,
+      toneProfile: {
+        humor: 50,
+        formality: 60,
+        emotion: 90,
+        urgency: 40
+      },
+      structure: {
+        hook: "Class of [YEAR], you are graduating into a world that needs exactly what you have to offer: [UNIQUE_QUALITIES].",
+        body: [
+          "What you've accomplished: [ACHIEVEMENTS]",
+          "The world you're entering: [CURRENT_LANDSCAPE]",
+          "Your unique preparation: [SKILLS_GAINED]",
+          "The challenge ahead: [CALL_TO_ACTION]"
+        ],
+        cta: "Go forth and [MISSION] - the world is waiting for your contribution."
+      },
+      fillInBlanks: {
+        YEAR: "2024",
+        UNIQUE_QUALITIES: "fresh perspective and digital fluency",
+        ACHIEVEMENTS: "adapting to remote learning and emerging stronger",
+        CURRENT_LANDSCAPE: "rapid technological change and global challenges",
+        SKILLS_GAINED: "resilience, adaptability, and critical thinking",
+        CALL_TO_ACTION: "create solutions for tomorrow's problems",
+        MISSION: "make your mark on the world"
+      },
+      smartRewrites: {
+        persuasive: "Emphasize graduates' unique position to solve global challenges",
+        emotional: "Share personal story about overcoming educational obstacles",
+        humorous: "Start with: 'You survived group projects - you can survive anything...'"
+      }
+    },
+    {
+      id: '9',
+      title: "Product Demo: Live Software Demonstration",
+      description: "Engaging live demo script that highlights key features and benefits",
+      category: "Product Demo",
+      genre: 'analytical',
+      difficulty: 'intermediate',
+      duration: "20 minutes",
+      rating: 4.5,
+      downloads: 3891,
+      author: "Demo Expert",
+      price: 0,
+      isUserGenerated: true,
+      toneProfile: {
+        humor: 35,
+        formality: 65,
+        emotion: 45,
+        urgency: 70
+      },
+      structure: {
+        hook: "Let me show you how [PRODUCT_NAME] can [PRIMARY_BENEFIT] in just [TIME_FRAME].",
+        body: [
+          "The problem we're solving: [PAIN_POINT]",
+          "Feature showcase: [KEY_FEATURES]",
+          "Real-world scenario: [USE_CASE]",
+          "Results you can expect: [OUTCOMES]"
+        ],
+        cta: "Ready to see how [PRODUCT_NAME] can transform your [BUSINESS_AREA]? Let's set up your trial."
+      },
+      fillInBlanks: {
+        PRODUCT_NAME: "WorkflowAI",
+        PRIMARY_BENEFIT: "reduce project management overhead by 60%",
+        TIME_FRAME: "10 minutes",
+        PAIN_POINT: "scattered communication and missed deadlines",
+        KEY_FEATURES: "intelligent task routing and automated progress tracking",
+        USE_CASE: "launching a new product campaign",
+        OUTCOMES: "faster delivery and improved team collaboration",
+        BUSINESS_AREA: "project management workflow"
+      },
+      smartRewrites: {
+        persuasive: "Focus on competitive advantage and ROI metrics",
+        emotional: "Share customer testimonial about stress reduction",
+        humorous: "Begin with: 'This is the demo that makes project managers smile...'"
+      }
+    },
+    {
+      id: '10',
+      title: "Retirement Speech: Farewell Address",
+      description: "Graceful farewell speech reflecting on career achievements and legacy",
+      category: "Farewell",
+      genre: 'celebratory',
+      difficulty: 'beginner',
+      duration: "8-10 minutes",
+      rating: 4.8,
+      downloads: 2749,
+      author: "Life Transitions",
+      price: 0,
+      isUserGenerated: false,
+      toneProfile: {
+        humor: 60,
+        formality: 50,
+        emotion: 85,
+        urgency: 20
+      },
+      structure: {
+        hook: "After [YEARS] years in [INDUSTRY], I've learned that [LIFE_LESSON] matters most.",
+        body: [
+          "My journey: From [START_POINT] to [CURRENT_ROLE]",
+          "Memorable moments: [CAREER_HIGHLIGHTS]",
+          "People who shaped me: [MENTORS_COLLEAGUES]",
+          "Advice for the future: [WISDOM_SHARED]"
+        ],
+        cta: "Thank you for [SPECIFIC_GRATITUDE]. I look forward to [RETIREMENT_PLANS]."
+      },
+      fillInBlanks: {
+        YEARS: "35",
+        INDUSTRY: "education",
+        LIFE_LESSON: "inspiring others to reach their potential",
+        START_POINT: "nervous first-year teacher",
+        CURRENT_ROLE: "principal",
+        CAREER_HIGHLIGHTS: "watching students discover their passions",
+        MENTORS_COLLEAGUES: "amazing teachers who became lifelong friends",
+        WISDOM_SHARED: "never stop learning and always believe in your students",
+        SPECIFIC_GRATITUDE: "letting me be part of so many success stories",
+        RETIREMENT_PLANS: "traveling and volunteering with literacy programs"
+      },
+      smartRewrites: {
+        persuasive: "Emphasize the impact and legacy you've built",
+        emotional: "Include specific student success story that moved you",
+        humorous: "Open with: 'They say retirement is when you stop living at work and start working at living...'"
+      }
+    },
+    {
+      id: '11',
+      title: "Crisis Communication: Public Statement",
+      description: "Professional crisis response template for organizational challenges",
+      category: "Crisis Management",
+      genre: 'analytical',
+      difficulty: 'advanced',
+      duration: "5-7 minutes",
+      rating: 4.4,
+      downloads: 1823,
+      author: "Crisis Communication Pro",
+      price: 0,
+      isUserGenerated: true,
+      toneProfile: {
+        humor: 5,
+        formality: 95,
+        emotion: 40,
+        urgency: 85
+      },
+      structure: {
+        hook: "I want to address [SITUATION] directly and share our immediate response and long-term commitment.",
+        body: [
+          "What happened: [FACTS_SUMMARY]",
+          "Our immediate actions: [RESPONSE_STEPS]",
+          "Accountability: [RESPONSIBILITY_ACCEPTANCE]",
+          "Moving forward: [PREVENTION_MEASURES]"
+        ],
+        cta: "We are committed to [COMMITMENT] and will provide updates as we progress."
+      },
+      fillInBlanks: {
+        SITUATION: "the data security incident affecting customer accounts",
+        FACTS_SUMMARY: "unauthorized access to encrypted customer data on March 15th",
+        RESPONSE_STEPS: "immediately secured systems and notified authorities",
+        RESPONSIBILITY_ACCEPTANCE: "taking full responsibility for this breach",
+        PREVENTION_MEASURES: "implementing multi-factor authentication and enhanced monitoring",
+        COMMITMENT: "rebuilding your trust through transparent action"
+      },
+      smartRewrites: {
+        persuasive: "Emphasize concrete actions and timeline for resolution",
+        emotional: "Acknowledge personal impact on affected customers",
+        humorous: "Maintain serious tone throughout - no humor appropriate"
+      }
+    },
+    {
+      id: '12',
+      title: "Team Building: Quarterly All-Hands",
+      description: "Energizing team meeting template to align goals and boost morale",
+      category: "Team Meeting",
+      genre: 'motivational',
+      difficulty: 'beginner',
+      duration: "15-20 minutes",
+      rating: 4.7,
+      downloads: 6234,
+      author: "Team Leadership",
+      price: 0,
+      isUserGenerated: false,
+      toneProfile: {
+        humor: 65,
+        formality: 40,
+        emotion: 75,
+        urgency: 60
+      },
+      structure: {
+        hook: "This quarter, we achieved [MAJOR_WIN] together. Let's talk about what's next.",
+        body: [
+          "Celebrating our wins: [ACHIEVEMENTS]",
+          "Learning from challenges: [LESSONS_LEARNED]",
+          "Our focus ahead: [QUARTERLY_GOALS]",
+          "How we'll succeed together: [TEAM_STRATEGY]"
+        ],
+        cta: "Let's make the next quarter our best yet by [SPECIFIC_ACTION]."
+      },
+      fillInBlanks: {
+        MAJOR_WIN: "exceeding our revenue target by 15%",
+        ACHIEVEMENTS: "launching three new features and gaining 500 new customers",
+        LESSONS_LEARNED: "the importance of cross-team communication",
+        QUARTERLY_GOALS: "improving customer satisfaction to 95%",
+        TEAM_STRATEGY: "implementing weekly collaboration sessions",
+        SPECIFIC_ACTION: "supporting each other's growth and celebrating small wins"
+      },
+      smartRewrites: {
+        persuasive: "Include competitive market position and growth opportunities",
+        emotional: "Share personal story about team member's contribution",
+        humorous: "Start with: 'I've seen our Slack channels - you're definitely collaborating...'"
       }
     }
   ];
@@ -405,8 +807,8 @@ export default function EnhancedTemplateMarketplace() {
                     <Edit3 className="h-4 w-4 mr-1" />
                     Customize
                   </Button>
-                  <Button size="sm" className="bg-purple-600 hover:bg-purple-700">
-                    ${template.price}
+                  <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">
+                    FREE
                   </Button>
                 </div>
               </div>
