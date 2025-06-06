@@ -95,7 +95,7 @@ export default function Home() {
               <div className="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center purple-glow">
                 <Mic className="text-white w-5 h-5" />
               </div>
-              <h1 className="text-xl font-bold gradient-text">
+              <h1 className="text-xl font-bold yapup-gradient">
                 YapUp
               </h1>
             </div>
@@ -118,7 +118,7 @@ export default function Home() {
           </Badge>
           
           <h1 className="text-5xl md:text-7xl font-display text-gray-900 mb-8 tracking-tight text-balance">
-            <span className="block gradient-text font-display">
+            <span className="block yapup-gradient font-display">
               YapUp
             </span>
             <span className="text-4xl md:text-5xl block mt-4">

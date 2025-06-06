@@ -161,6 +161,20 @@
     -webkit-text-fill-color: transparent;
   }
 
+  .yapup-gradient {
+    background: linear-gradient(135deg, 
+      #6366f1 0%, 
+      #8b5cf6 25%, 
+      #a855f7 50%, 
+      #c084fc 75%, 
+      #e879f9 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
   .gradient-card {
     background: linear-gradient(135deg, 
       hsl(255, 100%, 99%) 0%, 
