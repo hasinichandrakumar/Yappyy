@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
+import { motion, useAnimation, useInView } from "framer-motion";
+import { useRef } from "react";
 import { 
   Mic, 
   Video, 
@@ -29,12 +31,28 @@ import {
 
 export default function Home() {
   const [isHovered, setIsHovered] = useState<string | null>(null);
+  const [floatingElements, setFloatingElements] = useState<Array<{id: number, x: number, y: number, delay: number}>>([]);
   const { isAuthenticated, isLoading } = useAuth();
+  const heroRef = useRef(null);
+  const featuresRef = useRef(null);
+  const isHeroInView = useInView(heroRef);
+  const isFeaturesInView = useInView(featuresRef);
 
   const handleStartPracticing = () => {
     // Since we're in demo mode, always redirect to dashboard
     window.location.href = "/dashboard";
   };
+
+  // Generate floating background elements
+  useEffect(() => {
+    const elements = Array.from({length: 20}, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      delay: Math.random() * 5
+    }));
+    setFloatingElements(elements);
+  }, []);
 
   const advancedFeatures = [
     {
@@ -87,141 +105,404 @@ export default function Home() {
 
   return (
     <div className="min-h-screen gradient-bg-light">
+      {/* Floating Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        {floatingElements.map((element) => (
+          <motion.div
+            key={element.id}
+            className="absolute w-2 h-2 bg-cyan-200 rounded-full opacity-30"
+            style={{
+              left: `${element.x}%`,
+              top: `${element.y}%`,
+            }}
+            animate={{
+              y: [0, -20, 0],
+              x: [0, 10, 0],
+              scale: [1, 1.2, 1],
+              opacity: [0.3, 0.7, 0.3],
+            }}
+            transition={{
+              duration: 4 + element.delay,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: element.delay,
+            }}
+          />
+        ))}
+      </div>
+
       {/* Navigation */}
-      <nav className="gradient-card backdrop-blur-md shadow-lg purple-border sticky top-0 z-50">
+      <motion.nav 
+        className="gradient-card backdrop-blur-md shadow-lg purple-border sticky top-0 z-50"
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center purple-glow">
+            <motion.div 
+              className="flex items-center space-x-3"
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
+              <motion.div 
+                className="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center purple-glow"
+                animate={{ 
+                  boxShadow: [
+                    "0 0 20px hsla(180, 85%, 60%, 0.3)",
+                    "0 0 40px hsla(180, 85%, 60%, 0.5)",
+                    "0 0 20px hsla(180, 85%, 60%, 0.3)"
+                  ]
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
                 <Mic className="text-white w-5 h-5" />
-              </div>
+              </motion.div>
               <h1 className="text-xl font-bold yapup-gradient">
                 YapUp
               </h1>
-            </div>
+            </motion.div>
             <Link href="/dashboard">
-              <Button className="gradient-bg text-white hover:opacity-90 shadow-lg purple-glow">
-                Start Practicing
-                <PlayCircle className="w-4 h-4 ml-2" />
-              </Button>
+              <motion.div
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button className="gradient-bg text-white hover:opacity-90 shadow-lg purple-glow">
+                  Start Practicing
+                  <PlayCircle className="w-4 h-4 ml-2" />
+                </Button>
+              </motion.div>
             </Link>
           </div>
         </div>
-      </nav>
+      </motion.nav>
 
       {/* Hero Section */}
-      <section className="relative py-20 px-4 sm:px-6 lg:px-8">
+      <motion.section 
+        ref={heroRef}
+        className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1 }}
+      >
         <div className="max-w-7xl mx-auto text-center">
-          <Badge className="mb-6 bg-blue-100 text-blue-800 border-blue-200 px-4 py-2">
-            <Sparkles className="w-4 h-4 mr-2" />
-            Powered by GPT-4 Turbo & MediaPipe Neural Networks
-          </Badge>
+          <motion.div
+            initial={{ y: 50, opacity: 0 }}
+            animate={isHeroInView ? { y: 0, opacity: 1 } : {}}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            <Badge className="mb-6 bg-cyan-100 text-cyan-800 border-cyan-200 px-4 py-2">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+              </motion.div>
+              Powered by GPT-4 Turbo & MediaPipe Neural Networks
+            </Badge>
+          </motion.div>
           
-          <h1 className="text-5xl md:text-7xl font-display text-gray-900 mb-8 tracking-tight text-balance">
-            <span className="block yapup-gradient font-display">
+          <motion.h1 
+            className="text-5xl md:text-7xl font-display text-gray-900 mb-8 tracking-tight text-balance"
+            initial={{ y: 100, opacity: 0 }}
+            animate={isHeroInView ? { y: 0, opacity: 1 } : {}}
+            transition={{ duration: 1, delay: 0.4 }}
+          >
+            <motion.span 
+              className="block yapup-gradient font-display"
+              animate={{ 
+                textShadow: [
+                  "0 0 20px rgba(6, 182, 212, 0.5)",
+                  "0 0 40px rgba(6, 182, 212, 0.8)",
+                  "0 0 20px rgba(6, 182, 212, 0.5)"
+                ]
+              }}
+              transition={{ duration: 3, repeat: Infinity }}
+            >
               YapUp
-            </span>
-            <span className="text-4xl md:text-5xl block mt-4">
+            </motion.span>
+            <motion.span 
+              className="text-4xl md:text-5xl block mt-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8 }}
+            >
               Master Your Public Speaking
-            </span>
-          </h1>
+            </motion.span>
+          </motion.h1>
           
-          <p className="text-xl font-body text-gray-600 mb-8 max-w-3xl mx-auto text-balance">
+          <motion.p 
+            className="text-xl font-body text-gray-600 mb-8 max-w-3xl mx-auto text-balance"
+            initial={{ y: 50, opacity: 0 }}
+            animate={isHeroInView ? { y: 0, opacity: 1 } : {}}
+            transition={{ duration: 0.8, delay: 0.6 }}
+          >
             Transform your presentation skills with AI-powered real-time feedback, intelligent coaching, 
             and personalized improvement plans tailored to your speaking goals.
-          </p>
+          </motion.p>
           
-          <div className="mb-12 p-8 bg-white/90 backdrop-blur-sm rounded-2xl border border-purple-200 max-w-3xl mx-auto purple-glow">
+          <motion.div 
+            className="mb-12 p-8 bg-white/90 backdrop-blur-sm rounded-2xl border border-cyan-200 max-w-3xl mx-auto purple-glow"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={isHeroInView ? { scale: 1, opacity: 1 } : {}}
+            transition={{ duration: 0.8, delay: 0.8 }}
+            whileHover={{ scale: 1.02 }}
+          >
             <div className="text-center">
               <div className="grid grid-cols-3 gap-8 mb-4">
-                <div>
-                  <div className="text-3xl font-display gradient-text mb-1">55%</div>
-                  <p className="text-sm font-medium text-gray-700">Body Language</p>
-                </div>
-                <div>
-                  <div className="text-3xl font-display gradient-text mb-1">38%</div>
-                  <p className="text-sm font-medium text-gray-700">Tone of Voice</p>
-                </div>
-                <div>
-                  <div className="text-3xl font-display gradient-text mb-1">7%</div>
-                  <p className="text-sm font-medium text-gray-700">Words</p>
-                </div>
+                {[
+                  { value: "55%", label: "Body Language" },
+                  { value: "38%", label: "Tone of Voice" },
+                  { value: "7%", label: "Words" }
+                ].map((stat, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={isHeroInView ? { y: 0, opacity: 1 } : {}}
+                    transition={{ duration: 0.6, delay: 1 + index * 0.1 }}
+                  >
+                    <motion.div 
+                      className="text-3xl font-display gradient-text mb-1"
+                      animate={{ scale: [1, 1.1, 1] }}
+                      transition={{ duration: 2, repeat: Infinity, delay: index * 0.3 }}
+                    >
+                      {stat.value}
+                    </motion.div>
+                    <p className="text-sm font-medium text-gray-700">{stat.label}</p>
+                  </motion.div>
+                ))}
               </div>
               <div className="border-t border-cyan-200 pt-6">
-                <h2 className="text-4xl md:text-5xl font-display gradient-text tracking-tight">We coach 100% of you.</h2>
+                <motion.h2 
+                  className="text-4xl md:text-5xl font-display gradient-text tracking-tight"
+                  initial={{ opacity: 0 }}
+                  animate={isHeroInView ? { opacity: 1 } : {}}
+                  transition={{ duration: 1, delay: 1.5 }}
+                >
+                  We coach 100% of you.
+                </motion.h2>
               </div>
             </div>
-          </div>
+          </motion.div>
           
-          <div className="flex justify-center mb-16">
+          <motion.div 
+            className="flex justify-center mb-16"
+            initial={{ y: 50, opacity: 0 }}
+            animate={isHeroInView ? { y: 0, opacity: 1 } : {}}
+            transition={{ duration: 0.8, delay: 1.2 }}
+          >
             <Link href="/dashboard">
-              <Button size="lg" className="gradient-bg text-white hover:opacity-90 shadow-xl px-8 py-4 text-lg font-semibold tracking-wide purple-glow">
-                Start Your Free Session
-                <PlayCircle className="w-5 h-5 ml-3" />
-              </Button>
+              <motion.div
+                whileHover={{ scale: 1.05, y: -5 }}
+                whileTap={{ scale: 0.95 }}
+                animate={{
+                  boxShadow: [
+                    "0 10px 30px rgba(6, 182, 212, 0.3)",
+                    "0 20px 60px rgba(6, 182, 212, 0.4)",
+                    "0 10px 30px rgba(6, 182, 212, 0.3)"
+                  ]
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <Button size="lg" className="gradient-bg text-white hover:opacity-90 shadow-xl px-8 py-4 text-lg font-semibold tracking-wide purple-glow">
+                  Start Your Free Session
+                  <PlayCircle className="w-5 h-5 ml-3" />
+                </Button>
+              </motion.div>
             </Link>
-          </div>
+          </motion.div>
 
           {/* Real-time Metrics Preview */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+          <motion.div 
+            className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto"
+            initial={{ y: 100, opacity: 0 }}
+            animate={isHeroInView ? { y: 0, opacity: 1 } : {}}
+            transition={{ duration: 1, delay: 1.4 }}
+          >
             {metrics.map((metric, index) => (
-              <Card key={index} className="bg-white/70 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-                <CardContent className="p-6 text-center">
-                  <div className="w-12 h-12 mx-auto mb-4 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center">
-                    <metric.icon className="w-6 h-6 text-white" />
-                  </div>
-                  <h3 className="font-semibold text-gray-900 mb-1">{metric.label}</h3>
-                  <p className="text-sm text-gray-600">{metric.value}</p>
-                </CardContent>
-              </Card>
+              <motion.div
+                key={index}
+                initial={{ y: 50, opacity: 0 }}
+                animate={isHeroInView ? { y: 0, opacity: 1 } : {}}
+                transition={{ duration: 0.6, delay: 1.6 + index * 0.1 }}
+                whileHover={{ y: -10, scale: 1.05 }}
+              >
+                <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+                  <CardContent className="p-6 text-center">
+                    <motion.div 
+                      className="w-12 h-12 mx-auto mb-4 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center"
+                      animate={{ 
+                        rotate: [0, 360],
+                        scale: [1, 1.1, 1]
+                      }}
+                      transition={{ 
+                        rotate: { duration: 8, repeat: Infinity, ease: "linear" },
+                        scale: { duration: 2, repeat: Infinity, delay: index * 0.5 }
+                      }}
+                    >
+                      <metric.icon className="w-6 h-6 text-white" />
+                    </motion.div>
+                    <h3 className="font-semibold text-gray-900 mb-1">{metric.label}</h3>
+                    <p className="text-sm text-gray-600">{metric.value}</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </motion.section>
+
+      {/* Features Section */}
+      <motion.section 
+        ref={featuresRef}
+        className="py-20 bg-white/50 backdrop-blur-sm relative overflow-hidden"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1 }}
+      >
+        {/* Animated background pattern */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-full">
+            {Array.from({length: 6}).map((_, i) => (
+              <motion.div
+                key={i}
+                className="absolute w-32 h-32 border border-cyan-200 rounded-full opacity-20"
+                style={{
+                  left: `${20 + i * 15}%`,
+                  top: `${10 + i * 20}%`,
+                }}
+                animate={{
+                  scale: [1, 1.2, 1],
+                  opacity: [0.2, 0.4, 0.2],
+                  rotate: [0, 180, 360],
+                }}
+                transition={{
+                  duration: 8 + i,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: i * 0.5,
+                }}
+              />
             ))}
           </div>
         </div>
-      </section>
 
-      {/* Features Section */}
-      <section className="py-20 bg-white/50 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <motion.div 
+            className="text-center mb-16"
+            initial={{ y: 50, opacity: 0 }}
+            animate={isFeaturesInView ? { y: 0, opacity: 1 } : {}}
+            transition={{ duration: 0.8 }}
+          >
+            <motion.h2 
+              className="text-4xl font-bold text-gray-900 mb-4"
+              animate={{
+                backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+              }}
+              transition={{ duration: 5, repeat: Infinity }}
+              style={{
+                background: "linear-gradient(-45deg, #0891b2, #06b6d4, #22d3ee, #67e8f9)",
+                backgroundSize: "300% 300%",
+                backgroundClip: "text",
+                WebkitBackgroundClip: "text",
+                color: "transparent",
+              }}
+            >
               Advanced AI-Powered Features
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            </motion.h2>
+            <motion.p 
+              className="text-xl text-gray-600 max-w-3xl mx-auto"
+              initial={{ opacity: 0 }}
+              animate={isFeaturesInView ? { opacity: 1 } : {}}
+              transition={{ duration: 0.8, delay: 0.3 }}
+            >
               Our intelligent coaching system provides comprehensive feedback across every aspect of your presentation.
-            </p>
-          </div>
+            </motion.p>
+          </motion.div>
 
           <div className="grid md:grid-cols-2 gap-8">
             {advancedFeatures.map((feature, index) => (
-              <Card 
+              <motion.div
                 key={index}
-                className={`group cursor-pointer transition-all duration-500 hover:shadow-2xl border-0 overflow-hidden ${
-                  isHovered === feature.title ? 'scale-105' : ''
-                }`}
+                initial={{ y: 100, opacity: 0, scale: 0.8 }}
+                animate={isFeaturesInView ? { y: 0, opacity: 1, scale: 1 } : {}}
+                transition={{ 
+                  duration: 0.8, 
+                  delay: index * 0.2,
+                  type: "spring",
+                  bounce: 0.4
+                }}
+                whileHover={{ 
+                  y: -20, 
+                  scale: 1.05,
+                  rotateY: 5,
+                  transition: { duration: 0.3 }
+                }}
                 onMouseEnter={() => setIsHovered(feature.title)}
                 onMouseLeave={() => setIsHovered(null)}
               >
-                <CardContent className="p-8 relative">
-                  <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-5 group-hover:opacity-10 transition-opacity duration-500`} />
-                  <div className={`w-16 h-16 mb-6 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center shadow-lg`}>
-                    <feature.icon className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">{feature.title}</h3>
-                  <p className="text-gray-600 leading-relaxed mb-4">{feature.description}</p>
-                  <div className="space-y-2">
-                    {feature.details.map((detail, detailIndex) => (
-                      <div key={detailIndex} className="flex items-center text-sm text-gray-500">
-                        <div className="w-1 h-1 bg-cyan-500 rounded-full mr-2"></div>
-                        {detail}
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                <Card className="group cursor-pointer transition-all duration-500 hover:shadow-2xl border-0 overflow-hidden bg-white/80 backdrop-blur-sm">
+                  <CardContent className="p-8 relative">
+                    <motion.div 
+                      className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-5 group-hover:opacity-15 transition-opacity duration-500`}
+                      animate={isHovered === feature.title ? { opacity: 0.15 } : { opacity: 0.05 }}
+                    />
+                    <motion.div 
+                      className={`w-16 h-16 mb-6 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center shadow-lg relative z-10`}
+                      animate={{
+                        rotate: [0, 5, -5, 0],
+                        scale: isHovered === feature.title ? [1, 1.1, 1] : 1,
+                      }}
+                      transition={{
+                        rotate: { duration: 2, repeat: Infinity },
+                        scale: { duration: 0.3 }
+                      }}
+                    >
+                      <motion.div
+                        animate={{ rotate: [0, 360] }}
+                        transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                      >
+                        <feature.icon className="w-8 h-8 text-white" />
+                      </motion.div>
+                    </motion.div>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-4 relative z-10">{feature.title}</h3>
+                    <p className="text-gray-600 leading-relaxed mb-4 relative z-10">{feature.description}</p>
+                    <motion.div 
+                      className="space-y-2 relative z-10"
+                      initial={{ opacity: 0.7 }}
+                      animate={isHovered === feature.title ? { opacity: 1 } : { opacity: 0.7 }}
+                    >
+                      {feature.details.map((detail, detailIndex) => (
+                        <motion.div 
+                          key={detailIndex} 
+                          className="flex items-center text-sm text-gray-500"
+                          initial={{ x: -10, opacity: 0 }}
+                          animate={isHovered === feature.title ? { x: 0, opacity: 1 } : { x: -10, opacity: 0.7 }}
+                          transition={{ duration: 0.3, delay: detailIndex * 0.1 }}
+                        >
+                          <motion.div 
+                            className="w-1 h-1 bg-cyan-500 rounded-full mr-2"
+                            animate={{
+                              scale: [1, 1.5, 1],
+                              opacity: [0.5, 1, 0.5],
+                            }}
+                            transition={{
+                              duration: 1.5,
+                              repeat: Infinity,
+                              delay: detailIndex * 0.2,
+                            }}
+                          />
+                          {detail}
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                  </CardContent>
+                </Card>
+              </motion.div>
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Mission/About Us Section */}
       <section className="py-20 bg-gradient-to-br from-slate-50 to-blue-50">
