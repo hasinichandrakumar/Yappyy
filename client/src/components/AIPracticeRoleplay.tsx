@@ -97,7 +97,7 @@ export default function AIPracticeRoleplay() {
           <span>AI Practice</span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-5">
+      <CardContent className="space-y-6 pb-6">
         {!isSessionActive ? (
           <div className="space-y-4">
             {/* Custom Audience Toggle */}
@@ -157,15 +157,17 @@ export default function AIPracticeRoleplay() {
               />
             </div>
 
-            <Button
-              onClick={startPracticeSession}
-              disabled={useCustomAudience ? !customAudiencePrompt.trim() : !selectedRole}
-              className="w-full gradient-bg text-white hover:opacity-90"
-              size="sm"
-            >
-              <Play className="w-4 h-4 mr-2" />
-              Start Practice
-            </Button>
+            <div className="pt-2">
+              <Button
+                onClick={startPracticeSession}
+                disabled={useCustomAudience ? !customAudiencePrompt.trim() : !selectedRole}
+                className="w-full gradient-bg text-white hover:opacity-90"
+                size="sm"
+              >
+                <Play className="w-4 h-4 mr-2" />
+                Start Practice
+              </Button>
+            </div>
           </div>
         ) : (
           <div className="space-y-3">

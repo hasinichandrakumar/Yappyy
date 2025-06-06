@@ -90,29 +90,29 @@ export default function RealTimeMetrics() {
     tip?: string;
   }) => (
     <Card className="border border-gray-200 hover:shadow-md transition-shadow">
-      <CardContent className="p-4">
-        {/* Status badge at the top */}
+      <CardContent className="p-4 text-center">
+        {/* Status badge at the top, centered */}
         {status && (
-          <div className="flex justify-end mb-2">
+          <div className="flex justify-center mb-3">
             <Badge className={`text-xs ${status.color}`}>
               {status.label}
             </Badge>
           </div>
         )}
         
-        {/* Title with icon */}
-        <div className="flex items-center space-x-2 mb-3">
+        {/* Title with icon, centered */}
+        <div className="flex items-center justify-center space-x-2 mb-3">
           <Icon className="w-4 h-4 text-cyan-600" />
           <h3 className="text-sm font-medium text-gray-700">{title}</h3>
         </div>
         
-        {/* Value */}
-        <div className="text-2xl font-bold text-gray-900 mb-2">
+        {/* Value, centered */}
+        <div className="text-2xl font-bold text-gray-900 mb-3">
           {typeof value === 'number' ? Math.round(value) : value}
           {unit && <span className="text-sm text-gray-500 ml-1">{unit}</span>}
         </div>
         
-        {/* Progress bar */}
+        {/* Progress bar, centered */}
         {progress !== undefined && (
           <div className="space-y-2">
             <Progress value={Math.round(progress)} className="h-2" />
@@ -120,9 +120,9 @@ export default function RealTimeMetrics() {
           </div>
         )}
         
-        {/* Tip */}
+        {/* Tip, centered */}
         {tip && (
-          <p className="text-xs text-gray-600 mt-2 italic">{tip}</p>
+          <p className="text-xs text-gray-600 mt-3 italic leading-relaxed">{tip}</p>
         )}
       </CardContent>
     </Card>
