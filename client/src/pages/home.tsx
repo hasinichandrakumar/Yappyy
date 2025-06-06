@@ -43,14 +43,23 @@ export default function Home() {
     window.location.href = "/dashboard";
   };
 
-  // Generate floating background elements
+  // Generate organized floating background elements
   useEffect(() => {
-    const elements = Array.from({length: 20}, (_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      delay: Math.random() * 5
-    }));
+    const elements = [];
+    const cols = 6;
+    const rows = 4;
+    
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        elements.push({
+          id: row * cols + col,
+          x: (col * (100 / (cols - 1))) + (Math.random() - 0.5) * 5, // Add slight randomness
+          y: (row * (100 / (rows - 1))) + (Math.random() - 0.5) * 5,
+          delay: (row + col) * 0.3
+        });
+      }
+    }
+    
     setFloatingElements(elements);
   }, []);
 
@@ -110,25 +119,55 @@ export default function Home() {
         {floatingElements.map((element) => (
           <motion.div
             key={element.id}
-            className="absolute w-2 h-2 bg-cyan-200 rounded-full opacity-30"
+            className="absolute w-3 h-3 bg-gradient-to-br from-cyan-300 to-blue-400 rounded-full"
             style={{
               left: `${element.x}%`,
               top: `${element.y}%`,
             }}
             animate={{
-              y: [0, -20, 0],
-              x: [0, 10, 0],
-              scale: [1, 1.2, 1],
-              opacity: [0.3, 0.7, 0.3],
+              y: [0, -30, 0],
+              x: [0, 15, 0],
+              scale: [0.8, 1.4, 0.8],
+              opacity: [0.2, 0.6, 0.2],
+              rotate: [0, 180, 360],
             }}
             transition={{
-              duration: 4 + element.delay,
+              duration: 6,
               repeat: Infinity,
               ease: "easeInOut",
               delay: element.delay,
             }}
           />
         ))}
+        
+        {/* Additional connecting lines between dots */}
+        {floatingElements.map((element, index) => {
+          const nextElement = floatingElements[index + 1];
+          if (!nextElement || (index + 1) % 6 === 0) return null; // Don't connect across rows
+          
+          return (
+            <motion.div
+              key={`line-${element.id}`}
+              className="absolute h-px bg-gradient-to-r from-transparent via-cyan-300 to-transparent opacity-20"
+              style={{
+                left: `${element.x}%`,
+                top: `${element.y}%`,
+                width: `${Math.abs(nextElement.x - element.x)}%`,
+                transformOrigin: 'left center',
+              }}
+              animate={{
+                opacity: [0.1, 0.4, 0.1],
+                scaleX: [0.8, 1.2, 0.8],
+              }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: element.delay + 1,
+              }}
+            />
+          );
+        })}
       </div>
 
       {/* Navigation */}
