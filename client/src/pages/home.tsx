@@ -131,31 +131,31 @@ export default function Home() {
             and personalized improvement plans tailored to your speaking goals.
           </p>
           
-          <div className="mb-12 p-8 bg-white/90 backdrop-blur-sm rounded-2xl border border-purple-200 max-w-3xl mx-auto purple-glow">
+          <div className="mb-12 p-8 bg-gradient-to-br from-gray-900/95 to-black/95 backdrop-blur-sm rounded-2xl border border-cyan-500/30 max-w-3xl mx-auto gradient-shadow">
             <div className="text-center">
               <div className="grid grid-cols-3 gap-8 mb-4">
                 <div>
-                  <div className="text-3xl font-display gradient-text mb-1">55%</div>
-                  <p className="text-sm font-medium text-gray-700">Body Language</p>
+                  <div className="text-3xl font-display gradient-text-secondary mb-1">55%</div>
+                  <p className="text-sm font-medium text-gray-300">Body Language</p>
                 </div>
                 <div>
-                  <div className="text-3xl font-display gradient-text mb-1">38%</div>
-                  <p className="text-sm font-medium text-gray-700">Tone of Voice</p>
+                  <div className="text-3xl font-display gradient-text-secondary mb-1">38%</div>
+                  <p className="text-sm font-medium text-gray-300">Tone of Voice</p>
                 </div>
                 <div>
-                  <div className="text-3xl font-display gradient-text mb-1">7%</div>
-                  <p className="text-sm font-medium text-gray-700">Words</p>
+                  <div className="text-3xl font-display gradient-text-secondary mb-1">7%</div>
+                  <p className="text-sm font-medium text-gray-300">Words</p>
                 </div>
               </div>
-              <div className="border-t border-purple-200 pt-6">
-                <h2 className="text-4xl md:text-5xl font-display gradient-text tracking-tight">We coach 100% of you.</h2>
+              <div className="border-t border-cyan-500/30 pt-6">
+                <h2 className="text-4xl md:text-5xl font-display gradient-text-secondary tracking-tight">We coach 100% of you.</h2>
               </div>
             </div>
           </div>
           
           <div className="flex justify-center mb-16">
             <Link href="/dashboard">
-              <Button size="lg" className="gradient-bg text-white hover:opacity-90 shadow-xl px-8 py-4 text-lg font-semibold tracking-wide purple-glow">
+              <Button size="lg" className="gradient-button text-white hover:opacity-90 shadow-xl px-8 py-4 text-lg font-semibold tracking-wide">
                 Start Your Free Session
                 <PlayCircle className="w-5 h-5 ml-3" />
               </Button>
@@ -165,13 +165,13 @@ export default function Home() {
           {/* Real-time Metrics Preview */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
             {metrics.map((metric, index) => (
-              <Card key={index} className="bg-white/70 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+              <Card key={index} className="bg-gray-900/80 backdrop-blur-sm border border-cyan-500/30 shadow-lg hover:shadow-xl transition-all duration-300 gradient-card-hover">
                 <CardContent className="p-6 text-center">
-                  <div className="w-12 h-12 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                  <div className="w-12 h-12 mx-auto mb-4 bg-gradient-to-br from-cyan-500 to-teal-500 rounded-full flex items-center justify-center">
                     <metric.icon className="w-6 h-6 text-white" />
                   </div>
-                  <h3 className="font-semibold text-gray-900 mb-1">{metric.label}</h3>
-                  <p className="text-sm text-gray-600">{metric.value}</p>
+                  <h3 className="font-semibold text-white mb-1">{metric.label}</h3>
+                  <p className="text-sm text-gray-300">{metric.value}</p>
                 </CardContent>
               </Card>
             ))}
@@ -180,7 +180,7 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-white/50 backdrop-blur-sm">
+      <section className="py-20 bg-gray-900/30 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
