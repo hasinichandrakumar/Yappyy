@@ -2,12 +2,6 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertSessionSchema, insertCoachingFeedbackSchema } from "@shared/schema";
-import OpenAI from "openai";
-
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const openai = new OpenAI({ 
-  apiKey: process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY_ENV_VAR || "default_key" 
-});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -41,7 +35,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertSessionSchema.parse(req.body);
       const session = await storage.createSession(validatedData);
       res.status(201).json(session);
-    } catch (error) {
+    } catch (error: any) {
       res.status(400).json({ message: "Invalid session data", error: error.message });
     }
   });
@@ -52,7 +46,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertCoachingFeedbackSchema.parse(req.body);
       const feedback = await storage.addCoachingFeedback(validatedData);
       res.status(201).json(feedback);
-    } catch (error) {
+    } catch (error: any) {
       res.status(400).json({ message: "Invalid feedback data", error: error.message });
     }
   });
@@ -77,17 +71,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Transcript and metrics are required" });
       }
 
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          {
-            role: "system",
-            content: "You are an expert public speaking coach. Analyze the speech transcript and metrics to provide actionable coaching tips. Respond with JSON in this format: { 'tips': [{ 'type': 'posture|gesture|pace|volume|clarity|eye_contact', 'message': 'tip message', 'severity': 'good|warning|improvement' }] }"
-          },
-          {
-            role: "user",
-            content: `Analyze this speech:
-            
+      const response = await fetch('https://api.perplexity.ai/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.PERPLEXITY_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: "llama-3.1-sonar-small-128k-online",
+          messages: [
+            {
+              role: "system",
+              content: "You are an expert public speaking coach. Analyze the speech transcript and metrics to provide actionable coaching tips. Respond with JSON in this format: { \"tips\": [{ \"type\": \"posture|gesture|pace|volume|clarity|eye_contact\", \"message\": \"tip message\", \"severity\": \"good|warning|improvement\" }] }"
+            },
+            {
+              role: "user",
+              content: `Analyze this speech:
+              
 Transcript: ${transcript}
 
 Metrics:
@@ -97,20 +97,27 @@ Metrics:
 - Filler words: ${metrics.fillerWords}
 - Pauses: ${metrics.pauseCount}
 
-Provide specific, actionable coaching tips to improve this presentation.`
-          }
-        ],
-        response_format: { type: "json_object" },
+Provide specific, actionable coaching tips to improve this presentation. Respond with valid JSON.`
+            }
+          ],
+          temperature: 0.2,
+          stream: false
+        })
       });
 
-      const result = JSON.parse(response.choices[0].message.content);
+      if (!response.ok) {
+        throw new Error(`Perplexity API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const result = JSON.parse(data.choices[0].message.content);
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to analyze speech", error: error.message });
     }
   });
 
-  // Analyze posture from image
+  // Analyze posture from image (simplified text-based analysis)
   app.post("/api/analyze-posture", async (req, res) => {
     try {
       const { imageBase64 } = req.body;
@@ -119,32 +126,39 @@ Provide specific, actionable coaching tips to improve this presentation.`
         return res.status(400).json({ message: "Image data is required" });
       }
 
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: "Analyze this person's posture and body language for public speaking. Focus on: posture, hand gestures, eye contact direction, and overall presence. Respond with JSON in this format: { 'posture': 'good|needs_improvement', 'gesture': 'open|closed|neutral', 'eyeContact': 'good|poor', 'feedback': 'specific feedback message' }"
-              },
-              {
-                type: "image_url",
-                image_url: {
-                  url: `data:image/jpeg;base64,${imageBase64}`
-                }
-              }
-            ],
-          },
-        ],
-        response_format: { type: "json_object" },
-        max_tokens: 500,
+      // Since Perplexity doesn't support image analysis, we'll provide basic posture feedback
+      // In a real implementation, you would use computer vision or MediaPipe for posture analysis
+      const response = await fetch('https://api.perplexity.ai/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.PERPLEXITY_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: "llama-3.1-sonar-small-128k-online",
+          messages: [
+            {
+              role: "system",
+              content: "You are a public speaking coach. Provide general posture and body language advice for presentations. Respond with JSON in this format: { \"posture\": \"good|needs_improvement\", \"gesture\": \"open|closed|neutral\", \"eyeContact\": \"good|poor\", \"feedback\": \"specific feedback message\" }"
+            },
+            {
+              role: "user",
+              content: "Provide general advice for good posture and body language during a presentation. Focus on maintaining good posture, using open gestures, and maintaining eye contact."
+            }
+          ],
+          temperature: 0.2,
+          stream: false
+        })
       });
 
-      const result = JSON.parse(response.choices[0].message.content);
+      if (!response.ok) {
+        throw new Error(`Perplexity API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const result = JSON.parse(data.choices[0].message.content);
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: "Failed to analyze posture", error: error.message });
     }
   });

@@ -27,6 +27,7 @@ export class MemStorage implements IStorage {
       ...insertSession,
       id,
       createdAt: new Date(),
+      videoBlob: insertSession.videoBlob || null,
     };
     this.sessions.set(id, session);
     return session;
@@ -45,7 +46,10 @@ export class MemStorage implements IStorage {
   async addCoachingFeedback(insertFeedback: InsertCoachingFeedback): Promise<CoachingFeedback> {
     const id = this.currentFeedbackId++;
     const feedback: CoachingFeedback = {
-      ...insertFeedback,
+      type: insertFeedback.type,
+      message: insertFeedback.message,
+      severity: insertFeedback.severity,
+      sessionId: insertFeedback.sessionId || null,
       id,
       timestamp: new Date(),
     };
