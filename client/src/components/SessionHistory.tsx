@@ -3,10 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Play, ArrowRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import type { Session } from "@shared/schema";
+import type { PracticeSession } from "@shared/schema";
 
 export default function SessionHistory() {
-  const { data: sessions, isLoading } = useQuery<Session[]>({
+  const { data: sessions, isLoading } = useQuery<PracticeSession[]>({
     queryKey: ['/api/sessions']
   });
 
@@ -47,11 +47,11 @@ export default function SessionHistory() {
 
   const getConfidenceBadgeColor = (score: number) => {
     if (score >= 80) return "bg-green-100 text-green-800";
-    if (score >= 60) return "bg-yellow-100 text-yellow-800";
+    if (score >= 60) return "bg-cyan-100 text-cyan-800";
     return "bg-red-100 text-red-800";
   };
 
-  const getImprovementAreas = (session: Session) => {
+  const getImprovementAreas = (session: PracticeSession) => {
     const areas: string[] = [];
     if (session.averageWPM < 120 || session.averageWPM > 160) areas.push("Pace");
     if (session.voiceClarity < 80) areas.push("Clarity");

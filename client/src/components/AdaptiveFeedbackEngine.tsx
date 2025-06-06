@@ -195,27 +195,27 @@ export default function AdaptiveFeedbackEngine({ userProfile, currentPerformance
             <div className="text-xl font-bold text-green-600">{userProfile.masteredSkills.length}</div>
           </div>
           
-          <div className="p-3 bg-purple-50 rounded-lg border border-purple-100">
+          <div className="p-3 bg-cyan-50 rounded-lg border border-cyan-100">
             <div className="flex items-center space-x-2 mb-1">
-              <Cpu className="h-4 w-4 text-purple-600" />
+              <Cpu className="h-4 w-4 text-cyan-600" />
               <span className="text-sm font-medium text-gray-700">AI Level</span>
             </div>
-            <div className="text-xl font-bold text-purple-600">{userProfile.adaptiveLevel}/10</div>
+            <div className="text-xl font-bold text-cyan-600">{userProfile.adaptiveLevel}/10</div>
           </div>
           
-          <div className="p-3 bg-orange-50 rounded-lg border border-orange-100">
+          <div className="p-3 bg-cyan-50 rounded-lg border border-cyan-100">
             <div className="flex items-center space-x-2 mb-1">
-              <TrendingUp className="h-4 w-4 text-orange-600" />
+              <TrendingUp className="h-4 w-4 text-cyan-600" />
               <span className="text-sm font-medium text-gray-700">Velocity</span>
             </div>
-            <div className="text-xl font-bold text-orange-600">{Math.round(userProfile.learningVelocity * 100)}%</div>
+            <div className="text-xl font-bold text-cyan-600">{Math.round(userProfile.learningVelocity * 100)}%</div>
           </div>
         </div>
 
         {/* Adaptive Feedback */}
         <div className="space-y-4">
           <div className="flex items-center space-x-2">
-            <GitBranch className="h-5 w-5 text-blue-600" />
+            <GitBranch className="h-5 w-5 text-cyan-600" />
             <h3 className="font-semibold text-gray-900">Personalized Insights</h3>
             <Badge variant="secondary" className="text-xs">
               Never seen before
