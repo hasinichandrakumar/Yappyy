@@ -2,9 +2,11 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { 
   Users, 
   Gavel, 
@@ -32,6 +34,8 @@ export default function AIPracticeRoleplay() {
   const [isSessionActive, setIsSessionActive] = useState<boolean>(false);
   const [speechTopic, setSpeechTopic] = useState<string>("");
   const [latestResponse, setLatestResponse] = useState<string>("");
+  const [useCustomAudience, setUseCustomAudience] = useState<boolean>(false);
+  const [customAudiencePrompt, setCustomAudiencePrompt] = useState<string>("");
 
   const audienceRoles: AudienceRole[] = [
     {
@@ -74,7 +78,8 @@ export default function AIPracticeRoleplay() {
 
   const startPracticeSession = () => {
     setIsSessionActive(true);
-    setLatestResponse("Welcome! We're ready to hear your presentation.");
+    const audienceType = useCustomAudience ? "Custom Audience" : audienceRoles.find(role => role.id === selectedRole)?.name;
+    setLatestResponse(`Welcome! We're ready to hear your presentation as ${audienceType}.`);
   };
 
   const endPracticeSession = () => {
@@ -93,24 +98,48 @@ export default function AIPracticeRoleplay() {
       <CardContent className="space-y-4">
         {!isSessionActive ? (
           <div className="space-y-3">
-            <div>
-              <Label className="text-sm font-medium">Audience Type</Label>
-              <Select value={selectedRole} onValueChange={setSelectedRole}>
-                <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="Choose audience" />
-                </SelectTrigger>
-                <SelectContent>
-                  {audienceRoles.map((role) => (
-                    <SelectItem key={role.id} value={role.id}>
-                      <div className="flex items-center space-x-2">
-                        {role.icon}
-                        <span>{role.name}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            {/* Custom Audience Toggle */}
+            <div className="flex items-center justify-between p-2 bg-gradient-to-r from-purple-50 to-blue-50 rounded border border-purple-200">
+              <div>
+                <Label className="text-xs font-medium">Custom Audience</Label>
+                <p className="text-xs text-gray-600">Describe your own audience</p>
+              </div>
+              <Switch
+                checked={useCustomAudience}
+                onCheckedChange={setUseCustomAudience}
+              />
             </div>
+
+            {useCustomAudience ? (
+              <div>
+                <Label className="text-sm font-medium">Describe Your Audience</Label>
+                <Textarea
+                  placeholder="E.g., Board of directors at a tech company, focused on quarterly results and innovation. They're analytical, time-conscious, and looking for data-driven insights..."
+                  value={customAudiencePrompt}
+                  onChange={(e) => setCustomAudiencePrompt(e.target.value)}
+                  className="mt-1 h-20 text-xs"
+                />
+              </div>
+            ) : (
+              <div>
+                <Label className="text-sm font-medium">Audience Type</Label>
+                <Select value={selectedRole} onValueChange={setSelectedRole}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Choose audience" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {audienceRoles.map((role) => (
+                      <SelectItem key={role.id} value={role.id}>
+                        <div className="flex items-center space-x-2">
+                          {role.icon}
+                          <span>{role.name}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             <div>
               <Label htmlFor="speech-topic" className="text-sm">Topic (Optional)</Label>
@@ -125,7 +154,7 @@ export default function AIPracticeRoleplay() {
 
             <Button
               onClick={startPracticeSession}
-              disabled={!selectedRole}
+              disabled={useCustomAudience ? !customAudiencePrompt.trim() : !selectedRole}
               className="w-full gradient-bg text-white hover:opacity-90"
               size="sm"
             >
