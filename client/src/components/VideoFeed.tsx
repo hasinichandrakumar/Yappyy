@@ -50,113 +50,53 @@ export default function VideoFeed() {
         messages.push("Keep your shoulders back and maintain good posture");
       }
 
-      // Analyze gestures
-      if (gesture === 'closed') {
-        messages.push("Use more open hand gestures to appear welcoming");
-      }
-
       // Analyze eye contact
       if (eyeContact === 'poor') {
-        messages.push("Look directly at the camera more often");
+        messages.push("Try to maintain eye contact with your audience");
       }
 
-      // Analyze speaking pace
-      if (speakingPace < 100) {
-        messages.push("You're speaking slowly - try to pick up the pace");
+      // Analyze voice
+      if (volumeLevel < 0.3) {
+        messages.push("Speak louder to ensure your audience can hear you");
+      }
+
+      if (speakingPace < 120) {
+        messages.push("You can speak a bit faster to maintain engagement");
       } else if (speakingPace > 180) {
         messages.push("Slow down your speaking pace for better clarity");
       }
 
-      // Analyze voice clarity
-      if (voiceClarity < 70) {
-        messages.push("Speak more clearly and enunciate your words");
-      }
-
-      // Analyze volume
-      if (volumeLevel < 30) {
-        messages.push("Speak louder to project your voice better");
-      }
-
+      // Update feedback messages (limit to 2 messages at a time)
       if (messages.length > 0) {
-        setFeedbackMessages(prev => {
-          const newMessages = [...prev, ...messages].slice(-3); // Keep only last 3 messages
-          return newMessages;
-        });
+        setFeedbackMessages(messages.slice(0, 2));
       }
-    }, 3000); // Check every 3 seconds
+
+      // Clear messages after 5 seconds
+      setTimeout(() => {
+        setFeedbackMessages([]);
+      }, 5000);
+    }, 10000); // Check every 10 seconds
 
     return () => clearInterval(feedbackInterval);
-  }, [realTimeFeedback, isRecording, posture, gesture, eyeContact, speakingPace, voiceClarity, volumeLevel]);
-
-  // Clear feedback messages after 8 seconds
-  useEffect(() => {
-    if (feedbackMessages.length > 0) {
-      const timeout = setTimeout(() => {
-        setFeedbackMessages([]);
-      }, 8000);
-      return () => clearTimeout(timeout);
-    }
-  }, [feedbackMessages]);
+  }, [realTimeFeedback, isRecording, posture, eyeContact, volumeLevel, speakingPace]);
 
   const startCamera = async () => {
+    if (demoMode) return;
+    
     try {
-      // Check if media devices are available
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        setError("Media devices not supported in this browser. Please use a modern browser like Chrome, Firefox, or Safari.");
-        return;
-      }
-
       const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { 
-          width: { ideal: 1280 }, 
-          height: { ideal: 720 },
-          facingMode: 'user'
-        },
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true
-        }
+        video: { width: 640, height: 480 },
+        audio: true
       });
       
       setStream(mediaStream);
-      setError(""); // Clear any previous errors
-      
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
       }
-    } catch (err: any) {
-      console.error("Error accessing media devices:", err);
-      
-      let errorMessage = "Failed to access camera and microphone. ";
-      
-      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        errorMessage += "Please allow camera and microphone permissions in your browser settings and refresh the page.";
-      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
-        errorMessage += "No camera or microphone found. Please connect your devices and try again.";
-      } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
-        errorMessage += "Camera or microphone is already in use by another application.";
-      } else if (err.name === 'OverconstrainedError') {
-        errorMessage += "Camera resolution not supported. Trying with lower quality...";
-        // Try with lower constraints
-        try {
-          const fallbackStream = await navigator.mediaDevices.getUserMedia({
-            video: { width: 640, height: 480 },
-            audio: true
-          });
-          setStream(fallbackStream);
-          setError("");
-          if (videoRef.current) {
-            videoRef.current.srcObject = fallbackStream;
-          }
-          return;
-        } catch (fallbackErr) {
-          errorMessage += " Fallback also failed.";
-        }
-      } else {
-        errorMessage += "Please check your browser permissions and try again.";
-      }
-      
-      setError(errorMessage);
+      setError("");
+    } catch (err) {
+      setError("Camera access denied. Please enable camera permissions or use Demo Mode.");
+      console.error("Error accessing camera:", err);
     }
   };
 
@@ -164,26 +104,33 @@ export default function VideoFeed() {
     setIsRecording(true);
     startVoiceAnalysis();
     
-    // Start processing video frames for pose detection
+    // Start frame processing for MediaPipe
     if (videoRef.current && canvasRef.current) {
-      const processVideoFrame = () => {
-        if (isRecording && videoRef.current && canvasRef.current) {
-          const ctx = canvasRef.current.getContext('2d');
+      const processFrames = () => {
+        if (!isRecording) return;
+        
+        const video = videoRef.current;
+        const canvas = canvasRef.current;
+        
+        if (video && canvas) {
+          const ctx = canvas.getContext('2d');
           if (ctx) {
-            ctx.drawImage(videoRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height);
-            const imageData = ctx.getImageData(0, 0, canvasRef.current.width, canvasRef.current.height);
-            processFrame(imageData);
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            processFrame(canvas);
           }
-          requestAnimationFrame(processVideoFrame);
         }
+        
+        requestAnimationFrame(processFrames);
       };
-      processVideoFrame();
+      
+      processFrames();
     }
   };
 
   const stopRecording = () => {
     setIsRecording(false);
     stopVoiceAnalysis();
+    setFeedbackMessages([]);
   };
 
   const pauseRecording = () => {
@@ -191,47 +138,8 @@ export default function VideoFeed() {
     stopVoiceAnalysis();
   };
 
-  const enableDemoMode = () => {
-    setDemoMode(true);
-    setError("");
-    // Start simulated analysis in demo mode
-    startVoiceAnalysis();
-  };
-
-  if (error && !demoMode) {
-    return (
-      <Card className="bg-surface rounded-xl shadow-sm border border-gray-200">
-        <CardContent className="p-6">
-          <div className="text-center">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">Camera Access Required</h3>
-            <p className="text-red-600 mb-4">{error}</p>
-            <div className="space-y-3">
-              <div>
-                <h4 className="font-medium text-gray-900 mb-2">Steps to enable camera access:</h4>
-                <ol className="text-sm text-gray-600 text-left space-y-1">
-                  <li>1. Click the camera icon in your browser's address bar</li>
-                  <li>2. Select "Allow" for both camera and microphone</li>
-                  <li>3. Refresh this page</li>
-                  <li>4. If still blocked, check your browser settings</li>
-                </ol>
-              </div>
-              <div className="flex space-x-3 justify-center">
-                <Button onClick={startCamera} className="bg-primary text-white">
-                  Retry Camera Access
-                </Button>
-                <Button onClick={enableDemoMode} variant="outline">
-                  Try Demo Mode
-                </Button>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
-    <Card className="shadow-lg border-0 bg-white overflow-hidden">
+    <Card className="shadow-lg border-0">
       <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 border-b border-gray-100">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-3">
@@ -241,11 +149,20 @@ export default function VideoFeed() {
             Live Practice Session
           </h2>
           <div className="flex items-center space-x-4">
-            {/* Real-time AI Feedback Toggle */}
+            <div className="flex items-center space-x-2">
+              <Label htmlFor="demo-mode" className="text-sm font-medium text-gray-700">
+                Demo Mode
+              </Label>
+              <Switch
+                id="demo-mode"
+                checked={demoMode}
+                onCheckedChange={setDemoMode}
+                className="data-[state=checked]:bg-green-600"
+              />
+            </div>
             <div className="flex items-center space-x-2">
               <Label htmlFor="real-time-feedback" className="text-sm font-medium text-gray-700">
-                <Brain className="w-4 h-4 inline mr-1" />
-                Real-time AI Feedback
+                Real-time Feedback
               </Label>
               <Switch
                 id="real-time-feedback"
@@ -300,49 +217,42 @@ export default function VideoFeed() {
           {/* Real-time Feedback Overlays */}
           <div className="absolute inset-0">
             {/* Posture Indicator */}
-            {posture && (
-              <div className="absolute top-4 left-4">
-                <div className={`bg-opacity-90 text-white px-3 py-1.5 rounded-lg text-sm font-medium flex items-center space-x-2 ${
-                  posture === 'good' ? 'bg-secondary' : 'bg-warning'
-                }`}>
-                  <i className="fas fa-check-circle text-xs"></i>
-                  <span>{posture === 'good' ? 'Good Posture' : 'Improve Posture'}</span>
-                </div>
+            <div className="absolute top-4 left-4">
+              <div className={`px-3 py-1.5 rounded-full text-xs font-medium ${
+                posture === 'good' ? 'bg-green-100 text-green-800' :
+                posture === 'moderate' ? 'bg-yellow-100 text-yellow-800' :
+                'bg-red-100 text-red-800'
+              }`}>
+                Posture: {posture === 'good' ? 'Good' : posture === 'moderate' ? 'Fair' : 'Needs Work'}
               </div>
-            )}
-            
-            {/* Gesture Detection */}
-            {gesture && (
-              <div className="absolute top-4 right-4">
-                <div className="bg-accent bg-opacity-90 text-white px-3 py-1.5 rounded-lg text-sm font-medium flex items-center space-x-2">
-                  <i className="fas fa-hand-paper text-xs"></i>
-                  <span>{gesture === 'open' ? 'Open Gesture' : gesture === 'closed' ? 'Closed Gesture' : 'Neutral'}</span>
-                </div>
-              </div>
-            )}
+            </div>
             
             {/* Eye Contact Indicator */}
-            {eyeContact && (
-              <div className="absolute bottom-4 left-4">
-                <div className={`bg-opacity-90 text-white px-3 py-1.5 rounded-lg text-sm font-medium flex items-center space-x-2 ${
-                  eyeContact === 'good' ? 'bg-primary' : 'bg-warning'
-                }`}>
-                  <Eye className="w-3 h-3" />
-                  <span>{eyeContact === 'good' ? 'Good Eye Contact' : 'Maintain Eye Contact'}</span>
-                </div>
+            <div className="absolute top-4 right-4">
+              <div className={`px-3 py-1.5 rounded-full text-xs font-medium flex items-center space-x-1 ${
+                eyeContact === 'good' ? 'bg-green-100 text-green-800' :
+                eyeContact === 'moderate' ? 'bg-yellow-100 text-yellow-800' :
+                'bg-red-100 text-red-800'
+              }`}>
+                <Eye className="w-3 h-3" />
+                <span>Eye Contact: {eyeContact === 'good' ? 'Good' : eyeContact === 'moderate' ? 'Fair' : 'Poor'}</span>
               </div>
-            )}
+            </div>
             
-            {/* Volume Level */}
-            <div className="absolute bottom-4 right-4">
-              <div className="bg-gray-800 bg-opacity-75 text-white px-3 py-2 rounded-lg">
-                <div className="flex items-center space-x-2">
-                  <Volume2 className="w-3 h-3" />
-                  <div className="w-16 bg-gray-600 rounded-full h-1.5">
-                    <div 
-                      className="bg-secondary h-1.5 rounded-full transition-all duration-150" 
-                      style={{ width: `${volumeLevel}%` }}
-                    />
+            {/* Voice Analysis Overlay */}
+            <div className="absolute bottom-4 left-4">
+              <div className="bg-black bg-opacity-60 text-white px-3 py-2 rounded-lg">
+                <div className="flex items-center space-x-3 text-xs">
+                  <div className="flex items-center space-x-1">
+                    <Volume2 className="w-3 h-3" />
+                    <span>{Math.round(volumeLevel * 100)}%</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <Brain className="w-3 h-3" />
+                    <span>{speakingPace} WPM</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <span className="text-blue-300">Clarity: {Math.round(voiceClarity * 100)}%</span>
                   </div>
                 </div>
               </div>
@@ -404,7 +314,6 @@ export default function VideoFeed() {
             <Play className="w-4 h-4" />
             <span>New Session</span>
           </Button>
-        </div>
         </div>
       </CardContent>
     </Card>
