@@ -96,7 +96,7 @@ export default function Home() {
                 <Mic className="text-white w-5 h-5" />
               </div>
               <h1 className="text-xl font-bold gradient-text">
-                AI Speaking Coach
+                YapUp
               </h1>
             </div>
             <Link href="/dashboard">
@@ -118,9 +118,11 @@ export default function Home() {
           </Badge>
           
           <h1 className="text-5xl md:text-7xl font-display text-gray-900 mb-8 tracking-tight text-balance">
-            Master Your
             <span className="block gradient-text font-display">
-              Public Speaking
+              YapUp
+            </span>
+            <span className="text-4xl md:text-5xl block mt-4">
+              Master Your Public Speaking
             </span>
           </h1>
           
@@ -357,7 +359,7 @@ export default function Home() {
             <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
               <Mic className="text-white w-4 h-4" />
             </div>
-            <h3 className="text-xl font-bold">AI Speaking Coach</h3>
+            <h3 className="text-xl font-bold">YapUp</h3>
           </div>
           <p className="text-gray-400 mb-6">
             Empowering speakers worldwide with intelligent feedback and coaching.
