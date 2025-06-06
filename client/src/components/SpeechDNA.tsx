@@ -145,7 +145,7 @@ export default function SpeechDNA() {
       signature: "Start with WHY",
       difficulty: "intermediate",
       avatar: "🎯",
-      color: "bg-teal-600"
+      color: "bg-cyan-600"
     },
     {
       id: "amy-cuddy",
@@ -156,7 +156,7 @@ export default function SpeechDNA() {
       signature: "Fake it till you become it",
       difficulty: "intermediate",
       avatar: "💪",
-      color: "bg-purple-500"
+      color: "bg-cyan-600"
     },
     {
       id: "brene-brown",
@@ -167,7 +167,7 @@ export default function SpeechDNA() {
       signature: "Dare Greatly",
       difficulty: "intermediate",
       avatar: "💝",
-      color: "bg-rose-500"
+      color: "bg-cyan-600"
     },
     {
       id: "gary-vee",
@@ -178,7 +178,7 @@ export default function SpeechDNA() {
       signature: "Hustle and patience",
       difficulty: "beginner",
       avatar: "🔥",
-      color: "bg-red-500"
+      color: "bg-cyan-600"
     },
     {
       id: "ellen",
@@ -189,7 +189,7 @@ export default function SpeechDNA() {
       signature: "Be kind to one another",
       difficulty: "beginner",
       avatar: "💃",
-      color: "bg-pink-400"
+      color: "bg-cyan-600"
     },
     {
       id: "michelle-obama",
@@ -200,7 +200,7 @@ export default function SpeechDNA() {
       signature: "When they go low, we go high",
       difficulty: "intermediate",
       avatar: "✨",
-      color: "bg-emerald-500"
+      color: "bg-cyan-600"
     },
     {
       id: "gordon-ramsay",
@@ -211,7 +211,7 @@ export default function SpeechDNA() {
       signature: "This is absolutely brilliant!",
       difficulty: "advanced",
       avatar: "👨‍🍳",
-      color: "bg-orange-500"
+      color: "bg-cyan-600"
     }
   ];
 
@@ -475,7 +475,7 @@ export default function SpeechDNA() {
                     key={character.id}
                     className={`cursor-pointer transition-all hover:scale-105 ${
                       selectedPersona === character.id 
-                        ? 'ring-2 ring-purple-500 bg-purple-50' 
+                        ? 'ring-2 ring-cyan-500 bg-cyan-50' 
                         : 'hover:shadow-lg'
                     }`}
                     onClick={() => setSelectedPersona(character.id)}
@@ -509,7 +509,7 @@ export default function SpeechDNA() {
             <Card className="gradient-card purple-border">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <Target className="w-6 h-6 text-purple-600" />
+                  <Target className="w-6 h-6 text-cyan-600" />
                   <span className="gradient-text font-heading">
                     Training with {characters.find(c => c.id === selectedPersona)?.name}
                   </span>
