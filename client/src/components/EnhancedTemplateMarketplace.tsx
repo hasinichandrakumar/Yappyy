@@ -20,8 +20,30 @@ import {
   Briefcase,
   GraduationCap,
   Mic,
-  Award
+  Award,
+  FileText
 } from "lucide-react";
+
+// Helper function to replace template variables
+const replaceTemplateVariables = (
+  text: string, 
+  customInputs: { [key: string]: string }, 
+  defaultValues: { [key: string]: string }
+): string => {
+  let result = text;
+  
+  // Replace all [VARIABLE] patterns
+  const variables = text.match(/\[([^\]]+)\]/g);
+  if (variables) {
+    variables.forEach(variable => {
+      const key = variable.slice(1, -1); // Remove brackets
+      const value = customInputs[key] || defaultValues[key] || key;
+      result = result.replace(variable, value);
+    });
+  }
+  
+  return result;
+};
 
 interface SpeechTemplate {
   id: string;
@@ -874,24 +896,47 @@ export default function EnhancedTemplateMarketplace() {
               </div>
             </div>
 
-            {/* Preview */}
+            {/* Live Preview with Custom Content */}
             <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
               <h3 className="font-semibold text-gray-900 mb-2">Live Preview</h3>
-              <div className="space-y-2 text-sm">
-                <div>
-                  <strong>Hook:</strong> {selectedTemplate.structure.hook}
+              <div className="space-y-4 text-sm">
+                <div className="p-3 bg-white rounded border-l-4 border-blue-500">
+                  <strong className="text-blue-700">Hook:</strong>
+                  <p className="mt-1">{replaceTemplateVariables(selectedTemplate.structure.hook, customInputs, selectedTemplate.fillInBlanks)}</p>
                 </div>
-                <div>
-                  <strong>Body Structure:</strong>
-                  <ul className="list-disc list-inside ml-4 mt-1">
+                <div className="p-3 bg-white rounded border-l-4 border-green-500">
+                  <strong className="text-green-700">Body Structure:</strong>
+                  <ul className="list-disc list-inside ml-4 mt-2 space-y-1">
                     {selectedTemplate.structure.body.map((point, index) => (
-                      <li key={index}>{point}</li>
+                      <li key={index}>{replaceTemplateVariables(point, customInputs, selectedTemplate.fillInBlanks)}</li>
                     ))}
                   </ul>
                 </div>
-                <div>
-                  <strong>Call to Action:</strong> {selectedTemplate.structure.cta}
+                <div className="p-3 bg-white rounded border-l-4 border-purple-500">
+                  <strong className="text-purple-700">Call to Action:</strong>
+                  <p className="mt-1">{replaceTemplateVariables(selectedTemplate.structure.cta, customInputs, selectedTemplate.fillInBlanks)}</p>
                 </div>
+              </div>
+            </div>
+
+            {/* Full Speech Output */}
+            <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <h3 className="font-semibold text-gray-900 mb-2 flex items-center">
+                <FileText className="h-4 w-4 mr-2 text-gray-600" />
+                Complete Speech
+              </h3>
+              <div className="prose prose-sm max-w-none">
+                <p className="mb-4 text-gray-800 leading-relaxed">
+                  {replaceTemplateVariables(selectedTemplate.structure.hook, customInputs, selectedTemplate.fillInBlanks)}
+                </p>
+                {selectedTemplate.structure.body.map((point, index) => (
+                  <p key={index} className="mb-3 text-gray-700 leading-relaxed">
+                    {replaceTemplateVariables(point, customInputs, selectedTemplate.fillInBlanks)}
+                  </p>
+                ))}
+                <p className="mt-4 text-gray-800 font-medium">
+                  {replaceTemplateVariables(selectedTemplate.structure.cta, customInputs, selectedTemplate.fillInBlanks)}
+                </p>
               </div>
             </div>
 
