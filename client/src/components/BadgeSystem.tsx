@@ -112,8 +112,8 @@ export default function BadgeSystem() {
           "Advanced Clarity feedback layer",
           "Professional certificate for portfolio"
         ],
-        isUnlocked: Math.random() > 0.8,
-        progress: Math.floor(Math.random() * 100),
+        isUnlocked: Math.random() > 0.95,
+        progress: Math.floor(Math.random() * 15),
         rarity: "rare"
       },
       {
@@ -134,8 +134,8 @@ export default function BadgeSystem() {
           "Quick-pitch challenge access",
           "Networking event preparation tools"
         ],
-        isUnlocked: Math.random() > 0.5,
-        progress: Math.floor(Math.random() * 100),
+        isUnlocked: Math.random() > 0.85,
+        progress: Math.floor(Math.random() * 25),
         rarity: "common"
       },
       {
@@ -146,18 +146,18 @@ export default function BadgeSystem() {
         icon: <Clock className="w-6 h-6" />,
         color: "from-indigo-400 to-indigo-600",
         criteria: [
-          "Use 5+ strategic pauses per speech",
-          "No awkward or uncomfortable silence",
-          "Perfect timing for dramatic effect",
-          "Audience engagement during pauses"
+          "Use 15+ strategic pauses per speech with perfect timing",
+          "Zero awkward or uncomfortable silence across 12+ sessions",
+          "Masterful timing for dramatic effect (95%+ effectiveness)",
+          "Sustained audience engagement during all pauses"
         ],
         benefits: [
           "Advanced timing techniques unlock",
           "Dramatic speaking module access",
           "Pause effectiveness analytics"
         ],
-        isUnlocked: Math.random() > 0.7,
-        progress: Math.floor(Math.random() * 100),
+        isUnlocked: Math.random() > 0.92,
+        progress: Math.floor(Math.random() * 18),
         rarity: "rare"
       },
 
@@ -170,18 +170,18 @@ export default function BadgeSystem() {
         icon: <Shield className="w-6 h-6" />,
         color: "from-stone-400 to-stone-600",
         criteria: [
-          "Clear intro-body-conclusion structure",
-          "Logical flow between sections",
-          "Strong transitions throughout",
-          "Coherent argument progression"
+          "Flawless intro-body-conclusion structure across 15+ speeches",
+          "Perfect logical flow between all sections (98%+ coherence)",
+          "Masterful transitions throughout (zero awkward shifts)",
+          "Exceptional argument progression with advanced rhetorical techniques"
         ],
         benefits: [
           "Advanced structure templates",
           "Speech outline generator",
           "Professional presentation tools"
         ],
-        isUnlocked: Math.random() > 0.4,
-        progress: Math.floor(Math.random() * 100),
+        isUnlocked: Math.random() > 0.80,
+        progress: Math.floor(Math.random() * 30),
         rarity: "common"
       },
       {
@@ -192,18 +192,18 @@ export default function BadgeSystem() {
         icon: <Sparkles className="w-6 h-6" />,
         color: "from-pink-400 to-pink-600",
         criteria: [
-          "Attention-grabbing opening in every speech",
-          "Use facts, questions, or stories effectively",
-          "Immediate audience engagement",
-          "Strong first impression metrics"
+          "Masterful attention-grabbing opening in 20+ consecutive speeches",
+          "Expert use of facts, questions, or stories (95%+ effectiveness)",
+          "Instant audience engagement within first 10 seconds",
+          "Exceptional first impression metrics across all attempts"
         ],
         benefits: [
           "Opening statement library",
           "Hook effectiveness analyzer",
           "Attention-grabbing techniques guide"
         ],
-        isUnlocked: Math.random() > 0.6,
-        progress: Math.floor(Math.random() * 100),
+        isUnlocked: Math.random() > 0.88,
+        progress: Math.floor(Math.random() * 22),
         rarity: "rare"
       },
 
