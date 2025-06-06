@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 
 interface ScriptTemplate {
   id: string;
@@ -891,6 +892,42 @@ Thank you for your time and attention.`;
                       onChange={(e) => setAiPrompt(e.target.value)}
                       className="mt-1 min-h-32"
                     />
+                  </div>
+
+                  {/* Roleplay Toggle */}
+                  <div className="space-y-3 p-3 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <Label htmlFor="roleplay-toggle" className="text-sm font-medium">AI Roleplay Mode</Label>
+                        <p className="text-xs text-gray-600">Have AI adopt a famous speaker's style</p>
+                      </div>
+                      <Switch
+                        id="roleplay-toggle"
+                        checked={useRoleplay}
+                        onCheckedChange={setUseRoleplay}
+                      />
+                    </div>
+                    
+                    {useRoleplay && (
+                      <div>
+                        <Label htmlFor="role-select">Choose Speaking Persona</Label>
+                        <Select value={selectedRole} onValueChange={setSelectedRole}>
+                          <SelectTrigger className="mt-1">
+                            <SelectValue placeholder="Select a famous speaker to emulate" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {roleplayOptions.map(role => (
+                              <SelectItem key={role.id} value={role.id}>
+                                <div className="flex flex-col">
+                                  <span className="font-medium">{role.name}</span>
+                                  <span className="text-xs text-gray-500">{role.description}</span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
