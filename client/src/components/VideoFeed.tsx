@@ -11,6 +11,7 @@ export default function VideoFeed() {
   const [isRecording, setIsRecording] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState<string>("");
+  const [demoMode, setDemoMode] = useState<boolean>(false);
 
   const { 
     posture, 
@@ -35,18 +36,63 @@ export default function VideoFeed() {
 
   const startCamera = async () => {
     try {
+      // Check if media devices are available
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setError("Media devices not supported in this browser. Please use a modern browser like Chrome, Firefox, or Safari.");
+        return;
+      }
+
       const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { width: 1280, height: 720 },
-        audio: true
+        video: { 
+          width: { ideal: 1280 }, 
+          height: { ideal: 720 },
+          facingMode: 'user'
+        },
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true
+        }
       });
       
       setStream(mediaStream);
+      setError(""); // Clear any previous errors
+      
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
       }
-    } catch (err) {
-      setError("Failed to access camera and microphone. Please check permissions.");
+    } catch (err: any) {
       console.error("Error accessing media devices:", err);
+      
+      let errorMessage = "Failed to access camera and microphone. ";
+      
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        errorMessage += "Please allow camera and microphone permissions in your browser settings and refresh the page.";
+      } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+        errorMessage += "No camera or microphone found. Please connect your devices and try again.";
+      } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+        errorMessage += "Camera or microphone is already in use by another application.";
+      } else if (err.name === 'OverconstrainedError') {
+        errorMessage += "Camera resolution not supported. Trying with lower quality...";
+        // Try with lower constraints
+        try {
+          const fallbackStream = await navigator.mediaDevices.getUserMedia({
+            video: { width: 640, height: 480 },
+            audio: true
+          });
+          setStream(fallbackStream);
+          setError("");
+          if (videoRef.current) {
+            videoRef.current.srcObject = fallbackStream;
+          }
+          return;
+        } catch (fallbackErr) {
+          errorMessage += " Fallback also failed.";
+        }
+      } else {
+        errorMessage += "Please check your browser permissions and try again.";
+      }
+      
+      setError(errorMessage);
     }
   };
 
@@ -81,15 +127,39 @@ export default function VideoFeed() {
     stopVoiceAnalysis();
   };
 
-  if (error) {
+  const enableDemoMode = () => {
+    setDemoMode(true);
+    setError("");
+    // Start simulated analysis in demo mode
+    startVoiceAnalysis();
+  };
+
+  if (error && !demoMode) {
     return (
       <Card className="bg-surface rounded-xl shadow-sm border border-gray-200">
         <CardContent className="p-6">
-          <div className="text-center text-red-600">
-            <p>{error}</p>
-            <Button onClick={startCamera} className="mt-4">
-              Retry Camera Access
-            </Button>
+          <div className="text-center">
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">Camera Access Required</h3>
+            <p className="text-red-600 mb-4">{error}</p>
+            <div className="space-y-3">
+              <div>
+                <h4 className="font-medium text-gray-900 mb-2">Steps to enable camera access:</h4>
+                <ol className="text-sm text-gray-600 text-left space-y-1">
+                  <li>1. Click the camera icon in your browser's address bar</li>
+                  <li>2. Select "Allow" for both camera and microphone</li>
+                  <li>3. Refresh this page</li>
+                  <li>4. If still blocked, check your browser settings</li>
+                </ol>
+              </div>
+              <div className="flex space-x-3 justify-center">
+                <Button onClick={startCamera} className="bg-primary text-white">
+                  Retry Camera Access
+                </Button>
+                <Button onClick={enableDemoMode} variant="outline">
+                  Try Demo Mode
+                </Button>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -113,13 +183,27 @@ export default function VideoFeed() {
         
         {/* Video Feed Area */}
         <div className="relative bg-gray-900 rounded-lg overflow-hidden aspect-video">
-          <video
-            ref={videoRef}
-            autoPlay
-            muted
-            playsInline
-            className="w-full h-full object-cover"
-          />
+          {demoMode ? (
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-900 to-purple-900">
+              <div className="text-center text-white">
+                <div className="w-24 h-24 mx-auto mb-4 rounded-full border-4 border-white/30 flex items-center justify-center">
+                  <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-full bg-white/40"></div>
+                  </div>
+                </div>
+                <p className="text-lg font-medium">Demo Mode</p>
+                <p className="text-sm opacity-75">Camera simulation active</p>
+              </div>
+            </div>
+          ) : (
+            <video
+              ref={videoRef}
+              autoPlay
+              muted
+              playsInline
+              className="w-full h-full object-cover"
+            />
+          )}
           
           {/* Hidden canvas for frame processing */}
           <canvas
