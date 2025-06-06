@@ -68,7 +68,10 @@
 
   body {
     @apply font-sans antialiased text-foreground;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+    letter-spacing: -0.01em;
     background: linear-gradient(135deg, 
       hsl(250, 100%, 98%) 0%, 
       hsl(240, 100%, 95%) 25%, 
@@ -180,5 +183,49 @@
 
   .dark .purple-glow {
     box-shadow: 0 0 30px hsla(270, 90%, 70%, 0.2);
+  }
+
+  /* Typography utilities */
+  .font-display {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+
+  .font-heading {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.25;
+  }
+
+  .font-body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 400;
+    letter-spacing: -0.005em;
+    line-height: 1.6;
+  }
+
+  .font-medium {
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+  .font-semibold {
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .tracking-tight {
+    letter-spacing: -0.025em;
+  }
+
+  .tracking-wide {
+    letter-spacing: 0.025em;
   }
 }

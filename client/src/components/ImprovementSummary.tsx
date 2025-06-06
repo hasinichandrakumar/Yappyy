@@ -256,7 +256,7 @@ export default function ImprovementSummary() {
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Brain className="w-6 h-6 text-purple-600" />
-              <span className="text-purple-900">AI Improvement Summary</span>
+              <span className="text-purple-900 font-heading tracking-tight">AI Improvement Summary</span>
             </div>
             <Button 
               onClick={generateImprovementPlan}

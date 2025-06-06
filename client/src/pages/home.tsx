@@ -98,21 +98,21 @@ export default function Home() {
             Powered by Advanced AI
           </Badge>
           
-          <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-8 leading-tight">
+          <h1 className="text-5xl md:text-7xl font-display text-gray-900 mb-8 tracking-tight text-balance">
             Master Your
-            <span className="block bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+            <span className="block gradient-text font-display">
               Public Speaking
             </span>
           </h1>
           
-          <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl font-body text-gray-600 mb-12 max-w-3xl mx-auto text-balance">
             Transform your presentation skills with AI-powered real-time feedback, intelligent coaching, 
             and personalized improvement plans tailored to your speaking goals.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
             <Link href="/dashboard">
-              <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-xl px-8 py-4 text-lg">
+              <Button size="lg" className="gradient-bg text-white hover:opacity-90 shadow-xl px-8 py-4 text-lg font-semibold tracking-wide purple-glow">
                 Start Your Free Session
                 <PlayCircle className="w-5 h-5 ml-3" />
               </Button>

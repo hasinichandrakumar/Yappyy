@@ -26,7 +26,7 @@ export default function Dashboard() {
               <div className="w-8 h-8 gradient-bg rounded-lg flex items-center justify-center purple-glow">
                 <MicOff className="text-white w-4 h-4" />
               </div>
-              <h1 className="text-xl font-semibold gradient-text">AI Speaking Coach</h1>
+              <h1 className="text-xl font-heading gradient-text tracking-tight">AI Speaking Coach</h1>
             </div>
             <div className="flex items-center space-x-4">
               <button className="text-purple-600 hover:text-purple-700 transition-colors">
