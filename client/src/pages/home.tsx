@@ -110,11 +110,26 @@ export default function Home() {
             and personalized improvement plans tailored to your speaking goals.
           </p>
           
-          <div className="mb-12 p-6 bg-white/80 backdrop-blur-sm rounded-2xl border border-purple-200 max-w-2xl mx-auto">
+          <div className="mb-12 p-8 bg-white/90 backdrop-blur-sm rounded-2xl border border-purple-200 max-w-3xl mx-auto purple-glow">
             <div className="text-center">
-              <div className="text-4xl font-display gradient-text mb-2">55%</div>
-              <p className="text-lg font-medium text-gray-800 mb-1">Communication is 55% non-verbal.</p>
-              <p className="text-lg font-semibold gradient-text">We coach 100% of you.</p>
+              <div className="grid grid-cols-3 gap-8 mb-4">
+                <div>
+                  <div className="text-3xl font-display gradient-text mb-1">55%</div>
+                  <p className="text-sm font-medium text-gray-700">Body Language</p>
+                </div>
+                <div>
+                  <div className="text-3xl font-display gradient-text mb-1">38%</div>
+                  <p className="text-sm font-medium text-gray-700">Tone of Voice</p>
+                </div>
+                <div>
+                  <div className="text-3xl font-display gradient-text mb-1">7%</div>
+                  <p className="text-sm font-medium text-gray-700">Words</p>
+                </div>
+              </div>
+              <div className="border-t border-purple-200 pt-4">
+                <p className="text-lg font-semibold gradient-text mb-1">Communication is 93% non-verbal.</p>
+                <p className="text-xl font-display text-gray-800">We coach 100% of you.</p>
+              </div>
             </div>
           </div>
           
