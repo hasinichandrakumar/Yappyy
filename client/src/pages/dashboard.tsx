@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import VideoFeed from "@/components/VideoFeed";
 import RealTimeMetrics from "@/components/RealTimeMetrics";
-import SpeechTranscript from "@/components/SpeechTranscript";
-import CoachingTips from "@/components/CoachingTips";
+import LiveTranscript from "@/components/LiveTranscript";
+import SmartAIFeedback from "@/components/SmartAIFeedback";
 import SessionStats from "@/components/SessionStats";
 import SessionHistory from "@/components/SessionHistory";
 import DetailedAnalysis from "@/components/DetailedAnalysis";
@@ -123,13 +123,13 @@ export default function Dashboard() {
               {/* Left Column - Video Feed */}
               <div className="lg:col-span-2 space-y-6">
                 <VideoFeed />
-                <SpeechTranscript />
+                <LiveTranscript />
               </div>
               
               {/* Right Column - Live Feedback Sidebar */}
               <div className="lg:col-span-2 space-y-6">
                 <RealTimeMetrics />
-                <CoachingTips />
+                <SmartAIFeedback />
               </div>
             </div>
             

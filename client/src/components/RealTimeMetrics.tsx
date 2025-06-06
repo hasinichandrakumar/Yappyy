@@ -26,6 +26,10 @@ export default function RealTimeMetrics() {
     isListening 
   } = useSpeechRecognition();
 
+  // Simulated metrics for voice clarity and confidence
+  const [voiceClarity, setVoiceClarity] = useState(82);
+  const [confidenceScore, setConfidenceScore] = useState(75);
+
   // Live updating metrics with real-time simulation
   const [liveMetrics, setLiveMetrics] = useState({
     eyeContact: 78,
@@ -38,23 +42,29 @@ export default function RealTimeMetrics() {
     articulation: 88
   });
 
-  // Update metrics in real-time
+  // Update simulated metrics in real-time when listening
   useEffect(() => {
+    if (!isListening) return;
+
     const interval = setInterval(() => {
       setLiveMetrics(prev => ({
         eyeContact: Math.max(40, Math.min(95, prev.eyeContact + (Math.random() - 0.5) * 3)),
         posture: Math.max(60, Math.min(98, prev.posture + (Math.random() - 0.5) * 2)),
         gestureFrequency: Math.max(2, Math.min(12, prev.gestureFrequency + (Math.random() - 0.5) * 0.5)),
         energyLevel: Math.max(45, Math.min(95, prev.energyLevel + (Math.random() - 0.5) * 4)),
-        fillerWords: Math.max(0, Math.min(8, prev.fillerWords + (Math.random() - 0.5) * 0.3)),
+        fillerWords: fillerWords.length,
         pauseQuality: Math.max(50, Math.min(95, prev.pauseQuality + (Math.random() - 0.5) * 2)),
         volume: Math.max(40, Math.min(90, prev.volume + (Math.random() - 0.5) * 3)),
         articulation: Math.max(65, Math.min(98, prev.articulation + (Math.random() - 0.5) * 2))
       }));
+
+      // Update voice clarity and confidence based on speech metrics
+      setVoiceClarity(prev => Math.max(60, Math.min(95, prev + (Math.random() - 0.5) * 2)));
+      setConfidenceScore(prev => Math.max(50, Math.min(90, prev + (Math.random() - 0.5) * 3)));
     }, 2000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [isListening, fillerWords.length]);
 
   const getStatusBadge = (value: number, thresholds: { good: number, excellent: number }) => {
     if (value >= thresholds.excellent) return { label: "Excellent", color: "bg-green-100 text-green-800" };
@@ -126,12 +136,12 @@ export default function RealTimeMetrics() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <MetricCard
             title="Speaking Pace"
-            value={speakingPace}
+            value={wpm}
             unit="WPM"
             icon={Timer}
-            progress={Math.min((speakingPace / 160) * 100, 100)}
-            status={getStatusBadge(speakingPace, { good: 120, excellent: 140 })}
-            tip="Aim for 120-160 WPM for optimal comprehension"
+            progress={Math.min((wpm / 200) * 100, 100)}
+            status={getStatusBadge(wpm, { good: 140, excellent: 180 })}
+            tip="Ideal range: 140-180 WPM for engagement"
           />
           
           <MetricCard
