@@ -68,8 +68,8 @@ export default function RealTimeMetrics() {
 
   const getStatusBadge = (value: number, thresholds: { good: number, excellent: number }) => {
     if (value >= thresholds.excellent) return { label: "Excellent", color: "bg-green-100 text-green-800" };
-    if (value >= thresholds.good) return { label: "Good", color: "bg-blue-100 text-blue-800" };
-    return { label: "Needs Work", color: "bg-yellow-100 text-yellow-800" };
+    if (value >= thresholds.good) return { label: "Good", color: "bg-cyan-100 text-cyan-800" };
+    return { label: "Needs Work", color: "bg-cyan-100 text-cyan-600" };
   };
 
   const MetricCard = ({ 
@@ -91,23 +91,28 @@ export default function RealTimeMetrics() {
   }) => (
     <Card className="border border-gray-200 hover:shadow-md transition-shadow">
       <CardContent className="p-4">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center space-x-2">
-            <Icon className="w-4 h-4 text-cyan-600" />
-            <h3 className="text-sm font-medium text-gray-700">{title}</h3>
-          </div>
-          {status && (
+        {/* Status badge at the top */}
+        {status && (
+          <div className="flex justify-end mb-2">
             <Badge className={`text-xs ${status.color}`}>
               {status.label}
             </Badge>
-          )}
+          </div>
+        )}
+        
+        {/* Title with icon */}
+        <div className="flex items-center space-x-2 mb-3">
+          <Icon className="w-4 h-4 text-cyan-600" />
+          <h3 className="text-sm font-medium text-gray-700">{title}</h3>
         </div>
         
+        {/* Value */}
         <div className="text-2xl font-bold text-gray-900 mb-2">
           {typeof value === 'number' ? Math.round(value) : value}
           {unit && <span className="text-sm text-gray-500 ml-1">{unit}</span>}
         </div>
         
+        {/* Progress bar */}
         {progress !== undefined && (
           <div className="space-y-2">
             <Progress value={Math.round(progress)} className="h-2" />
@@ -115,6 +120,7 @@ export default function RealTimeMetrics() {
           </div>
         )}
         
+        {/* Tip */}
         {tip && (
           <p className="text-xs text-gray-600 mt-2 italic">{tip}</p>
         )}
@@ -207,8 +213,8 @@ export default function RealTimeMetrics() {
             status={liveMetrics.fillerWords <= 2 ? 
               { label: "Excellent", color: "bg-green-100 text-green-800" } :
               liveMetrics.fillerWords <= 4 ?
-              { label: "Good", color: "bg-blue-100 text-blue-800" } :
-              { label: "Reduce", color: "bg-yellow-100 text-yellow-800" }
+              { label: "Good", color: "bg-cyan-100 text-cyan-800" } :
+              { label: "Reduce", color: "bg-cyan-100 text-cyan-600" }
             }
             tip="Keep under 2 per minute for polished delivery"
           />

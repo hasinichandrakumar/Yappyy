@@ -28,7 +28,7 @@ interface AudienceRole {
 }
 
 export default function AIPracticeRoleplay() {
-  const { wordCount, sessionTime } = useSpeechRecognition();
+  const { wordCount } = useSpeechRecognition();
   
   const [selectedRole, setSelectedRole] = useState<string>("");
   const [isSessionActive, setIsSessionActive] = useState<boolean>(false);
@@ -174,7 +174,7 @@ export default function AIPracticeRoleplay() {
                 Session Active
               </Badge>
               <div className="text-sm space-y-1">
-                <div>Duration: {Math.floor(sessionTime / 60)}:{(sessionTime % 60).toString().padStart(2, '0')}</div>
+                <div>Duration: 0:00</div>
                 <div>Words: {wordCount}</div>
               </div>
             </div>

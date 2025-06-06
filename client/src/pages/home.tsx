@@ -241,7 +241,7 @@ export default function Home() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="space-y-8">
               <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-orange-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
                   <Shield className="w-6 h-6 text-white" />
                 </div>
                 <div>
@@ -254,7 +254,7 @@ export default function Home() {
               </div>
 
               <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
                   <Lightbulb className="w-6 h-6 text-white" />
                 </div>
                 <div>
@@ -291,12 +291,12 @@ export default function Home() {
                   and unlock opportunities through the power of masterful communication."
                 </blockquote>
                 <div className="mt-8 grid grid-cols-2 gap-4 text-center">
-                  <div className="bg-blue-50 rounded-lg p-4">
-                    <div className="text-2xl font-bold text-blue-600">10M+</div>
+                  <div className="bg-cyan-50 rounded-lg p-4">
+                    <div className="text-2xl font-bold text-cyan-600">10M+</div>
                     <div className="text-sm text-gray-600">Lives Transformed</div>
                   </div>
-                  <div className="bg-purple-50 rounded-lg p-4">
-                    <div className="text-2xl font-bold text-purple-600">95%</div>
+                  <div className="bg-cyan-50 rounded-lg p-4">
+                    <div className="text-2xl font-bold text-cyan-600">95%</div>
                     <div className="text-sm text-gray-600">Confidence Boost</div>
                   </div>
                 </div>
