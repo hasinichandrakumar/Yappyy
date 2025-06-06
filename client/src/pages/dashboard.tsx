@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bell, MicOff, User, BarChart3, Eye, Brain, Star } from "lucide-react";
+import { Bell, MicOff, User, BarChart3, Eye, Brain, Star, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import VideoFeed from "@/components/VideoFeed";
@@ -13,6 +13,7 @@ import BodyLanguageAnalyzer from "@/components/BodyLanguageAnalyzer";
 import AdvancedSpeechAnalysis from "@/components/AdvancedSpeechAnalysis";
 import ImprovementSummary from "@/components/ImprovementSummary";
 import SpeechDNA from "@/components/SpeechDNA";
+import SpeechROIAnalyzer from "@/components/SpeechROIAnalyzer";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview");
