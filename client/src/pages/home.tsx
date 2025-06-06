@@ -173,42 +173,37 @@ export default function Home() {
           </motion.div>
           
           <motion.h1 
-            className="text-5xl md:text-7xl font-display text-gray-900 mb-8 tracking-tight text-balance"
+            className="mb-8 tracking-tight text-balance"
             initial={{ y: 100, opacity: 0 }}
             animate={isHeroInView ? { y: 0, opacity: 1 } : {}}
             transition={{ duration: 1, delay: 0.4 }}
           >
             <motion.span 
-              className="block yapup-gradient font-display"
-              animate={{ 
-                textShadow: [
-                  "0 0 20px rgba(6, 182, 212, 0.5)",
-                  "0 0 40px rgba(6, 182, 212, 0.8)",
-                  "0 0 20px rgba(6, 182, 212, 0.5)"
-                ]
-              }}
-              transition={{ duration: 3, repeat: Infinity }}
+              className="block hero-title floating-text"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={isHeroInView ? { opacity: 1, scale: 1 } : {}}
+              transition={{ duration: 1.2, delay: 0.6 }}
             >
               YapUp
             </motion.span>
             <motion.span 
-              className="text-4xl md:text-5xl block mt-4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.8 }}
+              className="hero-subtitle block mt-6"
+              initial={{ opacity: 0, y: 30 }}
+              animate={isHeroInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ delay: 1.0, duration: 0.8 }}
             >
-              Master Your Public Speaking
+              Master Your <span className="highlight-word">Public Speaking</span>
             </motion.span>
           </motion.h1>
           
           <motion.p 
-            className="text-xl font-body text-gray-600 mb-8 max-w-3xl mx-auto text-balance"
+            className="creative-text mb-8 max-w-3xl mx-auto text-balance"
             initial={{ y: 50, opacity: 0 }}
             animate={isHeroInView ? { y: 0, opacity: 1 } : {}}
             transition={{ duration: 0.8, delay: 0.6 }}
           >
-            Transform your presentation skills with AI-powered real-time feedback, intelligent coaching, 
-            and personalized improvement plans tailored to your speaking goals.
+            Transform your presentation skills with <span className="highlight-word">AI-powered</span> real-time feedback, intelligent coaching, 
+            and personalized improvement plans tailored to your <span className="highlight-word">speaking goals</span>.
           </motion.p>
           
           <motion.div 
@@ -365,28 +360,20 @@ export default function Home() {
             transition={{ duration: 0.8 }}
           >
             <motion.h2 
-              className="text-4xl font-bold text-gray-900 mb-4"
-              animate={{
-                backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
-              }}
-              transition={{ duration: 5, repeat: Infinity }}
-              style={{
-                background: "linear-gradient(-45deg, #0891b2, #06b6d4, #22d3ee, #67e8f9)",
-                backgroundSize: "300% 300%",
-                backgroundClip: "text",
-                WebkitBackgroundClip: "text",
-                color: "transparent",
-              }}
+              className="feature-title mb-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={isFeaturesInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.8 }}
             >
-              Advanced AI-Powered Features
+              Advanced <span className="highlight-word">AI-Powered</span> Features
             </motion.h2>
             <motion.p 
-              className="text-xl text-gray-600 max-w-3xl mx-auto"
+              className="creative-text max-w-3xl mx-auto"
               initial={{ opacity: 0 }}
               animate={isFeaturesInView ? { opacity: 1 } : {}}
               transition={{ duration: 0.8, delay: 0.3 }}
             >
-              Our intelligent coaching system provides comprehensive feedback across every aspect of your presentation.
+              Our <span className="highlight-word">intelligent coaching</span> system provides comprehensive feedback across every aspect of your presentation.
             </motion.p>
           </motion.div>
 
@@ -561,11 +548,11 @@ export default function Home() {
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Tailored for Every Speaking Scenario
+            <h2 className="feature-title mb-4">
+              Tailored for Every <span className="highlight-word">Speaking Scenario</span>
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Get purpose-specific feedback and coaching for any type of presentation or speech.
+            <p className="creative-text max-w-3xl mx-auto">
+              Get purpose-specific feedback and coaching for any type of <span className="highlight-word">presentation</span> or speech.
             </p>
           </div>
 
@@ -588,11 +575,11 @@ export default function Home() {
       <section className="py-20 bg-gradient-to-r from-cyan-600 via-blue-600 to-teal-600">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <Award className="w-16 h-16 mx-auto mb-8 text-white/80" />
-          <h2 className="text-4xl font-bold text-white mb-6">
-            Ready to Transform Your Speaking Skills?
+          <h2 className="text-4xl font-bold text-white mb-6 floating-text">
+            Ready to Transform Your <span className="bg-white/20 px-3 py-1 rounded-lg">Speaking Skills</span>?
           </h2>
           <p className="text-xl text-white/90 mb-12 leading-relaxed">
-            Join thousands of speakers who have improved their presentation skills with our AI-powered coaching platform.
+            Join thousands of speakers who have improved their presentation skills with our <span className="bg-white/20 px-2 py-1 rounded">AI-powered coaching</span> platform.
           </p>
           <Link href="/dashboard">
             <Button size="lg" className="bg-white text-cyan-600 hover:bg-gray-100 shadow-xl px-12 py-4 text-lg font-semibold">
