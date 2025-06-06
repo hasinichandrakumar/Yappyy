@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
+import { useVoiceAnalysis } from "@/hooks/useVoiceAnalysis";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -26,9 +27,14 @@ export default function RealTimeMetrics() {
     isListening 
   } = useSpeechRecognition();
 
-  // Simulated metrics for voice clarity and confidence
-  const [voiceClarity, setVoiceClarity] = useState(82);
-  const [confidenceScore, setConfidenceScore] = useState(75);
+  const { 
+    voiceClarity, 
+    confidenceScore, 
+    volumeLevel,
+    startVoiceAnalysis,
+    stopVoiceAnalysis,
+    updateWordCount 
+  } = useVoiceAnalysis();
 
   // Live updating metrics with real-time simulation
   const [liveMetrics, setLiveMetrics] = useState({
@@ -58,13 +64,21 @@ export default function RealTimeMetrics() {
         articulation: Math.max(65, Math.min(98, prev.articulation + (Math.random() - 0.5) * 2))
       }));
 
-      // Update voice clarity and confidence based on speech metrics
-      setVoiceClarity(prev => Math.max(60, Math.min(95, prev + (Math.random() - 0.5) * 2)));
-      setConfidenceScore(prev => Math.max(50, Math.min(90, prev + (Math.random() - 0.5) * 3)));
+      // Update word count for voice analysis
+      updateWordCount(wordCount);
     }, 2000);
 
     return () => clearInterval(interval);
-  }, [isListening, fillerWords.length]);
+  }, [isListening, fillerWords.length, wordCount, updateWordCount]);
+
+  // Start/stop voice analysis with speech recognition
+  useEffect(() => {
+    if (isListening) {
+      startVoiceAnalysis();
+    } else {
+      stopVoiceAnalysis();
+    }
+  }, [isListening, startVoiceAnalysis, stopVoiceAnalysis]);
 
   const getStatusBadge = (value: number, thresholds: { good: number, excellent: number }) => {
     if (value >= thresholds.excellent) return { label: "Excellent", color: "bg-green-100 text-green-800" };
@@ -114,9 +128,15 @@ export default function RealTimeMetrics() {
         
         {/* Progress bar, centered */}
         {progress !== undefined && (
-          <div className="space-y-2">
+          <div className="space-y-3">
+            <div className="flex justify-between items-center text-xs text-gray-500 mb-1">
+              <span>0%</span>
+              <span>100%</span>
+            </div>
             <Progress value={Math.round(progress)} className="h-2" />
-            <p className="text-xs text-gray-500">{Math.round(progress)}% optimal</p>
+            <div className="text-center">
+              <p className="text-xs text-gray-600 font-medium">{Math.round(progress)}% optimal</p>
+            </div>
           </div>
         )}
         

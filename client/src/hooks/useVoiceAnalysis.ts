@@ -56,7 +56,47 @@ export function useVoiceAnalysis() {
         const averageVolume = sum / bufferLength;
         const volumeLevel = Math.min((averageVolume / 128) * 100, 100);
         
-        // Simulate other metrics based on audio analysis
+        // Calculate voice clarity based on frequency distribution
+        const clarityAnalysis = () => {
+          // Human speech fundamental frequencies typically range from 85-255 Hz (male) and 165-265 Hz (female)
+          // Important consonant frequencies are in 2-8 kHz range
+          const lowFreqs = dataArray.slice(0, Math.floor(bufferLength * 0.1)); // ~0-1 kHz
+          const speechFreqs = dataArray.slice(Math.floor(bufferLength * 0.1), Math.floor(bufferLength * 0.4)); // ~1-4 kHz
+          const consonantFreqs = dataArray.slice(Math.floor(bufferLength * 0.2), Math.floor(bufferLength * 0.7)); // ~2-7 kHz
+          
+          const lowAvg = lowFreqs.reduce((acc, val) => acc + val, 0) / lowFreqs.length;
+          const speechAvg = speechFreqs.reduce((acc, val) => acc + val, 0) / speechFreqs.length;
+          const consonantAvg = consonantFreqs.reduce((acc, val) => acc + val, 0) / consonantFreqs.length;
+          
+          // Calculate signal-to-noise ratio for clarity
+          const signalStrength = Math.max(speechAvg, consonantAvg);
+          const noiseLevel = lowAvg;
+          const snr = noiseLevel > 0 ? signalStrength / noiseLevel : signalStrength;
+          
+          // Calculate frequency distribution balance
+          const totalEnergy = dataArray.reduce((acc, val) => acc + val, 0);
+          const speechRatio = totalEnergy > 0 ? (speechAvg * speechFreqs.length) / totalEnergy : 0;
+          const consonantRatio = totalEnergy > 0 ? (consonantAvg * consonantFreqs.length) / totalEnergy : 0;
+          
+          // Combine metrics for overall clarity score
+          const snrScore = Math.min(snr * 20, 50); // SNR contribution (0-50)
+          const balanceScore = (speechRatio + consonantRatio) * 100; // Frequency balance (0-50)
+          
+          return Math.min(Math.max(snrScore + balanceScore, 0), 100);
+        };
+        
+        // Calculate confidence based on volume consistency and frequency stability
+        const confidenceAnalysis = () => {
+          const volumeConsistency = 100 - (Math.abs(averageVolume - 64) * 1.5); // Penalty for too quiet/loud
+          const frequencyStability = dataArray.reduce((acc, val, idx) => {
+            const prevVal = idx > 0 ? dataArray[idx - 1] : val;
+            return acc + Math.abs(val - prevVal);
+          }, 0) / bufferLength;
+          
+          const stabilityScore = Math.max(0, 100 - frequencyStability * 2);
+          return Math.min((volumeConsistency + stabilityScore) / 2, 100);
+        };
+        
         const elapsedMinutes = (Date.now() - startTime.current) / 60000;
         const wpm = elapsedMinutes > 0 ? Math.round(wordsSpoken.current / elapsedMinutes) : 0;
         
@@ -64,8 +104,8 @@ export function useVoiceAnalysis() {
           ...prev,
           volumeLevel: Math.round(volumeLevel),
           speakingPace: wpm,
-          voiceClarity: Math.min(85 + Math.random() * 15, 100), // Simulate clarity
-          confidenceScore: Math.min(60 + Math.random() * 35, 100) // Simulate confidence
+          voiceClarity: Math.round(clarityAnalysis()),
+          confidenceScore: Math.round(confidenceAnalysis())
         }));
         
         animationFrame.current = requestAnimationFrame(analyzeAudio);

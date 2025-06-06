@@ -80,6 +80,8 @@ export function useSpeechRecognition(): SpeechRecognitionHook {
       setFillerWords([]);
       setCurrentSentence('');
 
+      let fullTranscriptRef = '';
+
       recognitionRef.current.onresult = (event: any) => {
         let interimTranscript = '';
         let finalTranscript = '';
@@ -93,23 +95,32 @@ export function useSpeechRecognition(): SpeechRecognitionHook {
           }
         }
 
-        const fullTranscript = transcript + finalTranscript;
-        const currentText = finalTranscript || interimTranscript;
+        // Update the full transcript reference
+        if (finalTranscript) {
+          fullTranscriptRef += finalTranscript;
+        }
         
-        setTranscript(fullTranscript);
+        const currentText = finalTranscript || interimTranscript;
+        const displayTranscript = fullTranscriptRef + (interimTranscript ? ' ' + interimTranscript : '');
+        
+        setTranscript(displayTranscript);
         setCurrentSentence(currentText);
 
-        // Calculate word count and WPM
-        const words = fullTranscript.trim().split(/\s+/).filter(word => word.length > 0);
+        // Calculate word count and WPM using the accumulated transcript
+        const words = fullTranscriptRef.trim().split(/\s+/).filter(word => word.length > 0);
         const currentWordCount = words.length;
         setWordCount(currentWordCount);
 
         const currentTime = Date.now();
         const timeInMinutes = (currentTime - startTimeRef.current) / 60000;
-        const currentWPM = calculateWPM(currentWordCount, timeInMinutes);
-        setWpm(currentWPM);
+        
+        // Only calculate WPM if we have meaningful time elapsed and words
+        if (timeInMinutes > 0.1 && currentWordCount > 0) {
+          const currentWPM = calculateWPM(currentWordCount, timeInMinutes);
+          setWpm(currentWPM);
+        }
 
-        // Detect filler words in the current sentence
+        // Detect filler words in the final transcript only
         if (finalTranscript) {
           const newFillers = detectFillerWords(finalTranscript);
           setFillerWords(prev => [...prev, ...newFillers]);
@@ -129,7 +140,7 @@ export function useSpeechRecognition(): SpeechRecognitionHook {
 
       recognitionRef.current.start();
     }
-  }, [transcript, calculateWPM, detectFillerWords]);
+  }, [calculateWPM, detectFillerWords]);
 
   const stopListening = useCallback(() => {
     if (recognitionRef.current) {
