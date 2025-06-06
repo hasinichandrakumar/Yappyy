@@ -304,9 +304,9 @@ export default function DetailedAnalysis() {
             <h4 className="font-medium text-gray-900 mb-3">Priority Improvements</h4>
             <div className="space-y-2">
               {speechInsights.improvementAreas.map((area, index) => (
-                <div key={index} className="flex items-center space-x-2 p-2 bg-blue-50 rounded">
-                  <TrendingUp className="w-4 h-4 text-blue-600" />
-                  <span className="text-sm text-blue-800">{area}</span>
+                <div key={index} className="flex items-center space-x-2 p-2 bg-cyan-50 rounded">
+                  <TrendingUp className="w-4 h-4 text-cyan-600" />
+                  <span className="text-sm text-cyan-800">{area}</span>
                 </div>
               ))}
             </div>

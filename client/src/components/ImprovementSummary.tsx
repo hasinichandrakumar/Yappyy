@@ -40,7 +40,7 @@ interface AIAnalysis {
 
 export default function ImprovementSummary() {
   const { speakingPace, voiceClarity, confidenceScore, volumeLevel } = useVoiceAnalysis();
-  const { transcript, wordCount, sessionTime } = useSpeechRecognition();
+  const { transcript, wordCount } = useSpeechRecognition();
   const { posture, gesture, eyeContact } = useMediaPipe();
 
   const [aiAnalysis, setAiAnalysis] = useState<AIAnalysis>({
@@ -233,8 +233,8 @@ export default function ImprovementSummary() {
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'high': return 'bg-red-100 text-red-800 border-red-200';
-      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'low': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'medium': return 'bg-cyan-100 text-cyan-800 border-cyan-200';
+      case 'low': return 'bg-cyan-100 text-cyan-800 border-cyan-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
@@ -251,17 +251,17 @@ export default function ImprovementSummary() {
   return (
     <div className="space-y-6">
       {/* AI Analysis Header */}
-      <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
+      <Card className="bg-gradient-to-r from-cyan-50 to-blue-50 border-cyan-200">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <Brain className="w-6 h-6 text-purple-600" />
-              <span className="text-purple-900 font-heading tracking-tight">AI Improvement Summary</span>
+              <Brain className="w-6 h-6 text-cyan-600" />
+              <span className="text-cyan-900 font-heading tracking-tight">AI Improvement Summary</span>
             </div>
             <Button 
               onClick={generateImprovementPlan}
               disabled={isAnalyzing}
-              className="bg-purple-600 text-white hover:bg-purple-700"
+              className="bg-cyan-600 text-white hover:bg-cyan-700"
             >
               {isAnalyzing ? (
                 <>
@@ -279,9 +279,9 @@ export default function ImprovementSummary() {
         </CardHeader>
         {aiAnalysis.overallAssessment && (
           <CardContent>
-            <div className="p-4 bg-white/70 rounded-lg border border-purple-200">
-              <h4 className="font-heading text-purple-900 mb-2">Overall Assessment</h4>
-              <p className="font-body text-purple-800">{aiAnalysis.overallAssessment}</p>
+            <div className="p-4 bg-white/70 rounded-lg border border-cyan-200">
+              <h4 className="font-heading text-cyan-900 mb-2">Overall Assessment</h4>
+              <p className="font-body text-cyan-800">{aiAnalysis.overallAssessment}</p>
             </div>
           </CardContent>
         )}
@@ -326,7 +326,7 @@ export default function ImprovementSummary() {
                     <div>
                       <h4 className="font-medium text-gray-900 mb-2">Time to Improve</h4>
                       <div className="flex items-center space-x-2">
-                        <Star className="w-4 h-4 text-yellow-500" />
+                        <Star className="w-4 h-4 text-cyan-500" />
                         <span className="text-sm font-medium text-gray-700">{area.timeToImprove}</span>
                       </div>
                     </div>
