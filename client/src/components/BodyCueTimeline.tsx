@@ -85,8 +85,8 @@ export default function BodyCueTimeline({ cues, totalDuration }: BodyCueTimeline
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case 'good': return 'text-green-600 bg-green-50 border-green-200';
-      case 'warning': return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-      case 'improvement': return 'text-blue-600 bg-blue-50 border-blue-200';
+      case 'warning': return 'text-cyan-600 bg-cyan-50 border-cyan-200';
+      case 'improvement': return 'text-cyan-600 bg-cyan-50 border-cyan-200';
       default: return 'text-gray-600 bg-gray-50 border-gray-200';
     }
   };
@@ -95,7 +95,7 @@ export default function BodyCueTimeline({ cues, totalDuration }: BodyCueTimeline
     <Card className="w-full">
       <CardHeader>
         <div className="flex items-center space-x-2">
-          <Clock className="h-5 w-5 text-blue-600" />
+          <Clock className="h-5 w-5 text-cyan-600" />
           <CardTitle>Body Language Cue Timeline</CardTitle>
         </div>
         <p className="text-sm text-gray-600">

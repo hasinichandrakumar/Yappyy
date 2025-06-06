@@ -206,13 +206,13 @@ export default function BodyLanguageAnalyzer() {
               <div className="text-sm text-gray-600">Overall Presence</div>
             </div>
             <div className="text-center">
-              <div className="text-lg font-semibold text-blue-600">
+              <div className="text-lg font-semibold text-cyan-600">
                 {metrics.energyLevel}
               </div>
               <div className="text-sm text-gray-600">Energy Level</div>
             </div>
             <div className="text-center">
-              <div className="text-lg font-semibold text-purple-600">
+              <div className="text-lg font-semibold text-cyan-600">
                 {metrics.proximityToAudience}
               </div>
               <div className="text-sm text-gray-600">Audience Distance</div>
@@ -226,7 +226,7 @@ export default function BodyLanguageAnalyzer() {
         <Card className="bg-surface rounded-xl shadow-sm border border-gray-200">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <Eye className="w-5 h-5 text-indigo-600" />
+              <Eye className="w-5 h-5 text-cyan-600" />
               <span>Eye Contact & Facial Expression</span>
             </CardTitle>
           </CardHeader>
@@ -384,8 +384,8 @@ export default function BodyLanguageAnalyzer() {
                   <Progress value={value} className="h-2" />
                   {value < 70 && (
                     <div className="flex items-center space-x-1">
-                      <AlertCircle className="w-3 h-3 text-orange-500" />
-                      <p className="text-xs text-orange-600">
+                      <AlertCircle className="w-3 h-3 text-cyan-500" />
+                      <p className="text-xs text-cyan-600">
                         {key === 'chestOpenness' && "Open chest, pull shoulders back"}
                         {key === 'spinalCurvature' && "Straighten spine, engage core"}
                         {key === 'headTilt' && "Keep head level and centered"}

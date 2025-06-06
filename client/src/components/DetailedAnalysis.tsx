@@ -201,7 +201,7 @@ export default function DetailedAnalysis() {
       <Card className="bg-surface rounded-xl shadow-sm border border-gray-200">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Volume2 className="w-5 h-5 text-purple-600" />
+            <Volume2 className="w-5 h-5 text-cyan-600" />
             <span>Advanced Speech Insights</span>
           </CardTitle>
         </CardHeader>
@@ -223,7 +223,7 @@ export default function DetailedAnalysis() {
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <span className="text-sm font-medium text-gray-700">Sentence Structure</span>
-              <Badge className="bg-blue-100 text-blue-800 border-0">
+              <Badge className="bg-cyan-100 text-cyan-800 border-0">
                 {speechInsights.sentenceStructure}
               </Badge>
             </div>
