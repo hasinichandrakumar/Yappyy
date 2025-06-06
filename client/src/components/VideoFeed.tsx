@@ -267,7 +267,7 @@ export default function VideoFeed() {
               {feedbackMessages.map((message, index) => (
                 <div
                   key={index}
-                  className="bg-purple-600 bg-opacity-95 text-white px-4 py-3 rounded-lg shadow-lg animate-in slide-in-from-top-2 duration-300"
+                  className="bg-cyan-600 bg-opacity-95 text-white px-4 py-3 rounded-lg shadow-lg animate-in slide-in-from-top-2 duration-300"
                 >
                   <div className="flex items-start space-x-2">
                     <Zap className="w-4 h-4 text-yellow-300 mt-0.5 flex-shrink-0" />

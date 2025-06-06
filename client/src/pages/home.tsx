@@ -41,28 +41,28 @@ export default function Home() {
       icon: Brain,
       title: "Neural Speech Pattern Analysis",
       description: "Deep learning algorithms analyze pause patterns, intonation, articulation, and rhetorical device usage with 95% accuracy.",
-      gradient: "from-purple-500 to-blue-600",
+      gradient: "from-cyan-500 to-blue-600",
       details: ["Real-time vocal variety scoring", "Strategic pause effectiveness", "Consonant clarity assessment", "Emotional tone detection"]
     },
     {
       icon: Eye,
       title: "Computer Vision Body Language",
       description: "Advanced computer vision tracks 33 facial landmarks, 21 hand joints, and full-body posture for comprehensive presence analysis.",
-      gradient: "from-blue-500 to-indigo-600",
+      gradient: "from-cyan-500 to-blue-600",
       details: ["468 facial landmark tracking", "Hand gesture recognition", "Posture stability analysis", "Eye contact duration metrics"]
     },
     {
       icon: Bot,
       title: "Multi-Modal AI Coaching",
       description: "GPT-powered contextual coaching that adapts to speech purpose, audience, and individual speaking patterns in real-time.",
-      gradient: "from-indigo-500 to-purple-600",
+      gradient: "from-cyan-500 to-blue-600",
       details: ["Purpose-specific feedback", "Adaptive learning paths", "Personalized improvement plans", "Context-aware suggestions"]
     },
     {
       icon: Target,
       title: "Persuasiveness Intelligence",
       description: "AI analyzes argument structure, emotional appeal, credibility markers, and audience engagement to score persuasive impact.",
-      gradient: "from-purple-600 to-blue-500",
+      gradient: "from-cyan-600 to-blue-500",
       details: ["Rhetorical device detection", "Emotional intelligence scoring", "Credibility assessment", "Audience impact prediction"]
     }
   ];
@@ -147,7 +147,7 @@ export default function Home() {
                   <p className="text-sm font-medium text-gray-700">Words</p>
                 </div>
               </div>
-              <div className="border-t border-purple-200 pt-6">
+              <div className="border-t border-cyan-200 pt-6">
                 <h2 className="text-4xl md:text-5xl font-display gradient-text tracking-tight">We coach 100% of you.</h2>
               </div>
             </div>

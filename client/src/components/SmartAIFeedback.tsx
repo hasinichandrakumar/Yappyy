@@ -180,14 +180,14 @@ export default function SmartAIFeedback() {
         badge: 'bg-green-100 text-green-800'
       };
       case 'tip': return {
-        bg: 'bg-blue-50 border-blue-200',
-        icon: 'text-blue-600',
-        badge: 'bg-blue-100 text-blue-800'
+        bg: 'bg-cyan-50 border-cyan-200',
+        icon: 'text-cyan-600',
+        badge: 'bg-cyan-100 text-cyan-800'
       };
       case 'improvement': return {
-        bg: 'bg-purple-50 border-purple-200',
-        icon: 'text-purple-600',
-        badge: 'bg-purple-100 text-purple-800'
+        bg: 'bg-cyan-50 border-cyan-200',
+        icon: 'text-cyan-600',
+        badge: 'bg-cyan-100 text-cyan-800'
       };
       default: return {
         bg: 'bg-gray-50 border-gray-200',
