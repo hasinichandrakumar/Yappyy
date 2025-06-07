@@ -91,10 +91,10 @@ export default function Dashboard() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" className="space-y-8">
+          <TabsContent value="overview" className="space-y-10 pb-16">
             {/* Practice Focus Tabs */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-              <h3 className="text-xl font-semibold text-gray-900 mb-6">Practice Focus Areas</h3>
+            <div className="bg-white rounded-xl border border-gray-200 p-8 shadow-sm">
+              <h3 className="text-xl font-semibold text-gray-900 mb-8">Practice Focus Areas</h3>
               <div className="flex flex-wrap gap-4">
                 <Button variant="outline" className="flex items-center space-x-2 bg-cyan-50 border-cyan-200 text-cyan-700 hover:bg-cyan-100">
                   <Eye className="w-4 h-4" />
@@ -119,7 +119,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-12">
               {/* Left Column - Video Feed */}
               <div className="lg:col-span-2 space-y-8">
                 <VideoFeed />
@@ -133,12 +133,12 @@ export default function Dashboard() {
               </div>
             </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
               <AIPracticeRoleplay />
               <SessionStats />
             </div>
             
-            <div className="mt-8">
+            <div className="mb-16">
               <SessionHistory />
             </div>
           </TabsContent>

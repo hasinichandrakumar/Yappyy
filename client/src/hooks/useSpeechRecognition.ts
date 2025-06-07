@@ -65,6 +65,10 @@ export function useSpeechRecognition(): SpeechRecognitionHook {
     }
 
     console.log('Starting speech recognition...');
+    
+    // Set start time when beginning recording
+    startTimeRef.current = Date.now();
+    lastUpdateTimeRef.current = Date.now();
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     recognitionRef.current = new SpeechRecognition();
@@ -122,9 +126,12 @@ export function useSpeechRecognition(): SpeechRecognitionHook {
         const timeInMinutes = (currentTime - startTimeRef.current) / 60000;
         
         // Only calculate WPM if we have meaningful time elapsed and words
-        if (timeInMinutes > 0.1 && currentWordCount > 0) {
+        if (timeInMinutes > 0.05 && currentWordCount > 0) { // Calculate after 3 seconds
           const currentWPM = calculateWPM(currentWordCount, timeInMinutes);
           setWpm(currentWPM);
+          console.log(`WPM Calculation: ${currentWordCount} words in ${timeInMinutes.toFixed(2)} minutes = ${currentWPM} WPM`);
+        } else {
+          console.log(`WPM not calculated: time=${timeInMinutes.toFixed(2)}min, words=${currentWordCount}`);
         }
 
         // Detect filler words in the final transcript only
