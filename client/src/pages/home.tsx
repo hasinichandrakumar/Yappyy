@@ -616,7 +616,7 @@ export default function Home() {
                   <FileText className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-4">Professional Speech Templates</h3>
-                <p className="text-gray-600 mb-4">12+ free templates for every scenario with AI-powered customization</p>
+                <p className="text-gray-600 mb-4">Unlimited free templates for every scenario with AI-powered customization</p>
                 <div className="space-y-2 text-sm text-gray-500">
                   <div className="flex items-center">
                     <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
