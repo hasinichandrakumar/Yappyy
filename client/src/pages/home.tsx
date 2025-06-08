@@ -47,31 +47,45 @@ export default function Home() {
   const advancedFeatures = [
     {
       icon: Brain,
-      title: "Neural Speech Pattern Analysis",
-      description: "Deep learning algorithms analyze pause patterns, intonation, articulation, and rhetorical device usage with 95% accuracy.",
-      gradient: "from-cyan-500 to-blue-600",
-      details: ["Real-time vocal variety scoring", "Strategic pause effectiveness", "Consonant clarity assessment", "Emotional tone detection"]
+      title: "AI-Powered Speech Intelligence",
+      description: "Advanced neural networks analyze your vocal patterns, speech rhythm, and emotional delivery in real-time",
+      stats: "95% accuracy in identifying improvement areas",
+      color: "from-purple-500 to-pink-500"
     },
     {
       icon: Eye,
       title: "Computer Vision Body Language",
-      description: "Advanced computer vision tracks 33 facial landmarks, 21 hand joints, and full-body posture for comprehensive presence analysis.",
-      gradient: "from-cyan-500 to-blue-600",
-      details: ["468 facial landmark tracking", "Hand gesture recognition", "Posture stability analysis", "Eye contact duration metrics"]
+      description: "Real-time posture tracking, gesture analysis, and eye contact monitoring using advanced computer vision",
+      stats: "Track 50+ body language metrics simultaneously",
+      color: "from-blue-500 to-cyan-500"
     },
     {
       icon: Bot,
-      title: "Multi-Modal AI Coaching",
-      description: "GPT-powered contextual coaching that adapts to speech purpose, audience, and individual speaking patterns in real-time.",
-      gradient: "from-cyan-500 to-blue-600",
-      details: ["Purpose-specific feedback", "Adaptive learning paths", "Personalized improvement plans", "Context-aware suggestions"]
+      title: "Personalized AI Coach",
+      description: "Your dedicated AI speaking coach adapts to your learning style and provides contextual feedback",
+      stats: "Customized coaching for 10,000+ speech patterns",
+      color: "from-green-500 to-emerald-500"
     },
     {
-      icon: ArrowUpRight,
-      title: "Persuasiveness Intelligence",
-      description: "AI analyzes argument structure, emotional appeal, credibility markers, and audience engagement to score persuasive impact.",
-      gradient: "from-cyan-600 to-blue-500",
-      details: ["Rhetorical device detection", "Emotional intelligence scoring", "Credibility assessment", "Audience impact prediction"]
+      icon: BarChart3,
+      title: "Advanced Performance Analytics",
+      description: "Deep insights into your speaking trends, progress tracking, and predictive improvement forecasting",
+      stats: "Analyze 25+ speaking dimensions",
+      color: "from-orange-500 to-red-500"
+    },
+    {
+      icon: Lightbulb,
+      title: "Smart Content Enhancement",
+      description: "AI-powered content suggestions, structure optimization, and persuasion technique recommendations",
+      stats: "Increase speech impact by 40%",
+      color: "from-yellow-500 to-orange-500"
+    },
+    {
+      icon: Globe,
+      title: "Cultural Communication Adaptation",
+      description: "Adapt your speaking style for global audiences with cultural context awareness and regional communication preferences",
+      stats: "Support for 25+ cultural communication styles",
+      color: "from-indigo-500 to-purple-500"
     }
   ];
 

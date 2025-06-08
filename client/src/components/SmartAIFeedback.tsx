@@ -88,9 +88,9 @@ export default function SmartAIFeedback() {
 
 
 
-  // Monitor speaking pace (only when not in demo mode)
+  // Monitor speaking pace
   useEffect(() => {
-    if (demoMode || !isListening || wpm === lastWPMCheck) return;
+    if (!isListening || wpm === lastWPMCheck) return;
     
     console.log('Live feedback check:', { wpm, transcriptLength: transcript.length, isListening });
     setLastWPMCheck(wpm);
@@ -140,11 +140,11 @@ export default function SmartAIFeedback() {
         4
       ));
     }
-  }, [wpm, isListening, transcript, lastWPMCheck, demoMode]);
+  }, [wpm, isListening, transcript, lastWPMCheck]);
 
-  // Monitor filler words (only when not in demo mode)
+  // Monitor filler words
   useEffect(() => {
-    if (demoMode || !isListening) return;
+    if (!isListening) return;
 
     const currentFillerCount = fillerWords.length;
     
@@ -165,11 +165,11 @@ export default function SmartAIFeedback() {
     }
     
     setLastFillerCount(currentFillerCount);
-  }, [fillerWords.length, isListening, lastFillerCount, fillerWords, demoMode]);
+  }, [fillerWords.length, isListening, lastFillerCount, fillerWords]);
 
   // Simple speech detection test (fires when speech is first detected)
   useEffect(() => {
-    if (demoMode || !isListening) return;
+    if (!isListening) return;
 
     const wordCount = transcript.split(' ').length;
     
@@ -199,7 +199,7 @@ export default function SmartAIFeedback() {
         ));
       }
     }
-  }, [transcript, isListening, wpm, fillerWords.length, currentFeedback, demoMode]);
+  }, [transcript, isListening, wpm, fillerWords.length, currentFeedback]);
 
   const getIcon = (type: AIFeedback['type']) => {
     switch (type) {
@@ -247,16 +247,16 @@ export default function SmartAIFeedback() {
         <CardContent className="flex items-center justify-center p-8 text-gray-500 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-lg">
           <div className="text-center">
             <div className="relative">
-              <Brain className={`w-8 h-8 mx-auto mb-3 text-cyan-400 ${demoMode || isListening ? 'animate-pulse' : ''}`} />
-              {(demoMode || isListening) && (
+              <Brain className={`w-8 h-8 mx-auto mb-3 text-cyan-400 ${isListening ? 'animate-pulse' : ''}`} />
+              {isListening && (
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-ping" />
               )}
             </div>
             <p className="text-base font-medium text-gray-700">
-              {demoMode ? 'AI Coach Demo Mode' : isListening ? 'AI Coach is analyzing...' : 'AI Coach is ready'}
+              {isListening ? 'AI Coach is analyzing...' : 'AI Coach is ready'}
             </p>
             <p className="text-sm text-gray-500 mt-2">
-              {demoMode ? 'Sample feedback will cycle automatically' : 'Live feedback will appear as you speak'}
+              Live feedback will appear as you speak
             </p>
           </div>
         </CardContent>
