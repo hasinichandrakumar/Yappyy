@@ -36,6 +36,13 @@ interface SpeechDNAProfile {
   famousSpeaker: string;
   confidence: number;
   uniqueTraits: string[];
+  persuasionStyle: string;
+  rhetoricStrengths: string[];
+  emotionalIntelligence: number;
+  cognitiveComplexity: number;
+  adaptabilityScore: number;
+  leadershipPresence: number;
+  authenticityIndex: number;
 }
 
 interface CharacterPersona {

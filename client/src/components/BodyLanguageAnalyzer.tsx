@@ -32,6 +32,11 @@ interface BodyLanguageMetrics {
   overallPresence: number;
   energyLevel: string;
   proximityToAudience: string;
+  confidenceSignals: number;
+  gestureVariety: number;
+  facialEngagement: number;
+  postureAlignment: number;
+  movementPurpose: number;
 }
 
 interface PostureBreakdown {
@@ -58,7 +63,12 @@ export default function BodyLanguageAnalyzer() {
     footPosition: "Shoulder-width apart",
     overallPresence: 74,
     energyLevel: "Moderate",
-    proximityToAudience: "Appropriate"
+    proximityToAudience: "Appropriate",
+    confidenceSignals: 78,
+    gestureVariety: 85,
+    facialEngagement: 82,
+    postureAlignment: 76,
+    movementPurpose: 88
   });
 
   const [postureBreakdown, setPostureBreakdown] = useState<PostureBreakdown>({

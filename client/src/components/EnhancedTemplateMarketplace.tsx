@@ -31,24 +31,31 @@ interface SpeechTemplate {
   title: string;
   description: string;
   category: string;
-  genre: 'persuasive' | 'narrative' | 'motivational' | 'analytical' | 'celebratory';
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  genre: 'persuasive' | 'narrative' | 'motivational' | 'analytical' | 'celebratory' | 'inspirational' | 'educational';
+  difficulty: 'beginner' | 'intermediate' | 'advanced' | 'expert';
   duration: string;
   rating: number;
   downloads: number;
   author: string;
   price: number;
   isUserGenerated: boolean;
+  aiEnhanced: boolean;
+  culturalAdaptations: string[];
+  audienceTypes: string[];
   toneProfile: {
     humor: number;
     formality: number;
     emotion: number;
     urgency: number;
+    authority: number;
+    empathy: number;
   };
   structure: {
     hook: string;
     body: string[];
     cta: string;
+    transitions: string[];
+    conclusion: string;
   };
   fillInBlanks: {
     [key: string]: string;
@@ -57,6 +64,14 @@ interface SpeechTemplate {
     persuasive: string;
     emotional: string;
     humorous: string;
+    authoritative: string;
+    conversational: string;
+  };
+  rhetoricDevices: string[];
+  successMetrics: {
+    engagementScore: number;
+    persuasionRate: number;
+    memoryRetention: number;
   };
 }
 

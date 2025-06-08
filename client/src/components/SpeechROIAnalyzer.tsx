@@ -28,6 +28,12 @@ interface ROIMetrics {
   overallImpact: number;
   persuasionScore: number;
   engagementLevel: number;
+  credibilityIndex: number;
+  urgencyFactor: number;
+  socialProofStrength: number;
+  logicalCoherence: number;
+  rhetoricalPower: number;
+  audienceResonance: number;
 }
 
 interface SpeechAnalysis {
