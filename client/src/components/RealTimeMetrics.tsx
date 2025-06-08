@@ -22,7 +22,7 @@ export default function RealTimeMetrics() {
   const [metrics, setMetrics] = useState({
     eyeContact: 0,
     voiceClarity: 0,
-    speakingPace: 0,
+    speakingActivity: 0,
     confidence: 0,
     volume: 0
   });
@@ -67,21 +67,11 @@ export default function RealTimeMetrics() {
 
   // Update metrics based on real speech data with enhanced responsiveness
   useEffect(() => {
-    // Calculate speaking pace score based on WPM (optimal range: 150-180 WPM)
-    const calculatePaceScore = (wpm: number) => {
-      if (wpm === 0) return 0;
-      if (wpm >= 150 && wpm <= 180) return 100; // Perfect range
-      if (wpm >= 120 && wpm <= 200) return 85;  // Good range
-      if (wpm >= 100 && wpm <= 220) return 70;  // Acceptable range
-      if (wpm >= 80 && wpm <= 250) return 50;   // Needs improvement
-      return 25; // Too slow or too fast
-    };
-
     // Enhanced metrics calculation with better real-time responsiveness
     const newMetrics = {
       eyeContact: Math.round(eyeContact),
       voiceClarity: Math.round(Math.max(voiceClarity, isListening ? 20 : 0)), // Show activity when listening
-      speakingPace: calculatePaceScore(wpm),
+      speakingActivity: isListening && wordCount > 0 ? 75 : 0, // Simple activity indicator
       confidence: Math.round(Math.max(confidenceScore, isListening ? 30 : 0)), // Show baseline when active
       volume: Math.round(Math.max(volumeLevel, isListening ? 10 : 0)) // Show baseline when active
     };
@@ -90,7 +80,6 @@ export default function RealTimeMetrics() {
     
     if (isListening) {
       console.log('Live Metrics Update:', {
-        wpm,
         voiceClarity,
         confidenceScore,
         volumeLevel,
@@ -98,7 +87,7 @@ export default function RealTimeMetrics() {
         calculated: newMetrics
       });
     }
-  }, [eyeContact, voiceClarity, wpm, confidenceScore, volumeLevel, isListening, wordCount]);
+  }, [eyeContact, voiceClarity, confidenceScore, volumeLevel, isListening, wordCount]);
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return "text-green-600";
@@ -129,15 +118,11 @@ export default function RealTimeMetrics() {
     },
     {
       icon: Timer,
-      title: "Speaking Pace",
-      value: metrics.speakingPace,
+      title: "Speaking Activity",
+      value: metrics.speakingActivity,
       unit: "%",
-      target: wpm > 0 ? `${wpm} WPM` : isListening ? "Start speaking" : "Click to start",
-      subtitle: wpm > 0 ? 
-        wpm >= 150 && wpm <= 180 ? "Perfect pace" :
-        wpm >= 120 && wpm <= 200 ? "Good pace" :
-        wpm < 120 ? "Speak faster" : "Slow down"
-        : isListening ? "Listening..." : "Not active"
+      target: isListening ? "Activity level" : "Click to start",
+      subtitle: isListening && wordCount > 0 ? "Speaking detected" : isListening ? "Listening..." : "Not active"
     },
     {
       icon: Target,
@@ -164,10 +149,10 @@ export default function RealTimeMetrics() {
           <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
             <div className="text-center">
               <div className="text-2xl font-bold text-blue-600 tabular-nums">
-                {wpm > 0 ? `${wpm} WPM` : '-- WPM'}
+                {wordCount} words
               </div>
               <div className="text-xs text-gray-600 mt-1">
-                {wordCount} words • {Math.floor(sessionTime / 60)}:{(sessionTime % 60).toString().padStart(2, '0')}
+                Session: {Math.floor(sessionTime / 60)}:{(sessionTime % 60).toString().padStart(2, '0')}
               </div>
             </div>
           </div>
