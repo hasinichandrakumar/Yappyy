@@ -348,14 +348,14 @@ export default function Home() {
             {Array.from({length: 6}).map((_, i) => (
               <motion.div
                 key={i}
-                className="absolute w-32 h-32 border border-[#0BF9EA]/20 rounded-full opacity-20"
+                className="absolute w-32 h-32 border border-[#0BF9EA]/10 rounded-full opacity-5"
                 style={{
                   left: `${20 + i * 15}%`,
                   top: `${10 + i * 20}%`,
                 }}
                 animate={{
                   scale: [1, 1.2, 1],
-                  opacity: [0.2, 0.4, 0.2],
+                  opacity: [0.02, 0.08, 0.02],
                   rotate: [0, 180, 360],
                 }}
                 transition={{
