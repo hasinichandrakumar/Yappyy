@@ -254,7 +254,7 @@ export default function Home() {
                   </motion.div>
                 ))}
               </div>
-              <div className="border-t border-cyan-200 pt-6">
+              <div className="border-t border-[#0BF9EA]/20 pt-6">
                 <motion.h2 
                   className="text-4xl md:text-5xl font-display gradient-text tracking-tight"
                   initial={{ opacity: 0 }}
@@ -348,7 +348,7 @@ export default function Home() {
             {Array.from({length: 6}).map((_, i) => (
               <motion.div
                 key={i}
-                className="absolute w-32 h-32 border border-cyan-200 rounded-full opacity-20"
+                className="absolute w-32 h-32 border border-[#0BF9EA]/20 rounded-full opacity-20"
                 style={{
                   left: `${20 + i * 15}%`,
                   top: `${10 + i * 20}%`,
@@ -557,7 +557,7 @@ export default function Home() {
             {/* Real-Time Analysis */}
             <Card className="group hover:shadow-xl transition-all duration-500 border-0 bg-white/80 backdrop-blur-sm">
               <CardContent className="p-8">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-[#0BF9EA] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                   <Activity className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-4">Real-Time Speech Analysis</h3>
@@ -681,10 +681,10 @@ export default function Home() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {speechTypes.map((type, index) => (
-              <Card key={index} className="group hover:shadow-lg transition-all duration-300 border-2 border-gray-100 hover:border-cyan-200">
+              <Card key={index} className="group hover:shadow-lg transition-all duration-300 border-2 border-gray-100 hover:border-[#0BF9EA]/20">
                 <CardContent className="p-6 text-center">
-                  <div className="w-12 h-12 mx-auto mb-4 bg-gradient-to-br from-gray-100 to-gray-200 group-hover:from-cyan-100 group-hover:to-blue-100 rounded-full flex items-center justify-center transition-all duration-300">
-                    <Users className="w-6 h-6 text-gray-600 group-hover:text-cyan-600" />
+                  <div className="w-12 h-12 mx-auto mb-4 bg-gradient-to-br from-gray-100 to-gray-200 group-hover:from-[#0BF9EA]/10 group-hover:to-blue-100 rounded-full flex items-center justify-center transition-all duration-300">
+                    <Users className="w-6 h-6 text-gray-600 group-hover:text-[#0BF9EA]" />
                   </div>
                   <h3 className="font-semibold text-gray-900 text-sm">{type}</h3>
                 </CardContent>
