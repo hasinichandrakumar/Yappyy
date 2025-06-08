@@ -22,6 +22,7 @@ import BadgeSystem from "@/components/BadgeSystem";
 import AIPracticeRoleplay from "@/components/AIPracticeRoleplay";
 import BodyCueTimeline from "@/components/BodyCueTimeline";
 import SpeechFingerprintGenerator from "@/components/SpeechFingerprintGenerator";
+import AdvancedPracticeHub from "@/components/AdvancedPracticeHub";
 
 import AdaptiveFeedbackEngine from "@/components/AdaptiveFeedbackEngine";
 import EnhancedTemplateMarketplace from "@/components/EnhancedTemplateMarketplace";
@@ -107,52 +108,8 @@ export default function Dashboard() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-8 pb-16">
-            {/* Practice Session Header */}
-            <div className="bg-gradient-to-r from-blue-50 to-[#0BF9EA]/10 rounded-2xl p-8 border border-[#0BF9EA]/20">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                    {isSessionActive ? 'Session in Progress' : 'Start Your Practice Session'}
-                  </h2>
-                  <p className="text-gray-600">
-                    {isSessionActive ? 'AI is analyzing your speech in real-time' : 'Get real-time AI feedback to improve your speaking skills'}
-                  </p>
-                  {isSessionActive && (
-                    <div className="flex items-center space-x-2 mt-2">
-                      <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                      <span className="text-sm text-red-600 font-medium">Recording</span>
-                    </div>
-                  )}
-                </div>
-                <div className="flex items-center space-x-4">
-                  <div className="bg-white rounded-lg px-4 py-2 border border-gray-200">
-                    <span className="text-sm text-gray-500">Session #</span>
-                    <span className="text-lg font-bold text-[#0BF9EA] ml-1">24</span>
-                  </div>
-                  <div className="flex space-x-2">
-                    <Button 
-                      onClick={() => setIsSessionActive(true)}
-                      className="bg-[#0BF9EA] hover:bg-[#0BF9EA]/90 text-white shadow-lg"
-                      disabled={isSessionActive}
-                    >
-                      <PlayCircle className="w-4 h-4 mr-2" />
-                      {isSessionActive ? 'Session Active' : 'Quick Start'}
-                    </Button>
-                    <Button 
-                      onClick={() => {
-                        setIsSessionActive(false);
-                        setShowPostAnalysis(true);
-                      }}
-                      variant="outline" 
-                      className="border-[#0BF9EA] text-[#0BF9EA] hover:bg-[#0BF9EA]/10"
-                      disabled={!isSessionActive}
-                    >
-                      <Brain className="w-4 h-4 mr-2" />
-                      Finish & Analyze
-                    </Button>
-                  </div>
-                </div>
-              </div>
+            <AdvancedPracticeHub />
+          </TabsContent>
               
               {/* Focus Areas - Card Style */}
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4">

@@ -48,7 +48,17 @@ interface PostureBreakdown {
   chestOpenness: number;
 }
 
+interface Session {
+  id: number;
+  userId: string;
+  duration: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export default function BodyLanguageAnalyzer() {
+  const [selectedSession, setSelectedSession] = useState<Session | null>(null);
+  const [isAnalyzingSession, setIsAnalyzingSession] = useState(false);
   const [metrics, setMetrics] = useState<BodyLanguageMetrics>({
     eyeContactDuration: 65,
     eyeContactFrequency: 72,
