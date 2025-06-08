@@ -28,7 +28,11 @@ import {
   Clock,
   Lightbulb,
   Settings,
-  Download
+  Download,
+  AlertCircle,
+  CheckCircle,
+  MessageSquare,
+  CameraOff
 } from "lucide-react";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { useVoiceAnalysis } from "@/hooks/useVoiceAnalysis";
@@ -56,19 +60,24 @@ interface RealTimeMetric {
 }
 
 export default function AdvancedPracticeHub() {
-  const { isListening, startListening, stopListening, transcript, wordCount } = useSpeechRecognition();
-  const { voiceClarity, confidenceScore, volumeLevel, speakingPace } = useVoiceAnalysis();
-  const { eyeContact, posture, gesture } = useMediaPipe();
+  const { isListening, startListening, stopListening, transcript, wordCount, wpm } = useSpeechRecognition();
+  const { voiceClarity, confidenceScore, volumeLevel, speakingPace, startVoiceAnalysis, stopVoiceAnalysis } = useVoiceAnalysis();
+  const { eyeContact, posture, gesture, initializeMediaPipe, processFrame, isInitialized } = useMediaPipe();
 
   const [sessionActive, setSessionActive] = useState(false);
   const [sessionTime, setSessionTime] = useState(0);
   const [selectedMode, setSelectedMode] = useState<string>("general");
   const [focusLevel, setFocusLevel] = useState<"beginner" | "intermediate" | "advanced">("intermediate");
-  const [videoEnabled, setVideoEnabled] = useState(true);
-  const [audioEnabled, setAudioEnabled] = useState(true);
+  const [videoEnabled, setVideoEnabled] = useState(false);
+  const [audioEnabled, setAudioEnabled] = useState(false);
+  const [liveAdvice, setLiveAdvice] = useState<string[]>([]);
+  const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
 
   const sessionStartRef = useRef<number>(0);
   const metricsRef = useRef<RealTimeMetric[]>([]);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const practiceModes: PracticeMode[] = [
     {
@@ -105,17 +114,193 @@ export default function AdvancedPracticeHub() {
     }
   ];
 
+  // Start camera and analysis
+  const startVideoAnalysis = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { width: 640, height: 480 }, 
+        audio: true 
+      });
+      
+      setMediaStream(stream);
+      setVideoEnabled(true);
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+      
+      // Start MediaPipe analysis
+      if (initializeMediaPipe) {
+        initializeMediaPipe();
+      }
+      
+    } catch (error) {
+      console.error("Error accessing camera:", error);
+      setLiveAdvice(prev => [...prev, "Camera access denied. Please enable camera permissions."]);
+    }
+  };
+
+  // Stop camera and analysis
+  const stopVideoAnalysis = () => {
+    if (mediaStream) {
+      mediaStream.getTracks().forEach(track => track.stop());
+      setMediaStream(null);
+    }
+    
+    setVideoEnabled(false);
+
+  };
+
+  // Start complete session
+  const startSession = async () => {
+    setSessionActive(true);
+    sessionStartRef.current = Date.now();
+    
+    // Start video analysis
+    await startVideoAnalysis();
+    
+    // Start speech recognition
+    startListening();
+    setAudioEnabled(true);
+    
+    // Start voice analysis
+    if (startVoiceAnalysis) {
+      startVoiceAnalysis();
+    }
+    
+    // Start session timer
+    intervalRef.current = setInterval(() => {
+      setSessionTime(prev => prev + 1);
+    }, 1000);
+    
+    setLiveAdvice(["Session started! Begin speaking and maintain good posture."]);
+  };
+
+  // Stop complete session
+  const stopSession = () => {
+    setSessionActive(false);
+    
+    // Stop video analysis
+    stopVideoAnalysis();
+    
+    // Stop speech recognition
+    stopListening();
+    setAudioEnabled(false);
+    
+    // Stop voice analysis
+    if (stopVoiceAnalysis) {
+      stopVoiceAnalysis();
+    }
+    
+    // Stop timer
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    
+    setSessionTime(0);
+    setLiveAdvice(["Session ended. Review your performance metrics."]);
+  };
+
+  // Generate live coaching advice based on metrics
+  useEffect(() => {
+    if (!sessionActive) return;
+    
+    const advice: string[] = [];
+    
+    // Eye contact advice
+    const eyeContactValue = typeof eyeContact === 'number' ? eyeContact : 0;
+    if (eyeContactValue < 60) {
+      advice.push("Look directly at the camera more often to improve eye contact.");
+    } else if (eyeContactValue > 85) {
+      advice.push("Excellent eye contact! Keep it up.");
+    }
+    
+    // Posture advice
+    const postureValue = typeof posture === 'number' ? posture : 0;
+    if (postureValue < 70) {
+      advice.push("Straighten your shoulders and sit/stand up taller.");
+    } else if (postureValue > 85) {
+      advice.push("Great posture! You look confident and professional.");
+    }
+    
+    // Speaking pace advice
+    const currentWPM = wpm || speakingPace || 0;
+    if (currentWPM > 180) {
+      advice.push("Slow down your speaking pace for better clarity.");
+    } else if (currentWPM < 120 && currentWPM > 0) {
+      advice.push("Try speaking a bit faster to maintain engagement.");
+    } else if (currentWPM >= 120 && currentWPM <= 180) {
+      advice.push("Perfect speaking pace! Your rhythm is excellent.");
+    }
+    
+    // Voice clarity advice
+    if (voiceClarity && voiceClarity < 60) {
+      advice.push("Speak more clearly and articulate your words.");
+    } else if (voiceClarity && voiceClarity > 80) {
+      advice.push("Crystal clear voice! Your articulation is excellent.");
+    }
+    
+    // Confidence advice based on volume and consistency
+    if (confidenceScore && confidenceScore < 50) {
+      advice.push("Speak with more conviction and confidence.");
+    } else if (confidenceScore && confidenceScore > 80) {
+      advice.push("Your confidence is shining through! Great delivery.");
+    }
+    
+    // Update advice if we have new insights
+    if (advice.length > 0) {
+      setLiveAdvice(prev => {
+        const newAdvice = [...prev, ...advice];
+        return newAdvice.slice(-5); // Keep last 5 pieces of advice
+      });
+    }
+  }, [sessionActive, eyeContact, posture, wpm, speakingPace, voiceClarity, confidenceScore]);
+
   // Calculate real-time metrics with enhanced accuracy
   const calculateMetrics = (): RealTimeMetric[] => {
     const baseConfidence = Math.max(confidenceScore || 0, sessionActive ? 30 : 0);
     const baseClarity = Math.max(voiceClarity || 0, sessionActive ? 25 : 0);
     const baseVolume = Math.max(volumeLevel || 0, sessionActive ? 20 : 0);
-    const basePace = Math.max(speakingPace || 0, sessionActive ? 100 : 0);
+    const currentWPM = wpm || speakingPace || 0;
     const eyeContactValue = typeof eyeContact === 'number' ? eyeContact : 0;
     const postureValue = typeof posture === 'number' ? posture : 0;
     const gestureValue = typeof gesture === 'number' ? gesture : 0;
     
     return [
+      {
+        id: "speaking-pace",
+        label: "Speaking Pace",
+        value: Math.round(currentWPM),
+        target: 150,
+        unit: "WPM",
+        icon: <Timer className="w-4 h-4" />,
+        color: "purple",
+        trend: currentWPM > 120 && currentWPM < 180 ? 'up' : currentWPM > 180 ? 'down' : 'stable',
+        status: currentWPM >= 120 && currentWPM <= 180 ? 'excellent' : currentWPM > 100 ? 'good' : 'needs-improvement'
+      },
+      {
+        id: "eye-contact",
+        label: "Eye Contact",
+        value: Math.round(eyeContactValue),
+        target: 80,
+        unit: "%",
+        icon: <Eye className="w-4 h-4" />,
+        color: "blue",
+        trend: eyeContactValue > 70 ? 'up' : eyeContactValue > 50 ? 'stable' : 'down',
+        status: eyeContactValue > 75 ? 'excellent' : eyeContactValue > 55 ? 'good' : 'needs-improvement'
+      },
+      {
+        id: "posture",
+        label: "Posture",
+        value: Math.round(postureValue),
+        target: 85,
+        unit: "%",
+        icon: <Users className="w-4 h-4" />,
+        color: "green",
+        trend: postureValue > 75 ? 'up' : postureValue > 55 ? 'stable' : 'down',
+        status: postureValue > 80 ? 'excellent' : postureValue > 60 ? 'good' : 'needs-improvement'
+      },
       {
         id: "voice-clarity",
         label: "Voice Clarity",
@@ -123,7 +308,7 @@ export default function AdvancedPracticeHub() {
         target: 85,
         unit: "%",
         icon: <Volume2 className="w-4 h-4" />,
-        color: "blue",
+        color: "orange",
         trend: baseClarity > 70 ? 'up' : baseClarity > 50 ? 'stable' : 'down',
         status: baseClarity > 80 ? 'excellent' : baseClarity > 60 ? 'good' : 'needs-improvement'
       },
@@ -134,129 +319,288 @@ export default function AdvancedPracticeHub() {
         target: 80,
         unit: "%",
         icon: <Target className="w-4 h-4" />,
-        color: "green",
+        color: "red",
         trend: baseConfidence > 65 ? 'up' : baseConfidence > 45 ? 'stable' : 'down',
         status: baseConfidence > 75 ? 'excellent' : baseConfidence > 55 ? 'good' : 'needs-improvement'
-      },
-      {
-        id: "speaking-pace",
-        label: "Speaking Pace",
-        value: Math.round(basePace),
-        target: 150,
-        unit: "WPM",
-        icon: <Timer className="w-4 h-4" />,
-        color: "purple",
-        trend: basePace >= 120 && basePace <= 180 ? 'up' : 'stable',
-        status: basePace >= 120 && basePace <= 180 ? 'excellent' : basePace >= 100 && basePace <= 200 ? 'good' : 'needs-improvement'
-      },
-      {
-        id: "eye-contact",
-        label: "Eye Contact",
-        value: Math.round(Math.max(eyeContactValue || 0, sessionActive ? 45 : 0)),
-        target: 75,
-        unit: "%",
-        icon: <Eye className="w-4 h-4" />,
-        color: "amber",
-        trend: eyeContactValue > 60 ? 'up' : eyeContactValue > 40 ? 'stable' : 'down',
-        status: eyeContactValue > 70 ? 'excellent' : eyeContactValue > 50 ? 'good' : 'needs-improvement'
-      },
-      {
-        id: "body-language",
-        label: "Body Language",
-        value: Math.round(Math.max((postureValue + gestureValue) / 2, sessionActive ? 50 : 0)),
-        target: 80,
-        unit: "%",
-        icon: <Activity className="w-4 h-4" />,
-        color: "indigo",
-        trend: postureValue > 70 ? 'up' : postureValue > 50 ? 'stable' : 'down',
-        status: postureValue > 75 ? 'excellent' : postureValue > 55 ? 'good' : 'needs-improvement'
-      },
-      {
-        id: "volume-level",
-        label: "Volume Level",
-        value: Math.round(baseVolume),
-        target: 70,
-        unit: "%",
-        icon: <Gauge className="w-4 h-4" />,
-        color: "emerald",
-        trend: baseVolume > 60 ? 'up' : baseVolume > 40 ? 'stable' : 'down',
-        status: baseVolume > 65 ? 'excellent' : baseVolume > 45 ? 'good' : 'needs-improvement'
       }
     ];
   };
 
-  const metrics = calculateMetrics();
-
-  // Session management
-  const startSession = async () => {
-    setSessionActive(true);
-    sessionStartRef.current = Date.now();
-    
-    if (audioEnabled) {
-      await startListening();
+  // Update voice analysis hook to include word count
+  useEffect(() => {
+    if (sessionActive && wordCount > 0) {
+      // Update voice analysis with current word count
+      if (startVoiceAnalysis) {
+        // Voice analysis is already running
+      }
     }
-    
-    // Start session timer
-    const timerInterval = setInterval(() => {
-      const elapsed = Math.floor((Date.now() - sessionStartRef.current) / 1000);
-      setSessionTime(elapsed);
-    }, 1000);
-    
-    return () => clearInterval(timerInterval);
-  };
+  }, [wordCount, sessionActive]);
 
-  const stopSession = () => {
-    setSessionActive(false);
-    setSessionTime(0);
-    stopListening();
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'excellent': return 'text-green-600 bg-green-100';
-      case 'good': return 'text-blue-600 bg-blue-100';
-      case 'needs-improvement': return 'text-amber-600 bg-amber-100';
-      default: return 'text-gray-600 bg-gray-100';
+  // Session timer
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (sessionActive) {
+      timer = setInterval(() => {
+        setSessionTime(prev => prev + 1);
+      }, 1000);
     }
-  };
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [sessionActive]);
 
-  const getTrendIcon = (trend: string) => {
-    switch (trend) {
-      case 'up': return <TrendingUp className="w-3 h-3 text-green-500" />;
-      case 'down': return <TrendingUp className="w-3 h-3 text-red-500 rotate-180" />;
-      default: return <Activity className="w-3 h-3 text-gray-500" />;
-    }
-  };
-
+  // Format session time
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const getOverallScore = () => {
-    const scores = metrics.map(m => m.value);
-    return Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
-  };
+  const metrics = calculateMetrics();
 
   return (
     <div className="space-y-6">
-      {/* Session Control Header */}
-      <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+      {/* Practice Mode Selection */}
+      <Card className="gradient-card purple-border">
         <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Zap className="w-6 h-6 text-purple-600" />
+            <span className="gradient-text font-heading">Live Practice Session</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Mode Selection */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {practiceModes.map((mode) => (
+              <div
+                key={mode.id}
+                onClick={() => setSelectedMode(mode.id)}
+                className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
+                  selectedMode === mode.id
+                    ? 'border-purple-500 bg-purple-50'
+                    : 'border-gray-200 bg-white hover:border-purple-300'
+                }`}
+              >
+                <div className="flex items-center space-x-3 mb-2">
+                  {mode.icon}
+                  <h3 className="font-semibold text-sm">{mode.name}</h3>
+                </div>
+                <p className="text-xs text-gray-600 mb-3">{mode.description}</p>
+                <div className="flex flex-wrap gap-1">
+                  {mode.focusAreas.slice(0, 2).map((area, index) => (
+                    <Badge key={index} variant="secondary" className="text-xs">
+                      {area}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Session Controls */}
           <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center space-x-2">
-                <Brain className="w-6 h-6 text-blue-600" />
-                <span className="text-blue-900">Advanced Practice Hub</span>
-              </CardTitle>
-              <p className="text-blue-700 mt-1">State-of-the-art AI-powered speech coaching</p>
+            <div className="flex items-center space-x-4">
+              <Button
+                onClick={sessionActive ? stopSession : startSession}
+                className={sessionActive ? "bg-red-600 hover:bg-red-700" : "gradient-bg"}
+                size="lg"
+              >
+                {sessionActive ? (
+                  <>
+                    <Square className="w-5 h-5 mr-2" />
+                    Stop Session
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-5 h-5 mr-2" />
+                    Start Practice
+                  </>
+                )}
+              </Button>
+              
+              <div className="flex items-center space-x-2 text-sm text-gray-600">
+                <Clock className="w-4 h-4" />
+                <span className="font-mono">{formatTime(sessionTime)}</span>
+              </div>
             </div>
-            <div className="flex items-center space-x-3">
-              {sessionActive && (
-                <Badge className="bg-red-100 text-red-800">
-                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse mr-2"></div>
-                  Live Session
+
+            <div className="flex items-center space-x-2">
+              <Badge variant={videoEnabled ? "default" : "secondary"}>
+                <Camera className="w-3 h-3 mr-1" />
+                {videoEnabled ? "Camera On" : "Camera Off"}
+              </Badge>
+              <Badge variant={audioEnabled ? "default" : "secondary"}>
+                <Mic className="w-3 h-3 mr-1" />
+                {audioEnabled ? "Audio On" : "Audio Off"}
+              </Badge>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Live Practice Interface */}
+      {sessionActive && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Video Feed */}
+          <div className="lg:col-span-2 space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Camera className="w-5 h-5 text-blue-600" />
+                  <span>Live Video Feed</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="relative bg-gray-900 rounded-lg overflow-hidden aspect-video">
+                  {videoEnabled ? (
+                    <video
+                      ref={videoRef}
+                      autoPlay
+                      playsInline
+                      muted
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="text-center text-gray-400">
+                        <CameraOff className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                        <p className="text-lg mb-2">Camera Feed Disabled</p>
+                        <p className="text-sm">Start session to enable video analysis</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Analysis Overlay */}
+                  {videoEnabled && (
+                    <canvas
+                      ref={canvasRef}
+                      className="absolute inset-0 w-full h-full pointer-events-none"
+                    />
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Live Transcript */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <MessageSquare className="w-5 h-5 text-green-600" />
+                  <span>Live Transcript</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-gray-50 rounded-lg p-4 min-h-[120px] max-h-[200px] overflow-y-auto">
+                  {transcript ? (
+                    <p className="text-gray-800 leading-relaxed">{transcript}</p>
+                  ) : (
+                    <p className="text-gray-500 italic">Start speaking to see live transcript...</p>
+                  )}
+                </div>
+                <div className="flex items-center justify-between mt-4 text-sm text-gray-600">
+                  <span>Words: {wordCount}</span>
+                  <span>WPM: {wpm || 0}</span>
+                  <span className={`flex items-center space-x-1 ${isListening ? 'text-green-600' : 'text-gray-400'}`}>
+                    <div className={`w-2 h-2 rounded-full ${isListening ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
+                    <span>{isListening ? 'Listening' : 'Not listening'}</span>
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Live Metrics & Feedback */}
+          <div className="space-y-6">
+            {/* Real-time Metrics */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Activity className="w-5 h-5 text-purple-600" />
+                  <span>Live Metrics</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {metrics.map((metric) => (
+                  <div key={metric.id} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        {metric.icon}
+                        <span className="text-sm font-medium">{metric.label}</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm font-bold">{metric.value}{metric.unit}</span>
+                        <Badge 
+                          variant={metric.status === 'excellent' ? 'default' : 
+                                 metric.status === 'good' ? 'secondary' : 'destructive'}
+                          className="text-xs"
+                        >
+                          {metric.status === 'excellent' ? 'Great' : 
+                           metric.status === 'good' ? 'Good' : 'Improve'}
+                        </Badge>
+                      </div>
+                    </div>
+                    <Progress 
+                      value={(metric.value / metric.target) * 100} 
+                      className="h-2"
+                    />
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            {/* Live AI Coaching */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Brain className="w-5 h-5 text-cyan-600" />
+                  <span>AI Coach</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3 max-h-[300px] overflow-y-auto">
+                  {liveAdvice.length > 0 ? (
+                    liveAdvice.map((advice, index) => (
+                      <div key={index} className="flex items-start space-x-2 p-3 bg-blue-50 rounded-lg">
+                        <Lightbulb className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                        <p className="text-sm text-blue-800">{advice}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-6">
+                      <Brain className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                      <p className="text-gray-500 text-sm">AI coach will provide live feedback during your session</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {/* Session Summary (when not active) */}
+      {!sessionActive && sessionTime > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Award className="w-5 h-5 text-yellow-600" />
+              <span>Session Complete</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-6">
+              <p className="text-lg mb-2">Great job! You practiced for {formatTime(sessionTime)}</p>
+              <p className="text-gray-600 mb-4">Check the Analysis tab for detailed feedback</p>
+              <Button variant="outline" onClick={() => setSessionTime(0)}>
+                Start New Session
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
                 </Badge>
               )}
               <Badge variant="outline" className="text-blue-700">
