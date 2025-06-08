@@ -92,6 +92,10 @@ export default function Dashboard() {
               <Trophy className="w-4 h-4" />
               <span className="hidden sm:inline">Badges</span>
             </TabsTrigger>
+            <TabsTrigger value="vibe-tracker" className="flex items-center space-x-1 data-[state=active]:gradient-bg data-[state=active]:text-white">
+              <Star className="w-4 h-4" />
+              <span className="hidden sm:inline">Vibe</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-10 pb-16">
@@ -218,6 +222,10 @@ export default function Dashboard() {
 
           <TabsContent value="badges" className="space-y-6">
             <BadgeSystem />
+          </TabsContent>
+
+          <TabsContent value="vibe-tracker" className="space-y-6">
+            <VibeTracker />
           </TabsContent>
         </Tabs>
       </div>
