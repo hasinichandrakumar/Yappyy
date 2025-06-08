@@ -179,6 +179,114 @@ export default function SpeechDNA() {
       examples: ["McKinsey speakers", "Warren Buffett", "Sheryl Sandberg"],
       strengths: ["Logical arguments", "Data analysis", "Strategic planning"],
       challenges: ["Emotional connection", "Inspirational messages", "Entertainment"]
+    },
+    {
+      id: "storyteller",
+      name: "The Storyteller",
+      title: "Narrative Master",
+      description: "Weaves compelling stories that captivate and move audiences",
+      traits: ["Narrative", "Imaginative", "Engaging", "Memorable"],
+      icon: <BookOpen className="w-6 h-6" />,
+      color: "from-amber-500 to-orange-500",
+      examples: ["Malcolm Gladwell", "Elizabeth Gilbert", "Chimamanda Ngozi Adichie"],
+      strengths: ["Emotional engagement", "Memorable content", "Audience connection"],
+      challenges: ["Data-heavy presentations", "Time constraints", "Formal protocols"]
+    },
+    {
+      id: "motivator",
+      name: "The Motivator",
+      title: "Energy Catalyst",
+      description: "Ignites passion and drives action through powerful inspiration",
+      traits: ["Passionate", "High-energy", "Uplifting", "Action-oriented"],
+      icon: <Flame className="w-6 h-6" />,
+      color: "from-orange-500 to-red-500",
+      examples: ["Tony Robbins", "Eric Thomas", "Les Brown"],
+      strengths: ["Inspiring action", "Building momentum", "Overcoming obstacles"],
+      challenges: ["Subtle messaging", "Quiet audiences", "Technical content"]
+    },
+    {
+      id: "sage",
+      name: "The Sage",
+      title: "Wisdom Keeper",
+      description: "Shares deep insights with calm authority and thoughtful reflection",
+      traits: ["Wise", "Thoughtful", "Reflective", "Measured"],
+      icon: <Star className="w-6 h-6" />,
+      color: "from-slate-500 to-gray-600",
+      examples: ["Warren Buffett", "Bill Gates", "Dalai Lama"],
+      strengths: ["Deep insights", "Credible authority", "Timeless wisdom"],
+      challenges: ["High-energy events", "Young audiences", "Entertainment value"]
+    },
+    {
+      id: "challenger",
+      name: "The Challenger",
+      title: "Status Quo Disruptor",
+      description: "Questions assumptions and pushes boundaries with provocative ideas",
+      traits: ["Provocative", "Bold", "Questioning", "Unconventional"],
+      icon: <Zap className="w-6 h-6" />,
+      color: "from-yellow-500 to-orange-500",
+      examples: ["Malcolm X", "Steve Jobs", "Greta Thunberg"],
+      strengths: ["Driving change", "Memorable impact", "Breaking barriers"],
+      challenges: ["Conservative audiences", "Diplomatic settings", "Consensus building"]
+    },
+    {
+      id: "collaborator",
+      name: "The Collaborator",
+      title: "Team Builder",
+      description: "Facilitates dialogue and builds consensus through inclusive communication",
+      traits: ["Inclusive", "Diplomatic", "Facilitating", "Unifying"],
+      icon: <Users className="w-6 h-6" />,
+      color: "from-green-500 to-blue-500",
+      examples: ["Barack Obama", "Nelson Mandela", "Jacinda Ardern"],
+      strengths: ["Building consensus", "Team unity", "Diplomatic solutions"],
+      challenges: ["Urgent decisions", "Controversial topics", "Individual leadership"]
+    },
+    {
+      id: "innovator",
+      name: "The Innovator",
+      title: "Creative Pioneer",
+      description: "Introduces breakthrough ideas with creative and unconventional approaches",
+      traits: ["Creative", "Original", "Experimental", "Forward-thinking"],
+      icon: <Lightbulb className="w-6 h-6" />,
+      color: "from-cyan-500 to-blue-500",
+      examples: ["Tim Cook", "Satya Nadella", "Reid Hoffman"],
+      strengths: ["Fresh perspectives", "Creative solutions", "Future thinking"],
+      challenges: ["Traditional settings", "Risk-averse audiences", "Proven methods"]
+    },
+    {
+      id: "guide",
+      name: "The Guide",
+      title: "Pathway Illuminator",
+      description: "Leads audiences through complex journeys with clear direction and support",
+      traits: ["Supportive", "Clear", "Methodical", "Encouraging"],
+      icon: <Compass className="w-6 h-6" />,
+      color: "from-teal-500 to-green-500",
+      examples: ["Marie Forleo", "Tim Ferriss", "Gary Vaynerchuk"],
+      strengths: ["Step-by-step guidance", "Practical advice", "Sustainable change"],
+      challenges: ["Abstract concepts", "Theoretical discussions", "Quick fixes"]
+    },
+    {
+      id: "advocate",
+      name: "The Advocate",
+      title: "Cause Champion",
+      description: "Speaks passionately for important causes with moral authority",
+      traits: ["Passionate", "Principled", "Persuasive", "Committed"],
+      icon: <Shield className="w-6 h-6" />,
+      color: "from-red-500 to-pink-500",
+      examples: ["Martin Luther King Jr.", "Malala Yousafzai", "Al Gore"],
+      strengths: ["Moral authority", "Passionate delivery", "Social impact"],
+      challenges: ["Neutral topics", "Commercial settings", "Opposing viewpoints"]
+    },
+    {
+      id: "expert",
+      name: "The Expert",
+      title: "Authority Specialist",
+      description: "Delivers specialized knowledge with credible expertise and precision",
+      traits: ["Knowledgeable", "Credible", "Precise", "Authoritative"],
+      icon: <Award className="w-6 h-6" />,
+      color: "from-indigo-500 to-blue-500",
+      examples: ["Malcolm Gladwell", "Daniel Kahneman", "Yuval Noah Harari"],
+      strengths: ["Deep expertise", "Credible authority", "Detailed analysis"],
+      challenges: ["General audiences", "Emotional connection", "Simplification"]
     }
   ];
 
