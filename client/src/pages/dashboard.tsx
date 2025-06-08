@@ -122,10 +122,20 @@ export default function Dashboard() {
                     <span className="text-sm text-gray-500">Session #</span>
                     <span className="text-lg font-bold text-[#0BF9EA] ml-1">24</span>
                   </div>
-                  <Button className="bg-[#0BF9EA] hover:bg-[#0BF9EA]/90 text-white shadow-lg">
-                    <PlayCircle className="w-4 h-4 mr-2" />
-                    Quick Start
-                  </Button>
+                  <div className="flex space-x-2">
+                    <Button className="bg-[#0BF9EA] hover:bg-[#0BF9EA]/90 text-white shadow-lg">
+                      <PlayCircle className="w-4 h-4 mr-2" />
+                      Quick Start
+                    </Button>
+                    <Button 
+                      onClick={() => setShowPostAnalysis(true)}
+                      variant="outline" 
+                      className="border-[#0BF9EA] text-[#0BF9EA] hover:bg-[#0BF9EA]/10"
+                    >
+                      <Brain className="w-4 h-4 mr-2" />
+                      Finish & Analyze
+                    </Button>
+                  </div>
                 </div>
               </div>
               
@@ -318,6 +328,14 @@ export default function Dashboard() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Post Session Analysis Modal */}
+      <PostSessionAnalysis 
+        isVisible={showPostAnalysis}
+        onClose={() => setShowPostAnalysis(false)}
+        roleplayContext={sessionContext.roleplayType}
+        audienceType={sessionContext.audienceType}
+      />
     </div>
   );
 }

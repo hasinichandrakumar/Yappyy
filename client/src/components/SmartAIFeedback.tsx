@@ -25,11 +25,17 @@ interface AIFeedback {
   hideAfter?: number; // seconds
 }
 
-export default function SmartAIFeedback() {
-  const { wpm, fillerWords, isListening, transcript } = useSpeechRecognition();
+interface SmartAIFeedbackProps {
+  roleplayContext?: string;
+  audienceType?: string;
+}
+
+export default function SmartAIFeedback({ roleplayContext, audienceType }: SmartAIFeedbackProps = {}) {
+  const { wpm, fillerWords, isListening, transcript, wordCount } = useSpeechRecognition();
   const [currentFeedback, setCurrentFeedback] = useState<AIFeedback | null>(null);
   const [lastFillerCount, setLastFillerCount] = useState(0);
   const [lastWPMCheck, setLastWPMCheck] = useState(0);
+  const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null);
   const hideTimeoutRef = useRef<NodeJS.Timeout>();
 
   // Debug logging
@@ -88,22 +94,66 @@ export default function SmartAIFeedback() {
 
 
 
-  // Monitor speaking pace
+  // Track session start
   useEffect(() => {
-    if (!isListening || wpm === lastWPMCheck) return;
-    
-    console.log('Live feedback check:', { wpm, transcriptLength: transcript.length, isListening });
-    setLastWPMCheck(wpm);
+    if (isListening && !sessionStartTime) {
+      setSessionStartTime(new Date());
+    } else if (!isListening && sessionStartTime) {
+      setSessionStartTime(null);
+    }
+  }, [isListening, sessionStartTime]);
 
-    // Lower thresholds for easier testing
-    const wordCount = transcript.split(' ').length;
+  // Generate contextual feedback based on roleplay scenario
+  const getContextualFeedback = (type: string, baseMessage: string) => {
+    if (!roleplayContext) return baseMessage;
+
+    const contextualMessages: Record<string, Record<string, string>> = {
+      'job-interview': {
+        'pace-slow': 'In interviews, hesitation can signal uncertainty. Speak with confidence and maintain steady pace.',
+        'pace-fast': 'Take your time in interviews. Rushed answers may seem unprepared. Pause to think before responding.',
+        'pace-good': 'Perfect pace for an interview! You sound confident and thoughtful.',
+        'filler-warning': 'Minimize "um" and "uh" in interviews. Pause instead to collect your thoughts.',
+        'good-flow': 'Excellent! Your responses flow naturally. The interviewer can easily follow your experience.'
+      },
+      'sales-pitch': {
+        'pace-slow': 'Energy is key in sales! Increase your pace to build excitement about your product.',
+        'pace-fast': 'Slow down to let key benefits sink in. Give prospects time to absorb your value proposition.',
+        'pace-good': 'Perfect sales energy! Your pace builds excitement while remaining clear.',
+        'filler-warning': 'Clean delivery builds credibility. Remove fillers to sound more authoritative.',
+        'good-flow': 'Great flow! You\'re building a compelling case that guides prospects toward yes.'
+      },
+      'conference-presentation': {
+        'pace-slow': 'Academic audiences appreciate deliberate pace, but ensure you maintain engagement.',
+        'pace-fast': 'Technical content needs processing time. Slow down for complex concepts.',
+        'pace-good': 'Excellent pace for knowledge transfer! Your audience can follow and learn.',
+        'filler-warning': 'Professional presentations require polished delivery. Eliminate verbal fillers.',
+        'good-flow': 'Strong academic delivery! You\'re effectively transferring knowledge to your audience.'
+      },
+      'wedding-toast': {
+        'pace-slow': 'Emotional moments deserve thoughtful pacing. You\'re giving weight to meaningful words.',
+        'pace-fast': 'Slow down to let heartfelt moments resonate. This is about connection, not speed.',
+        'pace-good': 'Beautiful pacing! Your words carry the right emotional weight for this moment.',
+        'filler-warning': 'Keep it heartfelt and clean. Remove fillers for a more polished toast.',
+        'good-flow': 'Lovely flow! You\'re creating a meaningful moment that guests will remember.'
+      }
+    };
+
+    const contextMessages = contextualMessages[roleplayContext as keyof typeof contextualMessages];
+    return contextMessages?.[type] || baseMessage;
+  };
+
+  // Monitor speaking pace with contextual feedback
+  useEffect(() => {
+    if (!isListening || wpm === lastWPMCheck || wordCount < 5) return;
     
-    if (wpm > 0 && wordCount > 3) {
+    setLastWPMCheck(wpm);
+    
+    if (wpm > 0) {
       if (wpm < 100) {
         showFeedback(createFeedback(
           'warning',
-          'Speaking Too Slowly',
-          'Try to increase your pace slightly. Aim for 140-180 words per minute for better engagement.',
+          'Speaking Pace',
+          getContextualFeedback('pace-slow', 'Try to increase your pace slightly. Aim for 140-180 words per minute.'),
           'medium',
           true,
           4
@@ -112,16 +162,16 @@ export default function SmartAIFeedback() {
         showFeedback(createFeedback(
           'warning',
           'Speaking Too Fast',
-          'Slow down a bit! Your audience needs time to process your message. Aim for 140-180 WPM.',
+          getContextualFeedback('pace-fast', 'Slow down for better comprehension. Aim for 140-180 WPM.'),
           'high',
           true,
           5
         ));
-      } else if (wpm >= 120 && wpm <= 200 && wordCount > 5) {
+      } else if (wpm >= 120 && wpm <= 200) {
         showFeedback(createFeedback(
           'success',
-          'Perfect Speaking Pace',
-          'Excellent! You\'re speaking at an ideal pace that keeps your audience engaged.',
+          'Perfect Pace',
+          getContextualFeedback('pace-good', 'Excellent speaking pace! You\'re maintaining ideal rhythm.'),
           'low',
           true,
           3
@@ -156,7 +206,7 @@ export default function SmartAIFeedback() {
         showFeedback(createFeedback(
           'warning',
           'Filler Word Detected',
-          `I noticed "${recentFiller}". Try pausing instead to maintain professional delivery.`,
+          getContextualFeedback('filler-warning', `I noticed "${recentFiller}". Try pausing instead to maintain professional delivery.`),
           'medium',
           true,
           4
