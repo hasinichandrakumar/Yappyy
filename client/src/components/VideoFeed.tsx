@@ -1,325 +1,118 @@
-import { useRef, useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Play, Square, Pause, Eye, Volume2, Brain, Zap } from "lucide-react";
-import { useMediaPipe } from "@/hooks/useMediaPipe";
-import { useVoiceAnalysis } from "@/hooks/useVoiceAnalysis";
-import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
+import { Camera, CameraOff, Video, VideoOff } from "lucide-react";
 
 export default function VideoFeed() {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isRecording, setIsRecording] = useState(false);
-  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [isVideoEnabled, setIsVideoEnabled] = useState(false);
+  const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState<string>("");
 
-  const [realTimeFeedback, setRealTimeFeedback] = useState<boolean>(false);
-  const [feedbackMessages, setFeedbackMessages] = useState<string[]>([]);
-
-  const { 
-    posture, 
-    gesture, 
-    eyeContact, 
-    initializeMediaPipe, 
-    processFrame 
-  } = useMediaPipe();
-  
-  const { volumeLevel, startVoiceAnalysis, stopVoiceAnalysis, speakingPace, voiceClarity } = useVoiceAnalysis();
-  
-  const { 
-    startListening, 
-    stopListening, 
-    isListening, 
-    wpm, 
-    wordCount,
-    transcript 
-  } = useSpeechRecognition();
-
-  useEffect(() => {
-    startCamera();
-    initializeMediaPipe();
-    
-    return () => {
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-      }
-    };
-  }, []);
-
-  // Real-time feedback system
-  useEffect(() => {
-    if (!realTimeFeedback || !isRecording) return;
-
-    const feedbackInterval = setInterval(() => {
-      const messages: string[] = [];
-
-      // Analyze posture
-      if (posture === 'needs_improvement') {
-        messages.push("Keep your shoulders back and maintain good posture");
-      }
-
-      // Analyze eye contact
-      if (eyeContact === 'poor') {
-        messages.push("Try to maintain eye contact with your audience");
-      }
-
-      // Analyze voice
-      if (volumeLevel < 0.3) {
-        messages.push("Speak louder to ensure your audience can hear you");
-      }
-
-      // Use actual WPM from speech recognition if available
-      const currentWPM = wpm || speakingPace;
-      if (currentWPM > 0) {
-        if (currentWPM < 120) {
-          messages.push("You can speak a bit faster to maintain engagement");
-        } else if (currentWPM > 180) {
-          messages.push("Slow down your speaking pace for better clarity");
-        }
-      }
-
-      // Update feedback messages (limit to 2 messages at a time)
-      if (messages.length > 0) {
-        setFeedbackMessages(messages.slice(0, 2));
-      }
-
-      // Clear messages after 5 seconds
-      setTimeout(() => {
-        setFeedbackMessages([]);
-      }, 5000);
-    }, 10000); // Check every 10 seconds
-
-    return () => clearInterval(feedbackInterval);
-  }, [realTimeFeedback, isRecording, posture, eyeContact, volumeLevel, speakingPace, wpm]);
-
-  const startCamera = async () => {
-    
+  const startVideo = async () => {
     try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { width: 640, height: 480 },
-        audio: true
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: true, 
+        audio: false 
       });
       
-      setStream(mediaStream);
       if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
+        videoRef.current.srcObject = stream;
+        setMediaStream(stream);
+        setIsVideoEnabled(true);
+        setError("");
       }
-      setError("");
     } catch (err) {
-      setError("Camera access denied. Please enable camera permissions or use Demo Mode.");
       console.error("Error accessing camera:", err);
+      setError("Unable to access camera. Please ensure camera permissions are granted.");
     }
   };
 
-  const startRecording = () => {
-    console.log('Starting recording session...');
-    setIsRecording(true);
-    
-    // Start both voice analysis and speech recognition
-    startVoiceAnalysis();
-    startListening();
-    
-    // Start frame processing for MediaPipe
-    if (videoRef.current && canvasRef.current) {
-      const processFrames = () => {
-        if (!isRecording) return;
-        
-        const video = videoRef.current;
-        const canvas = canvasRef.current;
-        
-        if (video && canvas) {
-          const ctx = canvas.getContext('2d');
-          if (ctx) {
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            // Process frame for MediaPipe analysis
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            processFrame(imageData);
-          }
-        }
-        
-        requestAnimationFrame(processFrames);
-      };
-      
-      processFrames();
+  const stopVideo = () => {
+    if (mediaStream) {
+      mediaStream.getTracks().forEach(track => track.stop());
+      setMediaStream(null);
     }
+    
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+    
+    setIsVideoEnabled(false);
   };
 
-  const stopRecording = () => {
-    console.log('Stopping recording session...');
-    setIsRecording(false);
-    stopVoiceAnalysis();
-    stopListening();
-    setFeedbackMessages([]);
-  };
-
-  const pauseRecording = () => {
-    console.log('Pausing recording session...');
-    setIsRecording(false);
-    stopVoiceAnalysis();
-    stopListening();
-  };
+  useEffect(() => {
+    return () => {
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [mediaStream]);
 
   return (
-    <Card className="shadow-lg border-0">
-      <div className="bg-gradient-to-r from-cyan-50 to-blue-50 p-6 border-b border-gray-100">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-3">
-            <div className="p-2 bg-cyan-100 rounded-lg">
-              <Play className="w-5 h-5 text-cyan-600" />
-            </div>
-            Live Practice Session
-          </h2>
-          <div className="flex items-center space-x-4">
-
-            <div className="flex items-center space-x-2">
-              <Label htmlFor="real-time-feedback" className="text-sm font-medium text-gray-700">
-                Real-time Feedback
-              </Label>
-              <Switch
-                id="real-time-feedback"
-                checked={realTimeFeedback}
-                onCheckedChange={setRealTimeFeedback}
-                className="data-[state=checked]:bg-cyan-600"
-              />
-            </div>
-            {isRecording && (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                <span className="w-2 h-2 bg-red-400 rounded-full mr-1.5 animate-pulse"></span>
-                Recording
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-      
-      <CardContent className="p-6">
-        {/* Video Feed Area */}
-        <div className="relative bg-gray-900 rounded-lg overflow-hidden aspect-video">
+    <div className="space-y-4">
+      {/* Video Display */}
+      <div className="relative bg-gray-900 rounded-lg overflow-hidden aspect-video">
+        {isVideoEnabled ? (
           <video
             ref={videoRef}
             autoPlay
-            muted
             playsInline
+            muted
             className="w-full h-full object-cover"
           />
-          
-          {/* Hidden canvas for frame processing */}
-          <canvas
-            ref={canvasRef}
-            width={640}
-            height={480}
-            className="hidden"
-          />
-          
-          {/* Real-time Feedback Overlays */}
-          <div className="absolute inset-0">
-            {/* Posture Indicator */}
-            <div className="absolute top-4 left-4">
-              <div className={`px-3 py-1.5 rounded-full text-xs font-medium ${
-                posture === 'good' ? 'bg-green-100 text-green-800' :
-                posture === 'moderate' ? 'bg-yellow-100 text-yellow-800' :
-                'bg-red-100 text-red-800'
-              }`}>
-                Posture: {posture === 'good' ? 'Good' : posture === 'moderate' ? 'Fair' : 'Needs Work'}
-              </div>
-            </div>
-            
-            {/* Eye Contact Indicator */}
-            <div className="absolute top-4 right-4">
-              <div className={`px-3 py-1.5 rounded-full text-xs font-medium flex items-center space-x-1 ${
-                eyeContact === 'good' ? 'bg-green-100 text-green-800' :
-                eyeContact === 'moderate' ? 'bg-yellow-100 text-yellow-800' :
-                'bg-red-100 text-red-800'
-              }`}>
-                <Eye className="w-3 h-3" />
-                <span>Eye Contact: {eyeContact === 'good' ? 'Good' : eyeContact === 'moderate' ? 'Fair' : 'Poor'}</span>
-              </div>
-            </div>
-            
-            {/* Voice Analysis Overlay */}
-            <div className="absolute bottom-4 left-4">
-              <div className="bg-black bg-opacity-60 text-white px-3 py-2 rounded-lg">
-                <div className="flex items-center space-x-3 text-xs">
-                  <div className="flex items-center space-x-1">
-                    <Volume2 className="w-3 h-3" />
-                    <span>{Math.round(volumeLevel * 100)}%</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <Brain className="w-3 h-3" />
-                    <span>{wpm || speakingPace} WPM</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <span className="text-cyan-300">Clarity: {Math.round(voiceClarity)}%</span>
-                  </div>
-                  {wordCount > 0 && (
-                    <div className="flex items-center space-x-1">
-                      <span className="text-green-300">{wordCount} words</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Real-time AI Feedback Messages */}
-          {realTimeFeedback && feedbackMessages.length > 0 && (
-            <div className="absolute top-16 left-4 right-4 space-y-2 z-10">
-              {feedbackMessages.map((message, index) => (
-                <div
-                  key={index}
-                  className="bg-cyan-600 bg-opacity-95 text-white px-4 py-3 rounded-lg shadow-lg animate-in slide-in-from-top-2 duration-300"
-                >
-                  <div className="flex items-start space-x-2">
-                    <Zap className="w-4 h-4 text-yellow-300 mt-0.5 flex-shrink-0" />
-                    <p className="text-sm font-medium">{message}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-        
-        {/* Real-time Feedback Status */}
-        {realTimeFeedback && (
-          <div className="mt-4 p-3 bg-cyan-50 border border-cyan-200 rounded-lg">
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-cyan-600 rounded-full animate-pulse"></div>
-              <span className="text-sm font-medium text-cyan-800">
-                Real-time AI feedback is active - You'll receive live coaching tips during your presentation
-              </span>
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="text-center text-gray-400">
+              <Video className="w-16 h-16 mx-auto mb-4 opacity-50" />
+              <p className="text-lg mb-2">Camera Feed</p>
+              <p className="text-sm">Click to start video feed</p>
             </div>
           </div>
         )}
-
-        {/* Recording Controls */}
-        <div className="flex items-center justify-center space-x-4 mt-6">
+        
+        {/* Video Controls Overlay */}
+        <div className="absolute bottom-4 left-4 right-4 flex justify-center">
           <Button
-            onClick={stopRecording}
-            disabled={!isRecording}
-            className="bg-red-500 hover:bg-red-600 text-white w-12 h-12 rounded-full p-0"
+            onClick={isVideoEnabled ? stopVideo : startVideo}
+            variant={isVideoEnabled ? "destructive" : "default"}
+            size="sm"
+            className="bg-black/50 hover:bg-black/70 text-white border-white/20"
           >
-            <Square className="w-5 h-5" />
-          </Button>
-          <Button
-            onClick={pauseRecording}
-            disabled={!isRecording}
-            variant="secondary"
-            className="w-12 h-12 rounded-full p-0"
-          >
-            <Pause className="w-5 h-5" />
-          </Button>
-          <Button
-            onClick={startRecording}
-            disabled={isRecording}
-            className="bg-primary hover:bg-blue-700 text-white px-6 py-3 flex items-center space-x-2"
-          >
-            <Play className="w-4 h-4" />
-            <span>New Session</span>
+            {isVideoEnabled ? (
+              <>
+                <CameraOff className="w-4 h-4 mr-2" />
+                Stop Camera
+              </>
+            ) : (
+              <>
+                <Camera className="w-4 h-4 mr-2" />
+                Start Camera
+              </>
+            )}
           </Button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-700 text-sm">{error}</p>
+          <p className="text-red-600 text-xs mt-1">
+            Try refreshing the page or check your browser camera permissions.
+          </p>
+        </div>
+      )}
+
+      {/* Status Indicator */}
+      <div className="flex items-center justify-between text-sm text-gray-600">
+        <div className="flex items-center space-x-2">
+          <div className={`w-2 h-2 rounded-full ${isVideoEnabled ? 'bg-green-500' : 'bg-gray-400'}`} />
+          <span>{isVideoEnabled ? 'Camera Active' : 'Camera Inactive'}</span>
+        </div>
+        <span className="text-xs">
+          {isVideoEnabled ? 'Recording for speech analysis' : 'Click to enable video feed'}
+        </span>
+      </div>
+    </div>
   );
 }

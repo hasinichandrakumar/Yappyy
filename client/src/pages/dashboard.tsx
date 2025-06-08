@@ -111,45 +111,6 @@ export default function Dashboard() {
             <AdvancedPracticeHub />
           </TabsContent>
 
-              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-                <div className="bg-gradient-to-r from-gray-50 to-blue-50 px-6 py-4 border-b border-gray-100">
-                  <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                    <Users className="w-5 h-5 mr-2 text-[#0BF9EA]" />
-                    AI Practice Partner
-                  </h3>
-                </div>
-                <div className="p-6">
-                  <AIPracticeRoleplay />
-                </div>
-              </div>
-              
-              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-                <div className="bg-gradient-to-r from-gray-50 to-blue-50 px-6 py-4 border-b border-gray-100">
-                  <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                    <BarChart3 className="w-5 h-5 mr-2 text-[#0BF9EA]" />
-                    Session Stats
-                  </h3>
-                </div>
-                <div className="p-6">
-                  <SessionStats />
-                </div>
-              </div>
-            </div>
-            
-            {/* Session History */}
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-              <div className="bg-gradient-to-r from-gray-50 to-blue-50 px-6 py-4 border-b border-gray-100">
-                <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                  <Clock className="w-5 h-5 mr-2 text-[#0BF9EA]" />
-                  Recent Sessions
-                </h3>
-              </div>
-              <div className="p-6">
-                <SessionHistory />
-              </div>
-            </div>
-          </TabsContent>
-
           <TabsContent value="improvement" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <AdaptiveFeedbackEngine 
