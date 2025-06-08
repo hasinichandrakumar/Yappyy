@@ -18,6 +18,7 @@ import {
 import { useMediaPipe } from "@/hooks/useMediaPipe";
 import { useVoiceAnalysis } from "@/hooks/useVoiceAnalysis";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
+import SessionSelector from "./SessionSelector";
 
 interface PostureMetrics {
   spineAlignment: number;
@@ -44,10 +45,20 @@ interface SpeechInsights {
   improvementAreas: string[];
 }
 
+interface Session {
+  id: number;
+  userId: string;
+  duration: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export default function DetailedAnalysis() {
   const { posture, gesture, eyeContact } = useMediaPipe();
   const { speakingPace, voiceClarity, confidenceScore, volumeLevel } = useVoiceAnalysis();
   const { transcript, wordCount } = useSpeechRecognition();
+  const [selectedSession, setSelectedSession] = useState<Session | null>(null);
+  const [isAnalyzingSession, setIsAnalyzingSession] = useState(false);
 
   const [postureMetrics, setPostureMetrics] = useState<PostureMetrics>({
     spineAlignment: 85,
