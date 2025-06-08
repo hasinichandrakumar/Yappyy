@@ -13,7 +13,7 @@ export default function VideoFeed() {
   const [isRecording, setIsRecording] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState<string>("");
-  const [demoMode, setDemoMode] = useState<boolean>(false);
+
   const [realTimeFeedback, setRealTimeFeedback] = useState<boolean>(false);
   const [feedbackMessages, setFeedbackMessages] = useState<string[]>([]);
 
@@ -81,7 +81,6 @@ export default function VideoFeed() {
   }, [realTimeFeedback, isRecording, posture, eyeContact, volumeLevel, speakingPace]);
 
   const startCamera = async () => {
-    if (demoMode) return;
     
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
@@ -151,17 +150,7 @@ export default function VideoFeed() {
             Live Practice Session
           </h2>
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <Label htmlFor="demo-mode" className="text-sm font-medium text-gray-700">
-                Demo Mode
-              </Label>
-              <Switch
-                id="demo-mode"
-                checked={demoMode}
-                onCheckedChange={setDemoMode}
-                className="data-[state=checked]:bg-cyan-600"
-              />
-            </div>
+
             <div className="flex items-center space-x-2">
               <Label htmlFor="real-time-feedback" className="text-sm font-medium text-gray-700">
                 Real-time Feedback
@@ -186,27 +175,13 @@ export default function VideoFeed() {
       <CardContent className="p-6">
         {/* Video Feed Area */}
         <div className="relative bg-gray-900 rounded-lg overflow-hidden aspect-video">
-          {demoMode ? (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-900 to-purple-900">
-              <div className="text-center text-white">
-                <div className="w-24 h-24 mx-auto mb-4 rounded-full border-4 border-white/30 flex items-center justify-center">
-                  <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center">
-                    <div className="w-8 h-8 rounded-full bg-white/40"></div>
-                  </div>
-                </div>
-                <p className="text-lg font-medium">Demo Mode</p>
-                <p className="text-sm opacity-75">Camera simulation active</p>
-              </div>
-            </div>
-          ) : (
-            <video
-              ref={videoRef}
-              autoPlay
-              muted
-              playsInline
-              className="w-full h-full object-cover"
-            />
-          )}
+          <video
+            ref={videoRef}
+            autoPlay
+            muted
+            playsInline
+            className="w-full h-full object-cover"
+          />
           
           {/* Hidden canvas for frame processing */}
           <canvas

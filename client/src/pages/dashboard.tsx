@@ -25,6 +25,7 @@ import SpeechFingerprintGenerator from "@/components/SpeechFingerprintGenerator"
 import VibeTracker from "@/components/VibeTracker";
 import AdaptiveFeedbackEngine from "@/components/AdaptiveFeedbackEngine";
 import EnhancedTemplateMarketplace from "@/components/EnhancedTemplateMarketplace";
+import HelpGuide from "@/components/HelpGuide";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -95,6 +96,10 @@ export default function Dashboard() {
             <TabsTrigger value="vibe-tracker" className="flex items-center space-x-1 data-[state=active]:gradient-bg data-[state=active]:text-white">
               <Star className="w-4 h-4" />
               <span className="hidden sm:inline">Vibe</span>
+            </TabsTrigger>
+            <TabsTrigger value="help" className="flex items-center space-x-1 data-[state=active]:gradient-bg data-[state=active]:text-white">
+              <HelpCircle className="w-4 h-4" />
+              <span className="hidden sm:inline">Help</span>
             </TabsTrigger>
           </TabsList>
 
@@ -226,6 +231,10 @@ export default function Dashboard() {
 
           <TabsContent value="vibe-tracker" className="space-y-6">
             <VibeTracker />
+          </TabsContent>
+
+          <TabsContent value="help" className="space-y-6">
+            <HelpGuide />
           </TabsContent>
         </Tabs>
       </div>
