@@ -15,6 +15,7 @@ import {
   Zap
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import SessionSelector from "./SessionSelector";
 
 interface BodyLanguageMetrics {
   eyeContactDuration: number;
