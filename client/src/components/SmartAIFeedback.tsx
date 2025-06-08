@@ -163,11 +163,11 @@ export default function SmartAIFeedback({ demoMode = true }: SmartAIFeedbackProp
     }
     
     setLastFillerCount(currentFillerCount);
-  }, [fillerWords.length, isListening, lastFillerCount, fillerWords]);
+  }, [fillerWords.length, isListening, lastFillerCount, fillerWords, demoMode]);
 
-  // Provide periodic encouragement
+  // Provide periodic encouragement (only when not in demo mode)
   useEffect(() => {
-    if (!isListening) return;
+    if (demoMode || !isListening) return;
 
     const wordCount = transcript.split(' ').length;
     
@@ -184,7 +184,7 @@ export default function SmartAIFeedback({ demoMode = true }: SmartAIFeedbackProp
         ));
       }
     }
-  }, [transcript, isListening, wpm, fillerWords.length, currentFeedback]);
+  }, [transcript, isListening, wpm, fillerWords.length, currentFeedback, demoMode]);
 
   const getIcon = (type: AIFeedback['type']) => {
     switch (type) {
@@ -231,9 +231,18 @@ export default function SmartAIFeedback({ demoMode = true }: SmartAIFeedbackProp
       <Card className="shadow-lg border-0 bg-white">
         <CardContent className="flex items-center justify-center p-8 text-gray-500 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-lg">
           <div className="text-center">
-            <Brain className="w-8 h-8 mx-auto mb-3 text-cyan-400" />
-            <p className="text-base font-medium text-gray-700">AI Coach is listening...</p>
-            <p className="text-sm text-gray-500 mt-2">Real-time feedback will appear here</p>
+            <div className="relative">
+              <Brain className={`w-8 h-8 mx-auto mb-3 text-cyan-400 ${demoMode || isListening ? 'animate-pulse' : ''}`} />
+              {(demoMode || isListening) && (
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-ping" />
+              )}
+            </div>
+            <p className="text-base font-medium text-gray-700">
+              {demoMode ? 'AI Coach Demo Mode' : isListening ? 'AI Coach is analyzing...' : 'AI Coach is ready'}
+            </p>
+            <p className="text-sm text-gray-500 mt-2">
+              {demoMode ? 'Sample feedback will cycle automatically' : 'Live feedback will appear as you speak'}
+            </p>
           </div>
         </CardContent>
       </Card>
