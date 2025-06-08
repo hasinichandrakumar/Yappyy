@@ -176,16 +176,7 @@ export default function Dashboard() {
                   engagement: 75
                 }}
               />
-              <VibeTracker 
-                emotionalData={[]}
-                insights={[]}
-                userLearningProfile={{
-                  sessionCount: 15,
-                  adaptiveLevel: 6,
-                  previousPatterns: ['strategic pausing', 'data storytelling', 'confident openings'],
-                  improvementAreas: ['energy_dip', 'persuasion_peak']
-                }}
-              />
+              <VibeTracker />
             </div>
             <ImprovementSummary />
           </TabsContent>

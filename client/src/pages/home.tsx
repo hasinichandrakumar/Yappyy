@@ -57,7 +57,7 @@ export default function Home() {
       title: "Computer Vision Body Language",
       description: "Real-time posture tracking, gesture analysis, and eye contact monitoring using advanced computer vision",
       stats: "Track 50+ body language metrics simultaneously",
-      color: "from-blue-500 to-cyan-500"
+      color: "from-blue-500 to-[#0BF9EA]"
     },
     {
       icon: Bot,
@@ -462,7 +462,7 @@ export default function Home() {
       <section className="py-20 bg-gradient-to-br from-slate-50 to-blue-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <Badge className="mb-4 bg-cyan-100 text-cyan-700 px-4 py-2">Our Mission</Badge>
+            <Badge className="mb-4 bg-[#0BF9EA]/10 text-[#0BF9EA] px-4 py-2">Our Mission</Badge>
             <h2 className="text-4xl font-bold text-gray-900 mb-6">
               Unlock Your True Potential Through Masterful Communication
             </h2>
@@ -476,7 +476,7 @@ export default function Home() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="space-y-8">
               <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 bg-gradient-to-br from-[#0BF9EA] to-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
                   <Shield className="w-6 h-6 text-white" />
                 </div>
                 <div>
@@ -489,7 +489,7 @@ export default function Home() {
               </div>
 
               <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 bg-gradient-to-br from-[#0BF9EA] to-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
                   <Lightbulb className="w-6 h-6 text-white" />
                 </div>
                 <div>
