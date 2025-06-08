@@ -25,29 +25,23 @@ interface AIFeedback {
   hideAfter?: number; // seconds
 }
 
-interface SmartAIFeedbackProps {
-  demoMode?: boolean;
-}
-
-export default function SmartAIFeedback({ demoMode = true }: SmartAIFeedbackProps) {
+export default function SmartAIFeedback() {
   const { wpm, fillerWords, isListening, transcript } = useSpeechRecognition();
   const [currentFeedback, setCurrentFeedback] = useState<AIFeedback | null>(null);
   const [lastFillerCount, setLastFillerCount] = useState(0);
   const [lastWPMCheck, setLastWPMCheck] = useState(0);
-  const [demoFeedbackIndex, setDemoFeedbackIndex] = useState(0);
   const hideTimeoutRef = useRef<NodeJS.Timeout>();
 
   // Debug logging
   useEffect(() => {
     console.log('SmartAIFeedback state:', { 
-      demoMode, 
       isListening, 
       wpm, 
       transcriptLength: transcript.length,
       fillerWordsCount: fillerWords.length,
       currentFeedback: currentFeedback?.type 
     });
-  }, [demoMode, isListening, wpm, transcript, fillerWords, currentFeedback]);
+  }, [isListening, wpm, transcript, fillerWords, currentFeedback]);
 
   const createFeedback = (
     type: AIFeedback['type'],
@@ -67,15 +61,7 @@ export default function SmartAIFeedback({ demoMode = true }: SmartAIFeedbackProp
     hideAfter
   });
 
-  // Demo feedback examples for demonstration
-  const demoFeedbacks = [
-    createFeedback('tip', 'Great Eye Contact', 'Excellent! You maintained strong eye contact during that phrase. Keep it up!', 'low', true, 4),
-    createFeedback('improvement', 'Vary Your Pace', 'Try slowing down during key points to emphasize important information.', 'medium', true, 5),
-    createFeedback('success', 'Perfect Gesture', 'That hand gesture perfectly complemented your message and added emphasis.', 'low', true, 3),
-    createFeedback('warning', 'Reduce Filler Words', 'I noticed a few "um"s. Take brief pauses instead of using filler words.', 'medium', true, 6),
-    createFeedback('tip', 'Strong Opening', 'Your opening hook captured attention effectively. Great start!', 'low', true, 4),
-    createFeedback('improvement', 'Project Your Voice', 'Speak with more vocal energy to maintain audience engagement.', 'medium', true, 5)
-  ];
+
 
   const showFeedback = (feedback: AIFeedback) => {
     // Clear existing timeout
@@ -100,24 +86,7 @@ export default function SmartAIFeedback({ demoMode = true }: SmartAIFeedbackProp
     setCurrentFeedback(null);
   };
 
-  // Demo mode - cycle through feedback automatically
-  useEffect(() => {
-    if (!demoMode) return;
-    
-    // Show first feedback immediately in demo mode
-    if (!currentFeedback) {
-      showFeedback(demoFeedbacks[0]);
-      setDemoFeedbackIndex(1);
-    }
-    
-    const interval = setInterval(() => {
-      const feedback = demoFeedbacks[demoFeedbackIndex];
-      showFeedback(feedback);
-      setDemoFeedbackIndex((prev) => (prev + 1) % demoFeedbacks.length);
-    }, 5000); // Show new feedback every 5 seconds
 
-    return () => clearInterval(interval);
-  }, [demoMode, demoFeedbacks]);
 
   // Monitor speaking pace (only when not in demo mode)
   useEffect(() => {
