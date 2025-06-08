@@ -1,6 +1,9 @@
 import { useState } from "react";
-import { Bell, MicOff, User, BarChart3, Eye, Brain, Star, TrendingUp, FileText, Trophy, Users, Volume2 } from "lucide-react";
+import { Bell, MicOff, User, BarChart3, Eye, Brain, Star, TrendingUp, FileText, Trophy, Users, Volume2, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import VideoFeed from "@/components/VideoFeed";
 import RealTimeMetrics from "@/components/RealTimeMetrics";
@@ -25,6 +28,7 @@ import EnhancedTemplateMarketplace from "@/components/EnhancedTemplateMarketplac
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview");
+  const [demoMode, setDemoMode] = useState(true);
 
   return (
     <div className="min-h-screen bg-background">
@@ -39,6 +43,30 @@ export default function Dashboard() {
               <h1 className="text-xl font-heading yapup-gradient tracking-tight">YapUp</h1>
             </div>
             <div className="flex items-center space-x-4">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-lg px-3 py-2 border border-gray-200">
+                      <Label htmlFor="demo-mode" className="text-sm font-medium text-gray-700">
+                        Demo Mode
+                      </Label>
+                      <Switch
+                        id="demo-mode"
+                        checked={demoMode}
+                        onCheckedChange={setDemoMode}
+                        className="data-[state=checked]:bg-cyan-600"
+                      />
+                      <HelpCircle className="w-4 h-4 text-gray-400" />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="max-w-xs">
+                      Demo Mode shows sample data and simulated analysis. 
+                      Turn off to use real speech recognition and live analysis.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
               <button className="text-cyan-600 hover:text-cyan-700 transition-colors">
                 <Bell className="w-5 h-5" />
               </button>
@@ -122,14 +150,14 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-12">
               {/* Left Column - Video Feed */}
               <div className="lg:col-span-2 space-y-8">
-                <VideoFeed />
-                <LiveTranscript />
+                <VideoFeed demoMode={demoMode} />
+                <LiveTranscript demoMode={demoMode} />
               </div>
               
               {/* Right Column - Live Feedback Sidebar */}
               <div className="lg:col-span-2 space-y-8">
-                <RealTimeMetrics />
-                <SmartAIFeedback />
+                <RealTimeMetrics demoMode={demoMode} />
+                <SmartAIFeedback demoMode={demoMode} />
               </div>
             </div>
             
