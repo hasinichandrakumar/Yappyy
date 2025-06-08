@@ -167,7 +167,7 @@ export default function RealTimeMetrics() {
                 {wpm > 0 ? `${wpm} WPM` : '-- WPM'}
               </div>
               <div className="text-xs text-gray-600 mt-1">
-                {wordCount} words • {Math.floor((Date.now() - Date.now()) / 1000)}s
+                {wordCount} words • {Math.floor(sessionTime / 60)}:{(sessionTime % 60).toString().padStart(2, '0')}
               </div>
             </div>
           </div>
@@ -180,8 +180,17 @@ export default function RealTimeMetrics() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-                    <metric.icon className="w-5 h-5 text-white" />
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300 relative ${
+                    isListening && metric.value > 0 
+                      ? 'bg-gradient-to-br from-green-400 to-green-600 shadow-lg' 
+                      : 'bg-gradient-to-br from-blue-400 to-blue-600'
+                  }`}>
+                    <metric.icon className={`w-5 h-5 text-white ${
+                      isListening && metric.value > 0 ? 'animate-pulse' : ''
+                    }`} />
+                    {isListening && metric.value > 0 && (
+                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-ping"></div>
+                    )}
                   </div>
                   <div className="min-w-0 flex-1">
                     <h3 className="text-sm font-semibold text-gray-900 truncate">{metric.title}</h3>
