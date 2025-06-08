@@ -110,9 +110,6 @@ export default function Dashboard() {
           <TabsContent value="overview" className="space-y-8 pb-16">
             <AdvancedPracticeHub />
           </TabsContent>
-              
-              {/* Focus Areas - Card Style */}
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 {[
                   { icon: Eye, label: "Eye Contact", color: "bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100", active: true },
                   { icon: Users, label: "Posture", color: "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100", active: false },
