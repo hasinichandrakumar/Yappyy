@@ -56,10 +56,20 @@ export default function RealTimeMetrics() {
 
   // Update metrics based on real speech data
   useEffect(() => {
+    // Calculate speaking pace score based on WPM (optimal range: 150-180 WPM)
+    const calculatePaceScore = (wpm: number) => {
+      if (wpm === 0) return 0;
+      if (wpm >= 150 && wpm <= 180) return 100; // Perfect range
+      if (wpm >= 120 && wpm <= 200) return 85;  // Good range
+      if (wpm >= 100 && wpm <= 220) return 70;  // Acceptable range
+      if (wpm >= 80 && wpm <= 250) return 50;   // Needs improvement
+      return 25; // Too slow or too fast
+    };
+
     setMetrics({
       eyeContact: Math.round(eyeContact),
       voiceClarity: Math.round(voiceClarity),
-      speakingPace: Math.round(Math.min(100, (wpm / 200) * 100)), // Optimal pace around 150-180 WPM
+      speakingPace: calculatePaceScore(wpm),
       confidence: Math.round(confidenceScore),
       volume: Math.round(volumeLevel)
     });
@@ -97,8 +107,12 @@ export default function RealTimeMetrics() {
       title: "Speaking Pace",
       value: metrics.speakingPace,
       unit: "%",
-      target: `${wpm} WPM`,
-      subtitle: wpm > 0 ? `${wpm} words/min` : "Start speaking"
+      target: wpm > 0 ? `${wpm} WPM` : "Start speaking",
+      subtitle: wpm > 0 ? 
+        wpm >= 150 && wpm <= 180 ? "Perfect pace" :
+        wpm >= 120 && wpm <= 200 ? "Good pace" :
+        wpm < 120 ? "Speak faster" : "Slow down"
+        : "No data yet"
     },
     {
       icon: Target,
@@ -120,6 +134,17 @@ export default function RealTimeMetrics() {
           }`} />
           {isListening ? 'Live Analysis Active' : 'Start Speaking to Begin'}
         </div>
+        
+        {isListening && (
+          <div className="mt-2 space-y-1">
+            <div className="text-2xl font-bold text-blue-600">
+              {wpm > 0 ? `${wpm} WPM` : '-- WPM'}
+            </div>
+            <div className="text-sm text-gray-600">
+              {wordCount} words spoken
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-4">

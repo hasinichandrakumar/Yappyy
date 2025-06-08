@@ -65,10 +65,6 @@ export function useSpeechRecognition(): SpeechRecognitionHook {
     }
 
     console.log('Starting speech recognition...');
-    
-    // Set start time when beginning recording
-    startTimeRef.current = Date.now();
-    lastUpdateTimeRef.current = Date.now();
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     recognitionRef.current = new SpeechRecognition();
@@ -78,6 +74,7 @@ export function useSpeechRecognition(): SpeechRecognitionHook {
       recognitionRef.current.interimResults = true;
       recognitionRef.current.lang = 'en-US';
 
+      // Reset all state and timing
       startTimeRef.current = Date.now();
       lastUpdateTimeRef.current = Date.now();
       setIsListening(true);
@@ -94,50 +91,46 @@ export function useSpeechRecognition(): SpeechRecognitionHook {
         let interimTranscript = '';
         let finalTranscript = '';
 
-        for (let i = event.resultIndex; i < event.results.length; i++) {
+        // Rebuild the complete transcript from all results
+        for (let i = 0; i < event.results.length; i++) {
           const result = event.results[i];
           if (result.isFinal) {
-            finalTranscript += result[0].transcript;
+            finalTranscript += result[0].transcript + ' ';
           } else {
             interimTranscript += result[0].transcript;
           }
         }
 
-        console.log('Final transcript:', finalTranscript);
-        console.log('Interim transcript:', interimTranscript);
-
-        // Update the full transcript reference
-        if (finalTranscript) {
-          fullTranscriptRef += finalTranscript;
-        }
+        // Update full transcript with final results
+        fullTranscriptRef = finalTranscript;
         
-        const currentText = finalTranscript || interimTranscript;
-        const displayTranscript = fullTranscriptRef + (interimTranscript ? ' ' + interimTranscript : '');
+        const displayTranscript = fullTranscriptRef + (interimTranscript ? interimTranscript : '');
+        const allWords = displayTranscript.trim().split(/\s+/).filter(word => word.length > 0);
         
         setTranscript(displayTranscript);
-        setCurrentSentence(currentText);
+        setCurrentSentence(interimTranscript || finalTranscript.split(' ').slice(-10).join(' '));
 
-        // Calculate word count and WPM using the accumulated transcript
-        const words = fullTranscriptRef.trim().split(/\s+/).filter(word => word.length > 0);
-        const currentWordCount = words.length;
+        // Calculate word count from all spoken words (including interim)
+        const currentWordCount = allWords.length;
         setWordCount(currentWordCount);
 
+        // Calculate WPM based on elapsed time
         const currentTime = Date.now();
         const timeInMinutes = (currentTime - startTimeRef.current) / 60000;
         
-        // Only calculate WPM if we have meaningful time elapsed and words
-        if (timeInMinutes > 0.05 && currentWordCount > 0) { // Calculate after 3 seconds
-          const currentWPM = calculateWPM(currentWordCount, timeInMinutes);
+        // Calculate WPM if we have words and some time has passed
+        if (timeInMinutes > 0.01 && currentWordCount > 0) { // Start calculating after 0.6 seconds
+          const currentWPM = Math.round(currentWordCount / timeInMinutes);
           setWpm(currentWPM);
-          console.log(`WPM Calculation: ${currentWordCount} words in ${timeInMinutes.toFixed(2)} minutes = ${currentWPM} WPM`);
-        } else {
-          console.log(`WPM not calculated: time=${timeInMinutes.toFixed(2)}min, words=${currentWordCount}`);
+          console.log(`WPM: ${currentWordCount} words / ${timeInMinutes.toFixed(2)} min = ${currentWPM} WPM`);
         }
 
-        // Detect filler words in the final transcript only
-        if (finalTranscript) {
+        // Detect filler words in final transcript only
+        if (finalTranscript.trim()) {
           const newFillers = detectFillerWords(finalTranscript);
-          setFillerWords(prev => [...prev, ...newFillers]);
+          if (newFillers.length > 0) {
+            setFillerWords(prev => [...prev, ...newFillers]);
+          }
         }
 
         lastUpdateTimeRef.current = currentTime;
@@ -146,10 +139,37 @@ export function useSpeechRecognition(): SpeechRecognitionHook {
       recognitionRef.current.onerror = (event: any) => {
         console.error('Speech recognition error:', event.error);
         setIsListening(false);
+        
+        // Auto-restart on certain errors
+        if (event.error === 'no-speech' || event.error === 'audio-capture') {
+          console.log('Auto-restarting speech recognition...');
+          setTimeout(() => {
+            if (recognitionRef.current && !isListening) {
+              recognitionRef.current.start();
+              setIsListening(true);
+            }
+          }, 1000);
+        }
       };
 
       recognitionRef.current.onend = () => {
+        console.log('Speech recognition ended');
         setIsListening(false);
+        
+        // Auto-restart if we were listening (for continuous recognition)
+        if (isListening && recognitionRef.current) {
+          console.log('Auto-restarting speech recognition for continuous mode...');
+          setTimeout(() => {
+            if (recognitionRef.current) {
+              try {
+                recognitionRef.current.start();
+                setIsListening(true);
+              } catch (error) {
+                console.error('Failed to restart recognition:', error);
+              }
+            }
+          }, 100);
+        }
       };
 
       recognitionRef.current.start();
