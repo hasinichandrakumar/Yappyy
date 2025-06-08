@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bell, MicOff, User, BarChart3, Eye, Brain, Star, TrendingUp, FileText, Trophy, Users, Volume2, HelpCircle } from "lucide-react";
+import { Bell, MicOff, User, BarChart3, Eye, Brain, Star, TrendingUp, FileText, Trophy, Users, Volume2, HelpCircle, PlayCircle, Camera, MessageSquare, Activity, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -103,55 +103,138 @@ export default function Dashboard() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" className="space-y-10 pb-16">
-            {/* Practice Focus Tabs */}
-            <div className="bg-white rounded-xl border border-gray-200 p-8 shadow-sm">
-              <h3 className="text-xl font-semibold text-gray-900 mb-8">Practice Focus Areas</h3>
-              <div className="flex flex-wrap gap-4">
-                <Button variant="outline" className="flex items-center space-x-2 bg-cyan-50 border-cyan-200 text-cyan-700 hover:bg-cyan-100">
-                  <Eye className="w-4 h-4" />
-                  <span>Maintain Eye Contact</span>
-                </Button>
-                <Button variant="outline" className="flex items-center space-x-2">
-                  <Users className="w-4 h-4" />
-                  <span>Improve Posture</span>
-                </Button>
-                <Button variant="outline" className="flex items-center space-x-2">
-                  <Volume2 className="w-4 h-4" />
-                  <span>Voice Clarity</span>
-                </Button>
-                <Button variant="outline" className="flex items-center space-x-2">
-                  <BarChart3 className="w-4 h-4" />
-                  <span>Reduce Filler Words</span>
-                </Button>
-                <Button variant="outline" className="flex items-center space-x-2">
-                  <TrendingUp className="w-4 h-4" />
-                  <span>Energy & Pace</span>
-                </Button>
+          <TabsContent value="overview" className="space-y-8 pb-16">
+            {/* Practice Session Header */}
+            <div className="bg-gradient-to-r from-blue-50 to-[#0BF9EA]/10 rounded-2xl p-8 border border-[#0BF9EA]/20">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-900 mb-2">Start Your Practice Session</h2>
+                  <p className="text-gray-600">Get real-time AI feedback to improve your speaking skills</p>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <div className="bg-white rounded-lg px-4 py-2 border border-gray-200">
+                    <span className="text-sm text-gray-500">Session #</span>
+                    <span className="text-lg font-bold text-[#0BF9EA] ml-1">24</span>
+                  </div>
+                  <Button className="bg-[#0BF9EA] hover:bg-[#0BF9EA]/90 text-white shadow-lg">
+                    <PlayCircle className="w-4 h-4 mr-2" />
+                    Quick Start
+                  </Button>
+                </div>
+              </div>
+              
+              {/* Focus Areas - Card Style */}
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                {[
+                  { icon: Eye, label: "Eye Contact", color: "bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100", active: true },
+                  { icon: Users, label: "Posture", color: "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100", active: false },
+                  { icon: Volume2, label: "Voice Clarity", color: "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100", active: false },
+                  { icon: BarChart3, label: "Filler Words", color: "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100", active: false },
+                  { icon: TrendingUp, label: "Energy", color: "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100", active: false }
+                ].map((focus, index) => (
+                  <div key={index} className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${focus.active ? 'bg-[#0BF9EA]/10 border-[#0BF9EA] text-[#0BF9EA]' : focus.color}`}>
+                    <focus.icon className="w-6 h-6 mx-auto mb-2" />
+                    <span className="text-sm font-medium block text-center">{focus.label}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-12">
-              {/* Left Column - Video Feed */}
-              <div className="lg:col-span-2 space-y-8">
-                <VideoFeed />
-                <LiveTranscript />
+            {/* Main Practice Area - Improved Layout */}
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+              {/* Video & Transcript Section */}
+              <div className="xl:col-span-2 space-y-6">
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                  <div className="bg-gradient-to-r from-gray-50 to-blue-50 px-6 py-4 border-b border-gray-100">
+                    <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                      <Camera className="w-5 h-5 mr-2 text-[#0BF9EA]" />
+                      Live Video Feed
+                    </h3>
+                  </div>
+                  <div className="p-6">
+                    <VideoFeed />
+                  </div>
+                </div>
+                
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                  <div className="bg-gradient-to-r from-gray-50 to-blue-50 px-6 py-4 border-b border-gray-100">
+                    <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                      <MessageSquare className="w-5 h-5 mr-2 text-[#0BF9EA]" />
+                      Live Transcript
+                    </h3>
+                  </div>
+                  <div className="p-6">
+                    <LiveTranscript />
+                  </div>
+                </div>
               </div>
               
-              {/* Right Column - Live Feedback Sidebar */}
-              <div className="lg:col-span-2 space-y-8">
-                <RealTimeMetrics />
-                <SmartAIFeedback />
+              {/* Live Feedback Sidebar */}
+              <div className="space-y-6">
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                  <div className="bg-gradient-to-r from-gray-50 to-blue-50 px-6 py-4 border-b border-gray-100">
+                    <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                      <Activity className="w-5 h-5 mr-2 text-[#0BF9EA]" />
+                      Live Metrics
+                    </h3>
+                  </div>
+                  <div className="p-6">
+                    <RealTimeMetrics />
+                  </div>
+                </div>
+                
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                  <div className="bg-gradient-to-r from-gray-50 to-blue-50 px-6 py-4 border-b border-gray-100">
+                    <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                      <Brain className="w-5 h-5 mr-2 text-[#0BF9EA]" />
+                      AI Feedback
+                    </h3>
+                  </div>
+                  <div className="p-6">
+                    <SmartAIFeedback />
+                  </div>
+                </div>
               </div>
             </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-              <AIPracticeRoleplay />
-              <SessionStats />
+            {/* Practice Tools */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                <div className="bg-gradient-to-r from-gray-50 to-blue-50 px-6 py-4 border-b border-gray-100">
+                  <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                    <Users className="w-5 h-5 mr-2 text-[#0BF9EA]" />
+                    AI Practice Partner
+                  </h3>
+                </div>
+                <div className="p-6">
+                  <AIPracticeRoleplay />
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                <div className="bg-gradient-to-r from-gray-50 to-blue-50 px-6 py-4 border-b border-gray-100">
+                  <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                    <BarChart3 className="w-5 h-5 mr-2 text-[#0BF9EA]" />
+                    Session Stats
+                  </h3>
+                </div>
+                <div className="p-6">
+                  <SessionStats />
+                </div>
+              </div>
             </div>
             
-            <div className="mb-16">
-              <SessionHistory />
+            {/* Session History */}
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+              <div className="bg-gradient-to-r from-gray-50 to-blue-50 px-6 py-4 border-b border-gray-100">
+                <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                  <Clock className="w-5 h-5 mr-2 text-[#0BF9EA]" />
+                  Recent Sessions
+                </h3>
+              </div>
+              <div className="p-6">
+                <SessionHistory />
+              </div>
             </div>
           </TabsContent>
 
