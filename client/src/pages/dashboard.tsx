@@ -271,7 +271,7 @@ export default function Dashboard() {
                   engagement: 75
                 }}
               />
-              <VibeTracker />
+
             </div>
             <ImprovementSummary />
           </TabsContent>
