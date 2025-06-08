@@ -22,7 +22,7 @@ import BadgeSystem from "@/components/BadgeSystem";
 import AIPracticeRoleplay from "@/components/AIPracticeRoleplay";
 import BodyCueTimeline from "@/components/BodyCueTimeline";
 import SpeechFingerprintGenerator from "@/components/SpeechFingerprintGenerator";
-import VibeTracker from "@/components/VibeTracker";
+
 import AdaptiveFeedbackEngine from "@/components/AdaptiveFeedbackEngine";
 import EnhancedTemplateMarketplace from "@/components/EnhancedTemplateMarketplace";
 import HelpGuide from "@/components/HelpGuide";
@@ -62,48 +62,44 @@ export default function Dashboard() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="flex flex-wrap justify-center gap-2 mb-8 gradient-card purple-border shadow-lg p-2">
-            <TabsTrigger value="overview" className="flex items-center space-x-2 px-4 py-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
+          <TabsList className="grid grid-cols-5 lg:grid-cols-10 gap-1 mb-8 gradient-card purple-border shadow-lg p-1 h-auto">
+            <TabsTrigger value="overview" className="flex flex-col items-center space-y-1 px-2 py-2 text-xs data-[state=active]:gradient-bg data-[state=active]:text-white">
               <BarChart3 className="w-4 h-4" />
               <span>Practice</span>
             </TabsTrigger>
-            <TabsTrigger value="improvement" className="flex items-center space-x-2 px-4 py-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
+            <TabsTrigger value="improvement" className="flex flex-col items-center space-y-1 px-2 py-2 text-xs data-[state=active]:gradient-bg data-[state=active]:text-white">
               <Brain className="w-4 h-4" />
               <span>AI Coach</span>
             </TabsTrigger>
-            <TabsTrigger value="speech-dna" className="flex items-center space-x-2 px-4 py-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
+            <TabsTrigger value="speech-dna" className="flex flex-col items-center space-y-1 px-2 py-2 text-xs data-[state=active]:gradient-bg data-[state=active]:text-white">
               <Star className="w-4 h-4" />
               <span>Speech DNA</span>
             </TabsTrigger>
-            <TabsTrigger value="detailed" className="flex items-center space-x-2 px-4 py-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
+            <TabsTrigger value="detailed" className="flex flex-col items-center space-y-1 px-2 py-2 text-xs data-[state=active]:gradient-bg data-[state=active]:text-white">
               <Brain className="w-4 h-4" />
-              <span>Detailed Analysis</span>
+              <span>Analysis</span>
             </TabsTrigger>
-            <TabsTrigger value="body-language" className="flex items-center space-x-2 px-4 py-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
+            <TabsTrigger value="body-language" className="flex flex-col items-center space-y-1 px-2 py-2 text-xs data-[state=active]:gradient-bg data-[state=active]:text-white">
               <Eye className="w-4 h-4" />
-              <span>Body Language</span>
+              <span>Body Lang</span>
             </TabsTrigger>
-            <TabsTrigger value="speech-deep" className="flex items-center space-x-2 px-4 py-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
-              <MicOff className="w-4 h-4" />
-              <span>Speech Deep Dive</span>
+            <TabsTrigger value="speech-deep" className="flex flex-col items-center space-y-1 px-2 py-2 text-xs data-[state=active]:gradient-bg data-[state=active]:text-white">
+              <Volume2 className="w-4 h-4" />
+              <span>Deep Dive</span>
             </TabsTrigger>
-            <TabsTrigger value="roi-analyzer" className="flex items-center space-x-2 px-4 py-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
+            <TabsTrigger value="roi-analyzer" className="flex flex-col items-center space-y-1 px-2 py-2 text-xs data-[state=active]:gradient-bg data-[state=active]:text-white">
               <TrendingUp className="w-4 h-4" />
               <span>Impact</span>
             </TabsTrigger>
-            <TabsTrigger value="templates" className="flex items-center space-x-2 px-4 py-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
+            <TabsTrigger value="templates" className="flex flex-col items-center space-y-1 px-2 py-2 text-xs data-[state=active]:gradient-bg data-[state=active]:text-white">
               <FileText className="w-4 h-4" />
               <span>Templates</span>
             </TabsTrigger>
-            <TabsTrigger value="badges" className="flex items-center space-x-2 px-4 py-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
+            <TabsTrigger value="badges" className="flex flex-col items-center space-y-1 px-2 py-2 text-xs data-[state=active]:gradient-bg data-[state=active]:text-white">
               <Trophy className="w-4 h-4" />
               <span>Badges</span>
             </TabsTrigger>
-            <TabsTrigger value="vibe-tracker" className="flex items-center space-x-2 px-4 py-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
-              <Star className="w-4 h-4" />
-              <span>Vibe</span>
-            </TabsTrigger>
-            <TabsTrigger value="help" className="flex items-center space-x-2 px-4 py-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
+            <TabsTrigger value="help" className="flex flex-col items-center space-y-1 px-2 py-2 text-xs data-[state=active]:gradient-bg data-[state=active]:text-white">
               <HelpCircle className="w-4 h-4" />
               <span>Help</span>
             </TabsTrigger>
@@ -317,10 +313,6 @@ export default function Dashboard() {
 
           <TabsContent value="badges" className="space-y-6">
             <BadgeSystem />
-          </TabsContent>
-
-          <TabsContent value="vibe-tracker" className="space-y-6">
-            <VibeTracker />
           </TabsContent>
 
           <TabsContent value="help" className="space-y-6">
