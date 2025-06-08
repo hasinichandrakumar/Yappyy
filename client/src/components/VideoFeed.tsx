@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Play, Square, Pause, Eye, Volume2, Brain, Zap } from "lucide-react";
 import { useMediaPipe } from "@/hooks/useMediaPipe";
 import { useVoiceAnalysis } from "@/hooks/useVoiceAnalysis";
+import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 
 export default function VideoFeed() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -26,6 +27,15 @@ export default function VideoFeed() {
   } = useMediaPipe();
   
   const { volumeLevel, startVoiceAnalysis, stopVoiceAnalysis, speakingPace, voiceClarity } = useVoiceAnalysis();
+  
+  const { 
+    startListening, 
+    stopListening, 
+    isListening, 
+    wpm, 
+    wordCount,
+    transcript 
+  } = useSpeechRecognition();
 
   useEffect(() => {
     startCamera();

@@ -7,15 +7,39 @@ import { useVoiceAnalysis } from "@/hooks/useVoiceAnalysis";
 
 export default function RealTimeMetrics() {
   const { isListening, wpm, wordCount } = useSpeechRecognition();
-  const { voiceClarity, confidenceScore } = useVoiceAnalysis();
+  const { 
+    voiceClarity, 
+    confidenceScore, 
+    volumeLevel,
+    startVoiceAnalysis, 
+    stopVoiceAnalysis,
+    updateWordCount 
+  } = useVoiceAnalysis();
   
   const [eyeContact, setEyeContact] = useState(0);
   const [metrics, setMetrics] = useState({
     eyeContact: 0,
     voiceClarity: 0,
     speakingPace: 0,
-    confidence: 0
+    confidence: 0,
+    volume: 0
   });
+
+  // Start/stop voice analysis when listening changes
+  useEffect(() => {
+    if (isListening) {
+      console.log('Starting voice analysis...');
+      startVoiceAnalysis();
+    } else {
+      console.log('Stopping voice analysis...');
+      stopVoiceAnalysis();
+    }
+  }, [isListening, startVoiceAnalysis, stopVoiceAnalysis]);
+
+  // Update word count in voice analysis
+  useEffect(() => {
+    updateWordCount(wordCount);
+  }, [wordCount, updateWordCount]);
 
   // Simulate eye contact tracking (would connect to computer vision in real app)
   useEffect(() => {
@@ -32,15 +56,14 @@ export default function RealTimeMetrics() {
 
   // Update metrics based on real speech data
   useEffect(() => {
-    if (isListening && wordCount > 0) {
-      setMetrics({
-        eyeContact: Math.round(eyeContact),
-        voiceClarity: Math.round(voiceClarity),
-        speakingPace: Math.round(Math.min(100, (wpm / 200) * 100)), // Optimal pace around 150-180 WPM
-        confidence: Math.round(confidenceScore)
-      });
-    }
-  }, [isListening, wordCount, eyeContact, voiceClarity, wpm, confidenceScore]);
+    setMetrics({
+      eyeContact: Math.round(eyeContact),
+      voiceClarity: Math.round(voiceClarity),
+      speakingPace: Math.round(Math.min(100, (wpm / 200) * 100)), // Optimal pace around 150-180 WPM
+      confidence: Math.round(confidenceScore),
+      volume: Math.round(volumeLevel)
+    });
+  }, [eyeContact, voiceClarity, wpm, confidenceScore, volumeLevel]);
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return "text-green-600";
