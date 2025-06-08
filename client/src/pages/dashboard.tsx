@@ -56,50 +56,50 @@ export default function Dashboard() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-9 mb-8 gradient-card purple-border shadow-lg">
-            <TabsTrigger value="overview" className="flex items-center space-x-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
+          <TabsList className="flex flex-wrap justify-center gap-2 mb-8 gradient-card purple-border shadow-lg p-2">
+            <TabsTrigger value="overview" className="flex items-center space-x-2 px-4 py-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
               <BarChart3 className="w-4 h-4" />
               <span>Practice</span>
             </TabsTrigger>
-            <TabsTrigger value="improvement" className="flex items-center space-x-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
+            <TabsTrigger value="improvement" className="flex items-center space-x-2 px-4 py-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
               <Brain className="w-4 h-4" />
               <span>AI Coach</span>
             </TabsTrigger>
-            <TabsTrigger value="speech-dna" className="flex items-center space-x-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
+            <TabsTrigger value="speech-dna" className="flex items-center space-x-2 px-4 py-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
               <Star className="w-4 h-4" />
               <span>Speech DNA</span>
             </TabsTrigger>
-            <TabsTrigger value="detailed" className="flex items-center space-x-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
+            <TabsTrigger value="detailed" className="flex items-center space-x-2 px-4 py-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
               <Brain className="w-4 h-4" />
               <span>Detailed Analysis</span>
             </TabsTrigger>
-            <TabsTrigger value="body-language" className="flex items-center space-x-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
+            <TabsTrigger value="body-language" className="flex items-center space-x-2 px-4 py-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
               <Eye className="w-4 h-4" />
               <span>Body Language</span>
             </TabsTrigger>
-            <TabsTrigger value="speech-deep" className="flex items-center space-x-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
+            <TabsTrigger value="speech-deep" className="flex items-center space-x-2 px-4 py-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
               <MicOff className="w-4 h-4" />
               <span>Speech Deep Dive</span>
             </TabsTrigger>
-            <TabsTrigger value="roi-analyzer" className="flex items-center space-x-1 data-[state=active]:gradient-bg data-[state=active]:text-white">
+            <TabsTrigger value="roi-analyzer" className="flex items-center space-x-2 px-4 py-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
               <TrendingUp className="w-4 h-4" />
-              <span className="hidden sm:inline">Impact</span>
+              <span>Impact</span>
             </TabsTrigger>
-            <TabsTrigger value="templates" className="flex items-center space-x-1 data-[state=active]:gradient-bg data-[state=active]:text-white">
+            <TabsTrigger value="templates" className="flex items-center space-x-2 px-4 py-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
               <FileText className="w-4 h-4" />
-              <span className="hidden sm:inline">Templates</span>
+              <span>Templates</span>
             </TabsTrigger>
-            <TabsTrigger value="badges" className="flex items-center space-x-1 data-[state=active]:gradient-bg data-[state=active]:text-white">
+            <TabsTrigger value="badges" className="flex items-center space-x-2 px-4 py-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
               <Trophy className="w-4 h-4" />
-              <span className="hidden sm:inline">Badges</span>
+              <span>Badges</span>
             </TabsTrigger>
-            <TabsTrigger value="vibe-tracker" className="flex items-center space-x-1 data-[state=active]:gradient-bg data-[state=active]:text-white">
+            <TabsTrigger value="vibe-tracker" className="flex items-center space-x-2 px-4 py-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
               <Star className="w-4 h-4" />
-              <span className="hidden sm:inline">Vibe</span>
+              <span>Vibe</span>
             </TabsTrigger>
-            <TabsTrigger value="help" className="flex items-center space-x-1 data-[state=active]:gradient-bg data-[state=active]:text-white">
+            <TabsTrigger value="help" className="flex items-center space-x-2 px-4 py-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
               <HelpCircle className="w-4 h-4" />
-              <span className="hidden sm:inline">Help</span>
+              <span>Help</span>
             </TabsTrigger>
           </TabsList>
 
