@@ -2,10 +2,11 @@ import { useState } from "react";
 import { Bell, MicOff, User, BarChart3, Eye, Brain, Star, TrendingUp, FileText, Trophy, Users, Volume2, HelpCircle, PlayCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import AdvancedPracticeHub from "@/components/AdvancedPracticeHub";
-import DetailedAnalysis from "@/components/DetailedAnalysis";
+import EnhancedPracticeHub from "@/components/EnhancedPracticeHub";
+import AnalysisOverview from "@/components/AnalysisOverview";
 import BodyLanguageAnalyzer from "@/components/BodyLanguageAnalyzer";
 import AdvancedSpeechAnalysis from "@/components/AdvancedSpeechAnalysis";
+import ContentAnalysis from "@/components/ContentAnalysis";
 import ImprovementSummary from "@/components/ImprovementSummary";
 import SpeechDNA from "@/components/SpeechDNA";
 import SpeechROIAnalyzer from "@/components/SpeechROIAnalyzer";
@@ -122,7 +123,7 @@ export default function Dashboard() {
           {/* Tab Content */}
           <div className="mt-6">
             <TabsContent value="overview" className="mt-0">
-              <AdvancedPracticeHub />
+              <EnhancedPracticeHub />
             </TabsContent>
 
             <TabsContent value="ai-coach" className="mt-0">
@@ -135,7 +136,7 @@ export default function Dashboard() {
 
             <TabsContent value="detailed" className="mt-0">
               <Tabs defaultValue="overview" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
+                <TabsList className="grid w-full grid-cols-4">
                   <TabsTrigger value="overview" className="flex items-center space-x-2">
                     <BarChart3 className="w-4 h-4" />
                     <span>Overview</span>
@@ -144,22 +145,30 @@ export default function Dashboard() {
                     <Eye className="w-4 h-4" />
                     <span>Body Language</span>
                   </TabsTrigger>
-                  <TabsTrigger value="speech-deep" className="flex items-center space-x-2">
+                  <TabsTrigger value="voice-analysis" className="flex items-center space-x-2">
                     <Volume2 className="w-4 h-4" />
-                    <span>Deep Dive</span>
+                    <span>Voice Analysis</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="content-analysis" className="flex items-center space-x-2">
+                    <FileText className="w-4 h-4" />
+                    <span>Content Analysis</span>
                   </TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="overview" className="mt-6">
-                  <DetailedAnalysis />
+                  <AnalysisOverview />
                 </TabsContent>
                 
                 <TabsContent value="body-language" className="mt-6">
                   <BodyLanguageAnalyzer />
                 </TabsContent>
                 
-                <TabsContent value="speech-deep" className="mt-6">
+                <TabsContent value="voice-analysis" className="mt-6">
                   <AdvancedSpeechAnalysis />
+                </TabsContent>
+                
+                <TabsContent value="content-analysis" className="mt-6">
+                  <ContentAnalysis />
                 </TabsContent>
               </Tabs>
             </TabsContent>
