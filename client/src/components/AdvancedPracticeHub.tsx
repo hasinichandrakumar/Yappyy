@@ -415,7 +415,7 @@ export default function AdvancedPracticeHub() {
               ) : (
                 <div className="space-y-4">
                   <Button
-                    onClick={endSession}
+                    onClick={stopSession}
                     variant="destructive"
                     className="w-full"
                     size="lg"
