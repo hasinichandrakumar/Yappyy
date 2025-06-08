@@ -46,7 +46,7 @@ interface SpeechAnalysis {
 }
 
 export default function SpeechROIAnalyzer() {
-  const { transcript, wordCount, sessionTime } = useSpeechRecognition();
+  const { transcript, wordCount } = useSpeechRecognition();
   const { speakingPace, voiceClarity, confidenceScore } = useVoiceAnalysis();
 
   const [roiMetrics, setROIMetrics] = useState<ROIMetrics>({
@@ -55,7 +55,13 @@ export default function SpeechROIAnalyzer() {
     memoryRetention: 0,
     overallImpact: 0,
     persuasionScore: 0,
-    engagementLevel: 0
+    engagementLevel: 0,
+    credibilityIndex: 0,
+    urgencyFactor: 0,
+    socialProofStrength: 0,
+    logicalCoherence: 0,
+    rhetoricalPower: 0,
+    audienceResonance: 0
   });
 
   const [speechAnalysis, setSpeechAnalysis] = useState<SpeechAnalysis | null>(null);
@@ -76,7 +82,7 @@ PERFORMANCE METRICS:
 - Voice Clarity: ${voiceClarity}%
 - Confidence Score: ${confidenceScore}%
 - Word Count: ${wordCount}
-- Session Duration: ${sessionTime} seconds
+- Session Duration: ${Math.floor(wordCount / Math.max(speakingPace, 1) * 60)} seconds
 
 ANALYSIS REQUIREMENTS:
 Evaluate the speech's potential impact using persuasion theory and NLP principles:
@@ -204,7 +210,13 @@ Respond in JSON format:
       memoryRetention,
       overallImpact,
       persuasionScore,
-      engagementLevel
+      engagementLevel,
+      credibilityIndex: Math.min(95, Math.max(30, baseScore + clarityBonus + 5)),
+      urgencyFactor: Math.min(95, Math.max(20, baseScore + paceBonus)),
+      socialProofStrength: Math.min(95, Math.max(25, baseScore + lengthBonus - 10)),
+      logicalCoherence: Math.min(95, Math.max(35, baseScore + clarityBonus + 10)),
+      rhetoricalPower: Math.min(95, Math.max(40, baseScore + (paceBonus + clarityBonus + lengthBonus) / 3)),
+      audienceResonance: Math.min(95, Math.max(30, baseScore + clarityBonus + lengthBonus / 2))
     });
 
     setSpeechAnalysis({

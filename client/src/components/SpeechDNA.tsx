@@ -239,7 +239,14 @@ export default function SpeechDNA() {
         },
         famousSpeaker: generateFamousSpeaker(),
         confidence: confidenceScore,
-        uniqueTraits: generateUniqueTraits()
+        uniqueTraits: generateUniqueTraits(),
+        persuasionStyle: "Emotional Resonance",
+        rhetoricStrengths: ["Metaphorical Language", "Storytelling", "Logical Structure"],
+        emotionalIntelligence: Math.floor(Math.random() * 30) + 70,
+        cognitiveComplexity: Math.floor(Math.random() * 25) + 75,
+        adaptabilityScore: Math.floor(Math.random() * 35) + 65,
+        leadershipPresence: Math.floor(Math.random() * 40) + 60,
+        authenticityIndex: Math.floor(Math.random() * 30) + 70
       };
       
       setSpeechDNA(dnaProfile);
