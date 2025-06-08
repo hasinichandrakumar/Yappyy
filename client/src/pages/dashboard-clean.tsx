@@ -52,13 +52,21 @@ export default function Dashboard() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           {/* Clean Tab Navigation */}
           <div className="mb-8">
-            <TabsList className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-10 w-full h-auto p-2 bg-white rounded-xl border border-gray-200 shadow-sm">
+            <TabsList className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-8 w-full h-auto p-2 bg-white rounded-xl border border-gray-200 shadow-sm">
               <TabsTrigger 
                 value="overview" 
                 className="flex flex-col items-center space-y-1 px-3 py-3 text-xs font-medium data-[state=active]:bg-[#0BF9EA] data-[state=active]:text-white rounded-lg transition-all duration-200"
               >
                 <PlayCircle className="w-4 h-4" />
                 <span>Practice</span>
+              </TabsTrigger>
+              
+              <TabsTrigger 
+                value="detailed" 
+                className="flex flex-col items-center space-y-1 px-3 py-3 text-xs font-medium data-[state=active]:bg-[#0BF9EA] data-[state=active]:text-white rounded-lg transition-all duration-200"
+              >
+                <BarChart3 className="w-4 h-4" />
+                <span>Analysis</span>
               </TabsTrigger>
               
               <TabsTrigger 
@@ -75,30 +83,6 @@ export default function Dashboard() {
               >
                 <Star className="w-4 h-4" />
                 <span>Speech DNA</span>
-              </TabsTrigger>
-              
-              <TabsTrigger 
-                value="detailed" 
-                className="flex flex-col items-center space-y-1 px-3 py-3 text-xs font-medium data-[state=active]:bg-[#0BF9EA] data-[state=active]:text-white rounded-lg transition-all duration-200"
-              >
-                <BarChart3 className="w-4 h-4" />
-                <span>Analysis</span>
-              </TabsTrigger>
-              
-              <TabsTrigger 
-                value="body-language" 
-                className="flex flex-col items-center space-y-1 px-3 py-3 text-xs font-medium data-[state=active]:bg-[#0BF9EA] data-[state=active]:text-white rounded-lg transition-all duration-200"
-              >
-                <Eye className="w-4 h-4" />
-                <span>Body Language</span>
-              </TabsTrigger>
-              
-              <TabsTrigger 
-                value="speech-deep" 
-                className="flex flex-col items-center space-y-1 px-3 py-3 text-xs font-medium data-[state=active]:bg-[#0BF9EA] data-[state=active]:text-white rounded-lg transition-all duration-200"
-              >
-                <Volume2 className="w-4 h-4" />
-                <span>Deep Dive</span>
               </TabsTrigger>
               
               <TabsTrigger 
@@ -150,15 +134,34 @@ export default function Dashboard() {
             </TabsContent>
 
             <TabsContent value="detailed" className="mt-0">
-              <DetailedAnalysis />
-            </TabsContent>
-
-            <TabsContent value="body-language" className="mt-0">
-              <BodyLanguageAnalyzer />
-            </TabsContent>
-
-            <TabsContent value="speech-deep" className="mt-0">
-              <AdvancedSpeechAnalysis />
+              <Tabs defaultValue="overview" className="w-full">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="overview" className="flex items-center space-x-2">
+                    <BarChart3 className="w-4 h-4" />
+                    <span>Overview</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="body-language" className="flex items-center space-x-2">
+                    <Eye className="w-4 h-4" />
+                    <span>Body Language</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="speech-deep" className="flex items-center space-x-2">
+                    <Volume2 className="w-4 h-4" />
+                    <span>Deep Dive</span>
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="overview" className="mt-6">
+                  <DetailedAnalysis />
+                </TabsContent>
+                
+                <TabsContent value="body-language" className="mt-6">
+                  <BodyLanguageAnalyzer />
+                </TabsContent>
+                
+                <TabsContent value="speech-deep" className="mt-6">
+                  <AdvancedSpeechAnalysis />
+                </TabsContent>
+              </Tabs>
             </TabsContent>
 
             <TabsContent value="roi-analyzer" className="mt-0">
