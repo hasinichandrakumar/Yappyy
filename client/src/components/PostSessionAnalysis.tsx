@@ -64,15 +64,18 @@ export default function PostSessionAnalysis({
   const generateAnalysis = async () => {
     setIsGenerating(true);
     
-    // Simulate AI analysis based on actual session data
-    const sessionDuration = Math.floor(transcript.length / 10); // Approximate duration
-    const fillerRate = (fillerWords.length / wordCount) * 100;
-    const clarity = voiceClarity;
-    const confidence = confidenceScore;
+    // Calculate session metrics based on actual data
+    const sessionDuration = wordCount > 0 && wpm > 0 ? Math.round((wordCount / wpm) * 60) : Math.max(60, transcript.length * 2);
+    const fillerRate = wordCount > 0 ? (fillerWords.length / wordCount) * 100 : 0;
+    const clarity = Math.max(voiceClarity || 0, 50);
+    const confidence = Math.max(confidenceScore || 0, 50);
     
-    // Calculate overall score
-    const paceScore = wpm >= 120 && wpm <= 180 ? 100 : Math.max(0, 100 - Math.abs(wpm - 150) * 2);
-    const fillerScore = Math.max(0, 100 - fillerRate * 10);
+    // Calculate performance scores with real data
+    const paceScore = wpm === 0 ? 0 : 
+                     wpm >= 150 && wpm <= 180 ? 100 : 
+                     wpm >= 120 && wpm <= 200 ? 85 :
+                     wpm >= 100 && wpm <= 220 ? 70 : 50;
+    const fillerScore = Math.max(0, 100 - fillerRate * 8);
     const overallScore = Math.round((paceScore + fillerScore + clarity + confidence) / 4);
 
     // Generate contextual feedback based on roleplay
@@ -190,11 +193,11 @@ export default function PostSessionAnalysis({
       audienceType
     };
 
-    // Simulate AI processing time
-    setTimeout(() => {
-      setAnalysis(sessionAnalysis);
-      setIsGenerating(false);
-    }, 2000);
+    // Simulate AI processing with realistic delay
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    
+    setAnalysis(sessionAnalysis);
+    setIsGenerating(false);
   };
 
   if (!isVisible) return null;

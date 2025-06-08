@@ -35,6 +35,7 @@ export default function Dashboard() {
     roleplayType?: string;
     audienceType?: string;
   }>({});
+  const [isSessionActive, setIsSessionActive] = useState(false);
 
   return (
     <div className="min-h-screen bg-background">
@@ -124,9 +125,13 @@ export default function Dashboard() {
                       Quick Start
                     </Button>
                     <Button 
-                      onClick={() => setShowPostAnalysis(true)}
+                      onClick={() => {
+                        setIsSessionActive(false);
+                        setShowPostAnalysis(true);
+                      }}
                       variant="outline" 
                       className="border-[#0BF9EA] text-[#0BF9EA] hover:bg-[#0BF9EA]/10"
+                      disabled={!isSessionActive}
                     >
                       <Brain className="w-4 h-4 mr-2" />
                       Finish & Analyze
