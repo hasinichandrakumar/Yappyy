@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Eye, Volume2, Timer, Target } from "lucide-react";
@@ -17,6 +17,8 @@ export default function RealTimeMetrics() {
   } = useVoiceAnalysis();
   
   const [eyeContact, setEyeContact] = useState(0);
+  const [sessionTime, setSessionTime] = useState(0);
+  const sessionStartRef = useRef<number>(0);
   const [metrics, setMetrics] = useState({
     eyeContact: 0,
     voiceClarity: 0,
@@ -136,49 +138,47 @@ export default function RealTimeMetrics() {
         </div>
         
         {isListening && (
-          <div className="mt-2 space-y-1">
-            <div className="text-2xl font-bold text-blue-600">
-              {wpm > 0 ? `${wpm} WPM` : '-- WPM'}
-            </div>
-            <div className="text-sm text-gray-600">
-              {wordCount} words spoken
+          <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-blue-600 tabular-nums">
+                {wpm > 0 ? `${wpm} WPM` : '-- WPM'}
+              </div>
+              <div className="text-xs text-gray-600 mt-1">
+                {wordCount} words • {Math.floor((Date.now() - Date.now()) / 1000)}s
+              </div>
             </div>
           </div>
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="space-y-4">
         {metricCards.map((metric, index) => (
           <Card key={index} className="border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center">
-                    <metric.icon className="w-4 h-4 text-white" />
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                    <metric.icon className="w-5 h-5 text-white" />
                   </div>
-                  <h3 className="text-sm font-semibold text-gray-900">{metric.title}</h3>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-sm font-semibold text-gray-900 truncate">{metric.title}</h3>
+                    <div className="text-xs text-gray-500 mt-0.5">{metric.target}</div>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <span className={`text-lg font-bold ${getScoreColor(metric.value)}`}>
+                <div className="flex flex-col items-end">
+                  <span className={`text-xl font-bold ${getScoreColor(metric.value)} tabular-nums`}>
                     {metric.value}{metric.unit}
                   </span>
+                  {metric.subtitle && (
+                    <span className="text-xs text-gray-600 mt-0.5">{metric.subtitle}</span>
+                  )}
                 </div>
               </div>
               
               <Progress 
                 value={metric.value} 
-                className="h-2 mb-2"
-                style={{
-                  background: '#f3f4f6'
-                }}
+                className="h-3"
               />
-              
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-gray-500">{metric.target}</span>
-                {metric.subtitle && (
-                  <span className="text-xs text-gray-600">{metric.subtitle}</span>
-                )}
-              </div>
             </CardContent>
           </Card>
         ))}
