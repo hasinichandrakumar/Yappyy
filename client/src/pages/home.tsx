@@ -196,7 +196,7 @@ export default function Home() {
             transition={{ duration: 1, delay: 0.4 }}
           >
             <motion.span 
-              className="block hero-title floating-text"
+              className="block hero-title floating-text yapup-gradient"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={isHeroInView ? { opacity: 1, scale: 1 } : {}}
               transition={{ duration: 1.2, delay: 0.6 }}
@@ -224,7 +224,7 @@ export default function Home() {
           </motion.p>
           
           <motion.div 
-            className="mb-12 p-8 bg-white/90 backdrop-blur-sm rounded-2xl border border-cyan-200 max-w-3xl mx-auto purple-glow"
+            className="mb-12 p-8 bg-white/90 backdrop-blur-sm rounded-2xl border border-[#0BF9EA]/20 max-w-3xl mx-auto purple-glow"
             initial={{ scale: 0.8, opacity: 0 }}
             animate={isHeroInView ? { scale: 1, opacity: 1 } : {}}
             transition={{ duration: 0.8, delay: 0.8 }}
@@ -312,7 +312,7 @@ export default function Home() {
                 <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
                   <CardContent className="p-6 text-center">
                     <motion.div 
-                      className="w-12 h-12 mx-auto mb-4 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center"
+                      className="w-12 h-12 mx-auto mb-4 bg-gradient-to-br from-[#0BF9EA] to-blue-600 rounded-full flex items-center justify-center"
                       animate={{ 
                         rotate: [0, 360],
                         scale: [1, 1.1, 1]
@@ -502,7 +502,7 @@ export default function Home() {
               </div>
 
               <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 bg-gradient-to-br from-[#0BF9EA] to-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
                   <ArrowUpRight className="w-6 h-6 text-white" />
                 </div>
                 <div>
@@ -518,7 +518,7 @@ export default function Home() {
             <div className="relative">
               <div className="bg-white rounded-2xl shadow-2xl p-8 border border-gray-100">
                 <div className="text-center mb-6">
-                  <Globe className="w-16 h-16 mx-auto text-cyan-600 mb-4" />
+                  <Globe className="w-16 h-16 mx-auto text-[#0BF9EA] mb-4" />
                   <h4 className="text-2xl font-bold text-gray-900 mb-2">Our Vision</h4>
                 </div>
                 <blockquote className="text-lg text-gray-700 italic leading-relaxed text-center">
@@ -526,12 +526,12 @@ export default function Home() {
                   and unlock opportunities through the power of masterful communication."
                 </blockquote>
                 <div className="mt-8 grid grid-cols-2 gap-4 text-center">
-                  <div className="bg-cyan-50 rounded-lg p-4">
-                    <div className="text-2xl font-bold text-cyan-600">10M+</div>
+                  <div className="bg-[#0BF9EA]/10 rounded-lg p-4">
+                    <div className="text-2xl font-bold text-[#0BF9EA]">10M+</div>
                     <div className="text-sm text-gray-600">Lives Transformed</div>
                   </div>
-                  <div className="bg-cyan-50 rounded-lg p-4">
-                    <div className="text-2xl font-bold text-cyan-600">100%</div>
+                  <div className="bg-[#0BF9EA]/10 rounded-lg p-4">
+                    <div className="text-2xl font-bold text-[#0BF9EA]">100%</div>
                     <div className="text-sm text-gray-600">Confidence Boost</div>
                   </div>
                 </div>
@@ -542,7 +542,7 @@ export default function Home() {
       </section>
 
       {/* Core Features Showcase */}
-      <section className="py-20 bg-gradient-to-br from-gray-50 to-cyan-50">
+      <section className="py-20 bg-gradient-to-br from-gray-50 to-[#0BF9EA]/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="feature-title mb-4">
