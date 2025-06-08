@@ -111,8 +111,18 @@ export default function Dashboard() {
             <div className="bg-gradient-to-r from-blue-50 to-[#0BF9EA]/10 rounded-2xl p-8 border border-[#0BF9EA]/20">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-3xl font-bold text-gray-900 mb-2">Start Your Practice Session</h2>
-                  <p className="text-gray-600">Get real-time AI feedback to improve your speaking skills</p>
+                  <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                    {isSessionActive ? 'Session in Progress' : 'Start Your Practice Session'}
+                  </h2>
+                  <p className="text-gray-600">
+                    {isSessionActive ? 'AI is analyzing your speech in real-time' : 'Get real-time AI feedback to improve your speaking skills'}
+                  </p>
+                  {isSessionActive && (
+                    <div className="flex items-center space-x-2 mt-2">
+                      <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                      <span className="text-sm text-red-600 font-medium">Recording</span>
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center space-x-4">
                   <div className="bg-white rounded-lg px-4 py-2 border border-gray-200">
@@ -120,9 +130,13 @@ export default function Dashboard() {
                     <span className="text-lg font-bold text-[#0BF9EA] ml-1">24</span>
                   </div>
                   <div className="flex space-x-2">
-                    <Button className="bg-[#0BF9EA] hover:bg-[#0BF9EA]/90 text-white shadow-lg">
+                    <Button 
+                      onClick={() => setIsSessionActive(true)}
+                      className="bg-[#0BF9EA] hover:bg-[#0BF9EA]/90 text-white shadow-lg"
+                      disabled={isSessionActive}
+                    >
                       <PlayCircle className="w-4 h-4 mr-2" />
-                      Quick Start
+                      {isSessionActive ? 'Session Active' : 'Quick Start'}
                     </Button>
                     <Button 
                       onClick={() => {
