@@ -17,7 +17,7 @@
   --primary-foreground: 0 0% 100%;
   --secondary: 160 80% 50%; /* Green-aqua */
   --secondary-foreground: 0 0% 100%;
-  --accent: 180 100% 60%; /* Bright aqua */
+  --accent: 180 95% 52%; /* Bright aqua #0BF9EA */
   --accent-foreground: 0 0% 100%;
   --warning: 39 100% 47%; /* Keep warning orange */
   --warning-foreground: 60 9.1% 97.8%;
@@ -136,11 +136,24 @@
     background-color: hsl(var(--error));
   }
 
+  /* Bright aqua color utilities */
+  .text-bright-aqua {
+    color: #0BF9EA;
+  }
+  
+  .bg-bright-aqua {
+    background-color: #0BF9EA;
+  }
+  
+  .border-bright-aqua {
+    border-color: #0BF9EA;
+  }
+
   /* Gradient utilities */
   .gradient-bg {
     background: linear-gradient(135deg, 
       hsl(200, 85%, 60%) 0%, 
-      hsl(180, 100%, 50%) 50%, 
+      #0BF9EA 50%, 
       hsl(160, 80%, 50%) 100%);
   }
 
@@ -525,5 +538,32 @@
 
   .tracking-wide {
     letter-spacing: 0.025em;
+  }
+
+  /* YapUp Logo Gradient */
+  .yapup-gradient {
+    background: linear-gradient(135deg, 
+      #0BF9EA 0%, 
+      #22d3ee 25%, 
+      #06b6d4 50%, 
+      #0BF9EA 75%, 
+      #67e8f9 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 300% 300%;
+    animation: yapup-glow 3s ease-in-out infinite;
+    filter: drop-shadow(0 0 8px rgba(11, 249, 234, 0.3));
+  }
+
+  @keyframes yapup-glow {
+    0%, 100% {
+      background-position: 0% 50%;
+      filter: drop-shadow(0 0 8px rgba(11, 249, 234, 0.3));
+    }
+    50% {
+      background-position: 100% 50%;
+      filter: drop-shadow(0 0 12px rgba(11, 249, 234, 0.5));
+    }
   }
 }

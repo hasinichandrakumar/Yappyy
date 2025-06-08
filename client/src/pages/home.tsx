@@ -177,7 +177,7 @@ export default function Home() {
             animate={isHeroInView ? { y: 0, opacity: 1 } : {}}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            <Badge className="mb-6 bg-cyan-100 text-cyan-800 border-cyan-200 px-4 py-2 flex items-center justify-center">
+            <Badge className="mb-6 bg-[#0BF9EA]/10 text-[#0BF9EA] border-[#0BF9EA]/20 px-4 py-2 flex items-center justify-center">
               <motion.div
                 className="flex items-center justify-center"
                 animate={{ rotate: 360 }}
@@ -695,7 +695,7 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-cyan-600 via-blue-600 to-cyan-700">
+      <section className="py-20 bg-gradient-to-r from-blue-600 via-[#0BF9EA] to-blue-700">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <Award className="w-16 h-16 mx-auto mb-8 text-white/80" />
           <h2 className="text-4xl font-bold text-white mb-6 floating-text">
@@ -705,7 +705,7 @@ export default function Home() {
             Join thousands of speakers who have improved their presentation skills with our <span className="bg-white/20 px-2 py-1 rounded">AI-powered coaching</span> platform.
           </p>
           <Link href="/dashboard">
-            <Button size="lg" className="bg-white text-cyan-600 hover:bg-gray-100 shadow-xl px-12 py-4 text-lg font-semibold">
+            <Button size="lg" className="bg-white text-[#0BF9EA] hover:bg-gray-100 shadow-xl px-12 py-4 text-lg font-semibold">
               Start Your Journey
               <PlayCircle className="w-5 h-5 ml-3" />
             </Button>
