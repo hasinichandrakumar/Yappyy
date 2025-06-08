@@ -177,7 +177,7 @@ export default function Home() {
             animate={isHeroInView ? { y: 0, opacity: 1 } : {}}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            <Badge className="mb-6 bg-[#0BF9EA]/10 text-[#0BF9EA] border-[#0BF9EA]/20 px-4 py-2 flex items-center justify-center">
+            <Badge className="mb-6 bg-blue-500/10 text-blue-600 border-blue-500/20 px-4 py-2 flex items-center justify-center">
               <motion.div
                 className="flex items-center justify-center"
                 animate={{ rotate: 360 }}
