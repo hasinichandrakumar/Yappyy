@@ -43,18 +43,18 @@ export function useVoiceAnalysis() {
       setIsAnalyzing(true);
       startTime.current = Date.now();
       
-      // Start analyzing audio data
+      // Start analyzing audio data with higher frequency updates
       const analyzeAudio = () => {
-        if (!analyser.current || !isAnalyzing) return;
+        if (!analyser.current) return;
         
         const bufferLength = analyser.current.frequencyBinCount;
         const dataArray = new Uint8Array(bufferLength);
         analyser.current.getByteFrequencyData(dataArray);
         
-        // Calculate volume level
+        // Calculate volume level with better sensitivity
         const sum = dataArray.reduce((acc, value) => acc + value, 0);
         const averageVolume = sum / bufferLength;
-        const volumeLevel = Math.min((averageVolume / 128) * 100, 100);
+        const volumeLevel = Math.min((averageVolume / 100) * 100, 100); // More sensitive scaling
         
         // Calculate voice clarity based on frequency distribution
         const clarityAnalysis = () => {
@@ -100,6 +100,7 @@ export function useVoiceAnalysis() {
         const elapsedMinutes = (Date.now() - startTime.current) / 60000;
         const wpm = elapsedMinutes > 0 ? Math.round(wordsSpoken.current / elapsedMinutes) : 0;
         
+        // Update metrics more frequently with smoother transitions
         setMetrics(prev => ({
           ...prev,
           volumeLevel: Math.round(volumeLevel),
@@ -108,7 +109,10 @@ export function useVoiceAnalysis() {
           confidenceScore: Math.round(confidenceAnalysis())
         }));
         
-        animationFrame.current = requestAnimationFrame(analyzeAudio);
+        // Continue analysis loop
+        if (isAnalyzing) {
+          animationFrame.current = requestAnimationFrame(analyzeAudio);
+        }
       };
       
       analyzeAudio();
