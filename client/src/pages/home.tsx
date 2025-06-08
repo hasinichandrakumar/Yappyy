@@ -418,11 +418,11 @@ export default function Home() {
                 <Card className="group cursor-pointer transition-all duration-500 hover:shadow-2xl border-0 overflow-hidden bg-white/80 backdrop-blur-sm">
                   <CardContent className="p-8 relative">
                     <motion.div 
-                      className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-5 group-hover:opacity-15 transition-opacity duration-500`}
+                      className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-5 group-hover:opacity-15 transition-opacity duration-500`}
                       animate={isHovered === feature.title ? { opacity: 0.15 } : { opacity: 0.05 }}
                     />
                     <motion.div 
-                      className={`w-16 h-16 mb-6 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center shadow-lg relative z-10`}
+                      className={`w-16 h-16 mb-6 bg-gradient-to-br ${feature.color} rounded-2xl flex items-center justify-center shadow-lg relative z-10`}
                       animate={{
                         rotate: [0, 5, -5, 0],
                         scale: isHovered === feature.title ? [1, 1.1, 1] : 1,
@@ -446,29 +446,9 @@ export default function Home() {
                       initial={{ opacity: 0.7 }}
                       animate={isHovered === feature.title ? { opacity: 1 } : { opacity: 0.7 }}
                     >
-                      {feature.details.map((detail, detailIndex) => (
-                        <motion.div 
-                          key={detailIndex} 
-                          className="flex items-center text-sm text-gray-500"
-                          initial={{ x: -10, opacity: 0 }}
-                          animate={isHovered === feature.title ? { x: 0, opacity: 1 } : { x: -10, opacity: 0.7 }}
-                          transition={{ duration: 0.3, delay: detailIndex * 0.1 }}
-                        >
-                          <motion.div 
-                            className="w-1 h-1 bg-cyan-500 rounded-full mr-2"
-                            animate={{
-                              scale: [1, 1.5, 1],
-                              opacity: [0.5, 1, 0.5],
-                            }}
-                            transition={{
-                              duration: 1.5,
-                              repeat: Infinity,
-                              delay: detailIndex * 0.2,
-                            }}
-                          />
-                          {detail}
-                        </motion.div>
-                      ))}
+                      <Badge className="bg-white/10 text-gray-700 border-gray-300">
+                        {feature.stats}
+                      </Badge>
                     </motion.div>
                   </CardContent>
                 </Card>

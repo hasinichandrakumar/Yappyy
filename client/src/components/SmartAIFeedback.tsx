@@ -167,37 +167,87 @@ export default function SmartAIFeedback() {
     setLastFillerCount(currentFillerCount);
   }, [fillerWords.length, isListening, lastFillerCount, fillerWords]);
 
-  // Simple speech detection test (fires when speech is first detected)
+  // Advanced speech coaching with sophisticated feedback
   useEffect(() => {
     if (!isListening) return;
 
     const wordCount = transcript.split(' ').length;
     
-    // Immediate feedback when speech starts
+    // Immediate coaching when speech starts
     if (wordCount >= 3 && !currentFeedback) {
-      console.log('Triggering immediate speech detection feedback');
       showFeedback(createFeedback(
         'tip',
-        'Speech Detected!',
-        'Great! I can hear you speaking. Continue and I\'ll provide real-time coaching feedback.',
+        'AI Coach Activated',
+        'Excellent! Your speech analysis is now active. I\'m monitoring pace, clarity, and delivery patterns.',
         'low',
         true,
-        4
+        5
       ));
     }
     
-    // Periodic encouragement for longer speeches
-    if (wordCount > 0 && wordCount % 30 === 0 && currentFeedback?.type !== 'success') {
-      if (wpm >= 100 && fillerWords.length < wordCount * 0.1) {
+    // Advanced speaking pattern analysis
+    if (wordCount >= 20) {
+      const avgWordsPerSentence = wordCount / (transcript.split(/[.!?]+/).length - 1 || 1);
+      
+      if (avgWordsPerSentence > 25) {
         showFeedback(createFeedback(
-          'success',
-          'Excellent Progress!',
-          'You\'re maintaining good pace and clarity. Keep up the momentum!',
+          'improvement',
+          'Sentence Complexity Alert',
+          'Consider breaking down complex sentences for better audience comprehension. Aim for 15-20 words per sentence.',
+          'medium',
+          true,
+          6
+        ));
+      } else if (avgWordsPerSentence < 8) {
+        showFeedback(createFeedback(
+          'improvement',
+          'Sentence Variety Suggestion',
+          'Try varying your sentence lengths to create more engaging rhythm and flow.',
           'low',
           true,
-          3
+          5
         ));
       }
+    }
+    
+    // Energy and engagement monitoring
+    if (wordCount > 0 && wordCount % 40 === 0) {
+      const recentFillerRate = fillerWords.length / (wordCount / 100);
+      
+      if (wpm >= 140 && wpm <= 180 && recentFillerRate < 2) {
+        showFeedback(createFeedback(
+          'success',
+          'Outstanding Delivery!',
+          'Perfect pace, minimal fillers, and excellent flow. You\'re in the optimal speaking zone!',
+          'low',
+          true,
+          4
+        ));
+      } else if (wpm > 220) {
+        showFeedback(createFeedback(
+          'warning',
+          'Pace Control Needed',
+          'You\'re speaking very rapidly. Slow down to ensure key points resonate with your audience.',
+          'high',
+          true,
+          6
+        ));
+      }
+    }
+    
+    // Content engagement patterns
+    const questionMarks = (transcript.match(/\?/g) || []).length;
+    const exclamationMarks = (transcript.match(/!/g) || []).length;
+    
+    if (wordCount >= 50 && questionMarks === 0 && exclamationMarks === 0) {
+      showFeedback(createFeedback(
+        'tip',
+        'Engagement Enhancement',
+        'Consider adding rhetorical questions or emphatic statements to boost audience engagement.',
+        'low',
+        true,
+        5
+      ));
     }
   }, [transcript, isListening, wpm, fillerWords.length, currentFeedback]);
 
