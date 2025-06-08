@@ -22,7 +22,7 @@ import {
   Bot,
   Zap,
   Waves,
-  Target,
+  ArrowUpRight,
   Globe,
   Lightbulb,
   Settings,
@@ -67,7 +67,7 @@ export default function Home() {
       details: ["Purpose-specific feedback", "Adaptive learning paths", "Personalized improvement plans", "Context-aware suggestions"]
     },
     {
-      icon: Target,
+      icon: ArrowUpRight,
       title: "Persuasiveness Intelligence",
       description: "AI analyzes argument structure, emotional appeal, credibility markers, and audience engagement to score persuasive impact.",
       gradient: "from-cyan-600 to-blue-500",
@@ -163,8 +163,9 @@ export default function Home() {
             animate={isHeroInView ? { y: 0, opacity: 1 } : {}}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            <Badge className="mb-6 bg-cyan-100 text-cyan-800 border-cyan-200 px-4 py-2">
+            <Badge className="mb-6 bg-cyan-100 text-cyan-800 border-cyan-200 px-4 py-2 flex items-center justify-center">
               <motion.div
+                className="flex items-center justify-center"
                 animate={{ rotate: 360 }}
                 transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
               >
@@ -508,7 +509,7 @@ export default function Home() {
 
               <div className="flex items-start space-x-4">
                 <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Target className="w-6 h-6 text-white" />
+                  <ArrowUpRight className="w-6 h-6 text-white" />
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2">Breaking Through the Barrier</h3>
@@ -536,7 +537,7 @@ export default function Home() {
                     <div className="text-sm text-gray-600">Lives Transformed</div>
                   </div>
                   <div className="bg-cyan-50 rounded-lg p-4">
-                    <div className="text-2xl font-bold text-cyan-600">95%</div>
+                    <div className="text-2xl font-bold text-cyan-600">100%</div>
                     <div className="text-sm text-gray-600">Confidence Boost</div>
                   </div>
                 </div>
@@ -647,7 +648,7 @@ export default function Home() {
 
             <Card className="text-center p-6 hover:shadow-lg transition-all duration-300 bg-white/70 backdrop-blur-sm">
               <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                <Target className="w-6 h-6 text-white" />
+                <ArrowUpRight className="w-6 h-6 text-white" />
               </div>
               <h4 className="font-semibold text-gray-900 mb-2">ROI Analyzer</h4>
               <p className="text-sm text-gray-600">Measure speech impact and persuasiveness</p>

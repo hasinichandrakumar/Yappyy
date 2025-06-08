@@ -291,7 +291,7 @@ export default function ImprovementSummary() {
         <Card className="bg-surface rounded-xl shadow-sm border border-gray-200">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <Target className="w-5 h-5 text-red-600" />
+              <ArrowUpRight className="w-5 h-5 text-red-600" />
               <span>Priority Improvements</span>
             </CardTitle>
           </CardHeader>
@@ -422,7 +422,7 @@ export default function ImprovementSummary() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {aiAnalysis.longTermGoals.map((goal, index) => (
                 <div key={index} className="flex items-center space-x-2 p-3 bg-purple-50 rounded-lg">
-                  <Target className="w-4 h-4 text-purple-600" />
+                  <ArrowUpRight className="w-4 h-4 text-purple-600" />
                   <span className="text-sm text-purple-800">{goal}</span>
                 </div>
               ))}
