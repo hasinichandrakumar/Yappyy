@@ -70,10 +70,14 @@ export default function VideoFeed() {
         messages.push("Speak louder to ensure your audience can hear you");
       }
 
-      if (speakingPace < 120) {
-        messages.push("You can speak a bit faster to maintain engagement");
-      } else if (speakingPace > 180) {
-        messages.push("Slow down your speaking pace for better clarity");
+      // Use actual WPM from speech recognition if available
+      const currentWPM = wpm || speakingPace;
+      if (currentWPM > 0) {
+        if (currentWPM < 120) {
+          messages.push("You can speak a bit faster to maintain engagement");
+        } else if (currentWPM > 180) {
+          messages.push("Slow down your speaking pace for better clarity");
+        }
       }
 
       // Update feedback messages (limit to 2 messages at a time)
@@ -88,7 +92,7 @@ export default function VideoFeed() {
     }, 10000); // Check every 10 seconds
 
     return () => clearInterval(feedbackInterval);
-  }, [realTimeFeedback, isRecording, posture, eyeContact, volumeLevel, speakingPace]);
+  }, [realTimeFeedback, isRecording, posture, eyeContact, volumeLevel, speakingPace, wpm]);
 
   const startCamera = async () => {
     
@@ -110,8 +114,12 @@ export default function VideoFeed() {
   };
 
   const startRecording = () => {
+    console.log('Starting recording session...');
     setIsRecording(true);
+    
+    // Start both voice analysis and speech recognition
     startVoiceAnalysis();
+    startListening();
     
     // Start frame processing for MediaPipe
     if (videoRef.current && canvasRef.current) {
@@ -139,14 +147,18 @@ export default function VideoFeed() {
   };
 
   const stopRecording = () => {
+    console.log('Stopping recording session...');
     setIsRecording(false);
     stopVoiceAnalysis();
+    stopListening();
     setFeedbackMessages([]);
   };
 
   const pauseRecording = () => {
+    console.log('Pausing recording session...');
     setIsRecording(false);
     stopVoiceAnalysis();
+    stopListening();
   };
 
   return (
@@ -236,11 +248,16 @@ export default function VideoFeed() {
                   </div>
                   <div className="flex items-center space-x-1">
                     <Brain className="w-3 h-3" />
-                    <span>{speakingPace} WPM</span>
+                    <span>{wpm || speakingPace} WPM</span>
                   </div>
                   <div className="flex items-center space-x-1">
-                    <span className="text-cyan-300">Clarity: {Math.round(voiceClarity * 100)}%</span>
+                    <span className="text-cyan-300">Clarity: {Math.round(voiceClarity)}%</span>
                   </div>
+                  {wordCount > 0 && (
+                    <div className="flex items-center space-x-1">
+                      <span className="text-green-300">{wordCount} words</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
