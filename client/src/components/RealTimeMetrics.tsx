@@ -6,7 +6,7 @@ import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { useVoiceAnalysis } from "@/hooks/useVoiceAnalysis";
 
 export default function RealTimeMetrics() {
-  const { isListening, wpm, wordCount } = useSpeechRecognition();
+  const { isListening, wordCount } = useSpeechRecognition();
   const { 
     voiceClarity, 
     confidenceScore, 
