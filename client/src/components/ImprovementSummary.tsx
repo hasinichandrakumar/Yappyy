@@ -4,7 +4,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
-  Target, 
+  ArrowUpRight, 
   TrendingUp, 
   AlertTriangle,
   CheckCircle,
@@ -241,7 +241,7 @@ export default function ImprovementSummary() {
   const getPriorityIcon = (priority: string) => {
     switch (priority) {
       case 'high': return AlertTriangle;
-      case 'medium': return Target;
+      case 'medium': return ArrowUpRight;
       case 'low': return TrendingUp;
       default: return CheckCircle;
     }

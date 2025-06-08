@@ -9,7 +9,7 @@ import {
   AlertTriangle, 
   CheckCircle, 
   Lightbulb, 
-  Target,
+  ArrowUpRight,
   Clock,
   Volume2
 } from 'lucide-react';
@@ -162,7 +162,7 @@ export default function SmartAIFeedback() {
       case 'warning': return AlertTriangle;
       case 'success': return CheckCircle;
       case 'tip': return Lightbulb;
-      case 'improvement': return Target;
+      case 'improvement': return ArrowUpRight;
       default: return Brain;
     }
   };
