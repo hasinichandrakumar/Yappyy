@@ -78,7 +78,7 @@ export default function AdvancedPracticeHub() {
     posture,
     gesture,
     initializeMediaPipe
-  } = useMediaPipe(videoRef, canvasRef);
+  } = useMediaPipe();
 
   // Practice modes
   const practiceModes: PracticeMode[] = [
@@ -187,10 +187,10 @@ export default function AdvancedPracticeHub() {
   // Calculate real-time metrics
   const calculateMetrics = (): RealTimeMetric[] => {
     const baseConfidence = sessionActive ? 65 + Math.random() * 25 : 0;
-    const basePace = wpm || (sessionActive ? 140 + Math.random() * 40 : 0);
-    const eyeContactValue = eyeContact || (sessionActive ? 60 + Math.random() * 30 : 0);
-    const postureValue = posture || (sessionActive ? 70 + Math.random() * 20 : 0);
-    const gestureValue = gesture || (sessionActive ? 65 + Math.random() * 25 : 0);
+    const basePace = Number(wpm) || (sessionActive ? 140 + Math.random() * 40 : 0);
+    const eyeContactValue = Number(eyeContact) || (sessionActive ? 60 + Math.random() * 30 : 0);
+    const postureValue = Number(posture) || (sessionActive ? 70 + Math.random() * 20 : 0);
+    const gestureValue = Number(gesture) || (sessionActive ? 65 + Math.random() * 25 : 0);
     const baseVolume = sessionActive ? 60 + Math.random() * 30 : 0;
 
     return [

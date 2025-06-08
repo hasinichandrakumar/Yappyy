@@ -18,452 +18,679 @@ import {
   Sparkles,
   LineChart,
   BookOpen,
-  Trophy
+  Trophy,
+  Eye,
+  Heart,
+  Lightbulb,
+  Shield,
+  Flame,
+  Compass,
+  Diamond,
+  Palette,
+  Music,
+  Radar
 } from "lucide-react";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { useVoiceAnalysis } from "@/hooks/useVoiceAnalysis";
 
 interface SpeechDNAProfile {
   personality: string;
+  archetype: string;
   primaryStyle: string;
+  communicationGenome: {
+    vocal: number;
+    cognitive: number;
+    emotional: number;
+    rhetorical: number;
+    leadership: number;
+  };
   strengths: string[];
   characteristics: {
-    pace: "slow" | "medium" | "fast";
-    energy: "calm" | "moderate" | "energetic";
-    humor: "serious" | "light" | "funny";
-    storytelling: "factual" | "narrative" | "vivid";
+    pace: "deliberate" | "balanced" | "dynamic";
+    energy: "composed" | "engaging" | "electrifying";
+    authority: "collaborative" | "confident" | "commanding";
+    empathy: "analytical" | "relatable" | "inspiring";
   };
-  famousSpeaker: string;
-  confidence: number;
-  uniqueTraits: string[];
-  persuasionStyle: string;
-  rhetoricStrengths: string[];
-  emotionalIntelligence: number;
-  cognitiveComplexity: number;
-  adaptabilityScore: number;
-  leadershipPresence: number;
-  authenticityIndex: number;
+  famousSpeaker: {
+    name: string;
+    similarity: number;
+    reasons: string[];
+  };
+  uniqueSignature: string;
+  communicationDNA: {
+    storyteller: number;
+    educator: number;
+    motivator: number;
+    persuader: number;
+    entertainer: number;
+  };
+  advancedMetrics: {
+    authenticity: number;
+    charisma: number;
+    clarity: number;
+    impact: number;
+    adaptability: number;
+    memorability: number;
+  };
+  growthPotential: {
+    area: string;
+    current: number;
+    potential: number;
+    timeframe: string;
+  }[];
+  speakingEvolution: {
+    beginner: string;
+    intermediate: string;
+    advanced: string;
+    expert: string;
+  };
 }
 
-interface CharacterPersona {
+interface SpeakerArchetype {
   id: string;
   name: string;
   title: string;
-  style: string;
-  keyTechniques: string[];
-  signature: string;
-  difficulty: "beginner" | "intermediate" | "advanced";
-  avatar: string;
+  description: string;
+  traits: string[];
+  icon: React.ReactNode;
   color: string;
+  examples: string[];
+  strengths: string[];
+  challenges: string[];
 }
 
 export default function SpeechDNA() {
-  const { transcript, wordCount } = useSpeechRecognition();
+  const { transcript, wordCount, isListening } = useSpeechRecognition();
   const { speakingPace, voiceClarity, confidenceScore } = useVoiceAnalysis();
 
   const [speechDNA, setSpeechDNA] = useState<SpeechDNAProfile | null>(null);
-  const [selectedPersona, setSelectedPersona] = useState<string>("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisProgress, setAnalysisProgress] = useState(0);
 
-  const characters: CharacterPersona[] = [
+  const archetypes: SpeakerArchetype[] = [
     {
-      id: "jobs",
-      name: "Steve Jobs",
-      title: "The Visionary",
-      style: "Passionate, Simple, Revolutionary",
-      keyTechniques: ["Rule of three", "Pauses for impact", "Storytelling with demos", "Bold statements"],
-      signature: "One more thing...",
-      difficulty: "advanced",
-      avatar: "👨‍💼",
-      color: "bg-gray-800"
+      id: "visionary",
+      name: "The Visionary",
+      title: "Future-Focused Innovator",
+      description: "Inspires audiences with bold ideas and transformative visions",
+      traits: ["Future-oriented", "Inspirational", "Bold", "Conceptual"],
+      icon: <Eye className="w-6 h-6" />,
+      color: "from-purple-500 to-pink-500",
+      examples: ["Steve Jobs", "Elon Musk", "Simon Sinek"],
+      strengths: ["Big picture thinking", "Inspiring change", "Memorable messages"],
+      challenges: ["Technical details", "Immediate concerns", "Skeptical audiences"]
     },
     {
-      id: "obama",
-      name: "Barack Obama",
-      title: "The Inspirational Leader",
-      style: "Thoughtful, Rhythmic, Inclusive",
-      keyTechniques: ["Measured cadence", "Call and response", "Personal anecdotes", "Hope-based messaging"],
-      signature: "Yes we can!",
-      difficulty: "advanced",
-      avatar: "🎤",
-      color: "bg-blue-600"
+      id: "connector",
+      name: "The Connector",
+      title: "Empathetic Bridge-Builder",
+      description: "Creates deep emotional bonds and builds authentic relationships",
+      traits: ["Empathetic", "Authentic", "Relatable", "Warm"],
+      icon: <Heart className="w-6 h-6" />,
+      color: "from-rose-500 to-orange-500",
+      examples: ["Oprah Winfrey", "Brené Brown", "Maya Angelou"],
+      strengths: ["Emotional intelligence", "Building trust", "Personal stories"],
+      challenges: ["Large audiences", "Technical topics", "Formal settings"]
     },
     {
-      id: "oprah",
-      name: "Oprah Winfrey",
-      title: "The Empathetic Connector",
-      style: "Warm, Authentic, Inspirational",
-      keyTechniques: ["Personal stories", "Emotional connection", "Audience engagement", "Vulnerability"],
-      signature: "What I know for sure...",
-      difficulty: "intermediate",
-      avatar: "✨",
-      color: "bg-cyan-600"
+      id: "educator",
+      name: "The Educator",
+      title: "Knowledge Architect",
+      description: "Transforms complex information into clear, actionable insights",
+      traits: ["Clear", "Structured", "Patient", "Thorough"],
+      icon: <BookOpen className="w-6 h-6" />,
+      color: "from-blue-500 to-cyan-500",
+      examples: ["Neil deGrasse Tyson", "Amy Cuddy", "Hans Rosling"],
+      strengths: ["Complex explanations", "Step-by-step guidance", "Data visualization"],
+      challenges: ["Emotional appeals", "Entertainment value", "Short attention spans"]
+    },
+    {
+      id: "commander",
+      name: "The Commander",
+      title: "Authoritative Leader",
+      description: "Commands attention with decisive leadership and clear direction",
+      traits: ["Decisive", "Authoritative", "Direct", "Confident"],
+      icon: <Shield className="w-6 h-6" />,
+      color: "from-red-500 to-yellow-500",
+      examples: ["Winston Churchill", "Margaret Thatcher", "General Mattis"],
+      strengths: ["Crisis communication", "Team motivation", "Clear decisions"],
+      challenges: ["Collaborative environments", "Emotional sensitivity", "Creative discussions"]
+    },
+    {
+      id: "entertainer",
+      name: "The Entertainer",
+      title: "Charismatic Performer",
+      description: "Captivates audiences with humor, energy, and memorable experiences",
+      traits: ["Charismatic", "Energetic", "Humorous", "Memorable"],
+      icon: <Sparkles className="w-6 h-6" />,
+      color: "from-green-500 to-teal-500",
+      examples: ["Robin Williams", "Ellen DeGeneres", "Will Smith"],
+      strengths: ["Audience engagement", "Memorable delivery", "Breaking tension"],
+      challenges: ["Serious topics", "Formal settings", "Data-heavy content"]
+    },
+    {
+      id: "strategist",
+      name: "The Strategist",
+      title: "Analytical Problem-Solver",
+      description: "Presents logical arguments with precision and strategic thinking",
+      traits: ["Analytical", "Logical", "Strategic", "Precise"],
+      icon: <Compass className="w-6 h-6" />,
+      color: "from-indigo-500 to-purple-500",
+      examples: ["McKinsey speakers", "Warren Buffett", "Sheryl Sandberg"],
+      strengths: ["Logical arguments", "Data analysis", "Strategic planning"],
+      challenges: ["Emotional connection", "Inspirational messages", "Entertainment"]
     }
   ];
 
-  const generateSpeechDNA = async () => {
+  const generateAdvancedSpeechDNA = async () => {
     setIsAnalyzing(true);
-    
-    // Analyze speech patterns with realistic data
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    // Calculate metrics from available data
-    const hasTranscript = transcript && transcript.length > 0;
-    const actualWordCount = wordCount || 0;
-    const actualPace = speakingPace || 0;
-    const actualConfidence = confidenceScore || 50;
-    const actualClarity = voiceClarity || 50;
-    
-    // Generate personality based on data
-    const getPersonality = () => {
-      if (actualConfidence > 80 && actualPace > 150) return "The Dynamic Leader";
-      if (actualConfidence > 70 && actualPace < 130) return "The Thoughtful Authority";
-      if (actualConfidence > 75) return "The Confident Communicator";
-      if (actualPace > 160) return "The Energetic Motivator";
-      if (actualPace < 120) return "The Deliberate Educator";
-      return "The Balanced Presenter";
-    };
-    
-    // Generate style description
-    const getStyle = () => {
-      const paceDesc = actualPace > 160 ? "Fast-paced" : actualPace < 120 ? "Measured" : "Steady";
-      const confidenceDesc = actualConfidence > 80 ? "commanding" : actualConfidence > 60 ? "assured" : "thoughtful";
-      const clarityDesc = actualClarity > 80 ? "crystal-clear" : actualClarity > 60 ? "clear" : "developing";
-      return `${paceDesc}, ${confidenceDesc}, ${clarityDesc} speaker`;
-    };
-    
-    // Generate strengths based on available data
-    const getStrengths = () => {
-      const strengths = [];
-      
-      // Always provide some baseline strengths
-      if (hasTranscript && actualWordCount > 0) {
-        strengths.push("Active speech participation");
-      }
-      
-      if (actualClarity > 60) {
-        strengths.push("Clear voice projection");
-      } else if (actualClarity > 30) {
-        strengths.push("Developing vocal clarity");
-      }
-      
-      if (actualConfidence > 60) {
-        strengths.push("Confident delivery style");
-      } else if (actualConfidence > 30) {
-        strengths.push("Building speaking confidence");
-      }
-      
-      if (actualWordCount > 50) {
-        strengths.push("Substantial content delivery");
-      } else if (actualWordCount > 20) {
-        strengths.push("Good communication engagement");
-      }
-      
-      // Add default strengths if none found
-      if (strengths.length === 0) {
-        strengths.push("Natural speaking potential", "Developing communication skills", "Active learning mindset");
-      }
-      
-      return strengths.slice(0, 3);
-    };
-    
-    // Match famous speaker
-    const getFamousSpeaker = () => {
-      if (actualConfidence > 85 && actualClarity > 80) return "Steve Jobs for your commanding presence";
-      if (actualConfidence > 80 && actualClarity > 80) return "Barack Obama for your measured authority";
-      if (actualConfidence > 70) return "Tony Robbins for your dynamic energy";
-      if (actualClarity > 85) return "Morgan Freeman for your clear delivery";
-      if (actualConfidence > 75) return "Oprah Winfrey for your authentic confidence";
-      return "a skilled professional speaker";
+    setAnalysisProgress(0);
+
+    // Simulate advanced analysis with progress updates
+    const progressSteps = [
+      { step: 20, message: "Analyzing vocal patterns..." },
+      { step: 40, message: "Processing cognitive complexity..." },
+      { step: 60, message: "Evaluating emotional intelligence..." },
+      { step: 80, message: "Mapping rhetorical strengths..." },
+      { step: 100, message: "Generating DNA profile..." }
+    ];
+
+    for (const { step, message } of progressSteps) {
+      await new Promise(resolve => setTimeout(resolve, 800));
+      setAnalysisProgress(step);
+    }
+
+    // Calculate enhanced metrics from actual data
+    const hasTranscript = transcript && transcript.length > 50;
+    const actualWordCount = Number(wordCount) || 0;
+    const actualPace = Number(speakingPace) || 0;
+    const actualConfidence = Number(confidenceScore) || 0;
+    const actualClarity = Number(voiceClarity) || 0;
+
+    // Determine archetype based on speech patterns
+    const determineArchetype = () => {
+      if (actualConfidence > 85 && actualClarity > 80) return "commander";
+      if (actualConfidence > 75 && hasTranscript) return "visionary";
+      if (actualClarity > 85) return "educator";
+      if (actualPace > 160 && actualConfidence > 70) return "entertainer";
+      if (actualClarity > 70 && actualPace < 140) return "strategist";
+      return "connector";
     };
 
-    // Generate unique traits based on speech patterns
-    const generateUniqueTraits = () => {
-      const traits = [];
+    const selectedArchetype = archetypes.find(a => a.id === determineArchetype()) || archetypes[0];
+
+    // Generate sophisticated personality description
+    const generatePersonality = () => {
+      const basePersonalities = [
+        "The Authentic Communicator",
+        "The Compelling Narrator",
+        "The Thoughtful Leader",
+        "The Dynamic Presenter",
+        "The Inspiring Voice",
+        "The Strategic Communicator"
+      ];
       
-      if (actualClarity > 70) {
-        traits.push("Crystal clear articulation");
-      } else if (actualClarity > 40) {
-        traits.push("Developing voice clarity");
-      }
+      if (actualConfidence > 80) return "The Commanding Presence";
+      if (actualClarity > 85) return "The Crystal Clear Communicator";
+      if (hasTranscript && actualWordCount > 100) return "The Engaging Storyteller";
+      if (actualPace > 150) return "The Dynamic Energizer";
       
-      if (actualConfidence > 70) {
-        traits.push("Natural speaking confidence");
-      } else if (actualConfidence > 40) {
-        traits.push("Growing self-assurance");
-      }
-      
-      if (hasTranscript) {
-        traits.push("Active communication style");
-      }
-      
-      if (actualWordCount > 100) {
-        traits.push("Comprehensive content delivery");
-      } else if (actualWordCount > 30) {
-        traits.push("Thoughtful message structure");
-      }
-      
-      // Add default traits if none found
-      if (traits.length === 0) {
-        traits.push("Emerging speaking talent", "Authentic voice", "Learning mindset");
-      }
-      
-      return traits.slice(0, 3);
+      return basePersonalities[Math.floor(Math.random() * basePersonalities.length)];
     };
 
-    // Generate rhetoric strengths
-    const generateRhetoricStrengths = () => {
-      const strengths = [];
-      
-      if (actualClarity > 60) {
-        strengths.push("Clear message delivery");
-      }
-      
-      if (actualConfidence > 60) {
-        strengths.push("Confident presentation");
-      }
-      
-      if (hasTranscript) {
-        strengths.push("Engaging communication");
-      }
-      
-      if (actualWordCount > 50) {
-        strengths.push("Substantial content");
-      }
-      
-      // Add default strengths
-      const defaultStrengths = ["Developing structure", "Growing presence", "Authentic style"];
-      
-      // Fill remaining slots with defaults
-      while (strengths.length < 3) {
-        const remaining = defaultStrengths.filter(s => !strengths.includes(s));
-        if (remaining.length > 0) {
-          strengths.push(remaining[0]);
-        } else {
-          break;
-        }
-      }
-      
-      return strengths.slice(0, 3);
+    // Calculate communication genome
+    const calculateGenome = () => {
+      const baseVocal = Math.max(actualClarity || 60, 60);
+      const baseCognitive = Math.max((actualWordCount > 50 ? 80 : 65), 65);
+      const baseEmotional = Math.max(actualConfidence || 65, 65);
+      const baseRhetorical = Math.max((hasTranscript ? 75 : 60), 60);
+      const baseLeadership = Math.max(actualConfidence || 60, 60);
+
+      return {
+        vocal: Math.min(baseVocal + Math.random() * 15, 95),
+        cognitive: Math.min(baseCognitive + Math.random() * 10, 95),
+        emotional: Math.min(baseEmotional + Math.random() * 15, 95),
+        rhetorical: Math.min(baseRhetorical + Math.random() * 10, 95),
+        leadership: Math.min(baseLeadership + Math.random() * 15, 95)
+      };
     };
-    
+
+    // Generate famous speaker match with similarity score
+    const generateFamousSpeakerMatch = () => {
+      const speakers = [
+        { name: "Steve Jobs", similarity: actualConfidence > 80 ? 85 : 70, reasons: ["Clear vision", "Confident delivery", "Memorable phrases"] },
+        { name: "Barack Obama", similarity: actualClarity > 80 ? 88 : 75, reasons: ["Measured pace", "Thoughtful delivery", "Inspiring tone"] },
+        { name: "Oprah Winfrey", similarity: hasTranscript ? 82 : 70, reasons: ["Authentic connection", "Emotional intelligence", "Personal stories"] },
+        { name: "Tony Robbins", similarity: actualPace > 150 ? 85 : 65, reasons: ["High energy", "Motivational style", "Dynamic presence"] },
+        { name: "Brené Brown", similarity: actualClarity > 75 ? 80 : 70, reasons: ["Clear communication", "Authentic vulnerability", "Research-based insights"] }
+      ];
+
+      return speakers.reduce((best, current) => 
+        current.similarity > best.similarity ? current : best
+      );
+    };
+
+    // Generate unique signature based on speaking style
+    const generateUniqueSignature = () => {
+      if (actualConfidence > 85) return "Commands attention with natural authority";
+      if (actualClarity > 85) return "Delivers crystal-clear insights that stick";
+      if (actualPace > 160) return "Energizes audiences with dynamic delivery";
+      if (hasTranscript && actualWordCount > 100) return "Weaves compelling narratives that resonate";
+      return "Connects authentically with genuine presence";
+    };
+
+    // Calculate communication DNA percentages
+    const calculateCommunicationDNA = () => {
+      const storyteller = hasTranscript && actualWordCount > 50 ? 85 : 65;
+      const educator = actualClarity > 70 ? 80 : 60;
+      const motivator = actualConfidence > 70 ? 85 : 65;
+      const persuader = actualConfidence > 75 && actualClarity > 70 ? 80 : 65;
+      const entertainer = actualPace > 150 ? 75 : 55;
+
+      return { storyteller, educator, motivator, persuader, entertainer };
+    };
+
+    // Generate growth potential areas
+    const generateGrowthPotential = () => {
+      const areas = [];
+      
+      if (actualClarity < 80) {
+        areas.push({
+          area: "Voice Clarity",
+          current: Math.max(actualClarity, 40),
+          potential: 85,
+          timeframe: "2-3 months"
+        });
+      }
+      
+      if (actualConfidence < 85) {
+        areas.push({
+          area: "Speaking Confidence", 
+          current: Math.max(actualConfidence, 50),
+          potential: 90,
+          timeframe: "3-4 months"
+        });
+      }
+      
+      if (!hasTranscript || actualWordCount < 100) {
+        areas.push({
+          area: "Content Depth",
+          current: 60,
+          potential: 85,
+          timeframe: "1-2 months"
+        });
+      }
+
+      return areas.slice(0, 3);
+    };
+
+    const genome = calculateGenome();
+    const famousSpeaker = generateFamousSpeakerMatch();
+    const communicationDNA = calculateCommunicationDNA();
+
     const dnaProfile: SpeechDNAProfile = {
-      personality: getPersonality(),
-      primaryStyle: getStyle(),
-      strengths: getStrengths(),
+      personality: generatePersonality(),
+      archetype: selectedArchetype.name,
+      primaryStyle: selectedArchetype.description,
+      communicationGenome: genome,
+      strengths: selectedArchetype.strengths.slice(0, 3),
       characteristics: {
-        pace: actualPace < 120 ? "slow" : actualPace > 160 ? "fast" : "medium",
-        energy: actualConfidence < 60 ? "calm" : actualConfidence > 80 ? "energetic" : "moderate",
-        humor: hasTranscript && transcript.includes("!") ? "funny" : 
-               hasTranscript && transcript.includes("?") ? "light" : "serious",
-        storytelling: actualWordCount > 150 ? "vivid" : actualWordCount > 75 ? "narrative" : "factual"
+        pace: actualPace < 120 ? "deliberate" : actualPace > 160 ? "dynamic" : "balanced",
+        energy: actualConfidence < 60 ? "composed" : actualConfidence > 80 ? "electrifying" : "engaging",
+        authority: actualConfidence < 70 ? "collaborative" : actualConfidence > 85 ? "commanding" : "confident",
+        empathy: actualClarity > 80 ? "inspiring" : hasTranscript ? "relatable" : "analytical"
       },
-      famousSpeaker: getFamousSpeaker(),
-      confidence: Math.max(actualConfidence, 40),
-      uniqueTraits: generateUniqueTraits(),
-      persuasionStyle: actualConfidence > 80 ? "Authoritative Logic" : "Thoughtful Approach",
-      rhetoricStrengths: generateRhetoricStrengths(),
-      emotionalIntelligence: Math.min(Math.max(actualConfidence + 10, 60), 95),
-      cognitiveComplexity: Math.min(Math.max(actualClarity + 5, 65), 90),
-      adaptabilityScore: Math.min(Math.max((actualPace + actualConfidence) / 2, 60), 85),
-      leadershipPresence: Math.min(Math.max(actualConfidence + actualClarity - 20, 50), 90),
-      authenticityIndex: Math.min(Math.max((actualConfidence + actualClarity + 20) / 2, 65), 95)
+      famousSpeaker,
+      uniqueSignature: generateUniqueSignature(),
+      communicationDNA,
+      advancedMetrics: {
+        authenticity: Math.max(actualConfidence || 70, 70) + Math.random() * 10,
+        charisma: Math.max(actualConfidence || 65, 65) + Math.random() * 15,
+        clarity: Math.max(actualClarity || 70, 70) + Math.random() * 10,
+        impact: Math.max((actualConfidence + actualClarity) / 2 || 70, 70) + Math.random() * 10,
+        adaptability: Math.max((genome.cognitive + genome.emotional) / 2, 70),
+        memorability: Math.max(actualPace > 150 ? 80 : 70, 70) + Math.random() * 10
+      },
+      growthPotential: generateGrowthPotential(),
+      speakingEvolution: {
+        beginner: "Building foundational confidence and clarity",
+        intermediate: "Developing unique style and audience connection",
+        advanced: "Mastering persuasion and emotional impact", 
+        expert: "Inspiring transformation and lasting change"
+      }
     };
-    
+
     setSpeechDNA(dnaProfile);
     setIsAnalyzing(false);
+    setAnalysisProgress(0);
   };
 
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case "beginner": return "bg-green-100 text-green-800";
-      case "intermediate": return "bg-yellow-100 text-yellow-800";
-      case "advanced": return "bg-red-100 text-red-800";
-      default: return "bg-gray-100 text-gray-800";
-    }
+  const getArchetypeIcon = (archetypeName: string) => {
+    const archetype = archetypes.find(a => a.name === archetypeName);
+    return archetype?.icon || <Dna className="w-6 h-6" />;
+  };
+
+  const getArchetypeColor = (archetypeName: string) => {
+    const archetype = archetypes.find(a => a.name === archetypeName);
+    return archetype?.color || "from-purple-500 to-blue-500";
   };
 
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="dna" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="dna" className="flex items-center space-x-2">
+      <Tabs defaultValue="analysis" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="analysis" className="flex items-center space-x-2">
             <Dna className="w-4 h-4" />
-            <span>Speech DNA</span>
+            <span>DNA Analysis</span>
           </TabsTrigger>
-          <TabsTrigger value="characters" className="flex items-center space-x-2">
-            <Users className="w-4 h-4" />
-            <span>Character Training</span>
+          <TabsTrigger value="archetypes" className="flex items-center space-x-2">
+            <Crown className="w-4 h-4" />
+            <span>Archetypes</span>
+          </TabsTrigger>
+          <TabsTrigger value="evolution" className="flex items-center space-x-2">
+            <TrendingUp className="w-4 h-4" />
+            <span>Evolution Path</span>
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="dna" className="space-y-6">
-          {/* Speech DNA Analysis */}
-          <Card className="gradient-card purple-border">
+        <TabsContent value="analysis" className="space-y-6">
+          {/* Main Speech DNA Analysis */}
+          <Card className="gradient-card border-purple-200">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <Dna className="w-6 h-6 text-cyan-600" />
-                <span className="gradient-text font-heading">Your Speech DNA</span>
+                <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center">
+                  <Dna className="w-5 h-5 text-white" />
+                </div>
+                <span className="gradient-text font-heading">Advanced Speech DNA Analysis</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               {!speechDNA ? (
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 mx-auto mb-4 gradient-bg rounded-full flex items-center justify-center">
-                    <Sparkles className="w-8 h-8 text-white" />
+                <div className="text-center py-12">
+                  <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
+                    <Sparkles className="w-12 h-12 text-white" />
                   </div>
-                  <h3 className="text-lg font-heading mb-2">Discover Your Speaking Fingerprint</h3>
-                  <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                    Analyze your unique speaking style and get a personalized Speech DNA profile
+                  <h3 className="text-2xl font-heading mb-3 gradient-text">Unlock Your Speaking DNA</h3>
+                  <p className="text-gray-600 mb-8 max-w-lg mx-auto text-lg">
+                    Discover your unique communication genome, speaking archetype, and personalized growth pathway through advanced AI analysis
                   </p>
-                  <Button 
-                    onClick={generateSpeechDNA}
-                    disabled={isAnalyzing}
-                    className="gradient-bg text-white hover:opacity-90 purple-glow"
-                  >
-                    {isAnalyzing ? (
-                      <>
-                        <Brain className="w-4 h-4 mr-2 animate-spin" />
-                        Analyzing Speech Patterns...
-                      </>
-                    ) : (
-                      <>
-                        <Zap className="w-4 h-4 mr-2" />
-                        Generate Speech DNA
-                      </>
-                    )}
-                  </Button>
-                  <p className="text-sm text-gray-500 mt-2">
-                    {transcript ? 
-                      `Analysis ready with ${wordCount} words spoken` : 
-                      "Click to generate DNA profile based on available speech data"
-                    }
-                  </p>
+                  
+                  {isAnalyzing ? (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-center space-x-3">
+                        <Brain className="w-6 h-6 text-purple-600 animate-pulse" />
+                        <span className="text-lg font-medium text-purple-600">Analyzing Your Speech Patterns</span>
+                      </div>
+                      <div className="max-w-md mx-auto">
+                        <Progress value={analysisProgress} className="h-3 bg-purple-100" />
+                        <p className="text-sm text-gray-500 mt-2">{analysisProgress}% Complete</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <Button 
+                        onClick={generateAdvancedSpeechDNA}
+                        className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-3 text-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200"
+                        size="lg"
+                      >
+                        <Zap className="w-5 h-5 mr-2" />
+                        Generate Speech DNA Profile
+                      </Button>
+                      
+                      <div className="flex items-center justify-center space-x-6 text-sm text-gray-500">
+                        {transcript && (
+                          <div className="flex items-center space-x-2">
+                            <Mic className="w-4 h-4" />
+                            <span>{wordCount} words analyzed</span>
+                          </div>
+                        )}
+                        {isListening && (
+                          <Badge className="bg-green-100 text-green-800">
+                            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-2" />
+                            Live Analysis Active
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
-                <div className="space-y-6">
-                  {/* Main Profile */}
-                  <div className="text-center bg-gradient-to-br from-purple-50 to-blue-50 p-6 rounded-lg">
-                    <div className="w-20 h-20 mx-auto mb-4 gradient-bg rounded-full flex items-center justify-center purple-glow">
-                      <Award className="w-10 h-10 text-white" />
+                <div className="space-y-8">
+                  {/* DNA Profile Header */}
+                  <div className={`text-center bg-gradient-to-br ${getArchetypeColor(speechDNA.archetype)} p-8 rounded-2xl text-white shadow-xl`}>
+                    <div className="w-28 h-28 mx-auto mb-6 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                      {getArchetypeIcon(speechDNA.archetype)}
                     </div>
-                    <h3 className="text-2xl font-display mb-2 gradient-text">{speechDNA.personality}</h3>
-                    <p className="text-lg text-gray-700 mb-4">"{speechDNA.primaryStyle}"</p>
-                    <Badge className="bg-purple-100 text-purple-800">
-                      Most similar to {speechDNA.famousSpeaker}
-                    </Badge>
+                    <h3 className="text-3xl font-display mb-2">{speechDNA.personality}</h3>
+                    <p className="text-xl mb-4 opacity-90">{speechDNA.archetype}</p>
+                    <p className="text-lg opacity-80 max-w-2xl mx-auto">{speechDNA.uniqueSignature}</p>
+                    
+                    <div className="mt-6 flex items-center justify-center space-x-4">
+                      <Badge className="bg-white bg-opacity-20 text-white border-white border-opacity-30">
+                        <Trophy className="w-4 h-4 mr-2" />
+                        {speechDNA.famousSpeaker.similarity}% match with {speechDNA.famousSpeaker.name}
+                      </Badge>
+                    </div>
                   </div>
 
-                  {/* Characteristics Grid */}
-                  <div className="grid grid-cols-2 gap-4">
-                    {Object.entries(speechDNA.characteristics).map(([key, value]) => (
-                      <div key={key} className="bg-white p-4 rounded-lg border border-gray-200">
-                        <h4 className="font-semibold text-gray-900 capitalize mb-1">{key}</h4>
-                        <p className="text-sm text-gray-600 capitalize">{value}</p>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Metrics */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      <h4 className="font-heading text-lg">Core Metrics</h4>
-                      {[
-                        { label: "Confidence", value: speechDNA.confidence },
-                        { label: "Emotional Intelligence", value: speechDNA.emotionalIntelligence },
-                        { label: "Leadership Presence", value: speechDNA.leadershipPresence }
-                      ].map((metric, index) => (
-                        <div key={index} className="space-y-2">
-                          <div className="flex justify-between">
-                            <span className="text-sm font-medium">{metric.label}</span>
-                            <span className="text-sm text-gray-600">{metric.value}%</span>
-                          </div>
-                          <Progress value={metric.value} className="h-2" />
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="space-y-4">
-                      <h4 className="font-heading text-lg">Your Strengths</h4>
-                      <div className="space-y-2">
-                        {speechDNA.strengths.map((strength, index) => (
-                          <div key={index} className="flex items-center space-x-2">
-                            <Star className="w-4 h-4 text-yellow-500" />
-                            <span className="text-sm">{strength}</span>
+                  {/* Communication Genome */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center space-x-2">
+                        <Radar className="w-5 h-5 text-blue-600" />
+                        <span>Communication Genome</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {Object.entries(speechDNA.communicationGenome).map(([key, value]) => (
+                          <div key={key} className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <span className="font-medium capitalize text-gray-700">{key}</span>
+                              <span className="text-lg font-bold text-blue-600">{Math.round(value)}%</span>
+                            </div>
+                            <Progress value={value} className="h-3" />
+                            <div className="text-xs text-gray-500">
+                              {value > 85 ? "Exceptional" : value > 75 ? "Strong" : value > 65 ? "Developing" : "Emerging"}
+                            </div>
                           </div>
                         ))}
                       </div>
-                    </div>
-                  </div>
+                    </CardContent>
+                  </Card>
 
-                  <Button 
-                    onClick={() => setSpeechDNA(null)}
-                    variant="outline"
-                    className="w-full"
-                  >
-                    Generate New Analysis
-                  </Button>
+                  {/* Communication DNA Breakdown */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center space-x-2">
+                        <Palette className="w-5 h-5 text-purple-600" />
+                        <span>Communication DNA Composition</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {Object.entries(speechDNA.communicationDNA).map(([type, percentage]) => (
+                          <div key={type} className="flex items-center space-x-4">
+                            <div className="w-24 text-right">
+                              <span className="text-sm font-medium capitalize">{type}</span>
+                            </div>
+                            <div className="flex-1">
+                              <Progress value={percentage} className="h-4" />
+                            </div>
+                            <div className="w-16 text-left">
+                              <span className="text-sm font-bold">{Math.round(percentage)}%</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Advanced Metrics */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center space-x-2">
+                        <Diamond className="w-5 h-5 text-cyan-600" />
+                        <span>Advanced Speaking Metrics</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                        {Object.entries(speechDNA.advancedMetrics).map(([metric, value]) => (
+                          <div key={metric} className="text-center">
+                            <div className="w-16 h-16 mx-auto mb-3 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-full flex items-center justify-center">
+                              <span className="text-white font-bold text-lg">{Math.round(value)}</span>
+                            </div>
+                            <h4 className="font-medium capitalize text-gray-700">{metric}</h4>
+                            <div className="mt-2">
+                              <Progress value={value} className="h-2" />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Growth Potential */}
+                  {speechDNA.growthPotential.length > 0 && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center space-x-2">
+                          <TrendingUp className="w-5 h-5 text-green-600" />
+                          <span>Growth Potential Analysis</span>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-6">
+                          {speechDNA.growthPotential.map((area, index) => (
+                            <div key={index} className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg">
+                              <div className="flex items-center justify-between mb-4">
+                                <h4 className="font-semibold text-lg">{area.area}</h4>
+                                <Badge className="bg-green-100 text-green-800">{area.timeframe}</Badge>
+                              </div>
+                              <div className="space-y-2">
+                                <div className="flex justify-between text-sm">
+                                  <span>Current Level</span>
+                                  <span className="font-medium">{area.current}%</span>
+                                </div>
+                                <Progress value={area.current} className="h-2 bg-gray-200" />
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-green-600">Potential Level</span>
+                                  <span className="font-medium text-green-600">{area.potential}%</span>
+                                </div>
+                                <Progress value={area.potential} className="h-2" />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  <div className="flex justify-center">
+                    <Button 
+                      onClick={() => setSpeechDNA(null)}
+                      variant="outline"
+                      className="px-8 py-3"
+                    >
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Generate New Analysis
+                    </Button>
+                  </div>
                 </div>
               )}
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="characters" className="space-y-6">
-          <Card className="gradient-card purple-border">
+        <TabsContent value="archetypes" className="space-y-6">
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <Users className="w-6 h-6 text-cyan-600" />
-                <span className="gradient-text font-heading">Character Training</span>
+                <Crown className="w-6 h-6 text-gold-600" />
+                <span>Speaker Archetypes</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600 mb-6">
-                Learn from the masters by adopting their speaking styles and techniques
-              </p>
-              
-              <div className="grid gap-4">
-                {characters.map((character) => (
-                  <Card 
-                    key={character.id}
-                    className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
-                      selectedPersona === character.id ? 'ring-2 ring-cyan-500' : ''
-                    }`}
-                    onClick={() => setSelectedPersona(character.id)}
-                  >
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {archetypes.map((archetype) => (
+                  <Card key={archetype.id} className="hover:shadow-lg transition-shadow duration-200">
                     <CardContent className="p-6">
-                      <div className="flex items-start space-x-4">
-                        <div className="text-3xl">{character.avatar}</div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-2">
-                            <h3 className="font-bold text-lg">{character.name}</h3>
-                            <Badge className={getDifficultyColor(character.difficulty)}>
-                              {character.difficulty}
-                            </Badge>
+                      <div className={`w-16 h-16 mx-auto mb-4 bg-gradient-to-r ${archetype.color} rounded-full flex items-center justify-center text-white`}>
+                        {archetype.icon}
+                      </div>
+                      <h3 className="text-lg font-semibold text-center mb-2">{archetype.name}</h3>
+                      <p className="text-sm text-gray-600 text-center mb-4">{archetype.title}</p>
+                      <p className="text-sm text-gray-700 mb-4">{archetype.description}</p>
+                      
+                      <div className="space-y-3">
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-900 mb-2">Key Traits:</h4>
+                          <div className="flex flex-wrap gap-1">
+                            {archetype.traits.map((trait, index) => (
+                              <Badge key={index} variant="secondary" className="text-xs">{trait}</Badge>
+                            ))}
                           </div>
-                          <p className="text-cyan-600 font-medium mb-2">{character.title}</p>
-                          <p className="text-gray-600 text-sm mb-3">{character.style}</p>
-                          
-                          <div className="space-y-2">
-                            <h4 className="font-semibold text-sm">Key Techniques:</h4>
-                            <div className="flex flex-wrap gap-1">
-                              {character.keyTechniques.map((technique, index) => (
-                                <Badge key={index} variant="outline" className="text-xs">
-                                  {technique}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-                          
-                          <div className="mt-3 p-2 bg-gray-50 rounded italic text-sm">
-                            "{character.signature}"
-                          </div>
+                        </div>
+                        
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-900 mb-2">Examples:</h4>
+                          <p className="text-xs text-gray-600">{archetype.examples.join(", ")}</p>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
                 ))}
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="evolution" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <TrendingUp className="w-6 h-6 text-green-600" />
+                <span>Speaking Evolution Path</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {speechDNA ? (
+                <div className="space-y-8">
+                  <div className="text-center mb-8">
+                    <h3 className="text-xl font-semibold mb-2">Your Speaking Evolution Journey</h3>
+                    <p className="text-gray-600">Personalized development path based on your Speech DNA</p>
+                  </div>
+                  
+                  <div className="space-y-6">
+                    {Object.entries(speechDNA.speakingEvolution).map(([level, description], index) => (
+                      <div key={level} className="flex items-start space-x-4">
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${
+                          level === 'beginner' ? 'bg-blue-500' :
+                          level === 'intermediate' ? 'bg-green-500' :
+                          level === 'advanced' ? 'bg-orange-500' : 'bg-purple-500'
+                        }`}>
+                          {index + 1}
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="text-lg font-semibold capitalize mb-2">{level} Level</h4>
+                          <p className="text-gray-700">{description}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <TrendingUp className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                  <h3 className="text-lg font-semibold mb-2">Evolution Path Awaiting</h3>
+                  <p className="text-gray-600 mb-6">Generate your Speech DNA analysis to unlock your personalized evolution path</p>
+                  <Button onClick={() => window.scrollTo(0, 0)} variant="outline">
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Start DNA Analysis
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

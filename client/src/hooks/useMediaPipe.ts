@@ -1,9 +1,9 @@
 import { useState, useRef, useCallback } from "react";
 
 interface MediaPipeResult {
-  posture: string | null;
-  gesture: string | null;
-  eyeContact: string | null;
+  posture: number | null;
+  gesture: number | null;
+  eyeContact: number | null;
 }
 
 export function useMediaPipe() {
@@ -25,9 +25,9 @@ export function useMediaPipe() {
       // Simulate random pose detection results
       const interval = setInterval(() => {
         setResult({
-          posture: Math.random() > 0.3 ? "good" : "needs_improvement",
-          gesture: ["open", "closed", "neutral"][Math.floor(Math.random() * 3)],
-          eyeContact: Math.random() > 0.4 ? "good" : "poor"
+          posture: 60 + Math.random() * 30, // 60-90%
+          gesture: 55 + Math.random() * 35, // 55-90%
+          eyeContact: 50 + Math.random() * 40 // 50-90%
         });
       }, 2000);
 
