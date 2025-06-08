@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   Trophy, 
   Award, 
@@ -22,7 +23,18 @@ import {
   CheckCircle,
   Lock,
   Calendar,
-  BarChart3
+  BarChart3,
+  Gift,
+  Heart,
+  Eye,
+  MessageCircle,
+  Rocket,
+  Medal,
+  Gem,
+  Diamond,
+  PartyPopper,
+  Timer,
+  Volume2
 } from "lucide-react";
 
 interface BadgeData {
@@ -38,528 +50,646 @@ interface BadgeData {
   progress: number;
   rarity: "common" | "rare" | "epic" | "legendary";
   dateEarned?: Date;
+  points?: number;
+  celebrationGif?: string;
+}
+
+interface BadgeStats {
+  totalBadges: number;
+  unlockedBadges: number;
+  totalPoints: number;
+  currentStreak: number;
+  nextMilestone: string;
 }
 
 export default function BadgeSystem() {
-  const [badges, setBadges] = useState<BadgeData[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedBadge, setSelectedBadge] = useState<BadgeData | null>(null);
+  const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [hoveredBadge, setHoveredBadge] = useState<string | null>(null);
+  const [recentlyUnlocked, setRecentlyUnlocked] = useState<string[]>([]);
 
-  useEffect(() => {
-    // Initialize badge data with progress simulation
-    const badgeData: BadgeData[] = [
-      // DELIVERY & STYLE BADGES
-      {
-        id: "most-persuasive",
-        name: "Most Persuasive",
-        description: "Master the art of persuasion with compelling arguments",
-        category: "delivery",
-        icon: <Trophy className="w-6 h-6" />,
-        color: "from-yellow-400 to-yellow-600",
-        criteria: [
-          "Exceptional audience engagement score (95%+)",
-          "Flawless argument structure (AI-analyzed logic)",
-          "Masterful emotional appeal through voice and words",
-          "Complete 10 persuasive speeches with 90%+ success rate"
-        ],
-        benefits: [
-          "Unlocks advanced persuasion missions",
-          "Shareable badge for LinkedIn/resume",
-          "Bonus coaching session on negotiation"
-        ],
-        isUnlocked: Math.random() > 0.95,
-        progress: Math.floor(Math.random() * 15),
-        rarity: "legendary",
-        dateEarned: Math.random() > 0.95 ? new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000) : undefined
-      },
-      {
-        id: "best-voice-modulation",
-        name: "Voice Virtuoso",
-        description: "Perfect voice control and modulation mastery",
-        category: "delivery",
-        icon: <Mic className="w-6 h-6" />,
-        color: "from-blue-400 to-blue-600",
-        criteria: [
-          "Perfect pitch and tone variation across 8+ vocal ranges",
-          "Masterful strategic pauses with 95%+ effectiveness",
-          "Zero monotone delivery across 15+ sessions",
-          "Exceptional real-time waveform stability (98%+ consistency)"
-        ],
-        benefits: [
-          "Unlocks Expressive Delivery Masterclass",
-          "Voice-over challenge access",
-          "Custom voice evolution visualization"
-        ],
-        isUnlocked: Math.random() > 0.90,
-        progress: Math.floor(Math.random() * 20),
-        rarity: "epic"
-      },
-      {
-        id: "zero-filler-words",
-        name: "Zero Filler Master",
-        description: "Eliminate filler words while maintaining natural flow",
-        category: "delivery",
-        icon: <Target className="w-6 h-6" />,
-        color: "from-green-400 to-green-600",
-        criteria: [
-          "100% elimination of filler words for 10+ consecutive sessions",
-          "Maintain natural speaking flow (95%+ fluency score)",
-          "Consistent performance over 20+ sessions",
-          "Zero instances of 'um,' 'like,' 'you know,' 'so,' 'actually'"
-        ],
-        benefits: [
-          "Featured on app leaderboard",
-          "Advanced Clarity feedback layer",
-          "Professional certificate for portfolio"
-        ],
-        isUnlocked: Math.random() > 0.95,
-        progress: Math.floor(Math.random() * 15),
-        rarity: "rare"
-      },
-      {
-        id: "power-pitcher",
-        name: "Power Pitcher",
-        description: "Deliver compelling 60-second pitches with perfect pacing",
-        category: "delivery",
-        icon: <Zap className="w-6 h-6" />,
-        color: "from-purple-400 to-purple-600",
-        criteria: [
-          "Complete 25 pitches within exactly 58-60 seconds",
-          "Perfect pacing and clarity (98%+ score)",
-          "Compelling message delivery with 90%+ impact rating",
-          "Exceptional engagement metrics across all attempts"
-        ],
-        benefits: [
-          "Elevator pitch mastery badge",
-          "Quick-pitch challenge access",
-          "Networking event preparation tools"
-        ],
-        isUnlocked: Math.random() > 0.85,
-        progress: Math.floor(Math.random() * 25),
-        rarity: "common"
-      },
-      {
-        id: "silence-master",
-        name: "Silence Master",
-        description: "Use strategic pauses effectively without awkward silence",
-        category: "delivery",
-        icon: <Clock className="w-6 h-6" />,
-        color: "from-indigo-400 to-indigo-600",
-        criteria: [
-          "Use 15+ strategic pauses per speech with perfect timing",
-          "Zero awkward or uncomfortable silence across 12+ sessions",
-          "Masterful timing for dramatic effect (95%+ effectiveness)",
-          "Sustained audience engagement during all pauses"
-        ],
-        benefits: [
-          "Advanced timing techniques unlock",
-          "Dramatic speaking module access",
-          "Pause effectiveness analytics"
-        ],
-        isUnlocked: Math.random() > 0.92,
-        progress: Math.floor(Math.random() * 18),
-        rarity: "rare"
-      },
+  // Enhanced badge data with more engaging content and variety
+  const badges: BadgeData[] = [
+    // LEGENDARY BADGES
+    {
+      id: "grand-master",
+      name: "Grand Master Speaker",
+      description: "The ultimate achievement - mastery across all speaking dimensions",
+      category: "growth",
+      icon: <Crown className="w-8 h-8" />,
+      color: "from-purple-600 via-pink-500 to-yellow-400",
+      criteria: [
+        "Unlock 50+ badges across all categories",
+        "Maintain 95%+ average scores for 3 months",
+        "Complete the Executive Speaker Challenge",
+        "Mentor 5+ community members to success"
+      ],
+      benefits: [
+        "Exclusive Grand Master certificate",
+        "VIP access to all premium features",
+        "Personal brand consultation session",
+        "Speaking engagement opportunities"
+      ],
+      isUnlocked: false,
+      progress: 23,
+      rarity: "legendary",
+      points: 5000,
+      celebrationGif: "🎆"
+    },
+    {
+      id: "voice-virtuoso",
+      name: "Voice Virtuoso",
+      description: "Perfect vocal control and modulation mastery",
+      category: "delivery",
+      icon: <Volume2 className="w-6 h-6" />,
+      color: "from-blue-500 to-cyan-400",
+      criteria: [
+        "Perfect pitch variation (8+ vocal ranges)",
+        "Strategic pause mastery (95%+ effectiveness)",
+        "Zero monotone sessions (15+ consecutive)",
+        "Exceptional vocal clarity (98%+ consistency)"
+      ],
+      benefits: [
+        "Expressive Delivery Masterclass access",
+        "Voice-over challenge unlock",
+        "Custom vocal analysis reports"
+      ],
+      isUnlocked: true,
+      progress: 100,
+      rarity: "legendary",
+      points: 2500,
+      dateEarned: new Date("2024-02-10")
+    },
+    
+    // EPIC BADGES
+    {
+      id: "persuasion-master",
+      name: "Persuasion Master",
+      description: "Exceptional ability to influence and convince audiences",
+      category: "content",
+      icon: <Trophy className="w-6 h-6" />,
+      color: "from-orange-500 to-red-500",
+      criteria: [
+        "95%+ audience engagement score",
+        "Flawless argument structure (AI-verified)",
+        "Complete 10 persuasive speeches with 90%+ success",
+        "Master emotional appeal techniques"
+      ],
+      benefits: [
+        "Advanced persuasion missions",
+        "LinkedIn certification badge",
+        "Negotiation coaching bonus session"
+      ],
+      isUnlocked: true,
+      progress: 100,
+      rarity: "epic",
+      points: 1500,
+      dateEarned: new Date("2024-01-28")
+    },
+    {
+      id: "storyteller-supreme",
+      name: "Storyteller Supreme", 
+      description: "Captivate audiences with compelling narratives",
+      category: "content",
+      icon: <MessageCircle className="w-6 h-6" />,
+      color: "from-purple-500 to-pink-500",
+      criteria: [
+        "Create 20+ engaging story-driven speeches",
+        "Achieve 90%+ emotional resonance scores",
+        "Master narrative arc construction",
+        "Excel in dramatic tension and resolution"
+      ],
+      benefits: [
+        "Storytelling workshop access",
+        "Creative writing collaboration opportunities",
+        "Narrative coaching specialized sessions"
+      ],
+      isUnlocked: false,
+      progress: 67,
+      rarity: "epic",
+      points: 1200
+    },
 
-      // CONTENT & STRUCTURE BADGES
-      {
-        id: "rock-solid-structure",
-        name: "Rock Solid Structure",
-        description: "Master the art of clear speech organization",
-        category: "content",
-        icon: <Shield className="w-6 h-6" />,
-        color: "from-stone-400 to-stone-600",
-        criteria: [
-          "Flawless intro-body-conclusion structure across 15+ speeches",
-          "Perfect logical flow between all sections (98%+ coherence)",
-          "Masterful transitions throughout (zero awkward shifts)",
-          "Exceptional argument progression with advanced rhetorical techniques"
-        ],
-        benefits: [
-          "Advanced structure templates",
-          "Speech outline generator",
-          "Professional presentation tools"
-        ],
-        isUnlocked: Math.random() > 0.80,
-        progress: Math.floor(Math.random() * 30),
-        rarity: "common"
-      },
-      {
-        id: "hook-hunter",
-        name: "Hook Hunter",
-        description: "Craft irresistible opening statements",
-        category: "content",
-        icon: <Sparkles className="w-6 h-6" />,
-        color: "from-pink-400 to-pink-600",
-        criteria: [
-          "Masterful attention-grabbing opening in 20+ consecutive speeches",
-          "Expert use of facts, questions, or stories (95%+ effectiveness)",
-          "Instant audience engagement within first 10 seconds",
-          "Exceptional first impression metrics across all attempts"
-        ],
-        benefits: [
-          "Opening statement library",
-          "Hook effectiveness analyzer",
-          "Attention-grabbing techniques guide"
-        ],
-        isUnlocked: Math.random() > 0.88,
-        progress: Math.floor(Math.random() * 22),
-        rarity: "rare"
-      },
+    // RARE BADGES  
+    {
+      id: "confidence-champion",
+      name: "Confidence Champion",
+      description: "Demonstrate unwavering confidence and poise",
+      category: "delivery",
+      icon: <Shield className="w-6 h-6" />,
+      color: "from-green-500 to-emerald-400",
+      criteria: [
+        "Maintain 85%+ confidence scores for 30 days",
+        "Zero anxiety indicators in body language",
+        "Complete high-pressure scenario challenges",
+        "Demonstrate executive presence consistently"
+      ],
+      benefits: [
+        "Executive presence training",
+        "Leadership speaking opportunities",
+        "Confidence coaching certification"
+      ],
+      isUnlocked: true,
+      progress: 100,
+      rarity: "rare",
+      points: 800,
+      dateEarned: new Date("2024-02-05")
+    },
+    {
+      id: "body-language-expert",
+      name: "Body Language Expert",
+      description: "Master non-verbal communication and presence",
+      category: "delivery",
+      icon: <Eye className="w-6 h-6" />,
+      color: "from-indigo-500 to-blue-500",
+      criteria: [
+        "Perfect posture scores (20+ sessions)",
+        "Optimal eye contact patterns",
+        "Purposeful gesture mastery",
+        "Professional presence consistency"
+      ],
+      benefits: [
+        "Advanced body language analysis",
+        "Presence coaching sessions",
+        "Non-verbal communication masterclass"
+      ],
+      isUnlocked: false,
+      progress: 45,
+      rarity: "rare",
+      points: 600
+    },
+    {
+      id: "speed-demon",
+      name: "Speed Demon",
+      description: "Perfect speaking pace and rhythm control",
+      category: "delivery",
+      icon: <Zap className="w-6 h-6" />,
+      color: "from-yellow-500 to-orange-400",
+      criteria: [
+        "Optimal WPM range (150-180) for 10+ sessions",
+        "Perfect pause timing and rhythm",
+        "Dynamic pace variation mastery",
+        "Zero rushed or dragging segments"
+      ],
+      benefits: [
+        "Rhythm and pace masterclass",
+        "Advanced timing techniques",
+        "Speaking tempo optimization tools"
+      ],
+      isUnlocked: false,
+      progress: 78,
+      rarity: "rare",
+      points: 500
+    },
 
-      // GROWTH & HABIT BADGES
-      {
-        id: "level-up-speaker",
-        name: "Level Up Speaker",
-        description: "Show consistent improvement across multiple metrics",
-        category: "growth",
-        icon: <TrendingUp className="w-6 h-6" />,
-        color: "from-emerald-400 to-emerald-600",
-        criteria: [
-          "Improve 8+ metrics over 25+ sessions with measurable gains",
-          "Consistent upward trend with zero regression periods",
-          "Exceptional skill development across all categories",
-          "Top 5% performance analytics improvement"
-        ],
-        benefits: [
-          "Progress tracking dashboard",
-          "Personalized improvement plans",
-          "Advanced analytics access"
-        ],
-        isUnlocked: Math.random() > 0.85,
-        progress: Math.floor(Math.random() * 20),
-        rarity: "common"
-      },
-      {
-        id: "daily-grinder",
-        name: "Daily Grinder",
-        description: "Maintain a consistent practice streak",
-        category: "growth",
-        icon: <Flame className="w-6 h-6" />,
-        color: "from-orange-400 to-red-500",
-        criteria: [
-          "Practice public speaking 30 days in a row without missing a single day",
-          "Complete all daily challenges with 95%+ success rate",
-          "Maintain perfect engagement streak with measurable improvement",
-          "Demonstrate consistent skill development across all metrics"
-        ],
-        benefits: [
-          "Streak bonus multipliers",
-          "Exclusive daily challenges",
-          "Habit-building tools"
-        ],
-        isUnlocked: Math.random() > 0.93,
-        progress: Math.floor(Math.random() * 12),
-        rarity: "epic"
-      },
+    // COMMON BADGES
+    {
+      id: "first-steps",
+      name: "First Steps",
+      description: "Begin your speaking journey with your first session",
+      category: "growth",
+      icon: <Sparkles className="w-6 h-6" />,
+      color: "from-green-400 to-blue-400",
+      criteria: ["Complete 1 practice session"],
+      benefits: [
+        "Unlock advanced practice modes",
+        "Access to basic coaching tips",
+        "Progress tracking enabled"
+      ],
+      isUnlocked: true,
+      progress: 100,
+      rarity: "common",
+      points: 100,
+      dateEarned: new Date("2024-01-15")
+    },
+    {
+      id: "week-warrior",
+      name: "Week Warrior",
+      description: "Practice consistently for a full week",
+      category: "growth",
+      icon: <Calendar className="w-6 h-6" />,
+      color: "from-blue-400 to-purple-400",
+      criteria: ["Practice for 7 consecutive days"],
+      benefits: [
+        "Habit tracking rewards",
+        "Consistency bonus points",
+        "Weekly challenge access"
+      ],
+      isUnlocked: true,
+      progress: 100,
+      rarity: "common",
+      points: 200,
+      dateEarned: new Date("2024-01-22")
+    },
+    {
+      id: "clarity-seeker",
+      name: "Clarity Seeker",
+      description: "Achieve excellent voice clarity scores",
+      category: "delivery",
+      icon: <Mic className="w-6 h-6" />,
+      color: "from-cyan-400 to-blue-400",
+      criteria: ["Maintain 80%+ voice clarity for 5 sessions"],
+      benefits: [
+        "Voice training exercises",
+        "Articulation improvement tips",
+        "Clarity coaching modules"
+      ],
+      isUnlocked: true,
+      progress: 100,
+      rarity: "common",
+      points: 150,
+      dateEarned: new Date("2024-01-18")
+    },
+    {
+      id: "time-keeper",
+      name: "Time Keeper",
+      description: "Master timing and duration control",
+      category: "delivery",
+      icon: <Timer className="w-6 h-6" />,
+      color: "from-emerald-400 to-green-400",
+      criteria: ["Hit target duration within 30 seconds for 10 sessions"],
+      benefits: [
+        "Advanced timing tools",
+        "Duration optimization tips",
+        "Pacing control techniques"
+      ],
+      isUnlocked: false,
+      progress: 30,
+      rarity: "common",
+      points: 120
+    },
 
-      // COMMUNITY & COMPETITION BADGES
-      {
-        id: "crowd-favorite",
-        name: "Crowd Favorite",
-        description: "Win the hearts of your audience",
-        category: "community",
-        icon: <Users className="w-6 h-6" />,
-        color: "from-teal-400 to-teal-600",
-        criteria: [
-          "Achieve #1 peer rating in 5+ competitive contests",
-          "Maintain 98%+ audience engagement across all presentations",
-          "Deliver flawless presentation with zero technical errors",
-          "Earn unanimous community recognition and endorsement"
-        ],
-        benefits: [
-          "Featured speaker spotlight",
-          "Community challenges access",
-          "Peer mentorship opportunities"
-        ],
-        isUnlocked: Math.random() > 0.98,
-        progress: Math.floor(Math.random() * 8),
-        rarity: "legendary"
-      },
+    // COMMUNITY BADGES
+    {
+      id: "helpful-mentor",
+      name: "Helpful Mentor",
+      description: "Support and guide fellow speakers",
+      category: "community",
+      icon: <Heart className="w-6 h-6" />,
+      color: "from-pink-400 to-rose-400",
+      criteria: [
+        "Provide feedback to 10+ community members",
+        "Receive 50+ helpful votes",
+        "Mentor 2+ speakers to badge achievements"
+      ],
+      benefits: [
+        "Mentor badge showcase",
+        "Community leadership recognition",
+        "Advanced feedback tools access"
+      ],
+      isUnlocked: false,
+      progress: 15,
+      rarity: "rare",
+      points: 400
+    },
 
-      // FUN & THEMED BADGES
-      {
-        id: "fearless-roar",
-        name: "Fearless Roar",
-        description: "Conquer your fear with your first speech",
-        category: "themed",
-        icon: <Crown className="w-6 h-6" />,
-        color: "from-amber-400 to-yellow-500",
-        criteria: [
-          "Complete your very first speech",
-          "Overcome initial speaking anxiety",
-          "Take the first step in your journey",
-          "Show courage to begin"
-        ],
-        benefits: [
-          "Welcome to speaking community",
-          "Beginner's guide unlock",
-          "Confidence building exercises"
-        ],
-        isUnlocked: true,
-        progress: 100,
-        rarity: "common",
-        dateEarned: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000)
-      },
-      {
-        id: "speech-wizard",
-        name: "Speech Wizard",
-        description: "Achieve mastery across all speaking dimensions",
-        category: "themed",
-        icon: <Star className="w-6 h-6" />,
-        color: "from-violet-400 to-purple-600",
-        criteria: [
-          "Score above 98% across ALL metrics in a single session",
-          "Achieve perfect scores in voice, body language, and content",
-          "Flawless performance with zero detected errors",
-          "Demonstrate absolute mastery across every dimension"
-        ],
-        benefits: [
-          "Master speaker certification",
-          "Advanced technique access",
-          "Speaking wizard title"
-        ],
-        isUnlocked: Math.random() > 0.99,
-        progress: Math.floor(Math.random() * 5),
-        rarity: "legendary"
-      }
-    ];
+    // THEMED BADGES
+    {
+      id: "holiday-speaker",
+      name: "Holiday Speaker",
+      description: "Spread joy with festive speaking sessions",
+      category: "themed",
+      icon: <Gift className="w-6 h-6" />,
+      color: "from-red-500 to-green-500",
+      criteria: ["Complete 5 sessions during holiday season"],
+      benefits: [
+        "Festive templates access",
+        "Holiday-themed challenges",
+        "Seasonal coaching content"
+      ],
+      isUnlocked: false,
+      progress: 60,
+      rarity: "common",
+      points: 180
+    }
+  ];
 
-    setBadges(badgeData);
-  }, []);
+  const stats: BadgeStats = {
+    totalBadges: badges.length,
+    unlockedBadges: badges.filter(b => b.isUnlocked).length,
+    totalPoints: badges.filter(b => b.isUnlocked).reduce((sum, b) => sum + (b.points || 0), 0),
+    currentStreak: 7,
+    nextMilestone: "Unlock 5 more badges to reach Speaker Level 3"
+  };
 
-  const filteredBadges = selectedCategory === "all" 
+  const filteredBadges = activeCategory === "all" 
     ? badges 
-    : badges.filter(badge => badge.category === selectedCategory);
-
-  const unlockedBadges = badges.filter(badge => badge.isUnlocked);
-  const totalProgress = badges.reduce((sum, badge) => sum + badge.progress, 0) / badges.length;
+    : badges.filter(badge => badge.category === activeCategory);
 
   const getRarityColor = (rarity: string) => {
     switch (rarity) {
-      case "common": return "border-gray-300 bg-gray-50";
-      case "rare": return "border-blue-300 bg-blue-50";
-      case "epic": return "border-purple-300 bg-purple-50";
-      case "legendary": return "border-yellow-300 bg-yellow-50";
-      default: return "border-gray-300 bg-gray-50";
+      case "legendary": return "text-purple-600 bg-purple-100";
+      case "epic": return "text-orange-600 bg-orange-100";
+      case "rare": return "text-blue-600 bg-blue-100";
+      default: return "text-green-600 bg-green-100";
     }
   };
 
-  const getRarityBadgeColor = (rarity: string) => {
+  const getRarityBorder = (rarity: string) => {
     switch (rarity) {
-      case "common": return "bg-gray-100 text-gray-800";
-      case "rare": return "bg-blue-100 text-blue-800";
-      case "epic": return "bg-purple-100 text-purple-800";
-      case "legendary": return "bg-yellow-100 text-yellow-800";
-      default: return "bg-gray-100 text-gray-800";
+      case "legendary": return "border-purple-400 shadow-purple-200";
+      case "epic": return "border-orange-400 shadow-orange-200";
+      case "rare": return "border-blue-400 shadow-blue-200";
+      default: return "border-green-400 shadow-green-200";
     }
   };
+
+  // Simulate recent badge unlock
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setRecentlyUnlocked(["voice-virtuoso"]);
+      setShowCelebration(true);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-display gradient-text mb-2">Badge System</h1>
-        <p className="text-gray-600">Earn achievements and unlock new features as you master public speaking</p>
-        
-        {/* Progress Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-          <Card className="gradient-card">
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-display gradient-text mb-1">{unlockedBadges.length}</div>
-              <p className="text-sm text-gray-600">Badges Earned</p>
-            </CardContent>
-          </Card>
-          <Card className="gradient-card">
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-display gradient-text mb-1">{Math.round(totalProgress)}%</div>
-              <p className="text-sm text-gray-600">Overall Progress</p>
-            </CardContent>
-          </Card>
-          <Card className="gradient-card">
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-display gradient-text mb-1">{badges.length - unlockedBadges.length}</div>
-              <p className="text-sm text-gray-600">To Unlock</p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+      {/* Celebration Animation */}
+      <AnimatePresence>
+        {showCelebration && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+            onClick={() => setShowCelebration(false)}
+          >
+            <motion.div
+              initial={{ y: -50 }}
+              animate={{ y: 0 }}
+              className="bg-white rounded-2xl p-8 text-center max-w-md mx-4"
+            >
+              <motion.div
+                animate={{ rotate: [0, 10, -10, 0] }}
+                transition={{ duration: 0.5, repeat: Infinity }}
+              >
+                <PartyPopper className="w-16 h-16 mx-auto text-yellow-500 mb-4" />
+              </motion.div>
+              <h3 className="text-2xl font-bold mb-2">Congratulations!</h3>
+              <p className="text-gray-600 mb-4">You've unlocked the Voice Virtuoso badge!</p>
+              <Button onClick={() => setShowCelebration(false)}>
+                Awesome!
+              </Button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full">
-        <TabsList className="grid w-full grid-cols-6 mb-6 gradient-card purple-border">
-          <TabsTrigger value="all" className="flex items-center space-x-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
-            <Trophy className="w-4 h-4" />
-            <span>All</span>
-          </TabsTrigger>
-          <TabsTrigger value="delivery" className="flex items-center space-x-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
-            <Mic className="w-4 h-4" />
-            <span>Delivery</span>
-          </TabsTrigger>
-          <TabsTrigger value="content" className="flex items-center space-x-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
-            <Brain className="w-4 h-4" />
-            <span>Content</span>
-          </TabsTrigger>
-          <TabsTrigger value="growth" className="flex items-center space-x-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
-            <TrendingUp className="w-4 h-4" />
-            <span>Growth</span>
-          </TabsTrigger>
-          <TabsTrigger value="community" className="flex items-center space-x-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
-            <Users className="w-4 h-4" />
-            <span>Community</span>
-          </TabsTrigger>
-          <TabsTrigger value="themed" className="flex items-center space-x-2 data-[state=active]:gradient-bg data-[state=active]:text-white">
-            <Star className="w-4 h-4" />
-            <span>Special</span>
-          </TabsTrigger>
+      {/* Stats Overview */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
+      >
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+          <CardContent className="p-4 text-center">
+            <Trophy className="w-8 h-8 mx-auto text-blue-600 mb-2" />
+            <div className="text-2xl font-bold text-blue-800">{stats.unlockedBadges}</div>
+            <div className="text-sm text-blue-600">Badges Earned</div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+          <CardContent className="p-4 text-center">
+            <Star className="w-8 h-8 mx-auto text-purple-600 mb-2" />
+            <div className="text-2xl font-bold text-purple-800">{stats.totalPoints}</div>
+            <div className="text-sm text-purple-600">Total Points</div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+          <CardContent className="p-4 text-center">
+            <Flame className="w-8 h-8 mx-auto text-green-600 mb-2" />
+            <div className="text-2xl font-bold text-green-800">{stats.currentStreak}</div>
+            <div className="text-sm text-green-600">Day Streak</div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+          <CardContent className="p-4 text-center">
+            <Target className="w-8 h-8 mx-auto text-orange-600 mb-2" />
+            <div className="text-2xl font-bold text-orange-800">{Math.round((stats.unlockedBadges / stats.totalBadges) * 100)}%</div>
+            <div className="text-sm text-orange-600">Completion</div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Next Milestone */}
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-6 rounded-xl mb-6"
+      >
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-semibold mb-1">Next Milestone</h3>
+            <p className="text-indigo-100">{stats.nextMilestone}</p>
+          </div>
+          <Rocket className="w-8 h-8 text-indigo-200" />
+        </div>
+        <Progress value={70} className="mt-3 bg-indigo-400" />
+      </motion.div>
+
+      {/* Category Tabs */}
+      <Tabs value={activeCategory} onValueChange={setActiveCategory}>
+        <TabsList className="grid w-full grid-cols-3 md:grid-cols-6">
+          <TabsTrigger value="all" className="text-xs">All</TabsTrigger>
+          <TabsTrigger value="delivery" className="text-xs">Delivery</TabsTrigger>
+          <TabsTrigger value="content" className="text-xs">Content</TabsTrigger>
+          <TabsTrigger value="growth" className="text-xs">Growth</TabsTrigger>
+          <TabsTrigger value="community" className="text-xs">Community</TabsTrigger>
+          <TabsTrigger value="themed" className="text-xs">Themed</TabsTrigger>
         </TabsList>
 
-        <TabsContent value={selectedCategory} className="space-y-6">
-          {/* Badge Grid */}
+        <TabsContent value={activeCategory} className="mt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredBadges.map((badge) => (
-              <Card 
-                key={badge.id} 
-                className={`cursor-pointer transition-all hover:shadow-lg ${
-                  badge.isUnlocked 
-                    ? getRarityColor(badge.rarity) 
-                    : 'opacity-75 border-gray-200 bg-gray-50'
-                } ${selectedBadge?.id === badge.id ? 'ring-2 ring-purple-500' : ''}`}
+            {filteredBadges.map((badge, index) => (
+              <motion.div
+                key={badge.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                onMouseEnter={() => setHoveredBadge(badge.id)}
+                onMouseLeave={() => setHoveredBadge(null)}
+                className={`relative cursor-pointer transition-all duration-300 ${
+                  hoveredBadge === badge.id ? 'scale-105' : ''
+                }`}
                 onClick={() => setSelectedBadge(badge)}
               >
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <div className={`p-3 rounded-lg bg-gradient-to-r ${badge.color} text-white`}>
-                      {badge.isUnlocked ? badge.icon : <Lock className="w-6 h-6" />}
-                    </div>
-                    <div className="flex flex-col items-end space-y-1">
-                      <Badge className={getRarityBadgeColor(badge.rarity)}>
-                        {badge.rarity}
-                      </Badge>
-                      {badge.isUnlocked && (
-                        <CheckCircle className="w-5 h-5 text-green-500" />
-                      )}
-                    </div>
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg">{badge.name}</CardTitle>
-                    <p className="text-sm text-gray-600 mt-1">{badge.description}</p>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  {!badge.isUnlocked && (
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>Progress</span>
-                        <span>{badge.progress}%</span>
+                <Card className={`h-full ${
+                  badge.isUnlocked 
+                    ? `border-2 ${getRarityBorder(badge.rarity)} shadow-lg` 
+                    : 'border-gray-200 opacity-75'
+                } hover:shadow-xl transition-all duration-300`}>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div className={`p-3 rounded-xl bg-gradient-to-br ${badge.color} ${
+                        badge.isUnlocked ? '' : 'grayscale'
+                      }`}>
+                        {badge.isUnlocked ? badge.icon : <Lock className="w-6 h-6 text-gray-400" />}
                       </div>
-                      <Progress value={badge.progress} className="h-2" />
+                      <div className="flex flex-col items-end space-y-2">
+                        <Badge className={`${getRarityColor(badge.rarity)} border-0`}>
+                          {badge.rarity}
+                        </Badge>
+                        {badge.isUnlocked && badge.points && (
+                          <Badge variant="secondary" className="text-xs">
+                            {badge.points} pts
+                          </Badge>
+                        )}
+                        {recentlyUnlocked.includes(badge.id) && (
+                          <motion.div
+                            animate={{ scale: [1, 1.2, 1] }}
+                            transition={{ duration: 1, repeat: Infinity }}
+                          >
+                            <Badge className="bg-yellow-500 text-white">NEW!</Badge>
+                          </motion.div>
+                        )}
+                      </div>
                     </div>
-                  )}
-                  {badge.isUnlocked && badge.dateEarned && (
-                    <div className="flex items-center space-x-1 text-xs text-gray-500">
-                      <Calendar className="w-3 h-3" />
-                      <span>Earned {badge.dateEarned.toLocaleDateString()}</span>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                  </CardHeader>
+                  
+                  <CardContent className="pt-0">
+                    <CardTitle className={`text-lg mb-2 ${
+                      badge.isUnlocked ? 'text-gray-900' : 'text-gray-500'
+                    }`}>
+                      {badge.name}
+                    </CardTitle>
+                    <p className={`text-sm mb-4 ${
+                      badge.isUnlocked ? 'text-gray-600' : 'text-gray-400'
+                    }`}>
+                      {badge.description}
+                    </p>
+
+                    {!badge.isUnlocked && (
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Progress</span>
+                          <span className="font-medium">{badge.progress}%</span>
+                        </div>
+                        <Progress value={badge.progress} className="h-2" />
+                      </div>
+                    )}
+
+                    {badge.isUnlocked && badge.dateEarned && (
+                      <div className="flex items-center text-sm text-gray-500 mt-3">
+                        <CheckCircle className="w-4 h-4 mr-2 text-green-500" />
+                        Earned {badge.dateEarned.toLocaleDateString()}
+                      </div>
+                    )}
+
+                    {hoveredBadge === badge.id && badge.isUnlocked && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="absolute inset-0 bg-white/95 p-4 rounded-lg flex items-center justify-center"
+                      >
+                        <Button variant="outline" size="sm">
+                          View Details
+                        </Button>
+                      </motion.div>
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
             ))}
           </div>
         </TabsContent>
       </Tabs>
 
       {/* Badge Detail Modal */}
-      {selectedBadge && (
-        <Card className="gradient-card purple-border">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center space-x-3">
-                <div className={`p-3 rounded-lg bg-gradient-to-r ${selectedBadge.color} text-white`}>
-                  {selectedBadge.isUnlocked ? selectedBadge.icon : <Lock className="w-6 h-6" />}
-                </div>
-                <div>
-                  <h3 className="text-xl font-heading">{selectedBadge.name}</h3>
-                  <Badge className={getRarityBadgeColor(selectedBadge.rarity)}>
-                    {selectedBadge.rarity}
-                  </Badge>
-                </div>
-              </CardTitle>
-              <Button variant="outline" onClick={() => setSelectedBadge(null)}>
-                Close
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <p className="text-gray-700">{selectedBadge.description}</p>
-
-            {/* Criteria */}
-            <div>
-              <h4 className="font-medium text-gray-900 mb-3 flex items-center">
-                <Target className="w-4 h-4 text-purple-600 mr-2" />
-                Requirements
-              </h4>
-              <div className="space-y-2">
-                {selectedBadge.criteria.map((criterion, index) => (
-                  <div key={index} className="flex items-center space-x-2">
-                    <CheckCircle className={`w-4 h-4 ${selectedBadge.isUnlocked ? 'text-green-500' : 'text-gray-400'}`} />
-                    <span className="text-sm text-gray-700">{criterion}</span>
+      <AnimatePresence>
+        {selectedBadge && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 p-4"
+            onClick={() => setSelectedBadge(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-6">
+                <div className="flex items-start justify-between mb-6">
+                  <div className="flex items-center space-x-4">
+                    <div className={`p-4 rounded-xl bg-gradient-to-br ${selectedBadge.color}`}>
+                      {selectedBadge.icon}
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold">{selectedBadge.name}</h2>
+                      <p className="text-gray-600">{selectedBadge.description}</p>
+                      <div className="flex items-center space-x-2 mt-2">
+                        <Badge className={getRarityColor(selectedBadge.rarity)}>
+                          {selectedBadge.rarity}
+                        </Badge>
+                        {selectedBadge.points && (
+                          <Badge variant="secondary">{selectedBadge.points} points</Badge>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Benefits */}
-            <div>
-              <h4 className="font-medium text-gray-900 mb-3 flex items-center">
-                <Award className="w-4 h-4 text-yellow-600 mr-2" />
-                Rewards & Benefits
-              </h4>
-              <div className="space-y-2">
-                {selectedBadge.benefits.map((benefit, index) => (
-                  <div key={index} className="flex items-center space-x-2">
-                    <Star className="w-4 h-4 text-yellow-500" />
-                    <span className="text-sm text-gray-700">{benefit}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Progress */}
-            {!selectedBadge.isUnlocked && (
-              <div className="space-y-3">
-                <h4 className="font-medium text-gray-900 flex items-center">
-                  <BarChart3 className="w-4 h-4 text-blue-600 mr-2" />
-                  Your Progress
-                </h4>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Completion</span>
-                    <span>{selectedBadge.progress}%</span>
-                  </div>
-                  <Progress value={selectedBadge.progress} className="h-3" />
+                  <Button variant="ghost" onClick={() => setSelectedBadge(null)}>
+                    ×
+                  </Button>
                 </div>
-                <p className="text-xs text-gray-600">
-                  Keep practicing to unlock this badge and earn its exclusive rewards!
-                </p>
-              </div>
-            )}
 
-            {selectedBadge.isUnlocked && (
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg border border-green-200">
-                <div className="flex items-center space-x-2">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <span className="font-medium text-green-800">Badge Unlocked!</span>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <h3 className="font-semibold mb-3">Criteria</h3>
+                    <ul className="space-y-2">
+                      {selectedBadge.criteria.map((criterion, index) => (
+                        <li key={index} className="flex items-start space-x-2">
+                          <div className={`w-2 h-2 rounded-full mt-2 ${
+                            selectedBadge.isUnlocked ? 'bg-green-500' : 'bg-gray-300'
+                          }`} />
+                          <span className="text-sm text-gray-700">{criterion}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h3 className="font-semibold mb-3">Benefits</h3>
+                    <ul className="space-y-2">
+                      {selectedBadge.benefits.map((benefit, index) => (
+                        <li key={index} className="flex items-start space-x-2">
+                          <Gift className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                          <span className="text-sm text-gray-700">{benefit}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
-                {selectedBadge.dateEarned && (
-                  <p className="text-sm text-green-700 mt-1">
-                    Earned on {selectedBadge.dateEarned.toLocaleDateString()}
-                  </p>
+
+                {!selectedBadge.isUnlocked && (
+                  <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-medium">Progress</span>
+                      <span className="text-sm text-gray-600">{selectedBadge.progress}% complete</span>
+                    </div>
+                    <Progress value={selectedBadge.progress} className="h-3" />
+                  </div>
+                )}
+
+                {selectedBadge.isUnlocked && (
+                  <div className="mt-6 flex justify-center">
+                    <Button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+                      Share Achievement
+                    </Button>
+                  </div>
                 )}
               </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
