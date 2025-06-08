@@ -25,6 +25,7 @@ import {
 
 import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
 import { useMediaPipe } from '@/hooks/useMediaPipe';
+import VideoFeed from './VideoFeed';
 
 interface PracticeMode {
   id: string;
@@ -370,48 +371,77 @@ export default function AdvancedPracticeHub() {
         </CardContent>
       </Card>
 
+      {/* Video Feed - Always Available */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <div className="lg:col-span-2">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Camera className="w-5 h-5 text-blue-600" />
+                <span>Live Video Feed</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <VideoFeed />
+            </CardContent>
+          </Card>
+        </div>
+        
+        {/* Session Controls */}
+        <div>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Play className="w-5 h-5 text-green-600" />
+                <span>Practice Session</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {!sessionActive ? (
+                <div className="space-y-4">
+                  <Button
+                    onClick={startSession}
+                    className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white"
+                    size="lg"
+                  >
+                    <Play className="w-5 h-5 mr-2" />
+                    Start Practice Session
+                  </Button>
+                  
+                  <div className="text-center text-sm text-gray-600">
+                    <p>Camera and audio will be analyzed during your practice session</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <Button
+                    onClick={endSession}
+                    variant="destructive"
+                    className="w-full"
+                    size="lg"
+                  >
+                    <Square className="w-5 h-5 mr-2" />
+                    End Session
+                  </Button>
+                  
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-600">
+                      {Math.floor(sessionTime / 60)}:{(sessionTime % 60).toString().padStart(2, '0')}
+                    </div>
+                    <p className="text-sm text-gray-600">Session Time</p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
       {/* Live Practice Interface */}
       {sessionActive && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Video Feed */}
+          {/* Live Content */}
           <div className="lg:col-span-2 space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Camera className="w-5 h-5 text-blue-600" />
-                  <span>Live Video Feed</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="relative bg-gray-900 rounded-lg overflow-hidden aspect-video">
-                  {videoEnabled ? (
-                    <video
-                      ref={videoRef}
-                      autoPlay
-                      playsInline
-                      muted
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <div className="text-center text-gray-400">
-                        <CameraOff className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                        <p className="text-lg mb-2">Camera Feed Disabled</p>
-                        <p className="text-sm">Start session to enable video analysis</p>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Analysis Overlay */}
-                  {videoEnabled && (
-                    <canvas
-                      ref={canvasRef}
-                      className="absolute inset-0 w-full h-full pointer-events-none"
-                    />
-                  )}
-                </div>
-              </CardContent>
-            </Card>
 
             {/* Live Transcript */}
             <Card>
