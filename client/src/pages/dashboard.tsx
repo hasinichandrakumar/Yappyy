@@ -150,13 +150,13 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-12">
               {/* Left Column - Video Feed */}
               <div className="lg:col-span-2 space-y-8">
-                <VideoFeed demoMode={demoMode} />
-                <LiveTranscript demoMode={demoMode} />
+                <VideoFeed />
+                <LiveTranscript />
               </div>
               
               {/* Right Column - Live Feedback Sidebar */}
               <div className="lg:col-span-2 space-y-8">
-                <RealTimeMetrics demoMode={demoMode} />
+                <RealTimeMetrics />
                 <SmartAIFeedback demoMode={demoMode} />
               </div>
             </div>
