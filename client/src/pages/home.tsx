@@ -179,11 +179,12 @@ export default function Home() {
           >
             <Badge className="mb-6 bg-cyan-500/10 text-cyan-600 border-cyan-500/20 px-4 py-2 flex items-center justify-center">
               <motion.div
-                className="flex items-center justify-center"
+                className="flex items-center justify-center mr-2"
                 animate={{ rotate: 360 }}
-                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                style={{ transformOrigin: "center" }}
               >
-                <Sparkles className="w-4 h-4 mr-2" />
+                <Sparkles className="w-4 h-4" />
               </motion.div>
               Powered by GPT-4 Turbo & MediaPipe Neural Networks
             </Badge>
