@@ -26,9 +26,15 @@ import VibeTracker from "@/components/VibeTracker";
 import AdaptiveFeedbackEngine from "@/components/AdaptiveFeedbackEngine";
 import EnhancedTemplateMarketplace from "@/components/EnhancedTemplateMarketplace";
 import HelpGuide from "@/components/HelpGuide";
+import PostSessionAnalysis from "@/components/PostSessionAnalysis";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview");
+  const [showPostAnalysis, setShowPostAnalysis] = useState(false);
+  const [sessionContext, setSessionContext] = useState<{
+    roleplayType?: string;
+    audienceType?: string;
+  }>({});
 
   return (
     <div className="min-h-screen bg-background">
