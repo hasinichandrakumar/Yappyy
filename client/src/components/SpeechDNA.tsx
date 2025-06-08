@@ -132,15 +132,38 @@ export default function SpeechDNA() {
       return `${paceDesc}, ${confidenceDesc}, ${clarityDesc} speaker`;
     };
     
-    // Generate strengths
+    // Generate strengths based on available data
     const getStrengths = () => {
       const strengths = [];
-      if (actualPace >= 140 && actualPace <= 180) strengths.push("Optimal speaking pace");
-      if (actualConfidence > 75) strengths.push("Strong vocal confidence");
-      if (actualClarity > 75) strengths.push("Excellent articulation");
-      if (hasTranscript) strengths.push("Active speech engagement");
-      if (actualPace > 120) strengths.push("Good energy level");
-      if (actualClarity > 60) strengths.push("Clear communication");
+      
+      // Always provide some baseline strengths
+      if (hasTranscript && actualWordCount > 0) {
+        strengths.push("Active speech participation");
+      }
+      
+      if (actualClarity > 60) {
+        strengths.push("Clear voice projection");
+      } else if (actualClarity > 30) {
+        strengths.push("Developing vocal clarity");
+      }
+      
+      if (actualConfidence > 60) {
+        strengths.push("Confident delivery style");
+      } else if (actualConfidence > 30) {
+        strengths.push("Building speaking confidence");
+      }
+      
+      if (actualWordCount > 50) {
+        strengths.push("Substantial content delivery");
+      } else if (actualWordCount > 20) {
+        strengths.push("Good communication engagement");
+      }
+      
+      // Add default strengths if none found
+      if (strengths.length === 0) {
+        strengths.push("Natural speaking potential", "Developing communication skills", "Active learning mindset");
+      }
+      
       return strengths.slice(0, 3);
     };
     
@@ -167,9 +190,9 @@ export default function SpeechDNA() {
       },
       famousSpeaker: getFamousSpeaker(),
       confidence: Math.max(actualConfidence, 40),
-      uniqueTraits: ["Natural speaking rhythm", "Developing presence", "Clear delivery"],
+      uniqueTraits: generateUniqueTraits(),
       persuasionStyle: actualConfidence > 80 ? "Authoritative Logic" : "Thoughtful Approach",
-      rhetoricStrengths: ["Clear structure", "Engaging delivery", "Developing voice"],
+      rhetoricStrengths: generateRhetoricStrengths(),
       emotionalIntelligence: Math.min(Math.max(actualConfidence + 10, 60), 95),
       cognitiveComplexity: Math.min(Math.max(actualClarity + 5, 65), 90),
       adaptabilityScore: Math.min(Math.max((actualPace + actualConfidence) / 2, 60), 85),

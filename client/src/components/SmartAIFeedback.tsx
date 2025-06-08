@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
+import { useVoiceAnalysis } from '@/hooks/useVoiceAnalysis';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -31,10 +32,10 @@ interface SmartAIFeedbackProps {
 }
 
 export default function SmartAIFeedback({ roleplayContext, audienceType }: SmartAIFeedbackProps = {}) {
-  const { wpm, fillerWords, isListening, transcript, wordCount } = useSpeechRecognition();
+  const { fillerWords, isListening, transcript, wordCount } = useSpeechRecognition();
+  const { voiceClarity, confidenceScore, volumeLevel } = useVoiceAnalysis();
   const [currentFeedback, setCurrentFeedback] = useState<AIFeedback | null>(null);
   const [lastFillerCount, setLastFillerCount] = useState(0);
-  const [lastWPMCheck, setLastWPMCheck] = useState(0);
   const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null);
   const hideTimeoutRef = useRef<NodeJS.Timeout>();
 
@@ -42,22 +43,24 @@ export default function SmartAIFeedback({ roleplayContext, audienceType }: Smart
   useEffect(() => {
     console.log('SmartAIFeedback state:', { 
       isListening, 
-      wpm, 
       transcriptLength: transcript.length,
       fillerWordsCount: fillerWords.length,
+      wordCount,
+      voiceClarity,
+      confidenceScore,
       currentFeedback: currentFeedback?.type 
     });
-  }, [isListening, wpm, transcript, fillerWords, currentFeedback]);
+  }, [isListening, transcript, fillerWords, wordCount, voiceClarity, confidenceScore, currentFeedback]);
 
   const createFeedback = (
     type: AIFeedback['type'],
     title: string,
     message: string,
     priority: AIFeedback['priority'] = 'medium',
-    autoHide: boolean = true,
+    autoHide: boolean = false,
     hideAfter: number = 5
   ): AIFeedback => ({
-    id: `feedback-${Date.now()}-${Math.random()}`,
+    id: Date.now().toString(),
     type,
     title,
     message,
@@ -67,32 +70,18 @@ export default function SmartAIFeedback({ roleplayContext, audienceType }: Smart
     hideAfter
   });
 
-
-
   const showFeedback = (feedback: AIFeedback) => {
-    // Clear existing timeout
-    if (hideTimeoutRef.current) {
-      clearTimeout(hideTimeoutRef.current);
-    }
-
     setCurrentFeedback(feedback);
-
-    // Auto-hide if specified
+    
     if (feedback.autoHide && feedback.hideAfter) {
+      if (hideTimeoutRef.current) {
+        clearTimeout(hideTimeoutRef.current);
+      }
       hideTimeoutRef.current = setTimeout(() => {
         setCurrentFeedback(null);
       }, feedback.hideAfter * 1000);
     }
   };
-
-  const hideFeedback = () => {
-    if (hideTimeoutRef.current) {
-      clearTimeout(hideTimeoutRef.current);
-    }
-    setCurrentFeedback(null);
-  };
-
-
 
   // Track session start
   useEffect(() => {
@@ -103,205 +92,134 @@ export default function SmartAIFeedback({ roleplayContext, audienceType }: Smart
     }
   }, [isListening, sessionStartTime]);
 
-  // Generate contextual feedback based on roleplay scenario
-  const getContextualFeedback = (type: string, baseMessage: string) => {
-    if (!roleplayContext) return baseMessage;
-
-    const contextualMessages: Record<string, Record<string, string>> = {
-      'job-interview': {
-        'pace-slow': 'In interviews, hesitation can signal uncertainty. Speak with confidence and maintain steady pace.',
-        'pace-fast': 'Take your time in interviews. Rushed answers may seem unprepared. Pause to think before responding.',
-        'pace-good': 'Perfect pace for an interview! You sound confident and thoughtful.',
-        'filler-warning': 'Minimize "um" and "uh" in interviews. Pause instead to collect your thoughts.',
-        'good-flow': 'Excellent! Your responses flow naturally. The interviewer can easily follow your experience.'
-      },
-      'sales-pitch': {
-        'pace-slow': 'Energy is key in sales! Increase your pace to build excitement about your product.',
-        'pace-fast': 'Slow down to let key benefits sink in. Give prospects time to absorb your value proposition.',
-        'pace-good': 'Perfect sales energy! Your pace builds excitement while remaining clear.',
-        'filler-warning': 'Clean delivery builds credibility. Remove fillers to sound more authoritative.',
-        'good-flow': 'Great flow! You\'re building a compelling case that guides prospects toward yes.'
-      },
-      'conference-presentation': {
-        'pace-slow': 'Academic audiences appreciate deliberate pace, but ensure you maintain engagement.',
-        'pace-fast': 'Technical content needs processing time. Slow down for complex concepts.',
-        'pace-good': 'Excellent pace for knowledge transfer! Your audience can follow and learn.',
-        'filler-warning': 'Professional presentations require polished delivery. Eliminate verbal fillers.',
-        'good-flow': 'Strong academic delivery! You\'re effectively transferring knowledge to your audience.'
-      },
-      'wedding-toast': {
-        'pace-slow': 'Emotional moments deserve thoughtful pacing. You\'re giving weight to meaningful words.',
-        'pace-fast': 'Slow down to let heartfelt moments resonate. This is about connection, not speed.',
-        'pace-good': 'Beautiful pacing! Your words carry the right emotional weight for this moment.',
-        'filler-warning': 'Keep it heartfelt and clean. Remove fillers for a more polished toast.',
-        'good-flow': 'Lovely flow! You\'re creating a meaningful moment that guests will remember.'
-      }
-    };
-
-    const contextMessages = contextualMessages[roleplayContext as keyof typeof contextualMessages];
-    return contextMessages?.[type] || baseMessage;
-  };
-
-  // Monitor speaking pace with contextual feedback
+  // Monitor filler words
   useEffect(() => {
-    if (!isListening || wpm === lastWPMCheck || wordCount < 5) return;
-    
-    setLastWPMCheck(wpm);
-    
-    if (wpm > 0) {
-      if (wpm < 100) {
+    if (isListening && fillerWords.length > lastFillerCount) {
+      const newFillers = fillerWords.length - lastFillerCount;
+      setLastFillerCount(fillerWords.length);
+      
+      if (fillerWords.length >= 3) {
         showFeedback(createFeedback(
           'warning',
-          'Speaking Pace',
-          getContextualFeedback('pace-slow', 'Try to increase your pace slightly. Aim for 140-180 words per minute.'),
-          'medium',
+          'Reduce Filler Words',
+          `You've used ${fillerWords.length} filler words. Try pausing instead of saying "um" or "uh".`,
+          'high',
           true,
           4
         ));
-      } else if (wpm > 250) {
-        showFeedback(createFeedback(
-          'warning',
-          'Speaking Too Fast',
-          getContextualFeedback('pace-fast', 'Slow down for better comprehension. Aim for 140-180 WPM.'),
-          'high',
-          true,
-          5
-        ));
-      } else if (wpm >= 120 && wpm <= 200) {
-        showFeedback(createFeedback(
-          'success',
-          'Perfect Pace',
-          getContextualFeedback('pace-good', 'Excellent speaking pace! You\'re maintaining ideal rhythm.'),
-          'low',
-          true,
-          3
-        ));
       }
     }
-    
-    // Immediate feedback for any speech activity
-    if (wordCount >= 5 && wpm > 0 && !currentFeedback) {
+  }, [fillerWords, lastFillerCount, isListening]);
+
+  // Monitor voice clarity
+  useEffect(() => {
+    if (isListening && voiceClarity < 40 && wordCount > 10) {
+      showFeedback(createFeedback(
+        'improvement',
+        'Speak More Clearly',
+        'Your voice clarity could be improved. Slow down and articulate your words more clearly.',
+        'medium',
+        true,
+        5
+      ));
+    } else if (isListening && voiceClarity > 80 && wordCount > 20) {
+      showFeedback(createFeedback(
+        'success',
+        'Great Clarity!',
+        'Your voice is crystal clear. Keep up the excellent articulation!',
+        'low',
+        true,
+        3
+      ));
+    }
+  }, [voiceClarity, wordCount, isListening]);
+
+  // Monitor confidence
+  useEffect(() => {
+    if (isListening && confidenceScore < 30 && wordCount > 15) {
       showFeedback(createFeedback(
         'tip',
-        'Great Start!',
-        'Good speaking technique detected. Keep maintaining your natural rhythm.',
+        'Boost Your Confidence',
+        'Your voice sounds uncertain. Stand tall, breathe deeply, and project confidence.',
+        'medium',
+        true,
+        6
+      ));
+    } else if (isListening && confidenceScore > 85 && wordCount > 10) {
+      showFeedback(createFeedback(
+        'success',
+        'Confident Delivery!',
+        'You sound very confident and assured. Your audience can feel your authority.',
         'low',
+        true,
+        3
+      ));
+    }
+  }, [confidenceScore, wordCount, isListening]);
+
+  // Monitor volume levels
+  useEffect(() => {
+    if (isListening && volumeLevel < 20 && wordCount > 5) {
+      showFeedback(createFeedback(
+        'warning',
+        'Speak Louder',
+        'Your voice is too quiet. Project your voice so everyone can hear you clearly.',
+        'high',
+        true,
+        4
+      ));
+    } else if (isListening && volumeLevel > 90 && wordCount > 5) {
+      showFeedback(createFeedback(
+        'warning',
+        'Lower Your Volume',
+        'You might be speaking too loudly. Find a comfortable volume for your audience.',
+        'medium',
         true,
         4
       ));
     }
-  }, [wpm, isListening, transcript, lastWPMCheck]);
+  }, [volumeLevel, wordCount, isListening]);
 
-  // Monitor filler words
+  // Provide periodic encouragement
   useEffect(() => {
-    if (!isListening) return;
-
-    const currentFillerCount = fillerWords.length;
-    
-    if (currentFillerCount > lastFillerCount) {
-      const recentFiller = fillerWords[fillerWords.length - 1];
-      
-      // Trigger on any filler word for immediate feedback
-      if (currentFillerCount >= 1) {
-        showFeedback(createFeedback(
-          'warning',
-          'Filler Word Detected',
-          getContextualFeedback('filler-warning', `I noticed "${recentFiller}". Try pausing instead to maintain professional delivery.`),
-          'medium',
-          true,
-          4
-        ));
-      }
-    }
-    
-    setLastFillerCount(currentFillerCount);
-  }, [fillerWords.length, isListening, lastFillerCount, fillerWords]);
-
-  // Advanced speech coaching with sophisticated feedback
-  useEffect(() => {
-    if (!isListening) return;
-
-    const wordCount = transcript.split(' ').length;
-    
-    // Immediate coaching when speech starts
-    if (wordCount >= 3 && !currentFeedback) {
+    if (isListening && wordCount > 0 && wordCount % 50 === 0) {
       showFeedback(createFeedback(
         'tip',
-        'AI Coach Activated',
-        'Excellent! Your speech analysis is now active. I\'m monitoring pace, clarity, and delivery patterns.',
+        'Keep Going!',
+        `You've spoken ${wordCount} words. You're doing great - maintain your momentum!`,
         'low',
         true,
-        5
+        3
       ));
     }
-    
-    // Advanced speaking pattern analysis
-    if (wordCount >= 20) {
-      const avgWordsPerSentence = wordCount / (transcript.split(/[.!?]+/).length - 1 || 1);
-      
-      if (avgWordsPerSentence > 25) {
-        showFeedback(createFeedback(
-          'improvement',
-          'Sentence Complexity Alert',
-          'Consider breaking down complex sentences for better audience comprehension. Aim for 15-20 words per sentence.',
-          'medium',
-          true,
-          6
-        ));
-      } else if (avgWordsPerSentence < 8) {
-        showFeedback(createFeedback(
-          'improvement',
-          'Sentence Variety Suggestion',
-          'Try varying your sentence lengths to create more engaging rhythm and flow.',
-          'low',
-          true,
-          5
-        ));
-      }
-    }
-    
-    // Energy and engagement monitoring
-    if (wordCount > 0 && wordCount % 40 === 0) {
-      const recentFillerRate = fillerWords.length / (wordCount / 100);
-      
-      if (wpm >= 140 && wpm <= 180 && recentFillerRate < 2) {
+  }, [wordCount, isListening]);
+
+  // Context-specific feedback
+  useEffect(() => {
+    if (roleplayContext && isListening && wordCount > 30) {
+      if (roleplayContext.includes('presentation') && fillerWords.length === 0) {
         showFeedback(createFeedback(
           'success',
-          'Outstanding Delivery!',
-          'Perfect pace, minimal fillers, and excellent flow. You\'re in the optimal speaking zone!',
+          'Professional Presentation',
+          'Excellent! No filler words detected in your presentation. Very professional.',
           'low',
           true,
           4
         ));
-      } else if (wpm > 220) {
+      } else if (roleplayContext.includes('interview') && confidenceScore > 70) {
         showFeedback(createFeedback(
-          'warning',
-          'Pace Control Needed',
-          'You\'re speaking very rapidly. Slow down to ensure key points resonate with your audience.',
-          'high',
+          'success',
+          'Interview Confidence',
+          'You sound confident and composed - perfect for an interview setting.',
+          'low',
           true,
-          6
+          4
         ));
       }
     }
-    
-    // Content engagement patterns
-    const questionMarks = (transcript.match(/\?/g) || []).length;
-    const exclamationMarks = (transcript.match(/!/g) || []).length;
-    
-    if (wordCount >= 50 && questionMarks === 0 && exclamationMarks === 0) {
-      showFeedback(createFeedback(
-        'tip',
-        'Engagement Enhancement',
-        'Consider adding rhetorical questions or emphatic statements to boost audience engagement.',
-        'low',
-        true,
-        5
-      ));
-    }
-  }, [transcript, isListening, wpm, fillerWords.length, currentFeedback]);
+  }, [roleplayContext, wordCount, fillerWords, confidenceScore, isListening]);
 
-  const getIcon = (type: AIFeedback['type']) => {
+  const getFeedbackIcon = (type: AIFeedback['type']) => {
     switch (type) {
       case 'warning': return AlertTriangle;
       case 'success': return CheckCircle;
@@ -311,100 +229,306 @@ export default function SmartAIFeedback({ roleplayContext, audienceType }: Smart
     }
   };
 
-  const getColors = (type: AIFeedback['type']) => {
+  const getFeedbackColor = (type: AIFeedback['type']) => {
     switch (type) {
-      case 'warning': return {
-        bg: 'bg-yellow-50 border-yellow-200',
-        icon: 'text-yellow-600',
-        badge: 'bg-yellow-100 text-yellow-800'
-      };
-      case 'success': return {
-        bg: 'bg-green-50 border-green-200',
-        icon: 'text-green-600',
-        badge: 'bg-green-100 text-green-800'
-      };
-      case 'tip': return {
-        bg: 'bg-cyan-50 border-cyan-200',
-        icon: 'text-cyan-600',
-        badge: 'bg-cyan-100 text-cyan-800'
-      };
-      case 'improvement': return {
-        bg: 'bg-cyan-50 border-cyan-200',
-        icon: 'text-cyan-600',
-        badge: 'bg-cyan-100 text-cyan-800'
-      };
-      default: return {
-        bg: 'bg-gray-50 border-gray-200',
-        icon: 'text-gray-600',
-        badge: 'bg-gray-100 text-gray-800'
-      };
+      case 'warning': return 'border-red-200 bg-red-50';
+      case 'success': return 'border-green-200 bg-green-50';
+      case 'tip': return 'border-blue-200 bg-blue-50';
+      case 'improvement': return 'border-yellow-200 bg-yellow-50';
+      default: return 'border-gray-200 bg-gray-50';
+    }
+  };
+
+  const getBadgeColor = (type: AIFeedback['type']) => {
+    switch (type) {
+      case 'warning': return 'bg-red-100 text-red-800';
+      case 'success': return 'bg-green-100 text-green-800';
+      case 'tip': return 'bg-blue-100 text-blue-800';
+      case 'improvement': return 'bg-yellow-100 text-yellow-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   if (!currentFeedback) {
     return (
-      <Card className="shadow-lg border-0 bg-white">
-        <CardContent className="flex items-center justify-center p-8 text-gray-500 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-lg">
-          <div className="text-center">
-            <div className="relative">
-              <Brain className={`w-8 h-8 mx-auto mb-3 text-cyan-400 ${isListening ? 'animate-pulse' : ''}`} />
-              {isListening && (
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-ping" />
-              )}
+      <div className="space-y-6">
+        {/* Main Coach Status */}
+        <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+          <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${
+            isListening ? 'bg-gradient-to-br from-green-400 to-blue-500 animate-pulse' : 'bg-gradient-to-br from-blue-400 to-purple-500'
+          }`}>
+            <Brain className="w-8 h-8 text-white" />
+          </div>
+          <h3 className="text-xl font-bold text-blue-900 mb-2">AI Speaking Coach</h3>
+          <p className="text-sm text-blue-700 mb-4">
+            {isListening 
+              ? "🎯 Analyzing your speech in real-time..." 
+              : "Ready to provide personalized coaching feedback"
+            }
+          </p>
+          
+          {isListening && (
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <div className="bg-white/50 rounded-lg p-3">
+                <div className="text-lg font-bold text-blue-900">{wordCount}</div>
+                <div className="text-xs text-blue-600">Words Spoken</div>
+              </div>
+              <div className="bg-white/50 rounded-lg p-3">
+                <div className="text-lg font-bold text-blue-900">{Math.round(voiceClarity)}%</div>
+                <div className="text-xs text-blue-600">Voice Clarity</div>
+              </div>
             </div>
-            <p className="text-base font-medium text-gray-700">
-              {isListening ? 'AI Coach is analyzing...' : 'AI Coach is ready'}
-            </p>
-            <p className="text-sm text-gray-500 mt-2">
-              Live feedback will appear as you speak
+          )}
+        </div>
+
+        {/* Coaching Areas */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card className="p-4 border-blue-200">
+            <div className="flex items-center space-x-3 mb-3">
+              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                <Volume2 className="w-4 h-4 text-blue-600" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-sm">Voice Analysis</h4>
+                <p className="text-xs text-gray-600">Clarity, tone, and projection</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs">
+                <span>Clarity</span>
+                <span className={voiceClarity > 70 ? 'text-green-600' : voiceClarity > 40 ? 'text-yellow-600' : 'text-red-600'}>
+                  {Math.round(voiceClarity)}%
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div 
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    voiceClarity > 70 ? 'bg-green-500' : voiceClarity > 40 ? 'bg-yellow-500' : 'bg-red-500'
+                  }`}
+                  style={{ width: `${Math.min(voiceClarity, 100)}%` }}
+                ></div>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-4 border-purple-200">
+            <div className="flex items-center space-x-3 mb-3">
+              <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                <CheckCircle className="w-4 h-4 text-purple-600" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-sm">Confidence Level</h4>
+                <p className="text-xs text-gray-600">Authority and presence</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs">
+                <span>Confidence</span>
+                <span className={confidenceScore > 70 ? 'text-green-600' : confidenceScore > 40 ? 'text-yellow-600' : 'text-red-600'}>
+                  {Math.round(confidenceScore)}%
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div 
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    confidenceScore > 70 ? 'bg-green-500' : confidenceScore > 40 ? 'bg-yellow-500' : 'bg-red-500'
+                  }`}
+                  style={{ width: `${Math.min(confidenceScore, 100)}%` }}
+                ></div>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-4 border-green-200">
+            <div className="flex items-center space-x-3 mb-3">
+              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                <AlertTriangle className="w-4 h-4 text-green-600" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-sm">Filler Words</h4>
+                <p className="text-xs text-gray-600">Um, uh, like, you know</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-2xl font-bold text-gray-900">{fillerWords.length}</span>
+              <span className={`text-xs px-2 py-1 rounded-full ${
+                fillerWords.length === 0 ? 'bg-green-100 text-green-800' :
+                fillerWords.length <= 2 ? 'bg-yellow-100 text-yellow-800' :
+                'bg-red-100 text-red-800'
+              }`}>
+                {fillerWords.length === 0 ? 'Excellent' : 
+                 fillerWords.length <= 2 ? 'Good' : 'Needs Work'}
+              </span>
+            </div>
+          </Card>
+
+          <Card className="p-4 border-orange-200">
+            <div className="flex items-center space-x-3 mb-3">
+              <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                <Lightbulb className="w-4 h-4 text-orange-600" />
+              </div>
+              <div>
+                <h4 className="font-semibold text-sm">Speech Progress</h4>
+                <p className="text-xs text-gray-600">Session tracking</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs">
+                <span>Session Duration</span>
+                <span>{sessionStartTime ? Math.floor((Date.now() - sessionStartTime.getTime()) / 1000) : 0}s</span>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span>Words Spoken</span>
+                <span>{wordCount}</span>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Quick Tips */}
+        <Card className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200">
+          <h4 className="font-semibold text-sm mb-3 flex items-center">
+            <Lightbulb className="w-4 h-4 mr-2 text-indigo-600" />
+            Pro Speaking Tips
+          </h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+            <div className="flex items-start space-x-2">
+              <div className="w-2 h-2 bg-indigo-400 rounded-full mt-1 flex-shrink-0"></div>
+              <span>Maintain steady eye contact with your audience</span>
+            </div>
+            <div className="flex items-start space-x-2">
+              <div className="w-2 h-2 bg-indigo-400 rounded-full mt-1 flex-shrink-0"></div>
+              <span>Use strategic pauses instead of filler words</span>
+            </div>
+            <div className="flex items-start space-x-2">
+              <div className="w-2 h-2 bg-indigo-400 rounded-full mt-1 flex-shrink-0"></div>
+              <span>Project your voice to reach the back row</span>
+            </div>
+            <div className="flex items-start space-x-2">
+              <div className="w-2 h-2 bg-indigo-400 rounded-full mt-1 flex-shrink-0"></div>
+              <span>Vary your tone to keep audience engaged</span>
+            </div>
+          </div>
+        </Card>
+
+        {/* Performance Analytics */}
+        <Card className="p-4 border-emerald-200">
+          <h4 className="font-semibold text-sm mb-4 flex items-center">
+            <ArrowUpRight className="w-4 h-4 mr-2 text-emerald-600" />
+            Performance Analytics
+          </h4>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="text-center p-3 bg-emerald-50 rounded-lg">
+              <div className="text-lg font-bold text-emerald-700">
+                {Math.round((voiceClarity + confidenceScore) / 2)}%
+              </div>
+              <div className="text-xs text-emerald-600">Overall Score</div>
+            </div>
+            <div className="text-center p-3 bg-blue-50 rounded-lg">
+              <div className="text-lg font-bold text-blue-700">
+                {fillerWords.length === 0 ? 'A+' : 
+                 fillerWords.length <= 2 ? 'B+' : 
+                 fillerWords.length <= 5 ? 'C+' : 'D'}
+              </div>
+              <div className="text-xs text-blue-600">Speech Grade</div>
+            </div>
+          </div>
+        </Card>
+
+        {/* Improvement Recommendations */}
+        <Card className="p-4 border-amber-200">
+          <h4 className="font-semibold text-sm mb-3 flex items-center">
+            <AlertTriangle className="w-4 h-4 mr-2 text-amber-600" />
+            Improvement Focus Areas
+          </h4>
+          <div className="space-y-3">
+            {voiceClarity < 60 && (
+              <div className="p-3 bg-amber-50 rounded-lg border-l-3 border-amber-400">
+                <div className="font-medium text-xs text-amber-800">Voice Clarity</div>
+                <div className="text-xs text-amber-700 mt-1">
+                  Practice speaking more slowly and enunciating consonants clearly
+                </div>
+              </div>
+            )}
+            {confidenceScore < 60 && (
+              <div className="p-3 bg-red-50 rounded-lg border-l-3 border-red-400">
+                <div className="font-medium text-xs text-red-800">Confidence Building</div>
+                <div className="text-xs text-red-700 mt-1">
+                  Stand tall, make eye contact, and speak with authority
+                </div>
+              </div>
+            )}
+            {fillerWords.length > 3 && (
+              <div className="p-3 bg-orange-50 rounded-lg border-l-3 border-orange-400">
+                <div className="font-medium text-xs text-orange-800">Reduce Filler Words</div>
+                <div className="text-xs text-orange-700 mt-1">
+                  Pause instead of using "um" or "uh" - silence is powerful
+                </div>
+              </div>
+            )}
+            {voiceClarity >= 60 && confidenceScore >= 60 && fillerWords.length <= 3 && (
+              <div className="p-3 bg-green-50 rounded-lg border-l-3 border-green-400">
+                <div className="font-medium text-xs text-green-800">Excellent Progress!</div>
+                <div className="text-xs text-green-700 mt-1">
+                  Your speaking skills are developing well. Keep practicing consistently.
+                </div>
+              </div>
+            )}
+          </div>
+        </Card>
+
+        {!isListening && (
+          <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <p className="text-sm text-blue-700 font-medium">
+              🎤 Start speaking to receive personalized AI coaching feedback
             </p>
           </div>
-        </CardContent>
-      </Card>
+        )}
+      </div>
     );
   }
 
-  const Icon = getIcon(currentFeedback.type);
-  const colors = getColors(currentFeedback.type);
+  const Icon = getFeedbackIcon(currentFeedback.type);
 
   return (
-    <Card className={`${colors.bg} border transition-all duration-300 animate-in slide-in-from-top-2`}>
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-start gap-3 flex-1">
-            <Icon className={`w-5 h-5 mt-0.5 ${colors.icon} flex-shrink-0`} />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <h4 className="font-semibold text-gray-900 text-sm">
-                  {currentFeedback.title}
-                </h4>
-                <Badge className={`text-xs ${colors.badge}`}>
-                  {currentFeedback.type}
-                </Badge>
+    <div className="space-y-4">
+      <Card className={`${getFeedbackColor(currentFeedback.type)} border-l-4 shadow-sm animate-in fade-in slide-in-from-right-5 duration-300`}>
+        <CardContent className="p-4">
+          <div className="flex items-start justify-between">
+            <div className="flex items-start space-x-3 flex-1">
+              <div className="flex-shrink-0">
+                <Icon className="w-5 h-5 mt-0.5" />
               </div>
-              <p className="text-gray-700 text-sm leading-relaxed">
-                {currentFeedback.message}
-              </p>
-              <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
-                <Clock className="w-3 h-3" />
-                {currentFeedback.timestamp.toLocaleTimeString('en-US', { 
-                  hour12: false, 
-                  minute: '2-digit', 
-                  second: '2-digit' 
-                })}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center space-x-2 mb-2">
+                  <h4 className="font-semibold text-sm">{currentFeedback.title}</h4>
+                  <Badge className={`text-xs ${getBadgeColor(currentFeedback.type)}`}>
+                    {currentFeedback.type}
+                  </Badge>
+                </div>
+                <p className="text-sm text-gray-700 mb-3">{currentFeedback.message}</p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2 text-xs text-gray-500">
+                    <Clock className="w-3 h-3" />
+                    <span>{currentFeedback.timestamp.toLocaleTimeString()}</span>
+                  </div>
+                  {currentFeedback.autoHide && (
+                    <span className="text-xs text-gray-400">Auto-dismiss in {currentFeedback.hideAfter}s</span>
+                  )}
+                </div>
               </div>
             </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setCurrentFeedback(null)}
+              className="flex-shrink-0 h-6 w-6 p-0"
+            >
+              <X className="w-4 h-4" />
+            </Button>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={hideFeedback}
-            className="flex-shrink-0 h-6 w-6 p-0 hover:bg-gray-200"
-          >
-            <X className="w-4 h-4" />
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

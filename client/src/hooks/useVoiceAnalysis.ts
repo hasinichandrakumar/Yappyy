@@ -100,14 +100,25 @@ export function useVoiceAnalysis() {
         const elapsedMinutes = (Date.now() - startTime.current) / 60000;
         const wpm = elapsedMinutes > 0 ? Math.round(wordsSpoken.current / elapsedMinutes) : 0;
         
-        // Update metrics more frequently with smoother transitions
+        // Update metrics with proper calculations
+        const clarity = clarityAnalysis();
+        const confidence = confidenceAnalysis();
+        
         setMetrics(prev => ({
           ...prev,
-          volumeLevel: Math.round(volumeLevel),
+          volumeLevel: Math.round(Math.min(volumeLevel, 100)),
           speakingPace: wpm,
-          voiceClarity: Math.round(clarityAnalysis()),
-          confidenceScore: Math.round(confidenceAnalysis())
+          voiceClarity: Math.round(Math.min(clarity, 100)),
+          confidenceScore: Math.round(Math.min(confidence, 100))
         }));
+        
+        // Debug output to see if metrics are updating
+        console.log('Voice Analysis Update:', {
+          volumeLevel: Math.round(volumeLevel),
+          voiceClarity: Math.round(clarity),
+          confidenceScore: Math.round(confidence),
+          wordsSpoken: wordsSpoken.current
+        });
         
         // Continue analysis loop
         if (isAnalyzing) {
