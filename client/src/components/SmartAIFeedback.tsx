@@ -37,6 +37,18 @@ export default function SmartAIFeedback({ demoMode = true }: SmartAIFeedbackProp
   const [demoFeedbackIndex, setDemoFeedbackIndex] = useState(0);
   const hideTimeoutRef = useRef<NodeJS.Timeout>();
 
+  // Debug logging
+  useEffect(() => {
+    console.log('SmartAIFeedback state:', { 
+      demoMode, 
+      isListening, 
+      wpm, 
+      transcriptLength: transcript.length,
+      fillerWordsCount: fillerWords.length,
+      currentFeedback: currentFeedback?.type 
+    });
+  }, [demoMode, isListening, wpm, transcript, fillerWords, currentFeedback]);
+
   const createFeedback = (
     type: AIFeedback['type'],
     title: string,
@@ -92,14 +104,20 @@ export default function SmartAIFeedback({ demoMode = true }: SmartAIFeedbackProp
   useEffect(() => {
     if (!demoMode) return;
     
+    // Show first feedback immediately in demo mode
+    if (!currentFeedback) {
+      showFeedback(demoFeedbacks[0]);
+      setDemoFeedbackIndex(1);
+    }
+    
     const interval = setInterval(() => {
       const feedback = demoFeedbacks[demoFeedbackIndex];
       showFeedback(feedback);
       setDemoFeedbackIndex((prev) => (prev + 1) % demoFeedbacks.length);
-    }, 6000); // Show new feedback every 6 seconds
+    }, 5000); // Show new feedback every 5 seconds
 
     return () => clearInterval(interval);
-  }, [demoMode, demoFeedbackIndex, demoFeedbacks]);
+  }, [demoMode, demoFeedbacks]);
 
   // Monitor speaking pace (only when not in demo mode)
   useEffect(() => {
@@ -108,8 +126,11 @@ export default function SmartAIFeedback({ demoMode = true }: SmartAIFeedbackProp
     console.log('Live feedback check:', { wpm, transcriptLength: transcript.length, isListening });
     setLastWPMCheck(wpm);
 
-    if (wpm > 0) {
-      if (wpm < 120 && transcript.split(' ').length > 10) {
+    // Lower thresholds for easier testing
+    const wordCount = transcript.split(' ').length;
+    
+    if (wpm > 0 && wordCount > 3) {
+      if (wpm < 100) {
         showFeedback(createFeedback(
           'warning',
           'Speaking Too Slowly',
@@ -118,7 +139,7 @@ export default function SmartAIFeedback({ demoMode = true }: SmartAIFeedbackProp
           true,
           4
         ));
-      } else if (wpm > 200 && transcript.split(' ').length > 15) {
+      } else if (wpm > 250) {
         showFeedback(createFeedback(
           'warning',
           'Speaking Too Fast',
@@ -127,7 +148,7 @@ export default function SmartAIFeedback({ demoMode = true }: SmartAIFeedbackProp
           true,
           5
         ));
-      } else if (wpm >= 140 && wpm <= 180 && transcript.split(' ').length > 20) {
+      } else if (wpm >= 120 && wpm <= 200 && wordCount > 5) {
         showFeedback(createFeedback(
           'success',
           'Perfect Speaking Pace',
@@ -138,6 +159,18 @@ export default function SmartAIFeedback({ demoMode = true }: SmartAIFeedbackProp
         ));
       }
     }
+    
+    // Immediate feedback for any speech activity
+    if (wordCount >= 5 && wpm > 0 && !currentFeedback) {
+      showFeedback(createFeedback(
+        'tip',
+        'Great Start!',
+        'Good speaking technique detected. Keep maintaining your natural rhythm.',
+        'low',
+        true,
+        4
+      ));
+    }
   }, [wpm, isListening, transcript, lastWPMCheck, demoMode]);
 
   // Monitor filler words (only when not in demo mode)
@@ -147,14 +180,14 @@ export default function SmartAIFeedback({ demoMode = true }: SmartAIFeedbackProp
     const currentFillerCount = fillerWords.length;
     
     if (currentFillerCount > lastFillerCount) {
-      const newFillers = currentFillerCount - lastFillerCount;
       const recentFiller = fillerWords[fillerWords.length - 1];
       
-      if (currentFillerCount >= 3 && currentFillerCount % 2 === 0) {
+      // Trigger on any filler word for immediate feedback
+      if (currentFillerCount >= 1) {
         showFeedback(createFeedback(
           'warning',
-          'Filler Words Detected',
-          `Try to pause instead of using "${recentFiller}". Take a breath and continue with confidence.`,
+          'Filler Word Detected',
+          `I noticed "${recentFiller}". Try pausing instead to maintain professional delivery.`,
           'medium',
           true,
           4
@@ -165,19 +198,32 @@ export default function SmartAIFeedback({ demoMode = true }: SmartAIFeedbackProp
     setLastFillerCount(currentFillerCount);
   }, [fillerWords.length, isListening, lastFillerCount, fillerWords, demoMode]);
 
-  // Provide periodic encouragement (only when not in demo mode)
+  // Simple speech detection test (fires when speech is first detected)
   useEffect(() => {
     if (demoMode || !isListening) return;
 
     const wordCount = transcript.split(' ').length;
     
-    // Every 50 words, provide encouraging feedback if no issues
-    if (wordCount > 0 && wordCount % 50 === 0 && !currentFeedback) {
-      if (wpm >= 140 && wpm <= 180 && fillerWords.length < wordCount * 0.05) {
+    // Immediate feedback when speech starts
+    if (wordCount >= 3 && !currentFeedback) {
+      console.log('Triggering immediate speech detection feedback');
+      showFeedback(createFeedback(
+        'tip',
+        'Speech Detected!',
+        'Great! I can hear you speaking. Continue and I\'ll provide real-time coaching feedback.',
+        'low',
+        true,
+        4
+      ));
+    }
+    
+    // Periodic encouragement for longer speeches
+    if (wordCount > 0 && wordCount % 30 === 0 && currentFeedback?.type !== 'success') {
+      if (wpm >= 100 && fillerWords.length < wordCount * 0.1) {
         showFeedback(createFeedback(
           'success',
-          'Great Job!',
-          'You\'re maintaining excellent pace and clarity. Keep up the momentum!',
+          'Excellent Progress!',
+          'You\'re maintaining good pace and clarity. Keep up the momentum!',
           'low',
           true,
           3
