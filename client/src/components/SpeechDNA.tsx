@@ -169,12 +169,82 @@ export default function SpeechDNA() {
     
     // Match famous speaker
     const getFamousSpeaker = () => {
-      if (actualConfidence > 85 && actualPace > 150) return "Steve Jobs for your commanding presence";
+      if (actualConfidence > 85 && actualClarity > 80) return "Steve Jobs for your commanding presence";
       if (actualConfidence > 80 && actualClarity > 80) return "Barack Obama for your measured authority";
-      if (actualPace > 160 && actualConfidence > 70) return "Tony Robbins for your dynamic energy";
+      if (actualConfidence > 70) return "Tony Robbins for your dynamic energy";
       if (actualClarity > 85) return "Morgan Freeman for your clear delivery";
       if (actualConfidence > 75) return "Oprah Winfrey for your authentic confidence";
       return "a skilled professional speaker";
+    };
+
+    // Generate unique traits based on speech patterns
+    const generateUniqueTraits = () => {
+      const traits = [];
+      
+      if (actualClarity > 70) {
+        traits.push("Crystal clear articulation");
+      } else if (actualClarity > 40) {
+        traits.push("Developing voice clarity");
+      }
+      
+      if (actualConfidence > 70) {
+        traits.push("Natural speaking confidence");
+      } else if (actualConfidence > 40) {
+        traits.push("Growing self-assurance");
+      }
+      
+      if (hasTranscript) {
+        traits.push("Active communication style");
+      }
+      
+      if (actualWordCount > 100) {
+        traits.push("Comprehensive content delivery");
+      } else if (actualWordCount > 30) {
+        traits.push("Thoughtful message structure");
+      }
+      
+      // Add default traits if none found
+      if (traits.length === 0) {
+        traits.push("Emerging speaking talent", "Authentic voice", "Learning mindset");
+      }
+      
+      return traits.slice(0, 3);
+    };
+
+    // Generate rhetoric strengths
+    const generateRhetoricStrengths = () => {
+      const strengths = [];
+      
+      if (actualClarity > 60) {
+        strengths.push("Clear message delivery");
+      }
+      
+      if (actualConfidence > 60) {
+        strengths.push("Confident presentation");
+      }
+      
+      if (hasTranscript) {
+        strengths.push("Engaging communication");
+      }
+      
+      if (actualWordCount > 50) {
+        strengths.push("Substantial content");
+      }
+      
+      // Add default strengths
+      const defaultStrengths = ["Developing structure", "Growing presence", "Authentic style"];
+      
+      // Fill remaining slots with defaults
+      while (strengths.length < 3) {
+        const remaining = defaultStrengths.filter(s => !strengths.includes(s));
+        if (remaining.length > 0) {
+          strengths.push(remaining[0]);
+        } else {
+          break;
+        }
+      }
+      
+      return strengths.slice(0, 3);
     };
     
     const dnaProfile: SpeechDNAProfile = {
