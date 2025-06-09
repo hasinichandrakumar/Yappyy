@@ -9,7 +9,7 @@ import AnalysisOverview from "@/components/AnalysisOverview";
 import BodyLanguageAnalyzer from "@/components/BodyLanguageAnalyzer";
 import AdvancedSpeechAnalysis from "@/components/AdvancedSpeechAnalysis";
 import ContentAnalysis from "@/components/ContentAnalysis";
-import ImprovementSummary from "@/components/ImprovementSummary";
+import StreamlinedAICoach from "@/components/StreamlinedAICoach";
 import SpeechDNA from "@/components/SpeechDNA";
 import SpeechROIAnalyzer from "@/components/SpeechROIAnalyzer";
 import BadgeSystem from "@/components/BadgeSystem";
@@ -131,7 +131,7 @@ export default function Dashboard() {
             </TabsContent>
 
             <TabsContent value="ai-coach" className="mt-0">
-              <ImprovementSummary />
+              <StreamlinedAICoach />
             </TabsContent>
 
             <TabsContent value="speech-dna" className="mt-0">

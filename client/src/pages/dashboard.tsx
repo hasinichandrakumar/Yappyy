@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import VideoFeed from "@/components/VideoFeed";
 import RealTimeMetrics from "@/components/RealTimeMetrics";
 import LiveTranscript from "@/components/LiveTranscript";
-import SmartAIFeedback from "@/components/SmartAIFeedback";
+import StreamlinedAICoach from "@/components/StreamlinedAICoach";
 import SessionStats from "@/components/SessionStats";
 import SessionHistory from "@/components/SessionHistory";
 import DetailedAnalysis from "@/components/DetailedAnalysis";
@@ -23,8 +23,6 @@ import AIPracticeRoleplay from "@/components/AIPracticeRoleplay";
 import BodyCueTimeline from "@/components/BodyCueTimeline";
 import SpeechFingerprintGenerator from "@/components/SpeechFingerprintGenerator";
 import AdvancedPracticeHub from "@/components/AdvancedPracticeHub";
-
-import AdaptiveFeedbackEngine from "@/components/AdaptiveFeedbackEngine";
 import EnhancedTemplateMarketplace from "@/components/EnhancedTemplateMarketplace";
 import HelpGuide from "@/components/HelpGuide";
 import PostSessionAnalysis from "@/components/PostSessionAnalysis";
@@ -112,29 +110,7 @@ export default function Dashboard() {
           </TabsContent>
 
           <TabsContent value="improvement" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <AdaptiveFeedbackEngine 
-                userProfile={{
-                  userId: 'demo-user',
-                  sessionCount: 15,
-                  masteredSkills: ['voice_pacing', 'basic_gestures', 'eye_contact'],
-                  currentWeaknesses: ['advanced_rhetoric', 'emotional_intelligence'],
-                  feedbackHistory: ['gesture timing', 'voice clarity', 'posture'],
-                  adaptiveLevel: 6,
-                  learningVelocity: 0.85,
-                  personalityTraits: ['analytical', 'detail_oriented'],
-                  preferredFeedbackStyle: 'analytical'
-                }}
-                currentPerformance={{
-                  voiceClarity: 72,
-                  bodyLanguage: 78,
-                  contentStructure: 83,
-                  engagement: 75
-                }}
-              />
-
-            </div>
-            <ImprovementSummary />
+            <StreamlinedAICoach />
           </TabsContent>
 
           <TabsContent value="speech-dna" className="space-y-6">
