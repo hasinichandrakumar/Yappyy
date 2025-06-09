@@ -451,7 +451,7 @@ export default function Home() {
             className="w-16 h-16 mx-auto mb-6 rounded-lg"
           />
           <p className="text-gray-400 mb-6">
-            Empowering speakers worldwide with intelligent feedback and coaching.
+            Empowering speakers worldwide with AI-powered intelligent feedback and coaching.
           </p>
           <div className="flex justify-center space-x-8 text-sm text-gray-400">
             <span>Privacy Policy</span>
