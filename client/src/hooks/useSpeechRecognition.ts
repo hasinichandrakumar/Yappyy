@@ -1,199 +1,103 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
-interface SpeechRecognitionHook {
+interface SpeechRecognitionResult {
   transcript: string;
   isListening: boolean;
+  wordCount: number;
+  fillerWords: string[];
   startListening: () => void;
   stopListening: () => void;
-  resetTranscript: () => void;
-  wordCount: number;
-  wpm: number;
-  fillerWords: string[];
-  currentSentence: string;
 }
 
-// Common filler words to detect
-const FILLER_WORDS = [
-  'um', 'uh', 'ah', 'er', 'like', 'you know', 'so', 'actually', 'basically', 
-  'literally', 'right', 'ok', 'okay', 'well', 'i mean', 'kind of', 'sort of'
-];
-
-export function useSpeechRecognition(): SpeechRecognitionHook {
-  const [transcript, setTranscript] = useState('');
-  const [isListening, setIsListening] = useState(false);
-  const [wordCount, setWordCount] = useState(0);
-  const [wpm, setWpm] = useState(0);
+export function useSpeechRecognition(): SpeechRecognitionResult {
+  const [transcript, setTranscript] = useState<string>('');
+  const [isListening, setIsListening] = useState<boolean>(false);
+  const [wordCount, setWordCount] = useState<number>(0);
   const [fillerWords, setFillerWords] = useState<string[]>([]);
-  const [currentSentence, setCurrentSentence] = useState('');
   
   const recognitionRef = useRef<any>(null);
-  const startTimeRef = useRef<number>(0);
-  const lastUpdateTimeRef = useRef<number>(0);
+  const isActiveRef = useRef<boolean>(false);
 
-  const calculateWPM = useCallback((words: number, timeInMinutes: number) => {
-    return timeInMinutes > 0 ? Math.round(words / timeInMinutes) : 0;
-  }, []);
-
-  const detectFillerWords = useCallback((text: string): string[] => {
-    const words = text.toLowerCase().split(/\s+/);
-    const detected: string[] = [];
-    
-    // Check for single word fillers
-    words.forEach(word => {
-      const cleanWord = word.replace(/[.,!?;]/g, '');
-      if (FILLER_WORDS.includes(cleanWord)) {
-        detected.push(cleanWord);
-      }
-    });
-
-    // Check for phrase fillers
-    const textLower = text.toLowerCase();
-    FILLER_WORDS.forEach(filler => {
-      if (filler.includes(' ') && textLower.includes(filler)) {
-        detected.push(filler);
-      }
-    });
-
-    return detected;
-  }, []);
-
-  const startListening = useCallback(() => {
+  // Initialize speech recognition
+  useEffect(() => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      console.error('Speech recognition not supported in this browser');
-      alert('Speech recognition is not supported in this browser. Please use Chrome, Edge, or Safari.');
+      console.warn('Speech recognition not supported in this browser');
       return;
     }
 
-    console.log('Starting speech recognition...');
+    const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+    const recognition = new SpeechRecognition();
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    recognitionRef.current = new SpeechRecognition();
-    
-    if (recognitionRef.current) {
-      recognitionRef.current.continuous = true;
-      recognitionRef.current.interimResults = true;
-      recognitionRef.current.lang = 'en-US';
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+    recognition.maxAlternatives = 1;
 
-      // Reset all state and timing
-      startTimeRef.current = Date.now();
-      lastUpdateTimeRef.current = Date.now();
+    recognition.onstart = () => {
       setIsListening(true);
-      setTranscript('');
-      setWordCount(0);
-      setWpm(0);
-      setFillerWords([]);
-      setCurrentSentence('');
+    };
 
-      let fullTranscriptRef = '';
+    recognition.onresult = (event: any) => {
+      let finalTranscript = '';
+      
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript + ' ';
+        }
+      }
 
-      recognitionRef.current.onresult = (event: any) => {
-        console.log('Speech recognition result received');
-        let interimTranscript = '';
-        let finalTranscript = '';
-
-        // Rebuild the complete transcript from all results
-        for (let i = 0; i < event.results.length; i++) {
-          const result = event.results[i];
-          if (result.isFinal) {
-            finalTranscript += result[0].transcript + ' ';
-          } else {
-            interimTranscript += result[0].transcript;
+      if (finalTranscript) {
+        setTranscript(prev => {
+          const newTranscript = prev + finalTranscript;
+          
+          // Count words
+          const words = newTranscript.trim().split(/\s+/).filter(word => word.length > 0);
+          setWordCount(words.length);
+          
+          // Detect filler words
+          const detectedFillers = detectFillerWords(finalTranscript);
+          if (detectedFillers.length > 0) {
+            setFillerWords(prev => [...prev, ...detectedFillers]);
           }
-        }
+          
+          return newTranscript;
+        });
+      }
+    };
 
-        // Update full transcript with final results
-        fullTranscriptRef = finalTranscript;
-        
-        const displayTranscript = fullTranscriptRef + (interimTranscript ? interimTranscript : '');
-        const allWords = displayTranscript.trim().split(/\s+/).filter(word => word.length > 0);
-        
-        setTranscript(displayTranscript);
-        setCurrentSentence(interimTranscript || finalTranscript.split(' ').slice(-10).join(' '));
-
-        // Calculate word count from all spoken words (including interim)
-        const currentWordCount = allWords.length;
-        setWordCount(currentWordCount);
-
-        // Calculate WPM based on elapsed time
-        const currentTime = Date.now();
-        const timeInMinutes = (currentTime - startTimeRef.current) / 60000;
-        
-        // Calculate WPM if we have words and some time has passed
-        if (timeInMinutes > 0.01 && currentWordCount > 0) { // Start calculating after 0.6 seconds
-          const currentWPM = Math.round(currentWordCount / timeInMinutes);
-          setWpm(currentWPM);
-          console.log(`WPM: ${currentWordCount} words / ${timeInMinutes.toFixed(2)} min = ${currentWPM} WPM`);
-        }
-
-        // Detect filler words in final transcript only
-        if (finalTranscript.trim()) {
-          const newFillers = detectFillerWords(finalTranscript);
-          if (newFillers.length > 0) {
-            setFillerWords(prev => [...prev, ...newFillers]);
-          }
-        }
-
-        lastUpdateTimeRef.current = currentTime;
-      };
-
-      recognitionRef.current.onerror = (event: any) => {
-        console.error('Speech recognition error:', event.error);
-        setIsListening(false);
-        
-        // Auto-restart on certain errors
-        if (event.error === 'no-speech' || event.error === 'audio-capture') {
-          console.log('Auto-restarting speech recognition...');
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error);
+      if (event.error === 'no-speech') {
+        // Restart recognition if no speech detected
+        if (isActiveRef.current) {
           setTimeout(() => {
-            if (recognitionRef.current && !isListening) {
-              recognitionRef.current.start();
-              setIsListening(true);
+            if (isActiveRef.current) {
+              recognition.start();
             }
           }, 1000);
         }
-      };
+      }
+    };
 
-      recognitionRef.current.onend = () => {
-        console.log('Speech recognition ended');
-        setIsListening(false);
-        
-        // Auto-restart if we were listening (for continuous recognition)
-        if (isListening && recognitionRef.current) {
-          console.log('Auto-restarting speech recognition for continuous mode...');
-          setTimeout(() => {
-            if (recognitionRef.current) {
-              try {
-                recognitionRef.current.start();
-                setIsListening(true);
-              } catch (error) {
-                console.error('Failed to restart recognition:', error);
-              }
-            }
-          }, 100);
-        }
-      };
-
-      recognitionRef.current.start();
-    }
-  }, [calculateWPM, detectFillerWords]);
-
-  const stopListening = useCallback(() => {
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
+    recognition.onend = () => {
       setIsListening(false);
-    }
-  }, []);
+      // Restart recognition if it should still be active
+      if (isActiveRef.current) {
+        setTimeout(() => {
+          if (isActiveRef.current) {
+            try {
+              recognition.start();
+            } catch (error) {
+              console.warn('Could not restart speech recognition:', error);
+            }
+          }
+        }, 100);
+      }
+    };
 
-  const resetTranscript = useCallback(() => {
-    setTranscript('');
-    setWordCount(0);
-    setWpm(0);
-    setFillerWords([]);
-    setCurrentSentence('');
-    startTimeRef.current = 0;
-    lastUpdateTimeRef.current = 0;
-  }, []);
+    recognitionRef.current = recognition;
 
-  useEffect(() => {
     return () => {
       if (recognitionRef.current) {
         recognitionRef.current.stop();
@@ -201,23 +105,59 @@ export function useSpeechRecognition(): SpeechRecognitionHook {
     };
   }, []);
 
+  // Detect filler words in speech
+  const detectFillerWords = (text: string): string[] => {
+    const fillerPatterns = [
+      'um', 'uh', 'er', 'ah', 'like', 'you know', 'so', 'well',
+      'actually', 'basically', 'literally', 'obviously', 'right',
+      'kinda', 'sorta', 'anyway', 'meanwhile'
+    ];
+    
+    const words = text.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/);
+    const detectedFillers: string[] = [];
+    
+    words.forEach(word => {
+      if (fillerPatterns.includes(word.trim())) {
+        detectedFillers.push(word);
+      }
+    });
+    
+    return detectedFillers;
+  };
+
+  const startListening = useCallback(() => {
+    if (recognitionRef.current && !isActiveRef.current) {
+      try {
+        isActiveRef.current = true;
+        recognitionRef.current.start();
+      } catch (error) {
+        console.error('Error starting speech recognition:', error);
+      }
+    }
+  }, []);
+
+  const stopListening = useCallback(() => {
+    if (recognitionRef.current && isActiveRef.current) {
+      isActiveRef.current = false;
+      recognitionRef.current.stop();
+    }
+  }, []);
+
+  // Auto-start listening when component mounts
+  useEffect(() => {
+    startListening();
+    
+    return () => {
+      stopListening();
+    };
+  }, [startListening, stopListening]);
+
   return {
     transcript,
     isListening,
-    startListening,
-    stopListening,
-    resetTranscript,
     wordCount,
-    wpm,
     fillerWords,
-    currentSentence
+    startListening,
+    stopListening
   };
-}
-
-// Extend the Window interface to include speech recognition
-declare global {
-  interface Window {
-    SpeechRecognition: any;
-    webkitSpeechRecognition: any;
-  }
 }

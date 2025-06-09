@@ -4,7 +4,7 @@ import yapUpLogo from "@assets/YapUp-6_1749439026739.png";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import YapUpLogo, { YapUpIcon } from "@/components/YapUpLogo";
-import EnhancedPracticeHub from "@/components/EnhancedPracticeHub";
+import EnhancedPracticeHubFixed from "@/components/EnhancedPracticeHubFixed";
 import AnalysisOverview from "@/components/AnalysisOverview";
 import BodyLanguageAnalyzer from "@/components/BodyLanguageAnalyzer";
 import AdvancedSpeechAnalysis from "@/components/AdvancedSpeechAnalysis";
@@ -127,7 +127,7 @@ export default function Dashboard() {
           {/* Tab Content */}
           <div className="mt-6">
             <TabsContent value="overview" className="mt-0">
-              <EnhancedPracticeHub />
+              <EnhancedPracticeHubFixed />
             </TabsContent>
 
             <TabsContent value="ai-coach" className="mt-0">
