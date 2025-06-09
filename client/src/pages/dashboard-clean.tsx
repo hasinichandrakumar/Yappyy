@@ -30,8 +30,11 @@ export default function Dashboard() {
       <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <YapUpLogo width={140} height={42} />
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-gradient-to-br from-[#0BF9EA] to-blue-600 rounded-lg flex items-center justify-center">
+                <MicOff className="text-white w-4 h-4" />
+              </div>
+              <h1 className="text-xl font-semibold text-gray-900">YapUp</h1>
             </div>
             
             <div className="flex items-center space-x-3">
