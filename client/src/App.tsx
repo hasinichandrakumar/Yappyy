@@ -26,7 +26,8 @@ function Router() {
 
   return (
     <Switch>
-      <Route path="/" component={isAuthenticated ? Dashboard : Landing} />
+      <Route path="/" component={Landing} />
+      <Route path="/home" component={isAuthenticated ? Dashboard : Landing} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/logo" component={LogoExport} />
       <Route component={NotFound} />

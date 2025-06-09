@@ -9,18 +9,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup Google Authentication
   await setupGoogleAuth(app);
 
-  // Auth routes - simplified for demo without requiring authentication
+  // Auth routes
   app.get('/api/auth/user', async (req: any, res) => {
     try {
-      // For demo purposes, return a mock user when not authenticated
-      const user = req.user || {
-        id: 'demo-user',
-        email: 'demo@example.com',
-        firstName: 'Demo',
-        lastName: 'User',
-        profileImageUrl: 'https://via.placeholder.com/150'
-      };
-      res.json(user);
+      if (req.isAuthenticated() && req.user) {
+        const user = await storage.getUser(req.user.id);
+        res.json(user);
+      } else {
+        res.status(401).json({ message: "Not authenticated" });
+      }
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
