@@ -28,7 +28,7 @@ export function getSession() {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: false, // Set to false for development
+      secure: true, // Set to true for HTTPS domains
       maxAge: sessionTtl,
       sameSite: 'lax'
     },
@@ -95,10 +95,14 @@ export async function setupGoogleAuth(app: Express) {
 
     app.get(
       "/api/auth/google/callback",
-      passport.authenticate("google", { 
-        successRedirect: "/dashboard", 
-        failureRedirect: "/" 
-      })
+      (req, res, next) => {
+        console.log("OAuth callback received");
+        passport.authenticate("google", { 
+          successRedirect: "/dashboard", 
+          failureRedirect: "/?error=auth_failed",
+          failureFlash: true
+        })(req, res, next);
+      }
     );
 
     // Logout route
