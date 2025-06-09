@@ -8,6 +8,7 @@ import Home from "@/pages/home";
 import Dashboard from "@/pages/dashboard-clean";
 import Landing from "@/pages/landing";
 import LogoExport from "@/pages/logo-export";
+import LoginPage from "@/components/LoginPage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -26,11 +27,21 @@ function Router() {
 
   return (
     <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/landing" component={Landing} />
-      <Route path="/dashboard" component={Dashboard} />
-      <Route path="/logo" component={LogoExport} />
-      <Route component={NotFound} />
+      {isAuthenticated ? (
+        <>
+          <Route path="/" component={Dashboard} />
+          <Route path="/dashboard" component={Dashboard} />
+          <Route path="/logo" component={LogoExport} />
+          <Route component={NotFound} />
+        </>
+      ) : (
+        <>
+          <Route path="/" component={LoginPage} />
+          <Route path="/login" component={LoginPage} />
+          <Route path="/landing" component={Landing} />
+          <Route component={LoginPage} />
+        </>
+      )}
     </Switch>
   );
 }
