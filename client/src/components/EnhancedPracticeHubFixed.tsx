@@ -688,9 +688,9 @@ export default function EnhancedPracticeHubFixed() {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Video Feed with Integrated Analysis */}
-        <div>
+        <div className="lg:col-span-2">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
@@ -859,94 +859,106 @@ export default function EnhancedPracticeHubFixed() {
         </div>
       </div>
 
-      {/* AI Insights */}
-      {aiInsights.length > 0 && (
+
+
+      {/* Live Transcript - Full Width at Bottom */}
+      <div className="lg:col-span-3">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Brain className="w-5 h-5 text-purple-600" />
-              <span>AI Coach Insights</span>
-              <Badge variant="secondary" className="text-xs">Live Analysis</Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {aiInsights.map((insight) => (
-              <div key={insight.id} className={`p-4 rounded-lg border-2 ${getInsightColor(insight.type)}`}>
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex items-center space-x-2">
-                    {getInsightIcon(insight.type)}
-                    <Badge variant="outline" className="text-xs uppercase">
-                      {insight.type}
-                    </Badge>
-                    <span className="text-xs text-gray-500">
-                      {insight.category} • {Math.round(insight.novelty * 100)}% novel
-                    </span>
-                  </div>
-                  <Badge variant={insight.priority === 'high' ? 'destructive' : insight.priority === 'medium' ? 'default' : 'secondary'} className="text-xs">
-                    {insight.priority}
-                  </Badge>
-                </div>
-                
-                <h4 className="font-semibold mb-2">{insight.message}</h4>
-                <p className="text-sm text-gray-600 mb-3 italic">{insight.reasoning}</p>
-                
-                <div className="space-y-1">
-                  <h5 className="text-sm font-medium">Action Steps:</h5>
-                  <ul className="text-sm space-y-1">
-                    {insight.actionable.map((action, index) => (
-                      <li key={index} className="flex items-start">
-                        <div className="w-1 h-1 bg-current rounded-full mr-2 mt-2 flex-shrink-0"></div>
-                        {action}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Live Transcript - Always at Bottom */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Volume2 className="w-5 h-5" />
-              <span>Live Transcript</span>
-            </div>
-            {isSessionActive && (
-              <div className="flex items-center space-x-2 text-sm">
-                <Badge variant="secondary">{wordCount} words</Badge>
-                <Badge variant={fillerWords.length > 5 ? "destructive" : "secondary"}>
-                  {fillerWords.length} fillers
-                </Badge>
-              </div>
-            )}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="bg-gray-50 rounded-lg p-4 min-h-[120px] max-h-[200px] overflow-y-auto">
-            {transcript ? (
-              <div className="space-y-2">
-                <p className="text-sm leading-relaxed">{transcript}</p>
-                {fillerWords.length > 0 && (
-                  <div className="text-xs text-orange-600 bg-orange-50 p-2 rounded">
-                    <strong>Detected fillers:</strong> {fillerWords.slice(-10).join(", ")}
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Volume2 className="w-5 h-5" />
+                <span>Live Interactive Transcript</span>
+                {isSessionActive && isListening && (
+                  <div className="flex items-center space-x-1">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span className="text-sm text-green-600">Live</span>
                   </div>
                 )}
               </div>
-            ) : (
-              <p className="text-gray-400 text-sm italic text-center py-8">
-                {isSessionActive 
-                  ? (isListening ? "🎤 Listening... Start speaking to see transcript" : "Microphone not active") 
-                  : "Start a session to see live transcript"
-                }
-              </p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+              {isSessionActive && (
+                <div className="flex items-center space-x-3 text-sm">
+                  <Badge variant="secondary">{wordCount} words</Badge>
+                  <Badge variant={fillerWords.length > 5 ? "destructive" : "secondary"}>
+                    {fillerWords.length} fillers
+                  </Badge>
+                  <Badge variant="outline">{currentWPM} WPM</Badge>
+                </div>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="bg-gray-50 rounded-lg p-6 min-h-[150px] max-h-[250px] overflow-y-auto">
+              {transcript ? (
+                <div className="space-y-4">
+                  <div className="prose prose-sm max-w-none">
+                    <p className="text-base leading-relaxed text-gray-800 font-medium">
+                      {transcript}
+                    </p>
+                  </div>
+                  
+                  {fillerWords.length > 0 && (
+                    <div className="border-t pt-3 mt-4">
+                      <div className="text-sm text-orange-700 bg-orange-50 p-3 rounded-lg border border-orange-200">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <AlertCircle className="w-4 h-4" />
+                          <strong>Filler Words Detected:</strong>
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          {fillerWords.slice(-15).map((filler, index) => (
+                            <span key={index} className="px-2 py-1 bg-orange-100 text-orange-800 rounded text-xs">
+                              {filler}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {isSessionActive && (
+                    <div className="border-t pt-3 mt-4">
+                      <div className="grid grid-cols-4 gap-4 text-center">
+                        <div>
+                          <div className="text-lg font-bold text-blue-600">{wordCount}</div>
+                          <div className="text-xs text-gray-500">Total Words</div>
+                        </div>
+                        <div>
+                          <div className="text-lg font-bold text-green-600">{currentWPM}</div>
+                          <div className="text-xs text-gray-500">Words/Min</div>
+                        </div>
+                        <div>
+                          <div className="text-lg font-bold text-orange-600">{fillerWords.length}</div>
+                          <div className="text-xs text-gray-500">Filler Words</div>
+                        </div>
+                        <div>
+                          <div className="text-lg font-bold text-purple-600">{formatTime(sessionDuration)}</div>
+                          <div className="text-xs text-gray-500">Duration</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Volume2 className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-400 text-lg font-medium mb-2">
+                    {isSessionActive 
+                      ? (isListening ? "Listening for speech..." : "Microphone not active") 
+                      : "Interactive Transcript"
+                    }
+                  </p>
+                  <p className="text-gray-500 text-sm">
+                    {isSessionActive 
+                      ? "Start speaking to see your words appear here in real-time"
+                      : "Start a session to begin live transcription with AI analysis"
+                    }
+                  </p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
