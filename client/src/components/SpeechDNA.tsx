@@ -495,10 +495,7 @@ export default function SpeechDNA() {
             <Crown className="w-4 h-4" />
             <span>Archetypes</span>
           </TabsTrigger>
-          <TabsTrigger value="evolution" className="flex items-center space-x-2">
-            <TrendingUp className="w-4 h-4" />
-            <span>Evolution Path</span>
-          </TabsTrigger>
+
         </TabsList>
 
         <TabsContent value="analysis" className="space-y-6">
@@ -754,54 +751,7 @@ export default function SpeechDNA() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="evolution" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <TrendingUp className="w-6 h-6 text-green-600" />
-                <span>Speaking Evolution Path</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {speechDNA ? (
-                <div className="space-y-8">
-                  <div className="text-center mb-8">
-                    <h3 className="text-xl font-semibold mb-2">Your Speaking Evolution Journey</h3>
-                    <p className="text-gray-600">Personalized development path based on your Speech DNA</p>
-                  </div>
-                  
-                  <div className="space-y-6">
-                    {Object.entries(speechDNA.speakingEvolution).map(([level, description], index) => (
-                      <div key={level} className="flex items-start space-x-4">
-                        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${
-                          level === 'beginner' ? 'bg-blue-500' :
-                          level === 'intermediate' ? 'bg-green-500' :
-                          level === 'advanced' ? 'bg-orange-500' : 'bg-purple-500'
-                        }`}>
-                          {index + 1}
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="text-lg font-semibold capitalize mb-2">{level} Level</h4>
-                          <p className="text-gray-700">{description}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <TrendingUp className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                  <h3 className="text-lg font-semibold mb-2">Evolution Path Awaiting</h3>
-                  <p className="text-gray-600 mb-6">Generate your Speech DNA analysis to unlock your personalized evolution path</p>
-                  <Button onClick={() => window.scrollTo(0, 0)} variant="outline">
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    Start DNA Analysis
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+
       </Tabs>
     </div>
   );
