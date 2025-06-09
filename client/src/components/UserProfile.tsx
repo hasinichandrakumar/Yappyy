@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import ProfileLayout from "@/components/ProfileLayout";
 import { 
   User, 
   Mail, 
@@ -31,80 +31,24 @@ import {
   Camera
 } from "lucide-react";
 
-interface UserProfile {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  profileImageUrl?: string;
-  bio?: string;
-  jobTitle?: string;
-  company?: string;
-  speakingGoals?: string[];
-  experienceLevel?: string;
-  timezone?: string;
-  preferredLanguage?: string;
-  notificationPreferences?: any;
-  practiceReminders?: boolean;
-  weeklyGoal?: number;
-  themePreference?: string;
-}
-
-interface UserPreference {
-  id: number;
-  userId: string;
-  category: string;
-  setting: string;
-  value: string;
-}
-
-interface UserAchievement {
-  id: number;
-  userId: string;
-  achievementType: string;
-  achievementName: string;
-  description?: string;
-  earnedAt: string;
-  metadata?: any;
-}
-
-interface UserStreak {
-  id: number;
-  userId: string;
-  streakType: string;
-  currentStreak: number;
-  longestStreak: number;
-  lastPracticeDate?: string;
-}
-
-export default function ProfilePage() {
+export default function UserProfile() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState<any>({});
 
   // Fetch user data
   const { data: user, isLoading: userLoading } = useQuery({
     queryKey: ['/api/auth/user'],
   });
 
-  const { data: preferences = [] } = useQuery<UserPreference[]>({
-    queryKey: ['/api/user/preferences'],
-  });
-
-  const { data: achievements = [] } = useQuery<UserAchievement[]>({
-    queryKey: ['/api/user/achievements'],
-  });
-
-  const { data: streaks = [] } = useQuery<UserStreak[]>({
-    queryKey: ['/api/user/streaks'],
-  });
-
   // Profile update mutation
   const updateProfileMutation = useMutation({
-    mutationFn: async (updates: Partial<UserProfile>) => {
+    mutationFn: async (updates: any) => {
       const response = await fetch('/api/user/profile', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(updates),
       });
       if (!response.ok) throw new Error('Failed to update profile');
@@ -120,30 +64,14 @@ export default function ProfilePage() {
     }
   });
 
-  // Preference update mutation
-  const updatePreferenceMutation = useMutation({
-    mutationFn: async ({ category, setting, value }: { category: string; setting: string; value: string }) => {
-      const response = await fetch('/api/user/preferences', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ category, setting, value }),
-      });
-      if (!response.ok) throw new Error('Failed to update preference');
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/user/preferences'] });
-      toast({ title: "Preferences updated" });
-    },
-    onError: () => {
-      toast({ title: "Failed to update preferences", variant: "destructive" });
-    }
-  });
-
-  const [formData, setFormData] = useState<Partial<UserProfile>>({});
-
   const handleEdit = () => {
-    setFormData(user as UserProfile);
+    setFormData({
+      firstName: (user as any)?.firstName || '',
+      lastName: (user as any)?.lastName || '',
+      bio: (user as any)?.bio || '',
+      jobTitle: (user as any)?.jobTitle || '',
+      company: (user as any)?.company || '',
+    });
     setIsEditing(true);
   };
 
@@ -154,10 +82,6 @@ export default function ProfilePage() {
   const handleCancel = () => {
     setFormData({});
     setIsEditing(false);
-  };
-
-  const updatePreference = (category: string, setting: string, value: string) => {
-    updatePreferenceMutation.mutate({ category, setting, value });
   };
 
   const experienceLevels = [
@@ -180,22 +104,11 @@ export default function ProfilePage() {
     "Debate skills"
   ];
 
-  const timezones = [
-    "America/New_York",
-    "America/Chicago", 
-    "America/Denver",
-    "America/Los_Angeles",
-    "Europe/London",
-    "Europe/Paris",
-    "Asia/Tokyo",
-    "Australia/Sydney"
-  ];
-
   if (userLoading) {
     return (
-      <div className="container mx-auto p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+      <div className="space-y-4">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
           <div className="h-64 bg-gray-200 rounded"></div>
         </div>
       </div>
@@ -203,17 +116,16 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
+    <div className="max-w-4xl mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Profile & Settings</h1>
         <p className="text-gray-600 mt-2">Manage your account and personalize your speaking journey</p>
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="preferences">Preferences</TabsTrigger>
-          <TabsTrigger value="achievements">Achievements</TabsTrigger>
           <TabsTrigger value="progress">Progress</TabsTrigger>
         </TabsList>
 
@@ -261,11 +173,11 @@ export default function ProfilePage() {
                 </div>
                 <div className="flex-1">
                   <h2 className="text-2xl font-semibold">
-                    {user?.firstName} {user?.lastName}
+                    {(user as any)?.firstName} {(user as any)?.lastName}
                   </h2>
                   <p className="text-gray-600 flex items-center gap-2 mt-1">
                     <Mail className="w-4 h-4" />
-                    {user?.email}
+                    {(user as any)?.email}
                   </p>
                 </div>
               </div>
@@ -275,8 +187,8 @@ export default function ProfilePage() {
                   <Label htmlFor="firstName">First Name</Label>
                   <Input
                     id="firstName"
-                    value={isEditing ? formData.firstName || '' : user?.firstName || ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
+                    value={isEditing ? formData.firstName : (user as any)?.firstName || ''}
+                    onChange={(e) => setFormData((prev: any) => ({ ...prev, firstName: e.target.value }))}
                     disabled={!isEditing}
                   />
                 </div>
@@ -284,31 +196,35 @@ export default function ProfilePage() {
                   <Label htmlFor="lastName">Last Name</Label>
                   <Input
                     id="lastName"
-                    value={isEditing ? formData.lastName || '' : user?.lastName || ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
+                    value={isEditing ? formData.lastName : (user as any)?.lastName || ''}
+                    onChange={(e) => setFormData((prev: any) => ({ ...prev, lastName: e.target.value }))}
                     disabled={!isEditing}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="jobTitle">Job Title</Label>
+                  <Label htmlFor="jobTitle">
+                    <Briefcase className="w-4 h-4 inline mr-2" />
+                    Job Title
+                  </Label>
                   <Input
                     id="jobTitle"
                     placeholder="e.g. Software Engineer"
-                    value={isEditing ? formData.jobTitle || '' : user?.jobTitle || ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, jobTitle: e.target.value }))}
+                    value={isEditing ? formData.jobTitle : (user as any)?.jobTitle || ''}
+                    onChange={(e) => setFormData((prev: any) => ({ ...prev, jobTitle: e.target.value }))}
                     disabled={!isEditing}
-                    icon={<Briefcase className="w-4 h-4" />}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="company">Company</Label>
+                  <Label htmlFor="company">
+                    <Building className="w-4 h-4 inline mr-2" />
+                    Company
+                  </Label>
                   <Input
                     id="company"
                     placeholder="e.g. Acme Corp"
-                    value={isEditing ? formData.company || '' : user?.company || ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
+                    value={isEditing ? formData.company : (user as any)?.company || ''}
+                    onChange={(e) => setFormData((prev: any) => ({ ...prev, company: e.target.value }))}
                     disabled={!isEditing}
-                    icon={<Building className="w-4 h-4" />}
                   />
                 </div>
               </div>
@@ -318,8 +234,8 @@ export default function ProfilePage() {
                 <Textarea
                   id="bio"
                   placeholder="Tell us about yourself and your speaking goals..."
-                  value={isEditing ? formData.bio || '' : user?.bio || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}
+                  value={isEditing ? formData.bio : (user as any)?.bio || ''}
+                  onChange={(e) => setFormData((prev: any) => ({ ...prev, bio: e.target.value }))}
                   disabled={!isEditing}
                   rows={3}
                 />
@@ -328,8 +244,12 @@ export default function ProfilePage() {
               <div className="space-y-2">
                 <Label>Experience Level</Label>
                 <Select 
-                  value={isEditing ? formData.experienceLevel : user?.experienceLevel || ''}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, experienceLevel: value }))}
+                  value={(user as any)?.experienceLevel || ''}
+                  onValueChange={(value) => {
+                    if (isEditing) {
+                      setFormData((prev: any) => ({ ...prev, experienceLevel: value }));
+                    }
+                  }}
                   disabled={!isEditing}
                 >
                   <SelectTrigger>
@@ -351,17 +271,8 @@ export default function ProfilePage() {
                   {speakingGoalOptions.map((goal) => (
                     <Badge 
                       key={goal}
-                      variant={user?.speakingGoals?.includes(goal) ? "default" : "outline"}
+                      variant={((user as any)?.speakingGoals || []).includes(goal) ? "default" : "outline"}
                       className="cursor-pointer"
-                      onClick={() => {
-                        if (isEditing) {
-                          const currentGoals = formData.speakingGoals || user?.speakingGoals || [];
-                          const newGoals = currentGoals.includes(goal)
-                            ? currentGoals.filter(g => g !== goal)
-                            : [...currentGoals, goal];
-                          setFormData(prev => ({ ...prev, speakingGoals: newGoals }));
-                        }
-                      }}
                     >
                       <Target className="w-3 h-3 mr-1" />
                       {goal}
@@ -384,39 +295,34 @@ export default function ProfilePage() {
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label>Timezone</Label>
-                  <Select 
-                    value={user?.timezone || ''}
-                    onValueChange={(value) => updatePreference('general', 'timezone', value)}
-                  >
+                  <Label>
+                    <Clock className="w-4 h-4 inline mr-2" />
+                    Timezone
+                  </Label>
+                  <Select value={(user as any)?.timezone || ''}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select timezone" />
                     </SelectTrigger>
                     <SelectContent>
-                      {timezones.map((tz) => (
-                        <SelectItem key={tz} value={tz}>
-                          <Clock className="w-4 h-4 mr-2 inline" />
-                          {tz.replace('_', ' ')}
-                        </SelectItem>
-                      ))}
+                      <SelectItem value="America/New_York">America/New York</SelectItem>
+                      <SelectItem value="America/Chicago">America/Chicago</SelectItem>
+                      <SelectItem value="America/Los_Angeles">America/Los Angeles</SelectItem>
+                      <SelectItem value="Europe/London">Europe/London</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Language</Label>
-                  <Select 
-                    value={user?.preferredLanguage || 'en'}
-                    onValueChange={(value) => updatePreference('general', 'language', value)}
-                  >
+                  <Label>
+                    <Globe className="w-4 h-4 inline mr-2" />
+                    Language
+                  </Label>
+                  <Select value={(user as any)?.preferredLanguage || 'en'}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="en">
-                        <Globe className="w-4 h-4 mr-2 inline" />
-                        English
-                      </SelectItem>
+                      <SelectItem value="en">English</SelectItem>
                       <SelectItem value="es">Spanish</SelectItem>
                       <SelectItem value="fr">French</SelectItem>
                       <SelectItem value="de">German</SelectItem>
@@ -439,19 +345,13 @@ export default function ProfilePage() {
                     <p className="text-sm text-gray-600">Get daily reminders to practice speaking</p>
                   </div>
                   <Switch 
-                    checked={user?.practiceReminders || false}
-                    onCheckedChange={(checked) => 
-                      updatePreference('notifications', 'practice_reminders', checked.toString())
-                    }
+                    checked={(user as any)?.practiceReminders || false}
                   />
                 </div>
 
                 <div className="space-y-2">
                   <Label>Weekly Practice Goal</Label>
-                  <Select 
-                    value={user?.weeklyGoal?.toString() || '3'}
-                    onValueChange={(value) => updatePreference('goals', 'weekly_sessions', value)}
-                  >
+                  <Select value={((user as any)?.weeklyGoal || 3).toString()}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -475,10 +375,7 @@ export default function ProfilePage() {
                 
                 <div className="space-y-2">
                   <Label>Theme</Label>
-                  <Select 
-                    value={user?.themePreference || 'light'}
-                    onValueChange={(value) => updatePreference('appearance', 'theme', value)}
-                  >
+                  <Select value={(user as any)?.themePreference || 'light'}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -494,40 +391,6 @@ export default function ProfilePage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="achievements" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Trophy className="w-5 h-5" />
-                Your Achievements
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {achievements.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {achievements.map((achievement) => (
-                    <div key={achievement.id} className="border rounded-lg p-4">
-                      <div className="flex items-center gap-3 mb-2">
-                        <Trophy className="w-6 h-6 text-yellow-500" />
-                        <h3 className="font-semibold">{achievement.achievementName}</h3>
-                      </div>
-                      <p className="text-sm text-gray-600 mb-2">{achievement.description}</p>
-                      <p className="text-xs text-gray-500">
-                        Earned on {new Date(achievement.earnedAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <Trophy className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-                  <p className="text-gray-600">No achievements yet. Start practicing to earn your first badge!</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
         <TabsContent value="progress" className="space-y-6">
           <Card>
             <CardHeader>
@@ -537,37 +400,13 @@ export default function ProfilePage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {streaks.length > 0 ? (
-                <div className="space-y-4">
-                  {streaks.map((streak) => (
-                    <div key={streak.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <Flame className="w-6 h-6 text-orange-500" />
-                        <div>
-                          <h3 className="font-semibold capitalize">{streak.streakType.replace('_', ' ')}</h3>
-                          <p className="text-sm text-gray-600">
-                            Last practice: {streak.lastPracticeDate 
-                              ? new Date(streak.lastPracticeDate).toLocaleDateString()
-                              : 'Never'
-                            }
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-2xl font-bold text-orange-600">{streak.currentStreak}</div>
-                        <div className="text-sm text-gray-600">
-                          Best: {streak.longestStreak}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <Calendar className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-                  <p className="text-gray-600">Start practicing to build your streaks!</p>
-                </div>
-              )}
+              <div className="text-center py-8">
+                <Calendar className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                <p className="text-gray-600">Start practicing to build your streaks!</p>
+                <Button className="mt-4" onClick={() => window.location.href = '/dashboard'}>
+                  Start Practice Session
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import Home from "@/pages/home";
 import Dashboard from "@/pages/dashboard-clean";
-import ProfilePage from "@/pages/profile";
+import UserProfile from "@/components/UserProfile";
 import LogoExport from "@/pages/logo-export";
 import LoginPage from "@/components/LoginPage";
 import NotFound from "@/pages/not-found";
@@ -31,7 +31,7 @@ function Router() {
         <>
           <Route path="/" component={Dashboard} />
           <Route path="/dashboard" component={Dashboard} />
-          <Route path="/profile" component={ProfilePage} />
+          <Route path="/profile" component={UserProfile} />
           <Route path="/logo" component={LogoExport} />
           <Route component={NotFound} />
         </>

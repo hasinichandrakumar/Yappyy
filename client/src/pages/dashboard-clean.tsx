@@ -49,8 +49,20 @@ export default function Dashboard() {
               <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900">
                 <Bell className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-gray-600 hover:text-gray-900"
+                onClick={() => window.location.href = '/profile'}
+              >
                 <User className="w-4 h-4" />
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => window.location.href = '/api/auth/logout'}
+              >
+                Logout
               </Button>
             </div>
           </div>
