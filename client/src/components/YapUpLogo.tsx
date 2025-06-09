@@ -15,55 +15,57 @@ export default function YapUpLogo({ width = 200, height = 60, className = "" }: 
     >
       <defs>
         <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" style={{ stopColor: "#3B82F6", stopOpacity: 1 }} />
-          <stop offset="100%" style={{ stopColor: "#06B6D4", stopOpacity: 1 }} />
+          <stop offset="0%" style={{ stopColor: "#4F8EF7", stopOpacity: 1 }} />
+          <stop offset="100%" style={{ stopColor: "#5BA3F5", stopOpacity: 1 }} />
         </linearGradient>
         <linearGradient id="iconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style={{ stopColor: "#06B6D4", stopOpacity: 1 }} />
-          <stop offset="100%" style={{ stopColor: "#3B82F6", stopOpacity: 1 }} />
+          <stop offset="0%" style={{ stopColor: "#4F8EF7", stopOpacity: 1 }} />
+          <stop offset="100%" style={{ stopColor: "#5BA3F5", stopOpacity: 1 }} />
         </linearGradient>
       </defs>
       
-      {/* Logo Icon - Speaking/Microphone with Sound Waves */}
-      <g transform="translate(10, 15)">
-        {/* Microphone */}
-        <rect x="12" y="8" width="6" height="16" rx="3" fill="url(#iconGradient)"/>
-        <rect x="10" y="26" width="10" height="4" rx="2" fill="url(#iconGradient)"/>
-        <line x1="15" y1="30" x2="15" y2="34" stroke="url(#iconGradient)" strokeWidth="2"/>
+      {/* Logo Icon - Exclamation and Sound Waves */}
+      <g transform="translate(10, 12)">
+        {/* Exclamation mark */}
+        <rect x="8" y="4" width="4" height="16" rx="2" fill="url(#iconGradient)"/>
+        <circle cx="10" cy="26" r="2.5" fill="url(#iconGradient)"/>
         
         {/* Sound waves */}
         <path 
-          d="M 25 15 Q 30 15 30 20 Q 30 25 25 25" 
+          d="M 18 8 Q 22 8 22 16 Q 22 24 18 24" 
           fill="none" 
           stroke="url(#iconGradient)" 
-          strokeWidth="2" 
+          strokeWidth="2.5" 
           opacity="0.8"
+          strokeLinecap="round"
         />
         <path 
-          d="M 28 12 Q 35 12 35 20 Q 35 28 28 28" 
+          d="M 23 6 Q 28 6 28 16 Q 28 26 23 26" 
           fill="none" 
           stroke="url(#iconGradient)" 
-          strokeWidth="2" 
+          strokeWidth="2.5" 
           opacity="0.6"
+          strokeLinecap="round"
         />
         <path 
-          d="M 31 9 Q 40 9 40 20 Q 40 31 31 31" 
+          d="M 28 4 Q 34 4 34 16 Q 34 28 28 28" 
           fill="none" 
           stroke="url(#iconGradient)" 
-          strokeWidth="2" 
+          strokeWidth="2.5" 
           opacity="0.4"
+          strokeLinecap="round"
         />
       </g>
       
       {/* Text Logo */}
-      <g transform="translate(65, 35)">
+      <g transform="translate(55, 35)">
         {/* YapUp Text */}
         <text 
           x="0" 
           y="0" 
           fontFamily="system-ui, -apple-system, sans-serif" 
-          fontSize="24" 
-          fontWeight="700" 
+          fontSize="28" 
+          fontWeight="600" 
           fill="url(#logoGradient)"
         >
           YapUp
@@ -71,11 +73,12 @@ export default function YapUpLogo({ width = 200, height = 60, className = "" }: 
         {/* Tagline */}
         <text 
           x="0" 
-          y="15" 
+          y="16" 
           fontFamily="system-ui, -apple-system, sans-serif" 
-          fontSize="10" 
+          fontSize="11" 
           fontWeight="400" 
-          fill="#6B7280"
+          fill="#9CA3AF"
+          letterSpacing="0.5px"
         >
           Master Your Voice
         </text>
@@ -96,31 +99,32 @@ export function YapUpIcon({ width = 40, height = 40, className = "" }: YapUpLogo
     >
       <defs>
         <linearGradient id="iconOnlyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style={{ stopColor: "#06B6D4", stopOpacity: 1 }} />
-          <stop offset="100%" style={{ stopColor: "#3B82F6", stopOpacity: 1 }} />
+          <stop offset="0%" style={{ stopColor: "#4F8EF7", stopOpacity: 1 }} />
+          <stop offset="100%" style={{ stopColor: "#5BA3F5", stopOpacity: 1 }} />
         </linearGradient>
       </defs>
       
-      <g transform="translate(5, 8)">
-        {/* Microphone */}
-        <rect x="12" y="4" width="6" height="16" rx="3" fill="url(#iconOnlyGradient)"/>
-        <rect x="10" y="22" width="10" height="4" rx="2" fill="url(#iconOnlyGradient)"/>
-        <line x1="15" y1="26" x2="15" y2="30" stroke="url(#iconOnlyGradient)" strokeWidth="2"/>
+      <g transform="translate(8, 8)">
+        {/* Exclamation mark */}
+        <rect x="10" y="4" width="4" height="12" rx="2" fill="url(#iconOnlyGradient)"/>
+        <circle cx="12" cy="20" r="2" fill="url(#iconOnlyGradient)"/>
         
         {/* Sound waves */}
         <path 
-          d="M 25 11 Q 30 11 30 16 Q 30 21 25 21" 
+          d="M 18 7 Q 21 7 21 12 Q 21 17 18 17" 
           fill="none" 
           stroke="url(#iconOnlyGradient)" 
           strokeWidth="2" 
           opacity="0.8"
+          strokeLinecap="round"
         />
         <path 
-          d="M 28 8 Q 35 8 35 16 Q 35 24 28 24" 
+          d="M 21 5 Q 25 5 25 12 Q 25 19 21 19" 
           fill="none" 
           stroke="url(#iconOnlyGradient)" 
           strokeWidth="2" 
           opacity="0.6"
+          strokeLinecap="round"
         />
       </g>
     </svg>

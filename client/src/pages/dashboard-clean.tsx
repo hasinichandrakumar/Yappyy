@@ -12,6 +12,7 @@ import ContentAnalysis from "@/components/ContentAnalysis";
 import AIMentor from "@/components/AIMentor";
 import SimpleAICoach from "@/components/SimpleAICoach";
 import SessionStudyModal from "@/components/SessionStudyModal";
+import ClubsHub from "@/components/ClubsHub";
 import SpeechDNA from "@/components/SpeechDNA";
 import SpeechROIAnalyzer from "@/components/SpeechROIAnalyzer";
 import BadgeSystem from "@/components/BadgeSystem";
@@ -116,6 +117,14 @@ export default function Dashboard() {
               >
                 <Trophy className="w-4 h-4" />
                 <span>Badges</span>
+              </TabsTrigger>
+
+              <TabsTrigger 
+                value="clubs" 
+                className="flex flex-col items-center space-y-1 px-3 py-3 text-xs font-medium data-[state=active]:bg-[#0BF9EA] data-[state=active]:text-white rounded-lg transition-all duration-200"
+              >
+                <Users className="w-4 h-4" />
+                <span>Clubs</span>
               </TabsTrigger>
               
               <TabsTrigger 
@@ -244,6 +253,10 @@ export default function Dashboard() {
 
             <TabsContent value="badges" className="mt-0">
               <BadgeSystem />
+            </TabsContent>
+
+            <TabsContent value="clubs" className="mt-0">
+              <ClubsHub />
             </TabsContent>
 
             <TabsContent value="help" className="mt-0">
