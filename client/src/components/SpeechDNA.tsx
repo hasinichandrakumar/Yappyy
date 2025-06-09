@@ -306,7 +306,7 @@ export default function SpeechDNA() {
     // Calculate enhanced metrics from actual data
     const hasTranscript = transcript && transcript.length > 50;
     const actualWordCount = Number(wordCount) || 0;
-    const actualPace = Number(speakingPace) || 0;
+    const actualPace = actualWordCount > 0 ? Math.round((actualWordCount / 60) * 60) : 0;
     const actualConfidence = Number(confidenceScore) || 0;
     const actualClarity = Number(voiceClarity) || 0;
 
@@ -476,7 +476,7 @@ export default function SpeechDNA() {
   return (
     <div className="space-y-6">
       <Tabs defaultValue="analysis" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="analysis" className="flex items-center space-x-2">
             <Dna className="w-4 h-4" />
             <span>DNA Analysis</span>
