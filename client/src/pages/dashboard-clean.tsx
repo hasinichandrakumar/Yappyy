@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bell, MicOff, User, BarChart3, Eye, Brain, Star, TrendingUp, FileText, Trophy, Users, Volume2, HelpCircle, PlayCircle } from "lucide-react";
+import { Bell, MicOff, User, BarChart3, Eye, Brain, Star, TrendingUp, FileText, Trophy, Users, Volume2, HelpCircle, PlayCircle, BookOpen, Target } from "lucide-react";
 import yapUpLogo from "@assets/YapUp-6_1749439026739.png";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,7 +9,9 @@ import AnalysisOverview from "@/components/AnalysisOverview";
 import BodyLanguageAnalyzer from "@/components/BodyLanguageAnalyzer";
 import AdvancedSpeechAnalysis from "@/components/AdvancedSpeechAnalysis";
 import ContentAnalysis from "@/components/ContentAnalysis";
+import AIMentor from "@/components/AIMentor";
 import SimpleAICoach from "@/components/SimpleAICoach";
+import SessionStudyModal from "@/components/SessionStudyModal";
 import SpeechDNA from "@/components/SpeechDNA";
 import SpeechROIAnalyzer from "@/components/SpeechROIAnalyzer";
 import BadgeSystem from "@/components/BadgeSystem";
@@ -20,6 +22,8 @@ import PostSessionAnalysis from "@/components/PostSessionAnalysis";
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [showPostAnalysis, setShowPostAnalysis] = useState(false);
+  const [showSessionStudy, setShowSessionStudy] = useState(false);
+  const [studyingSessionId, setStudyingSessionId] = useState<string>("");
   const [sessionContext, setSessionContext] = useState<{
     roleplayType?: string;
     audienceType?: string;
@@ -140,6 +144,25 @@ export default function Dashboard() {
 
             <TabsContent value="detailed" className="mt-0">
               <Tabs defaultValue="overview" className="w-full">
+                {/* Study Session Header */}
+                <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                        <BookOpen className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-lg">Session Analysis</h3>
+                        <p className="text-sm text-gray-600">Deep dive into your practice sessions</p>
+                      </div>
+                    </div>
+                    <Button className="bg-blue-600 hover:bg-blue-700">
+                      <Target className="w-4 h-4 mr-2" />
+                      Study Current Session
+                    </Button>
+                  </div>
+                </div>
+
                 <TabsList className="grid w-full grid-cols-4">
                   <TabsTrigger value="overview" className="flex items-center space-x-2">
                     <BarChart3 className="w-4 h-4" />
@@ -172,7 +195,10 @@ export default function Dashboard() {
                 </TabsContent>
                 
                 <TabsContent value="content-analysis" className="mt-6">
-                  <ContentAnalysis />
+                  <div className="space-y-6">
+                    <ContentAnalysis />
+                    <AIMentor />
+                  </div>
                 </TabsContent>
               </Tabs>
             </TabsContent>
