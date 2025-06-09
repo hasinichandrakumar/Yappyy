@@ -6,7 +6,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import Home from "@/pages/home";
 import Dashboard from "@/pages/dashboard-clean";
-import Landing from "@/pages/landing";
 import LogoExport from "@/pages/logo-export";
 import LoginPage from "@/components/LoginPage";
 import NotFound from "@/pages/not-found";
@@ -38,7 +37,6 @@ function Router() {
         <>
           <Route path="/" component={Home} />
           <Route path="/login" component={LoginPage} />
-          <Route path="/landing" component={Landing} />
           <Route component={Home} />
         </>
       )}
