@@ -31,7 +31,9 @@ import {
   TrendingDown,
   Minus,
   Settings,
-  RefreshCw
+  RefreshCw,
+  AlertTriangle,
+  Info
 } from "lucide-react";
 
 // Advanced analytics interfaces
@@ -73,9 +75,9 @@ interface TechnologyStatus {
   camera: 'active' | 'inactive' | 'error';
   microphone: 'active' | 'inactive' | 'error';
   neuralNetwork: 'processing' | 'idle' | 'error';
-  voiceAnalysis: 'active' | 'inactive' | 'calibrating';
-  bodyTracking: 'active' | 'inactive' | 'initializing';
-  contentAnalysis: 'active' | 'inactive' | 'processing';
+  voiceAnalysis: 'active' | 'inactive' | 'calibrating' | 'error';
+  bodyTracking: 'active' | 'inactive' | 'initializing' | 'error';
+  contentAnalysis: 'active' | 'inactive' | 'processing' | 'error';
 }
 
 export default function EnhancedPracticeHub() {
@@ -122,6 +124,17 @@ export default function EnhancedPracticeHub() {
   const [neuralNetworkActive, setNeuralNetworkActive] = useState(false);
   const [processingLoad, setProcessingLoad] = useState(0);
   const [analysisFrameRate, setAnalysisFrameRate] = useState(0);
+  
+  // Live transcript state
+  const [transcript, setTranscript] = useState<string>("");
+  const [interimTranscript, setInterimTranscript] = useState<string>("");
+  const [isListening, setIsListening] = useState(false);
+  const [wordsPerMinute, setWordsPerMinute] = useState(0);
+  const [fillerWords, setFillerWords] = useState<string[]>([]);
+  
+  // Feedback state
+  const [lastFeedbackTime, setLastFeedbackTime] = useState(0);
+  const feedbackCooldown = 3000; // 3 seconds between feedback
 
   // Advanced MediaPipe integration
   const holisticModel = useRef<any>(null);
@@ -324,24 +337,173 @@ export default function EnhancedPracticeHub() {
     };
   };
 
+  // Initialize speech recognition for live transcript
+  const initializeSpeechRecognition = useCallback(() => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      console.error('Speech recognition not supported');
+      return false;
+    }
+
+    const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+    const recognition = new SpeechRecognition();
+
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => {
+      setIsListening(true);
+      setTechStatus(prev => ({ ...prev, voiceAnalysis: 'active' }));
+    };
+
+    recognition.onresult = (event: any) => {
+      let interimTranscript = '';
+      let finalTranscript = '';
+
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript + ' ';
+          // Analyze for filler words
+          const fillers = detectFillerWords(transcript);
+          if (fillers.length > 0) {
+            setFillerWords(prev => [...prev, ...fillers]);
+            generateFillerWordFeedback(fillers);
+          }
+        } else {
+          interimTranscript += transcript;
+        }
+      }
+
+      if (finalTranscript) {
+        setTranscript(prev => prev + finalTranscript);
+        calculateSpeakingPace(finalTranscript);
+      }
+      setInterimTranscript(interimTranscript);
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error);
+      setTechStatus(prev => ({ ...prev, voiceAnalysis: 'error' }));
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+      if (isRecording) {
+        // Restart recognition if session is still active
+        setTimeout(() => {
+          recognition.start();
+        }, 100);
+      }
+    };
+
+    recognitionRef.current = recognition;
+    return true;
+  }, [isRecording]);
+
+  // Detect filler words in speech
+  const detectFillerWords = (text: string): string[] => {
+    const fillerPatterns = [
+      'um', 'uh', 'er', 'ah', 'like', 'you know', 'so', 'well',
+      'actually', 'basically', 'literally', 'obviously', 'right'
+    ];
+    
+    const words = text.toLowerCase().split(' ');
+    const detectedFillers: string[] = [];
+    
+    fillerPatterns.forEach(filler => {
+      words.forEach(word => {
+        if (word.includes(filler)) {
+          detectedFillers.push(filler);
+        }
+      });
+    });
+    
+    return detectedFillers;
+  };
+
+  // Calculate speaking pace (WPM)
+  const calculateSpeakingPace = (newText: string) => {
+    if (!sessionMetrics) return;
+    
+    const words = newText.trim().split(' ').length;
+    const elapsedMinutes = (Date.now() - sessionMetrics.startTime) / 60000;
+    const wpm = Math.round(words / elapsedMinutes);
+    
+    setWordsPerMinute(wpm);
+    
+    // Generate pace feedback
+    if (wpm > 180) {
+      generatePaceFeedback('fast', wpm);
+    } else if (wpm < 120) {
+      generatePaceFeedback('slow', wpm);
+    }
+  };
+
+  // Generate feedback for filler words
+  const generateFillerWordFeedback = (fillers: string[]) => {
+    const currentTime = Date.now();
+    if (currentTime - lastFeedbackTime < feedbackCooldown) return;
+
+    const feedback: LiveFeedback = {
+      type: 'warning',
+      message: `Detected filler words: ${fillers.join(', ')}`,
+      category: 'voice',
+      timestamp: currentTime,
+      priority: 'medium',
+      actionable: true,
+      suggestion: 'Pause instead of using filler words. Take a breath before continuing.'
+    };
+
+    setLiveFeedback(prev => [...prev, feedback].slice(-10));
+    setLastFeedbackTime(currentTime);
+  };
+
+  // Generate feedback for speaking pace
+  const generatePaceFeedback = (type: 'fast' | 'slow', wpm: number) => {
+    const currentTime = Date.now();
+    if (currentTime - lastFeedbackTime < feedbackCooldown) return;
+
+    const feedback: LiveFeedback = {
+      type: 'warning',
+      message: type === 'fast' 
+        ? `Speaking too fast at ${wpm} WPM` 
+        : `Speaking too slowly at ${wpm} WPM`,
+      category: 'voice',
+      timestamp: currentTime,
+      priority: 'high',
+      actionable: true,
+      suggestion: type === 'fast' 
+        ? 'Slow down and breathe between sentences'
+        : 'Increase your energy and speaking pace'
+    };
+
+    setLiveFeedback(prev => [...prev, feedback].slice(-10));
+    setLastFeedbackTime(currentTime);
+  };
+
   // Real-time feedback generation system
   const generateLiveFeedback = useCallback(() => {
     const currentTime = Date.now();
+    if (currentTime - lastFeedbackTime < feedbackCooldown) return;
+
     const newFeedback: LiveFeedback[] = [];
 
-    // Analyze current metrics for feedback opportunities
+    // Eye contact feedback
     if (analytics.eyeContact < 60) {
       newFeedback.push({
         type: 'warning',
-        message: 'Increase eye contact with the camera',
+        message: 'Improve eye contact with camera',
         category: 'body',
         timestamp: currentTime,
         priority: 'high',
         actionable: true,
-        suggestion: 'Look directly at the camera lens for 3-5 seconds'
+        suggestion: 'Look directly at the camera lens for 3-5 seconds at a time'
       });
     }
 
+    // Posture feedback
     if (analytics.posture < 70) {
       newFeedback.push({
         type: 'info',
@@ -350,23 +512,12 @@ export default function EnhancedPracticeHub() {
         timestamp: currentTime,
         priority: 'medium',
         actionable: true,
-        suggestion: 'Roll shoulders back and align spine'
+        suggestion: 'Roll shoulders back, align spine, and sit/stand tall'
       });
     }
 
-    if (analytics.pace > 180) {
-      newFeedback.push({
-        type: 'warning',
-        message: 'Speaking pace is too fast',
-        category: 'voice',
-        timestamp: currentTime,
-        priority: 'high',
-        actionable: true,
-        suggestion: 'Take a breath and slow down your delivery'
-      });
-    }
-
-    if (analytics.confidence > 80) {
+    // Confidence feedback
+    if (analytics.confidence > 85) {
       newFeedback.push({
         type: 'success',
         message: 'Excellent confidence level!',
@@ -375,15 +526,36 @@ export default function EnhancedPracticeHub() {
         priority: 'low',
         actionable: false
       });
+    } else if (analytics.confidence < 60) {
+      newFeedback.push({
+        type: 'info',
+        message: 'Boost your confidence',
+        category: 'general',
+        timestamp: currentTime,
+        priority: 'medium',
+        actionable: true,
+        suggestion: 'Speak with conviction, use gestures, and maintain good posture'
+      });
     }
 
-    // Add new feedback and maintain recent items only
-    setLiveFeedback(prev => {
-      const combined = [...prev, ...newFeedback];
-      // Keep only last 10 feedback items
-      return combined.slice(-10);
-    });
-  }, [analytics]);
+    // Energy level feedback
+    if (analytics.energyLevel < 50) {
+      newFeedback.push({
+        type: 'info',
+        message: 'Increase your energy',
+        category: 'general',
+        timestamp: currentTime,
+        priority: 'medium',
+        actionable: true,
+        suggestion: 'Use more dynamic gestures and vary your vocal tone'
+      });
+    }
+
+    if (newFeedback.length > 0) {
+      setLiveFeedback(prev => [...prev, ...newFeedback].slice(-10));
+      setLastFeedbackTime(currentTime);
+    }
+  }, [analytics, lastFeedbackTime]);
 
   // Start advanced recording session
   const startRecording = async () => {
@@ -421,13 +593,9 @@ export default function EnhancedPracticeHub() {
       }
 
       // Initialize speech recognition
-      if ('webkitSpeechRecognition' in window) {
-        const recognition = new (window as any).webkitSpeechRecognition();
-        recognition.continuous = true;
-        recognition.interimResults = true;
-        recognition.lang = 'en-US';
-        recognitionRef.current = recognition;
-        recognition.start();
+      const speechInitialized = initializeSpeechRecognition();
+      if (speechInitialized && recognitionRef.current) {
+        recognitionRef.current.start();
       }
 
       // Start analysis intervals
@@ -544,16 +712,17 @@ export default function EnhancedPracticeHub() {
     // Process face mesh results for detailed analysis
   };
 
-  // Simulate real-time analytics updates
+  // Live analytics and feedback updates
   useEffect(() => {
     if (!isRecording) return;
 
     const interval = setInterval(() => {
+      // Update analytics with realistic variations
       setAnalytics(prev => ({
         confidence: Math.max(0, Math.min(100, prev.confidence + (Math.random() - 0.5) * 5)),
         engagement: Math.max(0, Math.min(100, prev.engagement + (Math.random() - 0.5) * 3)),
         clarity: Math.max(0, Math.min(100, prev.clarity + (Math.random() - 0.5) * 2)),
-        pace: Math.max(80, Math.min(220, prev.pace + (Math.random() - 0.5) * 10)),
+        pace: wordsPerMinute || Math.max(80, Math.min(220, prev.pace + (Math.random() - 0.5) * 10)),
         eyeContact: Math.max(0, Math.min(100, prev.eyeContact + (Math.random() - 0.5) * 8)),
         posture: Math.max(0, Math.min(100, prev.posture + (Math.random() - 0.5) * 4)),
         gestures: Math.max(0, Math.min(100, prev.gestures + (Math.random() - 0.5) * 6)),
@@ -561,10 +730,24 @@ export default function EnhancedPracticeHub() {
         energyLevel: Math.max(0, Math.min(100, prev.energyLevel + (Math.random() - 0.5) * 7)),
         professionalPresence: Math.max(0, Math.min(100, prev.professionalPresence + (Math.random() - 0.5) * 2))
       }));
-    }, 500);
+
+      // Generate live feedback based on current analytics
+      generateLiveFeedback();
+
+      // Update session metrics
+      if (sessionMetrics) {
+        const wordCount = transcript.trim().split(' ').filter(word => word.length > 0).length;
+        setSessionMetrics(prev => prev ? {
+          ...prev,
+          duration: Date.now() - prev.startTime,
+          wordsSpoken: wordCount,
+          averageConfidence: analytics.confidence
+        } : null);
+      }
+    }, 2000); // Update every 2 seconds
 
     return () => clearInterval(interval);
-  }, [isRecording]);
+  }, [isRecording, generateLiveFeedback, analytics, transcript, sessionMetrics, wordsPerMinute]);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -649,68 +832,146 @@ export default function EnhancedPracticeHub() {
         </CardContent>
       </Card>
 
-      {/* Enhanced Video Feed with Neural Network Overlay */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <Card className="overflow-hidden">
-            <CardContent className="p-0 relative">
-              <div className="aspect-video bg-gray-900 relative">
-                <video
-                  ref={videoRef}
-                  className="w-full h-full object-cover"
-                  autoPlay
-                  playsInline
-                  muted
-                />
-                <canvas
-                  ref={canvasRef}
-                  className="absolute inset-0 w-full h-full pointer-events-none"
-                  width={1920}
-                  height={1080}
-                />
-                
-                {/* Neural Network Processing Overlay */}
-                {neuralNetworkActive && (
-                  <div className="absolute top-4 left-4 bg-black/70 text-white p-3 rounded-lg">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                      <span className="text-sm font-medium">MediaPipe Neural Network</span>
-                    </div>
-                    <div className="text-xs text-gray-300">
-                      Processing: Holistic + Face Mesh + Hands
-                    </div>
-                  </div>
-                )}
+      {/* Main Practice Interface */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Video Feed and Transcript */}
+        <div className="lg:col-span-3">
+          <Tabs defaultValue="video" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="video">Video Analysis</TabsTrigger>
+              <TabsTrigger value="transcript">Live Transcript</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="video" className="mt-4">
+              <Card className="overflow-hidden">
+                <CardContent className="p-0 relative">
+                  <div className="aspect-video bg-gray-900 relative">
+                    <video
+                      ref={videoRef}
+                      className="w-full h-full object-cover"
+                      autoPlay
+                      playsInline
+                      muted
+                    />
+                    <canvas
+                      ref={canvasRef}
+                      className="absolute inset-0 w-full h-full pointer-events-none"
+                      width={1920}
+                      height={1080}
+                    />
+                    
+                    {/* Neural Network Processing Overlay */}
+                    {neuralNetworkActive && (
+                      <div className="absolute top-4 left-4 bg-black/70 text-white p-3 rounded-lg">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                          <span className="text-sm font-medium">MediaPipe Neural Network</span>
+                        </div>
+                        <div className="text-xs text-gray-300">
+                          Processing: Holistic + Face Mesh + Hands
+                        </div>
+                      </div>
+                    )}
 
-                {/* Real-time Metrics Overlay */}
-                {isRecording && (
-                  <div className="absolute bottom-4 left-4 right-4">
-                    <div className="grid grid-cols-5 gap-2">
-                      {[
-                        { label: 'Confidence', value: analytics.confidence, icon: Brain },
-                        { label: 'Eye Contact', value: analytics.eyeContact, icon: Eye },
-                        { label: 'Posture', value: analytics.posture, icon: Target },
-                        { label: 'Gestures', value: analytics.gestures, icon: Users },
-                        { label: 'Energy', value: analytics.energyLevel, icon: Zap }
-                      ].map((metric, index) => (
-                        <motion.div
-                          key={metric.label}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                          className="bg-black/70 text-white p-2 rounded text-center"
-                        >
-                          <metric.icon className="w-4 h-4 mx-auto mb-1" />
-                          <div className="text-lg font-bold">{Math.round(metric.value)}%</div>
-                          <div className="text-xs">{metric.label}</div>
-                        </motion.div>
-                      ))}
+                    {/* Real-time Metrics Overlay */}
+                    {isRecording && (
+                      <div className="absolute bottom-4 left-4 right-4">
+                        <div className="grid grid-cols-5 gap-2">
+                          {[
+                            { label: 'Confidence', value: analytics.confidence, icon: Brain },
+                            { label: 'Eye Contact', value: analytics.eyeContact, icon: Eye },
+                            { label: 'Posture', value: analytics.posture, icon: Target },
+                            { label: 'Gestures', value: analytics.gestures, icon: Users },
+                            { label: 'Energy', value: analytics.energyLevel, icon: Zap }
+                          ].map((metric, index) => (
+                            <motion.div
+                              key={metric.label}
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: index * 0.1 }}
+                              className="bg-black/70 text-white p-2 rounded text-center"
+                            >
+                              <metric.icon className="w-4 h-4 mx-auto mb-1" />
+                              <div className="text-lg font-bold">{Math.round(metric.value)}%</div>
+                              <div className="text-xs">{metric.label}</div>
+                            </motion.div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="transcript" className="mt-4">
+              <Card className="h-96">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center space-x-2">
+                      <Mic className={`w-5 h-5 ${isListening ? 'text-red-500 animate-pulse' : 'text-gray-400'}`} />
+                      <span>Live Transcript</span>
+                    </CardTitle>
+                    <div className="flex items-center space-x-4">
+                      <Badge variant={isListening ? "default" : "secondary"}>
+                        {isListening ? "Listening" : "Inactive"}
+                      </Badge>
+                      <Badge variant="outline">
+                        {wordsPerMinute} WPM
+                      </Badge>
                     </div>
                   </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                </CardHeader>
+                <CardContent className="h-64 overflow-y-auto">
+                  {isRecording ? (
+                    <div className="space-y-3">
+                      {/* Final transcript */}
+                      {transcript && (
+                        <div className="p-3 bg-blue-50 rounded-lg">
+                          <p className="text-gray-900 leading-relaxed">{transcript}</p>
+                        </div>
+                      )}
+                      
+                      {/* Interim transcript */}
+                      {interimTranscript && (
+                        <div className="p-3 bg-gray-50 rounded-lg border-l-4 border-blue-400">
+                          <p className="text-gray-600 italic">{interimTranscript}</p>
+                          <span className="text-xs text-blue-600">Live speech...</span>
+                        </div>
+                      )}
+
+                      {/* Filler words detected */}
+                      {fillerWords.length > 0 && (
+                        <div className="p-3 bg-yellow-50 rounded-lg border-l-4 border-yellow-400">
+                          <h4 className="font-medium text-yellow-800 mb-2">Filler Words Detected</h4>
+                          <div className="flex flex-wrap gap-1">
+                            {Array.from(new Set(fillerWords)).map((word, index) => (
+                              <Badge key={index} variant="secondary" className="bg-yellow-200 text-yellow-800">
+                                {word}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* No speech detected message */}
+                      {!transcript && !interimTranscript && (
+                        <div className="text-center py-8 text-gray-500">
+                          <Mic className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                          <p>Start speaking to see live transcript...</p>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <MicOff className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                      <p>Start a practice session to enable live transcript</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
 
         {/* Enhanced Live Feedback Panel */}
@@ -718,39 +979,80 @@ export default function EnhancedPracticeHub() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <Lightbulb className="w-5 h-5 text-yellow-500" />
-                <span>Live AI Coaching</span>
+                <Brain className="w-5 h-5 text-blue-500" />
+                <span>AI Coach</span>
+                {isRecording && (
+                  <Badge className="bg-green-500/90 text-white animate-pulse">
+                    <Activity className="w-3 h-3 mr-1" />
+                    Live
+                  </Badge>
+                )}
               </CardTitle>
             </CardHeader>
-            <CardContent className="max-h-96 overflow-y-auto">
-              <AnimatePresence>
-                {liveFeedback.slice(-5).map((feedback, index) => (
-                  <motion.div
-                    key={feedback.timestamp}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
-                    className={`p-3 rounded-lg mb-3 border-l-4 ${
-                      feedback.type === 'success' ? 'bg-green-50 border-green-400 text-green-800' :
-                      feedback.type === 'warning' ? 'bg-yellow-50 border-yellow-400 text-yellow-800' :
-                      feedback.type === 'error' ? 'bg-red-50 border-red-400 text-red-800' :
-                      'bg-blue-50 border-blue-400 text-blue-800'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">{feedback.message}</p>
-                        {feedback.suggestion && (
-                          <p className="text-xs mt-1 opacity-75">{feedback.suggestion}</p>
-                        )}
-                      </div>
-                      <Badge variant="secondary" className="text-xs ml-2">
-                        {feedback.category}
-                      </Badge>
+            <CardContent className="max-h-80 overflow-y-auto">
+              {isRecording ? (
+                <AnimatePresence>
+                  {liveFeedback.length === 0 ? (
+                    <div className="text-center py-6 text-gray-500">
+                      <Brain className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                      <p className="text-sm">AI analyzing your performance...</p>
+                      <p className="text-xs mt-1">Feedback will appear as you speak</p>
                     </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
+                  ) : (
+                    liveFeedback.slice(-6).map((feedback, index) => (
+                      <motion.div
+                        key={feedback.timestamp}
+                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: -20 }}
+                        transition={{ duration: 0.3 }}
+                        className={`p-3 rounded-lg mb-3 border-l-4 ${
+                          feedback.type === 'success' ? 'bg-green-50 border-green-400 text-green-800' :
+                          feedback.type === 'warning' ? 'bg-yellow-50 border-yellow-400 text-yellow-800' :
+                          feedback.type === 'error' ? 'bg-red-50 border-red-400 text-red-800' :
+                          'bg-blue-50 border-blue-400 text-blue-800'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2 mb-1">
+                              {feedback.type === 'success' && <CheckCircle className="w-4 h-4 text-green-600" />}
+                              {feedback.type === 'warning' && <AlertTriangle className="w-4 h-4 text-yellow-600" />}
+                              {feedback.type === 'error' && <AlertCircle className="w-4 h-4 text-red-600" />}
+                              {feedback.type === 'info' && <Info className="w-4 h-4 text-blue-600" />}
+                              <p className="text-sm font-medium">{feedback.message}</p>
+                            </div>
+                            {feedback.suggestion && (
+                              <p className="text-xs mt-1 opacity-75 pl-6">{feedback.suggestion}</p>
+                            )}
+                          </div>
+                          <div className="flex flex-col items-end space-y-1">
+                            <Badge variant="secondary" className="text-xs">
+                              {feedback.category}
+                            </Badge>
+                            <Badge 
+                              variant="outline" 
+                              className={`text-xs ${
+                                feedback.priority === 'high' ? 'border-red-300 text-red-600' :
+                                feedback.priority === 'medium' ? 'border-yellow-300 text-yellow-600' :
+                                'border-blue-300 text-blue-600'
+                              }`}
+                            >
+                              {feedback.priority}
+                            </Badge>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))
+                  )}
+                </AnimatePresence>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <Brain className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                  <p className="text-sm">Start a practice session for live AI coaching</p>
+                  <p className="text-xs mt-1">Get real-time feedback on your performance</p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
