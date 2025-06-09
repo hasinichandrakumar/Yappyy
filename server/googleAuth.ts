@@ -28,7 +28,7 @@ export function getSession() {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: true, // Set to true for HTTPS domains
+      secure: false, // Set to false for Replit development environment
       maxAge: sessionTtl,
       sameSite: 'lax'
     },
