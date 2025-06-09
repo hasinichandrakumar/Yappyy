@@ -30,7 +30,7 @@ import {
   Activity,
   FileText
 } from "lucide-react";
-import yapUpLogo from "@assets/YapUp-6_1749439026739.png";
+import yapUpLogo from "@assets/YapUp-2_1749483329460.png";
 
 export default function Home() {
   const [isHovered, setIsHovered] = useState<string | null>(null);
@@ -41,8 +41,8 @@ export default function Home() {
   const isFeaturesInView = useInView(featuresRef);
 
   const handleStartPracticing = () => {
-    // Since we're in demo mode, always redirect to dashboard
-    window.location.href = "/dashboard";
+    // Redirect to Google OAuth for authentication
+    window.location.href = "/api/auth/google";
   };
 
   const advancedFeatures = [
@@ -151,17 +151,16 @@ export default function Home() {
                 YapUp
               </h1>
             </motion.div>
-            <Link href="/dashboard">
-              <motion.div
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Button className="gradient-bg text-white hover:opacity-90 shadow-lg purple-glow">
-                  Start Practicing
-                  <PlayCircle className="w-4 h-4 ml-2" />
-                </Button>
-              </motion.div>
-            </Link>
+            <motion.div
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleStartPracticing}
+            >
+              <Button className="gradient-bg text-white hover:opacity-90 shadow-lg purple-glow">
+                Start Practicing
+                <PlayCircle className="w-4 h-4 ml-2" />
+              </Button>
+            </motion.div>
           </div>
         </div>
       </motion.nav>
@@ -277,25 +276,24 @@ export default function Home() {
             animate={isHeroInView ? { y: 0, opacity: 1 } : {}}
             transition={{ duration: 0.8, delay: 1.2 }}
           >
-            <Link href="/dashboard">
-              <motion.div
-                whileHover={{ scale: 1.05, y: -5 }}
-                whileTap={{ scale: 0.95 }}
-                animate={{
-                  boxShadow: [
-                    "0 10px 30px rgba(6, 182, 212, 0.3)",
-                    "0 20px 60px rgba(6, 182, 212, 0.4)",
-                    "0 10px 30px rgba(6, 182, 212, 0.3)"
-                  ]
-                }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                <Button size="lg" className="gradient-bg text-white hover:opacity-90 shadow-xl px-8 py-4 text-lg font-semibold tracking-wide purple-glow">
-                  Start Your Free Session
-                  <PlayCircle className="w-5 h-5 ml-3" />
-                </Button>
-              </motion.div>
-            </Link>
+            <motion.div
+              whileHover={{ scale: 1.05, y: -5 }}
+              whileTap={{ scale: 0.95 }}
+              animate={{
+                boxShadow: [
+                  "0 10px 30px rgba(6, 182, 212, 0.3)",
+                  "0 20px 60px rgba(6, 182, 212, 0.4)",
+                  "0 10px 30px rgba(6, 182, 212, 0.3)"
+                ]
+              }}
+              transition={{ duration: 2, repeat: Infinity }}
+              onClick={handleStartPracticing}
+            >
+              <Button size="lg" className="gradient-bg text-white hover:opacity-90 shadow-xl px-8 py-4 text-lg font-semibold tracking-wide purple-glow">
+                Start Your Free Session
+                <PlayCircle className="w-5 h-5 ml-3" />
+              </Button>
+            </motion.div>
           </motion.div>
 
           {/* Real-time Metrics Preview */}

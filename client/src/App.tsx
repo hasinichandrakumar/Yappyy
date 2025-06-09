@@ -36,10 +36,10 @@ function Router() {
         </>
       ) : (
         <>
-          <Route path="/" component={Landing} />
+          <Route path="/" component={Home} />
           <Route path="/login" component={LoginPage} />
           <Route path="/landing" component={Landing} />
-          <Route component={Landing} />
+          <Route component={Home} />
         </>
       )}
     </Switch>
