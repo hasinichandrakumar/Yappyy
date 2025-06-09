@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import yapUpLogo from "@assets/YapUp-5_1749436396086.png";
+import yapUpLogo from "@assets/YapUp-6_1749439026739.png";
 import { 
   Mic, 
   Brain, 
