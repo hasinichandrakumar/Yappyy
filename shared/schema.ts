@@ -20,8 +20,50 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  bio: text("bio"),
+  jobTitle: varchar("job_title"),
+  company: varchar("company"),
+  speakingGoals: text("speaking_goals").array(),
+  experienceLevel: varchar("experience_level"),
+  timezone: varchar("timezone"),
+  preferredLanguage: varchar("preferred_language").default("en"),
+  notificationPreferences: jsonb("notification_preferences"),
+  practiceReminders: boolean("practice_reminders").default(true),
+  weeklyGoal: integer("weekly_goal").default(3),
+  themePreference: varchar("theme_preference").default("light"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const userPreferences = pgTable("user_preferences", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  category: varchar("category").notNull(),
+  setting: varchar("setting").notNull(),
+  value: text("value").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const userAchievements = pgTable("user_achievements", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  achievementType: varchar("achievement_type").notNull(),
+  achievementName: varchar("achievement_name").notNull(),
+  description: text("description"),
+  earnedAt: timestamp("earned_at").defaultNow().notNull(),
+  metadata: jsonb("metadata"),
+});
+
+export const userStreaks = pgTable("user_streaks", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  streakType: varchar("streak_type").notNull(),
+  currentStreak: integer("current_streak").default(0),
+  longestStreak: integer("longest_streak").default(0),
+  lastPracticeDate: timestamp("last_practice_date"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 // Practice sessions table with enhanced AI analysis
@@ -107,6 +149,23 @@ export const insertAiInsightSchema = createInsertSchema(aiInsights).omit({
   createdAt: true,
 });
 
+export const insertUserPreferenceSchema = createInsertSchema(userPreferences).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertUserAchievementSchema = createInsertSchema(userAchievements).omit({
+  id: true,
+  earnedAt: true,
+});
+
+export const insertUserStreakSchema = createInsertSchema(userStreaks).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -118,3 +177,9 @@ export type InsertUserProgress = z.infer<typeof insertUserProgressSchema>;
 export type UserProgress = typeof userProgress.$inferSelect;
 export type InsertAiInsight = z.infer<typeof insertAiInsightSchema>;
 export type AiInsight = typeof aiInsights.$inferSelect;
+export type InsertUserPreference = z.infer<typeof insertUserPreferenceSchema>;
+export type UserPreference = typeof userPreferences.$inferSelect;
+export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;
+export type UserAchievement = typeof userAchievements.$inferSelect;
+export type InsertUserStreak = z.infer<typeof insertUserStreakSchema>;
+export type UserStreak = typeof userStreaks.$inferSelect;

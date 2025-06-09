@@ -4,6 +4,9 @@ import {
   coachingFeedback, 
   userProgress,
   aiInsights,
+  userPreferences,
+  userAchievements,
+  userStreaks,
   type User, 
   type UpsertUser,
   type PracticeSession,
@@ -13,7 +16,13 @@ import {
   type UserProgress,
   type InsertUserProgress,
   type AiInsight,
-  type InsertAiInsight
+  type InsertAiInsight,
+  type UserPreference,
+  type InsertUserPreference,
+  type UserAchievement,
+  type InsertUserAchievement,
+  type UserStreak,
+  type InsertUserStreak
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
@@ -22,6 +31,7 @@ export interface IStorage {
   // User operations (required for authentication)
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+  updateUserProfile(userId: string, updates: Partial<UpsertUser>): Promise<User>;
   
   // Practice session operations
   createPracticeSession(session: InsertPracticeSession): Promise<PracticeSession>;
@@ -39,6 +49,20 @@ export interface IStorage {
   // AI insights operations
   createAiInsight(insight: InsertAiInsight): Promise<AiInsight>;
   getUserAiInsights(userId: string): Promise<AiInsight[]>;
+  
+  // User preferences operations
+  getUserPreferences(userId: string): Promise<UserPreference[]>;
+  upsertUserPreference(preference: InsertUserPreference): Promise<UserPreference>;
+  deleteUserPreference(userId: string, category: string, setting: string): Promise<void>;
+  
+  // User achievements operations
+  getUserAchievements(userId: string): Promise<UserAchievement[]>;
+  addUserAchievement(achievement: InsertUserAchievement): Promise<UserAchievement>;
+  
+  // User streaks operations
+  getUserStreaks(userId: string): Promise<UserStreak[]>;
+  updateUserStreak(streak: InsertUserStreak): Promise<UserStreak>;
+  upsertUserStreak(userId: string, streakType: string, updates: Partial<InsertUserStreak>): Promise<UserStreak>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -143,6 +167,112 @@ export class DatabaseStorage implements IStorage {
       .from(aiInsights)
       .where(eq(aiInsights.userId, userId))
       .orderBy(desc(aiInsights.createdAt));
+  }
+
+  // User profile operations
+  async updateUserProfile(userId: string, updates: Partial<UpsertUser>): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  // User preferences operations
+  async getUserPreferences(userId: string): Promise<UserPreference[]> {
+    const preferences = await db.select().from(userPreferences).where(eq(userPreferences.userId, userId));
+    return preferences;
+  }
+
+  async upsertUserPreference(preference: InsertUserPreference): Promise<UserPreference> {
+    const existingPrefs = await db
+      .select()
+      .from(userPreferences)
+      .where(eq(userPreferences.userId, preference.userId))
+      .where(eq(userPreferences.category, preference.category))
+      .where(eq(userPreferences.setting, preference.setting));
+
+    if (existingPrefs.length > 0) {
+      const [updated] = await db
+        .update(userPreferences)
+        .set({ value: preference.value, updatedAt: new Date() })
+        .where(eq(userPreferences.id, existingPrefs[0].id))
+        .returning();
+      return updated;
+    } else {
+      const [created] = await db
+        .insert(userPreferences)
+        .values(preference)
+        .returning();
+      return created;
+    }
+  }
+
+  async deleteUserPreference(userId: string, category: string, setting: string): Promise<void> {
+    await db
+      .delete(userPreferences)
+      .where(eq(userPreferences.userId, userId))
+      .where(eq(userPreferences.category, category))
+      .where(eq(userPreferences.setting, setting));
+  }
+
+  // User achievements operations
+  async getUserAchievements(userId: string): Promise<UserAchievement[]> {
+    const achievements = await db
+      .select()
+      .from(userAchievements)
+      .where(eq(userAchievements.userId, userId))
+      .orderBy(desc(userAchievements.earnedAt));
+    return achievements;
+  }
+
+  async addUserAchievement(achievement: InsertUserAchievement): Promise<UserAchievement> {
+    const [created] = await db
+      .insert(userAchievements)
+      .values(achievement)
+      .returning();
+    return created;
+  }
+
+  // User streaks operations
+  async getUserStreaks(userId: string): Promise<UserStreak[]> {
+    const streaks = await db
+      .select()
+      .from(userStreaks)
+      .where(eq(userStreaks.userId, userId));
+    return streaks;
+  }
+
+  async updateUserStreak(streak: InsertUserStreak): Promise<UserStreak> {
+    const [updated] = await db
+      .insert(userStreaks)
+      .values(streak)
+      .returning();
+    return updated;
+  }
+
+  async upsertUserStreak(userId: string, streakType: string, updates: Partial<InsertUserStreak>): Promise<UserStreak> {
+    const existingStreaks = await db
+      .select()
+      .from(userStreaks)
+      .where(eq(userStreaks.userId, userId))
+      .where(eq(userStreaks.streakType, streakType));
+
+    if (existingStreaks.length > 0) {
+      const [updated] = await db
+        .update(userStreaks)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(userStreaks.id, existingStreaks[0].id))
+        .returning();
+      return updated;
+    } else {
+      const [created] = await db
+        .insert(userStreaks)
+        .values({ userId, streakType, ...updates })
+        .returning();
+      return created;
+    }
   }
 }
 
