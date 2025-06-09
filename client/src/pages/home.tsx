@@ -30,6 +30,7 @@ import {
   Activity,
   FileText
 } from "lucide-react";
+import yapUpLogo from "@assets/YapUp-4_1749436238667.png";
 
 export default function Home() {
   const [isHovered, setIsHovered] = useState<string | null>(null);
@@ -125,7 +126,7 @@ export default function Home() {
               transition={{ type: "spring", stiffness: 300 }}
             >
               <motion.div 
-                className="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center purple-glow"
+                className="w-10 h-10 rounded-xl flex items-center justify-center"
                 animate={{ 
                   boxShadow: [
                     "0 0 20px hsla(180, 85%, 60%, 0.3)",
@@ -134,15 +135,17 @@ export default function Home() {
                   ]
                 }}
                 transition={{ duration: 2, repeat: Infinity }}
+                whileHover={{ scale: 1.1 }}
               >
-                <motion.div
-                  animate={{ rotate: [0, 360] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-                  style={{ transformOrigin: "center" }}
-                  className="flex items-center justify-center"
-                >
-                  <Mic className="text-white w-5 h-5" />
-                </motion.div>
+                <motion.img
+                  src={yapUpLogo}
+                  alt="YapUp Logo"
+                  className="w-10 h-10 rounded-xl"
+                  animate={{ 
+                    scale: [1, 1.05, 1],
+                  }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                />
               </motion.div>
               <h1 className="text-xl font-bold yapup-gradient">
                 YapUp

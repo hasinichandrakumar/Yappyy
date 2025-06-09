@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import YapUpLogo from "@/components/YapUpLogo";
+import yapUpLogo from "@assets/YapUp-4_1749436238667.png";
 import { 
   Mic, 
   Brain, 
@@ -28,9 +28,11 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-[#0BF9EA] to-blue-600 rounded-lg flex items-center justify-center">
-                <Mic className="text-white w-4 h-4" />
-              </div>
+              <img
+                src={yapUpLogo}
+                alt="YapUp Logo"
+                className="w-8 h-8 rounded-lg"
+              />
               <h1 className="text-xl font-semibold text-gray-900">YapUp</h1>
             </div>
             <div className="flex items-center space-x-4">
@@ -49,6 +51,13 @@ export default function Landing() {
       <section className="relative py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center">
+            <div className="flex justify-center mb-8">
+              <img
+                src={yapUpLogo}
+                alt="YapUp Logo"
+                className="w-24 h-24 rounded-2xl shadow-lg"
+              />
+            </div>
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
               Master Your 
               <span className="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent"> Voice</span>
@@ -211,7 +220,11 @@ export default function Landing() {
       <footer className="bg-gray-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <YapUpLogo width={160} height={48} className="mx-auto mb-4" />
+            <img
+              src={yapUpLogo}
+              alt="YapUp Logo"
+              className="w-40 h-12 mx-auto mb-4 object-contain"
+            />
             <p className="text-gray-400 mb-4">
               Empowering speakers worldwide with AI-powered coaching technology
             </p>
