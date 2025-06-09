@@ -7,6 +7,7 @@ import {
   userPreferences,
   userAchievements,
   userStreaks,
+  dailyGoals,
   type User, 
   type UpsertUser,
   type PracticeSession,
@@ -22,10 +23,12 @@ import {
   type UserAchievement,
   type InsertUserAchievement,
   type UserStreak,
-  type InsertUserStreak
+  type InsertUserStreak,
+  type DailyGoal,
+  type InsertDailyGoal
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, gte, lte } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (required for authentication)
@@ -63,6 +66,12 @@ export interface IStorage {
   getUserStreaks(userId: string): Promise<UserStreak[]>;
   updateUserStreak(streak: InsertUserStreak): Promise<UserStreak>;
   upsertUserStreak(userId: string, streakType: string, updates: Partial<InsertUserStreak>): Promise<UserStreak>;
+  
+  // Daily goals operations
+  getUserDailyGoals(userId: string, date?: Date): Promise<DailyGoal[]>;
+  createDailyGoal(goal: InsertDailyGoal): Promise<DailyGoal>;
+  updateDailyGoal(goalId: number, updates: Partial<InsertDailyGoal>): Promise<DailyGoal>;
+  generateDailyGoalsForUser(userId: string): Promise<DailyGoal[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -279,6 +288,105 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return created;
     }
+  }
+
+  // Daily goals operations
+  async getUserDailyGoals(userId: string, date?: Date): Promise<DailyGoal[]> {
+    const targetDate = date || new Date();
+    const startOfDay = new Date(targetDate);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(targetDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const goals = await db
+      .select()
+      .from(dailyGoals)
+      .where(
+        and(
+          eq(dailyGoals.userId, userId),
+          gte(dailyGoals.dateAssigned, startOfDay),
+          lte(dailyGoals.dateAssigned, endOfDay)
+        )
+      )
+      .orderBy(desc(dailyGoals.createdAt));
+    
+    return goals;
+  }
+
+  async createDailyGoal(goalData: InsertDailyGoal): Promise<DailyGoal> {
+    const [goal] = await db
+      .insert(dailyGoals)
+      .values(goalData)
+      .returning();
+    return goal;
+  }
+
+  async updateDailyGoal(goalId: number, updates: Partial<InsertDailyGoal>): Promise<DailyGoal> {
+    const [goal] = await db
+      .update(dailyGoals)
+      .set(updates)
+      .where(eq(dailyGoals.id, goalId))
+      .returning();
+    return goal;
+  }
+
+  async generateDailyGoalsForUser(userId: string): Promise<DailyGoal[]> {
+    // Check if user already has goals for today
+    const existingGoals = await this.getUserDailyGoals(userId);
+    if (existingGoals.length > 0) {
+      return existingGoals;
+    }
+
+    // Generate new goals based on user's progress and preferences
+    const goalTemplates = [
+      {
+        goalType: 'practice',
+        title: 'Voice Clarity Challenge',
+        description: 'Practice speaking with crystal clear articulation',
+        targetValue: 3,
+        unit: 'minutes',
+        points: 25,
+        difficulty: 'easy',
+        category: 'voice'
+      },
+      {
+        goalType: 'improvement',
+        title: 'Eye Contact Mastery',
+        description: 'Maintain steady eye contact throughout your speech',
+        targetValue: 85,
+        unit: '% eye contact',
+        points: 30,
+        difficulty: 'medium',
+        category: 'body'
+      },
+      {
+        goalType: 'challenge',
+        title: 'Confident Posture Power',
+        description: 'Stand tall and command attention with your presence',
+        targetValue: 90,
+        unit: '% good posture',
+        points: 35,
+        difficulty: 'medium',
+        category: 'body'
+      }
+    ];
+
+    // Select 2 random goals for the day
+    const selectedTemplates = goalTemplates
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 2);
+
+    const newGoals: DailyGoal[] = [];
+    for (const template of selectedTemplates) {
+      const goal = await this.createDailyGoal({
+        userId,
+        ...template,
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // Expires in 24 hours
+      });
+      newGoals.push(goal);
+    }
+
+    return newGoals;
   }
 }
 

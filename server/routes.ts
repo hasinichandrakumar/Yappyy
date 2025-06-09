@@ -102,6 +102,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user's daily goals
+  app.get('/api/user/daily-goals', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const goals = await storage.generateDailyGoalsForUser(userId);
+      res.json(goals);
+    } catch (error) {
+      console.error("Error fetching daily goals:", error);
+      res.status(500).json({ message: "Failed to fetch daily goals" });
+    }
+  });
+
+  // Update daily goal progress
+  app.post('/api/user/daily-goals/:goalId/complete', requireAuth, async (req: any, res) => {
+    try {
+      const { goalId } = req.params;
+      const updatedGoal = await storage.updateDailyGoal(parseInt(goalId), {
+        isCompleted: true,
+        completedAt: new Date(),
+        currentValue: req.body.targetValue || 100
+      });
+      res.json(updatedGoal);
+    } catch (error) {
+      console.error("Error completing daily goal:", error);
+      res.status(500).json({ message: "Failed to complete goal" });
+    }
+  });
+
 
 
   // Get user practice sessions

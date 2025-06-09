@@ -168,6 +168,31 @@ export const insertUserStreakSchema = createInsertSchema(userStreaks).omit({
   updatedAt: true,
 });
 
+export const dailyGoals = pgTable("daily_goals", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  goalType: varchar("goal_type").notNull(),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  targetValue: integer("target_value").notNull(),
+  currentValue: integer("current_value").default(0),
+  unit: varchar("unit").notNull(),
+  points: integer("points").default(0),
+  difficulty: varchar("difficulty").notNull(),
+  category: varchar("category").notNull(),
+  isCompleted: boolean("is_completed").default(false),
+  completedAt: timestamp("completed_at"),
+  dateAssigned: timestamp("date_assigned").defaultNow(),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertDailyGoalSchema = createInsertSchema(dailyGoals).omit({
+  id: true,
+  dateAssigned: true,
+  createdAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -185,3 +210,5 @@ export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;
 export type UserAchievement = typeof userAchievements.$inferSelect;
 export type InsertUserStreak = z.infer<typeof insertUserStreakSchema>;
 export type UserStreak = typeof userStreaks.$inferSelect;
+export type InsertDailyGoal = z.infer<typeof insertDailyGoalSchema>;
+export type DailyGoal = typeof dailyGoals.$inferSelect;
