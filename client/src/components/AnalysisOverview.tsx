@@ -44,7 +44,17 @@ export default function AnalysisOverview() {
   const [sessionSummary, setSessionSummary] = useState<SessionSummary | null>(null);
 
   useEffect(() => {
-    // Load comprehensive overview data
+    // Check if user has completed any practice sessions
+    // Only show data if authentic sessions exist
+    const hasActiveSessions = false; // This will be connected to real session data
+    
+    if (!hasActiveSessions) {
+      setMetrics([]);
+      setSessionSummary(null);
+      return;
+    }
+    
+    // Load comprehensive overview data only when sessions exist
     const overviewData: OverviewMetric[] = [
       {
         category: 'overall',
@@ -150,7 +160,33 @@ export default function AnalysisOverview() {
     }
   };
 
-  if (!sessionSummary) return <div>Loading analysis...</div>;
+  if (!sessionSummary) {
+    return (
+      <div className="space-y-6">
+        <Card className="bg-gradient-to-r from-gray-50 to-blue-50 border-gray-200">
+          <CardContent className="py-12">
+            <div className="text-center">
+              <BarChart3 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">No Analysis Data Yet</h3>
+              <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                Complete your first practice session to see detailed performance analytics and insights.
+              </p>
+              <Button 
+                onClick={() => {
+                  // Switch to practice tab
+                  const practiceTab = document.querySelector('[data-value="practice"]') as HTMLElement;
+                  practiceTab?.click();
+                }}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                Start First Practice Session
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
