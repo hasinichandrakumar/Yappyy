@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Bell, MicOff, User, BarChart3, Eye, Brain, Star, TrendingUp, FileText, Trophy, Users, Volume2, HelpCircle, PlayCircle } from "lucide-react";
-import yapUpLogo from "@assets/YapUp-4_1749436238667.png";
+import yapUpLogo from "@assets/YapUp-5_1749436396086.png";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import YapUpLogo, { YapUpIcon } from "@/components/YapUpLogo";

@@ -30,7 +30,7 @@ import {
   Activity,
   FileText
 } from "lucide-react";
-import yapUpLogo from "@assets/YapUp-4_1749436238667.png";
+import yapUpLogo from "@assets/YapUp-5_1749436396086.png";
 
 export default function Home() {
   const [isHovered, setIsHovered] = useState<string | null>(null);
