@@ -151,16 +151,27 @@ export default function Home() {
                 YapUp
               </h1>
             </motion.div>
-            <motion.div
-              whileHover={{ scale: 1.05, y: -2 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleStartPracticing}
-            >
-              <Button className="gradient-bg text-white hover:opacity-90 shadow-lg purple-glow">
-                Start Practicing
-                <PlayCircle className="w-4 h-4 ml-2" />
-              </Button>
-            </motion.div>
+            <div className="flex items-center space-x-4">
+              <motion.div
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleStartPracticing}
+              >
+                <Button variant="ghost" className="text-gray-700 hover:text-gray-900">
+                  Sign In
+                </Button>
+              </motion.div>
+              <motion.div
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleStartPracticing}
+              >
+                <Button className="gradient-bg text-white hover:opacity-90 shadow-lg purple-glow">
+                  Start Practicing
+                  <PlayCircle className="w-4 h-4 ml-2" />
+                </Button>
+              </motion.div>
+            </div>
           </div>
         </div>
       </motion.nav>
