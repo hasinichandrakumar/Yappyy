@@ -31,6 +31,8 @@ export const users = pgTable("users", {
   practiceReminders: boolean("practice_reminders").default(true),
   weeklyGoal: integer("weekly_goal").default(3),
   themePreference: varchar("theme_preference").default("light"),
+  hasCompletedOnboarding: boolean("has_completed_onboarding").default(false),
+  onboardingCompletedAt: timestamp("onboarding_completed_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Bell, MicOff, User, BarChart3, Eye, Brain, Star, TrendingUp, FileText, Trophy, Users, Volume2, HelpCircle, PlayCircle, BookOpen, Target } from "lucide-react";
 import yapUpLogo from "@assets/YapUp-6_1749439026739.png";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ import BadgeSystem from "@/components/BadgeSystem";
 import EnhancedTemplateMarketplace from "@/components/EnhancedTemplateMarketplace";
 import HelpGuide from "@/components/HelpGuide";
 import PostSessionAnalysis from "@/components/PostSessionAnalysis";
+import WelcomeOnboarding from "@/components/WelcomeOnboarding";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -29,6 +31,41 @@ export default function Dashboard() {
     roleplayType?: string;
     audienceType?: string;
   }>({});
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  const queryClient = useQueryClient();
+
+  // Fetch user data to check onboarding status
+  const { data: user } = useQuery({
+    queryKey: ['/api/auth/user'],
+  });
+
+  // Complete onboarding mutation
+  const completeOnboardingMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch('/api/user/complete-onboarding', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (!response.ok) throw new Error('Failed to complete onboarding');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+    }
+  });
+
+  // Check if user needs onboarding when user data loads
+  useEffect(() => {
+    if (user && !(user as any)?.hasCompletedOnboarding) {
+      setShowOnboarding(true);
+    }
+  }, [user]);
+
+  const handleOnboardingComplete = () => {
+    setShowOnboarding(false);
+    completeOnboardingMutation.mutate();
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -295,6 +332,13 @@ export default function Dashboard() {
           // Could switch to detailed analysis tab automatically
           setActiveTab('detailed');
         }}
+      />
+
+      {/* Welcome Onboarding for new users */}
+      <WelcomeOnboarding
+        isOpen={showOnboarding}
+        onComplete={handleOnboardingComplete}
+        userName={(user as any)?.firstName || 'User'}
       />
     </div>
   );

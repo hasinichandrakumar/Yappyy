@@ -87,6 +87,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Mark onboarding as complete
+  app.post('/api/user/complete-onboarding', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const updatedUser = await storage.updateUserProfile(userId, {
+        hasCompletedOnboarding: true,
+        onboardingCompletedAt: new Date()
+      });
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error completing onboarding:", error);
+      res.status(500).json({ message: "Failed to complete onboarding" });
+    }
+  });
+
   // Get user practice sessions
   app.get("/api/practice-sessions", async (req: any, res) => {
     try {
