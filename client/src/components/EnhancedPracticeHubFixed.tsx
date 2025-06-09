@@ -148,116 +148,98 @@ export default function EnhancedPracticeHubFixed() {
     };
   }, [isSessionActive, sessionStartTime]);
 
-  // Camera initialization with retry logic
+  // Camera initialization with robust error handling
   const initializeCamera = useCallback(async () => {
     try {
       setCameraError("");
       setIsRetrying(true);
+      
+      // Stop any existing stream first
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+        setMediaStream(null);
+      }
+      
       console.log("Requesting camera access...");
       
       // Check if getUserMedia is available
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        throw new Error("getUserMedia not supported");
+      if (!navigator.mediaDevices?.getUserMedia) {
+        throw new Error("Camera not supported on this device");
       }
       
-      // Request permissions first
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          width: { ideal: 1280, min: 640 },
-          height: { ideal: 720, min: 480 },
-          facingMode: "user"
-        },
-        audio: false
-      });
+      // Request camera with basic constraints first
+      let stream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            facingMode: "user"
+          },
+          audio: false
+        });
+      } catch (constraintError) {
+        console.warn("Falling back to basic video constraints");
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false
+        });
+      }
 
       console.log("Camera stream obtained:", stream);
 
-      if (videoRef.current) {
+      if (videoRef.current && stream) {
         videoRef.current.srcObject = stream;
         setMediaStream(stream);
         
-        // Wait for the video to load
-        await new Promise<void>((resolve, reject) => {
-          if (!videoRef.current) {
-            reject(new Error("Video element not available"));
-            return;
-          }
-
-          const video = videoRef.current;
-          let resolved = false;
-
-          const onLoadedMetadata = () => {
-            console.log("Video metadata loaded");
-            if (!resolved) {
-              resolved = true;
-              video.removeEventListener('loadedmetadata', onLoadedMetadata);
-              video.removeEventListener('error', onError);
-              resolve();
-            }
-          };
-
-          const onError = (error: Event) => {
-            console.error("Video element error:", error);
-            if (!resolved) {
-              resolved = true;
-              video.removeEventListener('loadedmetadata', onLoadedMetadata);
-              video.removeEventListener('error', onError);
-              reject(new Error("Video element failed to load"));
-            }
-          };
-
-          video.addEventListener('loadedmetadata', onLoadedMetadata);
-          video.addEventListener('error', onError);
-
-          // If metadata is already loaded, resolve immediately
-          if (video.readyState >= 1) {
-            onLoadedMetadata();
-          }
-        });
-
-        // Now try to play the video
-        try {
-          await videoRef.current.play();
-          console.log("Video playing successfully");
+        // Set video properties
+        videoRef.current.muted = true;
+        videoRef.current.playsInline = true;
+        videoRef.current.autoplay = true;
+        
+        // Wait for the video to be ready
+        videoRef.current.onloadedmetadata = () => {
+          console.log("Video metadata loaded");
           setIsCameraActive(true);
           setRetryCount(0);
-        } catch (playError) {
-          console.error("Video play error:", playError);
-          throw new Error("Failed to start video playback");
+          setCameraError("");
+        };
+        
+        // Handle play promise if it exists
+        const playPromise = videoRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(playError => {
+            console.warn("Video play error (may be handled):", playError);
+            // Don't fail the whole initialization for autoplay issues
+          });
         }
+        
+        console.log("Camera setup complete");
+      } else {
+        throw new Error("Video element not available");
       }
     } catch (error: any) {
       console.error("Camera initialization error:", error);
-      let errorMessage = "Camera access failed: ";
+      let errorMessage = "Camera activation failed: ";
       
       if (error.name === "NotAllowedError") {
-        errorMessage += "Please allow camera access and refresh the page.";
+        errorMessage += "Camera permission denied. Please allow camera access and try again.";
       } else if (error.name === "NotFoundError") {
-        errorMessage += "No camera device found. Please connect a camera.";
+        errorMessage += "No camera found. Please connect a camera device.";
       } else if (error.name === "NotReadableError") {
-        errorMessage += "Camera is being used by another application.";
+        errorMessage += "Camera is busy or hardware error. Try closing other apps using the camera.";
       } else if (error.name === "OverconstrainedError") {
-        errorMessage += "Camera constraints not supported. Trying basic settings...";
-        
-        // Retry with basic constraints
-        if (retryCount < 2) {
-          setRetryCount(prev => prev + 1);
-          setTimeout(() => {
-            initializeCameraBasic();
-          }, 1000);
-          return;
-        }
-      } else if (error.message === "getUserMedia not supported") {
-        errorMessage += "Your browser doesn't support camera access.";
+        errorMessage += "Camera settings not supported. Please try again.";
       } else {
-        errorMessage += `${error.message || "Unknown error"}. Please check your camera.`;
+        errorMessage += `${error.message || "Unknown error"}. Please check your camera permissions.`;
       }
       
       setCameraError(errorMessage);
+      setIsCameraActive(false);
     } finally {
       setIsRetrying(false);
     }
-  }, [retryCount]);
+  }, [mediaStream]);
 
   // Fallback camera initialization with basic constraints
   const initializeCameraBasic = useCallback(async () => {
@@ -494,7 +476,12 @@ export default function EnhancedPracticeHubFixed() {
     
     // Auto-start camera if not already active
     if (!isCameraActive && !cameraError) {
-      await initializeCamera();
+      try {
+        await initializeCamera();
+      } catch (error) {
+        console.warn("Failed to auto-start camera:", error);
+        // Don't prevent session start if camera fails
+      }
     }
   };
 
@@ -752,12 +739,28 @@ export default function EnhancedPracticeHubFixed() {
                         <>
                           <Camera className="w-16 h-16 mx-auto mb-4" />
                           <p className="text-lg mb-2">Camera Not Active</p>
-                          <p className="text-sm mb-4">Click "Start Camera" above to begin video analysis</p>
-                          <div className="flex justify-center">
-                            <Button onClick={initializeCamera} className="bg-blue-600 hover:bg-blue-700">
-                              <Camera className="w-4 h-4 mr-2" />
-                              Activate Camera
+                          <p className="text-sm mb-4">Enable camera for body language analysis</p>
+                          <div className="flex flex-col items-center space-y-3">
+                            <Button 
+                              onClick={initializeCamera} 
+                              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2"
+                              disabled={isRetrying}
+                            >
+                              {isRetrying ? (
+                                <>
+                                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                                  Connecting...
+                                </>
+                              ) : (
+                                <>
+                                  <Camera className="w-4 h-4 mr-2" />
+                                  Activate Camera
+                                </>
+                              )}
                             </Button>
+                            <p className="text-xs text-gray-500 text-center max-w-xs">
+                              Your browser will ask for camera permission
+                            </p>
                           </div>
                         </>
                       )}
