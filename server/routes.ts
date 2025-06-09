@@ -101,19 +101,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Alias for sessions endpoint
   app.get("/api/sessions", async (req: any, res) => {
     try {
-      const userId = req.user?.id || 'demo-user';
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
       let sessions = await storage.getUserPracticeSessions(userId);
       
-      // If no sessions exist, create sample sessions for demo
+      // If no sessions exist, create sample sessions for the authenticated user
       if (sessions.length === 0) {
-        // First ensure the demo user exists
-        await storage.upsertUser({
-          id: userId,
-          email: 'demo@example.com',
-          firstName: 'Demo',
-          lastName: 'User',
-          profileImageUrl: 'https://via.placeholder.com/150'
-        });
         const sampleSessions = [
           {
             userId,
