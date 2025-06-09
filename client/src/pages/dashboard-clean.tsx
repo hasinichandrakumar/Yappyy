@@ -152,15 +152,46 @@ export default function Dashboard() {
                         <BookOpen className="w-5 h-5 text-white" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-lg">Session Analysis</h3>
-                        <p className="text-sm text-gray-600">Deep dive into your practice sessions</p>
+                        <h3 className="font-semibold text-lg">
+                          {studyingSessionId ? 'Studying Session' : 'Session Analysis'}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          {studyingSessionId 
+                            ? `Analyzing specific session data across all metrics`
+                            : 'Deep dive into your practice sessions'
+                          }
+                        </p>
                       </div>
                     </div>
-                    <Button className="bg-blue-600 hover:bg-blue-700">
-                      <Target className="w-4 h-4 mr-2" />
-                      Study Current Session
-                    </Button>
+                    <div className="flex items-center space-x-2">
+                      {studyingSessionId && (
+                        <Button 
+                          variant="outline"
+                          onClick={() => setStudyingSessionId("")}
+                          className="border-blue-300"
+                        >
+                          Exit Study Mode
+                        </Button>
+                      )}
+                      <Button 
+                        className="bg-blue-600 hover:bg-blue-700"
+                        onClick={() => setShowSessionStudy(true)}
+                      >
+                        <Target className="w-4 h-4 mr-2" />
+                        Study Different Session
+                      </Button>
+                    </div>
                   </div>
+                  {studyingSessionId && (
+                    <div className="mt-3 px-3 py-2 bg-blue-100 rounded-lg border border-blue-300">
+                      <div className="flex items-center space-x-2">
+                        <PlayCircle className="w-4 h-4 text-blue-600" />
+                        <span className="text-sm font-medium text-blue-800">
+                          Currently studying: Product Launch Presentation (Session {studyingSessionId})
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <TabsList className="grid w-full grid-cols-4">
@@ -228,6 +259,17 @@ export default function Dashboard() {
         onClose={() => setShowPostAnalysis(false)}
         roleplayContext={sessionContext.roleplayType}
         audienceType={sessionContext.audienceType}
+      />
+
+      {/* Session Study Modal */}
+      <SessionStudyModal
+        isOpen={showSessionStudy}
+        onClose={() => setShowSessionStudy(false)}
+        onSessionSelect={(sessionId) => {
+          setStudyingSessionId(sessionId);
+          // Could switch to detailed analysis tab automatically
+          setActiveTab('detailed');
+        }}
       />
     </div>
   );

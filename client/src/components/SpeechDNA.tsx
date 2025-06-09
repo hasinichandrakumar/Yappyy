@@ -475,6 +475,27 @@ export default function SpeechDNA() {
 
   return (
     <div className="space-y-6">
+      {/* Study Session Header */}
+      <Card className="border-blue-200 bg-gradient-to-r from-blue-50 to-purple-50">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                <BookOpen className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Speech DNA Study</h3>
+                <p className="text-sm text-gray-600">Analyze specific sessions to understand your speaking patterns</p>
+              </div>
+            </div>
+            <Button variant="outline" className="border-blue-300 text-blue-700 hover:bg-blue-100">
+              <Target className="w-4 h-4 mr-2" />
+              Study Session
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       <Tabs defaultValue="analysis" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="analysis" className="flex items-center space-x-2">
@@ -485,7 +506,6 @@ export default function SpeechDNA() {
             <Crown className="w-4 h-4" />
             <span>Archetypes</span>
           </TabsTrigger>
-
         </TabsList>
 
         <TabsContent value="analysis" className="space-y-6">
