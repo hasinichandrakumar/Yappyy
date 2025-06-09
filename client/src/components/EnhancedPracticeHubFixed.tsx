@@ -22,7 +22,8 @@ import {
   Timer,
   TrendingUp,
   Volume2,
-  RefreshCw
+  RefreshCw,
+  Settings
 } from "lucide-react";
 import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
 import { useVoiceAnalysis } from '@/hooks/useVoiceAnalysis';
@@ -51,10 +52,17 @@ interface SessionMetrics {
 }
 
 export default function EnhancedPracticeHubFixed() {
+  // Session configuration
+  const [sessionName, setSessionName] = useState("");
+  const [sessionPurpose, setSessionPurpose] = useState("");
+  const [selectedRoleplay, setSelectedRoleplay] = useState("");
+  const [sessionType, setSessionType] = useState<'general' | 'roleplay'>('general');
+  
   // Session state
   const [isSessionActive, setIsSessionActive] = useState(false);
   const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
   const [sessionDuration, setSessionDuration] = useState(0);
+  const [isSetupMode, setIsSetupMode] = useState(true);
   
   // Media state
   const [isCameraActive, setIsCameraActive] = useState(false);
@@ -66,6 +74,12 @@ export default function EnhancedPracticeHubFixed() {
   const [aiInsights, setAiInsights] = useState<AIInsight[]>([]);
   const [lastInsightTime, setLastInsightTime] = useState(0);
   const [insightHistory, setInsightHistory] = useState<string[]>([]);
+  
+  // Real-time analysis state
+  const [currentWPM, setCurrentWPM] = useState(0);
+  const [eyeContactScore, setEyeContactScore] = useState(0);
+  const [postureScore, setPostureScore] = useState(0);
+  const [sessionNumber, setSessionNumber] = useState(1);
   
   // Refs
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -85,14 +99,33 @@ export default function EnhancedPracticeHubFixed() {
     pace: 145
   });
 
-  // Update metrics from voice analysis
+  // Roleplay scenarios
+  const roleplays = [
+    { id: 'job-interview', name: 'Job Interview', description: 'Practice answering common interview questions' },
+    { id: 'presentation', name: 'Business Presentation', description: 'Deliver a professional presentation' },
+    { id: 'sales-pitch', name: 'Sales Pitch', description: 'Convince potential clients' },
+    { id: 'conference-talk', name: 'Conference Talk', description: 'Academic or industry conference presentation' },
+    { id: 'wedding-toast', name: 'Wedding Toast', description: 'Heartfelt speech for special occasions' },
+    { id: 'debate', name: 'Debate/Discussion', description: 'Argue a position persuasively' },
+    { id: 'teaching', name: 'Teaching/Training', description: 'Educational presentation or workshop' },
+    { id: 'media-interview', name: 'Media Interview', description: 'TV, radio, or podcast interview' }
+  ];
+
+  // Update metrics from voice analysis and calculate WPM
   useEffect(() => {
     setMetrics(prev => ({
       ...prev,
       voiceClarity: Math.round(voiceClarity),
       confidence: Math.round(confidenceScore)
     }));
-  }, [voiceClarity, confidenceScore]);
+    
+    // Calculate real-time WPM
+    if (sessionStartTime && wordCount > 0) {
+      const elapsedMinutes = (Date.now() - sessionStartTime) / 60000;
+      const wpm = Math.round(wordCount / elapsedMinutes);
+      setCurrentWPM(wpm);
+    }
+  }, [voiceClarity, confidenceScore, sessionStartTime, wordCount]);
 
   // Session timer
   useEffect(() => {
@@ -325,14 +358,55 @@ export default function EnhancedPracticeHubFixed() {
     }
   }, [isSessionActive, wordCount, voiceClarity, confidenceScore, generateAdvancedInsight]);
 
+  // Simulate real-time body language analysis
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    
+    if (isSessionActive && isCameraActive) {
+      interval = setInterval(() => {
+        // Simulate eye contact detection (would be replaced with actual MediaPipe analysis)
+        setEyeContactScore(prev => {
+          const variation = (Math.random() - 0.5) * 10;
+          return Math.max(0, Math.min(100, prev + variation));
+        });
+        
+        // Simulate posture analysis
+        setPostureScore(prev => {
+          const variation = (Math.random() - 0.5) * 8;
+          return Math.max(0, Math.min(100, prev + variation));
+        });
+      }, 2000);
+    }
+    
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isSessionActive, isCameraActive]);
+
+  // Initialize session name
+  useEffect(() => {
+    const storedNumber = localStorage.getItem('practiceSessionNumber');
+    const num = storedNumber ? parseInt(storedNumber) : 1;
+    setSessionNumber(num);
+    setSessionName(`Practice Session ${num}`);
+  }, []);
+
   // Start session
   const startSession = async () => {
+    if (!sessionPurpose.trim()) {
+      alert("Please enter a purpose for your session");
+      return;
+    }
+    
     const now = Date.now();
     setSessionStartTime(now);
     setIsSessionActive(true);
     setIsMicActive(true);
     setAiInsights([]);
     setInsightHistory([]);
+    setIsSetupMode(false);
+    setEyeContactScore(75); // Initial baseline
+    setPostureScore(80); // Initial baseline
     
     // Auto-start camera if not already active
     if (!isCameraActive && !cameraError) {
@@ -346,6 +420,13 @@ export default function EnhancedPracticeHubFixed() {
     setSessionStartTime(null);
     setSessionDuration(0);
     setIsMicActive(false);
+    
+    // Increment session number for next session
+    const nextNumber = sessionNumber + 1;
+    localStorage.setItem('practiceSessionNumber', nextNumber.toString());
+    setSessionNumber(nextNumber);
+    setSessionName(`Practice Session ${nextNumber}`);
+    setIsSetupMode(true);
   };
 
   const formatTime = (seconds: number) => {
@@ -376,18 +457,99 @@ export default function EnhancedPracticeHubFixed() {
 
   return (
     <div className="space-y-6">
+      {/* Session Setup */}
+      {isSetupMode && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Settings className="w-5 h-5 text-blue-600" />
+              <span>Session Setup</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Session Name */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Session Name</label>
+              <input
+                type="text"
+                value={sessionName}
+                onChange={(e) => setSessionName(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter session name..."
+              />
+            </div>
+
+            {/* Session Type */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Session Type</label>
+              <div className="flex space-x-2">
+                <Button
+                  onClick={() => setSessionType('general')}
+                  variant={sessionType === 'general' ? 'default' : 'outline'}
+                  size="sm"
+                >
+                  General Practice
+                </Button>
+                <Button
+                  onClick={() => setSessionType('roleplay')}
+                  variant={sessionType === 'roleplay' ? 'default' : 'outline'}
+                  size="sm"
+                >
+                  Roleplay
+                </Button>
+              </div>
+            </div>
+
+            {/* Roleplay Selection */}
+            {sessionType === 'roleplay' && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Choose Roleplay Scenario</label>
+                <select
+                  value={selectedRoleplay}
+                  onChange={(e) => setSelectedRoleplay(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Select a scenario...</option>
+                  {roleplays.map((roleplay) => (
+                    <option key={roleplay.id} value={roleplay.id}>
+                      {roleplay.name} - {roleplay.description}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* Purpose Input */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Session Purpose</label>
+              <textarea
+                value={sessionPurpose}
+                onChange={(e) => setSessionPurpose(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-20 resize-none"
+                placeholder="What's the goal of this session? (e.g., Practice quarterly presentation, improve storytelling, work on confidence...)"
+              />
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Session Controls */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Activity className="w-5 h-5 text-blue-600" />
-              <span>Practice Session</span>
+              <span>{sessionName || "Practice Session"}</span>
             </div>
             <Badge variant={isSessionActive ? "default" : "secondary"}>
               {isSessionActive ? `${formatTime(sessionDuration)}` : "Ready"}
             </Badge>
           </CardTitle>
+          {sessionPurpose && (
+            <div className="text-sm text-gray-600 bg-blue-50 p-2 rounded">
+              <strong>Purpose:</strong> {sessionPurpose}
+            </div>
+          )}
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between">
@@ -485,61 +647,86 @@ export default function EnhancedPracticeHubFixed() {
           </Card>
         </div>
 
-        {/* Real-time Metrics */}
+        {/* Live Analysis & AI Coach */}
         <div className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm">Real-time Metrics</CardTitle>
+              <CardTitle className="text-sm">Live Video Analysis</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-3">
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span>Voice Clarity</span>
-                    <span className="font-medium">{metrics.voiceClarity}%</span>
-                  </div>
-                  <Progress value={metrics.voiceClarity} className="h-2" />
-                </div>
-                
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>Confidence</span>
-                    <span className="font-medium">{metrics.confidence}%</span>
-                  </div>
-                  <Progress value={metrics.confidence} className="h-2" />
-                </div>
-                
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
                     <span>Eye Contact</span>
-                    <span className="font-medium">{metrics.eyeContact}%</span>
+                    <span className="font-medium">{Math.round(eyeContactScore)}%</span>
                   </div>
-                  <Progress value={metrics.eyeContact} className="h-2" />
+                  <Progress value={eyeContactScore} className="h-2" />
                 </div>
                 
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span>Posture</span>
-                    <span className="font-medium">{metrics.posture}%</span>
+                    <span>Body Posture</span>
+                    <span className="font-medium">{Math.round(postureScore)}%</span>
                   </div>
-                  <Progress value={metrics.posture} className="h-2" />
+                  <Progress value={postureScore} className="h-2" />
+                </div>
+                
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span>Words Per Minute</span>
+                    <span className="font-medium">{currentWPM}</span>
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {currentWPM < 130 && "Too slow"}
+                    {currentWPM >= 130 && currentWPM <= 170 && "Good pace"}
+                    {currentWPM > 170 && "Too fast"}
+                  </div>
                 </div>
               </div>
-              
-              <div className="pt-3 border-t space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Words Spoken</span>
-                  <span className="font-medium">{wordCount}</span>
+            </CardContent>
+          </Card>
+
+          {/* AI Coach with Timestamps */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Brain className="w-4 h-4 text-purple-600" />
+                <span className="text-sm">AI Coach</span>
+                {isSessionActive && (
+                  <Badge variant="secondary" className="text-xs">Live</Badge>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 max-h-60 overflow-y-auto">
+              {aiInsights.length === 0 ? (
+                <div className="text-sm text-gray-500 italic text-center py-4">
+                  {isSessionActive ? "Analyzing your performance..." : "Start session for live coaching"}
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span>Filler Words</span>
-                  <span className="font-medium">{fillerWords.length}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>Speaking Pace</span>
-                  <span className="font-medium">{sessionDuration > 0 ? Math.round((wordCount / sessionDuration) * 60) : 0} WPM</span>
-                </div>
-              </div>
+              ) : (
+                aiInsights.slice(-3).map((insight) => (
+                  <div key={insight.id} className={`p-3 rounded-lg border ${getInsightColor(insight.type)}`}>
+                    <div className="flex items-start justify-between mb-1">
+                      <div className="flex items-center space-x-1">
+                        {getInsightIcon(insight.type)}
+                        <span className="text-xs font-medium text-gray-600">
+                          {formatTime(Math.floor((insight.timestamp - (sessionStartTime || 0)) / 1000))}
+                        </span>
+                      </div>
+                      <Badge variant={insight.priority === 'high' ? 'destructive' : 'secondary'} className="text-xs">
+                        {insight.priority}
+                      </Badge>
+                    </div>
+                    
+                    <p className="text-sm font-medium mb-1">{insight.message}</p>
+                    <p className="text-xs text-gray-600 mb-2 italic">{insight.reasoning}</p>
+                    
+                    <div className="space-y-1">
+                      <h5 className="text-xs font-medium">Quick Fix:</h5>
+                      <p className="text-xs">{insight.actionable[0]}</p>
+                    </div>
+                  </div>
+                ))
+              )}
             </CardContent>
           </Card>
         </div>
@@ -593,28 +780,46 @@ export default function EnhancedPracticeHubFixed() {
         </Card>
       )}
 
-      {/* Live Transcript */}
-      {isSessionActive && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
+      {/* Live Transcript - Always at Bottom */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
               <Volume2 className="w-5 h-5" />
               <span>Live Transcript</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="bg-gray-50 rounded-lg p-4 min-h-[100px] max-h-[200px] overflow-y-auto">
-              {transcript ? (
-                <p className="text-sm leading-relaxed">{transcript}</p>
-              ) : (
-                <p className="text-gray-400 text-sm italic">
-                  {isListening ? "Listening..." : "Start speaking to see transcript"}
-                </p>
-              )}
             </div>
-          </CardContent>
-        </Card>
-      )}
+            {isSessionActive && (
+              <div className="flex items-center space-x-2 text-sm">
+                <Badge variant="secondary">{wordCount} words</Badge>
+                <Badge variant={fillerWords.length > 5 ? "destructive" : "secondary"}>
+                  {fillerWords.length} fillers
+                </Badge>
+              </div>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="bg-gray-50 rounded-lg p-4 min-h-[120px] max-h-[200px] overflow-y-auto">
+            {transcript ? (
+              <div className="space-y-2">
+                <p className="text-sm leading-relaxed">{transcript}</p>
+                {fillerWords.length > 0 && (
+                  <div className="text-xs text-orange-600 bg-orange-50 p-2 rounded">
+                    <strong>Detected fillers:</strong> {fillerWords.slice(-10).join(", ")}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p className="text-gray-400 text-sm italic text-center py-8">
+                {isSessionActive 
+                  ? (isListening ? "🎤 Listening... Start speaking to see transcript" : "Microphone not active") 
+                  : "Start a session to see live transcript"
+                }
+              </p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
