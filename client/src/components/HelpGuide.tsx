@@ -323,8 +323,9 @@ export default function HelpGuide() {
       </div>
 
       <Tabs defaultValue="features" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-8">
+        <TabsList className="grid w-full grid-cols-4 mb-8">
           <TabsTrigger value="features">📚 Feature Guide</TabsTrigger>
+          <TabsTrigger value="terminology">📖 Terminology</TabsTrigger>
           <TabsTrigger value="quickstart">🚀 Quick Start</TabsTrigger>
           <TabsTrigger value="tips">💡 Pro Tips</TabsTrigger>
         </TabsList>
@@ -397,6 +398,206 @@ export default function HelpGuide() {
               </CardContent>
             </Card>
           ))}
+        </TabsContent>
+
+        <TabsContent value="terminology" className="space-y-6">
+          <Card>
+            <CardHeader className="bg-gradient-to-r from-green-50 to-blue-50">
+              <CardTitle className="flex items-center gap-2">
+                <BookOpen className="w-6 h-6 text-green-600" />
+                YapUp Terminology Guide
+              </CardTitle>
+              <p className="text-gray-600 text-sm">
+                Master the language of public speaking with our comprehensive terminology guide.
+              </p>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="grid gap-6">
+                
+                {/* Performance Metrics */}
+                <div className="space-y-4">
+                  <h3 className="text-xl font-bold text-gray-900 border-b pb-2">Performance Metrics</h3>
+                  <div className="grid gap-4">
+                    <div className="p-4 bg-blue-50 rounded-lg">
+                      <h4 className="font-semibold text-blue-900 mb-2">Voice Clarity Score</h4>
+                      <p className="text-gray-700 text-sm">Measures pronunciation, articulation, and overall voice quality (0-100%). Higher scores indicate clearer, more professional vocal delivery.</p>
+                    </div>
+                    <div className="p-4 bg-purple-50 rounded-lg">
+                      <h4 className="font-semibold text-purple-900 mb-2">Speaking Pace (WPM)</h4>
+                      <p className="text-gray-700 text-sm">Words Per Minute - measures speaking speed. Optimal range is 140-180 WPM for most presentations. Too fast appears nervous, too slow loses attention.</p>
+                    </div>
+                    <div className="p-4 bg-green-50 rounded-lg">
+                      <h4 className="font-semibold text-green-900 mb-2">Eye Contact Percentage</h4>
+                      <p className="text-gray-700 text-sm">Percentage of time maintaining direct camera contact. Target 60-80% for natural engagement without appearing robotic.</p>
+                    </div>
+                    <div className="p-4 bg-orange-50 rounded-lg">
+                      <h4 className="font-semibold text-orange-900 mb-2">Confidence Score</h4>
+                      <p className="text-gray-700 text-sm">Overall presence and energy assessment combining vocal strength, posture, and gesture confidence (0-100%).</p>
+                    </div>
+                    <div className="p-4 bg-red-50 rounded-lg">
+                      <h4 className="font-semibold text-red-900 mb-2">Filler Words Count</h4>
+                      <p className="text-gray-700 text-sm">Number of verbal fillers like "um," "uh," "like," "you know." Lower counts indicate more polished delivery.</p>
+                    </div>
+                    <div className="p-4 bg-indigo-50 rounded-lg">
+                      <h4 className="font-semibold text-indigo-900 mb-2">Persuasiveness Score</h4>
+                      <p className="text-gray-700 text-sm">AI-calculated potential impact and persuasive power of your message based on structure, emotion, and delivery.</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Body Language Analysis */}
+                <div className="space-y-4">
+                  <h3 className="text-xl font-bold text-gray-900 border-b pb-2">Body Language Analysis</h3>
+                  <div className="grid gap-4">
+                    <div className="p-4 bg-yellow-50 rounded-lg">
+                      <h4 className="font-semibold text-yellow-900 mb-2">Posture Score</h4>
+                      <p className="text-gray-700 text-sm">Evaluation of spine alignment, shoulder position, and overall stance stability. Good posture projects confidence and authority.</p>
+                    </div>
+                    <div className="p-4 bg-teal-50 rounded-lg">
+                      <h4 className="font-semibold text-teal-900 mb-2">Gesture Naturalness</h4>
+                      <p className="text-gray-700 text-sm">Measures how natural and purposeful hand movements appear. Includes frequency, variety, and relevance to speech content.</p>
+                    </div>
+                    <div className="p-4 bg-pink-50 rounded-lg">
+                      <h4 className="font-semibold text-pink-900 mb-2">Facial Expression Score</h4>
+                      <p className="text-gray-700 text-sm">Analysis of facial engagement, micro-expressions, and emotional variety throughout presentation.</p>
+                    </div>
+                    <div className="p-4 bg-cyan-50 rounded-lg">
+                      <h4 className="font-semibold text-cyan-900 mb-2">Gesture Frequency</h4>
+                      <p className="text-gray-700 text-sm">Rate of hand and arm movements per minute. Balanced frequency enhances message without distraction.</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Speech Analysis Terms */}
+                <div className="space-y-4">
+                  <h3 className="text-xl font-bold text-gray-900 border-b pb-2">Speech Analysis</h3>
+                  <div className="grid gap-4">
+                    <div className="p-4 bg-emerald-50 rounded-lg">
+                      <h4 className="font-semibold text-emerald-900 mb-2">Speech DNA</h4>
+                      <p className="text-gray-700 text-sm">Unique speaking personality profile based on patterns, style preferences, and delivery characteristics across multiple sessions.</p>
+                    </div>
+                    <div className="p-4 bg-violet-50 rounded-lg">
+                      <h4 className="font-semibold text-violet-900 mb-2">Pace Variation</h4>
+                      <p className="text-gray-700 text-sm">How much speaking speed changes throughout presentation. Good variation (0.6-0.9) maintains audience interest.</p>
+                    </div>
+                    <div className="p-4 bg-amber-50 rounded-lg">
+                      <h4 className="font-semibold text-amber-900 mb-2">Intonation Range</h4>
+                      <p className="text-gray-700 text-sm">Vocal pitch variety and melody patterns. Higher range (0.7-1.0) creates more engaging, expressive delivery.</p>
+                    </div>
+                    <div className="p-4 bg-lime-50 rounded-lg">
+                      <h4 className="font-semibold text-lime-900 mb-2">Pause Effectiveness</h4>
+                      <p className="text-gray-700 text-sm">Strategic use of silence for emphasis and audience processing. Effective pauses enhance message impact.</p>
+                    </div>
+                    <div className="p-4 bg-rose-50 rounded-lg">
+                      <h4 className="font-semibold text-rose-900 mb-2">Vocal Resonance</h4>
+                      <p className="text-gray-700 text-sm">Depth and richness of voice projection. Better resonance commands attention and conveys authority.</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Advanced Features */}
+                <div className="space-y-4">
+                  <h3 className="text-xl font-bold text-gray-900 border-b pb-2">Advanced Features</h3>
+                  <div className="grid gap-4">
+                    <div className="p-4 bg-sky-50 rounded-lg">
+                      <h4 className="font-semibold text-sky-900 mb-2">ROI Analyzer</h4>
+                      <p className="text-gray-700 text-sm">Return on Investment calculator predicting potential business impact and audience response to presentations.</p>
+                    </div>
+                    <div className="p-4 bg-slate-50 rounded-lg">
+                      <h4 className="font-semibold text-slate-900 mb-2">Vibe Tracker</h4>
+                      <p className="text-gray-700 text-sm">Real-time emotional intelligence monitoring measuring audience connection and emotional resonance.</p>
+                    </div>
+                    <div className="p-4 bg-stone-50 rounded-lg">
+                      <h4 className="font-semibold text-stone-900 mb-2">Adaptive Feedback Engine</h4>
+                      <p className="text-gray-700 text-sm">AI system that personalizes coaching recommendations based on learning style, progress, and individual strengths/weaknesses.</p>
+                    </div>
+                    <div className="p-4 bg-neutral-50 rounded-lg">
+                      <h4 className="font-semibold text-neutral-900 mb-2">Speech Fingerprint</h4>
+                      <p className="text-gray-700 text-sm">Unique digital signature of speaking patterns, traits, and characteristics that evolve over time with practice.</p>
+                    </div>
+                    <div className="p-4 bg-zinc-50 rounded-lg">
+                      <h4 className="font-semibold text-zinc-900 mb-2">AI Practice Roleplay</h4>
+                      <p className="text-gray-700 text-sm">Interactive simulation with AI audience members for practicing Q&A, handling objections, and audience engagement.</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Content Analysis */}
+                <div className="space-y-4">
+                  <h3 className="text-xl font-bold text-gray-900 border-b pb-2">Content Analysis</h3>
+                  <div className="grid gap-4">
+                    <div className="p-4 bg-blue-50 rounded-lg">
+                      <h4 className="font-semibold text-blue-900 mb-2">Structure Quality</h4>
+                      <p className="text-gray-700 text-sm">Assessment of introduction, body, conclusion organization and logical flow of ideas throughout presentation.</p>
+                    </div>
+                    <div className="p-4 bg-purple-50 rounded-lg">
+                      <h4 className="font-semibold text-purple-900 mb-2">Transition Effectiveness</h4>
+                      <p className="text-gray-700 text-sm">How smoothly ideas connect and flow between sections. Good transitions guide audience through your message.</p>
+                    </div>
+                    <div className="p-4 bg-green-50 rounded-lg">
+                      <h4 className="font-semibold text-green-900 mb-2">Key Message Clarity</h4>
+                      <p className="text-gray-700 text-sm">How clearly and memorably your main points are communicated. Clear messages stick with audiences.</p>
+                    </div>
+                    <div className="p-4 bg-orange-50 rounded-lg">
+                      <h4 className="font-semibold text-orange-900 mb-2">Call-to-Action Strength</h4>
+                      <p className="text-gray-700 text-sm">Effectiveness of your audience request or desired action. Strong CTAs drive results and engagement.</p>
+                    </div>
+                    <div className="p-4 bg-red-50 rounded-lg">
+                      <h4 className="font-semibold text-red-900 mb-2">Emotional Resonance</h4>
+                      <p className="text-gray-700 text-sm">How well your content connects emotionally with audience. High resonance creates lasting impact.</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Achievement System */}
+                <div className="space-y-4">
+                  <h3 className="text-xl font-bold text-gray-900 border-b pb-2">Achievement System</h3>
+                  <div className="grid gap-4">
+                    <div className="p-4 bg-yellow-50 rounded-lg">
+                      <h4 className="font-semibold text-yellow-900 mb-2">Badge Categories</h4>
+                      <p className="text-gray-700 text-sm">Delivery (vocal skills), Content (message quality), Growth (improvement), Community (social features), Themed (special occasions).</p>
+                    </div>
+                    <div className="p-4 bg-teal-50 rounded-lg">
+                      <h4 className="font-semibold text-teal-900 mb-2">Badge Rarity</h4>
+                      <p className="text-gray-700 text-sm">Common (basic achievements), Rare (challenging goals), Epic (exceptional performance), Legendary (mastery level).</p>
+                    </div>
+                    <div className="p-4 bg-pink-50 rounded-lg">
+                      <h4 className="font-semibold text-pink-900 mb-2">Learning Velocity</h4>
+                      <p className="text-gray-700 text-sm">Rate of skill improvement over time. Higher velocity indicates faster mastery and more efficient practice.</p>
+                    </div>
+                    <div className="p-4 bg-cyan-50 rounded-lg">
+                      <h4 className="font-semibold text-cyan-900 mb-2">Mastery Level</h4>
+                      <p className="text-gray-700 text-sm">Overall proficiency ranking across all speaking skills. Progresses from Beginner to Expert with consistent practice.</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Technical Terms */}
+                <div className="space-y-4">
+                  <h3 className="text-xl font-bold text-gray-900 border-b pb-2">Technical Terms</h3>
+                  <div className="grid gap-4">
+                    <div className="p-4 bg-indigo-50 rounded-lg">
+                      <h4 className="font-semibold text-indigo-900 mb-2">MediaPipe Analysis</h4>
+                      <p className="text-gray-700 text-sm">Google's computer vision framework used for real-time body language, facial expression, and gesture tracking.</p>
+                    </div>
+                    <div className="p-4 bg-emerald-50 rounded-lg">
+                      <h4 className="font-semibold text-emerald-900 mb-2">Speech Recognition API</h4>
+                      <p className="text-gray-700 text-sm">Browser technology that converts spoken words to text for real-time transcript generation and analysis.</p>
+                    </div>
+                    <div className="p-4 bg-violet-50 rounded-lg">
+                      <h4 className="font-semibold text-violet-900 mb-2">Confidence Interval</h4>
+                      <p className="text-gray-700 text-sm">Statistical range indicating reliability of speech recognition accuracy. Higher confidence means more accurate transcription.</p>
+                    </div>
+                    <div className="p-4 bg-amber-50 rounded-lg">
+                      <h4 className="font-semibold text-amber-900 mb-2">Landmark Detection</h4>
+                      <p className="text-gray-700 text-sm">Identification of key facial and body points for measuring posture, expression, and movement patterns.</p>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="quickstart" className="space-y-6">
