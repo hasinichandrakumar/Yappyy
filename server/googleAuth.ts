@@ -52,6 +52,7 @@ export async function setupGoogleAuth(app: Express) {
         },
         async (accessToken, refreshToken, profile, done) => {
           try {
+            console.log("Google OAuth callback - Profile ID:", profile.id);
             const userData = {
               id: profile.id,
               email: profile.emails?.[0]?.value || "",
@@ -61,8 +62,10 @@ export async function setupGoogleAuth(app: Express) {
             };
 
             const user = await storage.upsertUser(userData);
+            console.log("User upserted successfully:", user.id);
             return done(null, user);
           } catch (error) {
+            console.error("OAuth callback error:", error);
             return done(error, undefined);
           }
         }
@@ -70,14 +73,18 @@ export async function setupGoogleAuth(app: Express) {
     );
 
     passport.serializeUser((user: any, done) => {
+      console.log("Serializing user:", user.id);
       done(null, user.id);
     });
 
     passport.deserializeUser(async (id: string, done) => {
       try {
+        console.log("Deserializing user ID:", id);
         const user = await storage.getUser(id);
+        console.log("Found user:", user ? "yes" : "no");
         done(null, user);
       } catch (error) {
+        console.error("Deserialize error:", error);
         done(error, null);
       }
     });
@@ -87,10 +94,10 @@ export async function setupGoogleAuth(app: Express) {
 
     app.get(
       "/api/auth/google/callback",
-      passport.authenticate("google", { failureRedirect: "/" }),
-      (req, res) => {
-        res.redirect("/");
-      }
+      passport.authenticate("google", { 
+        successRedirect: "/", 
+        failureRedirect: "/" 
+      })
     );
 
     // Logout route

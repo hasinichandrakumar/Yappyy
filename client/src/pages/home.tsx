@@ -34,7 +34,7 @@ import yapUpLogo from "@assets/YapUp-2_1749483329460.png";
 
 export default function Home() {
   const [isHovered, setIsHovered] = useState<string | null>(null);
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const heroRef = useRef(null);
   const featuresRef = useRef(null);
   const isHeroInView = useInView(heroRef);
