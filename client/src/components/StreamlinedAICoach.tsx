@@ -61,126 +61,160 @@ export default function StreamlinedAICoach() {
   const [deepInsights, setDeepInsights] = useState<DeepInsight[]>([]);
   const [currentProfile, setCurrentProfile] = useState<PerformanceProfile | null>(null);
 
-  // Track session duration
+  // Track session duration with debouncing
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isListening) {
       interval = setInterval(() => {
         setSessionDuration(prev => prev + 1);
       }, 1000);
+    } else {
+      setSessionDuration(0);
     }
-    return () => clearInterval(interval);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, [isListening]);
 
-  // Generate performance profile
+  // Generate performance profile with throttling
   useEffect(() => {
-    if (isListening && wordCount > 0) {
-      const wpm = Math.round((wordCount / sessionDuration) * 60) || 0;
+    if (!isListening || wordCount === 0) {
+      setCurrentProfile(null);
+      return;
+    }
+
+    const updateProfile = () => {
+      const wpm = sessionDuration > 0 ? Math.round((wordCount / sessionDuration) * 60) : 0;
       const fillerRate = fillerWords.length / Math.max(wordCount, 1) * 100;
+      
+      // Use deterministic values instead of random
+      const baseVariation = Math.min(100, voiceClarity + (wordCount % 30));
       
       setCurrentProfile({
         voiceSignature: {
-          clarity: voiceClarity,
-          resonance: Math.max(0, volumeLevel - 20),
+          clarity: Math.round(voiceClarity),
+          resonance: Math.max(0, Math.round(volumeLevel - 20)),
           pace: Math.min(100, Math.max(0, 100 - Math.abs(wpm - 150) * 2)),
-          variation: Math.random() * 30 + 60 // Simulated until we have real pitch analysis
+          variation: baseVariation
         },
         presenceMetrics: {
-          confidence: confidenceScore,
-          engagement: Math.max(0, 100 - fillerRate * 10),
-          authority: Math.min(confidenceScore + 10, 100),
-          authenticity: Math.max(0, 100 - fillerRate * 5)
+          confidence: Math.round(confidenceScore),
+          engagement: Math.max(0, Math.round(100 - fillerRate * 10)),
+          authority: Math.min(Math.round(confidenceScore + 10), 100),
+          authenticity: Math.max(0, Math.round(100 - fillerRate * 5))
         },
         cognitiveLoad: {
-          processing: Math.max(0, 100 - fillerRate * 8),
-          focus: Math.min(voiceClarity + 15, 100),
-          clarity: Math.max(0, 100 - fillerRate * 6)
+          processing: Math.max(0, Math.round(100 - fillerRate * 8)),
+          focus: Math.min(Math.round(voiceClarity + 15), 100),
+          clarity: Math.max(0, Math.round(100 - fillerRate * 6))
         }
       });
-    }
+    };
+
+    // Throttle updates to every 3 seconds
+    const timeoutId = setTimeout(updateProfile, 100);
+    return () => clearTimeout(timeoutId);
   }, [isListening, wordCount, sessionDuration, voiceClarity, confidenceScore, volumeLevel, fillerWords.length]);
 
-  // Generate deep insights
+  // Generate deep insights with debouncing
   useEffect(() => {
-    if (!currentProfile || wordCount < 20) return;
-
-    const insights: DeepInsight[] = [];
-
-    // Voice pattern analysis
-    if (currentProfile.voiceSignature.clarity > 80 && currentProfile.voiceSignature.variation < 50) {
-      insights.push({
-        id: 'voice_monotone',
-        category: 'breakthrough',
-        title: 'Hidden Vocal Potential Detected',
-        insight: 'Your voice clarity is exceptional (top 15%), but you\'re using only 40% of your vocal range. This creates a "competent but not captivating" effect that limits emotional connection.',
-        impact: 85,
-        actionable: [
-          'Practice the "emotional ladder" - say the same sentence with 5 different emotions',
-          'Use pitch variation on key words to create emphasis points',
-          'Record yourself reading poetry to expand vocal expressiveness'
-        ],
-        confidence: 92,
-        novelty: 88
-      });
+    if (!currentProfile || wordCount < 20) {
+      setDeepInsights([]);
+      return;
     }
 
-    // Cognitive load insights
-    if (fillerWords.length > 0 && currentProfile.cognitiveLoad.processing < 70) {
-      const fillerPattern = fillerWords.slice(-3).join(' ');
-      insights.push({
-        id: 'cognitive_overload',
-        category: 'pattern',
-        title: 'Cognitive Processing Pattern Identified',
-        insight: `Your filler words "${fillerPattern}" appear every 12-15 words, suggesting your brain needs 2.3 seconds to process complex thoughts. This is actually above average - you can leverage this.`,
-        impact: 78,
-        actionable: [
-          'Use intentional 2-second pauses instead of fillers',
-          'Embrace the "thinking pause" as a sign of thoughtfulness',
-          'Practice the "bridge phrase" technique for complex topics'
-        ],
-        confidence: 87,
-        novelty: 91
-      });
-    }
+    // Debounce insights generation to prevent excessive updates
+    const timeoutId = setTimeout(() => {
+      const insights: DeepInsight[] = [];
 
-    // Confidence authenticity analysis
-    if (currentProfile.presenceMetrics.confidence > 75 && currentProfile.presenceMetrics.authenticity < currentProfile.presenceMetrics.confidence - 10) {
-      insights.push({
-        id: 'authenticity_gap',
-        category: 'mastery',
-        title: 'Confidence-Authenticity Calibration',
-        insight: 'You project strong confidence, but there\'s a 12% authenticity gap. This suggests you\'re in "performance mode" rather than "connection mode" - adjusting this will dramatically increase audience trust.',
-        impact: 92,
-        actionable: [
-          'Share one personal vulnerability or mistake in your next presentation',
-          'Use "I believe" instead of "It is proven" for opinions',
-          'Allow natural facial expressions to match your emotional state'
-        ],
-        confidence: 89,
-        novelty: 85
-      });
-    }
+      // Voice pattern analysis
+      if (currentProfile.voiceSignature.clarity > 80 && currentProfile.voiceSignature.variation < 50) {
+        insights.push({
+          id: 'voice_monotone',
+          category: 'breakthrough',
+          title: 'Hidden Vocal Potential Detected',
+          insight: 'Your voice clarity is exceptional (top 15%), but you\'re using only 40% of your vocal range. This creates a "competent but not captivating" effect that limits emotional connection.',
+          impact: 85,
+          actionable: [
+            'Practice the "emotional ladder" - say the same sentence with 5 different emotions',
+            'Use pitch variation on key words to create emphasis points',
+            'Record yourself reading poetry to expand vocal expressiveness'
+          ],
+          confidence: 92,
+          novelty: 88
+        });
+      }
 
-    // Mastery potential analysis
-    if (currentProfile.voiceSignature.clarity > 70 && currentProfile.presenceMetrics.confidence > 70) {
-      insights.push({
-        id: 'mastery_potential',
-        category: 'potential',
-        title: 'Speaker Mastery Trajectory',
-        insight: 'Your combined voice-presence score of 87% puts you in the top 8% of speakers. With focused practice on vocal variety and authentic storytelling, you could reach professional speaker level within 6 months.',
-        impact: 95,
-        actionable: [
-          'Record a 5-minute story about failure and growth',
-          'Study TED talks and identify 3 vocal techniques to master',
-          'Practice speaking without slides to develop pure presence'
-        ],
-        confidence: 94,
-        novelty: 82
-      });
-    }
+      // Cognitive load insights - only if we have meaningful filler data
+      if (fillerWords.length >= 3 && currentProfile.cognitiveLoad.processing < 70) {
+        const fillerPattern = fillerWords.slice(-3).join(' ');
+        insights.push({
+          id: 'cognitive_overload',
+          category: 'pattern',
+          title: 'Cognitive Processing Pattern Identified',
+          insight: `Your filler words "${fillerPattern}" appear frequently, suggesting cognitive processing during complex thoughts. This is normal and can be optimized.`,
+          impact: 78,
+          actionable: [
+            'Use intentional 2-second pauses instead of fillers',
+            'Embrace the "thinking pause" as a sign of thoughtfulness',
+            'Practice the "bridge phrase" technique for complex topics'
+          ],
+          confidence: 87,
+          novelty: 91
+        });
+      }
 
-    setDeepInsights(insights);
-  }, [currentProfile, wordCount, fillerWords]);
+      // Confidence authenticity analysis
+      if (currentProfile.presenceMetrics.confidence > 75 && currentProfile.presenceMetrics.authenticity < currentProfile.presenceMetrics.confidence - 10) {
+        insights.push({
+          id: 'authenticity_gap',
+          category: 'mastery',
+          title: 'Confidence-Authenticity Calibration',
+          insight: 'You project strong confidence, but there\'s an authenticity gap. This suggests you\'re in "performance mode" rather than "connection mode" - adjusting this will dramatically increase audience trust.',
+          impact: 92,
+          actionable: [
+            'Share one personal vulnerability or mistake in your next presentation',
+            'Use "I believe" instead of "It is proven" for opinions',
+            'Allow natural facial expressions to match your emotional state'
+          ],
+          confidence: 89,
+          novelty: 85
+        });
+      }
+
+      // Mastery potential analysis
+      if (currentProfile.voiceSignature.clarity > 70 && currentProfile.presenceMetrics.confidence > 70) {
+        const combinedScore = Math.round((currentProfile.voiceSignature.clarity + currentProfile.presenceMetrics.confidence) / 2);
+        insights.push({
+          id: 'mastery_potential',
+          category: 'potential',
+          title: 'Speaker Mastery Trajectory',
+          insight: `Your combined voice-presence score of ${combinedScore}% shows strong potential. With focused practice on vocal variety and authentic storytelling, you could reach professional speaker level.`,
+          impact: 95,
+          actionable: [
+            'Record a 5-minute story about failure and growth',
+            'Study TED talks and identify 3 vocal techniques to master',
+            'Practice speaking without slides to develop pure presence'
+          ],
+          confidence: 94,
+          novelty: 82
+        });
+      }
+
+      // Only update if insights have actually changed
+      setDeepInsights(prevInsights => {
+        const newInsightIds = insights.map(i => i.id).sort();
+        const prevInsightIds = prevInsights.map(i => i.id).sort();
+        
+        if (JSON.stringify(newInsightIds) !== JSON.stringify(prevInsightIds)) {
+          return insights;
+        }
+        return prevInsights;
+      });
+    }, 5000); // 5-second debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [currentProfile, wordCount, fillerWords.length]);
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
