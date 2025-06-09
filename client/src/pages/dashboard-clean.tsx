@@ -55,6 +55,21 @@ export default function Dashboard() {
     }
   });
 
+  // Reset onboarding mutation (for testing)
+  const resetOnboardingMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch('/api/user/reset-onboarding', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      if (!response.ok) throw new Error('Failed to reset onboarding');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+    }
+  });
+
   // Check if user needs onboarding when user data loads
   useEffect(() => {
     if (user && !(user as any)?.hasCompletedOnboarding) {
@@ -93,6 +108,15 @@ export default function Dashboard() {
                 onClick={() => window.location.href = '/profile'}
               >
                 <User className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => resetOnboardingMutation.mutate()}
+                className="text-blue-600 hover:text-blue-800"
+                title="Experience the new user tutorial"
+              >
+                Tutorial
               </Button>
               <Button 
                 variant="outline" 

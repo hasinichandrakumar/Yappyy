@@ -54,16 +54,23 @@ export async function setupGoogleAuth(app: Express) {
         async (accessToken, refreshToken, profile, done) => {
           try {
             console.log("Google OAuth callback - Profile ID:", profile.id);
+            
+            // Check if this is a new user
+            const existingUser = await storage.getUser(profile.id);
+            const isNewUser = !existingUser;
+            
             const userData = {
               id: profile.id,
               email: profile.emails?.[0]?.value || "",
               firstName: profile.name?.givenName || "",
               lastName: profile.name?.familyName || "",
               profileImageUrl: profile.photos?.[0]?.value || "",
+              // Only set onboarding to false for new users
+              ...(isNewUser ? { hasCompletedOnboarding: false } : {})
             };
 
             const user = await storage.upsertUser(userData);
-            console.log("User upserted successfully:", user.id);
+            console.log("User upserted successfully:", user.id, "New user:", isNewUser);
             return done(null, user);
           } catch (error) {
             console.error("OAuth callback error:", error);
