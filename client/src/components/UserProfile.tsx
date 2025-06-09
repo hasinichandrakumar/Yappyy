@@ -116,10 +116,10 @@ export default function UserProfile() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Profile & Settings</h1>
-        <p className="text-gray-600 mt-2">Manage your account and personalize your speaking journey</p>
+    <ProfileLayout>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold">Profile Information</h1>
+        <p className="text-gray-600 mt-2">Manage your personal information and speaking preferences</p>
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">
@@ -411,6 +411,6 @@ export default function UserProfile() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+    </ProfileLayout>
   );
 }
