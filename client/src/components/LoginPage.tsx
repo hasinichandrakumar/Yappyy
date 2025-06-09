@@ -5,7 +5,7 @@ import yapUpLogoImage from "@assets/YapUp-2_1749483329460.png";
 
 export default function LoginPage() {
   const handleLogin = () => {
-    window.location.href = '/api/login';
+    window.location.href = '/api/auth/google';
   };
 
   return (
@@ -53,7 +53,7 @@ export default function LoginPage() {
             size="lg"
           >
             <LogIn className="w-5 h-5" />
-            <span>Start Demo Session</span>
+            <span>Continue with Google</span>
           </Button>
 
           <p className="text-xs text-gray-500 text-center">

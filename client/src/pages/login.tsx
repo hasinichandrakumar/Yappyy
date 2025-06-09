@@ -20,7 +20,7 @@ export default function LoginPage() {
 
   const handleLogin = () => {
     setIsLoading(true);
-    window.location.href = "/api/login";
+    window.location.href = "/api/auth/google";
   };
 
   return (
@@ -71,7 +71,7 @@ export default function LoginPage() {
                   className="w-full bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 h-12 text-lg font-medium shadow-sm"
                 >
                   <Chrome className="w-5 h-5 mr-3" />
-                  {isLoading ? "Connecting..." : "Start Demo Session"}
+                  {isLoading ? "Connecting..." : "Continue with Google"}
                 </Button>
 
                 <div className="text-center text-sm text-gray-500">

@@ -2,18 +2,17 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertPracticeSessionSchema, insertCoachingFeedbackSchema } from "@shared/schema";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupGoogleAuth, requireAuth } from "./googleAuth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
-  // Setup Replit Authentication
-  await setupAuth(app);
+  // Setup Google Authentication
+  await setupGoogleAuth(app);
 
   // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  app.get('/api/auth/user', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
+      const user = req.user;
       res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
