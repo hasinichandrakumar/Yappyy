@@ -25,7 +25,7 @@ import {
   type InsertUserStreak
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (required for authentication)
@@ -189,9 +189,11 @@ export class DatabaseStorage implements IStorage {
     const existingPrefs = await db
       .select()
       .from(userPreferences)
-      .where(eq(userPreferences.userId, preference.userId))
-      .where(eq(userPreferences.category, preference.category))
-      .where(eq(userPreferences.setting, preference.setting));
+      .where(and(
+        eq(userPreferences.userId, preference.userId),
+        eq(userPreferences.category, preference.category),
+        eq(userPreferences.setting, preference.setting)
+      ));
 
     if (existingPrefs.length > 0) {
       const [updated] = await db
@@ -212,9 +214,11 @@ export class DatabaseStorage implements IStorage {
   async deleteUserPreference(userId: string, category: string, setting: string): Promise<void> {
     await db
       .delete(userPreferences)
-      .where(eq(userPreferences.userId, userId))
-      .where(eq(userPreferences.category, category))
-      .where(eq(userPreferences.setting, setting));
+      .where(and(
+        eq(userPreferences.userId, userId),
+        eq(userPreferences.category, category),
+        eq(userPreferences.setting, setting)
+      ));
   }
 
   // User achievements operations
@@ -256,8 +260,10 @@ export class DatabaseStorage implements IStorage {
     const existingStreaks = await db
       .select()
       .from(userStreaks)
-      .where(eq(userStreaks.userId, userId))
-      .where(eq(userStreaks.streakType, streakType));
+      .where(and(
+        eq(userStreaks.userId, userId),
+        eq(userStreaks.streakType, streakType)
+      ));
 
     if (existingStreaks.length > 0) {
       const [updated] = await db

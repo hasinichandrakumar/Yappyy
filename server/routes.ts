@@ -20,6 +20,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update user profile
+  app.patch('/api/user/profile', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const updates = req.body;
+      const updatedUser = await storage.updateUserProfile(userId, updates);
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user profile:", error);
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
+  // Get user preferences
+  app.get('/api/user/preferences', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const preferences = await storage.getUserPreferences(userId);
+      res.json(preferences);
+    } catch (error) {
+      console.error("Error fetching user preferences:", error);
+      res.status(500).json({ message: "Failed to fetch preferences" });
+    }
+  });
+
+  // Update user preference
+  app.put('/api/user/preferences', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { category, setting, value } = req.body;
+      const preference = await storage.upsertUserPreference({
+        userId,
+        category,
+        setting,
+        value
+      });
+      res.json(preference);
+    } catch (error) {
+      console.error("Error updating user preference:", error);
+      res.status(500).json({ message: "Failed to update preference" });
+    }
+  });
+
+  // Get user achievements
+  app.get('/api/user/achievements', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const achievements = await storage.getUserAchievements(userId);
+      res.json(achievements);
+    } catch (error) {
+      console.error("Error fetching user achievements:", error);
+      res.status(500).json({ message: "Failed to fetch achievements" });
+    }
+  });
+
+  // Get user streaks
+  app.get('/api/user/streaks', requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const streaks = await storage.getUserStreaks(userId);
+      res.json(streaks);
+    } catch (error) {
+      console.error("Error fetching user streaks:", error);
+      res.status(500).json({ message: "Failed to fetch streaks" });
+    }
+  });
+
   // Get user practice sessions
   app.get("/api/practice-sessions", async (req: any, res) => {
     try {
