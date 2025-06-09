@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,27 +7,16 @@ import { motion, useAnimation, useInView } from "framer-motion";
 import { useRef } from "react";
 import { 
   Mic, 
-  Video, 
   Brain, 
   TrendingUp, 
-  Users, 
-  Award, 
   PlayCircle, 
-  MessageCircle,
   Eye,
   Volume2,
   BarChart3,
   Sparkles,
   Bot,
-  Zap,
-  Waves,
-  ArrowUpRight,
-  Globe,
   Lightbulb,
-  Settings,
-  Shield,
-  Activity,
-  FileText
+  Globe
 } from "lucide-react";
 import yapUpLogo from "@assets/YapUp-2_1749483329460.png";
 
@@ -41,7 +29,6 @@ export default function Home() {
   const isFeaturesInView = useInView(featuresRef);
 
   const handleStartPracticing = () => {
-    // Redirect to Google OAuth for authentication
     window.location.href = "/api/auth/google";
   };
 
@@ -88,17 +75,6 @@ export default function Home() {
       stats: "Support for 25+ cultural communication styles",
       color: "from-indigo-500 to-purple-500"
     }
-  ];
-
-  const speechTypes = [
-    "School Presentations",
-    "TED Talks", 
-    "Business Pitches",
-    "Conference Talks",
-    "Wedding Speeches",
-    "Job Interviews",
-    "Sales Presentations",
-    "Training Sessions"
   ];
 
   const metrics = [
@@ -355,33 +331,6 @@ export default function Home() {
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
       >
-        {/* Animated background pattern */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-full">
-            {Array.from({length: 6}).map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute w-32 h-32 border border-[#0BF9EA]/10 rounded-full opacity-5"
-                style={{
-                  left: `${20 + i * 15}%`,
-                  top: `${10 + i * 20}%`,
-                }}
-                animate={{
-                  scale: [1, 1.2, 1],
-                  opacity: [0.02, 0.08, 0.02],
-                  rotate: [0, 180, 360],
-                }}
-                transition={{
-                  duration: 8 + i,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                  delay: i * 0.5,
-                }}
-              />
-            ))}
-          </div>
-        </div>
-
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div 
             className="text-center mb-16"
@@ -471,246 +420,9 @@ export default function Home() {
         </div>
       </motion.section>
 
-      {/* Mission/About Us Section */}
-      <section className="py-20 bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <Badge className="mb-4 bg-[#0BF9EA]/10 text-[#0BF9EA] px-4 py-2">Our Mission</Badge>
-            <h2 className="text-4xl font-bold text-gray-900 mb-6">
-              Unlock Your True Potential Through Masterful Communication
-            </h2>
-            <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-              Public speaking is the ultimate multiplier of human influence. It shapes careers, builds movements, 
-              and transforms ideas into reality. Yet for millions, fear and lack of skill in communication becomes 
-              the invisible barrier that keeps their true potential locked away.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8">
-              <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-[#0BF9EA] to-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Shield className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">The Hidden Cost of Poor Communication</h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    Studies show that 75% of people fear public speaking more than death itself. This fear doesn't just affect presentations—it limits career advancement, 
-                    reduces leadership opportunities, and prevents brilliant ideas from reaching the world.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-[#0BF9EA] to-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Lightbulb className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">The Power of Influential Speaking</h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    Great speakers don't just communicate—they inspire action, change minds, and create lasting impact. 
-                    From boardroom presentations to wedding toasts, masterful communication opens doors that talent alone cannot.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-[#0BF9EA] to-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <ArrowUpRight className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Breaking Through the Barrier</h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    We believe every person has something valuable to share with the world. Our AI-powered platform doesn't just 
-                    teach speaking skills—it systematically dismantles the barriers between your potential and your impact.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="relative">
-              <div className="bg-white rounded-2xl shadow-2xl p-8 border border-gray-100">
-                <div className="text-center mb-6">
-                  <Globe className="w-16 h-16 mx-auto text-[#0BF9EA] mb-4" />
-                  <h4 className="text-2xl font-bold text-gray-900 mb-2">Our Vision</h4>
-                </div>
-                <blockquote className="text-lg text-gray-700 italic leading-relaxed text-center">
-                  "A world where every person can confidently share their ideas, influence positive change, 
-                  and unlock opportunities through the power of masterful communication."
-                </blockquote>
-                <div className="mt-8 grid grid-cols-2 gap-4 text-center">
-                  <div className="bg-[#0BF9EA]/10 rounded-lg p-4">
-                    <div className="text-2xl font-bold text-[#0BF9EA]">10M+</div>
-                    <div className="text-sm text-gray-600">Lives Transformed</div>
-                  </div>
-                  <div className="bg-[#0BF9EA]/10 rounded-lg p-4">
-                    <div className="text-2xl font-bold text-[#0BF9EA]">100%</div>
-                    <div className="text-sm text-gray-600">Confidence Boost</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Core Features Showcase */}
-      <section className="py-20 bg-gradient-to-br from-gray-50 to-[#0BF9EA]/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="feature-title mb-4">
-              Complete <span className="highlight-word">AI-Powered</span> Speaking Assistant
-            </h2>
-            <p className="creative-text max-w-3xl mx-auto">
-              Everything you need to master public speaking in one intelligent platform.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8 mb-16">
-            {/* Real-Time Analysis */}
-            <Card className="group hover:shadow-xl transition-all duration-500 border-0 bg-white/80 backdrop-blur-sm">
-              <CardContent className="p-8">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-[#0BF9EA] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <Activity className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Real-Time Speech Analysis</h3>
-                <p className="text-gray-600 mb-4">Live monitoring of voice clarity, pace, volume, and confidence with instant feedback</p>
-                <div className="space-y-2 text-sm text-gray-500">
-                  <div className="flex items-center">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                    Words per minute tracking
-                  </div>
-                  <div className="flex items-center">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-                    Voice clarity analysis
-                  </div>
-                  <div className="flex items-center">
-                    <div className="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
-                    Confidence scoring
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Body Language Detection */}
-            <Card className="group hover:shadow-xl transition-all duration-500 border-0 bg-white/80 backdrop-blur-sm">
-              <CardContent className="p-8">
-                <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-teal-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <Eye className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Advanced Body Language AI</h3>
-                <p className="text-gray-600 mb-4">MediaPipe-powered analysis of posture, gestures, and eye contact patterns</p>
-                <div className="space-y-2 text-sm text-gray-500">
-                  <div className="flex items-center">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                    Posture monitoring
-                  </div>
-                  <div className="flex items-center">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-                    Gesture analysis
-                  </div>
-                  <div className="flex items-center">
-                    <div className="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
-                    Eye contact tracking
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Smart Templates */}
-            <Card className="group hover:shadow-xl transition-all duration-500 border-0 bg-white/80 backdrop-blur-sm">
-              <CardContent className="p-8">
-                <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <FileText className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Professional Speech Templates</h3>
-                <p className="text-gray-600 mb-4">Unlimited free templates for every scenario with AI-powered customization</p>
-                <div className="space-y-2 text-sm text-gray-500">
-                  <div className="flex items-center">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                    TED Talks & Keynotes
-                  </div>
-                  <div className="flex items-center">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-                    Business Presentations
-                  </div>
-                  <div className="flex items-center">
-                    <div className="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
-                    Wedding & Social Speeches
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Advanced Features Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="text-center p-6 hover:shadow-lg transition-all duration-300 bg-white/70 backdrop-blur-sm">
-              <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-red-500 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                <Zap className="w-6 h-6 text-white" />
-              </div>
-              <h4 className="font-semibold text-gray-900 mb-2">Vibe Tracker</h4>
-              <p className="text-sm text-gray-600">Emotional engagement and energy level monitoring</p>
-            </Card>
-
-            <Card className="text-center p-6 hover:shadow-lg transition-all duration-300 bg-white/70 backdrop-blur-sm">
-              <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                <ArrowUpRight className="w-6 h-6 text-white" />
-              </div>
-              <h4 className="font-semibold text-gray-900 mb-2">ROI Analyzer</h4>
-              <p className="text-sm text-gray-600">Measure speech impact and persuasiveness</p>
-            </Card>
-
-            <Card className="text-center p-6 hover:shadow-lg transition-all duration-300 bg-white/70 backdrop-blur-sm">
-              <div className="w-12 h-12 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                <Brain className="w-6 h-6 text-white" />
-              </div>
-              <h4 className="font-semibold text-gray-900 mb-2">Speech DNA</h4>
-              <p className="text-sm text-gray-600">Discover your unique speaking personality</p>
-            </Card>
-
-            <Card className="text-center p-6 hover:shadow-lg transition-all duration-300 bg-white/70 backdrop-blur-sm">
-              <div className="w-12 h-12 bg-gradient-to-br from-pink-400 to-purple-500 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                <Award className="w-6 h-6 text-white" />
-              </div>
-              <h4 className="font-semibold text-gray-900 mb-2">Badge System</h4>
-              <p className="text-sm text-gray-600">Earn achievements as you master skills</p>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Speech Types Section */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="feature-title mb-4">
-              Tailored for Every <span className="highlight-word">Speaking Scenario</span>
-            </h2>
-            <p className="creative-text max-w-3xl mx-auto">
-              Get purpose-specific feedback and coaching for any type of <span className="highlight-word">presentation</span> or speech.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {speechTypes.map((type, index) => (
-              <Card key={index} className="group hover:shadow-lg transition-all duration-300 border-2 border-gray-100 hover:border-[#0BF9EA]/20">
-                <CardContent className="p-6 text-center">
-                  <div className="w-12 h-12 mx-auto mb-4 bg-gradient-to-br from-gray-100 to-gray-200 group-hover:from-[#0BF9EA]/10 group-hover:to-blue-100 rounded-full flex items-center justify-center transition-all duration-300">
-                    <Users className="w-6 h-6 text-gray-600 group-hover:text-[#0BF9EA]" />
-                  </div>
-                  <h3 className="font-semibold text-gray-900 text-sm">{type}</h3>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-br from-blue-500 via-cyan-400 to-blue-600">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <Award className="w-16 h-16 mx-auto mb-8 text-white/80" />
           <h2 className="text-4xl font-bold text-white mb-6 floating-text">
             Ready to Transform Your <span className="bg-white/20 px-3 py-1 rounded-lg">Speaking Skills</span>?
           </h2>
@@ -739,7 +451,7 @@ export default function Home() {
             className="w-16 h-16 mx-auto mb-6 rounded-lg"
           />
           <p className="text-gray-400 mb-6">
-            Empowering speakers worldwide with intelligent feedback and coaching.
+            Empowering speakers worldwide with AI-powered intelligent feedback and coaching.
           </p>
           <div className="flex justify-center space-x-8 text-sm text-gray-400">
             <span>Privacy Policy</span>
