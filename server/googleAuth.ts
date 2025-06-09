@@ -22,14 +22,15 @@ export function getSession() {
   });
   
   return session({
-    secret: process.env.SESSION_SECRET || "your-secret-key",
+    secret: process.env.SESSION_SECRET!,
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: false, // Set to false for development
       maxAge: sessionTtl,
+      sameSite: 'lax'
     },
   });
 }

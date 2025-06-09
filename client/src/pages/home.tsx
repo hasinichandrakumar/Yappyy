@@ -41,8 +41,17 @@ export default function Home() {
   const isFeaturesInView = useInView(featuresRef);
 
   const handleStartPracticing = () => {
-    // Redirect to Google OAuth for authentication
-    window.location.href = "/api/auth/google";
+    if (isAuthenticated) {
+      // Redirect to dashboard for authenticated users
+      window.location.href = "/dashboard";
+    } else {
+      // Redirect to Google OAuth for authentication
+      window.location.href = "/api/auth/google";
+    }
+  };
+
+  const handleLogout = () => {
+    window.location.href = "/api/auth/logout";
   };
 
   const advancedFeatures = [
@@ -209,6 +218,16 @@ export default function Home() {
             animate={isHeroInView ? { y: 0, opacity: 1 } : {}}
             transition={{ duration: 1, delay: 0.4 }}
           >
+            {isAuthenticated && user ? (
+              <motion.span 
+                className="block text-2xl md:text-3xl font-medium text-gray-700 mb-4"
+                initial={{ opacity: 0, y: 20 }}
+                animate={isHeroInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.8, delay: 0.5 }}
+              >
+                Hi {(user as any)?.firstName || (user as any)?.email?.split('@')[0] || 'there'}! 👋
+              </motion.span>
+            ) : null}
             <motion.span 
               className="block hero-title floating-text yapup-gradient"
               initial={{ opacity: 0, scale: 0.8 }}
@@ -223,7 +242,7 @@ export default function Home() {
               animate={isHeroInView ? { opacity: 1, y: 0 } : {}}
               transition={{ delay: 1.0, duration: 0.8 }}
             >
-              Master Your <span className="highlight-word">Public Speaking</span>
+              {isAuthenticated ? "Continue Your" : "Master Your"} <span className="highlight-word">Public Speaking</span>
             </motion.span>
           </motion.h1>
           
@@ -282,7 +301,7 @@ export default function Home() {
           </motion.div>
           
           <motion.div 
-            className="flex justify-center mb-16"
+            className="flex justify-center gap-4 mb-16"
             initial={{ y: 50, opacity: 0 }}
             animate={isHeroInView ? { y: 0, opacity: 1 } : {}}
             transition={{ duration: 0.8, delay: 1.2 }}
@@ -301,10 +320,21 @@ export default function Home() {
               onClick={handleStartPracticing}
             >
               <Button size="lg" className="gradient-bg text-white hover:opacity-90 shadow-xl px-8 py-4 text-lg font-semibold tracking-wide purple-glow">
-                Start Your Free Session
+                {isAuthenticated ? "Go to Dashboard" : "Start Your Free Session"}
                 <PlayCircle className="w-5 h-5 ml-3" />
               </Button>
             </motion.div>
+            {isAuthenticated && (
+              <motion.div
+                whileHover={{ scale: 1.05, y: -5 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleLogout}
+              >
+                <Button variant="outline" size="lg" className="bg-white/90 text-gray-700 hover:bg-gray-50 shadow-xl px-8 py-4 text-lg font-semibold tracking-wide">
+                  Logout
+                </Button>
+              </motion.div>
+            )}
           </motion.div>
 
           {/* Real-time Metrics Preview */}
