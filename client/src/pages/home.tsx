@@ -709,7 +709,7 @@ export default function Home() {
             Join thousands of speakers who have improved their presentation skills with our <span className="bg-white/20 px-2 py-1 rounded">AI-powered coaching</span> platform.
           </p>
           <Link href="/dashboard">
-            <Button size="lg" className="bg-white text-[#0BF9EA] hover:bg-gray-100 shadow-xl px-12 py-4 text-lg font-semibold">
+            <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 shadow-xl px-12 py-4 text-lg font-semibold">
               Start Your Journey
               <PlayCircle className="w-5 h-5 ml-3" />
             </Button>
