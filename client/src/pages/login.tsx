@@ -18,9 +18,9 @@ import {
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleGoogleLogin = () => {
+  const handleLogin = () => {
     setIsLoading(true);
-    window.location.href = "/api/auth/google";
+    window.location.href = "/api/login";
   };
 
   return (
@@ -66,12 +66,12 @@ export default function LoginPage() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <Button 
-                  onClick={handleGoogleLogin}
+                  onClick={handleLogin}
                   disabled={isLoading}
                   className="w-full bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 h-12 text-lg font-medium shadow-sm"
                 >
                   <Chrome className="w-5 h-5 mr-3" />
-                  {isLoading ? "Connecting..." : "Continue with Google"}
+                  {isLoading ? "Connecting..." : "Start Demo Session"}
                 </Button>
 
                 <div className="text-center text-sm text-gray-500">
@@ -179,7 +179,7 @@ export default function LoginPage() {
                 Get instant access to AI-powered coaching, advanced analytics, and personalized improvement plans.
               </p>
               <Button 
-                onClick={handleGoogleLogin}
+                onClick={handleLogin}
                 disabled={isLoading}
                 className="bg-white text-purple-600 hover:bg-gray-100 px-8 py-3 text-lg font-semibold shadow-lg"
               >
