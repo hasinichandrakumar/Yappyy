@@ -102,20 +102,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Reset onboarding (for testing)
-  app.post('/api/user/reset-onboarding', requireAuth, async (req: any, res) => {
-    try {
-      const userId = req.user.id;
-      const updatedUser = await storage.updateUserProfile(userId, {
-        hasCompletedOnboarding: false,
-        onboardingCompletedAt: null
-      });
-      res.json(updatedUser);
-    } catch (error) {
-      console.error("Error resetting onboarding:", error);
-      res.status(500).json({ message: "Failed to reset onboarding" });
-    }
-  });
+
 
   // Get user practice sessions
   app.get("/api/practice-sessions", async (req: any, res) => {
