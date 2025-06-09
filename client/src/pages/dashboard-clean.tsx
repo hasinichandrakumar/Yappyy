@@ -21,6 +21,8 @@ import EnhancedTemplateMarketplace from "@/components/EnhancedTemplateMarketplac
 import HelpGuide from "@/components/HelpGuide";
 import PostSessionAnalysis from "@/components/PostSessionAnalysis";
 import WelcomeOnboarding from "@/components/WelcomeOnboarding";
+import DailyGoalWidget from "@/components/DailyGoalWidget";
+import WelcomeBackWidget from "@/components/WelcomeBackWidget";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -191,7 +193,11 @@ export default function Dashboard() {
           {/* Tab Content */}
           <div className="mt-6">
             <TabsContent value="overview" className="mt-0">
-              <EnhancedPracticeHubFixed />
+              <div className="space-y-6">
+                <WelcomeBackWidget />
+                <DailyGoalWidget />
+                <EnhancedPracticeHubFixed />
+              </div>
             </TabsContent>
 
             <TabsContent value="ai-coach" className="mt-0">
