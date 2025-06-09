@@ -45,125 +45,103 @@ interface StreakInfo {
 }
 
 export default function DailyGoalWidget() {
-  const [dailyGoals, setDailyGoals] = useState<DailyGoal[]>([]);
-  const [streak, setStreak] = useState<StreakInfo>({ current: 0, best: 0, lastActivity: null });
   const [selectedGoal, setSelectedGoal] = useState<DailyGoal | null>(null);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    generateDailyGoals();
-    loadUserStreak();
-  }, []);
+  // Fetch daily goals from API
+  const { data: dailyGoals = [] } = useQuery({
+    queryKey: ['/api/user/daily-goals'],
+  });
 
-  const generateDailyGoals = () => {
-    const today = new Date();
-    const dayOfWeek = today.getDay();
-    
-    // Generate personalized goals based on user's progress and day of week
-    const goalPool: Omit<DailyGoal, 'id' | 'current' | 'completed'>[] = [
-      {
-        type: 'practice',
-        title: 'Voice Clarity Challenge',
-        description: 'Practice speaking with crystal clear articulation',
-        target: 3,
-        unit: 'minutes',
-        points: 25,
-        difficulty: 'easy',
-        category: 'voice',
-        timeEstimate: '5 min',
-        motivationalMessage: 'Every word matters! Clear speech builds confidence.',
-        icon: <Mic className="w-6 h-6" />,
-        color: 'bg-blue-500'
-      },
-      {
-        type: 'improvement',
-        title: 'Eye Contact Mastery',
-        description: 'Maintain steady eye contact throughout your speech',
-        target: 85,
-        unit: '% eye contact',
-        points: 30,
-        difficulty: 'medium',
-        category: 'body',
-        timeEstimate: '10 min',
-        motivationalMessage: 'Connect with your audience through your eyes!',
-        icon: <Eye className="w-6 h-6" />,
-        color: 'bg-green-500'
-      },
-      {
-        type: 'challenge',
-        title: 'Confident Posture Power',
-        description: 'Stand tall and command attention with your presence',
-        target: 90,
-        unit: '% good posture',
-        points: 35,
-        difficulty: 'medium',
-        category: 'body',
-        timeEstimate: '8 min',
-        motivationalMessage: 'Your posture speaks before you do!',
-        icon: <Target className="w-6 h-6" />,
-        color: 'bg-purple-500'
-      },
-      {
-        type: 'practice',
-        title: 'Storytelling Spark',
-        description: 'Craft and deliver a compelling 2-minute story',
-        target: 2,
-        unit: 'stories',
-        points: 40,
-        difficulty: 'hard',
-        category: 'content',
-        timeEstimate: '15 min',
-        motivationalMessage: 'Stories stick! Make yours unforgettable.',
-        icon: <Brain className="w-6 h-6" />,
-        color: 'bg-orange-500'
-      },
-      {
-        type: 'streak',
-        title: 'Consistency Champion',
-        description: 'Keep your practice streak alive today',
-        target: 1,
-        unit: 'session',
-        points: 20,
-        difficulty: 'easy',
-        category: 'confidence',
-        timeEstimate: '5 min',
-        motivationalMessage: 'Small steps, big progress! Keep going!',
-        icon: <Flame className="w-6 h-6" />,
-        color: 'bg-red-500'
-      }
-    ];
+  // Fetch user streaks
+  const { data: streaks = [] } = useQuery({
+    queryKey: ['/api/user/streaks'],
+  });
 
-    // Smart goal selection based on day and user patterns
-    const selectedGoals = goalPool
-      .sort(() => Math.random() - 0.5)
-      .slice(0, 2)
-      .map((goal, index) => ({
-        ...goal,
-        id: `goal-${today.getTime()}-${index}`,
-        current: 0,
-        completed: false
-      }));
+  // Complete goal mutation
+  const completeGoalMutation = useMutation({
+    mutationFn: async (goalId: number) => {
+      const response = await fetch(`/api/user/daily-goals/${goalId}/complete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ targetValue: 100 })
+      });
+      if (!response.ok) throw new Error('Failed to complete goal');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/user/daily-goals'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/user/streaks'] });
+    }
+  });
 
-    setDailyGoals(selectedGoals);
+  const getStreakInfo = () => {
+    const practiceStreak = (streaks as any[]).find((s: any) => s.streakType === 'practice');
+    return {
+      current: practiceStreak?.currentStreak || 0,
+      best: practiceStreak?.longestStreak || 0,
+      lastActivity: practiceStreak?.lastActivityDate ? new Date(practiceStreak.lastActivityDate) : null
+    };
   };
 
-  const loadUserStreak = () => {
-    // This would connect to real user data
-    setStreak({
-      current: 3,
-      best: 7,
-      lastActivity: new Date(Date.now() - 24 * 60 * 60 * 1000)
-    });
+  const mapGoalData = (apiGoal: any): DailyGoal => ({
+    id: apiGoal.id.toString(),
+    type: apiGoal.goalType,
+    title: apiGoal.title,
+    description: apiGoal.description,
+    target: apiGoal.targetValue,
+    current: apiGoal.currentValue,
+    unit: apiGoal.unit,
+    points: apiGoal.points,
+    difficulty: apiGoal.difficulty,
+    category: apiGoal.category,
+    timeEstimate: getTimeEstimate(apiGoal.difficulty),
+    motivationalMessage: getMotivationalMessage(apiGoal.category),
+    icon: getCategoryIcon(apiGoal.category),
+    color: getCategoryColor(apiGoal.category),
+    completed: apiGoal.isCompleted
+  });
+
+  const getTimeEstimate = (difficulty: string) => {
+    switch (difficulty) {
+      case 'easy': return '5 min';
+      case 'medium': return '10 min';
+      case 'hard': return '15 min';
+      default: return '5 min';
+    }
   };
 
-  const completeGoal = (goalId: string) => {
-    setDailyGoals(goals => 
-      goals.map(goal => 
-        goal.id === goalId 
-          ? { ...goal, completed: true, current: goal.target }
-          : goal
-      )
-    );
+  const getMotivationalMessage = (category: string) => {
+    const messages = {
+      voice: 'Every word matters! Clear speech builds confidence.',
+      body: 'Your presence speaks before you do!',
+      content: 'Stories stick! Make yours unforgettable.',
+      confidence: 'Small steps, big progress! Keep going!'
+    };
+    return messages[category as keyof typeof messages] || 'You\'ve got this!';
   };
+
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'voice': return <Mic className="w-6 h-6" />;
+      case 'body': return <Eye className="w-6 h-6" />;
+      case 'content': return <Brain className="w-6 h-6" />;
+      default: return <Target className="w-6 h-6" />;
+    }
+  };
+
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'voice': return 'bg-blue-500';
+      case 'body': return 'bg-green-500';
+      case 'content': return 'bg-orange-500';
+      default: return 'bg-purple-500';
+    }
+  };
+
+  const mappedGoals = (dailyGoals as any[]).map(mapGoalData);
+  const streak = getStreakInfo();
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -174,8 +152,8 @@ export default function DailyGoalWidget() {
     }
   };
 
-  const getCompletedGoals = () => dailyGoals.filter(goal => goal.completed).length;
-  const getTotalPoints = () => dailyGoals.filter(goal => goal.completed).reduce((sum, goal) => sum + goal.points, 0);
+  const getCompletedGoals = () => mappedGoals.filter(goal => goal.completed).length;
+  const getTotalPoints = () => mappedGoals.filter(goal => goal.completed).reduce((sum, goal) => sum + goal.points, 0);
 
   return (
     <div className="space-y-6">
@@ -201,7 +179,7 @@ export default function DailyGoalWidget() {
             </div>
             <div className="text-right">
               <div className="text-2xl font-bold text-gray-900">
-                {getCompletedGoals()}/{dailyGoals.length}
+                {getCompletedGoals()}/{mappedGoals.length}
               </div>
               <div className="text-sm text-gray-600">Goals Complete</div>
             </div>
@@ -211,7 +189,7 @@ export default function DailyGoalWidget() {
 
       {/* Daily Goals */}
       <div className="grid gap-4 md:grid-cols-2">
-        {dailyGoals.map((goal) => (
+        {mappedGoals.map((goal) => (
           <Card 
             key={goal.id} 
             className={`transition-all duration-300 hover:shadow-lg ${
@@ -288,14 +266,14 @@ export default function DailyGoalWidget() {
           <div className="text-center">
             <Star className="w-8 h-8 text-purple-500 mx-auto mb-3" />
             <h3 className="text-lg font-semibold text-purple-900 mb-2">
-              {getCompletedGoals() === dailyGoals.length 
-                ? "🎉 Amazing! All goals completed!" 
+              {getCompletedGoals() === mappedGoals.length 
+                ? "Amazing! All goals completed!" 
                 : getCompletedGoals() > 0 
                   ? "Great progress! Keep it up!" 
                   : "Ready to level up your speaking skills?"}
             </h3>
             <p className="text-purple-700 text-sm">
-              {getCompletedGoals() === dailyGoals.length 
+              {getCompletedGoals() === mappedGoals.length 
                 ? "You're building unstoppable speaking confidence!" 
                 : "Each practice session brings you closer to mastery."}
             </p>
@@ -323,10 +301,9 @@ export default function DailyGoalWidget() {
                 <Button 
                   size="sm"
                   onClick={() => {
-                    // Switch to practice tab and start session
                     const practiceTab = document.querySelector('[data-value="practice"]') as HTMLElement;
                     practiceTab?.click();
-                    completeGoal(selectedGoal.id);
+                    completeGoalMutation.mutate(parseInt(selectedGoal.id));
                     setSelectedGoal(null);
                   }}
                   className="bg-blue-600 hover:bg-blue-700"
