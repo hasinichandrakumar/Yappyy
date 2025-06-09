@@ -69,6 +69,8 @@ export default function EnhancedPracticeHubFixed() {
   const [isMicActive, setIsMicActive] = useState(false);
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
   const [cameraError, setCameraError] = useState<string>("");
+  const [isRetrying, setIsRetrying] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   
   // AI insights state
   const [aiInsights, setAiInsights] = useState<AIInsight[]>([]);
@@ -146,56 +148,138 @@ export default function EnhancedPracticeHubFixed() {
     };
   }, [isSessionActive, sessionStartTime]);
 
-  // Camera initialization
+  // Camera initialization with retry logic
   const initializeCamera = useCallback(async () => {
     try {
       setCameraError("");
+      setIsRetrying(true);
+      console.log("Requesting camera access...");
       
+      // Check if getUserMedia is available
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error("getUserMedia not supported");
+      }
+      
+      // Request permissions first
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
+          width: { ideal: 1280, min: 640 },
+          height: { ideal: 720, min: 480 },
           facingMode: "user"
         },
         audio: false
       });
 
+      console.log("Camera stream obtained:", stream);
+
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+        setMediaStream(stream);
         
-        // Wait for video to load and start playing
+        // Wait for the video to load
         await new Promise<void>((resolve, reject) => {
-          if (videoRef.current) {
-            videoRef.current.onloadedmetadata = () => {
-              if (videoRef.current) {
-                videoRef.current.play()
-                  .then(() => {
-                    setIsCameraActive(true);
-                    setMediaStream(stream);
-                    resolve();
-                  })
-                  .catch(reject);
-              }
-            };
-            videoRef.current.onerror = reject;
+          if (!videoRef.current) {
+            reject(new Error("Video element not available"));
+            return;
+          }
+
+          const video = videoRef.current;
+          let resolved = false;
+
+          const onLoadedMetadata = () => {
+            console.log("Video metadata loaded");
+            if (!resolved) {
+              resolved = true;
+              video.removeEventListener('loadedmetadata', onLoadedMetadata);
+              video.removeEventListener('error', onError);
+              resolve();
+            }
+          };
+
+          const onError = (error: Event) => {
+            console.error("Video element error:", error);
+            if (!resolved) {
+              resolved = true;
+              video.removeEventListener('loadedmetadata', onLoadedMetadata);
+              video.removeEventListener('error', onError);
+              reject(new Error("Video element failed to load"));
+            }
+          };
+
+          video.addEventListener('loadedmetadata', onLoadedMetadata);
+          video.addEventListener('error', onError);
+
+          // If metadata is already loaded, resolve immediately
+          if (video.readyState >= 1) {
+            onLoadedMetadata();
           }
         });
+
+        // Now try to play the video
+        try {
+          await videoRef.current.play();
+          console.log("Video playing successfully");
+          setIsCameraActive(true);
+          setRetryCount(0);
+        } catch (playError) {
+          console.error("Video play error:", playError);
+          throw new Error("Failed to start video playback");
+        }
       }
     } catch (error: any) {
       console.error("Camera initialization error:", error);
-      let errorMessage = "Camera access failed. ";
+      let errorMessage = "Camera access failed: ";
       
       if (error.name === "NotAllowedError") {
-        errorMessage += "Please allow camera permissions in your browser.";
+        errorMessage += "Please allow camera access and refresh the page.";
       } else if (error.name === "NotFoundError") {
-        errorMessage += "No camera device found.";
+        errorMessage += "No camera device found. Please connect a camera.";
       } else if (error.name === "NotReadableError") {
         errorMessage += "Camera is being used by another application.";
+      } else if (error.name === "OverconstrainedError") {
+        errorMessage += "Camera constraints not supported. Trying basic settings...";
+        
+        // Retry with basic constraints
+        if (retryCount < 2) {
+          setRetryCount(prev => prev + 1);
+          setTimeout(() => {
+            initializeCameraBasic();
+          }, 1000);
+          return;
+        }
+      } else if (error.message === "getUserMedia not supported") {
+        errorMessage += "Your browser doesn't support camera access.";
       } else {
-        errorMessage += "Please check your camera connection.";
+        errorMessage += `${error.message || "Unknown error"}. Please check your camera.`;
       }
       
       setCameraError(errorMessage);
+    } finally {
+      setIsRetrying(false);
+    }
+  }, [retryCount]);
+
+  // Fallback camera initialization with basic constraints
+  const initializeCameraBasic = useCallback(async () => {
+    try {
+      console.log("Trying basic camera constraints...");
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: false
+      });
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        setMediaStream(stream);
+        
+        await videoRef.current.play();
+        setIsCameraActive(true);
+        setRetryCount(0);
+        setCameraError("");
+      }
+    } catch (error: any) {
+      console.error("Basic camera initialization failed:", error);
+      setCameraError("Camera initialization failed with basic settings. Please check your camera.");
     }
   }, []);
 
@@ -569,9 +653,14 @@ export default function EnhancedPracticeHubFixed() {
               <Button
                 onClick={isCameraActive ? stopCamera : initializeCamera}
                 variant={isCameraActive ? "destructive" : "outline"}
-                disabled={!navigator.mediaDevices}
+                disabled={!navigator.mediaDevices || isRetrying}
               >
-                {isCameraActive ? (
+                {isRetrying ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    Connecting...
+                  </>
+                ) : isCameraActive ? (
                   <>
                     <CameraOff className="w-4 h-4 mr-2" />
                     Stop Camera
@@ -617,7 +706,9 @@ export default function EnhancedPracticeHubFixed() {
                     autoPlay
                     playsInline
                     muted
+                    controls={false}
                     className="w-full h-full object-cover transform scale-x-[-1]"
+                    style={{ transform: 'scaleX(-1)' }}
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
