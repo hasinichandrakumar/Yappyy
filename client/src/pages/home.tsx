@@ -720,12 +720,11 @@ export default function Home() {
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="flex items-center justify-center space-x-3 mb-6">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <Mic className="text-white w-4 h-4" />
-            </div>
-            <h3 className="text-xl font-bold yapup-gradient">YapUp</h3>
-          </div>
+          <img
+            src={yapUpLogo}
+            alt="YapUp Logo"
+            className="w-40 h-12 mx-auto mb-6 object-contain"
+          />
           <p className="text-gray-400 mb-6">
             Empowering speakers worldwide with intelligent feedback and coaching.
           </p>
