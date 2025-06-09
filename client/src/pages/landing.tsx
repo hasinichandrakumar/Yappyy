@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import yapUpLogo from "@assets/YapUp-6_1749439026739.png";
+import yapUpLogo from "@assets/YapUp-2_1749483329460.png";
 import { 
   Mic, 
   Brain, 
@@ -31,7 +31,7 @@ export default function Landing() {
               <img
                 src={yapUpLogo}
                 alt="YapUp Logo"
-                className="w-8 h-8 rounded-lg"
+                className="w-10 h-10 rounded-lg"
               />
               <h1 className="text-xl font-semibold text-gray-900">YapUp</h1>
             </div>
@@ -55,7 +55,7 @@ export default function Landing() {
               <img
                 src={yapUpLogo}
                 alt="YapUp Logo"
-                className="w-24 h-24 rounded-2xl shadow-lg"
+                className="w-32 h-32 rounded-2xl shadow-lg"
               />
             </div>
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
@@ -223,7 +223,7 @@ export default function Landing() {
             <img
               src={yapUpLogo}
               alt="YapUp Logo"
-              className="w-40 h-12 mx-auto mb-4 object-contain"
+              className="w-16 h-16 mx-auto mb-4 rounded-lg"
             />
             <p className="text-gray-400 mb-4">
               Empowering speakers worldwide with AI-powered coaching technology
