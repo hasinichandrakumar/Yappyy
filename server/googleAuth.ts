@@ -16,7 +16,7 @@ export function getSession() {
   const pgStore = connectPg(session);
   const sessionStore = new pgStore({
     conString: process.env.DATABASE_URL,
-    createTableIfMissing: false,
+    createTableIfMissing: true,
     ttl: sessionTtl,
     tableName: "sessions",
   });
@@ -89,9 +89,18 @@ export async function setupGoogleAuth(app: Express) {
       "/api/auth/google/callback",
       passport.authenticate("google", { failureRedirect: "/" }),
       (req, res) => {
-        res.redirect("/dashboard");
+        res.redirect("/");
       }
     );
+
+    // Logout route
+    app.get("/api/auth/logout", (req, res) => {
+      req.logout(() => {
+        req.session.destroy(() => {
+          res.redirect("/");
+        });
+      });
+    });
   } else {
     // Fallback routes when Google OAuth is not configured
     app.get("/api/auth/google", (req, res) => {
