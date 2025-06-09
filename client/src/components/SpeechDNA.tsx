@@ -78,12 +78,7 @@ interface SpeechDNAProfile {
     potential: number;
     timeframe: string;
   }[];
-  speakingEvolution: {
-    beginner: string;
-    intermediate: string;
-    advanced: string;
-    expert: string;
-  };
+
 }
 
 interface SpeakerArchetype {
@@ -101,7 +96,7 @@ interface SpeakerArchetype {
 
 export default function SpeechDNA() {
   const { transcript, wordCount, isListening } = useSpeechRecognition();
-  const { speakingPace, voiceClarity, confidenceScore } = useVoiceAnalysis();
+  const { voiceClarity, confidenceScore, pitch } = useVoiceAnalysis();
 
   const [speechDNA, setSpeechDNA] = useState<SpeechDNAProfile | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -460,12 +455,7 @@ export default function SpeechDNA() {
         memorability: Math.max(actualPace > 150 ? 80 : 70, 70) + Math.random() * 10
       },
       growthPotential: generateGrowthPotential(),
-      speakingEvolution: {
-        beginner: "Building foundational confidence and clarity",
-        intermediate: "Developing unique style and audience connection",
-        advanced: "Mastering persuasion and emotional impact", 
-        expert: "Inspiring transformation and lasting change"
-      }
+
     };
 
     setSpeechDNA(dnaProfile);
