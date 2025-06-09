@@ -5,7 +5,7 @@ import YapUpLogo from "@/components/YapUpLogo";
 
 export default function LoginPage() {
   const handleGoogleLogin = () => {
-    window.location.href = '/api/login';
+    window.location.href = '/api/auth/google';
   };
 
   return (
