@@ -4,8 +4,8 @@ import { LogIn, User, Shield } from "lucide-react";
 import yapUpLogoImage from "@assets/YapUp-2_1749483329460.png";
 
 export default function LoginPage() {
-  const handleGoogleLogin = () => {
-    window.location.href = '/api/auth/google';
+  const handleLogin = () => {
+    window.location.href = '/api/login';
   };
 
   return (
@@ -48,12 +48,12 @@ export default function LoginPage() {
           </div>
 
           <Button 
-            onClick={handleGoogleLogin}
+            onClick={handleLogin}
             className="w-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center space-x-2"
             size="lg"
           >
             <LogIn className="w-5 h-5" />
-            <span>Continue with Google</span>
+            <span>Start Demo Session</span>
           </Button>
 
           <p className="text-xs text-gray-500 text-center">
