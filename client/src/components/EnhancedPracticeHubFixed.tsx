@@ -238,6 +238,7 @@ export default function EnhancedPracticeHubFixed() {
     setWordCount(0);
     setFillerWords([]);
     setTranscript("");
+    setInterimTranscript("");
     
     // Reset all metrics to 0 at session start
     setEyeContactScore(0);
