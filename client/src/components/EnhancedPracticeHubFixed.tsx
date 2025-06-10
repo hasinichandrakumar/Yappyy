@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import CameraFeed from "@/components/CameraFeed";
+import SimpleCameraFeed from "@/components/SimpleCameraFeed";
 import { 
   Play, 
   Pause, 
@@ -245,7 +245,7 @@ export default function EnhancedPracticeHubFixed() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Video Feed with Integrated Analysis */}
         <div className="lg:col-span-2">
-          <CameraFeed 
+          <SimpleCameraFeed 
             onStreamReady={(stream) => {
               setIsCameraActive(true);
               if (videoRef.current) {
