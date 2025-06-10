@@ -20,8 +20,24 @@ export default function SimpleCameraFeed({ onStreamReady, onStreamEnd, className
     setError("");
     
     try {
+      // Check if getUserMedia is supported
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setError("Camera access not supported by this browser.");
+        return;
+      }
+
+      // Stop any existing stream first
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+        setMediaStream(null);
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user" },
+        video: { 
+          facingMode: "user",
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        },
         audio: false
       });
 
@@ -33,10 +49,13 @@ export default function SimpleCameraFeed({ onStreamReady, onStreamEnd, className
       }
     } catch (error: any) {
       console.error("Camera error:", error);
+      setIsActive(false);
       if (error.name === 'NotAllowedError') {
-        setError("Camera permission denied. Please allow camera access and try again.");
+        setError("Camera permission denied. Please allow camera access and refresh the page.");
       } else if (error.name === 'NotFoundError') {
         setError("No camera found. Please connect a camera and try again.");
+      } else if (error.name === 'NotReadableError') {
+        setError("Camera is already in use by another application.");
       } else {
         setError("Camera not available. Please check your camera and try again.");
       }
@@ -55,15 +74,28 @@ export default function SimpleCameraFeed({ onStreamReady, onStreamEnd, className
     onStreamEnd?.();
   };
 
-  // Auto-start camera
+  // Auto-start camera on mount
   useEffect(() => {
-    startCamera();
+    const initCamera = async () => {
+      await startCamera();
+    };
+    initCamera();
+    
     return () => {
       if (mediaStream) {
         mediaStream.getTracks().forEach(track => track.stop());
       }
     };
   }, []);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [mediaStream]);
 
   return (
     <Card className={className}>
