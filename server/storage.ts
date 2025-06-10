@@ -42,6 +42,29 @@ import {
 import { db } from "./db";
 import { eq, desc, and, gte, lte } from "drizzle-orm";
 
+// Database operation wrapper with retry logic
+async function withRetry<T>(operation: () => Promise<T>, maxRetries = 3): Promise<T> {
+  let lastError: Error;
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await operation();
+    } catch (error: any) {
+      lastError = error;
+      console.error(`Database operation failed (attempt ${attempt}/${maxRetries}):`, error.message);
+      
+      if (attempt === maxRetries) {
+        throw error;
+      }
+      
+      // Wait before retrying (exponential backoff)
+      await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+    }
+  }
+  
+  throw lastError!;
+}
+
 export interface IStorage {
   // User operations (required for authentication)
   getUser(id: string): Promise<User | undefined>;

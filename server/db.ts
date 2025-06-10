@@ -19,7 +19,12 @@ export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   max: 1, // Limit connections for serverless
   idleTimeoutMillis: 0, // Disable idle timeout
-  connectionTimeoutMillis: 5000, // 5 second timeout
+  connectionTimeoutMillis: 5000 // 5 second timeout
+});
+
+// Add error handling for pool
+pool.on('error', (err) => {
+  console.error('Database pool error:', err);
 });
 
 export const db = drizzle({ client: pool, schema });
