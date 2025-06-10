@@ -125,10 +125,10 @@ export default function Dashboard() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           {/* Single Strip Navigation */}
           <div className="mb-8">
-            <TabsList className="flex w-full h-auto p-2 bg-white rounded-xl border border-gray-200 shadow-sm overflow-x-auto space-x-1">
+            <TabsList className="flex w-full h-auto p-2 bg-white rounded-xl border border-gray-200 shadow-sm overflow-x-auto justify-between">
               <TabsTrigger 
                 value="overview" 
-                className="flex flex-col items-center space-y-1 px-4 py-3 text-xs font-medium data-[state=active]:bg-[#0BF9EA] data-[state=active]:text-white rounded-lg transition-all duration-200 min-w-[80px] flex-shrink-0"
+                className="flex flex-col items-center space-y-1 px-3 py-3 text-xs font-medium data-[state=active]:gradient-bg data-[state=active]:text-white rounded-lg transition-all duration-200 flex-1"
               >
                 <PlayCircle className="w-4 h-4" />
                 <span>Practice</span>
@@ -136,7 +136,7 @@ export default function Dashboard() {
               
               <TabsTrigger 
                 value="detailed" 
-                className="flex flex-col items-center space-y-1 px-4 py-3 text-xs font-medium data-[state=active]:bg-[#0BF9EA] data-[state=active]:text-white rounded-lg transition-all duration-200 min-w-[80px] flex-shrink-0"
+                className="flex flex-col items-center space-y-1 px-3 py-3 text-xs font-medium data-[state=active]:gradient-bg data-[state=active]:text-white rounded-lg transition-all duration-200 flex-1"
               >
                 <BarChart3 className="w-4 h-4" />
                 <span>Analysis</span>
@@ -144,7 +144,7 @@ export default function Dashboard() {
               
               <TabsTrigger 
                 value="ai-coach" 
-                className="flex flex-col items-center space-y-1 px-4 py-3 text-xs font-medium data-[state=active]:bg-[#0BF9EA] data-[state=active]:text-white rounded-lg transition-all duration-200 min-w-[80px] flex-shrink-0"
+                className="flex flex-col items-center space-y-1 px-3 py-3 text-xs font-medium data-[state=active]:gradient-bg data-[state=active]:text-white rounded-lg transition-all duration-200 flex-1"
               >
                 <Brain className="w-4 h-4" />
                 <span>AI Coach</span>
@@ -152,7 +152,7 @@ export default function Dashboard() {
               
               <TabsTrigger 
                 value="speech-dna" 
-                className="flex flex-col items-center space-y-1 px-4 py-3 text-xs font-medium data-[state=active]:bg-[#0BF9EA] data-[state=active]:text-white rounded-lg transition-all duration-200 min-w-[80px] flex-shrink-0"
+                className="flex flex-col items-center space-y-1 px-3 py-3 text-xs font-medium data-[state=active]:gradient-bg data-[state=active]:text-white rounded-lg transition-all duration-200 flex-1"
               >
                 <Star className="w-4 h-4" />
                 <span>Speech DNA</span>
@@ -160,7 +160,7 @@ export default function Dashboard() {
               
               <TabsTrigger 
                 value="roi-analyzer" 
-                className="flex flex-col items-center space-y-1 px-4 py-3 text-xs font-medium data-[state=active]:bg-[#0BF9EA] data-[state=active]:text-white rounded-lg transition-all duration-200 min-w-[80px] flex-shrink-0"
+                className="flex flex-col items-center space-y-1 px-3 py-3 text-xs font-medium data-[state=active]:gradient-bg data-[state=active]:text-white rounded-lg transition-all duration-200 flex-1"
               >
                 <TrendingUp className="w-4 h-4" />
                 <span>Impact</span>
@@ -168,7 +168,7 @@ export default function Dashboard() {
               
               <TabsTrigger 
                 value="templates" 
-                className="flex flex-col items-center space-y-1 px-4 py-3 text-xs font-medium data-[state=active]:bg-[#0BF9EA] data-[state=active]:text-white rounded-lg transition-all duration-200 min-w-[80px] flex-shrink-0"
+                className="flex flex-col items-center space-y-1 px-3 py-3 text-xs font-medium data-[state=active]:gradient-bg data-[state=active]:text-white rounded-lg transition-all duration-200 flex-1"
               >
                 <FileText className="w-4 h-4" />
                 <span>Templates</span>
@@ -176,7 +176,7 @@ export default function Dashboard() {
               
               <TabsTrigger 
                 value="badges" 
-                className="flex flex-col items-center space-y-1 px-4 py-3 text-xs font-medium data-[state=active]:bg-[#0BF9EA] data-[state=active]:text-white rounded-lg transition-all duration-200 min-w-[80px] flex-shrink-0"
+                className="flex flex-col items-center space-y-1 px-3 py-3 text-xs font-medium data-[state=active]:gradient-bg data-[state=active]:text-white rounded-lg transition-all duration-200 flex-1"
               >
                 <Trophy className="w-4 h-4" />
                 <span>Badges</span>
@@ -184,7 +184,7 @@ export default function Dashboard() {
 
               <TabsTrigger 
                 value="clubs" 
-                className="flex flex-col items-center space-y-1 px-4 py-3 text-xs font-medium data-[state=active]:bg-[#0BF9EA] data-[state=active]:text-white rounded-lg transition-all duration-200 min-w-[80px] flex-shrink-0"
+                className="flex flex-col items-center space-y-1 px-3 py-3 text-xs font-medium data-[state=active]:gradient-bg data-[state=active]:text-white rounded-lg transition-all duration-200 flex-1"
               >
                 <Users className="w-4 h-4" />
                 <span>Clubs</span>
@@ -192,7 +192,7 @@ export default function Dashboard() {
               
               <TabsTrigger 
                 value="help" 
-                className="flex flex-col items-center space-y-1 px-4 py-3 text-xs font-medium data-[state=active]:bg-[#0BF9EA] data-[state=active]:text-white rounded-lg transition-all duration-200 min-w-[80px] flex-shrink-0"
+                className="flex flex-col items-center space-y-1 px-3 py-3 text-xs font-medium data-[state=active]:gradient-bg data-[state=active]:text-white rounded-lg transition-all duration-200 flex-1"
               >
                 <HelpCircle className="w-4 h-4" />
                 <span>Help</span>
