@@ -228,6 +228,30 @@ export default function Home() {
         </div>
       </motion.nav>
 
+      {/* Error Alert */}
+      {authError && (
+        <motion.div 
+          className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mx-4 mt-4"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="flex justify-between items-center">
+            <div className="flex items-center">
+              <div className="w-4 h-4 mr-2">⚠️</div>
+              <span className="font-medium">Authentication Error:</span>
+              <span className="ml-2">{authError}</span>
+            </div>
+            <button 
+              onClick={() => setAuthError(null)}
+              className="text-red-500 hover:text-red-700 ml-4"
+            >
+              ×
+            </button>
+          </div>
+        </motion.div>
+      )}
+
       {/* Hero Section */}
       <motion.section 
         ref={heroRef}
