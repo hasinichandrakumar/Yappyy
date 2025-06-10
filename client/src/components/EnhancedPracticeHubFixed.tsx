@@ -167,51 +167,80 @@ export default function EnhancedPracticeHubFixed() {
         throw new Error("Camera not supported on this device");
       }
       
-      // Request camera with basic constraints first
+      // Request camera with progressive fallback
       let stream;
       try {
+        // Try with ideal constraints first
         stream = await navigator.mediaDevices.getUserMedia({
           video: {
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-            facingMode: "user"
+            width: { ideal: 1280, min: 640 },
+            height: { ideal: 720, min: 480 },
+            facingMode: "user",
+            frameRate: { ideal: 30, min: 15 }
           },
           audio: false
         });
       } catch (constraintError) {
-        console.warn("Falling back to basic video constraints");
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-          audio: false
-        });
+        console.warn("Falling back to basic constraints");
+        try {
+          // Fallback to basic constraints
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "user" },
+            audio: false
+          });
+        } catch (basicError) {
+          // Final fallback - any video
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: false
+          });
+        }
       }
 
-      console.log("Camera stream obtained:", stream);
+      console.log("Camera stream obtained successfully");
 
       if (videoRef.current && stream) {
-        videoRef.current.srcObject = stream;
+        // Set up video element
+        const video = videoRef.current;
+        video.srcObject = stream;
+        video.muted = true;
+        video.playsInline = true;
+        video.autoplay = true;
+        
         setMediaStream(stream);
         
-        // Set video properties
-        videoRef.current.muted = true;
-        videoRef.current.playsInline = true;
-        videoRef.current.autoplay = true;
+        // Create a promise for video readiness
+        const videoReady = new Promise<void>((resolve, reject) => {
+          const onLoadedData = () => {
+            console.log("Video ready and playing");
+            setIsCameraActive(true);
+            setRetryCount(0);
+            setCameraError("");
+            video.removeEventListener('loadeddata', onLoadedData);
+            video.removeEventListener('error', onError);
+            resolve();
+          };
+          
+          const onError = (event: any) => {
+            console.error("Video element error:", event);
+            video.removeEventListener('loadeddata', onLoadedData);
+            video.removeEventListener('error', onError);
+            reject(new Error("Video element failed to load"));
+          };
+          
+          video.addEventListener('loadeddata', onLoadedData);
+          video.addEventListener('error', onError);
+        });
         
-        // Wait for the video to be ready
-        videoRef.current.onloadedmetadata = () => {
-          console.log("Video metadata loaded");
+        // Start video playback
+        try {
+          await video.play();
+          await videoReady;
+        } catch (playError) {
+          console.warn("Video autoplay failed, trying manual play:", playError);
+          // Sometimes autoplay fails but the video still works
           setIsCameraActive(true);
-          setRetryCount(0);
           setCameraError("");
-        };
-        
-        // Handle play promise if it exists
-        const playPromise = videoRef.current.play();
-        if (playPromise !== undefined) {
-          playPromise.catch(playError => {
-            console.warn("Video play error (may be handled):", playError);
-            // Don't fail the whole initialization for autoplay issues
-          });
         }
         
         console.log("Camera setup complete");
@@ -223,23 +252,27 @@ export default function EnhancedPracticeHubFixed() {
       let errorMessage = "Camera activation failed: ";
       
       if (error.name === "NotAllowedError") {
-        errorMessage += "Camera permission denied. Please allow camera access and try again.";
+        errorMessage += "Camera permission denied. Please allow camera access and refresh the page.";
       } else if (error.name === "NotFoundError") {
         errorMessage += "No camera found. Please connect a camera device.";
       } else if (error.name === "NotReadableError") {
-        errorMessage += "Camera is busy or hardware error. Try closing other apps using the camera.";
+        errorMessage += "Camera is busy. Close other apps using the camera and try again.";
       } else if (error.name === "OverconstrainedError") {
-        errorMessage += "Camera settings not supported. Please try again.";
+        errorMessage += "Camera settings not supported. Trying basic settings...";
+        // Auto-retry with basic settings
+        setTimeout(() => initializeCameraBasic(), 1000);
+        return;
       } else {
-        errorMessage += `${error.message || "Unknown error"}. Please check your camera permissions.`;
+        errorMessage += `${error.message || "Unknown error"}. Please check camera permissions.`;
       }
       
       setCameraError(errorMessage);
       setIsCameraActive(false);
+      setRetryCount(prev => prev + 1);
     } finally {
       setIsRetrying(false);
     }
-  }, [mediaStream]);
+  }, []);
 
   // Fallback camera initialization with basic constraints
   const initializeCameraBasic = useCallback(async () => {
