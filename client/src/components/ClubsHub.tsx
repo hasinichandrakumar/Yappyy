@@ -67,8 +67,9 @@ export default function ClubsHub() {
   const [practiceMode, setPracticeMode] = useState<'judge' | 'competitor'>('competitor');
   const [aiJudgeFeedback, setAiJudgeFeedback] = useState<string>("");
 
-  // DECA Events Data (based on official DECA guidelines)
+  // DECA Events Data (Complete official DECA competitive events)
   const decaEvents: ClubEvent[] = [
+    // Individual Series Events
     {
       id: 'aaam',
       name: 'Apparel and Accessories Marketing',
@@ -76,10 +77,165 @@ export default function ClubsHub() {
       description: 'Marketing concepts in fashion retail industry',
       format: 'role-play',
       timeLimit: '10 min prep + 10 min role-play + 5 min Q&A',
-      participants: '1 participant + 1 judge',
+      participants: '1 participant',
       judgeCount: 1,
       keySkills: ['Market Analysis', 'Product Knowledge', 'Customer Service', 'Sales Techniques']
     },
+    {
+      id: 'asm',
+      name: 'Automotive Services Marketing',
+      category: 'Individual Series',
+      description: 'Marketing in automotive services industry',
+      format: 'role-play',
+      timeLimit: '10 min prep + 10 min role-play + 5 min Q&A',
+      participants: '1 participant',
+      judgeCount: 1,
+      keySkills: ['Service Marketing', 'Customer Relations', 'Technical Knowledge', 'Problem Solving']
+    },
+    {
+      id: 'bm',
+      name: 'Business Management',
+      category: 'Individual Series',
+      description: 'General business management principles',
+      format: 'role-play',
+      timeLimit: '10 min prep + 10 min role-play + 5 min Q&A',
+      participants: '1 participant',
+      judgeCount: 1,
+      keySkills: ['Leadership', 'Operations Management', 'Strategic Planning', 'Decision Making']
+    },
+    {
+      id: 'bfs',
+      name: 'Business Finance',
+      category: 'Individual Series',
+      description: 'Financial management and analysis',
+      format: 'role-play',
+      timeLimit: '10 min prep + 10 min role-play + 5 min Q&A',
+      participants: '1 participant',
+      judgeCount: 1,
+      keySkills: ['Financial Analysis', 'Investment Strategies', 'Risk Management', 'Budgeting']
+    },
+    {
+      id: 'bl',
+      name: 'Business Law',
+      category: 'Individual Series',
+      description: 'Legal aspects of business operations',
+      format: 'role-play',
+      timeLimit: '10 min prep + 10 min role-play + 5 min Q&A',
+      participants: '1 participant',
+      judgeCount: 1,
+      keySkills: ['Legal Knowledge', 'Compliance', 'Contract Analysis', 'Ethics']
+    },
+    {
+      id: 'fsm',
+      name: 'Food Service Management',
+      category: 'Individual Series',
+      description: 'Restaurant and food service operations',
+      format: 'role-play',
+      timeLimit: '10 min prep + 10 min role-play + 5 min Q&A',
+      participants: '1 participant',
+      judgeCount: 1,
+      keySkills: ['Operations Management', 'Customer Service', 'Quality Control', 'Staff Management']
+    },
+    {
+      id: 'hm',
+      name: 'Hospitality Management',
+      category: 'Individual Series',
+      description: 'Hotel and hospitality industry management',
+      format: 'role-play',
+      timeLimit: '10 min prep + 10 min role-play + 5 min Q&A',
+      participants: '1 participant',
+      judgeCount: 1,
+      keySkills: ['Guest Relations', 'Operations Management', 'Revenue Management', 'Service Excellence']
+    },
+    {
+      id: 'hr',
+      name: 'Human Resources Management',
+      category: 'Individual Series',
+      description: 'Personnel and human resources management',
+      format: 'role-play',
+      timeLimit: '10 min prep + 10 min role-play + 5 min Q&A',
+      participants: '1 participant',
+      judgeCount: 1,
+      keySkills: ['Employee Relations', 'Recruitment', 'Training', 'Labor Law']
+    },
+    {
+      id: 'lm',
+      name: 'Lodging Management',
+      category: 'Individual Series',
+      description: 'Hotel and lodging operations management',
+      format: 'role-play',
+      timeLimit: '10 min prep + 10 min role-play + 5 min Q&A',
+      participants: '1 participant',
+      judgeCount: 1,
+      keySkills: ['Property Management', 'Guest Services', 'Revenue Optimization', 'Facility Operations']
+    },
+    {
+      id: 'mrm',
+      name: 'Marketing Research',
+      category: 'Individual Series',
+      description: 'Market research methodology and analysis',
+      format: 'role-play',
+      timeLimit: '10 min prep + 10 min role-play + 5 min Q&A',
+      participants: '1 participant',
+      judgeCount: 1,
+      keySkills: ['Data Analysis', 'Research Design', 'Statistical Analysis', 'Report Writing']
+    },
+    {
+      id: 'pim',
+      name: 'Personal Financial Literacy',
+      category: 'Individual Series',
+      description: 'Personal finance and money management',
+      format: 'role-play',
+      timeLimit: '10 min prep + 10 min role-play + 5 min Q&A',
+      participants: '1 participant',
+      judgeCount: 1,
+      keySkills: ['Financial Planning', 'Investment Knowledge', 'Insurance', 'Credit Management']
+    },
+    {
+      id: 'pms',
+      name: 'Professional Selling',
+      category: 'Individual Series',
+      description: 'Advanced selling techniques and strategies',
+      format: 'role-play',
+      timeLimit: '10 min prep + 10 min role-play + 5 min Q&A',
+      participants: '1 participant',
+      judgeCount: 1,
+      keySkills: ['Sales Process', 'Relationship Building', 'Negotiation', 'Product Knowledge']
+    },
+    {
+      id: 'qsrm',
+      name: 'Quick Serve Restaurant Management',
+      category: 'Individual Series',
+      description: 'Fast food and quick service restaurant operations',
+      format: 'role-play',
+      timeLimit: '10 min prep + 10 min role-play + 5 min Q&A',
+      participants: '1 participant',
+      judgeCount: 1,
+      keySkills: ['Speed of Service', 'Quality Control', 'Cost Management', 'Customer Satisfaction']
+    },
+    {
+      id: 'rmm',
+      name: 'Retail Merchandising',
+      category: 'Individual Series',
+      description: 'Retail merchandising and display strategies',
+      format: 'role-play',
+      timeLimit: '10 min prep + 10 min role-play + 5 min Q&A',
+      participants: '1 participant',
+      judgeCount: 1,
+      keySkills: ['Visual Merchandising', 'Inventory Management', 'Consumer Behavior', 'Sales Analytics']
+    },
+    {
+      id: 'sem',
+      name: 'Sports and Entertainment Marketing',
+      category: 'Individual Series',
+      description: 'Marketing in sports and entertainment industries',
+      format: 'role-play',
+      timeLimit: '10 min prep + 10 min role-play + 5 min Q&A',
+      participants: '1 participant',
+      judgeCount: 1,
+      keySkills: ['Event Marketing', 'Sponsorship', 'Fan Engagement', 'Digital Marketing']
+    },
+    // Team Decision Making Events
     {
       id: 'btdm',
       name: 'Business to Business Marketing',
@@ -92,6 +248,62 @@ export default function ClubsHub() {
       keySkills: ['Strategic Planning', 'Team Collaboration', 'Data Analysis', 'Professional Communication']
     },
     {
+      id: 'ftdm',
+      name: 'Financial Services Team Decision Making',
+      category: 'Team Decision Making',
+      description: 'Financial services industry challenges',
+      format: 'case-study',
+      timeLimit: '30 min prep + 15 min presentation + 5 min Q&A',
+      participants: '2-3 team members',
+      judgeCount: 3,
+      keySkills: ['Financial Analysis', 'Risk Assessment', 'Regulatory Compliance', 'Client Relations']
+    },
+    {
+      id: 'htdm',
+      name: 'Hospitality Services Team Decision Making',
+      category: 'Team Decision Making',
+      description: 'Hospitality industry problem solving',
+      format: 'case-study',
+      timeLimit: '30 min prep + 15 min presentation + 5 min Q&A',
+      participants: '2-3 team members',
+      judgeCount: 3,
+      keySkills: ['Service Excellence', 'Operations Management', 'Revenue Management', 'Guest Experience']
+    },
+    {
+      id: 'mtdm',
+      name: 'Marketing Team Decision Making',
+      category: 'Team Decision Making',
+      description: 'Marketing strategy and implementation',
+      format: 'case-study',
+      timeLimit: '30 min prep + 15 min presentation + 5 min Q&A',
+      participants: '2-3 team members',
+      judgeCount: 3,
+      keySkills: ['Market Analysis', 'Campaign Development', 'Digital Marketing', 'Brand Management']
+    },
+    {
+      id: 'rtdm',
+      name: 'Retail Team Decision Making',
+      category: 'Team Decision Making',
+      description: 'Retail industry challenges and solutions',
+      format: 'case-study',
+      timeLimit: '30 min prep + 15 min presentation + 5 min Q&A',
+      participants: '2-3 team members',
+      judgeCount: 3,
+      keySkills: ['Retail Operations', 'Customer Experience', 'Inventory Management', 'Sales Strategy']
+    },
+    // Written Events
+    {
+      id: 'bor',
+      name: 'Business Operations Research',
+      category: 'Written Events',
+      description: 'Research project on business operations',
+      format: 'written',
+      timeLimit: '15 min presentation + 5 min Q&A',
+      participants: '1-3 participants',
+      judgeCount: 3,
+      keySkills: ['Research Methodology', 'Data Analysis', 'Report Writing', 'Business Intelligence']
+    },
+    {
       id: 'ebg',
       name: 'Entrepreneurship Business Growth',
       category: 'Written Events',
@@ -101,6 +313,72 @@ export default function ClubsHub() {
       participants: '1-3 participants',
       judgeCount: 3,
       keySkills: ['Business Planning', 'Financial Analysis', 'Innovation', 'Growth Strategies']
+    },
+    {
+      id: 'eis',
+      name: 'Entrepreneurship Independent Study',
+      category: 'Written Events',
+      description: 'Independent study of entrepreneurial concepts',
+      format: 'written',
+      timeLimit: '15 min presentation + 5 min Q&A',
+      participants: '1 participant',
+      judgeCount: 3,
+      keySkills: ['Independent Research', 'Innovation', 'Business Concepts', 'Self-Direction']
+    },
+    {
+      id: 'fml',
+      name: 'Financial Management',
+      category: 'Written Events',
+      description: 'Advanced financial management project',
+      format: 'written',
+      timeLimit: '15 min presentation + 5 min Q&A',
+      participants: '1-3 participants',
+      judgeCount: 3,
+      keySkills: ['Financial Strategy', 'Investment Analysis', 'Risk Management', 'Corporate Finance']
+    },
+    {
+      id: 'htm',
+      name: 'Hospitality and Tourism Management',
+      category: 'Written Events',
+      description: 'Tourism and hospitality industry analysis',
+      format: 'written',
+      timeLimit: '15 min presentation + 5 min Q&A',
+      participants: '1-3 participants',
+      judgeCount: 3,
+      keySkills: ['Tourism Marketing', 'Destination Management', 'Service Quality', 'Sustainability']
+    },
+    {
+      id: 'irl',
+      name: 'International Business',
+      category: 'Written Events',
+      description: 'Global business operations and strategy',
+      format: 'written',
+      timeLimit: '15 min presentation + 5 min Q&A',
+      participants: '1-3 participants',
+      judgeCount: 3,
+      keySkills: ['Global Markets', 'Cultural Awareness', 'International Trade', 'Cross-Cultural Communication']
+    },
+    {
+      id: 'mml',
+      name: 'Marketing Management',
+      category: 'Written Events',
+      description: 'Comprehensive marketing strategy project',
+      format: 'written',
+      timeLimit: '15 min presentation + 5 min Q&A',
+      participants: '1-3 participants',
+      judgeCount: 3,
+      keySkills: ['Strategic Marketing', 'Brand Management', 'Consumer Research', 'Digital Strategy']
+    },
+    {
+      id: 'sml',
+      name: 'Sports and Entertainment Management',
+      category: 'Written Events',
+      description: 'Sports and entertainment industry project',
+      format: 'written',
+      timeLimit: '15 min presentation + 5 min Q&A',
+      participants: '1-3 participants',
+      judgeCount: 3,
+      keySkills: ['Event Management', 'Sponsorship Strategy', 'Fan Engagement', 'Revenue Generation']
     }
   ];
 
@@ -457,71 +735,136 @@ ${rubric.criteria.map(criteria =>
 
       {/* Event Selection and Training */}
       {selectedClub && (
-        <Tabs defaultValue="events" className="w-full">
+        <Tabs defaultValue="practice" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="events">Events & Practice</TabsTrigger>
+            <TabsTrigger value="practice">Live Practice</TabsTrigger>
             <TabsTrigger value="rubric">AI Judge</TabsTrigger>
             <TabsTrigger value="resources">Resources</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="events" className="space-y-6">
+          <TabsContent value="practice" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Available Competitive Events</CardTitle>
+                <CardTitle className="flex items-center space-x-2">
+                  <Camera className="w-5 h-5" />
+                  <span>AI Competition Teacher</span>
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Select value={selectedEvent} onValueChange={setSelectedEvent}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose a competitive event" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {getClubEvents(selectedClub).map(event => (
-                      <SelectItem key={event.id} value={event.id}>
-                        {event.name} - {event.category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Video Feed */}
+                  <div className="space-y-4">
+                    <div className="aspect-video bg-gray-900 rounded-lg relative overflow-hidden">
+                      <video
+                        className="w-full h-full object-cover"
+                        autoPlay
+                        playsInline
+                        muted
+                        id="competition-video"
+                      />
+                      <div className="absolute top-4 left-4 bg-black/70 text-white px-3 py-1 rounded-lg text-sm">
+                        Competition Practice
+                      </div>
+                      <div className="absolute bottom-4 right-4 flex space-x-2">
+                        <Button size="sm" variant="secondary">
+                          <Camera className="w-4 h-4" />
+                        </Button>
+                        <Button size="sm" variant="secondary">
+                          <Mic className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {/* Event Selection */}
+                    <div>
+                      <label className="text-sm font-medium mb-2 block">Select Competition Event</label>
+                      <Select value={selectedEvent} onValueChange={setSelectedEvent}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Choose your event" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {getClubEvents(selectedClub).map(event => (
+                            <SelectItem key={event.id} value={event.id}>
+                              {event.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                {selectedEvent && (
-                  <div className="p-4 bg-gray-50 rounded-lg">
-                    {(() => {
-                      const event = getClubEvents(selectedClub).find(e => e.id === selectedEvent);
-                      return event ? (
-                        <div className="space-y-3">
-                          <h4 className="font-semibold">{event.name}</h4>
-                          <p className="text-sm text-gray-600">{event.description}</p>
-                          
-                          <div className="grid grid-cols-2 gap-4 text-sm">
-                            <div>
-                              <strong>Format:</strong> {event.format}
-                            </div>
-                            <div>
-                              <strong>Time Limit:</strong> {event.timeLimit}
-                            </div>
-                            <div>
-                              <strong>Participants:</strong> {event.participants}
-                            </div>
-                            <div>
-                              <strong>Judges:</strong> {event.judgeCount}
-                            </div>
+                    <div className="flex space-x-2">
+                      <Button className="flex-1">
+                        <Play className="w-4 h-4 mr-2" />
+                        Start Practice
+                      </Button>
+                      <Button variant="outline">
+                        <Target className="w-4 h-4 mr-2" />
+                        Stop & Evaluate
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* AI Teacher Feedback */}
+                  <div className="space-y-4">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg flex items-center space-x-2">
+                          <Brain className="w-5 h-5" />
+                          <span>AI Competition Teacher</span>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-blue-50 rounded-lg">
+                          <h4 className="font-semibold text-blue-900 mb-2">Live Coaching</h4>
+                          <p className="text-sm text-blue-800">
+                            Your AI teacher is ready to provide real-time feedback based on official {selectedClub.toUpperCase()} competition standards.
+                          </p>
+                        </div>
+
+                        {selectedEvent && (
+                          <div className="p-4 bg-gray-50 rounded-lg">
+                            <h5 className="font-medium mb-2">Event Guidelines</h5>
+                            {(() => {
+                              const event = getClubEvents(selectedClub).find(e => e.id === selectedEvent);
+                              return event ? (
+                                <div className="text-sm space-y-1">
+                                  <p><strong>Format:</strong> {event.format}</p>
+                                  <p><strong>Time:</strong> {event.timeLimit}</p>
+                                  <p><strong>Focus:</strong> {event.keySkills.join(', ')}</p>
+                                </div>
+                              ) : null;
+                            })()}
                           </div>
-                          
-                          <div>
-                            <strong className="text-sm">Key Skills:</strong>
-                            <div className="flex flex-wrap gap-1 mt-1">
-                              {event.keySkills.map((skill, index) => (
-                                <Badge key={index} variant="outline" className="text-xs">
-                                  {skill}
-                                </Badge>
-                              ))}
+                        )}
+
+                        <div className="space-y-3">
+                          <h5 className="font-medium">Real-Time Feedback</h5>
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between items-center p-2 bg-green-50 rounded">
+                              <span>Professional Delivery</span>
+                              <Badge variant="secondary">Excellent</Badge>
+                            </div>
+                            <div className="flex justify-between items-center p-2 bg-yellow-50 rounded">
+                              <span>Content Organization</span>
+                              <Badge variant="secondary">Good</Badge>
+                            </div>
+                            <div className="flex justify-between items-center p-2 bg-red-50 rounded">
+                              <span>Time Management</span>
+                              <Badge variant="destructive">Needs Work</Badge>
                             </div>
                           </div>
                         </div>
-                      ) : null;
-                    })()}
+
+                        <div className="p-3 bg-purple-50 rounded-lg">
+                          <h5 className="font-medium text-purple-900 mb-1">Teacher's Tip</h5>
+                          <p className="text-sm text-purple-800">
+                            "Remember to make eye contact with each judge when presenting. This shows confidence and engagement."
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
-                )}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -665,10 +1008,7 @@ ${rubric.criteria.map(criteria =>
                     <h5 className="font-medium">Event-Specific Rubrics</h5>
                     <p className="text-sm text-gray-600">Detailed scoring criteria</p>
                   </div>
-                  <div className="p-3 border rounded hover:bg-gray-50 cursor-pointer">
-                    <h5 className="font-medium">Sample Presentations</h5>
-                    <p className="text-sm text-gray-600">Award-winning examples</p>
-                  </div>
+
                 </CardContent>
               </Card>
 

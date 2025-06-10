@@ -115,7 +115,7 @@ export default function Dashboard() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           {/* Clean Tab Navigation */}
           <div className="mb-8">
-            <TabsList className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-8 w-full h-auto p-2 bg-white rounded-xl border border-gray-200 shadow-sm">
+            <TabsList className="grid grid-cols-8 w-full h-auto p-2 bg-white rounded-xl border border-gray-200 shadow-sm overflow-x-auto">
               <TabsTrigger 
                 value="overview" 
                 className="flex flex-col items-center space-y-1 px-3 py-3 text-xs font-medium data-[state=active]:bg-[#0BF9EA] data-[state=active]:text-white rounded-lg transition-all duration-200"
