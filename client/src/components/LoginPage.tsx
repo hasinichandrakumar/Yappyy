@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LogIn, User, Shield } from "lucide-react";
-import yapUpLogoImage from "@assets/YapUp-2_1749483329460.png";
+import { LogIn, User, Shield, Mic } from "lucide-react";
 
 export default function LoginPage() {
   const handleLogin = () => {
@@ -13,11 +12,9 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-4">
           <div className="flex justify-center">
-            <img 
-              src={yapUpLogoImage} 
-              alt="YapUp Logo" 
-              className="w-20 h-20 rounded-xl shadow-lg"
-            />
+            <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg flex items-center justify-center">
+              <Mic className="w-10 h-10 text-white" />
+            </div>
           </div>
           <div>
             <CardTitle className="text-2xl font-bold gradient-text">
