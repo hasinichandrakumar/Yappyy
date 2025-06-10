@@ -73,6 +73,7 @@ export default function EnhancedPracticeHubFixed() {
   // Speech recognition state
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
+  const [interimTranscript, setInterimTranscript] = useState("");
   const [wordCount, setWordCount] = useState(0);
   const [currentWPM, setCurrentWPM] = useState(0);
   const [fillerWords, setFillerWords] = useState<string[]>([]);
@@ -106,22 +107,30 @@ export default function EnhancedPracticeHubFixed() {
 
       recognitionRef.current.onresult = (event: any) => {
         let finalTranscript = '';
-        let interimTranscript = '';
+        let currentInterim = '';
 
         for (let i = event.resultIndex; i < event.results.length; i++) {
-          const transcript = event.results[i][0].transcript;
+          const transcriptSegment = event.results[i][0].transcript;
           if (event.results[i].isFinal) {
-            finalTranscript += transcript;
+            finalTranscript += transcriptSegment + ' ';
           } else {
-            interimTranscript += transcript;
+            currentInterim += transcriptSegment;
           }
         }
 
-        const fullTranscript = finalTranscript + interimTranscript;
-        setTranscript(prev => prev + finalTranscript);
+        // Update final transcript
+        if (finalTranscript) {
+          setTranscript(prev => prev + finalTranscript);
+        }
+        
+        // Update interim transcript for live display
+        setInterimTranscript(currentInterim);
+        
+        // Get the full current text (final + interim)
+        const fullCurrentText = transcript + finalTranscript + currentInterim;
         
         // Count words and calculate WPM
-        const words = fullTranscript.trim().split(/\s+/).filter(word => word.length > 0);
+        const words = fullCurrentText.trim().split(/\s+/).filter(word => word.length > 0);
         setWordCount(words.length);
         
         if (speechStartTime.current > 0) {
@@ -130,11 +139,19 @@ export default function EnhancedPracticeHubFixed() {
           setCurrentWPM(wpm);
         }
 
-        // Detect filler words
-        const fillerWordList = ['um', 'uh', 'like', 'you know', 'so', 'actually', 'basically'];
-        const detectedFillers = words.filter(word => 
-          fillerWordList.includes(word.toLowerCase().replace(/[.,!?]/g, ''))
-        );
+        // Detect filler words - only from final transcript to avoid duplicates
+        const fillerWordList = ['um', 'uh', 'like', 'you know', 'so', 'actually', 'basically', 'well', 'right', 'okay', 'hmm', 'err'];
+        const finalText = transcript + finalTranscript;
+        const allWords = finalText.toLowerCase().split(/\s+/);
+        const detectedFillers: string[] = [];
+        
+        allWords.forEach(word => {
+          const cleanWord = word.replace(/[.,!?;:'"]/g, '');
+          if (fillerWordList.includes(cleanWord) && cleanWord.length > 0) {
+            detectedFillers.push(cleanWord);
+          }
+        });
+        
         setFillerWords(detectedFillers);
       };
 
@@ -293,12 +310,12 @@ export default function EnhancedPracticeHubFixed() {
             <Button
               onClick={startSession}
               size="lg"
-              className="bg-green-600 hover:bg-green-700 text-white text-xl px-16 py-8 h-auto mb-4 shadow-lg transform hover:scale-105 transition-transform"
+              className="bg-green-600 hover:bg-green-700 text-white text-lg px-8 py-4 h-auto mb-4 shadow-lg"
             >
-              <Play className="w-10 h-10 mr-4" />
+              <Play className="w-6 h-6 mr-3" />
               <div className="text-left">
-                <div className="text-2xl font-bold">Start Practice Session</div>
-                <div className="text-base opacity-90 font-normal">Camera + Microphone Ready</div>
+                <div className="text-lg font-bold">Start Practice Session</div>
+                <div className="text-sm opacity-90 font-normal">Camera + Microphone</div>
               </div>
             </Button>
             <p className="text-gray-600 text-base">
@@ -362,7 +379,7 @@ export default function EnhancedPracticeHubFixed() {
               </Button>
             </div>
             
-            <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="grid grid-cols-3 gap-4 text-center mb-6">
               <div>
                 <div className="text-2xl font-bold text-blue-600">{wordCount}</div>
                 <div className="text-sm text-gray-500">Words Spoken</div>
@@ -375,6 +392,36 @@ export default function EnhancedPracticeHubFixed() {
                 <div className="text-2xl font-bold text-orange-600">{fillerWords.length}</div>
                 <div className="text-sm text-gray-500">Filler Words</div>
               </div>
+            </div>
+
+            {/* Live Transcript Display */}
+            <div className="bg-gray-50 border-2 border-gray-200 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-medium text-gray-700">Live Transcript</h3>
+                {isListening && (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                    <span className="text-xs text-gray-500">Listening...</span>
+                  </div>
+                )}
+              </div>
+              <div className="bg-white rounded border p-3 min-h-[100px] max-h-[200px] overflow-y-auto">
+                {transcript || interimTranscript ? (
+                  <p className="text-gray-800 text-sm leading-relaxed whitespace-pre-wrap">
+                    <span>{transcript}</span>
+                    <span className="text-gray-500 italic">{interimTranscript}</span>
+                  </p>
+                ) : (
+                  <p className="text-gray-400 text-sm italic">
+                    {isListening ? "Start speaking to see your transcript here..." : "Click 'Start Microphone' to begin transcription"}
+                  </p>
+                )}
+              </div>
+              {fillerWords.length > 0 && (
+                <div className="mt-2 text-xs text-orange-600">
+                  <span className="font-medium">Detected filler words:</span> {fillerWords.join(', ')}
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
