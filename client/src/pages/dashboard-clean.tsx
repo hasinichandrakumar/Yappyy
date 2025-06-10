@@ -15,14 +15,6 @@ import WelcomeBackWidget from "@/components/WelcomeBackWidget";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview");
-  const [showPostAnalysis, setShowPostAnalysis] = useState(false);
-  const [showSessionStudy, setShowSessionStudy] = useState(false);
-  const [studyingSessionId, setStudyingSessionId] = useState<string>("");
-  const [sessionContext, setSessionContext] = useState<{
-    roleplayType?: string;
-    audienceType?: string;
-  }>({});
-  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
