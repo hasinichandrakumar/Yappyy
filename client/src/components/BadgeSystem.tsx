@@ -57,7 +57,7 @@ interface BadgeData {
 interface BadgeStats {
   totalBadges: number;
   unlockedBadges: number;
-  totalPoints: number;
+  totalYapX: number;
   currentStreak: number;
   nextMilestone: string;
 }
@@ -368,7 +368,7 @@ export default function BadgeSystem() {
   const stats: BadgeStats = {
     totalBadges: badges.length,
     unlockedBadges: badges.filter(b => b.isUnlocked).length,
-    totalPoints: badges.filter(b => b.isUnlocked).reduce((sum, b) => sum + (b.points || 0), 0),
+    totalYapX: badges.filter(b => b.isUnlocked).reduce((sum, b) => sum + (b.points || 0), 0),
     currentStreak: 7,
     nextMilestone: "Unlock 5 more badges to reach Speaker Level 3"
   };
@@ -454,8 +454,8 @@ export default function BadgeSystem() {
         <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
           <CardContent className="p-4 text-center">
             <Star className="w-8 h-8 mx-auto text-purple-600 mb-2" />
-            <div className="text-2xl font-bold text-purple-800">{stats.totalPoints}</div>
-            <div className="text-sm text-purple-600">Total Points</div>
+            <div className="text-2xl font-bold text-purple-800">{stats.totalYapX}</div>
+            <div className="text-sm text-purple-600">Total YapX</div>
           </CardContent>
         </Card>
 
@@ -630,7 +630,7 @@ export default function BadgeSystem() {
                           {selectedBadge.rarity}
                         </Badge>
                         {selectedBadge.points && (
-                          <Badge variant="secondary">{selectedBadge.points} points</Badge>
+                          <Badge variant="secondary">{selectedBadge.points} YapX</Badge>
                         )}
                       </div>
                     </div>

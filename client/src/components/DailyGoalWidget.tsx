@@ -28,7 +28,7 @@ interface DailyGoal {
   target: number;
   current: number;
   unit: string;
-  points: number;
+  yapX: number;
   difficulty: 'easy' | 'medium' | 'hard';
   category: 'voice' | 'body' | 'content' | 'confidence';
   timeEstimate: string;
