@@ -1,4 +1,5 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
+import { useEffect } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -14,6 +15,14 @@ import ClubsHub from "@/components/ClubsHub";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
+  const [location, setLocation] = useLocation();
+
+  // Handle redirect from old routes
+  useEffect(() => {
+    if (location === '/competitions') {
+      setLocation('/clubs');
+    }
+  }, [location, setLocation]);
 
   if (isLoading) {
     return (
@@ -26,25 +35,25 @@ function Router() {
     );
   }
 
+  if (!isAuthenticated) {
+    return (
+      <Switch>
+        <Route path="/" component={Home} />
+        <Route path="/login" component={LoginPage} />
+        <Route component={Home} />
+      </Switch>
+    );
+  }
+
   return (
     <Switch>
-      {isAuthenticated ? (
-        <>
-          <Route path="/" component={Dashboard} />
-          <Route path="/dashboard" component={Dashboard} />
-          <Route path="/profile" component={UserProfile} />
-          <Route path="/profile/:section" component={UserProfile} />
-          <Route path="/clubs" component={ClubsHub} />
-          <Route path="/logo" component={LogoExport} />
-          <Route component={NotFound} />
-        </>
-      ) : (
-        <>
-          <Route path="/" component={Home} />
-          <Route path="/login" component={LoginPage} />
-          <Route component={Home} />
-        </>
-      )}
+      <Route path="/" component={Dashboard} />
+      <Route path="/dashboard" component={Dashboard} />
+      <Route path="/profile" component={UserProfile} />
+      <Route path="/profile/:section" component={UserProfile} />
+      <Route path="/clubs" component={ClubsHub} />
+      <Route path="/logo" component={LogoExport} />
+      <Route path="*" component={Dashboard} />
     </Switch>
   );
 }
