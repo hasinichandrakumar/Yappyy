@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { useQuery } from "@tanstack/react-query";
 import SimpleCameraFeed from "@/components/SimpleCameraFeed";
 import { 
   Play, 
@@ -63,6 +64,11 @@ export default function EnhancedPracticeHubFixed() {
   const [sessionType, setSessionType] = useState<'general' | 'roleplay'>('general');
   const [sessionPurpose, setSessionPurpose] = useState("");
   const [isSetupMode, setIsSetupMode] = useState(false);
+
+  // Fetch existing practice sessions to determine next session number
+  const { data: practiceSessions = [] } = useQuery({
+    queryKey: ['/api/practice-sessions']
+  });
 
   // Speech recognition state
   const [isListening, setIsListening] = useState(false);
@@ -169,8 +175,16 @@ export default function EnhancedPracticeHubFixed() {
     return () => clearInterval(interval);
   }, [isSessionActive, sessionStartTime, isCameraActive]);
 
+  // Generate automatic session name based on existing sessions
+  const generateSessionName = () => {
+    const sessionCount = Array.isArray(practiceSessions) ? practiceSessions.length : 0;
+    return `Practice Session ${sessionCount + 1}`;
+  };
+
   // Start session
   const startSession = () => {
+    const autoSessionName = generateSessionName();
+    setSessionName(autoSessionName);
     setIsSessionActive(true);
     setSessionStartTime(Date.now());
     setSessionDuration(0);
@@ -290,7 +304,7 @@ export default function EnhancedPracticeHubFixed() {
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Activity className="w-5 h-5 text-blue-600" />
-              <span>{sessionName || "Practice Session"}</span>
+              <span>{sessionName || generateSessionName()}</span>
             </div>
             <Badge variant={isSessionActive ? "default" : "secondary"}>
               {isSessionActive ? `${formatTime(sessionDuration)}` : "Ready"}
