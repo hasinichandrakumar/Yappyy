@@ -285,6 +285,101 @@ export default function EnhancedPracticeHubFixed() {
 
   return (
     <div className="space-y-6">
+      {/* Main Start Button - Top Priority */}
+      {!isSessionActive && (
+        <Card className="border-2 border-green-500 shadow-lg bg-gradient-to-r from-green-50 to-blue-50">
+          <CardContent className="text-center py-8">
+            <h2 className="text-2xl font-bold mb-4 text-gray-800">Ready to Practice Speaking?</h2>
+            <Button
+              onClick={startSession}
+              size="lg"
+              className="bg-green-600 hover:bg-green-700 text-white text-xl px-16 py-8 h-auto mb-4 shadow-lg transform hover:scale-105 transition-transform"
+            >
+              <Play className="w-10 h-10 mr-4" />
+              <div className="text-left">
+                <div className="text-2xl font-bold">Start Practice Session</div>
+                <div className="text-base opacity-90 font-normal">Camera + Microphone Ready</div>
+              </div>
+            </Button>
+            <p className="text-gray-600 text-base">
+              One click activates everything for your {generateSessionName()}
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Active Session Controls */}
+      {isSessionActive && (
+        <Card className="border-2 border-blue-500 bg-blue-50">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Activity className="w-6 h-6 text-blue-600" />
+                <span className="text-xl">{sessionName}</span>
+              </div>
+              <div className="flex items-center space-x-4">
+                <Badge variant="default" className="text-lg px-4 py-2">
+                  {formatTime(sessionDuration)}
+                </Badge>
+                {isListening && (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 bg-red-500 rounded-full animate-pulse"></div>
+                    <span className="text-base text-green-600 font-medium">Recording</span>
+                  </div>
+                )}
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-center space-x-6 mb-4">
+              <Button
+                onClick={stopSession}
+                variant="destructive"
+                size="lg"
+                className="px-8 py-4"
+              >
+                <Square className="w-6 h-6 mr-2" />
+                Stop Session
+              </Button>
+              
+              <Button
+                onClick={isListening ? stopListening : startListening}
+                variant={isListening ? "outline" : "default"}
+                size="lg"
+                className="px-8 py-4"
+              >
+                {isListening ? (
+                  <>
+                    <MicOff className="w-6 h-6 mr-2" />
+                    Mute Microphone
+                  </>
+                ) : (
+                  <>
+                    <Mic className="w-6 h-6 mr-2" />
+                    Start Microphone
+                  </>
+                )}
+              </Button>
+            </div>
+            
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div>
+                <div className="text-2xl font-bold text-blue-600">{wordCount}</div>
+                <div className="text-sm text-gray-500">Words Spoken</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-green-600">{currentWPM}</div>
+                <div className="text-sm text-gray-500">Words Per Minute</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-orange-600">{fillerWords.length}</div>
+                <div className="text-sm text-gray-500">Filler Words</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Session Setup */}
       {isSetupMode && (
         <Card>
