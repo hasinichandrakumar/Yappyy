@@ -374,8 +374,8 @@ export default function EnhancedPracticeHubFixed() {
       </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Video Feed with Body Metrics Overlay */}
-        <div className="lg:col-span-2 relative">
+        {/* Video Feed */}
+        <div className="lg:col-span-2">
           <SimpleCameraFeed 
             onStreamReady={(stream) => {
               setIsCameraActive(true);
@@ -387,30 +387,6 @@ export default function EnhancedPracticeHubFixed() {
               setIsCameraActive(false);
             }}
           />
-          
-          {/* Live Body Metrics Overlay */}
-          {isCameraActive && (
-            <div className="absolute top-4 right-4 space-y-2">
-              <div className="bg-black/80 text-white px-3 py-2 rounded-lg text-sm backdrop-blur">
-                <div className="flex items-center space-x-2">
-                  <Eye className="w-4 h-4" />
-                  <span>Eye Contact: {eyeContactScore}%</span>
-                </div>
-              </div>
-              <div className="bg-black/80 text-white px-3 py-2 rounded-lg text-sm backdrop-blur">
-                <div className="flex items-center space-x-2">
-                  <Activity className="w-4 h-4" />
-                  <span>Posture: {postureScore}%</span>
-                </div>
-              </div>
-              <div className="bg-black/80 text-white px-3 py-2 rounded-lg text-sm backdrop-blur">
-                <div className="flex items-center space-x-2">
-                  <Volume2 className="w-4 h-4" />
-                  <span>Voice: {voiceClarity}%</span>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Real-time AI Insights Panel */}
