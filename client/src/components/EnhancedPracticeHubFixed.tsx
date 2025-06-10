@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import CameraFeed from "@/components/CameraFeed";
 import { 
   Play, 
   Pause, 
@@ -775,92 +776,18 @@ export default function EnhancedPracticeHubFixed() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Video Feed with Integrated Analysis */}
         <div className="lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Camera className="w-5 h-5" />
-                  <span>Live Video Analysis</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className={`w-2 h-2 rounded-full ${isCameraActive ? 'bg-green-500' : 'bg-red-500'}`} />
-                  <span className="text-sm">{isCameraActive ? 'Active' : 'Inactive'}</span>
-                </div>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="relative bg-gray-900 rounded-lg overflow-hidden aspect-video">
-                {isCameraActive ? (
-                  <>
-                    <video
-                      ref={videoRef}
-                      autoPlay
-                      playsInline
-                      muted
-                      controls={false}
-                      className="w-full h-full object-cover transform scale-x-[-1]"
-                      style={{ transform: 'scaleX(-1)' }}
-                    />
-                    {/* Live Analysis Overlay */}
-                    <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-sm rounded-lg p-2 space-y-1">
-                      <div className="flex items-center space-x-2 text-white text-xs">
-                        <Eye className="w-3 h-3" />
-                        <span>Eye Contact: {Math.round(eyeContactScore)}%</span>
-                      </div>
-                      <div className="flex items-center space-x-2 text-white text-xs">
-                        <Target className="w-3 h-3" />
-                        <span>Posture: {Math.round(postureScore)}%</span>
-                      </div>
-                      {isSessionActive && (
-                        <div className="flex items-center space-x-2 text-green-400 text-xs">
-                          <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                          <span>Recording</span>
-                        </div>
-                      )}
-                    </div>
-                  </>
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <div className="text-center text-gray-400">
-                      {cameraError ? (
-                        <>
-                          <AlertCircle className="w-16 h-16 mx-auto mb-4 text-red-400" />
-                          <p className="text-lg mb-2 text-red-400">Camera Error</p>
-                          <p className="text-sm mb-4">{cameraError}</p>
-                          <Button onClick={initializeCamera} variant="outline" className="text-white border-white/20">
-                            <RefreshCw className="w-4 h-4 mr-2" />
-                            Retry Camera
-                          </Button>
-                        </>
-                      ) : (
-                        <>
-                          <Camera className="w-16 h-16 mx-auto mb-4" />
-                          <p className="text-lg mb-2">Camera Not Active</p>
-                          <p className="text-sm mb-4">Enable camera for body language analysis</p>
-                          <div className="flex flex-col items-center space-y-3">
-                            <Button 
-                              onClick={initializeCamera} 
-                              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2"
-                              disabled={isRetrying}
-                            >
-                              {isRetrying ? (
-                                <>
-                                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                                  Connecting...
-                                </>
-                              ) : (
-                                <>
-                                  <Camera className="w-4 h-4 mr-2" />
-                                  Activate Camera
-                                </>
-                              )}
-                            </Button>
-                            <p className="text-xs text-gray-500 text-center max-w-xs">
-                              Your browser will ask for camera permission
-                            </p>
-                          </div>
-                        </>
-                      )}
+          <CameraFeed 
+            onStreamReady={(stream) => {
+              setIsCameraActive(true);
+              setCameraError("");
+              if (videoRef.current) {
+                videoRef.current.srcObject = stream;
+              }
+            }}
+            onStreamEnd={() => {
+              setIsCameraActive(false);
+            }}
+          />
                     </div>
                   </div>
                 )}
