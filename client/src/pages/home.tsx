@@ -33,11 +33,46 @@ import yapUpLogo from "@assets/YapUp-2_1749483329460.png";
 
 export default function Home() {
   const [isHovered, setIsHovered] = useState<string | null>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
   const { user, isAuthenticated, isLoading } = useAuth();
   const heroRef = useRef(null);
   const featuresRef = useRef(null);
   const isHeroInView = useInView(heroRef);
   const isFeaturesInView = useInView(featuresRef);
+
+  // Check for authentication errors in URL params
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const error = urlParams.get('error');
+    const details = urlParams.get('details');
+    
+    if (error) {
+      let errorMessage = 'Authentication failed';
+      switch (error) {
+        case 'auth_error':
+          errorMessage = 'Google OAuth configuration error';
+          break;
+        case 'auth_failed':
+          errorMessage = 'Google authentication was cancelled or failed';
+          break;
+        case 'login_error':
+          errorMessage = 'Login session could not be established';
+          break;
+        case 'oauth_not_configured':
+          errorMessage = 'Google OAuth is not properly configured';
+          break;
+      }
+      
+      if (details) {
+        errorMessage += `: ${decodeURIComponent(details)}`;
+      }
+      
+      setAuthError(errorMessage);
+      
+      // Clear error from URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
 
   const handleStartPracticing = (e: React.MouseEvent) => {
     e.preventDefault();
