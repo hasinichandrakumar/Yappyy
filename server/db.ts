@@ -14,17 +14,22 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-// Create pool with proper configuration for serverless environment
+// Create pool with optimized configuration for Neon serverless
 export const pool = new Pool({ 
   connectionString: process.env.DATABASE_URL,
-  max: 1, // Limit connections for serverless
-  idleTimeoutMillis: 0, // Disable idle timeout
-  connectionTimeoutMillis: 5000 // 5 second timeout
+  max: 1,
+  idleTimeoutMillis: 30000, // 30 seconds
+  connectionTimeoutMillis: 10000, // 10 seconds
 });
 
-// Add error handling for pool
+// Add comprehensive error handling
 pool.on('error', (err) => {
-  console.error('Database pool error:', err);
+  console.error('Database pool error:', err.message);
+  // Don't throw here to prevent app crashes
+});
+
+pool.on('connect', () => {
+  console.log('Database connected successfully');
 });
 
 export const db = drizzle({ client: pool, schema });
