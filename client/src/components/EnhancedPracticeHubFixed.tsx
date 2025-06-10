@@ -221,6 +221,17 @@ export default function EnhancedPracticeHubFixed() {
     setWordCount(0);
     setFillerWords([]);
     setTranscript("");
+    
+    // Reset all metrics to 0 at session start
+    setEyeContactScore(0);
+    setPostureScore(0);
+    setVoiceClarity(0);
+    setConfidenceScore(0);
+    
+    // Auto-start microphone
+    setTimeout(() => {
+      startListening();
+    }, 500);
   };
 
   // Stop session
@@ -374,8 +385,8 @@ export default function EnhancedPracticeHubFixed() {
       </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Video Feed */}
-        <div className="lg:col-span-2">
+        {/* Video Feed with Live Metrics */}
+        <div className="lg:col-span-2 relative">
           <SimpleCameraFeed 
             onStreamReady={(stream) => {
               setIsCameraActive(true);
@@ -387,6 +398,36 @@ export default function EnhancedPracticeHubFixed() {
               setIsCameraActive(false);
             }}
           />
+          
+          {/* Live Body Metrics Overlay */}
+          {isCameraActive && isSessionActive && (
+            <div className="absolute top-4 right-4 space-y-2">
+              <div className="bg-black/80 text-white px-3 py-2 rounded-lg text-sm backdrop-blur">
+                <div className="flex items-center space-x-2">
+                  <Eye className="w-4 h-4" />
+                  <span>Eye Contact: {eyeContactScore}%</span>
+                </div>
+              </div>
+              <div className="bg-black/80 text-white px-3 py-2 rounded-lg text-sm backdrop-blur">
+                <div className="flex items-center space-x-2">
+                  <Activity className="w-4 h-4" />
+                  <span>Posture: {postureScore}%</span>
+                </div>
+              </div>
+              <div className="bg-black/80 text-white px-3 py-2 rounded-lg text-sm backdrop-blur">
+                <div className="flex items-center space-x-2">
+                  <Volume2 className="w-4 h-4" />
+                  <span>Voice: {voiceClarity}%</span>
+                </div>
+              </div>
+              <div className="bg-black/80 text-white px-3 py-2 rounded-lg text-sm backdrop-blur">
+                <div className="flex items-center space-x-2">
+                  <Target className="w-4 h-4" />
+                  <span>Confidence: {confidenceScore}%</span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Real-time AI Insights Panel */}
@@ -462,51 +503,67 @@ export default function EnhancedPracticeHubFixed() {
           </div>
 
           {/* Session Controls */}
-          <div className="flex items-center justify-between pt-4 border-t">
-            <div className="flex items-center space-x-4">
+          {!isSessionActive ? (
+            <div className="text-center py-8">
               <Button
-                onClick={isSessionActive ? stopSession : startSession}
-                variant={isSessionActive ? "destructive" : "default"}
-                className={isSessionActive ? "" : "bg-green-600 hover:bg-green-700"}
+                onClick={startSession}
+                size="lg"
+                className="bg-green-600 hover:bg-green-700 text-white text-lg px-8 py-4 h-auto"
               >
-                {isSessionActive ? (
-                  <>
-                    <Square className="w-4 h-4 mr-2" />
-                    Stop Session
-                  </>
-                ) : (
-                  <>
-                    <Play className="w-4 h-4 mr-2" />
-                    Start Session
-                  </>
-                )}
+                <Play className="w-6 h-6 mr-3" />
+                Start Practice Session
+                <div className="ml-3 text-sm opacity-90">
+                  Camera + Microphone
+                </div>
               </Button>
-              
-              <Button
-                onClick={isListening ? stopListening : startListening}
-                variant="outline"
-                disabled={!isSessionActive}
-              >
-                {isListening ? (
-                  <>
-                    <MicOff className="w-4 h-4 mr-2" />
-                    Mute
-                  </>
-                ) : (
-                  <>
-                    <Mic className="w-4 h-4 mr-2" />
-                    Unmute
-                  </>
-                )}
-              </Button>
+              <p className="text-gray-500 text-sm mt-3">
+                Automatically activates camera and microphone for full practice experience
+              </p>
             </div>
-            
-            {isSessionActive && (
-              <Badge variant="outline" className="text-blue-600">
-                {formatTime(sessionDuration)}
-              </Badge>
-            )}
-          </div>
+          ) : (
+            <div className="flex items-center justify-between pt-4 border-t">
+              <div className="flex items-center space-x-4">
+                <Button
+                  onClick={stopSession}
+                  variant="destructive"
+                  size="lg"
+                >
+                  <Square className="w-5 h-5 mr-2" />
+                  Stop Session
+                </Button>
+                
+                <Button
+                  onClick={isListening ? stopListening : startListening}
+                  variant="outline"
+                  size="lg"
+                >
+                  {isListening ? (
+                    <>
+                      <MicOff className="w-5 h-5 mr-2" />
+                      Mute Mic
+                    </>
+                  ) : (
+                    <>
+                      <Mic className="w-5 h-5 mr-2" />
+                      Unmute Mic
+                    </>
+                  )}
+                </Button>
+              </div>
+              
+              <div className="flex items-center space-x-3">
+                <Badge variant="outline" className="text-blue-600 text-lg px-3 py-1">
+                  {formatTime(sessionDuration)}
+                </Badge>
+                {isListening && (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                    <span className="text-sm text-gray-600">Recording</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
