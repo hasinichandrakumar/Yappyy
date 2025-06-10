@@ -99,6 +99,18 @@ export async function setupGoogleAuth(app: Express) {
       }
     });
 
+    // Debug endpoint to check OAuth configuration
+    app.get("/api/auth/debug", (req, res) => {
+      res.json({
+        hasClientId: !!process.env.GOOGLE_CLIENT_ID,
+        hasClientSecret: !!process.env.GOOGLE_CLIENT_SECRET,
+        hasSessionSecret: !!process.env.SESSION_SECRET,
+        domain: process.env.REPLIT_DEV_DOMAIN,
+        callbackUrl: `https://${process.env.REPLIT_DEV_DOMAIN}/api/auth/google/callback`,
+        nodeEnv: process.env.NODE_ENV
+      });
+    });
+
     // Google OAuth routes
     app.get("/api/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 
@@ -148,6 +160,36 @@ export async function setupGoogleAuth(app: Express) {
       res.redirect("/?error=oauth_not_configured");
     });
   }
+
+  // Demo authentication for development/testing
+  app.get("/api/auth/demo", async (req, res) => {
+    try {
+      // Create or get demo user
+      const demoUser = {
+        id: "demo-user-123",
+        email: "demo@yapup.com",
+        firstName: "Demo",
+        lastName: "User",
+        profileImageUrl: "",
+        hasCompletedOnboarding: false
+      };
+
+      const user = await storage.upsertUser(demoUser);
+      
+      // Log in the demo user
+      req.logIn(user, (err) => {
+        if (err) {
+          console.error("Demo login error:", err);
+          return res.redirect("/?error=demo_login_failed");
+        }
+        console.log("Demo user logged in successfully");
+        return res.redirect("/dashboard");
+      });
+    } catch (error) {
+      console.error("Demo auth error:", error);
+      res.redirect("/?error=demo_auth_error");
+    }
+  });
 
   app.get("/api/auth/logout", (req, res) => {
     req.logout(() => {

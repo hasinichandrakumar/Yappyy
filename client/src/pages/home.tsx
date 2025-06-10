@@ -93,6 +93,12 @@ export default function Home() {
     window.location.href = "/api/auth/google";
   };
 
+  const handleDemoLogin = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    window.location.href = "/api/auth/demo";
+  };
+
   const handleLogout = () => {
     window.location.href = "/api/auth/logout";
   };
@@ -204,6 +210,15 @@ export default function Home() {
               </h1>
             </motion.div>
             <div className="flex items-center space-x-4">
+              <motion.div
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleDemoLogin}
+              >
+                <Button variant="outline" className="text-gray-700 hover:text-gray-900 border-gray-300">
+                  Try Demo
+                </Button>
+              </motion.div>
               <motion.div
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
