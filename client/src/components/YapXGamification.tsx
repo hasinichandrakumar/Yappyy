@@ -298,7 +298,7 @@ export default function YapXGamification() {
                   ))}
                 </div>
                 {currentLevel >= level.level && (
-                  <Badge variant="default" size="sm" className="mt-2 bg-green-600">
+                  <Badge variant="default" className="mt-2 bg-green-600">
                     Unlocked
                   </Badge>
                 )}

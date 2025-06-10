@@ -4,7 +4,7 @@
 
 :root {
   --background: 210 40% 98%; /* Light blue-aqua background */
-  --foreground: 210 15% 15%; /* Dark blue-gray text */
+  --foreground: 210 100% 8%; /* Deep navy/black text matching bottom section */
   --muted: 190 50% 95%; /* Muted aqua */
   --muted-foreground: 200 10% 50%;
   --popover: 210 100% 99%;
