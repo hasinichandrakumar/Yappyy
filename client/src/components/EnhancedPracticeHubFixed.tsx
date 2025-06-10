@@ -140,19 +140,31 @@ export default function EnhancedPracticeHubFixed() {
         }
 
         // Detect filler words - only from final transcript to avoid duplicates
-        const fillerWordList = ['um', 'uh', 'like', 'you know', 'so', 'actually', 'basically', 'well', 'right', 'okay', 'hmm', 'err'];
-        const finalText = transcript + finalTranscript;
-        const allWords = finalText.toLowerCase().split(/\s+/);
-        const detectedFillers: string[] = [];
-        
-        allWords.forEach(word => {
-          const cleanWord = word.replace(/[.,!?;:'"]/g, '');
-          if (fillerWordList.includes(cleanWord) && cleanWord.length > 0) {
-            detectedFillers.push(cleanWord);
+        if (finalTranscript) {
+          const fillerWordList = ['um', 'uh', 'like', 'you know', 'so', 'actually', 'basically', 'well', 'right', 'okay', 'hmm', 'err', 'ah', 'erm'];
+          const currentFinalText = transcript + finalTranscript;
+          const allWords = currentFinalText.toLowerCase().split(/\s+/);
+          const detectedFillers: string[] = [];
+          
+          // Check for multi-word fillers first
+          for (let i = 0; i < allWords.length - 1; i++) {
+            const twoWordPhrase = allWords[i] + ' ' + allWords[i + 1];
+            if (twoWordPhrase === 'you know') {
+              detectedFillers.push('you know');
+              i++; // Skip next word as it's part of the phrase
+            }
           }
-        });
-        
-        setFillerWords(detectedFillers);
+          
+          // Check for single-word fillers
+          allWords.forEach(word => {
+            const cleanWord = word.replace(/[.,!?;:'"]/g, '');
+            if (fillerWordList.includes(cleanWord) && cleanWord.length > 0 && cleanWord !== 'you' && cleanWord !== 'know') {
+              detectedFillers.push(cleanWord);
+            }
+          });
+          
+          setFillerWords(detectedFillers);
+        }
       };
 
       recognitionRef.current.onerror = (event: any) => {
@@ -420,7 +432,7 @@ export default function EnhancedPracticeHubFixed() {
               </div>
               {fillerWords.length > 0 && (
                 <div className="mt-2 text-xs text-orange-600">
-                  <span className="font-medium">Detected filler words:</span> {fillerWords.join(', ')}
+                  <span className="font-medium">Filler words detected ({fillerWords.length}):</span> {fillerWords.join(', ')}
                 </div>
               )}
             </div>
@@ -428,54 +440,54 @@ export default function EnhancedPracticeHubFixed() {
         </Card>
       )}
 
-      {/* Session Setup */}
+      {/* Personalized Practice Setup */}
       {isSetupMode && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Settings className="w-5 h-5 text-blue-600" />
-              <span>Session Setup</span>
+              <span>Personalize Your Practice</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Session Name</label>
+              <label className="text-sm font-medium">What would you like to call this practice session?</label>
               <input
                 type="text"
                 value={sessionName}
                 onChange={(e) => setSessionName(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter session name..."
+                placeholder="e.g., Job Interview Prep, TED Talk Practice, Presentation Skills..."
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Session Type</label>
+              <label className="text-sm font-medium">Choose your practice style</label>
               <div className="flex space-x-2">
                 <Button
                   onClick={() => setSessionType('general')}
                   variant={sessionType === 'general' ? 'default' : 'outline'}
                   size="sm"
                 >
-                  General Practice
+                  Free Practice
                 </Button>
                 <Button
                   onClick={() => setSessionType('roleplay')}
                   variant={sessionType === 'roleplay' ? 'default' : 'outline'}
                   size="sm"
                 >
-                  Roleplay
+                  Scenario Practice
                 </Button>
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Session Purpose</label>
+              <label className="text-sm font-medium">What's your goal for today's session?</label>
               <textarea
                 value={sessionPurpose}
                 onChange={(e) => setSessionPurpose(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-20 resize-none"
-                placeholder="What's the goal of this session?"
+                placeholder="Describe what you want to achieve or improve in this session..."
               />
             </div>
           </CardContent>
@@ -592,44 +604,7 @@ export default function EnhancedPracticeHubFixed() {
         </div>
       </div>
 
-      {/* Live Transcript */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Mic className="w-5 h-5 text-blue-600" />
-            <span>Live Transcript</span>
-            {isListening && (
-              <div className="flex items-center space-x-2 ml-auto">
-                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                <span className="text-sm text-gray-500">Recording</span>
-              </div>
-            )}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 min-h-[200px] max-h-[300px] overflow-y-auto">
-            {transcript ? (
-              <div className="space-y-2">
-                <p className="text-gray-800 dark:text-gray-200 leading-relaxed">
-                  {transcript}
-                </p>
-                <div className="flex items-center justify-between text-sm text-gray-500 pt-2 border-t">
-                  <span>Words: {wordCount}</span>
-                  <span>WPM: {currentWPM}</span>
-                  {fillerWords.length > 0 && (
-                    <span className="text-orange-600">Filler words: {fillerWords.length}</span>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div className="text-center text-gray-500 py-8">
-                <Mic className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                <p>Start speaking to see your transcript appear here</p>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+
 
       {/* Practice Session Analysis */}
       <Card>
