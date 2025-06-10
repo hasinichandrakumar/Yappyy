@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Bell, MicOff, User, BarChart3, Eye, Brain, Star, TrendingUp, FileText, Trophy, Users, Volume2, HelpCircle, PlayCircle, BookOpen, Target } from "lucide-react";
 import yapUpLogo from "@assets/YapUp-6_1749439026739.png";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,7 @@ export default function Dashboard() {
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
 
   // Fetch user data to check onboarding status
   const { data: user } = useQuery({
@@ -87,14 +89,21 @@ export default function Dashboard() {
             </div>
             
             <div className="flex items-center space-x-3">
-              <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-gray-600 hover:text-gray-900"
+                onClick={() => setActiveTab("help")}
+                title="Help & Notifications"
+              >
                 <Bell className="w-4 h-4" />
               </Button>
               <Button 
                 variant="ghost" 
                 size="sm" 
                 className="text-gray-600 hover:text-gray-900"
-                onClick={() => window.location.href = '/profile'}
+                onClick={() => setLocation('/profile')}
+                title="User Profile"
               >
                 <User className="w-4 h-4" />
               </Button>
@@ -102,6 +111,7 @@ export default function Dashboard() {
                 variant="outline" 
                 size="sm"
                 onClick={() => window.location.href = '/api/auth/logout'}
+                title="Logout"
               >
                 Logout
               </Button>

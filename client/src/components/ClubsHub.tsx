@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +21,11 @@ import {
   Zap,
   Crown,
   BookOpen,
-  GraduationCap
+  GraduationCap,
+  Camera,
+  Mic,
+  Play,
+  Square
 } from "lucide-react";
 
 interface ClubEvent {
@@ -66,6 +70,85 @@ export default function ClubsHub() {
   const [customRubric, setCustomRubric] = useState<string>("");
   const [practiceMode, setPracticeMode] = useState<'judge' | 'competitor'>('competitor');
   const [aiJudgeFeedback, setAiJudgeFeedback] = useState<string>("");
+  
+  // Camera state
+  const [isCameraActive, setIsCameraActive] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [cameraError, setCameraError] = useState<string>("");
+  const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Initialize camera
+  const initializeCamera = useCallback(async () => {
+    try {
+      setCameraError("");
+      
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+        setMediaStream(null);
+      }
+      
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          facingMode: "user"
+        },
+        audio: false
+      });
+
+      if (videoRef.current && stream) {
+        videoRef.current.srcObject = stream;
+        setMediaStream(stream);
+        setIsCameraActive(true);
+        
+        videoRef.current.onloadedmetadata = () => {
+          if (videoRef.current) {
+            videoRef.current.play().catch(console.warn);
+          }
+        };
+      }
+    } catch (error: any) {
+      console.error("Camera error:", error);
+      let errorMessage = "Camera access failed: ";
+      
+      if (error.name === "NotAllowedError") {
+        errorMessage += "Please allow camera access and try again.";
+      } else if (error.name === "NotFoundError") {
+        errorMessage += "No camera found. Please connect a camera device.";
+      } else {
+        errorMessage += "Please check your camera permissions.";
+      }
+      
+      setCameraError(errorMessage);
+      setIsCameraActive(false);
+    }
+  }, [mediaStream]);
+
+  // Stop camera
+  const stopCamera = useCallback(() => {
+    if (mediaStream) {
+      mediaStream.getTracks().forEach(track => track.stop());
+      setMediaStream(null);
+    }
+    
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+    
+    setIsCameraActive(false);
+    setIsRecording(false);
+  }, [mediaStream]);
+
+  // Start/stop recording
+  const toggleRecording = () => {
+    if (!isCameraActive) {
+      initializeCamera();
+      return;
+    }
+    
+    setIsRecording(!isRecording);
+  };
 
   // DECA Events Data (Complete official DECA competitive events)
   const decaEvents: ClubEvent[] = [
@@ -755,18 +838,41 @@ ${rubric.criteria.map(criteria =>
                   {/* Video Feed */}
                   <div className="space-y-4">
                     <div className="aspect-video bg-gray-900 rounded-lg relative overflow-hidden">
-                      <video
-                        className="w-full h-full object-cover"
-                        autoPlay
-                        playsInline
-                        muted
-                        id="competition-video"
-                      />
+                      {cameraError ? (
+                        <div className="flex items-center justify-center h-full">
+                          <div className="text-center text-white">
+                            <AlertCircle className="w-12 h-12 mx-auto mb-4 text-red-400" />
+                            <p className="text-sm">{cameraError}</p>
+                            <Button 
+                              onClick={initializeCamera} 
+                              className="mt-4"
+                              variant="secondary"
+                            >
+                              Try Again
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <video
+                          ref={videoRef}
+                          className="w-full h-full object-cover"
+                          autoPlay
+                          playsInline
+                          muted
+                        />
+                      )}
+                      
                       <div className="absolute top-4 left-4 bg-black/70 text-white px-3 py-1 rounded-lg text-sm">
-                        Competition Practice
+                        {isRecording ? "Recording..." : "Competition Practice"}
+                        {isRecording && <div className="inline-block w-2 h-2 bg-red-500 rounded-full ml-2 animate-pulse" />}
                       </div>
+                      
                       <div className="absolute bottom-4 right-4 flex space-x-2">
-                        <Button size="sm" variant="secondary">
+                        <Button 
+                          size="sm" 
+                          variant={isCameraActive ? "default" : "secondary"}
+                          onClick={isCameraActive ? stopCamera : initializeCamera}
+                        >
                           <Camera className="w-4 h-4" />
                         </Button>
                         <Button size="sm" variant="secondary">
@@ -793,13 +899,36 @@ ${rubric.criteria.map(criteria =>
                     </div>
 
                     <div className="flex space-x-2">
-                      <Button className="flex-1">
-                        <Play className="w-4 h-4 mr-2" />
-                        Start Practice
+                      <Button 
+                        className="flex-1"
+                        onClick={toggleRecording}
+                        disabled={!selectedEvent}
+                      >
+                        {isRecording ? (
+                          <>
+                            <Square className="w-4 h-4 mr-2" />
+                            Stop Practice
+                          </>
+                        ) : (
+                          <>
+                            <Play className="w-4 h-4 mr-2" />
+                            Start Practice
+                          </>
+                        )}
                       </Button>
-                      <Button variant="outline">
+                      <Button 
+                        variant="outline"
+                        onClick={() => {
+                          if (isRecording) {
+                            setIsRecording(false);
+                            // Generate AI feedback here
+                            generateAIJudgeFeedback();
+                          }
+                        }}
+                        disabled={!isRecording}
+                      >
                         <Target className="w-4 h-4 mr-2" />
-                        Stop & Evaluate
+                        Get Evaluation
                       </Button>
                     </div>
                   </div>
