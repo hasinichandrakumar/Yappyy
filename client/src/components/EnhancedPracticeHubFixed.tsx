@@ -170,60 +170,38 @@ export default function EnhancedPracticeHubFixed() {
         throw new Error("getUserMedia not supported in this browser");
       }
 
-      // Request permissions first
-      let stream: MediaStream;
-      
-      // Try multiple constraint configurations
-      const constraintOptions = [
-        // High quality
-        {
-          video: {
-            width: { ideal: 1280, min: 320 },
-            height: { ideal: 720, min: 240 },
-            facingMode: "user",
-            frameRate: { ideal: 30, min: 10 }
-          },
-          audio: false
-        },
-        // Medium quality
-        {
-          video: {
-            width: 640,
-            height: 480,
-            facingMode: "user"
-          },
-          audio: false
-        },
-        // Basic fallback
-        {
-          video: {
-            facingMode: "user"
-          },
-          audio: false
-        },
-        // Minimal fallback
-        {
+      // Request camera access with progressive fallback
+      let stream: MediaStream | null = null;
+      let lastError: any = null;
+
+      // Try basic camera request first
+      try {
+        console.log("Requesting basic camera access...");
+        stream = await navigator.mediaDevices.getUserMedia({
           video: true,
           audio: false
-        }
-      ];
-
-      let lastError;
-      for (const constraints of constraintOptions) {
+        });
+        console.log("Camera stream obtained successfully");
+      } catch (error: any) {
+        console.error("Basic camera request failed:", error);
+        lastError = error;
+        
+        // Try with specific constraints as fallback
         try {
-          console.log("Trying constraints:", constraints);
-          stream = await navigator.mediaDevices.getUserMedia(constraints);
-          console.log("Successfully obtained stream with constraints:", constraints);
-          break;
-        } catch (error: any) {
-          console.warn("Failed with constraints:", constraints, error);
-          lastError = error;
-          continue;
+          console.log("Trying with user-facing camera constraint...");
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "user" },
+            audio: false
+          });
+          console.log("User-facing camera stream obtained");
+        } catch (fallbackError: any) {
+          console.error("Fallback camera request failed:", fallbackError);
+          lastError = fallbackError;
         }
       }
 
-      if (!stream!) {
-        throw lastError || new Error("Failed to get media stream with any constraints");
+      if (!stream) {
+        throw lastError || new Error("Camera access denied or unavailable");
       }
 
       // Ensure video element exists
@@ -244,7 +222,7 @@ export default function EnhancedPracticeHubFixed() {
       setMediaStream(stream);
       
       // Handle video load events
-      return new Promise<void>((resolve, reject) => {
+      await new Promise<void>((resolve, reject) => {
         const cleanup = () => {
           video.removeEventListener('loadedmetadata', onLoadedMetadata);
           video.removeEventListener('canplay', onCanPlay);
@@ -756,6 +734,28 @@ export default function EnhancedPracticeHubFixed() {
                   </>
                 )}
               </Button>
+              
+              {/* Camera Error Display */}
+              {cameraError && (
+                <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                  <strong>Camera Error:</strong> {cameraError}
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="ml-2 text-xs h-6"
+                    onClick={initializeCamera}
+                  >
+                    Retry
+                  </Button>
+                </div>
+              )}
+              
+              {/* Debug Info */}
+              <div className="mt-2 text-xs text-gray-500">
+                Camera Support: {navigator.mediaDevices ? 'Yes' : 'No'} | 
+                Retry Count: {retryCount} | 
+                Status: {isCameraActive ? 'Active' : 'Inactive'}
+              </div>
             </div>
             
             <div className="flex items-center space-x-4 text-sm">

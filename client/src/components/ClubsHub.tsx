@@ -33,11 +33,15 @@ interface ClubEvent {
   name: string;
   category: string;
   description: string;
-  format: 'role-play' | 'presentation' | 'written' | 'case-study';
+  format: 'role-play' | 'presentation' | 'written' | 'case-study' | 'objective-test' | 'performance';
   timeLimit: string;
   participants: string;
   judgeCount: number;
   keySkills: string[];
+  rubric: RubricCriteria[];
+  organization: 'DECA' | 'FBLA' | 'HOSA';
+  competitionLevel: 'Regional' | 'State' | 'National';
+  preparationTips: string[];
 }
 
 interface RubricCriteria {
@@ -45,10 +49,11 @@ interface RubricCriteria {
   name: string;
   description: string;
   maxPoints: number;
+  weight: number;
   levels: {
     level: number;
-    descriptor: string;
     points: number;
+    descriptor: string;
   }[];
 }
 
