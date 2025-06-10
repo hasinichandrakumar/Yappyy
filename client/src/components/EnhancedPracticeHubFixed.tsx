@@ -148,131 +148,195 @@ export default function EnhancedPracticeHubFixed() {
     };
   }, [isSessionActive, sessionStartTime]);
 
-  // Camera initialization with robust error handling
+  // Camera initialization with comprehensive error handling and browser compatibility
   const initializeCamera = useCallback(async () => {
     try {
       setCameraError("");
       setIsRetrying(true);
+      console.log("Starting camera initialization...");
       
-      // Stop any existing stream first
+      // Stop any existing streams
       if (mediaStream) {
         mediaStream.getTracks().forEach(track => track.stop());
         setMediaStream(null);
       }
       
-      console.log("Requesting camera access...");
-      
-      // Check if getUserMedia is available
-      if (!navigator.mediaDevices?.getUserMedia) {
-        throw new Error("Camera not supported on this device");
+      // Check for media devices support
+      if (!navigator.mediaDevices) {
+        throw new Error("MediaDevices not supported in this browser");
       }
       
-      // Request camera with progressive fallback
-      let stream;
-      try {
-        // Try with ideal constraints first
-        stream = await navigator.mediaDevices.getUserMedia({
+      if (!navigator.mediaDevices.getUserMedia) {
+        throw new Error("getUserMedia not supported in this browser");
+      }
+
+      // Request permissions first
+      let stream: MediaStream;
+      
+      // Try multiple constraint configurations
+      const constraintOptions = [
+        // High quality
+        {
           video: {
-            width: { ideal: 1280, min: 640 },
-            height: { ideal: 720, min: 480 },
+            width: { ideal: 1280, min: 320 },
+            height: { ideal: 720, min: 240 },
             facingMode: "user",
-            frameRate: { ideal: 30, min: 15 }
+            frameRate: { ideal: 30, min: 10 }
           },
           audio: false
-        });
-      } catch (constraintError) {
-        console.warn("Falling back to basic constraints");
+        },
+        // Medium quality
+        {
+          video: {
+            width: 640,
+            height: 480,
+            facingMode: "user"
+          },
+          audio: false
+        },
+        // Basic fallback
+        {
+          video: {
+            facingMode: "user"
+          },
+          audio: false
+        },
+        // Minimal fallback
+        {
+          video: true,
+          audio: false
+        }
+      ];
+
+      let lastError;
+      for (const constraints of constraintOptions) {
         try {
-          // Fallback to basic constraints
-          stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: "user" },
-            audio: false
-          });
-        } catch (basicError) {
-          // Final fallback - any video
-          stream = await navigator.mediaDevices.getUserMedia({
-            video: true,
-            audio: false
-          });
+          console.log("Trying constraints:", constraints);
+          stream = await navigator.mediaDevices.getUserMedia(constraints);
+          console.log("Successfully obtained stream with constraints:", constraints);
+          break;
+        } catch (error: any) {
+          console.warn("Failed with constraints:", constraints, error);
+          lastError = error;
+          continue;
         }
       }
 
-      console.log("Camera stream obtained successfully");
+      if (!stream!) {
+        throw lastError || new Error("Failed to get media stream with any constraints");
+      }
 
-      if (videoRef.current && stream) {
-        // Set up video element
-        const video = videoRef.current;
-        video.srcObject = stream;
-        video.muted = true;
-        video.playsInline = true;
-        video.autoplay = true;
-        
-        setMediaStream(stream);
-        
-        // Create a promise for video readiness
-        const videoReady = new Promise<void>((resolve, reject) => {
-          const onLoadedData = () => {
-            console.log("Video ready and playing");
+      // Ensure video element exists
+      if (!videoRef.current) {
+        throw new Error("Video element ref not available");
+      }
+
+      const video = videoRef.current;
+      
+      // Set up video element properties
+      video.srcObject = stream;
+      video.muted = true;
+      video.playsInline = true;
+      video.autoplay = true;
+      video.controls = false;
+      
+      // Store stream reference
+      setMediaStream(stream);
+      
+      // Handle video load events
+      return new Promise<void>((resolve, reject) => {
+        const cleanup = () => {
+          video.removeEventListener('loadedmetadata', onLoadedMetadata);
+          video.removeEventListener('canplay', onCanPlay);
+          video.removeEventListener('error', onError);
+          clearTimeout(timeoutId);
+        };
+
+        const onLoadedMetadata = () => {
+          console.log("Video metadata loaded");
+        };
+
+        const onCanPlay = async () => {
+          console.log("Video can play");
+          try {
+            await video.play();
             setIsCameraActive(true);
-            setRetryCount(0);
             setCameraError("");
-            video.removeEventListener('loadeddata', onLoadedData);
-            video.removeEventListener('error', onError);
+            setRetryCount(0);
+            cleanup();
             resolve();
-          };
-          
-          const onError = (event: any) => {
-            console.error("Video element error:", event);
-            video.removeEventListener('loadeddata', onLoadedData);
-            video.removeEventListener('error', onError);
-            reject(new Error("Video element failed to load"));
-          };
-          
-          video.addEventListener('loadeddata', onLoadedData);
-          video.addEventListener('error', onError);
-        });
-        
-        // Start video playback
-        try {
-          await video.play();
-          await videoReady;
-        } catch (playError) {
-          console.warn("Video autoplay failed, trying manual play:", playError);
-          // Sometimes autoplay fails but the video still works
+          } catch (playError) {
+            console.warn("Autoplay failed:", playError);
+            // Try to play manually or set active anyway
+            setIsCameraActive(true);
+            setCameraError("");
+            cleanup();
+            resolve();
+          }
+        };
+
+        const onError = (event: any) => {
+          console.error("Video error:", event);
+          cleanup();
+          reject(new Error("Video playback failed"));
+        };
+
+        // Set up event listeners
+        video.addEventListener('loadedmetadata', onLoadedMetadata);
+        video.addEventListener('canplay', onCanPlay);
+        video.addEventListener('error', onError);
+
+        // Fallback timeout
+        const timeoutId = setTimeout(() => {
+          console.log("Video setup timeout, attempting to activate anyway");
           setIsCameraActive(true);
           setCameraError("");
-        }
-        
-        console.log("Camera setup complete");
-      } else {
-        throw new Error("Video element not available");
-      }
+          cleanup();
+          resolve();
+        }, 5000);
+
+        // Force play attempt
+        video.play().catch(e => console.warn("Initial play attempt failed:", e));
+      });
+
     } catch (error: any) {
-      console.error("Camera initialization error:", error);
-      let errorMessage = "Camera activation failed: ";
+      console.error("Camera initialization failed:", error);
       
-      if (error.name === "NotAllowedError") {
-        errorMessage += "Camera permission denied. Please allow camera access and refresh the page.";
-      } else if (error.name === "NotFoundError") {
-        errorMessage += "No camera found. Please connect a camera device.";
-      } else if (error.name === "NotReadableError") {
-        errorMessage += "Camera is busy. Close other apps using the camera and try again.";
-      } else if (error.name === "OverconstrainedError") {
-        errorMessage += "Camera settings not supported. Trying basic settings...";
-        // Auto-retry with basic settings
-        setTimeout(() => initializeCameraBasic(), 1000);
-        return;
-      } else {
-        errorMessage += `${error.message || "Unknown error"}. Please check camera permissions.`;
+      let errorMessage = "Camera setup failed: ";
+      
+      switch (error.name) {
+        case "NotAllowedError":
+          errorMessage += "Permission denied. Please allow camera access and try again.";
+          break;
+        case "NotFoundError":
+          errorMessage += "No camera found. Please connect a camera.";
+          break;
+        case "NotReadableError":
+          errorMessage += "Camera is busy. Close other apps and try again.";
+          break;
+        case "OverconstrainedError":
+          errorMessage += "Camera constraints not supported.";
+          break;
+        case "SecurityError":
+          errorMessage += "Security error. Ensure you're using HTTPS.";
+          break;
+        default:
+          errorMessage += error.message || "Unknown error occurred.";
       }
       
       setCameraError(errorMessage);
       setIsCameraActive(false);
       setRetryCount(prev => prev + 1);
+      
+      // Clean up any partial streams
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+        setMediaStream(null);
+      }
     } finally {
       setIsRetrying(false);
     }
-  }, []);
+  }, [mediaStream]);
 
   // Fallback camera initialization with basic constraints
   const initializeCameraBasic = useCallback(async () => {

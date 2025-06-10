@@ -7,10 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import YapUpLogo, { YapUpIcon } from "@/components/YapUpLogo";
 import EnhancedPracticeHubFixed from "@/components/EnhancedPracticeHubFixed";
-import AnalysisOverview from "@/components/AnalysisOverview";
-import BodyLanguageAnalyzer from "@/components/BodyLanguageAnalyzer";
-import AdvancedSpeechAnalysis from "@/components/AdvancedSpeechAnalysis";
-import ContentAnalysis from "@/components/ContentAnalysis";
+import PlaceholderComponent from "@/components/PlaceholderComponent";
 import AIMentor from "@/components/AIMentor";
 import SimpleAICoach from "@/components/SimpleAICoach";
 import SessionStudyModal from "@/components/SessionStudyModal";
@@ -290,20 +287,20 @@ export default function Dashboard() {
                 </TabsList>
                 
                 <TabsContent value="overview" className="mt-6">
-                  <AnalysisOverview />
+                  <PlaceholderComponent title="Analysis Overview" description="Comprehensive session analysis will appear here after your practice session." />
                 </TabsContent>
                 
                 <TabsContent value="body-language" className="mt-6">
-                  <BodyLanguageAnalyzer />
+                  <PlaceholderComponent title="Body Language Analysis" description="Real-time posture and gesture analysis will be displayed here." />
                 </TabsContent>
                 
                 <TabsContent value="voice-analysis" className="mt-6">
-                  <AdvancedSpeechAnalysis />
+                  <PlaceholderComponent title="Voice Analysis" description="Speech patterns, pace, and vocal quality metrics will be shown here." />
                 </TabsContent>
                 
                 <TabsContent value="content-analysis" className="mt-6">
                   <div className="space-y-6">
-                    <ContentAnalysis />
+                    <PlaceholderComponent title="Content Analysis" description="Speech content structure and effectiveness analysis." />
                     <AIMentor />
                   </div>
                 </TabsContent>
