@@ -178,8 +178,8 @@ export default function Dashboard() {
                 value="clubs" 
                 className="flex flex-col items-center space-y-1 px-3 py-3 text-xs font-medium data-[state=active]:gradient-bg data-[state=active]:text-white rounded-lg transition-all duration-200 flex-1"
               >
-                <Trophy className="w-4 h-4" />
-                <span>Clubs</span>
+                <Target className="w-4 h-4" />
+                <span>Compete</span>
               </TabsTrigger>
               
               <TabsTrigger 
@@ -319,7 +319,7 @@ export default function Dashboard() {
             </TabsContent>
 
             <TabsContent value="clubs" className="mt-0">
-              <CompetitiveClubsHub />
+              <CompetitiveEventsHub />
             </TabsContent>
 
             <TabsContent value="help" className="mt-0">
