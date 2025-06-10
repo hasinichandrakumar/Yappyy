@@ -167,10 +167,18 @@ export default function Dashboard() {
               </TabsTrigger>
 
               <TabsTrigger 
-                value="clubs" 
+                value="social" 
                 className="flex flex-col items-center space-y-1 px-3 py-3 text-xs font-medium data-[state=active]:gradient-bg data-[state=active]:text-white rounded-lg transition-all duration-200 flex-1"
               >
                 <Users className="w-4 h-4" />
+                <span>Social</span>
+              </TabsTrigger>
+
+              <TabsTrigger 
+                value="clubs" 
+                className="flex flex-col items-center space-y-1 px-3 py-3 text-xs font-medium data-[state=active]:gradient-bg data-[state=active]:text-white rounded-lg transition-all duration-200 flex-1"
+              >
+                <Trophy className="w-4 h-4" />
                 <span>Clubs</span>
               </TabsTrigger>
               
@@ -304,6 +312,10 @@ export default function Dashboard() {
 
             <TabsContent value="badges" className="mt-0">
               <BadgeSystem />
+            </TabsContent>
+
+            <TabsContent value="social" className="mt-0">
+              <SocialLeaderboard />
             </TabsContent>
 
             <TabsContent value="clubs" className="mt-0">

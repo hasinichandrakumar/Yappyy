@@ -225,17 +225,13 @@ export default function CameraFeed({ onStreamReady, onStreamEnd, className = "" 
     }
   };
 
-  // Auto-start camera when component mounts (after a brief delay for better UX)
+  // Auto-start camera when component mounts
   useEffect(() => {
-    if (!autoStartAttempted && !isActive && !isLoading) {
-      const timer = setTimeout(() => {
-        setAutoStartAttempted(true);
-        startCamera();
-      }, 1000); // 1 second delay to let component settle
-      
-      return () => clearTimeout(timer);
+    if (!autoStartAttempted && !isActive && !isLoading && !error) {
+      setAutoStartAttempted(true);
+      startCamera();
     }
-  }, [autoStartAttempted, isActive, isLoading, startCamera]);
+  }, [autoStartAttempted, isActive, isLoading, error, startCamera]);
 
   // Cleanup on unmount
   useEffect(() => {

@@ -8,6 +8,10 @@ import {
   userAchievements,
   userStreaks,
   dailyGoals,
+  leaderboardEntries,
+  socialInteractions,
+  challenges,
+  challengeParticipations,
   type User, 
   type UpsertUser,
   type PracticeSession,
@@ -25,7 +29,15 @@ import {
   type UserStreak,
   type InsertUserStreak,
   type DailyGoal,
-  type InsertDailyGoal
+  type InsertDailyGoal,
+  type LeaderboardEntry,
+  type InsertLeaderboardEntry,
+  type SocialInteraction,
+  type InsertSocialInteraction,
+  type Challenge,
+  type InsertChallenge,
+  type ChallengeParticipation,
+  type InsertChallengeParticipation
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, gte, lte } from "drizzle-orm";
