@@ -95,13 +95,13 @@ export default function WelcomeBackWidget() {
   };
 
   const getTimeColor = () => {
-    if (!welcomeMessage) return 'from-blue-50 to-cyan-50';
+    if (!welcomeMessage) return 'from-slate-50 to-blue-50/30';
     
     switch (welcomeMessage.timeOfDay) {
-      case 'morning': return 'from-orange-50 to-yellow-50';
-      case 'afternoon': return 'from-yellow-50 to-orange-50';
-      case 'evening': return 'from-purple-50 to-blue-50';
-      default: return 'from-blue-50 to-cyan-50';
+      case 'morning': return 'from-slate-50 to-blue-50/30';
+      case 'afternoon': return 'from-blue-50/30 to-slate-50';
+      case 'evening': return 'from-slate-50 to-indigo-50/30';
+      default: return 'from-slate-50 to-blue-50/30';
     }
   };
 
