@@ -17,6 +17,7 @@ export default function CameraFeed({ onStreamReady, onStreamEnd, className = "" 
   const [error, setError] = useState<string>("");
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
   const [retryCount, setRetryCount] = useState(0);
+  const [autoStartAttempted, setAutoStartAttempted] = useState(false);
 
   // Check if browser supports camera access
   const isCameraSupported = useCallback(() => {
@@ -36,8 +37,17 @@ export default function CameraFeed({ onStreamReady, onStreamEnd, className = "" 
 
   // Start camera with progressive fallback constraints
   const startCamera = useCallback(async () => {
+    console.log("Starting camera initialization...");
+    
     if (!isCameraSupported()) {
+      console.error("Camera not supported");
       setError("Camera not supported in this browser. Please use Chrome, Firefox, or Safari.");
+      return;
+    }
+
+    console.log("Camera supported, checking for HTTPS...");
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+      setError("Camera requires HTTPS. Please access the site securely or use localhost for testing.");
       return;
     }
 
@@ -214,6 +224,18 @@ export default function CameraFeed({ onStreamReady, onStreamEnd, className = "" 
         return `Camera error: ${error.message || error.name || 'Unknown error'}`;
     }
   };
+
+  // Auto-start camera when component mounts (after a brief delay for better UX)
+  useEffect(() => {
+    if (!autoStartAttempted && !isActive && !isLoading) {
+      const timer = setTimeout(() => {
+        setAutoStartAttempted(true);
+        startCamera();
+      }, 1000); // 1 second delay to let component settle
+      
+      return () => clearTimeout(timer);
+    }
+  }, [autoStartAttempted, isActive, isLoading, startCamera]);
 
   // Cleanup on unmount
   useEffect(() => {
