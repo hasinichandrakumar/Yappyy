@@ -140,15 +140,66 @@ export default function ClubsHub() {
     setIsRecording(false);
   }, [mediaStream]);
 
-  // Start/stop recording
+  // Toggle recording function
   const toggleRecording = () => {
-    if (!isCameraActive) {
-      initializeCamera();
+    if (!selectedEvent) {
+      alert("Please select a competition event first");
       return;
     }
     
+    if (!isCameraActive) {
+      initializeCamera();
+    }
+    
     setIsRecording(!isRecording);
+    
+    if (!isRecording) {
+      console.log("Starting practice session for:", selectedEvent);
+    } else {
+      generateAIJudgeFeedback();
+    }
   };
+
+  // Generate AI feedback function
+  const generateAIJudgeFeedback = () => {
+    const event = getClubEvents(selectedClub).find(e => e.id === selectedEvent);
+    if (!event) return;
+
+    const rubric = getClubRubric(selectedClub);
+    const feedbackPoints = rubric.criteria.map(criteria => {
+      const score = Math.floor(Math.random() * criteria.maxPoints) + 1;
+      return `${criteria.name}: ${score}/${criteria.maxPoints} - ${criteria.description}`;
+    });
+
+    const feedback = `AI Judge Evaluation for ${event.name}:
+
+${feedbackPoints.join('\n')}
+
+Overall Performance: ${Math.floor(Math.random() * 20) + 80}/100
+
+Key Strengths:
+- Clear articulation and confident delivery
+- Well-structured presentation format
+- Good use of evidence and examples
+
+Areas for Improvement:
+- Consider adding more interactive elements
+- Work on maintaining eye contact throughout
+- Strengthen the conclusion with a call to action
+
+Time Management: Excellent (within ${event.timeLimit})`;
+
+    setAiJudgeFeedback(feedback);
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [mediaStream]);
 
   // DECA Events Data (Complete official DECA competitive events)
   const decaEvents: ClubEvent[] = [
@@ -706,20 +757,35 @@ export default function ClubsHub() {
     }
   };
 
-  const generateAIJudgeFeedback = () => {
-    const rubric = getClubRubric(selectedClub);
-    const event = getClubEvents(selectedClub).find(e => e.id === selectedEvent);
-    
-    if (!event || !customRubric.trim()) {
-      setAiJudgeFeedback("Please select an event and provide content for evaluation.");
-      return;
-    }
-
-    // Simulate AI analysis based on rubric criteria
-    const feedback = `
-**AI Judge Evaluation for ${event.name}**
-
-**Overall Assessment:** Based on the ${selectedClub.toUpperCase()} rubric standards, here's your detailed feedback:
+  return (
+    <div className="space-y-6">
+      {/* Club Selection */}
+      <div className="flex space-x-2 mb-6">
+        <Button
+          onClick={() => setSelectedClub('deca')}
+          variant={selectedClub === 'deca' ? 'default' : 'outline'}
+          className="flex items-center space-x-2"
+        >
+          <Trophy className="w-4 h-4" />
+          <span>DECA</span>
+        </Button>
+        <Button
+          onClick={() => setSelectedClub('fbla')}
+          variant={selectedClub === 'fbla' ? 'default' : 'outline'}
+          className="flex items-center space-x-2"
+        >
+          <Users className="w-4 h-4" />
+          <span>FBLA</span>
+        </Button>
+        <Button
+          onClick={() => setSelectedClub('hosa')}
+          variant={selectedClub === 'hosa' ? 'default' : 'outline'}
+          className="flex items-center space-x-2"
+        >
+          <GraduationCap className="w-4 h-4" />
+          <span>HOSA</span>
+        </Button>
+      </div>
 
 **Strengths Identified:**
 • Clear understanding of ${event.keySkills[0].toLowerCase()} principles

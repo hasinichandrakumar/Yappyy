@@ -325,7 +325,16 @@ export default function AnalysisOverview() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button variant="outline" className="h-auto p-4 text-left">
+            <Button 
+              variant="outline" 
+              className="h-auto p-4 text-left"
+              onClick={() => {
+                // Switch to practice tab and start an eye contact focused session
+                const practiceTab = document.querySelector('[data-value="overview"]') as HTMLElement;
+                practiceTab?.click();
+                // Focus would be on eye contact practice
+              }}
+            >
               <div>
                 <div className="font-medium mb-1">Practice Eye Contact</div>
                 <div className="text-sm text-gray-600">
@@ -334,7 +343,16 @@ export default function AnalysisOverview() {
               </div>
             </Button>
             
-            <Button variant="outline" className="h-auto p-4 text-left">
+            <Button 
+              variant="outline" 
+              className="h-auto p-4 text-left"
+              onClick={() => {
+                // Switch to practice tab and start a voice clarity session
+                const practiceTab = document.querySelector('[data-value="overview"]') as HTMLElement;
+                practiceTab?.click();
+                // Focus would be on voice clarity practice
+              }}
+            >
               <div>
                 <div className="font-medium mb-1">Voice Clarity Drills</div>
                 <div className="text-sm text-gray-600">
@@ -343,7 +361,15 @@ export default function AnalysisOverview() {
               </div>
             </Button>
             
-            <Button variant="outline" className="h-auto p-4 text-left">
+            <Button 
+              variant="outline" 
+              className="h-auto p-4 text-left"
+              onClick={() => {
+                // Switch to templates tab for structured practice
+                const templatesTab = document.querySelector('[data-value="templates"]') as HTMLElement;
+                templatesTab?.click();
+              }}
+            >
               <div>
                 <div className="font-medium mb-1">Content Structure</div>
                 <div className="text-sm text-gray-600">
