@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useParams } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -32,10 +33,14 @@ import {
 } from "lucide-react";
 
 export default function UserProfile() {
+  const { section } = useParams<{ section?: string }>();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<any>({});
+  
+  // Determine current section (default to 'profile' if none specified)
+  const currentSection = section || 'profile';
 
   // Fetch user data
   const { data: user, isLoading: userLoading } = useQuery({

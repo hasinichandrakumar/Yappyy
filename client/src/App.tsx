@@ -33,6 +33,7 @@ function Router() {
           <Route path="/" component={Dashboard} />
           <Route path="/dashboard" component={Dashboard} />
           <Route path="/profile" component={UserProfile} />
+          <Route path="/profile/:section" component={UserProfile} />
           <Route path="/clubs" component={ClubsHub} />
           <Route path="/logo" component={LogoExport} />
           <Route component={NotFound} />
