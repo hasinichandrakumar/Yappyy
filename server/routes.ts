@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertPracticeSessionSchema, insertCoachingFeedbackSchema } from "@shared/schema";
 import { setupGoogleAuth, requireAuth } from "./googleAuth";
+import { generateClubCoaching } from "./ai-coaching";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -767,6 +768,9 @@ Respond with detailed analysis in JSON format:
       res.status(500).json({ message: "Failed to generate improvement plan", error: error.message });
     }
   });
+
+  // AI Club Coaching endpoint
+  app.post("/api/club-coaching", requireAuth, generateClubCoaching);
 
   const httpServer = createServer(app);
   return httpServer;
