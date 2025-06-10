@@ -40,7 +40,10 @@ export default function Home() {
   const isHeroInView = useInView(heroRef);
   const isFeaturesInView = useInView(featuresRef);
 
-  const handleStartPracticing = () => {
+  const handleStartPracticing = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (isAuthenticated) {
       // Redirect to dashboard for authenticated users
       window.location.href = "/dashboard";
@@ -48,6 +51,12 @@ export default function Home() {
       // Redirect to Google OAuth for authentication
       window.location.href = "/api/auth/google";
     }
+  };
+
+  const handleSignIn = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    window.location.href = "/api/auth/google";
   };
 
   const handleLogout = () => {
@@ -164,7 +173,7 @@ export default function Home() {
               <motion.div
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={handleStartPracticing}
+                onClick={handleSignIn}
               >
                 <Button variant="ghost" className="text-gray-700 hover:text-gray-900">
                   Sign In
@@ -750,9 +759,12 @@ export default function Home() {
           <motion.div
             whileHover={{ scale: 1.05, y: -3 }}
             whileTap={{ scale: 0.95 }}
-            onClick={handleStartPracticing}
           >
-            <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 shadow-xl px-12 py-4 text-lg font-semibold">
+            <Button 
+              size="lg" 
+              className="bg-white text-blue-600 hover:bg-gray-100 shadow-xl px-12 py-4 text-lg font-semibold"
+              onClick={handleStartPracticing}
+            >
               Start Your Journey
               <PlayCircle className="w-5 h-5 ml-3" />
             </Button>
