@@ -737,33 +737,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Speech Types Section */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="feature-title mb-4">
-              Tailored for Every <span className="highlight-word">Speaking Scenario</span>
-            </h2>
-            <p className="creative-text max-w-3xl mx-auto">
-              Get purpose-specific feedback and coaching for any type of <span className="highlight-word">presentation</span> or speech.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {speechTypes.map((type, index) => (
-              <Card key={index} className="group hover:shadow-lg transition-all duration-300 border-2 border-gray-100 hover:border-[#0BF9EA]/20">
-                <CardContent className="p-6 text-center">
-                  <div className="w-12 h-12 mx-auto mb-4 bg-gradient-to-br from-gray-100 to-gray-200 group-hover:from-[#0BF9EA]/10 group-hover:to-blue-100 rounded-full flex items-center justify-center transition-all duration-300">
-                    <Users className="w-6 h-6 text-gray-600 group-hover:text-[#0BF9EA]" />
-                  </div>
-                  <h3 className="font-semibold text-gray-900 text-sm">{type}</h3>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-br from-blue-500 via-cyan-400 to-blue-600">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
