@@ -1,837 +1,646 @@
-import { useState, useRef, useCallback, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { allCompetitionEvents, getEventSpecificCoaching } from "@/data/competitionEvents";
+import { useState, useRef, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { 
-  Users, 
-  Trophy, 
-  FileText, 
-  Brain, 
-  Target, 
-  Award, 
-  Star,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  Lightbulb,
-  TrendingUp,
-  Zap,
-  Crown,
-  BookOpen,
-  GraduationCap,
+  Video, 
+  VideoOff, 
+  Mic, 
+  MicOff, 
+  Play, 
+  Square, 
   Camera,
-  Mic,
-  Play,
-  Square
-} from "lucide-react";
+  Award,
+  Users,
+  Clock,
+  Star,
+  BookOpen,
+  Target,
+  Brain,
+  MessageSquare,
+  Trophy,
+  Presentation,
+  FileText,
+  CheckCircle,
+  AlertCircle
+} from 'lucide-react';
+import CameraFeed from './CameraFeed';
 
-interface ClubEvent {
-  id: string;
-  name: string;
-  category: string;
-  description: string;
-  format: 'role-play' | 'presentation' | 'written' | 'case-study' | 'objective-test' | 'performance';
-  timeLimit: string;
-  participants: string;
-  judgeCount: number;
-  keySkills: string[];
-  rubric: RubricCriteria[];
-  organization: 'DECA' | 'FBLA' | 'HOSA';
-  competitionLevel: 'Regional' | 'State' | 'National';
-  preparationTips: string[];
-}
-
-interface RubricCriteria {
-  id: string;
-  name: string;
-  description: string;
-  maxPoints: number;
-  weight: number;
-  levels: {
-    level: number;
-    points: number;
-    descriptor: string;
-  }[];
-}
-
-interface ClubRubric {
-  eventName: string;
-  totalPoints: number;
-  criteria: RubricCriteria[];
-  timeAllocation: {
-    prep?: string;
-    presentation?: string;
-    qa?: string;
-  };
-  judgeInstructions: string[];
-}
-
-export default function ClubsHub() {
-  const [selectedClub, setSelectedClub] = useState<string>("deca");
-  const [selectedEvent, setSelectedEvent] = useState<string>("");
-  const [selectedTab, setSelectedTab] = useState("events");
-  const [customRubric, setCustomRubric] = useState<string>("");
-  const [practiceMode, setPracticeMode] = useState<'judge' | 'competitor'>('competitor');
-  const [aiJudgeFeedback, setAiJudgeFeedback] = useState<string>("");
-  
-  // Camera state
-  const [isCameraActive, setIsCameraActive] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
-  const [cameraError, setCameraError] = useState<string>("");
-  const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  // Initialize camera
-  const initializeCamera = useCallback(async () => {
-    try {
-      setCameraError("");
-      
-      if (mediaStream) {
-        mediaStream.getTracks().forEach(track => track.stop());
-        setMediaStream(null);
-      }
-      
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-          facingMode: "user"
-        },
-        audio: false
-      });
-
-      if (videoRef.current && stream) {
-        videoRef.current.srcObject = stream;
-        setMediaStream(stream);
-        setIsCameraActive(true);
-        
-        videoRef.current.onloadedmetadata = () => {
-          if (videoRef.current) {
-            videoRef.current.play().catch(console.warn);
-          }
-        };
-      }
-    } catch (error: any) {
-      console.error("Camera error:", error);
-      let errorMessage = "Camera access failed: ";
-      
-      if (error.name === "NotAllowedError") {
-        errorMessage += "Please allow camera access and try again.";
-      } else if (error.name === "NotFoundError") {
-        errorMessage += "No camera found. Please connect a camera device.";
-      } else {
-        errorMessage += "Please check your camera permissions.";
-      }
-      
-      setCameraError(errorMessage);
-      setIsCameraActive(false);
-    }
-  }, [mediaStream]);
-
-  // Stop camera
-  const stopCamera = useCallback(() => {
-    if (mediaStream) {
-      mediaStream.getTracks().forEach(track => track.stop());
-      setMediaStream(null);
-    }
-    
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
-    }
-    
-    setIsCameraActive(false);
-    setIsRecording(false);
-  }, [mediaStream]);
-
-  // Toggle recording function
-  const toggleRecording = () => {
-    if (!selectedEvent) {
-      alert("Please select a competition event first");
-      return;
-    }
-    
-    if (!isCameraActive) {
-      initializeCamera();
-    }
-    
-    setIsRecording(!isRecording);
-    
-    if (!isRecording) {
-      console.log("Starting practice session for:", selectedEvent);
-    } else {
-      generateAIJudgeFeedback();
-    }
-  };
-
-  // Generate AI feedback function
-  const generateAIJudgeFeedback = () => {
-    const event = getClubEvents(selectedClub).find(e => e.id === selectedEvent);
-    if (!event) return;
-
-    const rubric = getClubRubric(selectedClub);
-    const feedbackPoints = rubric.criteria.map(criteria => {
-      const score = Math.floor(Math.random() * criteria.maxPoints) + 1;
-      return `${criteria.name}: ${score}/${criteria.maxPoints} - ${criteria.description}`;
-    });
-
-    const feedback = `AI Judge Evaluation for ${event.name}:
-
-${feedbackPoints.join('\n')}
-
-Overall Performance: ${Math.floor(Math.random() * 20) + 80}/100
-
-Key Strengths:
-- Clear articulation and confident delivery
-- Well-structured presentation format
-- Good use of evidence and examples
-
-Areas for Improvement:
-- Consider adding more interactive elements
-- Work on maintaining eye contact throughout
-- Strengthen the conclusion with a call to action
-
-Time Management: Excellent (within ${event.timeLimit})`;
-
-    setAiJudgeFeedback(feedback);
-  };
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (mediaStream) {
-        mediaStream.getTracks().forEach(track => track.stop());
-      }
-    };
-  }, [mediaStream]);
-
-  // DECA Events Data (Complete official DECA competitive events)
-  const decaEvents: ClubEvent[] = [
-    // Individual Series Events
+// Club event data
+const clubEvents = {
+  DECA: [
     {
-      id: 'aaam',
-      name: 'Apparel and Accessories Marketing',
-      category: 'Individual Series',
-      description: 'Marketing concepts in fashion retail industry',
-      format: 'role-play',
-      timeLimit: '10 min prep + 10 min role-play + 5 min Q&A',
-      participants: '1 participant',
-      judgeCount: 1,
-      keySkills: ['Market Analysis', 'Product Knowledge', 'Customer Service', 'Sales Techniques']
+      id: 'deca-role-play',
+      name: 'Business Management & Administration Role Play',
+      category: 'Role Play',
+      timeLimit: '10 minutes prep + 10 minutes presentation',
+      description: 'Address business situations and make decisions as a manager',
+      keySkills: ['Problem Solving', 'Decision Making', 'Communication', 'Leadership']
     },
     {
-      id: 'asm',
-      name: 'Automotive Services Marketing',
-      category: 'Individual Series',
-      description: 'Marketing in automotive services industry',
-      format: 'role-play',
-      timeLimit: '10 min prep + 10 min role-play + 5 min Q&A',
-      participants: '1 participant',
-      judgeCount: 1,
-      keySkills: ['Service Marketing', 'Customer Relations', 'Technical Knowledge', 'Problem Solving']
+      id: 'deca-presentation',
+      name: 'Entrepreneurship Series',
+      category: 'Presentation',
+      timeLimit: '15 minutes presentation + 5 minutes Q&A',
+      description: 'Develop and present a business plan for a new venture',
+      keySkills: ['Business Planning', 'Financial Analysis', 'Market Research', 'Presentation']
     },
     {
-      id: 'bm',
-      name: 'Business Management',
-      category: 'Individual Series',
-      description: 'General business management principles',
-      format: 'role-play',
-      timeLimit: '10 min prep + 10 min role-play + 5 min Q&A',
-      participants: '1 participant',
-      judgeCount: 1,
-      keySkills: ['Leadership', 'Operations Management', 'Strategic Planning', 'Decision Making']
-    },
-    {
-      id: 'bfs',
-      name: 'Business Finance',
-      category: 'Individual Series',
-      description: 'Financial management and analysis',
-      format: 'role-play',
-      timeLimit: '10 min prep + 10 min role-play + 5 min Q&A',
-      participants: '1 participant',
-      judgeCount: 1,
-      keySkills: ['Financial Analysis', 'Investment Strategies', 'Risk Management', 'Budgeting']
-    },
-    {
-      id: 'bl',
-      name: 'Business Law',
-      category: 'Individual Series',
-      description: 'Legal aspects of business operations',
-      format: 'role-play',
-      timeLimit: '10 min prep + 10 min role-play + 5 min Q&A',
-      participants: '1 participant',
-      judgeCount: 1,
-      keySkills: ['Legal Knowledge', 'Compliance', 'Contract Analysis', 'Ethics']
-    },
-    {
-      id: 'fsm',
-      name: 'Food Service Management',
-      category: 'Individual Series',
-      description: 'Restaurant and food service operations',
-      format: 'role-play',
-      timeLimit: '10 min prep + 10 min role-play + 5 min Q&A',
-      participants: '1 participant',
-      judgeCount: 1,
-      keySkills: ['Operations Management', 'Customer Service', 'Quality Control', 'Staff Management']
-    },
-    {
-      id: 'hm',
-      name: 'Hospitality Management',
-      category: 'Individual Series',
-      description: 'Hotel and hospitality industry management',
-      format: 'role-play',
-      timeLimit: '10 min prep + 10 min role-play + 5 min Q&A',
-      participants: '1 participant',
-      judgeCount: 1,
-      keySkills: ['Guest Relations', 'Operations Management', 'Revenue Management', 'Service Excellence']
-    },
-    {
-      id: 'hr',
-      name: 'Human Resources Management',
-      category: 'Individual Series',
-      description: 'Personnel and human resources management',
-      format: 'role-play',
-      timeLimit: '10 min prep + 10 min role-play + 5 min Q&A',
-      participants: '1 participant',
-      judgeCount: 1,
-      keySkills: ['Employee Relations', 'Recruitment', 'Training', 'Labor Law']
-    },
-    {
-      id: 'lm',
-      name: 'Lodging Management',
-      category: 'Individual Series',
-      description: 'Hotel and lodging operations management',
-      format: 'role-play',
-      timeLimit: '10 min prep + 10 min role-play + 5 min Q&A',
-      participants: '1 participant',
-      judgeCount: 1,
-      keySkills: ['Property Management', 'Guest Services', 'Revenue Optimization', 'Facility Operations']
-    },
-    {
-      id: 'mrm',
-      name: 'Marketing Research',
-      category: 'Individual Series',
-      description: 'Market research methodology and analysis',
-      format: 'role-play',
-      timeLimit: '10 min prep + 10 min role-play + 5 min Q&A',
-      participants: '1 participant',
-      judgeCount: 1,
-      keySkills: ['Data Analysis', 'Research Design', 'Statistical Analysis', 'Report Writing']
-    },
-    {
-      id: 'pim',
-      name: 'Personal Financial Literacy',
-      category: 'Individual Series',
-      description: 'Personal finance and money management',
-      format: 'role-play',
-      timeLimit: '10 min prep + 10 min role-play + 5 min Q&A',
-      participants: '1 participant',
-      judgeCount: 1,
-      keySkills: ['Financial Planning', 'Investment Knowledge', 'Insurance', 'Credit Management']
-    },
-    {
-      id: 'pms',
-      name: 'Professional Selling',
-      category: 'Individual Series',
-      description: 'Advanced selling techniques and strategies',
-      format: 'role-play',
-      timeLimit: '10 min prep + 10 min role-play + 5 min Q&A',
-      participants: '1 participant',
-      judgeCount: 1,
-      keySkills: ['Sales Process', 'Relationship Building', 'Negotiation', 'Product Knowledge']
-    },
-    {
-      id: 'qsrm',
-      name: 'Quick Serve Restaurant Management',
-      category: 'Individual Series',
-      description: 'Fast food and quick service restaurant operations',
-      format: 'role-play',
-      timeLimit: '10 min prep + 10 min role-play + 5 min Q&A',
-      participants: '1 participant',
-      judgeCount: 1,
-      keySkills: ['Speed of Service', 'Quality Control', 'Cost Management', 'Customer Satisfaction']
-    },
-    {
-      id: 'rmm',
-      name: 'Retail Merchandising',
-      category: 'Individual Series',
-      description: 'Retail merchandising and display strategies',
-      format: 'role-play',
-      timeLimit: '10 min prep + 10 min role-play + 5 min Q&A',
-      participants: '1 participant',
-      judgeCount: 1,
-      keySkills: ['Visual Merchandising', 'Inventory Management', 'Consumer Behavior', 'Sales Analytics']
-    },
-    {
-      id: 'sem',
-      name: 'Sports and Entertainment Marketing',
-      category: 'Individual Series',
-      description: 'Marketing in sports and entertainment industries',
-      format: 'role-play',
-      timeLimit: '10 min prep + 10 min role-play + 5 min Q&A',
-      participants: '1 participant',
-      judgeCount: 1,
-      keySkills: ['Event Marketing', 'Sponsorship', 'Fan Engagement', 'Digital Marketing']
-    },
-    // Team Decision Making Events
-    {
-      id: 'btdm',
-      name: 'Business to Business Marketing',
-      category: 'Team Decision Making',
-      description: 'B2B marketing strategies and solutions',
-      format: 'case-study',
-      timeLimit: '30 min prep + 15 min presentation + 5 min Q&A',
-      participants: '2-3 team members',
-      judgeCount: 3,
-      keySkills: ['Strategic Planning', 'Team Collaboration', 'Data Analysis', 'Professional Communication']
-    },
-    {
-      id: 'ftdm',
-      name: 'Financial Services Team Decision Making',
-      category: 'Team Decision Making',
-      description: 'Financial services industry challenges',
-      format: 'case-study',
-      timeLimit: '30 min prep + 15 min presentation + 5 min Q&A',
-      participants: '2-3 team members',
-      judgeCount: 3,
-      keySkills: ['Financial Analysis', 'Risk Assessment', 'Regulatory Compliance', 'Client Relations']
-    },
-    {
-      id: 'htdm',
-      name: 'Hospitality Services Team Decision Making',
-      category: 'Team Decision Making',
-      description: 'Hospitality industry problem solving',
-      format: 'case-study',
-      timeLimit: '30 min prep + 15 min presentation + 5 min Q&A',
-      participants: '2-3 team members',
-      judgeCount: 3,
-      keySkills: ['Service Excellence', 'Operations Management', 'Revenue Management', 'Guest Experience']
-    },
-    {
-      id: 'mtdm',
-      name: 'Marketing Team Decision Making',
-      category: 'Team Decision Making',
-      description: 'Marketing strategy and implementation',
-      format: 'case-study',
-      timeLimit: '30 min prep + 15 min presentation + 5 min Q&A',
-      participants: '2-3 team members',
-      judgeCount: 3,
-      keySkills: ['Market Analysis', 'Campaign Development', 'Digital Marketing', 'Brand Management']
-    },
-    {
-      id: 'rtdm',
-      name: 'Retail Team Decision Making',
-      category: 'Team Decision Making',
-      description: 'Retail industry challenges and solutions',
-      format: 'case-study',
-      timeLimit: '30 min prep + 15 min presentation + 5 min Q&A',
-      participants: '2-3 team members',
-      judgeCount: 3,
-      keySkills: ['Retail Operations', 'Customer Experience', 'Inventory Management', 'Sales Strategy']
-    },
-    // Written Events
-    {
-      id: 'bor',
-      name: 'Business Operations Research',
-      category: 'Written Events',
-      description: 'Research project on business operations',
-      format: 'written',
-      timeLimit: '15 min presentation + 5 min Q&A',
-      participants: '1-3 participants',
-      judgeCount: 3,
-      keySkills: ['Research Methodology', 'Data Analysis', 'Report Writing', 'Business Intelligence']
-    },
-    {
-      id: 'ebg',
-      name: 'Entrepreneurship Business Growth',
-      category: 'Written Events',
-      description: 'Comprehensive business plan for growth',
-      format: 'written',
-      timeLimit: '15 min presentation + 5 min Q&A',
-      participants: '1-3 participants',
-      judgeCount: 3,
-      keySkills: ['Business Planning', 'Financial Analysis', 'Innovation', 'Growth Strategies']
-    },
-    {
-      id: 'eis',
-      name: 'Entrepreneurship Independent Study',
-      category: 'Written Events',
-      description: 'Independent study of entrepreneurial concepts',
-      format: 'written',
-      timeLimit: '15 min presentation + 5 min Q&A',
-      participants: '1 participant',
-      judgeCount: 3,
-      keySkills: ['Independent Research', 'Innovation', 'Business Concepts', 'Self-Direction']
-    },
-    {
-      id: 'fml',
-      name: 'Financial Management',
-      category: 'Written Events',
-      description: 'Advanced financial management project',
-      format: 'written',
-      timeLimit: '15 min presentation + 5 min Q&A',
-      participants: '1-3 participants',
-      judgeCount: 3,
-      keySkills: ['Financial Strategy', 'Investment Analysis', 'Risk Management', 'Corporate Finance']
-    },
-    {
-      id: 'htm',
-      name: 'Hospitality and Tourism Management',
-      category: 'Written Events',
-      description: 'Tourism and hospitality industry analysis',
-      format: 'written',
-      timeLimit: '15 min presentation + 5 min Q&A',
-      participants: '1-3 participants',
-      judgeCount: 3,
-      keySkills: ['Tourism Marketing', 'Destination Management', 'Service Quality', 'Sustainability']
-    },
-    {
-      id: 'irl',
-      name: 'International Business',
-      category: 'Written Events',
-      description: 'Global business operations and strategy',
-      format: 'written',
-      timeLimit: '15 min presentation + 5 min Q&A',
-      participants: '1-3 participants',
-      judgeCount: 3,
-      keySkills: ['Global Markets', 'Cultural Awareness', 'International Trade', 'Cross-Cultural Communication']
-    },
-    {
-      id: 'mml',
-      name: 'Marketing Management',
-      category: 'Written Events',
-      description: 'Comprehensive marketing strategy project',
-      format: 'written',
-      timeLimit: '15 min presentation + 5 min Q&A',
-      participants: '1-3 participants',
-      judgeCount: 3,
-      keySkills: ['Strategic Marketing', 'Brand Management', 'Consumer Research', 'Digital Strategy']
-    },
-    {
-      id: 'sml',
-      name: 'Sports and Entertainment Management',
-      category: 'Written Events',
-      description: 'Sports and entertainment industry project',
-      format: 'written',
-      timeLimit: '15 min presentation + 5 min Q&A',
-      participants: '1-3 participants',
-      judgeCount: 3,
-      keySkills: ['Event Management', 'Sponsorship Strategy', 'Fan Engagement', 'Revenue Generation']
-    }
-  ];
-
-  // FBLA Events Data (based on official FBLA competitive events)
-  const fblaEvents: ClubEvent[] = [
-    {
-      id: 'business-presentation',
-      name: 'Business Presentation',
-      category: 'Presentation Events',
-      description: 'Oral presentation on business topic',
-      format: 'presentation',
-      timeLimit: '7 min presentation + 3 min Q&A',
-      participants: '1 participant',
-      judgeCount: 2,
-      keySkills: ['Public Speaking', 'Business Knowledge', 'Visual Design', 'Time Management']
-    },
-    {
-      id: 'entrepreneurship',
-      name: 'Entrepreneurship',
+      id: 'deca-case-study',
+      name: 'Marketing Management Case Study',
       category: 'Case Study',
-      description: 'Analyze entrepreneurial opportunity',
-      format: 'case-study',
-      timeLimit: '90 min prep + 10 min presentation',
-      participants: '1 participant',
-      judgeCount: 2,
-      keySkills: ['Problem Solving', 'Innovation', 'Market Research', 'Financial Planning']
+      timeLimit: '30 minutes analysis + 15 minutes presentation',
+      description: 'Analyze marketing challenges and develop strategic solutions',
+      keySkills: ['Marketing Strategy', 'Data Analysis', 'Strategic Thinking', 'Communication']
+    }
+  ],
+  FBLA: [
+    {
+      id: 'fbla-presentation',
+      name: 'Business Presentation',
+      category: 'Presentation',
+      timeLimit: '7 minutes presentation + 3 minutes Q&A',
+      description: 'Present solutions to current business challenges',
+      keySkills: ['Public Speaking', 'Business Analysis', 'Visual Design', 'Q&A Handling']
     },
     {
-      id: 'impromptu-speaking',
+      id: 'fbla-interview',
+      name: 'Job Interview',
+      category: 'Interview',
+      timeLimit: '10 minutes',
+      description: 'Professional interview simulation with business scenarios',
+      keySkills: ['Professional Communication', 'Self-Presentation', 'Behavioral Responses', 'Confidence']
+    },
+    {
+      id: 'fbla-impromptu',
       name: 'Impromptu Speaking',
-      category: 'Speaking Events',
-      description: 'Spontaneous speech on business topic',
-      format: 'presentation',
-      timeLimit: '1 min prep + 3 min speech',
-      participants: '1 participant',
-      judgeCount: 3,
-      keySkills: ['Quick Thinking', 'Organization', 'Confidence', 'Business Terminology']
+      category: 'Speaking',
+      timeLimit: '1 minute prep + 4 minutes speaking',
+      description: 'Deliver an organized speech on a business topic with minimal preparation',
+      keySkills: ['Quick Thinking', 'Organization', 'Confidence', 'Business Knowledge']
     }
-  ];
-
-  // HOSA Events Data (based on official HOSA competitive events)
-  const hosaEvents: ClubEvent[] = [
+  ],
+  HOSA: [
     {
-      id: 'medical-innovation',
-      name: 'Medical Innovation',
-      category: 'Health Professions Events',
-      description: 'Present innovative healthcare solution',
-      format: 'presentation',
-      timeLimit: '7 min presentation + 3 min Q&A',
-      participants: '1-3 participants',
-      judgeCount: 3,
-      keySkills: ['Healthcare Knowledge', 'Innovation', 'Research Skills', 'Problem Solving']
+      id: 'hosa-speaking',
+      name: 'Prepared Speaking',
+      category: 'Speaking',
+      timeLimit: '5-7 minutes presentation',
+      description: 'Present on health-related topics with visual aids',
+      keySkills: ['Health Knowledge', 'Visual Communication', 'Audience Engagement', 'Evidence-Based Speaking']
     },
     {
-      id: 'health-career-display',
+      id: 'hosa-interview',
       name: 'Health Career Display',
-      category: 'Recognition Events',
-      description: 'Visual display about health career',
-      format: 'presentation',
-      timeLimit: '5 min presentation per judge',
-      participants: '1 participant',
-      judgeCount: 3,
-      keySkills: ['Research', 'Visual Communication', 'Career Knowledge', 'Presentation Skills']
+      category: 'Interview',
+      timeLimit: '5 minutes presentation + interview',
+      description: 'Present career research and answer questions about health professions',
+      keySkills: ['Career Research', 'Professional Presentation', 'Health Industry Knowledge', 'Q&A Skills']
     },
     {
-      id: 'public-health',
-      name: 'Public Health',
-      category: 'Team Events',
-      description: 'Address community health issue',
-      format: 'case-study',
-      timeLimit: '60 min prep + 10 min presentation',
-      participants: '2-4 team members',
-      judgeCount: 3,
-      keySkills: ['Epidemiology', 'Community Health', 'Data Analysis', 'Policy Development']
+      id: 'hosa-case-study',
+      name: 'Medical Innovation',
+      category: 'Case Study',
+      timeLimit: '20 minutes prep + 10 minutes presentation',
+      description: 'Analyze medical innovations and present implementation strategies',
+      keySkills: ['Medical Research', 'Innovation Analysis', 'Implementation Planning', 'Healthcare Systems']
     }
-  ];
+  ]
+};
 
-  // Sample rubrics for each organization
-  const decaRubric: ClubRubric = {
-    eventName: "DECA Role-Play Rubric",
-    totalPoints: 100,
-    timeAllocation: {
-      prep: "10 minutes",
-      presentation: "10 minutes",
-      qa: "5 minutes"
-    },
-    criteria: [
-      {
-        id: 'performance-indicators',
-        name: 'Performance Indicators',
-        description: 'Demonstration of business knowledge and application',
-        maxPoints: 70,
-        levels: [
-          { level: 4, descriptor: 'Exceeds Expectations - Comprehensive understanding with creative application', points: 70 },
-          { level: 3, descriptor: 'Meets Expectations - Solid understanding with good application', points: 56 },
-          { level: 2, descriptor: 'Below Expectations - Basic understanding with limited application', points: 42 },
-          { level: 1, descriptor: 'Little/No Value - Minimal understanding with poor application', points: 14 }
-        ]
-      },
-      {
-        id: 'communication-skills',
-        name: 'Communication Skills',
-        description: 'Verbal communication, confidence, and professional demeanor',
-        maxPoints: 30,
-        levels: [
-          { level: 4, descriptor: 'Excellent communication with strong presence', points: 30 },
-          { level: 3, descriptor: 'Good communication with adequate presence', points: 24 },
-          { level: 2, descriptor: 'Fair communication with some hesitation', points: 18 },
-          { level: 1, descriptor: 'Poor communication with lack of confidence', points: 6 }
-        ]
-      }
-    ],
-    judgeInstructions: [
-      "Evaluate based on realistic business scenarios",
-      "Consider creativity and innovation in solutions",
-      "Assess professional communication throughout",
-      "Note time management and organization"
-    ]
+interface AICoachingSessionProps {
+  club: 'DECA' | 'FBLA' | 'HOSA';
+  event: any;
+  onClose: () => void;
+}
+
+const AICoachingSession = ({ club, event, onClose }: AICoachingSessionProps) => {
+  const [isRecording, setIsRecording] = useState(false);
+  const [sessionPhase, setSessionPhase] = useState<'prep' | 'presenting' | 'feedback'>('prep');
+  const [feedback, setFeedback] = useState<any>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [practiceNotes, setPracticeNotes] = useState('');
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [stream, setStream] = useState<MediaStream | null>(null);
+
+  const startSession = () => {
+    setSessionPhase('presenting');
+    setIsRecording(true);
   };
 
-  const fblaRubric: ClubRubric = {
-    eventName: "FBLA Business Presentation Rubric",
-    totalPoints: 100,
-    timeAllocation: {
-      presentation: "7 minutes",
-      qa: "3 minutes"
-    },
-    criteria: [
-      {
-        id: 'organization-delivery',
-        name: 'Organization and Delivery',
-        description: 'Structure, flow, and presentation skills',
-        maxPoints: 25,
-        levels: [
-          { level: 4, descriptor: 'Exceptional organization with flawless delivery', points: 25 },
-          { level: 3, descriptor: 'Well organized with good delivery', points: 20 },
-          { level: 2, descriptor: 'Adequately organized with fair delivery', points: 15 },
-          { level: 1, descriptor: 'Poorly organized with weak delivery', points: 5 }
-        ]
-      },
-      {
-        id: 'content-knowledge',
-        name: 'Content and Knowledge',
-        description: 'Accuracy, depth, and relevance of business content',
-        maxPoints: 50,
-        levels: [
-          { level: 4, descriptor: 'Comprehensive knowledge with excellent content', points: 50 },
-          { level: 3, descriptor: 'Good knowledge with solid content', points: 40 },
-          { level: 2, descriptor: 'Basic knowledge with adequate content', points: 30 },
-          { level: 1, descriptor: 'Limited knowledge with poor content', points: 10 }
-        ]
-      },
-      {
-        id: 'visual-aids',
-        name: 'Visual Aids and Technology',
-        description: 'Effective use of presentation technology',
-        maxPoints: 25,
-        levels: [
-          { level: 4, descriptor: 'Creative and highly effective visual aids', points: 25 },
-          { level: 3, descriptor: 'Good use of visual aids', points: 20 },
-          { level: 2, descriptor: 'Adequate visual aids', points: 15 },
-          { level: 1, descriptor: 'Poor or no visual aids', points: 5 }
-        ]
-      }
-    ],
-    judgeInstructions: [
-      "Focus on business application and real-world relevance",
-      "Evaluate professional presentation standards",
-      "Consider audience engagement and interaction",
-      "Assess adherence to time limits"
-    ]
+  const stopSession = async () => {
+    setIsRecording(false);
+    setIsAnalyzing(true);
+    
+    // Simulate AI analysis - in real implementation, this would call OpenAI API
+    setTimeout(() => {
+      const mockFeedback = generateAIFeedback(club, event);
+      setFeedback(mockFeedback);
+      setSessionPhase('feedback');
+      setIsAnalyzing(false);
+    }, 3000);
   };
 
-  const hosaRubric: ClubRubric = {
-    eventName: "HOSA Health Innovation Rubric",
-    totalPoints: 100,
-    timeAllocation: {
-      presentation: "7 minutes",
-      qa: "3 minutes"
-    },
-    criteria: [
-      {
-        id: 'innovation-creativity',
-        name: 'Innovation and Creativity',
-        description: 'Originality and creative problem-solving in healthcare',
-        maxPoints: 30,
-        levels: [
-          { level: 4, descriptor: 'Highly innovative with creative healthcare solutions', points: 30 },
-          { level: 3, descriptor: 'Good innovation with solid creativity', points: 24 },
-          { level: 2, descriptor: 'Some innovation with basic creativity', points: 18 },
-          { level: 1, descriptor: 'Limited innovation with little creativity', points: 6 }
-        ]
-      },
-      {
-        id: 'scientific-accuracy',
-        name: 'Scientific Accuracy',
-        description: 'Correct use of medical and scientific terminology',
-        maxPoints: 35,
-        levels: [
-          { level: 4, descriptor: 'Exceptional scientific accuracy and terminology', points: 35 },
-          { level: 3, descriptor: 'Good scientific accuracy with proper terminology', points: 28 },
-          { level: 2, descriptor: 'Adequate accuracy with some terminology errors', points: 21 },
-          { level: 1, descriptor: 'Poor accuracy with incorrect terminology', points: 7 }
-        ]
-      },
-      {
-        id: 'presentation-skills',
-        name: 'Presentation Skills',
-        description: 'Professional delivery and communication',
-        maxPoints: 35,
-        levels: [
-          { level: 4, descriptor: 'Outstanding presentation with excellent communication', points: 35 },
-          { level: 3, descriptor: 'Good presentation with clear communication', points: 28 },
-          { level: 2, descriptor: 'Fair presentation with adequate communication', points: 21 },
-          { level: 1, descriptor: 'Poor presentation with unclear communication', points: 7 }
-        ]
-      }
-    ],
-    judgeInstructions: [
-      "Evaluate healthcare impact and feasibility",
-      "Assess understanding of medical/scientific concepts",
-      "Consider ethical implications of proposed solutions",
-      "Look for evidence-based reasoning and research"
-    ]
+  const generateAIFeedback = (club: string, event: any) => {
+    // This would be replaced with actual AI analysis
+    return {
+      overallScore: Math.floor(Math.random() * 30) + 70,
+      strengths: [
+        'Strong opening that grabbed attention',
+        'Clear articulation and pace',
+        'Good use of gestures to emphasize points',
+        'Professional appearance and posture'
+      ],
+      improvements: [
+        'Consider adding more specific examples',
+        'Work on smoother transitions between points',
+        'Maintain eye contact during conclusion',
+        'Use pauses more strategically for emphasis'
+      ],
+      clubSpecificFeedback: getClubSpecificFeedback(club, event),
+      nextSteps: [
+        'Practice with a timer to perfect pacing',
+        'Record yourself to review body language',
+        'Research additional supporting evidence',
+        'Practice Q&A scenarios'
+      ]
+    };
   };
 
-  const getClubEvents = (club: string): ClubEvent[] => {
+  const getClubSpecificFeedback = (club: string, event: any) => {
     switch (club) {
-      case 'deca': return decaEvents;
-      case 'fbla': return fblaEvents;
-      case 'hosa': return hosaEvents;
-      default: return [];
+      case 'DECA':
+        return {
+          businessAcumen: 'Demonstrated solid understanding of business principles',
+          decisionMaking: 'Show more confidence in your recommendations',
+          professionalPresence: 'Excellent professional demeanor throughout'
+        };
+      case 'FBLA':
+        return {
+          businessCommunication: 'Clear and concise business language',
+          leadershipQualities: 'Natural leadership presence observed',
+          practicalApplication: 'Strong connection to real-world scenarios'
+        };
+      case 'HOSA':
+        return {
+          healthKnowledge: 'Solid foundation of health concepts',
+          patientCommunication: 'Compassionate and clear communication style',
+          evidenceBased: 'Good use of current health research'
+        };
+      default:
+        return {};
     }
   };
 
-  const getClubRubric = (club: string): ClubRubric => {
+  const getClubColor = (club: string) => {
     switch (club) {
-      case 'deca': return decaRubric;
-      case 'fbla': return fblaRubric;
-      case 'hosa': return hosaRubric;
-      default: return decaRubric;
+      case 'DECA': return 'blue';
+      case 'FBLA': return 'green';
+      case 'HOSA': return 'red';
+      default: return 'gray';
     }
   };
 
   return (
-    <div className="space-y-6">
-      {/* Club Selection */}
-      <div className="flex space-x-2 mb-6">
-        <Button
-          onClick={() => setSelectedClub('deca')}
-          variant={selectedClub === 'deca' ? 'default' : 'outline'}
-          className="flex items-center space-x-2"
-        >
-          <Trophy className="w-4 h-4" />
-          <span>DECA</span>
-        </Button>
-        <Button
-          onClick={() => setSelectedClub('fbla')}
-          variant={selectedClub === 'fbla' ? 'default' : 'outline'}
-          className="flex items-center space-x-2"
-        >
-          <Users className="w-4 h-4" />
-          <span>FBLA</span>
-        </Button>
-        <Button
-          onClick={() => setSelectedClub('hosa')}
-          variant={selectedClub === 'hosa' ? 'default' : 'outline'}
-          className="flex items-center space-x-2"
-        >
-          <GraduationCap className="w-4 h-4" />
-          <span>HOSA</span>
-        </Button>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg max-w-6xl w-full max-h-[95vh] overflow-y-auto">
+        {/* Header */}
+        <div className="sticky top-0 bg-white border-b p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold mb-2">AI {club} Judge</h2>
+              <div className="flex items-center space-x-3">
+                <Badge className={`bg-${getClubColor(club)}-100 text-${getClubColor(club)}-800`}>
+                  {club}
+                </Badge>
+                <Badge variant="outline">{event.category}</Badge>
+                <span className="text-sm text-gray-600">{event.name}</span>
+              </div>
+            </div>
+            <Button variant="outline" onClick={onClose}>Close</Button>
+          </div>
+        </div>
+
+        <div className="p-6">
+          {sessionPhase === 'prep' && (
+            <div className="space-y-6">
+              {/* Event Overview */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Target className="w-5 h-5 mr-2" />
+                    Event Overview
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-gray-600 mb-4">{event.description}</p>
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <Clock className="w-4 h-4 text-gray-500" />
+                          <span className="text-sm">{event.timeLimit}</span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Award className="w-4 h-4 text-gray-500" />
+                          <span className="text-sm">{event.category}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold mb-2">Key Skills</h4>
+                      <div className="flex flex-wrap gap-1">
+                        {event.keySkills.map((skill: string, index: number) => (
+                          <Badge key={index} variant="secondary" className="text-xs">
+                            {skill}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Practice Notes */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <FileText className="w-5 h-5 mr-2" />
+                    Practice Notes
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Textarea
+                    placeholder="Write your preparation notes, key points, or questions here..."
+                    value={practiceNotes}
+                    onChange={(e) => setPracticeNotes(e.target.value)}
+                    className="min-h-[100px]"
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Camera Setup */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Camera className="w-5 h-5 mr-2" />
+                    Camera Setup
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CameraFeed 
+                    onStreamReady={setStream}
+                    className="mb-4"
+                  />
+                  <div className="flex justify-center">
+                    <Button 
+                      onClick={startSession}
+                      className="bg-green-600 hover:bg-green-700"
+                      size="lg"
+                      disabled={!stream}
+                    >
+                      <Play className="w-4 h-4 mr-2" />
+                      Start Practice Session
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {sessionPhase === 'presenting' && (
+            <div className="space-y-6">
+              <div className="text-center">
+                <h3 className="text-xl font-bold mb-2">Recording in Progress</h3>
+                <p className="text-gray-600">Present as if you're in the actual competition</p>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Video Feed */}
+                <Card>
+                  <CardContent className="p-4">
+                    <CameraFeed />
+                  </CardContent>
+                </Card>
+
+                {/* Live Instructions */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <Brain className="w-5 h-5 mr-2" />
+                      AI Judge Instructions
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="p-3 bg-blue-50 rounded-lg">
+                        <p className="text-sm"><strong>Current Event:</strong> {event.name}</p>
+                        <p className="text-sm"><strong>Time Limit:</strong> {event.timeLimit}</p>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <h4 className="font-semibold">The AI Judge is evaluating:</h4>
+                        <ul className="text-sm space-y-1 ml-4">
+                          <li>• Voice clarity and confidence</li>
+                          <li>• Body language and posture</li>
+                          <li>• Content organization and flow</li>
+                          <li>• {club}-specific criteria</li>
+                          <li>• Professional presentation skills</li>
+                        </ul>
+                      </div>
+
+                      <div className="pt-4 border-t">
+                        <Button 
+                          onClick={stopSession}
+                          variant="destructive"
+                          className="w-full"
+                        >
+                          <Square className="w-4 h-4 mr-2" />
+                          Stop & Get Feedback
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
+
+          {sessionPhase === 'feedback' && (
+            <div className="space-y-6">
+              {isAnalyzing ? (
+                <div className="text-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                  <h3 className="text-xl font-bold mb-2">AI Judge Analyzing Performance</h3>
+                  <p className="text-gray-600">Evaluating your presentation against {club} standards...</p>
+                </div>
+              ) : feedback && (
+                <div className="space-y-6">
+                  {/* Overall Score */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center">
+                        <Trophy className="w-5 h-5 mr-2" />
+                        Overall Performance Score
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center space-x-4">
+                        <div className="text-4xl font-bold text-green-600">{feedback.overallScore}/100</div>
+                        <div className="flex-1">
+                          <div className="w-full bg-gray-200 rounded-full h-3">
+                            <div 
+                              className="bg-green-600 h-3 rounded-full transition-all duration-1000"
+                              style={{ width: `${feedback.overallScore}%` }}
+                            ></div>
+                          </div>
+                          <p className="text-sm text-gray-600 mt-1">
+                            {feedback.overallScore >= 90 ? 'Excellent' : 
+                             feedback.overallScore >= 80 ? 'Very Good' : 
+                             feedback.overallScore >= 70 ? 'Good' : 'Needs Improvement'}
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Strengths */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center text-green-700">
+                        <CheckCircle className="w-5 h-5 mr-2" />
+                        Strengths
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-2">
+                        {feedback.strengths.map((strength: string, index: number) => (
+                          <li key={index} className="flex items-start space-x-2">
+                            <Star className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                            <span className="text-sm">{strength}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+
+                  {/* Areas for Improvement */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center text-orange-700">
+                        <AlertCircle className="w-5 h-5 mr-2" />
+                        Areas for Improvement
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-2">
+                        {feedback.improvements.map((improvement: string, index: number) => (
+                          <li key={index} className="flex items-start space-x-2">
+                            <Target className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" />
+                            <span className="text-sm">{improvement}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+
+                  {/* Club-Specific Feedback */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center">
+                        <Badge className={`bg-${getClubColor(club)}-100 text-${getClubColor(club)}-800 mr-2`}>
+                          {club}
+                        </Badge>
+                        {club}-Specific Evaluation
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {Object.entries(feedback.clubSpecificFeedback).map(([key, value]) => (
+                          <div key={key} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                            <span className="font-medium capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
+                            <span className="text-sm text-gray-600">{value as string}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Next Steps */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center">
+                        <BookOpen className="w-5 h-5 mr-2" />
+                        Recommended Next Steps
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-2">
+                        {feedback.nextSteps.map((step: string, index: number) => (
+                          <li key={index} className="flex items-start space-x-2">
+                            <div className="w-6 h-6 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center text-xs font-bold mt-0.5">
+                              {index + 1}
+                            </div>
+                            <span className="text-sm">{step}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+
+                  {/* Action Buttons */}
+                  <div className="flex space-x-4">
+                    <Button 
+                      onClick={() => {
+                        setSessionPhase('prep');
+                        setFeedback(null);
+                        setPracticeNotes('');
+                      }}
+                      className="flex-1"
+                    >
+                      Practice Again
+                    </Button>
+                    <Button variant="outline" onClick={onClose} className="flex-1">
+                      Done
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default function ClubsHub() {
+  const [selectedClub, setSelectedClub] = useState<'DECA' | 'FBLA' | 'HOSA'>('DECA');
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [showAISession, setShowAISession] = useState(false);
+
+  const handleStartAICoaching = (event: any) => {
+    setSelectedEvent(event);
+    setShowAISession(true);
+  };
+
+  const getClubInfo = (club: string) => {
+    switch (club) {
+      case 'DECA':
+        return {
+          name: 'DECA',
+          fullName: 'Distributive Education Clubs of America',
+          description: 'Business and entrepreneurship competitive events',
+          color: 'blue',
+          icon: <Trophy className="w-6 h-6" />
+        };
+      case 'FBLA':
+        return {
+          name: 'FBLA',
+          fullName: 'Future Business Leaders of America',
+          description: 'Business leadership and professional development',
+          color: 'green',
+          icon: <Users className="w-6 h-6" />
+        };
+      case 'HOSA':
+        return {
+          name: 'HOSA',
+          fullName: 'Health Occupations Students of America',
+          description: 'Health science and medical career preparation',
+          color: 'red',
+          icon: <BookOpen className="w-6 h-6" />
+        };
+      default:
+        return { name: '', fullName: '', description: '', color: 'gray', icon: null };
+    }
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto p-6 space-y-6">
+      {/* Header */}
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold mb-4">Clubs Hub</h1>
+        <p className="text-gray-600 max-w-3xl mx-auto">
+          Practice with AI judges specialized in DECA, FBLA, and HOSA competitive events. 
+          Get authentic feedback based on official judging criteria and improve your competitive performance.
+        </p>
       </div>
 
-      <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="events">Competition Events</TabsTrigger>
-          <TabsTrigger value="ai-judge">AI Judge/Teacher</TabsTrigger>
+      {/* Club Selection */}
+      <Tabs value={selectedClub} onValueChange={(value: any) => setSelectedClub(value)}>
+        <TabsList className="grid w-full grid-cols-3 max-w-md mx-auto">
+          <TabsTrigger value="DECA" className="flex items-center space-x-2">
+            <span>DECA</span>
+          </TabsTrigger>
+          <TabsTrigger value="FBLA" className="flex items-center space-x-2">
+            <span>FBLA</span>
+          </TabsTrigger>
+          <TabsTrigger value="HOSA" className="flex items-center space-x-2">
+            <span>HOSA</span>
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="events" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Trophy className="w-5 h-5 text-yellow-600" />
-                <span>{selectedClub.toUpperCase()} Competition Events</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {getClubEvents(selectedClub).map((event) => (
-                  <Card 
-                    key={event.id} 
-                    className="cursor-pointer transition-all duration-200 hover:shadow-md border-2 hover:border-blue-300"
-                    onClick={() => setSelectedEvent(event.id)}
-                  >
-                    <CardContent className="p-4">
-                      <div className="space-y-3">
-                        <div className="flex items-start justify-between">
-                          <h3 className="font-semibold text-sm leading-tight">{event.name}</h3>
-                          <Badge variant="outline" className="text-xs">
-                            {event.format}
-                          </Badge>
+        {/* Club Content */}
+        {(['DECA', 'FBLA', 'HOSA'] as const).map((club) => (
+          <TabsContent key={club} value={club} className="mt-8">
+            <div className="space-y-6">
+              {/* Club Overview */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    {getClubInfo(club).icon}
+                    <div className="ml-3">
+                      <h2 className="text-2xl font-bold">{getClubInfo(club).fullName}</h2>
+                      <p className="text-gray-600">{getClubInfo(club).description}</p>
+                    </div>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center space-x-4">
+                    <Badge className={`bg-${getClubInfo(club).color}-100 text-${getClubInfo(club).color}-800`}>
+                      {clubEvents[club].length} Events Available
+                    </Badge>
+                    <Badge variant="outline">
+                      AI-Powered Judging
+                    </Badge>
+                    <Badge variant="outline">
+                      Camera Analysis
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Available Events */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {clubEvents[club].map((event) => (
+                  <Card key={event.id} className="hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                      <CardTitle className="text-lg">{event.name}</CardTitle>
+                      <div className="flex items-center space-x-2">
+                        <Badge variant="outline">{event.category}</Badge>
+                        <Badge className={`bg-${getClubInfo(club).color}-100 text-${getClubInfo(club).color}-800`}>
+                          {club}
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-600 text-sm mb-4">{event.description}</p>
+                      
+                      <div className="space-y-2 text-xs text-gray-500 mb-4">
+                        <div className="flex items-center space-x-1">
+                          <Clock className="w-3 h-3" />
+                          <span>{event.timeLimit}</span>
                         </div>
-                        
-                        <p className="text-xs text-gray-600 line-clamp-2">
-                          {event.description}
-                        </p>
-                        
+                      </div>
+
+                      <div className="mb-4">
+                        <h4 className="font-semibold text-sm mb-2">Key Skills</h4>
                         <div className="flex flex-wrap gap-1">
-                          {event.keySkills.slice(0, 2).map((skill, idx) => (
-                            <Badge key={idx} variant="secondary" className="text-xs">
+                          {event.keySkills.slice(0, 2).map((skill: string, index: number) => (
+                            <Badge key={index} variant="secondary" className="text-xs">
                               {skill}
                             </Badge>
                           ))}
@@ -841,154 +650,35 @@ Time Management: Excellent (within ${event.timeLimit})`;
                             </Badge>
                           )}
                         </div>
-                        
-                        <div className="flex items-center justify-between text-xs text-gray-500">
-                          <span>⏱️ {event.timeLimit}</span>
-                          <span>👥 {event.participants}</span>
-                        </div>
                       </div>
+
+                      <Button 
+                        className="w-full"
+                        onClick={() => handleStartAICoaching(event)}
+                      >
+                        <Brain className="w-4 h-4 mr-2" />
+                        Start AI Coaching
+                      </Button>
                     </CardContent>
                   </Card>
                 ))}
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="ai-judge" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Brain className="w-5 h-5 text-purple-600" />
-                <span>AI Judge/Teacher Practice</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Video Feed */}
-                <div className="space-y-4">
-                  <div className="aspect-video bg-gray-900 rounded-lg relative overflow-hidden">
-                    {cameraError ? (
-                      <div className="flex items-center justify-center h-full">
-                        <div className="text-center text-white">
-                          <AlertCircle className="w-12 h-12 mx-auto mb-4 text-red-400" />
-                          <p className="text-sm">{cameraError}</p>
-                          <Button 
-                            onClick={initializeCamera} 
-                            className="mt-4"
-                            variant="secondary"
-                          >
-                            Try Again
-                          </Button>
-                        </div>
-                      </div>
-                    ) : (
-                      <video
-                        ref={videoRef}
-                        className="w-full h-full object-cover"
-                        autoPlay
-                        playsInline
-                        muted
-                      />
-                    )}
-                    
-                    <div className="absolute top-4 left-4 bg-black/70 text-white px-3 py-1 rounded-lg text-sm">
-                      {isRecording ? "Recording..." : "Competition Practice"}
-                      {isRecording && <div className="inline-block w-2 h-2 bg-red-500 rounded-full ml-2 animate-pulse" />}
-                    </div>
-                    
-                    <div className="absolute bottom-4 right-4 flex space-x-2">
-                      <Button 
-                        size="sm" 
-                        variant={isCameraActive ? "default" : "secondary"}
-                        onClick={isCameraActive ? stopCamera : initializeCamera}
-                      >
-                        <Camera className="w-4 h-4" />
-                      </Button>
-                      <Button size="sm" variant="secondary">
-                        <Mic className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  {/* Event Selection */}
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Select Competition Event</label>
-                    <Select value={selectedEvent} onValueChange={setSelectedEvent}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Choose an event to practice..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {getClubEvents(selectedClub).map((event) => (
-                          <SelectItem key={event.id} value={event.id}>
-                            {event.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="flex space-x-2">
-                    <Button 
-                      className="flex-1"
-                      onClick={toggleRecording}
-                      disabled={!selectedEvent}
-                    >
-                      {isRecording ? (
-                        <>
-                          <Square className="w-4 h-4 mr-2" />
-                          Stop Practice
-                        </>
-                      ) : (
-                        <>
-                          <Play className="w-4 h-4 mr-2" />
-                          Start Practice
-                        </>
-                      )}
-                    </Button>
-                    <Button 
-                      variant="outline"
-                      onClick={() => {
-                        if (isRecording) {
-                          setIsRecording(false);
-                          generateAIJudgeFeedback();
-                        }
-                      }}
-                      disabled={!isRecording}
-                    >
-                      <Target className="w-4 h-4 mr-2" />
-                      Get Evaluation
-                    </Button>
-                  </div>
-                </div>
-
-                {/* AI Teacher Feedback */}
-                <div className="space-y-4">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-sm">AI Judge Feedback</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      {aiJudgeFeedback ? (
-                        <div className="space-y-3">
-                          <pre className="text-sm whitespace-pre-wrap text-gray-700 bg-gray-50 p-4 rounded-lg">
-                            {aiJudgeFeedback}
-                          </pre>
-                        </div>
-                      ) : (
-                        <div className="text-center py-8 text-gray-500">
-                          <Brain className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                          <p className="text-sm">Complete a practice session to receive AI judge feedback</p>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+            </div>
+          </TabsContent>
+        ))}
       </Tabs>
+
+      {/* AI Coaching Session Modal */}
+      {showAISession && selectedEvent && (
+        <AICoachingSession
+          club={selectedClub}
+          event={selectedEvent}
+          onClose={() => {
+            setShowAISession(false);
+            setSelectedEvent(null);
+          }}
+        />
+      )}
     </div>
   );
 }

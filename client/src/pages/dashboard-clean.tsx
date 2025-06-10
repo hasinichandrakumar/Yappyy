@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import YapUpLogo, { YapUpIcon } from "@/components/YapUpLogo";
 import EnhancedPracticeHubFixed from "@/components/EnhancedPracticeHubFixed";
 import PlaceholderComponent from "@/components/PlaceholderComponent";
-import CompetitiveEventsHub from "@/components/CompetitiveEventsHub";
+import ClubsHub from "@/components/ClubsHub";
 import BadgeSystem from "@/components/BadgeSystem";
 import DailyGoalWidget from "@/components/DailyGoalWidget";
 import WelcomeBackWidget from "@/components/WelcomeBackWidget";
@@ -179,7 +179,7 @@ export default function Dashboard() {
                 className="flex flex-col items-center space-y-1 px-3 py-3 text-xs font-medium data-[state=active]:gradient-bg data-[state=active]:text-white rounded-lg transition-all duration-200 flex-1"
               >
                 <Target className="w-4 h-4" />
-                <span>Compete</span>
+                <span>Clubs</span>
               </TabsTrigger>
               
               <TabsTrigger 
@@ -319,7 +319,7 @@ export default function Dashboard() {
             </TabsContent>
 
             <TabsContent value="clubs" className="mt-0">
-              <CompetitiveEventsHub />
+              <ClubsHub />
             </TabsContent>
 
             <TabsContent value="help" className="mt-0">
