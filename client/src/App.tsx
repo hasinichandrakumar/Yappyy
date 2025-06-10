@@ -39,7 +39,8 @@ function Router() {
     return (
       <Switch>
         <Route path="/login" component={LoginPage} />
-        <Route component={LoginPage} />
+        <Route path="/" component={Home} />
+        <Route component={Home} />
       </Switch>
     );
   }
