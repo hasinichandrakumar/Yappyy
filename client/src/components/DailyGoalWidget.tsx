@@ -93,7 +93,7 @@ export default function DailyGoalWidget() {
     target: apiGoal.targetValue,
     current: apiGoal.currentValue,
     unit: apiGoal.unit,
-    points: apiGoal.points,
+    yapX: apiGoal.points,
     difficulty: apiGoal.difficulty,
     category: apiGoal.category,
     timeEstimate: getTimeEstimate(apiGoal.difficulty),
@@ -153,7 +153,7 @@ export default function DailyGoalWidget() {
   };
 
   const getCompletedGoals = () => mappedGoals.filter(goal => goal.completed).length;
-  const getTotalPoints = () => mappedGoals.filter(goal => goal.completed).reduce((sum, goal) => sum + goal.points, 0);
+  const getTotalYapX = () => mappedGoals.filter(goal => goal.completed).reduce((sum, goal) => sum + goal.yapX, 0);
 
   return (
     <div className="space-y-6">
@@ -172,8 +172,8 @@ export default function DailyGoalWidget() {
               <div className="flex items-center space-x-2">
                 <Trophy className="w-6 h-6 text-yellow-500" />
                 <div>
-                  <div className="text-xl font-bold text-yellow-900">{getTotalPoints()}</div>
-                  <div className="text-sm text-yellow-700">Points Today</div>
+                  <div className="text-xl font-bold text-yellow-900">{getTotalYapX()}</div>
+                  <div className="text-sm text-yellow-700">YapX Today</div>
                 </div>
               </div>
             </div>
@@ -252,7 +252,7 @@ export default function DailyGoalWidget() {
               ) : (
                 <div className="flex items-center justify-center py-2 text-green-600">
                   <CheckCircle className="w-4 h-4 mr-2" />
-                  <span className="font-medium">Completed! +{goal.points} points</span>
+                  <span className="font-medium">Completed! +{goal.yapX} YapX</span>
                 </div>
               )}
             </CardContent>
