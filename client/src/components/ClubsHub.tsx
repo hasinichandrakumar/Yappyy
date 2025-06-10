@@ -65,8 +65,9 @@ interface ClubRubric {
 }
 
 export default function ClubsHub() {
-  const [selectedClub, setSelectedClub] = useState<string>("");
+  const [selectedClub, setSelectedClub] = useState<string>("deca");
   const [selectedEvent, setSelectedEvent] = useState<string>("");
+  const [selectedTab, setSelectedTab] = useState("events");
   const [customRubric, setCustomRubric] = useState<string>("");
   const [practiceMode, setPracticeMode] = useState<'judge' | 'competitor'>('competitor');
   const [aiJudgeFeedback, setAiJudgeFeedback] = useState<string>("");
@@ -787,313 +788,132 @@ Time Management: Excellent (within ${event.timeLimit})`;
         </Button>
       </div>
 
-**Strengths Identified:**
-• Clear understanding of ${event.keySkills[0].toLowerCase()} principles
-• Professional presentation approach
-• Good use of industry terminology
+      <Tabs value={selectedTab} onValueChange={setSelectedTab}>
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="events">Competition Events</TabsTrigger>
+          <TabsTrigger value="ai-judge">AI Judge/Teacher</TabsTrigger>
+        </TabsList>
 
-**Areas for Improvement:**
-• Consider strengthening your ${event.keySkills[1].toLowerCase()} demonstration
-• Enhance visual aids for better judge engagement
-• Practice time management for the ${event.timeLimit} format
-
-**Specific Rubric Analysis:**
-${rubric.criteria.map(criteria => 
-  `• **${criteria.name}:** Currently at Level 3/4 - ${criteria.levels[1].descriptor}`
-).join('\n')}
-
-**Judge's Recommended Action Steps:**
-1. Practice the specific performance indicators for ${event.category}
-2. Develop stronger opening and closing statements
-3. Prepare for Q&A by anticipating judge questions
-4. Review ${selectedClub.toUpperCase()} guidelines for ${event.format} events
-
-**Competition Tips:**
-• Arrive early and review room setup
-• Bring backup materials and technology
-• Maintain professional demeanor throughout
-• Follow time limits strictly - judges penalize for overtime
-
-**Estimated Score:** 78-85/100 (Strong performance with room for excellence)
-`;
-
-    setAiJudgeFeedback(feedback);
-  };
-
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <Card className="gradient-card border-blue-200">
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
-              <Users className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <span className="gradient-text font-heading text-xl">Competitive Clubs</span>
-              <p className="text-sm text-gray-600 font-normal">DECA, FBLA & HOSA Competition Training</p>
-            </div>
-          </CardTitle>
-        </CardHeader>
-      </Card>
-
-      {/* Club Selection */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card 
-          className={`cursor-pointer transition-all duration-200 ${selectedClub === 'deca' ? 'ring-2 ring-blue-500 bg-blue-50' : 'hover:shadow-md'}`}
-          onClick={() => setSelectedClub('deca')}
-        >
-          <CardContent className="p-6 text-center">
-            <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Trophy className="w-8 h-8 text-white" />
-            </div>
-            <h3 className="font-bold text-lg mb-2">DECA</h3>
-            <p className="text-sm text-gray-600 mb-3">Distributive Education Clubs of America</p>
-            <Badge variant="secondary">Marketing & Business</Badge>
-          </CardContent>
-        </Card>
-
-        <Card 
-          className={`cursor-pointer transition-all duration-200 ${selectedClub === 'fbla' ? 'ring-2 ring-green-500 bg-green-50' : 'hover:shadow-md'}`}
-          onClick={() => setSelectedClub('fbla')}
-        >
-          <CardContent className="p-6 text-center">
-            <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <GraduationCap className="w-8 h-8 text-white" />
-            </div>
-            <h3 className="font-bold text-lg mb-2">FBLA</h3>
-            <p className="text-sm text-gray-600 mb-3">Future Business Leaders of America</p>
-            <Badge variant="secondary">Business Leadership</Badge>
-          </CardContent>
-        </Card>
-
-        <Card 
-          className={`cursor-pointer transition-all duration-200 ${selectedClub === 'hosa' ? 'ring-2 ring-red-500 bg-red-50' : 'hover:shadow-md'}`}
-          onClick={() => setSelectedClub('hosa')}
-        >
-          <CardContent className="p-6 text-center">
-            <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Award className="w-8 h-8 text-white" />
-            </div>
-            <h3 className="font-bold text-lg mb-2">HOSA</h3>
-            <p className="text-sm text-gray-600 mb-3">Health Occupations Students of America</p>
-            <Badge variant="secondary">Healthcare Careers</Badge>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Event Selection and Training */}
-      {selectedClub && (
-        <Tabs defaultValue="practice" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="practice">Live Practice</TabsTrigger>
-            <TabsTrigger value="rubric">AI Judge</TabsTrigger>
-            <TabsTrigger value="resources">Resources</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="practice" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Camera className="w-5 h-5" />
-                  <span>AI Competition Teacher</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Video Feed */}
-                  <div className="space-y-4">
-                    <div className="aspect-video bg-gray-900 rounded-lg relative overflow-hidden">
-                      {cameraError ? (
-                        <div className="flex items-center justify-center h-full">
-                          <div className="text-center text-white">
-                            <AlertCircle className="w-12 h-12 mx-auto mb-4 text-red-400" />
-                            <p className="text-sm">{cameraError}</p>
-                            <Button 
-                              onClick={initializeCamera} 
-                              className="mt-4"
-                              variant="secondary"
-                            >
-                              Try Again
-                            </Button>
-                          </div>
+        <TabsContent value="events" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Trophy className="w-5 h-5 text-yellow-600" />
+                <span>{selectedClub.toUpperCase()} Competition Events</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {getClubEvents(selectedClub).map((event) => (
+                  <Card 
+                    key={event.id} 
+                    className="cursor-pointer transition-all duration-200 hover:shadow-md border-2 hover:border-blue-300"
+                    onClick={() => setSelectedEvent(event.id)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="space-y-3">
+                        <div className="flex items-start justify-between">
+                          <h3 className="font-semibold text-sm leading-tight">{event.name}</h3>
+                          <Badge variant="outline" className="text-xs">
+                            {event.format}
+                          </Badge>
                         </div>
-                      ) : (
-                        <video
-                          ref={videoRef}
-                          className="w-full h-full object-cover"
-                          autoPlay
-                          playsInline
-                          muted
-                        />
-                      )}
-                      
-                      <div className="absolute top-4 left-4 bg-black/70 text-white px-3 py-1 rounded-lg text-sm">
-                        {isRecording ? "Recording..." : "Competition Practice"}
-                        {isRecording && <div className="inline-block w-2 h-2 bg-red-500 rounded-full ml-2 animate-pulse" />}
+                        
+                        <p className="text-xs text-gray-600 line-clamp-2">
+                          {event.description}
+                        </p>
+                        
+                        <div className="flex flex-wrap gap-1">
+                          {event.keySkills.slice(0, 2).map((skill, idx) => (
+                            <Badge key={idx} variant="secondary" className="text-xs">
+                              {skill}
+                            </Badge>
+                          ))}
+                          {event.keySkills.length > 2 && (
+                            <Badge variant="secondary" className="text-xs">
+                              +{event.keySkills.length - 2}
+                            </Badge>
+                          )}
+                        </div>
+                        
+                        <div className="flex items-center justify-between text-xs text-gray-500">
+                          <span>⏱️ {event.timeLimit}</span>
+                          <span>👥 {event.participants}</span>
+                        </div>
                       </div>
-                      
-                      <div className="absolute bottom-4 right-4 flex space-x-2">
-                        <Button 
-                          size="sm" 
-                          variant={isCameraActive ? "default" : "secondary"}
-                          onClick={isCameraActive ? stopCamera : initializeCamera}
-                        >
-                          <Camera className="w-4 h-4" />
-                        </Button>
-                        <Button size="sm" variant="secondary">
-                          <Mic className="w-4 h-4" />
-                        </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="ai-judge" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Brain className="w-5 h-5 text-purple-600" />
+                <span>AI Judge/Teacher Practice</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Video Feed */}
+                <div className="space-y-4">
+                  <div className="aspect-video bg-gray-900 rounded-lg relative overflow-hidden">
+                    {cameraError ? (
+                      <div className="flex items-center justify-center h-full">
+                        <div className="text-center text-white">
+                          <AlertCircle className="w-12 h-12 mx-auto mb-4 text-red-400" />
+                          <p className="text-sm">{cameraError}</p>
+                          <Button 
+                            onClick={initializeCamera} 
+                            className="mt-4"
+                            variant="secondary"
+                          >
+                            Try Again
+                          </Button>
+                        </div>
                       </div>
+                    ) : (
+                      <video
+                        ref={videoRef}
+                        className="w-full h-full object-cover"
+                        autoPlay
+                        playsInline
+                        muted
+                      />
+                    )}
+                    
+                    <div className="absolute top-4 left-4 bg-black/70 text-white px-3 py-1 rounded-lg text-sm">
+                      {isRecording ? "Recording..." : "Competition Practice"}
+                      {isRecording && <div className="inline-block w-2 h-2 bg-red-500 rounded-full ml-2 animate-pulse" />}
                     </div>
                     
-                    {/* Event Selection */}
-                    <div>
-                      <label className="text-sm font-medium mb-2 block">Select Competition Event</label>
-                      <Select value={selectedEvent} onValueChange={setSelectedEvent}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Choose your event" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {getClubEvents(selectedClub).map(event => (
-                            <SelectItem key={event.id} value={event.id}>
-                              {event.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="flex space-x-2">
+                    <div className="absolute bottom-4 right-4 flex space-x-2">
                       <Button 
-                        className="flex-1"
-                        onClick={toggleRecording}
-                        disabled={!selectedEvent}
+                        size="sm" 
+                        variant={isCameraActive ? "default" : "secondary"}
+                        onClick={isCameraActive ? stopCamera : initializeCamera}
                       >
-                        {isRecording ? (
-                          <>
-                            <Square className="w-4 h-4 mr-2" />
-                            Stop Practice
-                          </>
-                        ) : (
-                          <>
-                            <Play className="w-4 h-4 mr-2" />
-                            Start Practice
-                          </>
-                        )}
+                        <Camera className="w-4 h-4" />
                       </Button>
-                      <Button 
-                        variant="outline"
-                        onClick={() => {
-                          if (isRecording) {
-                            setIsRecording(false);
-                            // Generate AI feedback here
-                            generateAIJudgeFeedback();
-                          }
-                        }}
-                        disabled={!isRecording}
-                      >
-                        <Target className="w-4 h-4 mr-2" />
-                        Get Evaluation
+                      <Button size="sm" variant="secondary">
+                        <Mic className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
-
-                  {/* AI Teacher Feedback */}
-                  <div className="space-y-4">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg flex items-center space-x-2">
-                          <Brain className="w-5 h-5" />
-                          <span>AI Competition Teacher</span>
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="p-4 bg-blue-50 rounded-lg">
-                          <h4 className="font-semibold text-blue-900 mb-2">Live Coaching</h4>
-                          <p className="text-sm text-blue-800">
-                            Your AI teacher is ready to provide real-time feedback based on official {selectedClub.toUpperCase()} competition standards.
-                          </p>
-                        </div>
-
-                        {selectedEvent && (
-                          <div className="p-4 bg-gray-50 rounded-lg">
-                            <h5 className="font-medium mb-2">Event Guidelines</h5>
-                            {(() => {
-                              const event = getClubEvents(selectedClub).find(e => e.id === selectedEvent);
-                              return event ? (
-                                <div className="text-sm space-y-1">
-                                  <p><strong>Format:</strong> {event.format}</p>
-                                  <p><strong>Time:</strong> {event.timeLimit}</p>
-                                  <p><strong>Focus:</strong> {event.keySkills.join(', ')}</p>
-                                </div>
-                              ) : null;
-                            })()}
-                          </div>
-                        )}
-
-                        <div className="space-y-3">
-                          <h5 className="font-medium">Real-Time Feedback</h5>
-                          <div className="space-y-2 text-sm">
-                            <div className="flex justify-between items-center p-2 bg-green-50 rounded">
-                              <span>Professional Delivery</span>
-                              <Badge variant="secondary">Excellent</Badge>
-                            </div>
-                            <div className="flex justify-between items-center p-2 bg-yellow-50 rounded">
-                              <span>Content Organization</span>
-                              <Badge variant="secondary">Good</Badge>
-                            </div>
-                            <div className="flex justify-between items-center p-2 bg-red-50 rounded">
-                              <span>Time Management</span>
-                              <Badge variant="destructive">Needs Work</Badge>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="p-3 bg-purple-50 rounded-lg">
-                          <h5 className="font-medium text-purple-900 mb-1">Teacher's Tip</h5>
-                          <p className="text-sm text-purple-800">
-                            "Remember to make eye contact with each judge when presenting. This shows confidence and engagement."
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="rubric" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Brain className="w-5 h-5" />
-                  <span>AI Competition Judge</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                  
+                  {/* Event Selection */}
                   <div>
-                    <label className="text-sm font-medium">Practice Mode</label>
-                    <Select value={practiceMode} onValueChange={(value: any) => setPracticeMode(value)}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="competitor">Competitor Practice</SelectItem>
-                        <SelectItem value="judge">Judge Training</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium">Event</label>
+                    <label className="text-sm font-medium mb-2 block">Select Competition Event</label>
                     <Select value={selectedEvent} onValueChange={setSelectedEvent}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select event" />
+                        <SelectValue placeholder="Choose an event to practice..." />
                       </SelectTrigger>
                       <SelectContent>
-                        {getClubEvents(selectedClub).map(event => (
+                        {getClubEvents(selectedClub).map((event) => (
                           <SelectItem key={event.id} value={event.id}>
                             {event.name}
                           </SelectItem>
@@ -1101,142 +921,68 @@ ${rubric.criteria.map(criteria =>
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
 
-                <div>
-                  <label className="text-sm font-medium mb-2 block">
-                    {practiceMode === 'competitor' ? 'Your Presentation/Response' : 'Competitor Content to Evaluate'}
-                  </label>
-                  <Textarea
-                    value={customRubric}
-                    onChange={(e) => setCustomRubric(e.target.value)}
-                    placeholder={practiceMode === 'competitor' 
-                      ? "Enter your presentation content, business plan, or competition response here..." 
-                      : "Paste the competitor's content to evaluate using official rubrics..."
-                    }
-                    className="min-h-32"
-                  />
-                </div>
-
-                <Button onClick={generateAIJudgeFeedback} className="w-full">
-                  <Target className="w-4 h-4 mr-2" />
-                  {practiceMode === 'competitor' ? 'Get Judge Feedback' : 'Generate Judge Scorecard'}
-                </Button>
-
-                {aiJudgeFeedback && (
-                  <div className="p-4 bg-gray-50 rounded-lg">
-                    <h4 className="font-semibold mb-2">AI Judge Evaluation</h4>
-                    <div className="text-sm whitespace-pre-line">{aiJudgeFeedback}</div>
+                  <div className="flex space-x-2">
+                    <Button 
+                      className="flex-1"
+                      onClick={toggleRecording}
+                      disabled={!selectedEvent}
+                    >
+                      {isRecording ? (
+                        <>
+                          <Square className="w-4 h-4 mr-2" />
+                          Stop Practice
+                        </>
+                      ) : (
+                        <>
+                          <Play className="w-4 h-4 mr-2" />
+                          Start Practice
+                        </>
+                      )}
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      onClick={() => {
+                        if (isRecording) {
+                          setIsRecording(false);
+                          generateAIJudgeFeedback();
+                        }
+                      }}
+                      disabled={!isRecording}
+                    >
+                      <Target className="w-4 h-4 mr-2" />
+                      Get Evaluation
+                    </Button>
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                </div>
 
-            {selectedClub && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Official {selectedClub.toUpperCase()} Rubric</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {(() => {
-                    const rubric = getClubRubric(selectedClub);
-                    return (
-                      <div className="space-y-4">
-                        <div className="flex justify-between items-center">
-                          <h5 className="font-medium">{rubric.eventName}</h5>
-                          <Badge variant="outline">Total: {rubric.totalPoints} points</Badge>
-                        </div>
-                        
-                        {rubric.timeAllocation && (
-                          <div className="p-3 bg-blue-50 rounded">
-                            <h6 className="font-medium text-sm mb-1">Time Allocation:</h6>
-                            <div className="text-xs space-y-1">
-                              {rubric.timeAllocation.prep && <div>Prep: {rubric.timeAllocation.prep}</div>}
-                              {rubric.timeAllocation.presentation && <div>Presentation: {rubric.timeAllocation.presentation}</div>}
-                              {rubric.timeAllocation.qa && <div>Q&A: {rubric.timeAllocation.qa}</div>}
-                            </div>
-                          </div>
-                        )}
-
+                {/* AI Teacher Feedback */}
+                <div className="space-y-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-sm">AI Judge Feedback</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {aiJudgeFeedback ? (
                         <div className="space-y-3">
-                          {rubric.criteria.map(criteria => (
-                            <div key={criteria.id} className="border rounded p-3">
-                              <div className="flex justify-between items-start mb-2">
-                                <h6 className="font-medium">{criteria.name}</h6>
-                                <Badge variant="secondary">{criteria.maxPoints} pts</Badge>
-                              </div>
-                              <p className="text-sm text-gray-600 mb-2">{criteria.description}</p>
-                              <div className="text-xs space-y-1">
-                                {criteria.levels.map(level => (
-                                  <div key={level.level} className="flex justify-between">
-                                    <span>Level {level.level}: {level.descriptor}</span>
-                                    <span className="font-medium">{level.points} pts</span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          ))}
+                          <pre className="text-sm whitespace-pre-wrap text-gray-700 bg-gray-50 p-4 rounded-lg">
+                            {aiJudgeFeedback}
+                          </pre>
                         </div>
-                      </div>
-                    );
-                  })()}
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-
-          <TabsContent value="resources" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <BookOpen className="w-5 h-5" />
-                    <span>Competition Guides</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="p-3 border rounded hover:bg-gray-50 cursor-pointer">
-                    <h5 className="font-medium">Official {selectedClub.toUpperCase()} Guidelines</h5>
-                    <p className="text-sm text-gray-600">Competition rules and procedures</p>
-                  </div>
-                  <div className="p-3 border rounded hover:bg-gray-50 cursor-pointer">
-                    <h5 className="font-medium">Event-Specific Rubrics</h5>
-                    <p className="text-sm text-gray-600">Detailed scoring criteria</p>
-                  </div>
-
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Lightbulb className="w-5 h-5" />
-                    <span>Quick Tips</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-start space-x-2">
-                    <CheckCircle className="w-4 h-4 text-green-500 mt-1" />
-                    <span className="text-sm">Practice with official time limits</span>
-                  </div>
-                  <div className="flex items-start space-x-2">
-                    <CheckCircle className="w-4 h-4 text-green-500 mt-1" />
-                    <span className="text-sm">Use industry-specific terminology</span>
-                  </div>
-                  <div className="flex items-start space-x-2">
-                    <CheckCircle className="w-4 h-4 text-green-500 mt-1" />
-                    <span className="text-sm">Prepare for judge questions</span>
-                  </div>
-                  <div className="flex items-start space-x-2">
-                    <CheckCircle className="w-4 h-4 text-green-500 mt-1" />
-                    <span className="text-sm">Review current industry trends</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-        </Tabs>
-      )}
+                      ) : (
+                        <div className="text-center py-8 text-gray-500">
+                          <Brain className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                          <p className="text-sm">Complete a practice session to receive AI judge feedback</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
