@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import YapUpLogo, { YapUpIcon } from "@/components/YapUpLogo";
 import EnhancedPracticeHubFixed from "@/components/EnhancedPracticeHubFixed";
 import PlaceholderComponent from "@/components/PlaceholderComponent";
-import CompetitiveClubsHub from "@/components/CompetitiveClubsHub";
+import CompetitiveEventsHub from "@/components/CompetitiveEventsHub";
 import BadgeSystem from "@/components/BadgeSystem";
 import DailyGoalWidget from "@/components/DailyGoalWidget";
 import WelcomeBackWidget from "@/components/WelcomeBackWidget";

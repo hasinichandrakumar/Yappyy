@@ -10,6 +10,7 @@ import UserProfile from "@/components/UserProfile";
 import LogoExport from "@/pages/logo-export";
 import LoginPage from "@/components/LoginPage";
 import NotFound from "@/pages/not-found";
+import CompetitiveEventsHub from "@/components/CompetitiveEventsHub";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -32,6 +33,7 @@ function Router() {
           <Route path="/" component={Dashboard} />
           <Route path="/dashboard" component={Dashboard} />
           <Route path="/profile" component={UserProfile} />
+          <Route path="/competitions" component={CompetitiveEventsHub} />
           <Route path="/logo" component={LogoExport} />
           <Route component={NotFound} />
         </>
