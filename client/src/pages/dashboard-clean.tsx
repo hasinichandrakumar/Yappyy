@@ -12,6 +12,7 @@ import CompetitiveClubsHub from "@/components/CompetitiveClubsHub";
 import BadgeSystem from "@/components/BadgeSystem";
 import DailyGoalWidget from "@/components/DailyGoalWidget";
 import WelcomeBackWidget from "@/components/WelcomeBackWidget";
+import SocialLeaderboard from "@/components/SocialLeaderboard";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview");

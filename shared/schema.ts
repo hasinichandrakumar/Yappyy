@@ -193,6 +193,79 @@ export const insertDailyGoalSchema = createInsertSchema(dailyGoals).omit({
   createdAt: true,
 });
 
+// Leaderboard and social features
+export const leaderboardEntries = pgTable("leaderboard_entries", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  period: text("period").notNull(), // 'daily', 'weekly', 'monthly', 'all-time'
+  category: text("category").notNull(), // 'overall', 'practice-time', 'yapx-earned', 'streaks', 'goals-completed'
+  score: integer("score").notNull().default(0),
+  rank: integer("rank").notNull().default(0),
+  metadata: jsonb("metadata"), // Additional stats like practice sessions, total time, etc.
+  calculatedAt: timestamp("calculated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const socialInteractions = pgTable("social_interactions", {
+  id: serial("id").primaryKey(),
+  fromUserId: text("from_user_id").notNull(),
+  toUserId: text("to_user_id").notNull(),
+  type: text("type").notNull(), // 'follow', 'like', 'comment', 'challenge', 'cheer'
+  entityType: text("entity_type"), // 'achievement', 'practice-session', 'goal-completion'
+  entityId: text("entity_id"),
+  message: text("message"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const challenges = pgTable("challenges", {
+  id: serial("id").primaryKey(),
+  creatorId: text("creator_id").notNull(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  type: text("type").notNull(), // 'practice-streak', 'yapx-target', 'skill-focus', 'time-challenge'
+  targetValue: integer("target_value").notNull(),
+  unit: text("unit").notNull(), // 'days', 'minutes', 'yapx', 'sessions'
+  duration: integer("duration").notNull(), // duration in days
+  reward: integer("reward").notNull().default(0), // YapX reward
+  participants: text("participants").array().default([]),
+  isPublic: boolean("is_public").default(true),
+  status: text("status").default("active"), // 'active', 'completed', 'expired'
+  startDate: timestamp("start_date").defaultNow().notNull(),
+  endDate: timestamp("end_date").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const challengeParticipations = pgTable("challenge_participations", {
+  id: serial("id").primaryKey(),
+  challengeId: integer("challenge_id").notNull(),
+  userId: text("user_id").notNull(),
+  currentProgress: integer("current_progress").default(0),
+  isCompleted: boolean("is_completed").default(false),
+  completedAt: timestamp("completed_at"),
+  joinedAt: timestamp("joined_at").defaultNow().notNull(),
+});
+
+export const insertLeaderboardEntrySchema = createInsertSchema(leaderboardEntries).omit({
+  id: true,
+  createdAt: true,
+  calculatedAt: true,
+});
+
+export const insertSocialInteractionSchema = createInsertSchema(socialInteractions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertChallengeSchema = createInsertSchema(challenges).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertChallengeParticipationSchema = createInsertSchema(challengeParticipations).omit({
+  id: true,
+  joinedAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -212,3 +285,11 @@ export type InsertUserStreak = z.infer<typeof insertUserStreakSchema>;
 export type UserStreak = typeof userStreaks.$inferSelect;
 export type InsertDailyGoal = z.infer<typeof insertDailyGoalSchema>;
 export type DailyGoal = typeof dailyGoals.$inferSelect;
+export type InsertLeaderboardEntry = z.infer<typeof insertLeaderboardEntrySchema>;
+export type LeaderboardEntry = typeof leaderboardEntries.$inferSelect;
+export type InsertSocialInteraction = z.infer<typeof insertSocialInteractionSchema>;
+export type SocialInteraction = typeof socialInteractions.$inferSelect;
+export type InsertChallenge = z.infer<typeof insertChallengeSchema>;
+export type Challenge = typeof challenges.$inferSelect;
+export type InsertChallengeParticipation = z.infer<typeof insertChallengeParticipationSchema>;
+export type ChallengeParticipation = typeof challengeParticipations.$inferSelect;

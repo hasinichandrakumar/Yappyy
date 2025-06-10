@@ -367,26 +367,26 @@ export default function DailyGoalWidget() {
       </div>
 
       {/* Enhanced Encouragement Section */}
-      <Card className="relative overflow-hidden bg-gradient-to-br from-purple-100 via-blue-50 to-indigo-100 border-0 shadow-lg">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-400/10 to-blue-400/10"></div>
+      <Card className="relative overflow-hidden bg-gradient-to-br from-blue-100 via-indigo-50 to-cyan-100 border-0 shadow-lg">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-400/10 to-indigo-400/10"></div>
         <CardContent className="relative py-8">
           <div className="text-center space-y-4">
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full blur-lg opacity-30 animate-pulse"></div>
-              <div className="relative p-4 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full shadow-lg mx-auto w-fit">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full blur-lg opacity-30 animate-pulse"></div>
+              <div className="relative p-4 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full shadow-lg mx-auto w-fit">
                 <Star className="w-8 h-8 text-white" />
               </div>
             </div>
             
             <div className="space-y-2">
-              <h3 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+              <h3 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                 {getCompletedGoals() === mappedGoals.length 
                   ? "Amazing! All goals completed!" 
                   : getCompletedGoals() > 0 
                     ? "Great progress! Keep it up!" 
                     : "Ready to level up your speaking skills?"}
               </h3>
-              <p className="text-purple-700 font-medium max-w-md mx-auto">
+              <p className="text-blue-700 font-medium max-w-md mx-auto">
                 {getCompletedGoals() === mappedGoals.length 
                   ? "You're building unstoppable speaking confidence! Your dedication is truly inspiring." 
                   : "Each practice session brings you closer to mastery. Consistency creates champions."}
@@ -399,9 +399,9 @@ export default function DailyGoalWidget() {
                   <Trophy className="w-4 h-4 text-yellow-600" />
                   <span className="text-sm font-semibold text-yellow-800">Perfect Day!</span>
                 </div>
-                <div className="flex items-center space-x-2 px-4 py-2 bg-purple-100 rounded-full">
-                  <Flame className="w-4 h-4 text-purple-600" />
-                  <span className="text-sm font-semibold text-purple-800">Streak Active</span>
+                <div className="flex items-center space-x-2 px-4 py-2 bg-blue-100 rounded-full">
+                  <Flame className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm font-semibold text-blue-800">Streak Active</span>
                 </div>
               </div>
             )}
