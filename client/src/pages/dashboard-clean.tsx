@@ -11,7 +11,7 @@ import PlaceholderComponent from "@/components/PlaceholderComponent";
 import AIMentor from "@/components/AIMentor";
 import SimpleAICoach from "@/components/SimpleAICoach";
 import SessionStudyModal from "@/components/SessionStudyModal";
-import ClubsHub from "@/components/ClubsHub";
+import CompetitiveClubsHub from "@/components/CompetitiveClubsHub";
 import SpeechDNA from "@/components/SpeechDNA";
 import SpeechROIAnalyzer from "@/components/SpeechROIAnalyzer";
 import BadgeSystem from "@/components/BadgeSystem";
@@ -320,7 +320,7 @@ export default function Dashboard() {
             </TabsContent>
 
             <TabsContent value="clubs" className="mt-0">
-              <ClubsHub />
+              <CompetitiveClubsHub />
             </TabsContent>
 
             <TabsContent value="help" className="mt-0">
