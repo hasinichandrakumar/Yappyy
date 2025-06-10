@@ -8,17 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import YapUpLogo, { YapUpIcon } from "@/components/YapUpLogo";
 import EnhancedPracticeHubFixed from "@/components/EnhancedPracticeHubFixed";
 import PlaceholderComponent from "@/components/PlaceholderComponent";
-import AIMentor from "@/components/AIMentor";
-import SimpleAICoach from "@/components/SimpleAICoach";
-import SessionStudyModal from "@/components/SessionStudyModal";
 import CompetitiveClubsHub from "@/components/CompetitiveClubsHub";
-import SpeechDNA from "@/components/SpeechDNA";
-import SpeechROIAnalyzer from "@/components/SpeechROIAnalyzer";
 import BadgeSystem from "@/components/BadgeSystem";
-import EnhancedTemplateMarketplace from "@/components/EnhancedTemplateMarketplace";
-import HelpGuide from "@/components/HelpGuide";
-import PostSessionAnalysis from "@/components/PostSessionAnalysis";
-import WelcomeOnboarding from "@/components/WelcomeOnboarding";
 import DailyGoalWidget from "@/components/DailyGoalWidget";
 import WelcomeBackWidget from "@/components/WelcomeBackWidget";
 
@@ -208,11 +199,11 @@ export default function Dashboard() {
             </TabsContent>
 
             <TabsContent value="ai-coach" className="mt-0">
-              <SimpleAICoach />
+              <PlaceholderComponent title="AI Coach" description="Intelligent speaking coach with personalized feedback and improvement suggestions." />
             </TabsContent>
 
             <TabsContent value="speech-dna" className="mt-0">
-              <SpeechDNA />
+              <PlaceholderComponent title="Speech DNA" description="Unique vocal fingerprint analysis showing your speaking patterns and characteristics." />
             </TabsContent>
 
             <TabsContent value="detailed" className="mt-0">
@@ -301,18 +292,18 @@ export default function Dashboard() {
                 <TabsContent value="content-analysis" className="mt-6">
                   <div className="space-y-6">
                     <PlaceholderComponent title="Content Analysis" description="Speech content structure and effectiveness analysis." />
-                    <AIMentor />
+                    <PlaceholderComponent title="AI Mentor" description="Personalized coaching suggestions and speaking improvement strategies." />
                   </div>
                 </TabsContent>
               </Tabs>
             </TabsContent>
 
             <TabsContent value="roi-analyzer" className="mt-0">
-              <SpeechROIAnalyzer />
+              <PlaceholderComponent title="Speech ROI Analyzer" description="Return on investment analysis for your speaking skills and career impact." />
             </TabsContent>
 
             <TabsContent value="templates" className="mt-0">
-              <EnhancedTemplateMarketplace />
+              <PlaceholderComponent title="Template Marketplace" description="Browse and customize speech templates for various occasions and audiences." />
             </TabsContent>
 
             <TabsContent value="badges" className="mt-0">
@@ -324,37 +315,13 @@ export default function Dashboard() {
             </TabsContent>
 
             <TabsContent value="help" className="mt-0">
-              <HelpGuide />
+              <PlaceholderComponent title="Help Guide" description="Tutorials, FAQs, and support resources to help you master the platform." />
             </TabsContent>
           </div>
         </Tabs>
       </div>
 
-      {/* Post Session Analysis Modal */}
-      <PostSessionAnalysis 
-        isVisible={showPostAnalysis}
-        onClose={() => setShowPostAnalysis(false)}
-        roleplayContext={sessionContext.roleplayType}
-        audienceType={sessionContext.audienceType}
-      />
 
-      {/* Session Study Modal */}
-      <SessionStudyModal
-        isOpen={showSessionStudy}
-        onClose={() => setShowSessionStudy(false)}
-        onSessionSelect={(sessionId) => {
-          setStudyingSessionId(sessionId);
-          // Could switch to detailed analysis tab automatically
-          setActiveTab('detailed');
-        }}
-      />
-
-      {/* Welcome Onboarding for new users */}
-      <WelcomeOnboarding
-        isOpen={showOnboarding}
-        onComplete={handleOnboardingComplete}
-        userName={(user as any)?.firstName || 'User'}
-      />
     </div>
   );
 }
