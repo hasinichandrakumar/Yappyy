@@ -349,15 +349,10 @@ export default function DailyGoalWidget() {
                   <div className="absolute inset-0 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
                 </Button>
               ) : (
-                <div className="flex items-center justify-center py-4 px-6 bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl border border-green-200">
-                  <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-green-500 rounded-full">
-                      <CheckCircle className="w-4 h-4 text-white" />
-                    </div>
-                    <div>
-                      <div className="font-semibold text-green-800">Completed!</div>
-                      <div className="text-sm text-green-600">+{goal.yapX} YapX earned</div>
-                    </div>
+                <div className="flex items-center justify-center py-3 px-4 bg-gray-100 rounded-lg">
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="w-4 h-4 text-green-600" />
+                    <span className="text-sm font-medium text-gray-700">Goal completed</span>
                   </div>
                 </div>
               )}
