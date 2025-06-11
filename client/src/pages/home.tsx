@@ -29,7 +29,7 @@ import {
   Activity,
   FileText
 } from "lucide-react";
-import yappyyLogo from "@assets/image_1749675170033.png";
+import yappyyLogo from "@assets/4-removebg-preview_1749675270050.png";
 import yappyyMicIcon from "@assets/image_1749675190198.png";
 
 export default function Home() {
@@ -854,12 +854,7 @@ export default function Home() {
           <img
             src={yappyyLogo}
             alt="Yappyy Logo"
-            className="h-8 w-auto mx-auto mb-6"
-            style={{ 
-              imageRendering: 'crisp-edges',
-              maxWidth: '150px',
-              objectFit: 'contain'
-            }}
+            className="yappyy-logo yappyy-logo-footer mx-auto mb-6"
           />
           <p className="text-gray-400 mb-6">
             Empowering speakers worldwide with intelligent feedback and coaching.

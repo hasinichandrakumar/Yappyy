@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LogIn, User, Shield, Mic } from "lucide-react";
-import yappyyMicIcon from "@assets/5-removebg-preview_1749674959175.png";
-import yappyyLogo from "@assets/4-removebg-preview_1749674959175.png";
+import yappyyMicIcon from "@assets/image_1749675190198.png";
+import yappyyLogo from "@assets/4-removebg-preview_1749675270050.png";
 
 export default function LoginPage() {
   const handleLogin = () => {
@@ -22,12 +22,7 @@ export default function LoginPage() {
             <img 
               src={yappyyLogo} 
               alt="Yappyy" 
-              className="h-8 w-auto mx-auto mb-2"
-              style={{ 
-                imageRendering: 'crisp-edges',
-                maxWidth: '150px',
-                objectFit: 'contain'
-              }}
+              className="yappyy-logo yappyy-logo-login mx-auto mb-2"
             />
             <CardTitle className="text-xl font-bold gradient-text font-display">
               Welcome

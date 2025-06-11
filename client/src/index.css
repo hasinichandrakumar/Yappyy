@@ -96,22 +96,22 @@
 
 .yappyy-logo-nav {
   height: 1.5rem;
-  max-width: 120px;
+  max-width: 100px;
 }
 
 .yappyy-logo-hero {
-  max-height: 100px;
-  max-width: 280px;
+  max-height: 80px;
+  max-width: 200px;
 }
 
 .yappyy-logo-footer {
-  height: 2rem;
-  max-width: 140px;
+  height: 2.5rem;
+  max-width: 120px;
 }
 
 .yappyy-logo-login {
-  height: 2rem;
-  max-width: 140px;
+  height: 2.5rem;
+  max-width: 120px;
 }
 
 .dark {
