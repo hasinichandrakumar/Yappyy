@@ -382,7 +382,7 @@ export default function Home() {
               transition={{ duration: 2, repeat: Infinity }}
               onClick={handleStartPracticing}
             >
-              <Button size="lg" className="bg-gray-900 text-white hover:bg-gray-800 shadow-xl px-8 py-4 text-lg font-semibold tracking-wide">
+              <Button size="lg" className="bg-gray-900 text-cyan-400 hover:bg-gray-800 hover:text-cyan-300 shadow-xl px-8 py-4 text-lg font-semibold tracking-wide transition-all duration-300">
                 {isAuthenticated ? "Go to Dashboard" : "Start Your Journey"}
                 <PlayCircle className="w-5 h-5 ml-3" />
               </Button>
