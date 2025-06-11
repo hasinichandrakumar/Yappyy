@@ -39,8 +39,8 @@ export default function LoginPage() {
             <div className="flex items-center space-x-3 p-3 bg-purple-50 rounded-lg">
               <Shield className="w-5 h-5 text-purple-600" />
               <div>
-                <p className="font-medium text-sm">Secure & Private</p>
-                <p className="text-xs text-gray-600">Your practice sessions stay confidential</p>
+                <p className="font-medium text-sm font-heading">Secure & Private</p>
+                <p className="text-xs text-gray-600 font-body">Your practice sessions stay confidential</p>
               </div>
             </div>
           </div>
@@ -51,7 +51,7 @@ export default function LoginPage() {
             size="lg"
           >
             <LogIn className="w-5 h-5" />
-            <span>Continue with Google</span>
+            <span className="font-button">Continue with Google</span>
           </Button>
 
           <p className="text-xs text-gray-500 text-center">
