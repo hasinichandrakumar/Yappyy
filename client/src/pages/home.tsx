@@ -29,7 +29,7 @@ import {
   Activity,
   FileText
 } from "lucide-react";
-import yappyyLogo from "@assets/yappyy-logo.svg";
+import yappyyLogo from "@assets/Untitled_design-11600-removebg-preview_1749685340210.png";
 import yappyyMicIcon from "@assets/image_1749675190198.png";
 
 export default function Home() {

@@ -88,26 +88,28 @@
   height: auto;
   object-fit: contain;
   background: transparent;
+  filter: contrast(1.5) brightness(1.1);
+  image-rendering: crisp-edges;
 }
 
 .yappyy-logo-nav {
-  height: 1.5rem;
-  max-width: 100px;
+  height: 2.5rem;
+  max-width: 140px;
 }
 
 .yappyy-logo-hero {
-  max-height: 80px;
-  max-width: 200px;
+  max-height: 120px;
+  max-width: 300px;
 }
 
 .yappyy-logo-footer {
-  height: 2.5rem;
-  max-width: 120px;
+  height: 3.5rem;
+  max-width: 160px;
 }
 
 .yappyy-logo-login {
-  height: 2.5rem;
-  max-width: 120px;
+  height: 3.5rem;
+  max-width: 160px;
 }
 
 .dark {
