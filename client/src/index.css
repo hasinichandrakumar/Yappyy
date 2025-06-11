@@ -84,17 +84,10 @@
 
 /* Yappyy Logo Optimization */
 .yappyy-logo {
-  image-rendering: crisp-edges;
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: optimize-contrast;
-  -ms-interpolation-mode: nearest-neighbor;
-  filter: contrast(2) brightness(0.8) saturate(1.2);
   max-width: 100%;
   height: auto;
   object-fit: contain;
   background: transparent;
-  mix-blend-mode: darken;
-  opacity: 0.95;
 }
 
 .yappyy-logo-nav {
