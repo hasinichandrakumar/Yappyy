@@ -1,0 +1,35 @@
+<svg width="200" height="60" viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#06B6D4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0EA5E9;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Y -->
+  <path d="M8 10 L16 25 L24 10 L28 10 L18 28 L18 45 L14 45 L14 28 L4 10 Z" fill="url(#logoGradient)"/>
+  
+  <!-- A -->
+  <path d="M35 10 L43 45 L39 45 L37.5 40 L30.5 40 L29 45 L25 45 L33 10 Z M31.5 36 L36.5 36 L34 25 Z" fill="url(#logoGradient)"/>
+  
+  <!-- P -->
+  <path d="M50 10 L50 45 L46 45 L46 10 L58 10 Q62 10 64 12 Q66 14 66 18 Q66 22 64 24 Q62 26 58 26 L50 26 Z M50 14 L50 22 L58 22 Q60 22 61 21 Q62 20 62 18 Q62 16 61 15 Q60 14 58 14 Z" fill="url(#logoGradient)"/>
+  
+  <!-- P -->
+  <path d="M73 10 L73 45 L69 45 L69 10 L81 10 Q85 10 87 12 Q89 14 89 18 Q89 22 87 24 Q85 26 81 26 L73 26 Z M73 14 L73 22 L81 22 Q83 22 84 21 Q85 20 85 18 Q85 16 84 15 Q83 14 81 14 Z" fill="url(#logoGradient)"/>
+  
+  <!-- Y -->
+  <path d="M96 10 L104 25 L112 10 L116 10 L106 28 L106 45 L102 45 L102 28 L92 10 Z" fill="url(#logoGradient)"/>
+  
+  <!-- Y -->
+  <path d="M123 10 L131 25 L139 10 L143 10 L133 28 L133 45 L129 45 L129 28 L119 10 Z" fill="url(#logoGradient)"/>
+  
+  <!-- Microphone Icon -->
+  <g transform="translate(155, 15)">
+    <rect x="12" y="5" width="8" height="15" rx="4" fill="url(#logoGradient)"/>
+    <path d="M8 15 Q8 22 16 22 Q24 22 24 15" stroke="url(#logoGradient)" stroke-width="2" fill="none"/>
+    <line x1="16" y1="22" x2="16" y2="28" stroke="url(#logoGradient)" stroke-width="2"/>
+    <line x1="12" y1="28" x2="20" y2="28" stroke="url(#logoGradient)" stroke-width="2"/>
+  </g>
+</svg>
