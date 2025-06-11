@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LogIn, User, Shield, Mic } from "lucide-react";
 import yappyyMicIcon from "@assets/5-removebg-preview_1749674959175.png";
+import yappyyLogo from "@assets/4-removebg-preview_1749674959175.png";
 
 export default function LoginPage() {
   const handleLogin = () => {
@@ -18,8 +19,13 @@ export default function LoginPage() {
             </div>
           </div>
           <div>
-            <CardTitle className="text-2xl font-bold gradient-text font-display">
-              Welcome to Yappyy
+            <img 
+              src={yappyyLogo} 
+              alt="Yappyy" 
+              className="h-12 w-auto mx-auto mb-2"
+            />
+            <CardTitle className="text-xl font-bold gradient-text font-display">
+              Welcome
             </CardTitle>
             <p className="text-gray-600 mt-2 font-body">
               AI-powered public speaking improvement platform

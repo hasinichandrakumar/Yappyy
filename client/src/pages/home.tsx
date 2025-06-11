@@ -206,9 +206,11 @@ export default function Home() {
                   transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                 />
               </motion.div>
-              <h1 className="text-xl font-bold yapup-gradient font-display">
-                Yappyy
-              </h1>
+              <img 
+                src={yappyyLogo} 
+                alt="Yappyy" 
+                className="h-8 w-auto"
+              />
             </motion.div>
             <div className="flex items-center space-x-4">
               <motion.div
@@ -311,14 +313,14 @@ export default function Home() {
                 Hi {(user as any)?.firstName || (user as any)?.email?.split('@')[0] || 'there'}! 👋
               </motion.span>
             ) : null}
-            <motion.span 
-              className="block hero-title floating-text yapup-gradient font-display"
+            <motion.img
+              src={yappyyLogo}
+              alt="Yappyy"
+              className="block mx-auto max-w-md w-full h-auto"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={isHeroInView ? { opacity: 1, scale: 1 } : {}}
               transition={{ duration: 1.2, delay: 0.6 }}
-            >
-              Yappyy
-            </motion.span>
+            />
             <motion.span 
               className="hero-subtitle block mt-6"
               initial={{ opacity: 0, y: 30 }}
@@ -852,7 +854,7 @@ export default function Home() {
           <img
             src={yappyyLogo}
             alt="Yappyy Logo"
-            className="w-16 h-16 mx-auto mb-6 rounded-lg"
+            className="h-12 w-auto mx-auto mb-6"
           />
           <p className="text-gray-400 mb-6">
             Empowering speakers worldwide with intelligent feedback and coaching.
