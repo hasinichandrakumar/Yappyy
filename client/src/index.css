@@ -32,6 +32,56 @@
   --surface: 210 100% 99%; /* Pure white with blue tint */
 }
 
+/* Font utility classes for easy customization */
+.font-heading {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+}
+
+.font-display {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+}
+
+.font-body {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+}
+
+.font-button {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+}
+
+/* Alternative font themes - uncomment the one you prefer */
+
+/* Theme 1: Modern & Clean (Inter + Poppins) - DEFAULT */
+/* Already set above */
+
+/* Theme 2: Professional & Bold (Montserrat + Open Sans) */
+/*
+.font-heading { font-family: 'Montserrat', sans-serif; font-weight: 600; }
+.font-display { font-family: 'Montserrat', sans-serif; font-weight: 700; }
+.font-body { font-family: 'Open Sans', sans-serif; font-weight: 400; }
+.font-button { font-family: 'Open Sans', sans-serif; font-weight: 500; }
+*/
+
+/* Theme 3: Friendly & Rounded (Poppins everywhere) */
+/*
+.font-heading { font-family: 'Poppins', sans-serif; font-weight: 600; }
+.font-display { font-family: 'Poppins', sans-serif; font-weight: 700; }
+.font-body { font-family: 'Poppins', sans-serif; font-weight: 400; }
+.font-button { font-family: 'Poppins', sans-serif; font-weight: 500; }
+*/
+
+/* Theme 4: Tech & Sleek (Roboto everywhere) */
+/*
+.font-heading { font-family: 'Roboto', sans-serif; font-weight: 500; }
+.font-display { font-family: 'Roboto', sans-serif; font-weight: 700; }
+.font-body { font-family: 'Roboto', sans-serif; font-weight: 400; }
+.font-button { font-family: 'Roboto', sans-serif; font-weight: 500; }
+*/
+
 .dark {
   --background: 210 20% 8%; /* Dark blue background */
   --foreground: 190 100% 95%; /* Light aqua-white text */

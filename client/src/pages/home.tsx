@@ -205,7 +205,7 @@ export default function Home() {
                   transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                 />
               </motion.div>
-              <h1 className="text-xl font-bold yapup-gradient">
+              <h1 className="text-xl font-bold yapup-gradient font-display">
                 Yappyy
               </h1>
             </motion.div>
@@ -311,7 +311,7 @@ export default function Home() {
               </motion.span>
             ) : null}
             <motion.span 
-              className="block hero-title floating-text yapup-gradient"
+              className="block hero-title floating-text yapup-gradient font-display"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={isHeroInView ? { opacity: 1, scale: 1 } : {}}
               transition={{ duration: 1.2, delay: 0.6 }}
@@ -329,7 +329,7 @@ export default function Home() {
           </motion.h1>
           
           <motion.p 
-            className="creative-text mb-8 max-w-3xl mx-auto text-balance"
+            className="creative-text mb-8 max-w-3xl mx-auto text-balance font-body"
             initial={{ y: 50, opacity: 0 }}
             animate={isHeroInView ? { y: 0, opacity: 1 } : {}}
             transition={{ duration: 0.8, delay: 0.6 }}
