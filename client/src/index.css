@@ -82,6 +82,38 @@
 .font-button { font-family: 'Roboto', sans-serif; font-weight: 500; }
 */
 
+/* Yappyy Logo Optimization */
+.yappyy-logo {
+  image-rendering: crisp-edges;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: optimize-contrast;
+  -ms-interpolation-mode: nearest-neighbor;
+  filter: contrast(1.1) brightness(1.05);
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.yappyy-logo-nav {
+  height: 1.5rem;
+  max-width: 120px;
+}
+
+.yappyy-logo-hero {
+  max-height: 100px;
+  max-width: 280px;
+}
+
+.yappyy-logo-footer {
+  height: 2rem;
+  max-width: 140px;
+}
+
+.yappyy-logo-login {
+  height: 2rem;
+  max-width: 140px;
+}
+
 .dark {
   --background: 210 20% 8%; /* Dark blue background */
   --foreground: 190 100% 95%; /* Light aqua-white text */

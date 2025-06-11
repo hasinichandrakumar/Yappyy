@@ -22,7 +22,12 @@ export default function LoginPage() {
             <img 
               src={yappyyLogo} 
               alt="Yappyy" 
-              className="h-12 w-auto mx-auto mb-2"
+              className="h-8 w-auto mx-auto mb-2"
+              style={{ 
+                imageRendering: 'crisp-edges',
+                maxWidth: '150px',
+                objectFit: 'contain'
+              }}
             />
             <CardTitle className="text-xl font-bold gradient-text font-display">
               Welcome

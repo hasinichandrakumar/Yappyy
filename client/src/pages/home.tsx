@@ -29,8 +29,8 @@ import {
   Activity,
   FileText
 } from "lucide-react";
-import yappyyLogo from "@assets/4-removebg-preview_1749674959175.png";
-import yappyyMicIcon from "@assets/5-removebg-preview_1749674959175.png";
+import yappyyLogo from "@assets/image_1749675170033.png";
+import yappyyMicIcon from "@assets/image_1749675190198.png";
 
 export default function Home() {
   const [isHovered, setIsHovered] = useState<string | null>(null);
@@ -209,7 +209,7 @@ export default function Home() {
               <img 
                 src={yappyyLogo} 
                 alt="Yappyy" 
-                className="h-8 w-auto"
+                className="yappyy-logo yappyy-logo-nav"
               />
             </motion.div>
             <div className="flex items-center space-x-4">
@@ -316,7 +316,7 @@ export default function Home() {
             <motion.img
               src={yappyyLogo}
               alt="Yappyy"
-              className="block mx-auto max-w-md w-full h-auto"
+              className="yappyy-logo yappyy-logo-hero block mx-auto"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={isHeroInView ? { opacity: 1, scale: 1 } : {}}
               transition={{ duration: 1.2, delay: 0.6 }}
@@ -854,7 +854,12 @@ export default function Home() {
           <img
             src={yappyyLogo}
             alt="Yappyy Logo"
-            className="h-12 w-auto mx-auto mb-6"
+            className="h-8 w-auto mx-auto mb-6"
+            style={{ 
+              imageRendering: 'crisp-edges',
+              maxWidth: '150px',
+              objectFit: 'contain'
+            }}
           />
           <p className="text-gray-400 mb-6">
             Empowering speakers worldwide with intelligent feedback and coaching.
