@@ -29,7 +29,8 @@ import {
   Activity,
   FileText
 } from "lucide-react";
-import yapUpLogo from "@assets/YapUp-2_1749483329460.png";
+import yappyyLogo from "@assets/4-removebg-preview_1749674959175.png";
+import yappyyMicIcon from "@assets/5-removebg-preview_1749674959175.png";
 
 export default function Home() {
   const [isHovered, setIsHovered] = useState<string | null>(null);
@@ -196,8 +197,8 @@ export default function Home() {
                 whileHover={{ scale: 1.1 }}
               >
                 <motion.img
-                  src={yapUpLogo}
-                  alt="YapUp Logo"
+                  src={yappyyMicIcon}
+                  alt="Yappyy Logo"
                   className="w-10 h-10 rounded-xl"
                   animate={{ 
                     scale: [1, 1.05, 1],
@@ -849,8 +850,8 @@ export default function Home() {
       <footer className="bg-gray-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <img
-            src={yapUpLogo}
-            alt="YapUp Logo"
+            src={yappyyLogo}
+            alt="Yappyy Logo"
             className="w-16 h-16 mx-auto mb-6 rounded-lg"
           />
           <p className="text-gray-400 mb-6">

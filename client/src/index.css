@@ -34,22 +34,22 @@
 
 /* Font utility classes for easy customization */
 .font-heading {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   font-weight: 600;
 }
 
 .font-display {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   font-weight: 700;
 }
 
 .font-body {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Open Sans', sans-serif;
   font-weight: 400;
 }
 
 .font-button {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Open Sans', sans-serif;
   font-weight: 500;
 }
 

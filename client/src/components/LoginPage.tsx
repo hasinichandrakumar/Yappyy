@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LogIn, User, Shield, Mic } from "lucide-react";
+import yappyyMicIcon from "@assets/5-removebg-preview_1749674959175.png";
 
 export default function LoginPage() {
   const handleLogin = () => {
@@ -13,14 +14,14 @@ export default function LoginPage() {
         <CardHeader className="text-center space-y-4">
           <div className="flex justify-center">
             <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg flex items-center justify-center">
-              <Mic className="w-10 h-10 text-white" />
+              <img src={yappyyMicIcon} alt="Yappyy" className="w-12 h-12" />
             </div>
           </div>
           <div>
-            <CardTitle className="text-2xl font-bold gradient-text">
+            <CardTitle className="text-2xl font-bold gradient-text font-display">
               Welcome to Yappyy
             </CardTitle>
-            <p className="text-gray-600 mt-2">
+            <p className="text-gray-600 mt-2 font-body">
               AI-powered public speaking improvement platform
             </p>
           </div>
@@ -30,8 +31,8 @@ export default function LoginPage() {
             <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
               <User className="w-5 h-5 text-blue-600" />
               <div>
-                <p className="font-medium text-sm">Personalized Coaching</p>
-                <p className="text-xs text-gray-600">AI analysis tailored to your speaking style</p>
+                <p className="font-medium text-sm font-heading">Personalized Coaching</p>
+                <p className="text-xs text-gray-600 font-body">AI analysis tailored to your speaking style</p>
               </div>
             </div>
             
