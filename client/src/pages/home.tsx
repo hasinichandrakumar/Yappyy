@@ -816,7 +816,7 @@ export default function Home() {
           >
             <Button 
               size="lg" 
-              className="bg-white text-blue-600 hover:bg-gray-100 shadow-xl px-12 py-4 text-lg font-semibold"
+              className="bg-gray-900 text-cyan-400 hover:bg-gray-800 hover:text-cyan-300 shadow-xl px-12 py-4 text-lg font-semibold transition-all duration-300"
               onClick={handleStartPracticing}
             >
               Start Your Journey
