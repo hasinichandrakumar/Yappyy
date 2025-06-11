@@ -568,7 +568,7 @@ export default function Home() {
       <section className="py-20 bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <Badge className="mb-4 bg-[#0BF9EA]/10 text-[#0BF9EA] px-4 py-2">Our Mission</Badge>
+            <Badge className="mb-4 bg-gray-900 text-cyan-400 px-4 py-2">Our Mission</Badge>
             <h2 className="text-4xl font-bold text-gray-900 mb-6">
               Unlock Your True Potential Through Masterful Communication
             </h2>
