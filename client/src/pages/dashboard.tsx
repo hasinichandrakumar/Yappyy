@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Bell, MicOff, User, BarChart3, Eye, Brain, Star, TrendingUp, FileText, Trophy, Users, Volume2, HelpCircle, PlayCircle, Camera, MessageSquare, Activity, Clock } from "lucide-react";
+import yappyyLogo from "@assets/Untitled_design-11600-removebg-preview_1749685340210.png";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -42,11 +43,12 @@ export default function Dashboard() {
       <nav className="gradient-card shadow-lg purple-border sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 gradient-bg rounded-lg flex items-center justify-center purple-glow">
-                <MicOff className="text-white w-4 h-4" />
-              </div>
-              <h1 className="text-xl font-heading yapup-gradient tracking-tight">YapUp</h1>
+            <div className="flex items-center">
+              <img 
+                src={yappyyLogo} 
+                alt="Yappyy" 
+                className="yappyy-logo yappyy-logo-nav"
+              />
             </div>
             <div className="flex items-center space-x-4">
               <button className="text-cyan-600 hover:text-cyan-700 transition-colors">
