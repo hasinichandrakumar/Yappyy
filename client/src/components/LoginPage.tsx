@@ -18,7 +18,7 @@ export default function LoginPage() {
           </div>
           <div>
             <CardTitle className="text-2xl font-bold gradient-text">
-              Welcome to YapUp
+              Welcome to Yappyy
             </CardTitle>
             <p className="text-gray-600 mt-2">
               AI-powered public speaking improvement platform

@@ -206,7 +206,7 @@ export default function Home() {
                 />
               </motion.div>
               <h1 className="text-xl font-bold yapup-gradient">
-                YapUp
+                Yappyy
               </h1>
             </motion.div>
             <div className="flex items-center space-x-4">
@@ -316,7 +316,7 @@ export default function Home() {
               animate={isHeroInView ? { opacity: 1, scale: 1 } : {}}
               transition={{ duration: 1.2, delay: 0.6 }}
             >
-              YapUp
+              Yappyy
             </motion.span>
             <motion.span 
               className="hero-subtitle block mt-6"
