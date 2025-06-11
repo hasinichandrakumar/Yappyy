@@ -93,23 +93,23 @@
 }
 
 .yappyy-logo-nav {
-  height: 2.5rem;
-  max-width: 140px;
+  height: 3rem;
+  max-width: 170px;
 }
 
 .yappyy-logo-hero {
-  max-height: 120px;
-  max-width: 300px;
+  max-height: 150px;
+  max-width: 380px;
 }
 
 .yappyy-logo-footer {
-  height: 3.5rem;
-  max-width: 160px;
+  height: 4rem;
+  max-width: 200px;
 }
 
 .yappyy-logo-login {
-  height: 3.5rem;
-  max-width: 160px;
+  height: 4rem;
+  max-width: 200px;
 }
 
 .dark {
