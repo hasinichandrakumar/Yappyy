@@ -369,42 +369,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Transcript and metrics are required" });
       }
 
-      const response = await fetch('https://api.perplexity.ai/chat/completions', {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${process.env.PERPLEXITY_API_KEY}`,
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: "llama-3.1-sonar-small-128k-online",
+          model: "gpt-4o",
           messages: [
             {
               role: "system",
-              content: "You are an expert public speaking coach. Analyze the speech transcript and metrics to provide actionable coaching tips. Respond with JSON in this format: { \"tips\": [{ \"type\": \"posture|gesture|pace|volume|clarity|eye_contact\", \"message\": \"tip message\", \"severity\": \"good|warning|improvement\" }] }"
+              content: "You are an expert public speaking coach with years of experience helping speakers improve. Analyze the speech transcript and metrics to provide actionable, specific coaching tips. Focus on practical improvements that can be implemented immediately. Respond with JSON in this format: { \"tips\": [{ \"type\": \"posture|gesture|pace|volume|clarity|eye_contact|content\", \"message\": \"specific tip message\", \"severity\": \"good|warning|improvement\" }] }"
             },
             {
               role: "user",
-              content: `Analyze this speech:
+              content: `Analyze this speech performance:
               
 Transcript: ${transcript}
 
-Metrics:
+Performance Metrics:
 - Speaking pace: ${metrics.speakingPace} WPM
 - Voice clarity: ${metrics.voiceClarity}%
-- Confidence: ${metrics.confidenceScore}%
-- Filler words: ${metrics.fillerWords}
-- Pauses: ${metrics.pauseCount}
+- Confidence level: ${metrics.confidenceScore}%
+- Filler words count: ${metrics.fillerWords}
+- Strategic pauses: ${metrics.pauseCount}
 
-Provide specific, actionable coaching tips to improve this presentation. Respond with valid JSON.`
+Provide specific, actionable coaching tips to improve this presentation. Focus on immediate improvements and long-term development. Respond with valid JSON only.`
             }
           ],
-          temperature: 0.2,
-          stream: false
+          temperature: 0.3,
+          response_format: { type: "json_object" }
         })
       });
 
       if (!response.ok) {
-        throw new Error(`Perplexity API error: ${response.status}`);
+        throw new Error(`OpenAI API error: ${response.status}`);
       }
 
       const data = await response.json();
@@ -424,33 +424,43 @@ Provide specific, actionable coaching tips to improve this presentation. Respond
         return res.status(400).json({ message: "Image data is required" });
       }
 
-      // Since Perplexity doesn't support image analysis, we'll provide basic posture feedback
-      // In a real implementation, you would use computer vision or MediaPipe for posture analysis
-      const response = await fetch('https://api.perplexity.ai/chat/completions', {
+      // Use OpenAI with vision capabilities for advanced posture analysis
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${process.env.PERPLEXITY_API_KEY}`,
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: "llama-3.1-sonar-small-128k-online",
+          model: "gpt-4o",
           messages: [
             {
               role: "system",
-              content: "You are a public speaking coach. Provide general posture and body language advice for presentations. Respond with JSON in this format: { \"posture\": \"good|needs_improvement\", \"gesture\": \"open|closed|neutral\", \"eyeContact\": \"good|poor\", \"feedback\": \"specific feedback message\" }"
+              content: "You are an expert body language and posture coach for public speaking. Analyze the image to provide specific feedback on posture, gestures, and overall presentation stance. Focus on actionable improvements. Respond with JSON in this format: { \"posture\": \"good|needs_improvement\", \"gesture\": \"open|closed|neutral\", \"eyeContact\": \"good|poor\", \"feedback\": \"specific feedback message\", \"improvements\": [\"actionable tip 1\", \"actionable tip 2\"] }"
             },
             {
               role: "user",
-              content: "Provide general advice for good posture and body language during a presentation. Focus on maintaining good posture, using open gestures, and maintaining eye contact."
+              content: [
+                {
+                  type: "text",
+                  text: "Analyze this speaker's posture and body language. Provide specific feedback on how to improve their presentation stance."
+                },
+                {
+                  type: "image_url",
+                  image_url: {
+                    url: `data:image/jpeg;base64,${imageBase64}`
+                  }
+                }
+              ]
             }
           ],
-          temperature: 0.2,
-          stream: false
+          temperature: 0.3,
+          response_format: { type: "json_object" }
         })
       });
 
       if (!response.ok) {
-        throw new Error(`Perplexity API error: ${response.status}`);
+        throw new Error(`OpenAI API error: ${response.status}`);
       }
 
       const data = await response.json();
@@ -484,18 +494,18 @@ Provide specific, actionable coaching tips to improve this presentation. Respond
         other: "general speech"
       };
 
-      const response = await fetch('https://api.perplexity.ai/chat/completions', {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${process.env.PERPLEXITY_API_KEY}`,
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: "llama-3.1-sonar-small-128k-online",
+          model: "gpt-4o",
           messages: [
             {
               role: "system",
-              content: `You are an expert speech coach. Analyze the speech transcript for format and structure based on the specified purpose. Provide specific, actionable feedback on how to improve the speech format.`
+              content: `You are an expert speech coach specializing in format and structure optimization. Analyze speech transcripts based on their intended purpose and provide specific, actionable feedback on structure, content flow, and format improvements. Respond with JSON containing detailed analysis and recommendations.`
             },
             {
               role: "user",
@@ -517,16 +527,17 @@ Keep feedback constructive and actionable.`
             }
           ],
           temperature: 0.3,
-          stream: false
+          response_format: { type: "json_object" }
         })
       });
 
       if (!response.ok) {
-        throw new Error(`Perplexity API error: ${response.status}`);
+        throw new Error(`OpenAI API error: ${response.status}`);
       }
 
       const data = await response.json();
-      res.json({ feedback: data.choices[0].message.content });
+      const result = JSON.parse(data.choices[0].message.content);
+      res.json(result);
     } catch (error: any) {
       res.status(500).json({ message: "Failed to analyze speech format", error: error.message });
     }
