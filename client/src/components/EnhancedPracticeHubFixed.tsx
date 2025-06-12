@@ -63,7 +63,7 @@ export default function EnhancedPracticeHubFixed() {
   const [sessionName, setSessionName] = useState("");
   const [sessionType, setSessionType] = useState<'general' | 'roleplay'>('general');
   const [sessionPurpose, setSessionPurpose] = useState("");
-  const [isSetupMode, setIsSetupMode] = useState(false);
+
 
   // Fetch existing practice sessions to determine next session number
   const { data: practiceSessions = [] } = useQuery({
@@ -440,59 +440,7 @@ export default function EnhancedPracticeHubFixed() {
         </Card>
       )}
 
-      {/* Personalized Practice Setup */}
-      {isSetupMode && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Settings className="w-5 h-5 text-blue-600" />
-              <span>Personalize Your Practice</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">What would you like to call this practice session?</label>
-              <input
-                type="text"
-                value={sessionName}
-                onChange={(e) => setSessionName(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="e.g., Job Interview Prep, TED Talk Practice, Presentation Skills..."
-              />
-            </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Choose your practice style</label>
-              <div className="flex space-x-2">
-                <Button
-                  onClick={() => setSessionType('general')}
-                  variant={sessionType === 'general' ? 'default' : 'outline'}
-                  size="sm"
-                >
-                  Free Practice
-                </Button>
-                <Button
-                  onClick={() => setSessionType('roleplay')}
-                  variant={sessionType === 'roleplay' ? 'default' : 'outline'}
-                  size="sm"
-                >
-                  Scenario Practice
-                </Button>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">What's your goal for today's session?</label>
-              <textarea
-                value={sessionPurpose}
-                onChange={(e) => setSessionPurpose(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-20 resize-none"
-                placeholder="Describe what you want to achieve or improve in this session..."
-              />
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Session Controls */}
       <Card>
@@ -515,14 +463,6 @@ export default function EnhancedPracticeHubFixed() {
         <CardContent>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Button
-                onClick={!isSetupMode ? () => setIsSetupMode(true) : () => setIsSetupMode(false)}
-                variant="outline"
-                size="sm"
-              >
-                <Settings className="w-4 h-4 mr-2" />
-                {isSetupMode ? 'Hide Setup' : 'Setup'}
-              </Button>
             </div>
             
             <div className="flex items-center space-x-4 text-sm">
