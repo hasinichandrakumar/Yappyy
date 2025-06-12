@@ -3,21 +3,21 @@
 @tailwind utilities;
 
 :root {
-  --background: 210 40% 98%; /* Light blue-aqua background */
-  --foreground: 210 100% 8%; /* Deep navy/black text matching bottom section */
-  --muted: 190 50% 95%; /* Muted aqua */
-  --muted-foreground: 200 10% 50%;
-  --popover: 210 100% 99%;
-  --popover-foreground: 210 15% 15%;
-  --card: 210 100% 99%; /* Pure white with slight blue tint */
-  --card-foreground: 210 15% 15%;
-  --border: 200 30% 88%; /* Blue-aqua border */
-  --input: 200 30% 90%; /* Blue-aqua input */
-  --primary: 200 85% 60%; /* Rich aqua-blue */
+  --background: 214 100% 98%; /* Light blue background matching logo */
+  --foreground: 214 100% 8%; /* Deep navy text */
+  --muted: 214 50% 95%; /* Muted blue */
+  --muted-foreground: 214 10% 50%;
+  --popover: 214 100% 99%;
+  --popover-foreground: 214 15% 15%;
+  --card: 214 100% 99%; /* Pure white with blue tint */
+  --card-foreground: 214 15% 15%;
+  --border: 214 30% 88%; /* Blue border */
+  --input: 214 30% 90%; /* Blue input */
+  --primary: 217 91% 60%; /* #3B82F6 - Blue from logo */
   --primary-foreground: 0 0% 100%;
-  --secondary: 160 80% 50%; /* Green-aqua */
+  --secondary: 188 95% 43%; /* #06B6D4 - Cyan from logo */
   --secondary-foreground: 0 0% 100%;
-  --accent: 180 95% 52%; /* Bright aqua #0BF9EA */
+  --accent: 199 89% 48%; /* #0EA5E9 - Sky from logo */
   --accent-foreground: 0 0% 100%;
   --warning: 39 100% 47%; /* Keep warning orange */
   --warning-foreground: 60 9.1% 97.8%;
@@ -25,11 +25,14 @@
   --error-foreground: 60 9.1% 97.8%;
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 60 9.1% 97.8%;
-  --ring: 200 85% 60%; /* Aqua ring */
+  --ring: 217 91% 60%; /* Blue ring matching primary */
   --radius: 0.75rem;
   
-  /* Custom colors from design */
-  --surface: 210 100% 99%; /* Pure white with blue tint */
+  /* Custom colors from logo */
+  --surface: 214 100% 99%; /* Pure white with blue tint */
+  --logo-blue: 217 91% 60%; /* #3B82F6 */
+  --logo-cyan: 188 95% 43%; /* #06B6D4 */
+  --logo-sky: 199 89% 48%; /* #0EA5E9 */
 }
 
 /* Font utility classes for easy customization */
@@ -227,7 +230,7 @@
     border-color: #0BF9EA;
   }
 
-  /* Gradient utilities */
+  /* Gradient utilities matching logo colors */
   .gradient-bg {
     background: linear-gradient(135deg, 
       #3b82f6 0%, 
@@ -237,9 +240,9 @@
 
   .gradient-bg-light {
     background: linear-gradient(135deg, 
-      #eff6ff 0%, 
-      #e0f2fe 50%, 
-      #cffafe 100%);
+      hsl(217, 91%, 98%) 0%, 
+      hsl(188, 95%, 97%) 50%, 
+      hsl(199, 89%, 96%) 100%);
   }
 
   .gradient-text {
@@ -470,48 +473,48 @@
 
   .gradient-card {
     background: linear-gradient(135deg, 
-      hsl(210, 100%, 99%) 0%, 
-      hsl(200, 100%, 97%) 50%, 
-      hsl(190, 100%, 95%) 100%);
-    border: 1px solid hsl(200, 30%, 88%);
+      hsl(217, 91%, 99%) 0%, 
+      hsl(188, 95%, 97%) 50%, 
+      hsl(199, 89%, 95%) 100%);
+    border: 1px solid hsl(217, 30%, 88%);
   }
 
   .dark .gradient-card {
     background: linear-gradient(135deg, 
-      hsl(210, 25%, 12%) 0%, 
-      hsl(200, 20%, 15%) 50%, 
-      hsl(180, 25%, 18%) 100%);
-    border: 1px solid hsl(200, 15%, 18%);
+      hsl(217, 25%, 12%) 0%, 
+      hsl(188, 20%, 15%) 50%, 
+      hsl(199, 25%, 18%) 100%);
+    border: 1px solid hsl(217, 15%, 18%);
   }
 
   .purple-glow {
-    box-shadow: 0 0 30px hsla(180, 85%, 60%, 0.3);
+    box-shadow: 0 0 30px hsla(217, 91%, 60%, 0.3);
   }
 
   .dark .purple-glow {
-    box-shadow: 0 0 30px hsla(180, 90%, 70%, 0.2);
+    box-shadow: 0 0 30px hsla(188, 95%, 70%, 0.2);
   }
 
   /* Additional gradient utilities */
   .gradient-border {
     border: 2px solid;
     border-image: linear-gradient(135deg, 
-      hsl(200, 85%, 60%), 
-      hsl(180, 100%, 50%), 
-      hsl(160, 80%, 50%)) 1;
+      hsl(217, 91%, 60%), 
+      hsl(188, 95%, 43%), 
+      hsl(199, 89%, 48%)) 1;
   }
 
   .gradient-shadow {
-    box-shadow: 0 20px 40px hsla(180, 100%, 50%, 0.1),
-                0 10px 20px hsla(200, 85%, 60%, 0.1),
-                0 5px 10px hsla(160, 80%, 50%, 0.1);
+    box-shadow: 0 20px 40px hsla(217, 91%, 60%, 0.1),
+                0 10px 20px hsla(188, 95%, 43%, 0.1),
+                0 5px 10px hsla(199, 89%, 48%, 0.1);
   }
 
   .gradient-text-secondary {
     background: linear-gradient(45deg, 
-      #06b6d4 0%, 
-      #14b8a6 50%, 
-      #10b981 100%);
+      #3b82f6 0%, 
+      #06b6d4 50%, 
+      #0ea5e9 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -519,21 +522,19 @@
 
   .gradient-button {
     background: linear-gradient(135deg, 
-      #0ea5e9 0%, 
-      #06b6d4 25%, 
-      #14b8a6 75%, 
-      #10b981 100%);
+      #3b82f6 0%, 
+      #06b6d4 50%, 
+      #0ea5e9 100%);
     transition: all 0.3s ease;
   }
 
   .gradient-button:hover {
     background: linear-gradient(135deg, 
-      #0284c7 0%, 
-      #0891b2 25%, 
-      #0f766e 75%, 
-      #059669 100%);
+      #2563eb 0%, 
+      #0891b2 50%, 
+      #0284c7 100%);
     transform: translateY(-2px);
-    box-shadow: 0 10px 25px hsla(180, 100%, 50%, 0.3);
+    box-shadow: 0 10px 25px hsla(217, 91%, 60%, 0.3);
   }
 
   .gradient-card-hover {

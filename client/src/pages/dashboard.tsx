@@ -52,7 +52,7 @@ export default function Dashboard() {
               />
             </div>
             <div className="flex items-center space-x-4">
-              <button className="text-cyan-600 hover:text-cyan-700 transition-colors">
+              <button className="text-blue-500 hover:text-blue-600 transition-colors">
                 <Bell className="w-5 h-5" />
               </button>
               <div className="w-8 h-8 gradient-bg rounded-full flex items-center justify-center purple-glow">
