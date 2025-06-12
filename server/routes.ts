@@ -307,6 +307,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Speech persona endpoints
+  app.get("/api/speech-persona", requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user?.replit?.id || req.user?.id || 'demo-user';
+      const persona = await storage.getSpeechPersona(userId);
+      res.json(persona);
+    } catch (error) {
+      console.error("Error fetching speech persona:", error);
+      res.status(500).json({ error: "Failed to fetch speech persona" });
+    }
+  });
+
+  app.post("/api/speech-persona/generate", requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user?.replit?.id || req.user?.id || 'demo-user';
+      const sessions = await storage.getUserPracticeSessions(userId);
+      const persona = await storage.generateSpeechPersona(userId, sessions);
+      res.json(persona);
+    } catch (error) {
+      console.error("Error generating speech persona:", error);
+      res.status(500).json({ error: "Failed to generate speech persona" });
+    }
+  });
+
   // Real-time transcription endpoint
   app.post("/api/transcribe", async (req, res) => {
     try {
