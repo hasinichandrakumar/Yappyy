@@ -63,6 +63,7 @@ export default function EnhancedPracticeHubFixed() {
   const [sessionName, setSessionName] = useState("");
   const [sessionType, setSessionType] = useState<'general' | 'roleplay'>('general');
   const [sessionPurpose, setSessionPurpose] = useState("");
+  const [recentFillerAlert, setRecentFillerAlert] = useState<string | null>(null);
 
 
   // Fetch existing practice sessions to determine next session number
@@ -104,6 +105,14 @@ export default function EnhancedPracticeHubFixed() {
       recognitionRef.current.continuous = true;
       recognitionRef.current.interimResults = true;
       recognitionRef.current.lang = 'en-US';
+      recognitionRef.current.maxAlternatives = 1;
+      
+      // Better settings for capturing short utterances like "um" and "uh"
+      try {
+        recognitionRef.current.grammars = new (window as any).webkitSpeechGrammarList();
+      } catch (e) {
+        // Grammar not supported, continue without it
+      }
 
       recognitionRef.current.onresult = (event: any) => {
         let finalTranscript = '';
@@ -139,31 +148,63 @@ export default function EnhancedPracticeHubFixed() {
           setCurrentWPM(wpm);
         }
 
-        // Detect filler words - only from final transcript to avoid duplicates
-        if (finalTranscript) {
-          const fillerWordList = ['um', 'uh', 'like', 'you know', 'so', 'actually', 'basically', 'well', 'right', 'okay', 'hmm', 'err', 'ah', 'erm'];
-          const currentFinalText = transcript + finalTranscript;
-          const allWords = currentFinalText.toLowerCase().split(/\s+/);
-          const detectedFillers: string[] = [];
+        // Enhanced filler word detection - check both final and interim for immediate feedback
+        const textToAnalyze = finalTranscript || currentInterim;
+        if (textToAnalyze.trim().length > 0) {
+          const fillerWordList = ['um', 'uh', 'like', 'you know', 'so', 'actually', 'basically', 'well', 'right', 'okay', 'hmm', 'err', 'ah', 'erm', 'eh', 'oh'];
           
-          // Check for multi-word fillers first
-          for (let i = 0; i < allWords.length - 1; i++) {
-            const twoWordPhrase = allWords[i] + ' ' + allWords[i + 1];
-            if (twoWordPhrase === 'you know') {
-              detectedFillers.push('you know');
-              i++; // Skip next word as it's part of the phrase
+          // Normalize and clean the text
+          const normalizedText = textToAnalyze.toLowerCase()
+            .replace(/[.,!?;:'"()]/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+          
+          const words = normalizedText.split(' ').filter(word => word.length > 0);
+          const newFillers: string[] = [];
+          
+          // Check for multi-word fillers
+          for (let i = 0; i < words.length - 1; i++) {
+            const phrase = words[i] + ' ' + words[i + 1];
+            if (phrase === 'you know') {
+              newFillers.push('you know');
+              i++; // Skip next word
             }
           }
           
-          // Check for single-word fillers
-          allWords.forEach(word => {
-            const cleanWord = word.replace(/[.,!?;:'"]/g, '');
-            if (fillerWordList.includes(cleanWord) && cleanWord.length > 0 && cleanWord !== 'you' && cleanWord !== 'know') {
-              detectedFillers.push(cleanWord);
+          // Check for single-word fillers with exact matching
+          words.forEach(word => {
+            const cleanWord = word.replace(/[^a-zA-Z]/g, '');
+            
+            // Prioritize most common fillers
+            if (cleanWord === 'um' || cleanWord === 'uh' || cleanWord === 'like') {
+              newFillers.push(cleanWord);
+            }
+            // Check other filler words
+            else if (fillerWordList.includes(cleanWord) && cleanWord.length > 1) {
+              newFillers.push(cleanWord);
             }
           });
           
-          setFillerWords(detectedFillers);
+          // Only update if we detected new fillers from final transcript
+          if (newFillers.length > 0 && finalTranscript) {
+            setFillerWords(prev => {
+              const updated = [...prev, ...newFillers];
+              console.log('Filler words detected:', newFillers, 'Total:', updated.length);
+              
+              // Show immediate visual feedback
+              setRecentFillerAlert(newFillers[0]);
+              setTimeout(() => setRecentFillerAlert(null), 3000);
+              
+              return updated;
+            });
+          }
+          
+          // Also check interim results for immediate visual feedback (without adding to count)
+          if (newFillers.length > 0 && currentInterim && !finalTranscript) {
+            console.log('Interim filler detected:', newFillers);
+            setRecentFillerAlert(newFillers[0]);
+            setTimeout(() => setRecentFillerAlert(null), 2000);
+          }
         }
       };
 
@@ -314,7 +355,18 @@ export default function EnhancedPracticeHubFixed() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      {/* Filler Word Alert Overlay */}
+      {recentFillerAlert && (
+        <div className="fixed top-4 right-4 z-50 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg animate-bounce">
+          <div className="flex items-center space-x-2">
+            <AlertCircle className="w-5 h-5" />
+            <span className="font-semibold">Filler word detected: "{recentFillerAlert}"</span>
+          </div>
+          <div className="text-sm opacity-90 mt-1">Try pausing instead</div>
+        </div>
+      )}
+
       {/* Main Start Button - Top Priority */}
       {!isSessionActive && (
         <Card className="border-2 border-green-500 shadow-lg bg-gradient-to-r from-green-50 to-blue-50">
