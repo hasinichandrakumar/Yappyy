@@ -14,7 +14,7 @@ export default function DashboardSimple() {
               <div className="w-8 h-8 gradient-bg rounded-lg flex items-center justify-center purple-glow">
                 <MicOff className="text-white w-4 h-4" />
               </div>
-              <h1 className="text-xl font-heading gradient-text tracking-tight">YapUp</h1>
+              <h1 className="text-xl font-heading gradient-text tracking-tight">YAPPYY</h1>
             </div>
             <div className="flex items-center space-x-4">
               <button className="text-purple-600 hover:text-purple-700 transition-colors">

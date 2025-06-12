@@ -618,8 +618,8 @@
     letter-spacing: 0.025em;
   }
 
-  /* YapUp Logo Gradient */
-  .yapup-gradient {
+  /* YAPPYY Logo Gradient */
+  .yappyy-gradient {
     background: linear-gradient(135deg, 
       #0BF9EA 0%, 
       #22d3ee 25%, 
@@ -630,11 +630,11 @@
     background-clip: text;
     -webkit-text-fill-color: transparent;
     background-size: 300% 300%;
-    animation: yapup-glow 8s ease-in-out infinite;
+    animation: yappyy-glow 8s ease-in-out infinite;
     filter: drop-shadow(0 0 8px rgba(11, 249, 234, 0.3));
   }
 
-  @keyframes yapup-glow {
+  @keyframes yappyy-glow {
     0%, 100% {
       background-position: 0% 50%;
       filter: drop-shadow(0 0 8px rgba(11, 249, 234, 0.3));

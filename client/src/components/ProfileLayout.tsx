@@ -10,7 +10,7 @@ import {
   ArrowLeft,
   Home
 } from "lucide-react";
-import yapUpLogo from "@assets/YapUp-6_1749439026739.png";
+import yappyyLogo from "@assets/Untitled_design-11600-removebg-preview_1749744306540.png";
 
 interface ProfileLayoutProps {
   children: React.ReactNode;
@@ -45,11 +45,11 @@ export default function ProfileLayout({ children }: ProfileLayoutProps) {
               </Link>
               <div className="flex items-center space-x-3">
                 <img
-                  src={yapUpLogo}
-                  alt="YapUp Logo"
+                  src={yappyyLogo}
+                  alt="YAPPYY Logo"
                   className="w-8 h-8 rounded-lg"
                 />
-                <h1 className="text-xl font-semibold text-gray-900">YapUp</h1>
+                <h1 className="text-xl font-semibold text-gray-900">YAPPYY</h1>
               </div>
             </div>
             

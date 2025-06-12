@@ -831,7 +831,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <img
             src={yappyyLogo}
-            alt="Yappyy Logo"
+            alt="YAPPYY Logo"
             className="yappyy-logo yappyy-logo-footer mx-auto mb-6"
           />
           <p className="text-gray-400 mb-6">

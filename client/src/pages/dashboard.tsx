@@ -47,7 +47,7 @@ export default function Dashboard() {
             <div className="flex items-center">
               <img 
                 src={yappyyLogo} 
-                alt="Yappyy" 
+                alt="YAPPYY" 
                 className="yappyy-logo yappyy-logo-nav"
               />
             </div>
