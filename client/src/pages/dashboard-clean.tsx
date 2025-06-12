@@ -10,7 +10,7 @@ import EnhancedPracticeHubFixed from "@/components/EnhancedPracticeHubFixed";
 import PlaceholderComponent from "@/components/PlaceholderComponent";
 import ClubsHub from "@/components/ClubsHub";
 import BadgeSystem from "@/components/BadgeSystem";
-import DailyGoalWidget from "@/components/DailyGoalWidget";
+
 import WelcomeBackWidget from "@/components/WelcomeBackWidget";
 import SocialLeaderboard from "@/components/SocialLeaderboard";
 
@@ -197,7 +197,7 @@ export default function Dashboard() {
             <TabsContent value="overview" className="mt-0">
               <div className="space-y-6">
                 <WelcomeBackWidget />
-                <DailyGoalWidget />
+
                 <EnhancedPracticeHubFixed />
               </div>
             </TabsContent>
