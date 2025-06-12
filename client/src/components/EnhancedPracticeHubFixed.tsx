@@ -276,12 +276,12 @@ export default function EnhancedPracticeHubFixed() {
 
           // Overall confidence based on weighted performance metrics
           const weightedScore = (eyeContactScore * 0.3) + (postureScore * 0.3) + (voiceClarity * 0.4);
-          setConfidenceScore(Math.round(Math.max(40, Math.min(100, weightedScore))));
+          setCurrentConfidenceScore(Math.round(Math.max(40, Math.min(100, weightedScore))));
         }
       }, 1000);
     }
     return () => clearInterval(interval);
-  }, [isSessionActive, sessionStartTime, isCameraActive, isListening, transcript, fillerWords, eyeContactScore, postureScore, voiceClarity]);
+  }, [isSessionActive, sessionStartTime, isCameraActive, isListening, transcript, fillerWords, eyeContactScore, postureScore, voiceClarity, currentConfidenceScore]);
 
   // Generate automatic session name based on existing sessions
   const generateSessionName = () => {
@@ -305,7 +305,7 @@ export default function EnhancedPracticeHubFixed() {
     setEyeContactScore(0);
     setPostureScore(0);
     setVoiceClarity(0);
-    setConfidenceScore(0);
+    setCurrentConfidenceScore(0);
     
     // Auto-start microphone
     setTimeout(() => {
@@ -366,12 +366,12 @@ export default function EnhancedPracticeHubFixed() {
         eyeContact: eyeContactScore,
         posture: postureScore,
         voiceClarity,
-        confidence: confidenceScore
+        confidence: currentConfidenceScore
       },
       scores: {
         speech: speechScore,
         clarity: clarityScore,
-        confidence: confidenceScore,
+        confidence: confidenceAnalysisScore,
         overall: overallScore
       },
       feedback: purposeFeedback,
@@ -1040,7 +1040,7 @@ export default function EnhancedPracticeHubFixed() {
               <div className="bg-black/80 text-white px-3 py-2 rounded-lg text-sm backdrop-blur">
                 <div className="flex items-center space-x-2">
                   <Target className="w-4 h-4" />
-                  <span>Confidence: {confidenceScore}%</span>
+                  <span>Confidence: {currentConfidenceScore}%</span>
                 </div>
               </div>
             </div>
