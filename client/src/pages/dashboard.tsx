@@ -12,12 +12,13 @@ import LiveTranscript from "@/components/LiveTranscript";
 import StreamlinedAICoach from "@/components/StreamlinedAICoach";
 import SessionStats from "@/components/SessionStats";
 import SessionHistory from "@/components/SessionHistory";
-import DetailedAnalysis from "@/components/DetailedAnalysis";
+import DetailedAnalysisWithSession from "@/components/DetailedAnalysisWithSession";
 import BodyLanguageAnalyzer from "@/components/BodyLanguageAnalyzer";
 import AdvancedSpeechAnalysis from "@/components/AdvancedSpeechAnalysis";
 import ImprovementSummary from "@/components/ImprovementSummary";
-import SpeechDNA from "@/components/SpeechDNA";
+import SpeechDNAWithSession from "@/components/SpeechDNAWithSession";
 import SpeechROIAnalyzer from "@/components/SpeechROIAnalyzer";
+import AICoachWithSession from "@/components/AICoachWithSession";
 import ScriptTemplates from "@/components/ScriptTemplates";
 import BadgeSystem from "@/components/BadgeSystem";
 import AIPracticeRoleplay from "@/components/AIPracticeRoleplay";
@@ -113,20 +114,15 @@ export default function Dashboard() {
           </TabsContent>
 
           <TabsContent value="improvement" className="space-y-6">
-            <StreamlinedAICoach />
+            <AICoachWithSession />
           </TabsContent>
 
           <TabsContent value="speech-dna" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <SpeechFingerprintGenerator 
-                sessionCount={15}
-              />
-              <SpeechDNA />
-            </div>
+            <SpeechDNAWithSession />
           </TabsContent>
 
           <TabsContent value="detailed" className="space-y-6">
-            <DetailedAnalysis />
+            <DetailedAnalysisWithSession />
           </TabsContent>
 
           <TabsContent value="body-language" className="space-y-6">
