@@ -1,0 +1,418 @@
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import PracticePathwaySelection from "./PracticePathwaySelection";
+import SpeechInputSelector from "./SpeechInputSelector";
+import LivePracticeInterface from "./LivePracticeInterface";
+import LVIEFeedbackEngine from "./LVIEFeedbackEngine";
+import { 
+  Target, 
+  FileText, 
+  Mic, 
+  Zap, 
+  BarChart3, 
+  History,
+  Trophy,
+  Bot,
+  Settings,
+  HelpCircle
+} from "lucide-react";
+
+interface PracticeGoal {
+  id: string;
+  name: string;
+  icon: React.ReactNode;
+  description: string;
+  duration: string;
+}
+
+interface SessionData {
+  goal?: PracticeGoal;
+  inputType?: string;
+  inputContent?: string;
+  advancedOptions?: Record<string, boolean>;
+  isRecording: boolean;
+  isPaused: boolean;
+  duration: number;
+  audioLevel: number;
+  speechRate: number;
+  confidenceScore: number;
+  fillerWordCount: number;
+  transcript: TranscriptWord[];
+}
+
+interface TranscriptWord {
+  word: string;
+  timestamp: number;
+  confidence: number;
+  type: "normal" | "filler" | "keyword" | "repeated";
+  emotion?: "happy" | "neutral" | "concerned" | "excited";
+}
+
+export default function EnhancedPracticeDashboard() {
+  const [activeTab, setActiveTab] = useState("pathway");
+  const [sessionData, setSessionData] = useState<SessionData>({
+    isRecording: false,
+    isPaused: false,
+    duration: 0,
+    audioLevel: 45,
+    speechRate: 125,
+    confidenceScore: 78,
+    fillerWordCount: 2,
+    transcript: []
+  });
+
+  // Helper function to generate transcript words
+  const generateTranscriptWord = (timestamp: number): TranscriptWord => {
+    const words = ["Hello", "everyone", "today", "I", "want", "to", "discuss", "like", "um", "actually"];
+    const word = words[Math.floor(Math.random() * words.length)];
+    const rand = Math.random();
+    
+    let type: "normal" | "filler" | "keyword" | "repeated" = "normal";
+    if (rand > 0.8) type = "filler";
+    else if (rand > 0.9) type = "keyword";
+    
+    let emotion: "happy" | "neutral" | "concerned" | "excited" | undefined = undefined;
+    if (Math.random() > 0.8) {
+      const emotions: ("happy" | "neutral" | "concerned")[] = ["happy", "neutral", "concerned"];
+      emotion = emotions[Math.floor(Math.random() * emotions.length)];
+    }
+
+    return {
+      word,
+      timestamp,
+      confidence: Math.random(),
+      type,
+      emotion
+    };
+  };
+
+  // Simulate real-time session data updates
+  useEffect(() => {
+    if (!sessionData.isRecording || sessionData.isPaused) return;
+
+    const interval = setInterval(() => {
+      setSessionData(prev => {
+        const newWords: TranscriptWord[] = Math.random() > 0.7 ? [generateTranscriptWord(prev.duration)] : [];
+        
+        return {
+          ...prev,
+          duration: prev.duration + 1,
+          audioLevel: Math.max(20, Math.min(80, prev.audioLevel + (Math.random() - 0.5) * 10)),
+          speechRate: Math.max(80, Math.min(200, prev.speechRate + (Math.random() - 0.5) * 5)),
+          confidenceScore: Math.max(40, Math.min(100, prev.confidenceScore + (Math.random() - 0.5) * 3)),
+          fillerWordCount: prev.fillerWordCount + (Math.random() > 0.9 ? 1 : 0),
+          transcript: [...prev.transcript, ...newWords]
+        };
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [sessionData.isRecording, sessionData.isPaused]);
+
+  const handleGoalSelect = (goal: PracticeGoal) => {
+    setSessionData(prev => ({ ...prev, goal }));
+    setActiveTab("input");
+  };
+
+  const handleInputSelect = (type: string, content?: string) => {
+    setSessionData(prev => ({ 
+      ...prev, 
+      inputType: type, 
+      inputContent: content 
+    }));
+    setActiveTab("practice");
+  };
+
+  const handleOptionsChange = (options: Record<string, boolean>) => {
+    setSessionData(prev => ({ ...prev, advancedOptions: options }));
+  };
+
+  const handleStartRecording = () => {
+    setSessionData(prev => ({ 
+      ...prev, 
+      isRecording: true, 
+      isPaused: false,
+      duration: 0,
+      transcript: []
+    }));
+  };
+
+  const handlePauseRecording = () => {
+    setSessionData(prev => ({ ...prev, isPaused: !prev.isPaused }));
+  };
+
+  const handleStopRecording = () => {
+    setSessionData(prev => ({ ...prev, isRecording: false, isPaused: false }));
+    setActiveTab("analysis");
+  };
+
+  const handleResetSession = () => {
+    setSessionData(prev => ({
+      ...prev,
+      isRecording: false,
+      isPaused: false,
+      duration: 0,
+      audioLevel: 45,
+      speechRate: 125,
+      confidenceScore: 78,
+      fillerWordCount: 0,
+      transcript: []
+    }));
+  };
+
+  const handleVoiceFeedbackToggle = (enabled: boolean) => {
+    console.log("Voice feedback:", enabled);
+  };
+
+  const getTabIcon = (tab: string) => {
+    switch (tab) {
+      case "pathway": return <Target className="w-4 h-4" />;
+      case "input": return <FileText className="w-4 h-4" />;
+      case "practice": return <Mic className="w-4 h-4" />;
+      case "feedback": return <Zap className="w-4 h-4" />;
+      case "analysis": return <BarChart3 className="w-4 h-4" />;
+      case "history": return <History className="w-4 h-4" />;
+      case "challenges": return <Trophy className="w-4 h-4" />;
+      case "coach": return <Bot className="w-4 h-4" />;
+      default: return null;
+    }
+  };
+
+  const isTabDisabled = (tab: string) => {
+    switch (tab) {
+      case "input": return !sessionData.goal;
+      case "practice": return !sessionData.inputType;
+      case "feedback": return !sessionData.goal;
+      case "analysis": return sessionData.transcript.length === 0;
+      default: return false;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto p-6">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Practice Hub</h1>
+              <p className="text-gray-600 mt-1">Advanced AI-powered speech coaching platform</p>
+            </div>
+            {sessionData.goal && (
+              <Card className="p-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-cyan-500 rounded-lg flex items-center justify-center text-white">
+                    {sessionData.goal.icon}
+                  </div>
+                  <div>
+                    <div className="font-semibold text-sm">{sessionData.goal.name}</div>
+                    <div className="text-xs text-gray-600">{sessionData.goal.duration}</div>
+                  </div>
+                </div>
+              </Card>
+            )}
+          </div>
+        </div>
+
+        {/* Main Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-8 h-auto">
+            <TabsTrigger 
+              value="pathway" 
+              className="flex flex-col items-center p-3 data-[state=active]:bg-cyan-500 data-[state=active]:text-white"
+            >
+              {getTabIcon("pathway")}
+              <span className="text-xs mt-1">Goal</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="input" 
+              disabled={isTabDisabled("input")}
+              className="flex flex-col items-center p-3 data-[state=active]:bg-cyan-500 data-[state=active]:text-white disabled:opacity-50"
+            >
+              {getTabIcon("input")}
+              <span className="text-xs mt-1">Input</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="practice" 
+              disabled={isTabDisabled("practice")}
+              className="flex flex-col items-center p-3 data-[state=active]:bg-cyan-500 data-[state=active]:text-white disabled:opacity-50"
+            >
+              {getTabIcon("practice")}
+              <span className="text-xs mt-1">Practice</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="feedback" 
+              disabled={isTabDisabled("feedback")}
+              className="flex flex-col items-center p-3 data-[state=active]:bg-cyan-500 data-[state=active]:text-white disabled:opacity-50"
+            >
+              {getTabIcon("feedback")}
+              <span className="text-xs mt-1">L.V.I.E.™</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="analysis" 
+              disabled={isTabDisabled("analysis")}
+              className="flex flex-col items-center p-3 data-[state=active]:bg-cyan-500 data-[state=active]:text-white disabled:opacity-50"
+            >
+              {getTabIcon("analysis")}
+              <span className="text-xs mt-1">Results</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="history" 
+              className="flex flex-col items-center p-3 data-[state=active]:bg-cyan-500 data-[state=active]:text-white"
+            >
+              {getTabIcon("history")}
+              <span className="text-xs mt-1">History</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="challenges" 
+              className="flex flex-col items-center p-3 data-[state=active]:bg-cyan-500 data-[state=active]:text-white"
+            >
+              {getTabIcon("challenges")}
+              <span className="text-xs mt-1">Challenges</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="coach" 
+              className="flex flex-col items-center p-3 data-[state=active]:bg-cyan-500 data-[state=active]:text-white"
+            >
+              {getTabIcon("coach")}
+              <span className="text-xs mt-1">AI Coach</span>
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Section 1: Practice Pathway Selection */}
+          <TabsContent value="pathway" className="space-y-6">
+            <PracticePathwaySelection 
+              onGoalSelect={handleGoalSelect}
+              onOptionsChange={handleOptionsChange}
+            />
+          </TabsContent>
+
+          {/* Section 2: Speech Input */}
+          <TabsContent value="input" className="space-y-6">
+            <SpeechInputSelector onInputSelect={handleInputSelect} />
+          </TabsContent>
+
+          {/* Section 3: Live Practice */}
+          <TabsContent value="practice" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <LivePracticeInterface
+                  isRecording={sessionData.isRecording}
+                  isPaused={sessionData.isPaused}
+                  duration={sessionData.duration}
+                  onStartRecording={handleStartRecording}
+                  onPauseRecording={handlePauseRecording}
+                  onStopRecording={handleStopRecording}
+                  onResetSession={handleResetSession}
+                  audioLevel={sessionData.audioLevel}
+                  speechRate={sessionData.speechRate}
+                  transcript={sessionData.transcript}
+                />
+              </div>
+              <div>
+                <LVIEFeedbackEngine
+                  isActive={sessionData.isRecording && !sessionData.isPaused}
+                  audioLevel={sessionData.audioLevel}
+                  speechRate={sessionData.speechRate}
+                  confidenceScore={sessionData.confidenceScore}
+                  fillerWordCount={sessionData.fillerWordCount}
+                  onVoiceFeedbackToggle={handleVoiceFeedbackToggle}
+                />
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Section 4: L.V.I.E. Feedback */}
+          <TabsContent value="feedback" className="space-y-6">
+            <LVIEFeedbackEngine
+              isActive={sessionData.isRecording && !sessionData.isPaused}
+              audioLevel={sessionData.audioLevel}
+              speechRate={sessionData.speechRate}
+              confidenceScore={sessionData.confidenceScore}
+              fillerWordCount={sessionData.fillerWordCount}
+              onVoiceFeedbackToggle={handleVoiceFeedbackToggle}
+            />
+          </TabsContent>
+
+          {/* Section 5: Analysis & Results */}
+          <TabsContent value="analysis" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <BarChart3 className="w-5 h-5" />
+                  <span>Speech Scorecard</span>
+                  <Badge className="bg-cyan-100 text-cyan-700">AI-Generated</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <div className="text-3xl font-bold text-blue-700">{sessionData.speechRate}</div>
+                    <div className="text-sm text-blue-600 font-medium">WPM Speed</div>
+                    <div className="text-xs text-gray-500">Goal: 120-150</div>
+                  </div>
+                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                    <div className="text-3xl font-bold text-green-700">{sessionData.fillerWordCount}</div>
+                    <div className="text-sm text-green-600 font-medium">Filler Words</div>
+                    <div className="text-xs text-gray-500">Goal: &lt; 3/min</div>
+                  </div>
+                  <div className="text-center p-4 bg-purple-50 rounded-lg">
+                    <div className="text-3xl font-bold text-purple-700">{sessionData.confidenceScore}%</div>
+                    <div className="text-sm text-purple-600 font-medium">Confidence</div>
+                    <div className="text-xs text-gray-500">Based on pace & tone</div>
+                  </div>
+                  <div className="text-center p-4 bg-orange-50 rounded-lg">
+                    <div className="text-3xl font-bold text-orange-700">{sessionData.audioLevel}</div>
+                    <div className="text-sm text-orange-600 font-medium">Projection (dB)</div>
+                    <div className="text-xs text-gray-500">Avg. volume level</div>
+                  </div>
+                </div>
+                
+                <div className="mt-6 p-4 bg-cyan-50 rounded-lg">
+                  <h4 className="font-semibold text-cyan-800 mb-2">💡 Coaching Tip of the Day:</h4>
+                  <p className="text-cyan-700">
+                    Try replacing 'um' with a purposeful pause. Silence is powerful and gives your audience time to process your ideas.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Placeholder tabs for future implementation */}
+          <TabsContent value="history" className="space-y-6">
+            <Card>
+              <CardContent className="p-8 text-center">
+                <History className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">Speech History & Progress</h3>
+                <p className="text-gray-500">Track your improvement over time with detailed analytics</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="challenges" className="space-y-6">
+            <Card>
+              <CardContent className="p-8 text-center">
+                <Trophy className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">Challenges & Simulation Arena</h3>
+                <p className="text-gray-500">Weekly challenges and simulation rooms coming soon</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="coach" className="space-y-6">
+            <Card>
+              <CardContent className="p-8 text-center">
+                <Bot className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">"Coach Me" AI Assistant</h3>
+                <p className="text-gray-500">Get personalized coaching advice based on your performance</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+}
