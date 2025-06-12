@@ -145,12 +145,53 @@ export default function EnhancedPracticeHubClean() {
     }, 500);
   };
 
-  const stopSession = () => {
+  const stopSession = async () => {
     setIsSessionActive(false);
     setIsListening(false);
     
     // Generate comprehensive session analysis
     const analysisData = generateSessionAnalysis();
+    
+    // Save session to database
+    try {
+      const sessionPayload = {
+        name: sessionName || generateSessionName(),
+        type: 'general',
+        purpose: sessionPurpose || '',
+        duration: sessionDuration,
+        transcript: transcript,
+        wordCount: wordCount,
+        fillerWords: fillerWords,
+        wpm: currentWPM,
+        voiceClarity: voiceClarity,
+        eyeContactScore: eyeContactScore,
+        postureScore: postureScore,
+        confidenceScore: currentConfidenceScore,
+        overallScore: analysisData.scores.overall,
+        aiAnalysis: analysisData.aiAnalysis,
+        liveFeedbackHistory: liveFeedback,
+        detailedMetrics: {
+          metrics: analysisData.metrics,
+          scores: analysisData.scores,
+          feedback: analysisData.feedback,
+          improvements: analysisData.improvements,
+          achievements: analysisData.achievements
+        }
+      };
+
+      const response = await fetch('/api/practice-sessions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(sessionPayload)
+      });
+
+      if (response.ok) {
+        console.log('Session saved successfully');
+      }
+    } catch (error) {
+      console.error('Failed to save session:', error);
+    }
+    
     setSessionData(analysisData);
     setShowSessionAnalysis(true);
   };

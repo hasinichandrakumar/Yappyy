@@ -193,6 +193,27 @@ export const insertDailyGoalSchema = createInsertSchema(dailyGoals).omit({
   createdAt: true,
 });
 
+export const speechPersona = pgTable("speech_persona", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().unique(),
+  speakingStyle: text("speaking_style"),
+  communicationPersonality: text("communication_personality"),
+  strengthAreas: text("strength_areas").array().default([]),
+  growthAreas: text("growth_areas").array().default([]),
+  preferredPace: real("preferred_pace"),
+  confidenceLevel: text("confidence_level"),
+  personaDescription: text("persona_description"),
+  progressInsights: jsonb("progress_insights"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow()
+});
+
+export const insertSpeechPersonaSchema = createInsertSchema(speechPersona).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+
 // Leaderboard and social features
 export const leaderboardEntries = pgTable("leaderboard_entries", {
   id: serial("id").primaryKey(),
@@ -293,3 +314,5 @@ export type InsertChallenge = z.infer<typeof insertChallengeSchema>;
 export type Challenge = typeof challenges.$inferSelect;
 export type InsertChallengeParticipation = z.infer<typeof insertChallengeParticipationSchema>;
 export type ChallengeParticipation = typeof challengeParticipations.$inferSelect;
+export type InsertSpeechPersona = z.infer<typeof insertSpeechPersonaSchema>;
+export type SpeechPersona = typeof speechPersona.$inferSelect;
