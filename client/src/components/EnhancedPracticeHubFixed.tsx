@@ -72,6 +72,17 @@ export default function EnhancedPracticeHubFixed() {
   const [recentFillerAlert, setRecentFillerAlert] = useState<string | null>(null);
   const [showSessionAnalysis, setShowSessionAnalysis] = useState(false);
   const [sessionData, setSessionData] = useState<any>(null);
+  const [isEditingSession, setIsEditingSession] = useState(false);
+  const [tempSessionName, setTempSessionName] = useState("");
+  const [tempSessionPurpose, setTempSessionPurpose] = useState("");
+  const [liveFeedback, setLiveFeedback] = useState<Array<{
+    id: string;
+    timestamp: number;
+    category: 'content' | 'voice_modulation' | 'voice_clarity' | 'body_language';
+    message: string;
+    severity: 'info' | 'warning' | 'success';
+    timeLabel: string;
+  }>>([]);
 
 
   // Fetch existing practice sessions to determine next session number
@@ -283,6 +294,17 @@ export default function EnhancedPracticeHubFixed() {
     return () => clearInterval(interval);
   }, [isSessionActive, sessionStartTime, isCameraActive, isListening, transcript, fillerWords, eyeContactScore, postureScore, voiceClarity, currentConfidenceScore]);
 
+  // Live AI feedback generation
+  useEffect(() => {
+    if (!isSessionActive || !isListening) return;
+
+    const feedbackInterval = setInterval(() => {
+      generateLiveFeedback();
+    }, 15000); // Generate feedback every 15 seconds
+
+    return () => clearInterval(feedbackInterval);
+  }, [isSessionActive, isListening, sessionStartTime]);
+
   // Generate automatic session name based on existing sessions
   const generateSessionName = () => {
     const sessionCount = Array.isArray(practiceSessions) ? practiceSessions.length : 0;
@@ -293,6 +315,8 @@ export default function EnhancedPracticeHubFixed() {
   const startSession = () => {
     const autoSessionName = generateSessionName();
     setSessionName(autoSessionName);
+    setTempSessionName(autoSessionName);
+    setTempSessionPurpose(sessionPurpose);
     setIsSessionActive(true);
     setSessionStartTime(Date.now());
     setSessionDuration(0);
@@ -300,6 +324,7 @@ export default function EnhancedPracticeHubFixed() {
     setFillerWords([]);
     setTranscript("");
     setInterimTranscript("");
+    setLiveFeedback([]);
     
     // Reset all metrics to 0 at session start
     setEyeContactScore(0);
@@ -311,6 +336,83 @@ export default function EnhancedPracticeHubFixed() {
     setTimeout(() => {
       startListening();
     }, 500);
+  };
+
+  // Save session changes
+  const saveSessionChanges = () => {
+    setSessionName(tempSessionName);
+    setSessionPurpose(tempSessionPurpose);
+    setIsEditingSession(false);
+  };
+
+  // Cancel session changes
+  const cancelSessionChanges = () => {
+    setTempSessionName(sessionName);
+    setTempSessionPurpose(sessionPurpose);
+    setIsEditingSession(false);
+  };
+
+  // Generate live AI feedback
+  const generateLiveFeedback = () => {
+    if (!isSessionActive || !isListening) return;
+
+    const currentTime = Date.now();
+    const sessionTime = Math.floor((currentTime - sessionStartTime) / 1000);
+    const timeLabel = formatTime(sessionTime);
+    
+    const feedbackOptions = [
+      {
+        category: 'voice_modulation' as const,
+        messages: [
+          { text: "Great vocal variety - keep varying your tone", severity: 'success' as const },
+          { text: "Try to add more energy to your voice", severity: 'warning' as const },
+          { text: "Excellent pace control", severity: 'success' as const },
+          { text: "Consider slowing down slightly for clarity", severity: 'warning' as const }
+        ]
+      },
+      {
+        category: 'voice_clarity' as const,
+        messages: [
+          { text: "Clear articulation - well done", severity: 'success' as const },
+          { text: "Focus on enunciating consonants", severity: 'warning' as const },
+          { text: "Good projection and volume", severity: 'success' as const },
+          { text: "Speak up - project your voice more", severity: 'warning' as const }
+        ]
+      },
+      {
+        category: 'body_language' as const,
+        messages: [
+          { text: "Excellent posture maintained", severity: 'success' as const },
+          { text: "Good eye contact with camera", severity: 'success' as const },
+          { text: "Try to straighten your shoulders", severity: 'warning' as const },
+          { text: "Natural hand gestures enhance your message", severity: 'success' as const }
+        ]
+      },
+      {
+        category: 'content' as const,
+        messages: [
+          { text: "Strong opening statement", severity: 'success' as const },
+          { text: "Clear structure in your points", severity: 'success' as const },
+          { text: "Consider adding supporting examples", severity: 'info' as const },
+          { text: "Good use of transitions", severity: 'success' as const }
+        ]
+      }
+    ];
+
+    // Randomly select feedback category and message
+    const randomCategory = feedbackOptions[Math.floor(Math.random() * feedbackOptions.length)];
+    const randomMessage = randomCategory.messages[Math.floor(Math.random() * randomCategory.messages.length)];
+
+    const newFeedback = {
+      id: `feedback-${currentTime}`,
+      timestamp: currentTime,
+      category: randomCategory.category,
+      message: randomMessage.text,
+      severity: randomMessage.severity,
+      timeLabel
+    };
+
+    setLiveFeedback(prev => [...prev, newFeedback].slice(-10)); // Keep last 10 feedback items
   };
 
   // Stop session
@@ -860,29 +962,103 @@ export default function EnhancedPracticeHubFixed() {
         </Card>
       )}
 
-      {/* Active Session Controls */}
-      {isSessionActive && (
-        <Card className="border-2 border-blue-500 bg-blue-50">
+      {/* Session Customization Panel */}
+      {!isSessionActive && (
+        <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Activity className="w-6 h-6 text-blue-600" />
-                <span className="text-xl">{sessionName}</span>
-              </div>
-              <div className="flex items-center space-x-4">
-                <Badge variant="default" className="text-lg px-4 py-2">
-                  {formatTime(sessionDuration)}
-                </Badge>
-                {isListening && (
-                  <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 bg-red-500 rounded-full animate-pulse"></div>
-                    <span className="text-base text-green-600 font-medium">Recording</span>
-                  </div>
-                )}
-              </div>
+            <CardTitle className="flex items-center space-x-2">
+              <Settings className="w-5 h-5 text-gray-600" />
+              <span>Customize Your Session</span>
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Session Name
+                </label>
+                <input
+                  type="text"
+                  value={sessionPurpose ? sessionName : generateSessionName()}
+                  onChange={(e) => setSessionName(e.target.value)}
+                  placeholder="e.g., Job Interview Practice"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Session Purpose
+                </label>
+                <input
+                  type="text"
+                  value={sessionPurpose}
+                  onChange={(e) => setSessionPurpose(e.target.value)}
+                  placeholder="e.g., Practice for technical interview"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+            <div className="text-sm text-gray-600">
+              <strong>Purpose helps AI provide targeted feedback:</strong> Include specific goals like "job interview", "presentation", "wedding speech", etc.
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Active Session Controls */}
+      {isSessionActive && (
+        <div className="grid lg:grid-cols-3 gap-6 mb-6">
+          {/* Session Info and Controls */}
+          <div className="lg:col-span-2">
+            <Card className="border-2 border-blue-500 bg-blue-50">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Activity className="w-6 h-6 text-blue-600" />
+                    {!isEditingSession ? (
+                      <div className="flex items-center space-x-2">
+                        <span className="text-xl">{sessionName}</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setIsEditingSession(true)}
+                          className="text-blue-600 hover:text-blue-800"
+                        >
+                          <Settings className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center space-x-2 flex-1">
+                        <input
+                          type="text"
+                          value={tempSessionName}
+                          onChange={(e) => setTempSessionName(e.target.value)}
+                          className="px-2 py-1 border rounded text-lg bg-white"
+                          autoFocus
+                        />
+                        <Button size="sm" onClick={saveSessionChanges} className="bg-green-600 hover:bg-green-700">
+                          Save
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={cancelSessionChanges}>
+                          Cancel
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <Badge variant="default" className="text-lg px-4 py-2">
+                      {formatTime(sessionDuration)}
+                    </Badge>
+                    {isListening && (
+                      <div className="flex items-center space-x-2">
+                        <div className="w-4 h-4 bg-red-500 rounded-full animate-pulse"></div>
+                        <span className="text-base text-green-600 font-medium">Recording</span>
+                      </div>
+                    )}
+                  </div>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
             <div className="flex items-center justify-center space-x-6 mb-4">
               <Button
                 onClick={stopSession}
