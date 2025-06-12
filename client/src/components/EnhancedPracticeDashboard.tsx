@@ -392,18 +392,7 @@ export default function EnhancedPracticeDashboard() {
           <TabsContent value="practice" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
-                <LivePracticeInterface
-                  isRecording={sessionData.isRecording}
-                  isPaused={sessionData.isPaused}
-                  duration={sessionData.duration}
-                  onStartRecording={handleStartRecording}
-                  onPauseRecording={handlePauseRecording}
-                  onStopRecording={handleStopRecording}
-                  onResetSession={handleResetSession}
-                  audioLevel={sessionData.audioLevel}
-                  speechRate={sessionData.speechRate}
-                  transcript={sessionData.transcript}
-                />
+                <EnhancedPracticeHubClean />
               </div>
               <div>
                 <LVIEFeedbackEngine
