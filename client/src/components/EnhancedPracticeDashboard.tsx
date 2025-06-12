@@ -217,6 +217,99 @@ export default function EnhancedPracticeDashboard() {
           </div>
         </div>
 
+        {/* Live Metrics Panel - Shows when recording */}
+        {sessionData.isRecording && (
+          <Card className="mb-6 bg-gradient-to-r from-cyan-50 to-blue-50 border-cyan-200">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm font-semibold text-gray-700">Live Session Metrics</span>
+                  <Badge className="bg-red-100 text-red-700">
+                    {sessionData.isPaused ? "Paused" : "Recording"}
+                  </Badge>
+                </div>
+                <div className="text-2xl font-mono font-bold text-gray-900">
+                  {Math.floor(sessionData.duration / 60).toString().padStart(2, '0')}:
+                  {(sessionData.duration % 60).toString().padStart(2, '0')}
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div className="bg-white rounded-lg p-3 text-center shadow-sm">
+                  <div className="text-2xl font-bold text-blue-600">{sessionData.speechRate}</div>
+                  <div className="text-xs text-gray-600">WPM</div>
+                  <div className="text-xs text-gray-500">Goal: 120-150</div>
+                </div>
+                <div className="bg-white rounded-lg p-3 text-center shadow-sm">
+                  <div className="text-2xl font-bold text-green-600">{sessionData.transcript.length}</div>
+                  <div className="text-xs text-gray-600">Words</div>
+                  <div className="text-xs text-gray-500">Spoken</div>
+                </div>
+                <div className="bg-white rounded-lg p-3 text-center shadow-sm">
+                  <div className="text-2xl font-bold text-red-600">{sessionData.fillerWordCount}</div>
+                  <div className="text-xs text-gray-600">Fillers</div>
+                  <div className="text-xs text-gray-500">To reduce</div>
+                </div>
+                <div className="bg-white rounded-lg p-3 text-center shadow-sm">
+                  <div className="text-2xl font-bold text-purple-600">{sessionData.confidenceScore}%</div>
+                  <div className="text-xs text-gray-600">Confidence</div>
+                  <div className="text-xs text-gray-500">AI Score</div>
+                </div>
+                <div className="bg-white rounded-lg p-3 text-center shadow-sm">
+                  <div className="text-2xl font-bold text-orange-600">{sessionData.audioLevel}</div>
+                  <div className="text-xs text-gray-600">Volume</div>
+                  <div className="text-xs text-gray-500">dB Level</div>
+                </div>
+              </div>
+              
+              {/* Quick Performance Indicators */}
+              <div className="flex justify-center space-x-4 mt-4">
+                <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs ${
+                  sessionData.speechRate >= 120 && sessionData.speechRate <= 150 
+                    ? 'bg-green-100 text-green-700' 
+                    : 'bg-yellow-100 text-yellow-700'
+                }`}>
+                  <div className={`w-2 h-2 rounded-full ${
+                    sessionData.speechRate >= 120 && sessionData.speechRate <= 150 ? 'bg-green-500' : 'bg-yellow-500'
+                  }`}></div>
+                  <span>Pace</span>
+                </div>
+                <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs ${
+                  sessionData.fillerWordCount < 3 
+                    ? 'bg-green-100 text-green-700' 
+                    : 'bg-red-100 text-red-700'
+                }`}>
+                  <div className={`w-2 h-2 rounded-full ${
+                    sessionData.fillerWordCount < 3 ? 'bg-green-500' : 'bg-red-500'
+                  }`}></div>
+                  <span>Clarity</span>
+                </div>
+                <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs ${
+                  sessionData.audioLevel > 40 
+                    ? 'bg-green-100 text-green-700' 
+                    : 'bg-orange-100 text-orange-700'
+                }`}>
+                  <div className={`w-2 h-2 rounded-full ${
+                    sessionData.audioLevel > 40 ? 'bg-green-500' : 'bg-orange-500'
+                  }`}></div>
+                  <span>Volume</span>
+                </div>
+                <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs ${
+                  sessionData.confidenceScore > 70 
+                    ? 'bg-green-100 text-green-700' 
+                    : 'bg-blue-100 text-blue-700'
+                }`}>
+                  <div className={`w-2 h-2 rounded-full ${
+                    sessionData.confidenceScore > 70 ? 'bg-green-500' : 'bg-blue-500'
+                  }`}></div>
+                  <span>Confidence</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-8 h-auto">
