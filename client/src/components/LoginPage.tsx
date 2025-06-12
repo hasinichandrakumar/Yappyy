@@ -21,7 +21,7 @@ export default function LoginPage() {
           <div>
             <img 
               src={yappyyLogo} 
-              alt="Yappyy" 
+              alt="YAPPYY" 
               className="yappyy-logo yappyy-logo-login mx-auto mb-2"
             />
             <CardTitle className="text-xl font-bold gradient-text font-display">
