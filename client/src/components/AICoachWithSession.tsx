@@ -22,6 +22,7 @@ import {
   FileText
 } from "lucide-react";
 import SessionSelector from "./SessionSelector";
+import AICoachComprehensive from "./AICoachComprehensive";
 
 interface ProgressInsight {
   skill: string;
