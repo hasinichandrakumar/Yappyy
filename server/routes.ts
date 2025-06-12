@@ -331,6 +331,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Comprehensive AI coaching analysis
+  app.post("/api/ai-coaching-comprehensive", requireAuth, async (req: any, res) => {
+    try {
+      const { session, purpose, userProgress, previousSessions } = req.body;
+
+      if (!session) {
+        return res.status(400).json({ message: "Session data is required" });
+      }
+
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: `You are an expert speech coach with deep expertise in public speaking development. Analyze the session data comprehensively, considering the speaker's purpose, execution, and progress over time. Provide actionable insights that help speakers improve systematically.
+
+Respond with JSON in this exact format:
+{
+  "purposeAlignment": number (0-100),
+  "executionQuality": number (0-100), 
+  "improvementPotential": number (0-100),
+  "overallAssessment": "detailed paragraph assessment",
+  "improvements": [
+    {"area": "skill name", "description": "what improved"}
+  ],
+  "nextSessionFocus": [
+    {"area": "focus area", "actionable": "specific action"}
+  ],
+  "skillBreakdown": [
+    {
+      "name": "skill name",
+      "currentScore": number,
+      "previousScore": number,
+      "coachNotes": "specific feedback"
+    }
+  ],
+  "developmentPlan": {
+    "immediate": [{"goal": "immediate goal", "action": "specific action"}],
+    "shortTerm": [{"goal": "short term goal", "action": "specific action"}], 
+    "longTerm": [{"goal": "long term goal", "action": "specific action"}]
+  }
+}`
+            },
+            {
+              role: "user",
+              content: `Analyze this speaking session comprehensively:
+
+Session Purpose: ${purpose}
+Session Data: ${JSON.stringify(session)}
+User Progress History: ${JSON.stringify(userProgress?.slice(-3) || [])}
+Recent Sessions: ${JSON.stringify(previousSessions?.slice(-3) || [])}
+
+Provide comprehensive coaching analysis focusing on:
+1. How well the session aligned with its intended purpose
+2. Quality of execution and delivery
+3. Progress patterns and improvement opportunities
+4. Skill-by-skill breakdown with coaching notes
+5. Strategic development plan with immediate, short-term, and long-term goals
+
+Be specific, actionable, and encouraging while maintaining professional coaching standards.`
+            }
+          ],
+          temperature: 0.4,
+          response_format: { type: "json_object" }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`OpenAI API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const analysis = JSON.parse(data.choices[0].message.content);
+      res.json(analysis);
+    } catch (error: any) {
+      console.error("Error generating comprehensive coaching analysis:", error);
+      res.status(500).json({ message: "Failed to generate coaching analysis", error: error.message });
+    }
+  });
+
   // Real-time transcription endpoint
   app.post("/api/transcribe", async (req, res) => {
     try {
