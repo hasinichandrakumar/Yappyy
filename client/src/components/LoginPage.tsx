@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LogIn, User, Shield, Mic } from "lucide-react";
 import yappyyMicIcon from "@assets/image_1749675190198.png";
-import yappyyLogo from "@assets/Untitled_design-11600-removebg-preview_1749685340210.png";
+import yappyyLogo from "@assets/yappyy-logo.svg";
 
 export default function LoginPage() {
   const handleLogin = () => {
