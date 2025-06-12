@@ -1135,10 +1135,48 @@ export default function EnhancedPracticeHubFixed() {
               )}
             </div>
           </CardContent>
-        </Card>
+            </Card>
+          </div>
+
+          {/* Live AI Feedback Panel */}
+          <div className="lg:col-span-1">
+            <Card className="border-2 border-green-500 bg-green-50 h-full">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Brain className="w-5 h-5 text-green-600" />
+                  <span>Live AI Coach</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3 max-h-80 overflow-y-auto">
+                  {liveFeedback.length === 0 ? (
+                    <div className="text-center text-gray-500 py-8">
+                      <Brain className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm">AI feedback will appear here during your session</p>
+                    </div>
+                  ) : (
+                    liveFeedback.map((feedback) => (
+                      <div key={feedback.id} className={`p-3 rounded-lg border-l-4 ${
+                        feedback.severity === 'success' ? 'bg-green-50 border-green-400' :
+                        feedback.severity === 'warning' ? 'bg-orange-50 border-orange-400' :
+                        'bg-blue-50 border-blue-400'
+                      }`}>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs font-medium text-gray-600 capitalize">
+                            {feedback.category.replace('_', ' ')}
+                          </span>
+                          <span className="text-xs text-gray-500">{feedback.timeLabel}</span>
+                        </div>
+                        <p className="text-sm text-gray-800">{feedback.message}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       )}
-
-
 
       {/* Session Controls */}
       <Card>

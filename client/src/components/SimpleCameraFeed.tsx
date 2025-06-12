@@ -11,11 +11,27 @@ interface SimpleCameraFeedProps {
   isRecording?: boolean;
   wpm?: number;
   duration?: number;
+  isActive?: boolean;
+  onToggle?: () => void;
+  videoRef?: React.RefObject<HTMLVideoElement>;
 }
 
-export default function SimpleCameraFeed({ onStreamReady, onStreamEnd, className = "", isRecording = false, wpm = 0, duration = 0 }: SimpleCameraFeedProps) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [isActive, setIsActive] = useState(false);
+export default function SimpleCameraFeed({ 
+  onStreamReady, 
+  onStreamEnd, 
+  className = "", 
+  isRecording = false, 
+  wpm = 0, 
+  duration = 0,
+  isActive: externalIsActive,
+  onToggle: externalOnToggle,
+  videoRef: externalVideoRef
+}: SimpleCameraFeedProps) {
+  const internalVideoRef = useRef<HTMLVideoElement>(null);
+  const videoRef = externalVideoRef || internalVideoRef;
+  const [internalIsActive, setInternalIsActive] = useState(false);
+  const isActive = externalIsActive !== undefined ? externalIsActive : internalIsActive;
+  const setIsActive = externalOnToggle ? () => externalOnToggle() : setInternalIsActive;
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);

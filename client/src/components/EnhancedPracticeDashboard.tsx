@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import PracticePathwaySelection from "./PracticePathwaySelection";
 import SpeechInputSelector from "./SpeechInputSelector";
-import LivePracticeInterface from "./LivePracticeInterface";
+import EnhancedPracticeHubClean from "./EnhancedPracticeHubClean";
 import LVIEFeedbackEngine from "./LVIEFeedbackEngine";
 import { 
   Target, 
