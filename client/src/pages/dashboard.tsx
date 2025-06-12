@@ -27,6 +27,7 @@ import AdvancedPracticeHub from "@/components/AdvancedPracticeHub";
 import EnhancedTemplateMarketplace from "@/components/EnhancedTemplateMarketplace";
 import HelpGuide from "@/components/HelpGuide";
 import PostSessionAnalysis from "@/components/PostSessionAnalysis";
+import EnhancedPracticeDashboard from "@/components/EnhancedPracticeDashboard";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -108,7 +109,7 @@ export default function Dashboard() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-8 pb-16">
-            <AdvancedPracticeHub />
+            <EnhancedPracticeDashboard />
           </TabsContent>
 
           <TabsContent value="improvement" className="space-y-6">
