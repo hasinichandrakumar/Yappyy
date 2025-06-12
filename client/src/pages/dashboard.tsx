@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Bell, MicOff, User, BarChart3, Eye, Brain, Star, TrendingUp, FileText, Trophy, Users, Volume2, HelpCircle, PlayCircle, Camera, MessageSquare, Activity, Clock } from "lucide-react";
-import yappyyLogo from "@assets/yappyy-logo.svg";
+import yappyyLogo from "@assets/Untitled_design-11600-removebg-preview_1749744306540.png";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
