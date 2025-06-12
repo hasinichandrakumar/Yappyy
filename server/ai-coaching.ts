@@ -21,14 +21,14 @@ export async function generateClubCoaching(req: Request, res: Response) {
       return res.status(400).json({ error: 'Club and event information required' });
     }
 
-    const perplexityResponse = await fetch('https://api.perplexity.ai/chat/completions', {
+    const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.PERPLEXITY_API_KEY}`,
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama-3.1-sonar-large-128k-online',
+        model: 'gpt-4o',
         messages: [
           {
             role: 'system',
@@ -41,26 +41,23 @@ export async function generateClubCoaching(req: Request, res: Response) {
         ],
         max_tokens: 2000,
         temperature: 0.3,
-        top_p: 0.9,
-        return_citations: true,
-        search_domain_filter: ["edu"],
-        search_recency_filter: "year"
+        response_format: { type: "json_object" }
       }),
     });
 
-    if (!perplexityResponse.ok) {
-      throw new Error(`Perplexity API error: ${perplexityResponse.statusText}`);
+    if (!openaiResponse.ok) {
+      throw new Error(`OpenAI API error: ${openaiResponse.statusText}`);
     }
 
-    const data = await perplexityResponse.json();
+    const data = await openaiResponse.json();
     const aiResponse = data.choices[0]?.message?.content;
 
     if (!aiResponse) {
       throw new Error('No response from AI');
     }
 
-    // Parse the structured response
-    const feedback = parseAIResponse(aiResponse, club);
+    // Parse the structured JSON response from OpenAI
+    const feedback = JSON.parse(aiResponse);
     
     res.json(feedback);
   } catch (error) {
@@ -105,7 +102,19 @@ Event Context: ${event.name} - ${event.category}
 Event Description: ${event.description}
 Key Skills Being Evaluated: ${event.keySkills.join(', ')}
 
-Provide detailed feedback in a structured format with scores, strengths, improvements, and next steps.`;
+You must respond with valid JSON in this exact format:
+{
+  "overallScore": number (0-100),
+  "strengths": ["strength1", "strength2", "strength3"],
+  "improvements": ["improvement1", "improvement2", "improvement3"],
+  "categoryScores": {
+    "content": number (0-100),
+    "delivery": number (0-100),
+    "professionalism": number (0-100)
+  },
+  "nextSteps": ["step1", "step2", "step3"],
+  "judgeComments": "detailed feedback paragraph"
+}`;
 }
 
 function getUserPrompt(club: string, event: any, transcript?: string, duration?: number, notes?: string): string {
