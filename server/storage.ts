@@ -8,6 +8,7 @@ import {
   userAchievements,
   userStreaks,
   dailyGoals,
+  speechPersona,
   leaderboardEntries,
   socialInteractions,
   challenges,
@@ -107,6 +108,10 @@ export interface IStorage {
   createDailyGoal(goal: InsertDailyGoal): Promise<DailyGoal>;
   updateDailyGoal(goalId: number, updates: Partial<InsertDailyGoal>): Promise<DailyGoal>;
   generateDailyGoalsForUser(userId: string): Promise<DailyGoal[]>;
+
+  // Speech persona operations
+  getSpeechPersona(userId: string): Promise<any>;
+  generateSpeechPersona(userId: string, sessions: any[]): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -422,6 +427,93 @@ export class DatabaseStorage implements IStorage {
     }
 
     return newGoals;
+  }
+
+  // Speech persona operations
+  async getSpeechPersona(userId: string): Promise<any> {
+    return withRetry(async () => {
+      const [persona] = await db
+        .select()
+        .from(speechPersona)
+        .where(eq(speechPersona.userId, userId));
+      return persona || null;
+    });
+  }
+
+  async generateSpeechPersona(userId: string, sessions: any[]): Promise<any> {
+    return withRetry(async () => {
+      if (sessions.length === 0) {
+        return null;
+      }
+
+      // Calculate persona characteristics
+      const avgWpm = sessions.reduce((sum: number, s: any) => sum + (s.wpm || 0), 0) / sessions.length;
+      const avgClarity = sessions.reduce((sum: number, s: any) => sum + (s.voiceClarity || 0), 0) / sessions.length;
+      const avgOverall = sessions.reduce((sum: number, s: any) => sum + (s.overallScore || 0), 0) / sessions.length;
+      const totalFillers = sessions.reduce((sum: number, s: any) => sum + (s.fillerWords?.length || 0), 0);
+      const avgFillerRate = totalFillers / Math.max(1, sessions.reduce((sum: number, s: any) => sum + (s.wordCount || 0), 0)) * 100;
+
+      // Determine speaking style
+      const speakingStyle = (() => {
+        if (avgWpm > 160) return avgClarity > 80 ? "Dynamic Presenter" : "Rapid Fire Communicator";
+        if (avgWpm < 110) return avgClarity > 80 ? "Thoughtful Narrator" : "Deliberate Speaker";
+        return avgClarity > 85 ? "Balanced Communicator" : "Steady Speaker";
+      })();
+
+      // Determine personality
+      const communicationPersonality = (() => {
+        if (avgOverall > 85) return "Natural Leader";
+        if (avgOverall > 75) return "Confident Communicator";
+        if (avgOverall > 65) return "Developing Professional";
+        if (avgOverall > 55) return "Emerging Speaker";
+        return "Foundation Builder";
+      })();
+
+      // Identify strengths and growth areas
+      const strengthAreas = [];
+      if (avgClarity > 80) strengthAreas.push("Clear Articulation");
+      if (avgWpm >= 120 && avgWpm <= 150) strengthAreas.push("Optimal Pacing");
+      if (avgFillerRate < 3) strengthAreas.push("Fluent Delivery");
+
+      const growthAreas = [];
+      if (avgClarity < 70) growthAreas.push("Voice Clarity");
+      if (avgWpm < 100) growthAreas.push("Speaking Energy");
+      if (avgFillerRate > 5) growthAreas.push("Verbal Fluency");
+
+      const confidenceLevel = avgOverall > 80 ? "High Confidence" : avgOverall > 65 ? "Growing Confidence" : "Building Confidence";
+      const personaDescription = `You're a ${speakingStyle.toLowerCase()} with ${confidenceLevel.toLowerCase()}.`;
+
+      const personaData = {
+        userId,
+        speakingStyle,
+        communicationPersonality,
+        strengthAreas,
+        growthAreas,
+        preferredPace: Math.round(avgWpm),
+        confidenceLevel,
+        personaDescription,
+        progressInsights: {
+          totalSessions: sessions.length,
+          avgOverallScore: Math.round(avgOverall),
+          lastUpdated: new Date()
+        }
+      };
+
+      // Upsert persona
+      const [persona] = await db
+        .insert(speechPersona)
+        .values(personaData)
+        .onConflictDoUpdate({
+          target: speechPersona.userId,
+          set: {
+            ...personaData,
+            updatedAt: new Date()
+          }
+        })
+        .returning();
+
+      return persona;
+    });
   }
 }
 
