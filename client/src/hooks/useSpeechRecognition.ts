@@ -55,7 +55,7 @@ export function useSpeechRecognition(): SpeechRecognitionResult {
           const words = newTranscript.trim().split(/\s+/).filter(word => word.length > 0);
           setWordCount(words.length);
           
-          // Detect filler words
+          // Enhanced filler word detection
           const detectedFillers = detectFillerWords(finalTranscript);
           if (detectedFillers.length > 0) {
             setFillerWords(prev => [...prev, ...detectedFillers]);
@@ -105,22 +105,50 @@ export function useSpeechRecognition(): SpeechRecognitionResult {
     };
   }, []);
 
-  // Detect filler words in speech
+  // Comprehensive filler word detection
   const detectFillerWords = (text: string): string[] => {
-    const fillerPatterns = [
-      'um', 'uh', 'er', 'ah', 'like', 'you know', 'so', 'well',
-      'actually', 'basically', 'literally', 'obviously', 'right',
-      'kinda', 'sorta', 'anyway', 'meanwhile'
+    const singleWordFillers = [
+      'um', 'uh', 'er', 'erm', 'ah', 'eh', 'oh', 'hmm', 'mhm',
+      'like', 'so', 'well', 'actually', 'basically', 'literally', 'obviously', 
+      'right', 'okay', 'alright', 'yeah', 'yep', 'yup', 'nah', 'nope',
+      'kinda', 'sorta', 'anyway', 'meanwhile', 'whatever', 'stuff', 'things',
+      'totally', 'really', 'super', 'pretty', 'quite', 'very'
     ];
     
-    const words = text.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/);
+    const phraseFillers = [
+      'you know', 'i mean', 'you see', 'kind of', 'sort of', 
+      'and uh', 'and um', 'but uh', 'but um', 'so uh', 'so um',
+      'uh huh', 'mm hmm', 'oh well', 'i guess', 'i think',
+      'to be honest', 'if you will', 'as it were', 'per se'
+    ];
+    
+    const cleanText = text.toLowerCase().replace(/[.,!?;:]/g, '');
+    const words = cleanText.split(/\s+/).filter(word => word.length > 0);
     const detectedFillers: string[] = [];
     
-    words.forEach(word => {
-      if (fillerPatterns.includes(word.trim())) {
-        detectedFillers.push(word);
+    // Check for phrase fillers first
+    for (let i = 0; i < words.length - 1; i++) {
+      const twoWords = `${words[i]} ${words[i + 1]}`;
+      const threeWords = i < words.length - 2 ? `${words[i]} ${words[i + 1]} ${words[i + 2]}` : '';
+      
+      if (phraseFillers.includes(twoWords)) {
+        detectedFillers.push(twoWords);
+        i++; // Skip next word since it's part of the phrase
+      } else if (threeWords && phraseFillers.includes(threeWords)) {
+        detectedFillers.push(threeWords);
+        i += 2; // Skip next two words
+      } else if (singleWordFillers.includes(words[i])) {
+        detectedFillers.push(words[i]);
       }
-    });
+    }
+    
+    // Check last word if not already processed
+    if (words.length > 0) {
+      const lastWord = words[words.length - 1];
+      if (singleWordFillers.includes(lastWord)) {
+        detectedFillers.push(lastWord);
+      }
+    }
     
     return detectedFillers;
   };

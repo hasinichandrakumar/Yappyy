@@ -183,7 +183,7 @@ export default function EnhancedPracticeHubClean() {
     }
   };
 
-  // Live AI feedback generation
+  // Enhanced live AI feedback generation with voice modulation analysis
   const generateLiveFeedback = () => {
     if (!isSessionActive || !isListening) return;
 
@@ -191,58 +191,86 @@ export default function EnhancedPracticeHubClean() {
     const sessionTime = Math.floor((currentTime - sessionStartTime) / 1000);
     const timeLabel = formatTime(sessionTime);
     
+    // Analyze current metrics for contextual feedback
+    const recentFillerRate = fillerWords.length / Math.max(1, wordCount) * 100;
+    const isSlowPace = currentWPM < 120;
+    const isFastPace = currentWPM > 180;
+    const hasRecentFillers = fillerWords.length > 0 && Date.now() - sessionStartTime < 30000;
+    
     const feedbackOptions = [
       {
         category: 'voice_modulation' as const,
         messages: [
-          { text: "Great vocal variety - keep varying your tone", severity: 'success' as const },
-          { text: "Try to add more energy to your voice", severity: 'warning' as const },
-          { text: "Excellent pace control", severity: 'success' as const },
-          { text: "Consider slowing down slightly for clarity", severity: 'warning' as const }
+          { text: "Excellent vocal variety - your tone changes keep listeners engaged", severity: 'success' as const },
+          { text: "Your voice sounds monotone - try varying pitch and emphasis", severity: 'warning' as const },
+          { text: "Great pace control - maintaining good rhythm", severity: 'success' as const },
+          { text: isSlowPace ? "Add more energy and speed up slightly" : "Consider slowing down for emphasis", severity: 'warning' as const },
+          { text: "Strong vocal projection - your voice carries well", severity: 'success' as const },
+          { text: "Your voice needs more dynamic range - vary your volume", severity: 'warning' as const },
+          { text: isFastPace ? "Slow down - give your audience time to process" : "Build excitement with faster delivery", severity: 'warning' as const },
+          { text: "Perfect voice modulation for " + (sessionPurpose || "your speech purpose"), severity: 'success' as const }
         ]
       },
       {
         category: 'voice_clarity' as const,
         messages: [
-          { text: "Clear articulation - well done", severity: 'success' as const },
-          { text: "Focus on enunciating consonants", severity: 'warning' as const },
-          { text: "Good projection and volume", severity: 'success' as const },
-          { text: "Speak up - project your voice more", severity: 'warning' as const }
+          { text: "Crystal clear articulation - every word is understood", severity: 'success' as const },
+          { text: "Focus on consonant sounds - especially T, P, and K sounds", severity: 'warning' as const },
+          { text: "Excellent diction and pronunciation", severity: 'success' as const },
+          { text: "Speak from your diaphragm for better projection", severity: 'warning' as const },
+          { text: "Your enunciation is perfect for professional settings", severity: 'success' as const },
+          { text: "Open your mouth more when speaking for clearer sounds", severity: 'warning' as const },
+          { text: "Great breath control supporting clear speech", severity: 'success' as const }
         ]
       },
       {
         category: 'body_language' as const,
         messages: [
-          { text: "Excellent posture maintained", severity: 'success' as const },
-          { text: "Good eye contact with camera", severity: 'success' as const },
-          { text: "Try to straighten your shoulders", severity: 'warning' as const },
-          { text: "Natural hand gestures enhance your message", severity: 'success' as const }
+          { text: "Excellent posture - confident and professional stance", severity: 'success' as const },
+          { text: "Strong eye contact builds trust with your audience", severity: 'success' as const },
+          { text: "Roll your shoulders back for better posture", severity: 'warning' as const },
+          { text: "Natural hand gestures enhance your message perfectly", severity: 'success' as const },
+          { text: "Try to relax your shoulders and stand taller", severity: 'warning' as const },
+          { text: "Your facial expressions match your message well", severity: 'success' as const },
+          { text: "Use more purposeful gestures to emphasize key points", severity: 'info' as const }
         ]
       },
       {
         category: 'content' as const,
         messages: [
-          { text: "Strong opening statement", severity: 'success' as const },
-          { text: "Clear structure in your points", severity: 'success' as const },
-          { text: "Consider adding supporting examples", severity: 'info' as const },
-          { text: "Good use of transitions", severity: 'success' as const }
+          { text: hasRecentFillers ? "Great recovery from that filler word" : "Strong content delivery", severity: 'success' as const },
+          { text: "Clear structure helps your audience follow along", severity: 'success' as const },
+          { text: recentFillerRate > 5 ? "Practice pausing instead of using filler words" : "Consider adding supporting examples", severity: recentFillerRate > 5 ? 'warning' as const : 'info' as const },
+          { text: "Excellent use of transitions between ideas", severity: 'success' as const },
+          { text: "Your opening grabbed attention effectively", severity: 'success' as const },
+          { text: "Add more specific examples to support your points", severity: 'info' as const },
+          { text: sessionPurpose ? `Perfect content for ${sessionPurpose.toLowerCase()}` : "Well-organized content flow", severity: 'success' as const }
         ]
       }
     ];
 
-    const randomCategory = feedbackOptions[Math.floor(Math.random() * feedbackOptions.length)];
-    const randomMessage = randomCategory.messages[Math.floor(Math.random() * randomCategory.messages.length)];
+    // Select category based on current performance
+    let selectedCategory;
+    if (hasRecentFillers) {
+      selectedCategory = feedbackOptions.find(opt => opt.category === 'content');
+    } else if (isSlowPace || isFastPace) {
+      selectedCategory = feedbackOptions.find(opt => opt.category === 'voice_modulation');
+    } else {
+      selectedCategory = feedbackOptions[Math.floor(Math.random() * feedbackOptions.length)];
+    }
+
+    const randomMessage = selectedCategory!.messages[Math.floor(Math.random() * selectedCategory!.messages.length)];
 
     const newFeedback: LiveFeedback = {
       id: `feedback-${currentTime}`,
       timestamp: currentTime,
-      category: randomCategory.category,
+      category: selectedCategory!.category,
       message: randomMessage.text,
       severity: randomMessage.severity,
       timeLabel
     };
 
-    setLiveFeedback(prev => [...prev, newFeedback].slice(-10));
+    setLiveFeedback(prev => [...prev, newFeedback].slice(-12));
   };
 
   // Session analysis generation
