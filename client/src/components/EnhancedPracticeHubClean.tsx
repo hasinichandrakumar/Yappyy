@@ -290,6 +290,9 @@ export default function EnhancedPracticeHubClean() {
     const confidenceAnalysisScore = Math.max(0, Math.min(100, currentConfidenceScore));
     const overallScore = Math.round((speechScore + clarityScore + confidenceAnalysisScore) / 3);
     
+    // Generate comprehensive AI analysis paragraphs
+    const aiAnalysis = generateComprehensiveAnalysis(wordsPerMinute, totalFillers, fillerRate, clarityScore, (eyeContactScore + postureScore) / 2, sessionPurpose);
+    
     const purposeFeedback = generatePurposeBasedFeedback(sessionPurpose, {
       wpm: wordsPerMinute,
       fillerCount: totalFillers,
@@ -321,10 +324,70 @@ export default function EnhancedPracticeHubClean() {
         confidence: confidenceAnalysisScore,
         overall: overallScore
       },
+      aiAnalysis,
       feedback: purposeFeedback,
       transcript: transcript,
       improvements: generateImprovementSuggestions(wordsPerMinute, totalFillers, fillerRate),
-      achievements: generateAchievements(overallScore, totalFillers, wordsPerMinute)
+      achievements: generateAchievements(overallScore, totalFillers, wordsPerMinute),
+      liveFeedbackHistory: liveFeedback
+    };
+  };
+
+  // Generate comprehensive AI analysis paragraphs
+  const generateComprehensiveAnalysis = (wpm: number, fillers: number, fillerRate: number, clarity: number, bodyScore: number, purpose: string) => {
+    // Voice Modulation Analysis
+    const voiceAnalysis = (() => {
+      const isMonotone = clarity < 70;
+      const isPaceTooSlow = wpm < 120;
+      const isPaceTooFast = wpm > 180;
+      const isOptimalPace = wpm >= 120 && wpm <= 150;
+      
+      if (isMonotone && isPaceTooSlow) {
+        return `Your voice modulation needs significant improvement for ${purpose || 'speaking'}. Your current pace of ${wpm} WPM is too slow, which combined with limited vocal variety, may cause your audience to lose interest. Practice varying your pitch, volume, and emphasis to create a more dynamic delivery. For ${purpose?.toLowerCase() || 'this type of speech'}, aim for 130-150 WPM with clear emphasis on key points. Work on breathing exercises and vocal warm-ups to develop better control over your voice's dynamic range.`;
+      } else if (isPaceTooFast) {
+        return `Your speaking pace of ${wpm} WPM is too fast for effective ${purpose || 'communication'}. While your voice has good energy, slowing down will improve comprehension and allow your audience to process your message better. Practice using strategic pauses for emphasis and to give yourself time to breathe. For ${purpose?.toLowerCase() || 'this context'}, aim for 130-150 WPM. Your vocal clarity score of ${clarity}% shows ${clarity > 80 ? 'good' : 'developing'} articulation - maintain this while reducing your pace.`;
+      } else if (isOptimalPace && clarity > 80) {
+        return `Excellent voice modulation for ${purpose || 'speaking'}! Your pace of ${wpm} WPM is ideal, and your clarity score of ${clarity}% demonstrates strong vocal control. Your voice effectively supports your message with appropriate energy and articulation. To further enhance your delivery, focus on varying your tone to match the emotional content of your speech and using strategic pauses to emphasize key points.`;
+      } else {
+        return `Your voice modulation shows promise with a pace of ${wpm} WPM. ${clarity > 80 ? 'Your clear articulation is a strength' : 'Work on improving clarity through better enunciation'}. For ${purpose?.toLowerCase() || 'this type of presentation'}, focus on ${isMonotone ? 'adding more vocal variety and emotional range' : 'maintaining consistent energy throughout'}. Practice recording yourself to hear how your voice sounds to others and adjust your pitch and volume accordingly.`;
+      }
+    })();
+
+    // Body Language Analysis
+    const bodyLanguageAnalysis = (() => {
+      const postureGood = postureScore > 80;
+      const eyeContactGood = eyeContactScore > 75;
+      
+      if (postureGood && eyeContactGood) {
+        return `Your body language demonstrates strong confidence and professionalism perfect for ${purpose || 'presenting'}. Your posture score of ${postureScore}% and eye contact score of ${eyeContactScore}% show excellent non-verbal communication skills. You maintain an authoritative presence that helps build trust with your audience. Continue using purposeful gestures to emphasize key points, and remember that your confident stance reinforces your verbal message effectively.`;
+      } else if (!postureGood && !eyeContactGood) {
+        return `Your body language needs focused improvement for effective ${purpose || 'communication'}. Both your posture (${postureScore}%) and eye contact (${eyeContactScore}%) scores indicate areas for development. Stand tall with shoulders back and chest open to project confidence. Practice maintaining eye contact with the camera as if speaking to a trusted colleague. For ${purpose?.toLowerCase() || 'this context'}, strong body language is crucial for credibility and audience engagement.`;
+      } else if (postureGood) {
+        return `Your posture is excellent (${postureScore}%), showing confidence and professionalism. However, your eye contact (${eyeContactScore}%) could be improved for better audience connection in ${purpose || 'speaking situations'}. Practice looking directly at the camera more frequently, treating it as a friendly face. This will help build trust and keep your audience engaged throughout your presentation.`;
+      } else {
+        return `Your eye contact shows good engagement (${eyeContactScore}%), but your posture (${postureScore}%) needs attention for ${purpose || 'professional speaking'}. Focus on standing or sitting up straighter, keeping your shoulders back and head level. Good posture not only looks more confident but also helps with breathing and voice projection, enhancing your overall delivery.`;
+      }
+    })();
+
+    // Content Analysis
+    const contentAnalysis = (() => {
+      const fillerPercentage = Math.round(fillerRate);
+      const hasExcessiveFillers = fillerPercentage > 5;
+      const hasMinimalFillers = fillerPercentage < 2;
+      
+      if (hasMinimalFillers && wordCount > 50) {
+        return `Outstanding content delivery for ${purpose || 'your presentation'}! With only ${fillers} filler words out of ${wordCount} total words (${fillerPercentage}%), you demonstrate excellent verbal fluency and preparation. Your speech flows naturally and professionally, allowing your message to come through clearly. This level of fluency is ideal for ${purpose?.toLowerCase() || 'professional communication'} and shows strong command of your material.`;
+      } else if (hasExcessiveFillers) {
+        return `Your content delivery shows room for improvement in verbal fluency. With ${fillers} filler words out of ${wordCount} total words (${fillerPercentage}%), your message may lose impact. For ${purpose || 'effective speaking'}, practice the "pause technique" - replace filler words with brief, intentional pauses. This gives you time to think and makes you sound more confident and prepared. Consider outlining your key points beforehand and practicing transitions between ideas.`;
+      } else {
+        return `Your content delivery shows good progress with ${fillers} filler words out of ${wordCount} total words (${fillerPercentage}%). While this is within acceptable range for ${purpose || 'most speaking contexts'}, continued practice can help you achieve even greater fluency. Focus on preparation and become more comfortable with brief pauses instead of filler words. Your message structure appears solid - now work on polishing the delivery for maximum impact.`;
+      }
+    })();
+
+    return {
+      voiceModulation: voiceAnalysis,
+      bodyLanguage: bodyLanguageAnalysis,
+      content: contentAnalysis
     };
   };
 
@@ -430,16 +493,16 @@ export default function EnhancedPracticeHubClean() {
     return () => clearInterval(interval);
   }, [isSessionActive, sessionStartTime, isCameraActive, isListening, eyeContactScore, postureScore, voiceClarity]);
 
-  // Live AI feedback generation effect
+  // Enhanced live AI feedback generation effect
   useEffect(() => {
     if (!isSessionActive || !isListening) return;
 
     const feedbackInterval = setInterval(() => {
       generateLiveFeedback();
-    }, 15000);
+    }, 8000); // More frequent feedback every 8 seconds
 
     return () => clearInterval(feedbackInterval);
-  }, [isSessionActive, isListening, sessionStartTime]);
+  }, [isSessionActive, isListening, sessionStartTime, fillerWords.length, currentWPM]);
 
   return (
     <div className="space-y-6 relative">
@@ -497,6 +560,40 @@ export default function EnhancedPracticeHubClean() {
                   </div>
                 </div>
               </div>
+
+              {/* AI Analysis Paragraphs */}
+              {sessionData.aiAnalysis && (
+                <div className="space-y-6 mb-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Voice Modulation Analysis */}
+                    <div className="bg-blue-50 rounded-lg p-4">
+                      <div className="flex items-center space-x-2 mb-3">
+                        <Volume2 className="w-5 h-5 text-blue-600" />
+                        <h3 className="font-semibold text-blue-800">Voice Modulation</h3>
+                      </div>
+                      <p className="text-sm text-blue-700 leading-relaxed">{sessionData.aiAnalysis.voiceModulation}</p>
+                    </div>
+
+                    {/* Body Language Analysis */}
+                    <div className="bg-green-50 rounded-lg p-4">
+                      <div className="flex items-center space-x-2 mb-3">
+                        <Eye className="w-5 h-5 text-green-600" />
+                        <h3 className="font-semibold text-green-800">Body Language</h3>
+                      </div>
+                      <p className="text-sm text-green-700 leading-relaxed">{sessionData.aiAnalysis.bodyLanguage}</p>
+                    </div>
+
+                    {/* Content Analysis */}
+                    <div className="bg-purple-50 rounded-lg p-4">
+                      <div className="flex items-center space-x-2 mb-3">
+                        <FileText className="w-5 h-5 text-purple-600" />
+                        <h3 className="font-semibold text-purple-800">Content Delivery</h3>
+                      </div>
+                      <p className="text-sm text-purple-700 leading-relaxed">{sessionData.aiAnalysis.content}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div className="flex justify-center space-x-4">
                 <Button 
