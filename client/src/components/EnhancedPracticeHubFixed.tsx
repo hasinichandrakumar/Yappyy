@@ -25,7 +25,13 @@ import {
   BarChart3,
   Clock,
   Volume2,
-  TrendingUp
+  TrendingUp,
+  X,
+  CheckCircle,
+  Star,
+  ArrowRight,
+  Trophy,
+  FileText
 } from "lucide-react";
 
 interface AIInsight {
@@ -64,6 +70,8 @@ export default function EnhancedPracticeHubFixed() {
   const [sessionType, setSessionType] = useState<'general' | 'roleplay'>('general');
   const [sessionPurpose, setSessionPurpose] = useState("");
   const [recentFillerAlert, setRecentFillerAlert] = useState<string | null>(null);
+  const [showSessionAnalysis, setShowSessionAnalysis] = useState(false);
+  const [sessionData, setSessionData] = useState<any>(null);
 
 
   // Fetch existing practice sessions to determine next session number
@@ -85,7 +93,7 @@ export default function EnhancedPracticeHubFixed() {
   const [eyeContactScore, setEyeContactScore] = useState(75);
   const [postureScore, setPostureScore] = useState(80);
   const [voiceClarity, setVoiceClarity] = useState(85);
-  const [confidenceScore, setConfidenceScore] = useState(70);
+  const [currentConfidenceScore, setCurrentConfidenceScore] = useState(70);
 
   // AI insights
   const [aiInsights, setAiInsights] = useState<AIInsight[]>([]);
@@ -309,6 +317,204 @@ export default function EnhancedPracticeHubFixed() {
   const stopSession = () => {
     setIsSessionActive(false);
     setIsListening(false);
+    
+    // Generate comprehensive session analysis
+    const analysisData = generateSessionAnalysis();
+    setSessionData(analysisData);
+    setShowSessionAnalysis(true);
+  };
+
+  // Generate session analysis based on performance and purpose
+  const generateSessionAnalysis = () => {
+    const wordsPerMinute = currentWPM;
+    const totalWords = wordCount;
+    const totalFillers = fillerWords.length;
+    const fillerRate = totalWords > 0 ? (totalFillers / totalWords) * 100 : 0;
+    const durationMinutes = sessionDuration / 60;
+    
+    // Calculate overall scores
+    const speechScore = Math.max(0, Math.min(100, 
+      ((wordsPerMinute >= 120 && wordsPerMinute <= 150) ? 90 : 
+       (wordsPerMinute >= 100 && wordsPerMinute <= 180) ? 75 : 50) - (fillerRate * 10)
+    ));
+    
+    const clarityScore = Math.max(0, Math.min(100, voiceClarity));
+    const confidenceAnalysisScore = Math.max(0, Math.min(100, currentConfidenceScore));
+    const overallScore = Math.round((speechScore + clarityScore + confidenceAnalysisScore) / 3);
+    
+    // Generate purpose-specific feedback
+    const purposeFeedback = generatePurposeBasedFeedback(sessionPurpose, {
+      wpm: wordsPerMinute,
+      fillerCount: totalFillers,
+      duration: durationMinutes,
+      wordCount: totalWords,
+      overallScore
+    });
+    
+    return {
+      session: {
+        name: sessionName || generateSessionName(),
+        purpose: sessionPurpose,
+        duration: sessionDuration,
+        type: sessionType
+      },
+      metrics: {
+        wordsPerMinute,
+        totalWords,
+        totalFillers,
+        fillerRate: Math.round(fillerRate * 10) / 10,
+        eyeContact: eyeContactScore,
+        posture: postureScore,
+        voiceClarity,
+        confidence: confidenceScore
+      },
+      scores: {
+        speech: speechScore,
+        clarity: clarityScore,
+        confidence: confidenceScore,
+        overall: overallScore
+      },
+      feedback: purposeFeedback,
+      transcript: transcript,
+      improvements: generateImprovementSuggestions(wordsPerMinute, totalFillers, fillerRate),
+      achievements: generateAchievements(overallScore, totalFillers, wordsPerMinute)
+    };
+  };
+
+  // Generate purpose-based feedback
+  const generatePurposeBasedFeedback = (purpose: string, metrics: any) => {
+    if (!purpose) {
+      return {
+        summary: "Good practice session completed!",
+        strengths: ["Completed a full practice session", "Built speaking confidence"],
+        areas: ["Consider setting a specific purpose for more targeted feedback"]
+      };
+    }
+
+    const lowercasePurpose = purpose.toLowerCase();
+    
+    if (lowercasePurpose.includes('interview') || lowercasePurpose.includes('job')) {
+      return {
+        summary: `Your interview practice session shows ${metrics.overallScore >= 75 ? 'strong' : 'developing'} professional communication skills.`,
+        strengths: [
+          metrics.wpm >= 120 && metrics.wpm <= 150 ? "Appropriate speaking pace for interviews" : null,
+          metrics.fillerCount <= 3 ? "Professional speech clarity" : null,
+          "Focused practice on interview skills"
+        ].filter(Boolean),
+        areas: [
+          metrics.wpm < 120 ? "Speak with more energy and confidence" : null,
+          metrics.wpm > 180 ? "Slow down to ensure clear communication" : null,
+          metrics.fillerCount > 5 ? "Reduce filler words for more professional presence" : null,
+          "Practice specific interview questions for your field"
+        ].filter(Boolean)
+      };
+    }
+    
+    if (lowercasePurpose.includes('presentation') || lowercasePurpose.includes('pitch')) {
+      return {
+        summary: `Your presentation practice demonstrates ${metrics.overallScore >= 75 ? 'engaging' : 'developing'} public speaking abilities.`,
+        strengths: [
+          metrics.wpm >= 140 && metrics.wpm <= 160 ? "Dynamic presentation pace" : null,
+          metrics.fillerCount <= 2 ? "Polished delivery style" : null,
+          "Dedicated presentation skill development"
+        ].filter(Boolean),
+        areas: [
+          metrics.wpm < 140 ? "Increase energy to captivate your audience" : null,
+          metrics.wpm > 180 ? "Slow down to help audience follow your ideas" : null,
+          metrics.fillerCount > 3 ? "Replace filler words with strategic pauses" : null,
+          "Practice with visual aids and audience interaction"
+        ].filter(Boolean)
+      };
+    }
+
+    if (lowercasePurpose.includes('conversation') || lowercasePurpose.includes('social')) {
+      return {
+        summary: `Your conversational practice shows ${metrics.overallScore >= 70 ? 'natural' : 'improving'} communication flow.`,
+        strengths: [
+          metrics.fillerCount <= 5 ? "Natural speaking rhythm" : null,
+          "Working on everyday communication skills"
+        ].filter(Boolean),
+        areas: [
+          metrics.fillerCount > 8 ? "Practice smoother speech transitions" : null,
+          "Develop active listening responses"
+        ].filter(Boolean)
+      };
+    }
+
+    // General purpose feedback
+    return {
+      summary: `Your practice session on "${purpose}" shows ${metrics.overallScore >= 75 ? 'excellent' : 'good'} progress.`,
+      strengths: [
+        metrics.wpm >= 120 && metrics.wpm <= 150 ? "Well-paced delivery" : null,
+        metrics.fillerCount <= 3 ? "Clear communication style" : null,
+        "Focused practice approach"
+      ].filter(Boolean),
+      areas: [
+        metrics.wpm < 120 ? "Increase speaking energy and pace" : null,
+        metrics.wpm > 180 ? "Slow down for better comprehension" : null,
+        metrics.fillerCount > 5 ? "Reduce filler words with practice" : null
+      ].filter(Boolean)
+    };
+  };
+
+  // Generate improvement suggestions
+  const generateImprovementSuggestions = (wpm: number, fillers: number, fillerRate: number) => {
+    const suggestions = [];
+    
+    if (wpm < 120) {
+      suggestions.push({
+        area: "Speaking Pace",
+        suggestion: "Practice reading aloud daily to build natural speaking rhythm",
+        priority: "high"
+      });
+    } else if (wpm > 180) {
+      suggestions.push({
+        area: "Speaking Pace", 
+        suggestion: "Focus on clear articulation by slowing down slightly",
+        priority: "high"
+      });
+    }
+    
+    if (fillers > 5) {
+      suggestions.push({
+        area: "Filler Words",
+        suggestion: "Practice the 'pause technique' - replace filler words with 2-second pauses",
+        priority: "high"
+      });
+    }
+    
+    if (fillerRate > 5) {
+      suggestions.push({
+        area: "Speech Clarity",
+        suggestion: "Record yourself daily and identify your most common filler patterns",
+        priority: "medium"
+      });
+    }
+    
+    return suggestions;
+  };
+
+  // Generate achievements
+  const generateAchievements = (overallScore: number, fillers: number, wpm: number) => {
+    const achievements = [];
+    
+    if (overallScore >= 85) {
+      achievements.push({ title: "Excellent Speaker", description: "Outstanding overall performance!" });
+    } else if (overallScore >= 75) {
+      achievements.push({ title: "Strong Communicator", description: "Very good speaking skills demonstrated" });
+    }
+    
+    if (fillers === 0) {
+      achievements.push({ title: "Filler-Free Zone", description: "Perfect session with no filler words!" });
+    } else if (fillers <= 2) {
+      achievements.push({ title: "Clear Speaker", description: "Minimal filler word usage" });
+    }
+    
+    if (wpm >= 120 && wpm <= 150) {
+      achievements.push({ title: "Perfect Pace", description: "Ideal speaking speed maintained" });
+    }
+    
+    return achievements;
   };
 
   // Start listening
@@ -364,6 +570,270 @@ export default function EnhancedPracticeHubFixed() {
             <span className="font-semibold">Filler word detected: "{recentFillerAlert}"</span>
           </div>
           <div className="text-sm opacity-90 mt-1">Try pausing instead</div>
+        </div>
+      )}
+
+      {/* Session Analysis Modal */}
+      {showSessionAnalysis && sessionData && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Session Analysis</h2>
+                  <p className="text-gray-600">{sessionData.session.name}</p>
+                </div>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowSessionAnalysis(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <X className="w-5 h-5" />
+                </Button>
+              </div>
+
+              {/* Overall Score */}
+              <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 mb-6">
+                <div className="text-center">
+                  <div className="text-4xl font-bold text-blue-600 mb-2">{sessionData.scores.overall}%</div>
+                  <div className="text-lg font-semibold text-gray-700 mb-4">Overall Performance</div>
+                  <div className="flex justify-center space-x-8 text-sm">
+                    <div className="text-center">
+                      <div className="font-semibold text-green-600">{sessionData.metrics.wordsPerMinute}</div>
+                      <div className="text-gray-600">WPM</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="font-semibold text-blue-600">{sessionData.metrics.totalWords}</div>
+                      <div className="text-gray-600">Words</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="font-semibold text-red-600">{sessionData.metrics.totalFillers}</div>
+                      <div className="text-gray-600">Fillers</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="font-semibold text-purple-600">{Math.round(sessionData.session.duration / 60)}m</div>
+                      <div className="text-gray-600">Duration</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Purpose-Based Feedback */}
+              {sessionData.session.purpose && (
+                <Card className="mb-6">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Target className="w-5 h-5 text-orange-500" />
+                      <span>Purpose-Based Analysis</span>
+                    </CardTitle>
+                    <p className="text-sm text-gray-600">Feedback for: "{sessionData.session.purpose}"</p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="font-semibold text-gray-800 mb-2">Summary</h4>
+                        <p className="text-gray-700">{sessionData.feedback.summary}</p>
+                      </div>
+                      
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <h4 className="font-semibold text-green-700 mb-2 flex items-center">
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                            Strengths
+                          </h4>
+                          <ul className="space-y-1">
+                            {sessionData.feedback.strengths.map((strength: string, index: number) => (
+                              <li key={index} className="text-sm text-gray-700 flex items-start">
+                                <Star className="w-3 h-3 text-yellow-500 mt-1 mr-2 flex-shrink-0" />
+                                {strength}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        
+                        <div>
+                          <h4 className="font-semibold text-blue-700 mb-2 flex items-center">
+                            <TrendingUp className="w-4 h-4 mr-1" />
+                            Areas to Focus
+                          </h4>
+                          <ul className="space-y-1">
+                            {sessionData.feedback.areas.map((area: string, index: number) => (
+                              <li key={index} className="text-sm text-gray-700 flex items-start">
+                                <ArrowRight className="w-3 h-3 text-blue-500 mt-1 mr-2 flex-shrink-0" />
+                                {area}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Detailed Metrics */}
+              <div className="grid md:grid-cols-3 gap-4 mb-6">
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center space-x-2">
+                      <Volume2 className="w-5 h-5 text-blue-500" />
+                      <span>Speech Analysis</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-sm">Pace Score</span>
+                        <span className="font-semibold">{sessionData.scores.speech}%</span>
+                      </div>
+                      <Progress value={sessionData.scores.speech} className="h-2" />
+                      <div className="text-xs text-gray-600">
+                        {sessionData.metrics.wordsPerMinute >= 120 && sessionData.metrics.wordsPerMinute <= 150 
+                          ? "Optimal speaking pace" 
+                          : sessionData.metrics.wordsPerMinute < 120 
+                            ? "Consider speaking faster" 
+                            : "Consider slowing down"}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center space-x-2">
+                      <Eye className="w-5 h-5 text-green-500" />
+                      <span>Clarity Score</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-sm">Voice Clarity</span>
+                        <span className="font-semibold">{sessionData.scores.clarity}%</span>
+                      </div>
+                      <Progress value={sessionData.scores.clarity} className="h-2" />
+                      <div className="text-xs text-gray-600">
+                        Filler rate: {sessionData.metrics.fillerRate}%
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center space-x-2">
+                      <Brain className="w-5 h-5 text-purple-500" />
+                      <span>Confidence</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-sm">Overall Confidence</span>
+                        <span className="font-semibold">{sessionData.scores.confidence}%</span>
+                      </div>
+                      <Progress value={sessionData.scores.confidence} className="h-2" />
+                      <div className="text-xs text-gray-600">
+                        Based on speech patterns
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Achievements */}
+              {sessionData.achievements.length > 0 && (
+                <Card className="mb-6">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Trophy className="w-5 h-5 text-yellow-500" />
+                      <span>Achievements Unlocked</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid md:grid-cols-2 gap-3">
+                      {sessionData.achievements.map((achievement: any, index: number) => (
+                        <div key={index} className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                          <div className="font-semibold text-yellow-800">{achievement.title}</div>
+                          <div className="text-sm text-yellow-700">{achievement.description}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Improvement Suggestions */}
+              {sessionData.improvements.length > 0 && (
+                <Card className="mb-6">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Lightbulb className="w-5 h-5 text-orange-500" />
+                      <span>Personalized Recommendations</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {sessionData.improvements.map((improvement: any, index: number) => (
+                        <div key={index} className={`p-3 rounded-lg border-l-4 ${
+                          improvement.priority === 'high' ? 'bg-red-50 border-red-400' : 'bg-blue-50 border-blue-400'
+                        }`}>
+                          <div className="font-semibold text-gray-800">{improvement.area}</div>
+                          <div className="text-sm text-gray-700 mt-1">{improvement.suggestion}</div>
+                          <Badge className={`mt-2 ${improvement.priority === 'high' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'}`}>
+                            {improvement.priority} priority
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Session Transcript */}
+              {sessionData.transcript && (
+                <Card className="mb-6">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <FileText className="w-5 h-5 text-gray-500" />
+                      <span>Session Transcript</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="bg-gray-50 rounded-lg p-4 max-h-40 overflow-y-auto">
+                      <p className="text-sm text-gray-700 leading-relaxed">{sessionData.transcript || "No transcript available"}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex justify-center space-x-4">
+                <Button 
+                  onClick={() => setShowSessionAnalysis(false)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6"
+                >
+                  Continue Practicing
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => {
+                    // Reset session for new practice
+                    setShowSessionAnalysis(false);
+                    setSessionData(null);
+                    setTranscript("");
+                    setFillerWords([]);
+                    setWordCount(0);
+                    setCurrentWPM(0);
+                    setSessionDuration(0);
+                  }}
+                >
+                  Start New Session
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
