@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import SimpleCameraFeed from "@/components/SimpleCameraFeed";
 import { 
   Play, 
   Pause, 
@@ -128,6 +129,14 @@ export default function LivePracticeInterface({
 
   return (
     <div className="space-y-6">
+      {/* Video Feed with Real-time Metrics */}
+      <SimpleCameraFeed 
+        isRecording={isRecording}
+        wpm={speechRate}
+        duration={duration}
+        className="w-full"
+      />
+
       {/* Main Control Panel */}
       <Card>
         <CardHeader>

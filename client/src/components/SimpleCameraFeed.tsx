@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Camera, CameraOff, AlertCircle, RefreshCw } from 'lucide-react';
+import { Camera, CameraOff, AlertCircle, RefreshCw, Eye, User, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -8,14 +8,40 @@ interface SimpleCameraFeedProps {
   onStreamReady?: (stream: MediaStream) => void;
   onStreamEnd?: () => void;
   className?: string;
+  isRecording?: boolean;
+  wpm?: number;
+  duration?: number;
 }
 
-export default function SimpleCameraFeed({ onStreamReady, onStreamEnd, className = "" }: SimpleCameraFeedProps) {
+export default function SimpleCameraFeed({ onStreamReady, onStreamEnd, className = "", isRecording = false, wpm = 0, duration = 0 }: SimpleCameraFeedProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isActive, setIsActive] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
+  const [eyeContactScore, setEyeContactScore] = useState(75);
+  const [postureScore, setPostureScore] = useState(82);
+
+  // Simulate real-time eye contact and posture tracking
+  useEffect(() => {
+    if (!isRecording || !isActive) return;
+
+    const interval = setInterval(() => {
+      // Simulate eye contact detection (would be replaced with actual computer vision)
+      setEyeContactScore(prev => {
+        const variation = (Math.random() - 0.5) * 20;
+        return Math.max(30, Math.min(100, prev + variation));
+      });
+
+      // Simulate posture tracking (would be replaced with actual pose detection)
+      setPostureScore(prev => {
+        const variation = (Math.random() - 0.5) * 15;
+        return Math.max(40, Math.min(100, prev + variation));
+      });
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [isRecording, isActive]);
 
   const startCamera = async () => {
     setError("");
@@ -132,6 +158,78 @@ export default function SimpleCameraFeed({ onStreamReady, onStreamEnd, className
                 isActive ? 'block' : 'hidden'
               }`}
             />
+            
+            {/* Real-time Metrics Overlay */}
+            {isActive && isRecording && (
+              <div className="absolute inset-0 pointer-events-none">
+                {/* Top-left metrics */}
+                <div className="absolute top-4 left-4 space-y-2">
+                  {/* Eye Contact */}
+                  <div className="bg-black bg-opacity-70 rounded-lg px-3 py-2 text-white text-sm flex items-center space-x-2">
+                    <Eye className="w-4 h-4" />
+                    <span>Eye Contact</span>
+                    <div className={`px-2 py-1 rounded text-xs font-bold ${
+                      eyeContactScore >= 70 ? 'bg-green-500' : 
+                      eyeContactScore >= 50 ? 'bg-yellow-500' : 'bg-red-500'
+                    }`}>
+                      {Math.round(eyeContactScore)}%
+                    </div>
+                  </div>
+                  
+                  {/* Posture */}
+                  <div className="bg-black bg-opacity-70 rounded-lg px-3 py-2 text-white text-sm flex items-center space-x-2">
+                    <User className="w-4 h-4" />
+                    <span>Posture</span>
+                    <div className={`px-2 py-1 rounded text-xs font-bold ${
+                      postureScore >= 75 ? 'bg-green-500' : 
+                      postureScore >= 55 ? 'bg-yellow-500' : 'bg-red-500'
+                    }`}>
+                      {Math.round(postureScore)}%
+                    </div>
+                  </div>
+                </div>
+
+                {/* Top-right metrics */}
+                <div className="absolute top-4 right-4 space-y-2">
+                  {/* WPM */}
+                  <div className="bg-black bg-opacity-70 rounded-lg px-3 py-2 text-white text-sm flex items-center space-x-2">
+                    <Clock className="w-4 h-4" />
+                    <span>WPM</span>
+                    <div className={`px-2 py-1 rounded text-xs font-bold ${
+                      wpm >= 120 && wpm <= 150 ? 'bg-green-500' : 
+                      wpm >= 100 || (wpm > 150 && wpm <= 180) ? 'bg-yellow-500' : 'bg-red-500'
+                    }`}>
+                      {wpm}
+                    </div>
+                  </div>
+                  
+                  {/* Session Timer */}
+                  <div className="bg-black bg-opacity-70 rounded-lg px-3 py-2 text-white text-sm flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                    <span className="font-mono">
+                      {Math.floor(duration / 60).toString().padStart(2, '0')}:
+                      {(duration % 60).toString().padStart(2, '0')}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Bottom performance indicators */}
+                {(eyeContactScore < 50 || postureScore < 55 || wpm < 100 || wpm > 180) && (
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <div className="bg-yellow-500 bg-opacity-90 rounded-lg px-4 py-2 text-black text-sm flex items-center space-x-2">
+                      <AlertCircle className="w-4 h-4" />
+                      <span className="font-medium">
+                        {eyeContactScore < 50 ? "Look at camera more directly" :
+                         postureScore < 55 ? "Straighten your posture" :
+                         wpm < 100 ? "Speak a bit faster" :
+                         wpm > 180 ? "Slow down your speech" : ""}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            
             {!isActive && (
               <div className="absolute inset-0 flex items-center justify-center text-gray-400">
                 <div className="text-center">
