@@ -30,10 +30,10 @@ export default function HomePage() {
       <section className="relative overflow-hidden py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] mb-6">
+            <h1 className="text-5xl md:text-7xl font-display text-transparent bg-clip-text bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] mb-6">
               Master Your Voice
             </h1>
-            <p className="text-xl md:text-2xl text-slate-600 mb-8 max-w-3xl mx-auto">
+            <p className="text-xl md:text-2xl font-body text-slate-600 mb-8 max-w-3xl mx-auto">
               AI-powered speech coaching that transforms your communication skills through real-time feedback and personalized training
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -56,10 +56,10 @@ export default function HomePage() {
       <section className="py-16 bg-gradient-to-br from-blue-50 to-cyan-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-heading text-gray-900 mb-4">
               Why Communication is More Than Just Words
             </h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            <p className="text-lg font-body text-gray-600 max-w-3xl mx-auto">
               Research shows that effective communication involves much more than what you say. 
               The 7-38-55 rule reveals the true breakdown of how people perceive your message.
             </p>
@@ -223,7 +223,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-4xl font-bold text-slate-800 mb-6 flex items-center gap-3 flex-wrap">
+              <h2 className="text-4xl font-heading text-slate-800 mb-6 flex items-center gap-3 flex-wrap">
                 Why Choose
                 <img src={yappyyLogoPath} alt="Yappyy" className="h-14" />
                 ?
