@@ -1353,7 +1353,7 @@ ${transcript}`;
             <div className="mb-6">
               <h4 className="text-sm font-semibold text-slate-700 mb-2">Detected Filler Words:</h4>
               <div className="flex flex-wrap gap-2">
-                {[...new Set(sessionMetrics.fillerWords)].map((filler, index) => (
+                {Array.from(new Set(sessionMetrics.fillerWords)).map((filler, index) => (
                   <span
                     key={index}
                     className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm border border-red-200"
