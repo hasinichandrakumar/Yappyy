@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Mic, Video, Square, Play, Pause, Edit3, Save, X } from 'lucide-react';
+import { Mic, Video, Square, Play, Pause, Edit3, Save, X, Trophy, FileText, Target } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface LiveFeedbackItem {
@@ -475,19 +475,75 @@ export default function ImprovedPracticePage() {
 
         {/* Live Feedback Sidebar */}
         <div className="space-y-4">
-          {/* Session Goals */}
+          {/* Practice Badges to Earn */}
           <Card className="p-4">
-            <h3 className="font-semibold mb-3">Session Goals</h3>
+            <div className="flex items-center gap-2 mb-3">
+              <Trophy className="h-5 w-5 text-yellow-500" />
+              <h3 className="font-semibold">Badges to Earn</h3>
+            </div>
             <div className="space-y-3">
-              {currentGoals.map((goal, index) => (
-                <div key={index}>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>{goal.name}</span>
-                    <span>{goal.progress}/{goal.target}</span>
+              {[
+                { 
+                  name: "First Steps", 
+                  description: "Complete your first session", 
+                  difficulty: "Easy",
+                  color: "bg-green-100 text-green-800 border-green-200",
+                  icon: "🎯"
+                },
+                { 
+                  name: "Volume Master", 
+                  description: "Maintain good volume throughout", 
+                  difficulty: "Easy",
+                  color: "bg-green-100 text-green-800 border-green-200",
+                  icon: "🔊"
+                },
+                { 
+                  name: "Clarity Champion", 
+                  description: "Achieve 85% clarity score", 
+                  difficulty: "Medium",
+                  color: "bg-yellow-100 text-yellow-800 border-yellow-200",
+                  icon: "✨"
+                },
+                { 
+                  name: "Filler Fighter", 
+                  description: "Use fewer than 5 filler words", 
+                  difficulty: "Medium",
+                  color: "bg-yellow-100 text-yellow-800 border-yellow-200",
+                  icon: "🎭"
+                },
+                { 
+                  name: "Purpose Driven", 
+                  description: "Complete 3 sessions with clear purposes", 
+                  difficulty: "Hard",
+                  color: "bg-red-100 text-red-800 border-red-200",
+                  icon: "🚀"
+                },
+                { 
+                  name: "Marathon Speaker", 
+                  description: "Practice for 60+ minutes total", 
+                  difficulty: "Hard",
+                  color: "bg-red-100 text-red-800 border-red-200",
+                  icon: "⏱️"
+                }
+              ].map((badge, index) => (
+                <div key={index} className="flex items-start gap-3 p-3 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
+                  <div className="text-xl">{badge.icon}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-medium text-sm text-gray-900">{badge.name}</h4>
+                      <Badge className={`text-xs px-2 py-0.5 ${badge.color}`}>
+                        {badge.difficulty}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-gray-600 leading-relaxed">{badge.description}</p>
                   </div>
-                  <Progress value={(goal.progress / goal.target) * 100} />
                 </div>
               ))}
+            </div>
+            <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <p className="text-xs text-blue-700 font-medium">
+                💡 Start practicing to unlock these achievements!
+              </p>
             </div>
           </Card>
 
