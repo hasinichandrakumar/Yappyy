@@ -4,6 +4,13 @@ import { storage } from "./storage";
 import { insertPracticeSessionSchema, insertCoachingFeedbackSchema } from "@shared/schema";
 import { setupGoogleAuth, requireAuth } from "./googleAuth";
 import { generateClubCoaching } from "./ai-coaching";
+import { 
+  generateComprehensiveAnalysis, 
+  generateSpeechPersona, 
+  generateCoachingInsights, 
+  generateLiveFeedback, 
+  personalizeTemplate 
+} from "./openai-coaching";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -780,6 +787,13 @@ Provide specific, actionable coaching tips to improve this presentation. Focus o
       res.status(500).json({ message: "Failed to analyze speech", error: error.message });
     }
   });
+
+  // OpenAI-powered comprehensive coaching endpoints
+  app.post('/api/openai/comprehensive-analysis', generateComprehensiveAnalysis);
+  app.post('/api/openai/speech-persona', generateSpeechPersona);
+  app.post('/api/openai/coaching-insights', generateCoachingInsights);
+  app.post('/api/openai/live-feedback', generateLiveFeedback);
+  app.post('/api/openai/personalize-template', personalizeTemplate);
 
   // Analyze posture from image (simplified text-based analysis)
   app.post("/api/analyze-posture", async (req, res) => {

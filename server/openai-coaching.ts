@@ -67,7 +67,12 @@ export async function generateComprehensiveAnalysis(req: Request, res: Response)
       temperature: 0.7
     });
 
-    const analysis = JSON.parse(response.choices[0].message.content);
+    const content = response.choices[0].message.content;
+    if (!content) {
+      throw new Error('No response content received');
+    }
+    
+    const analysis = JSON.parse(content);
     res.json({ success: true, analysis });
 
   } catch (error) {
@@ -124,7 +129,12 @@ export async function generateSpeechPersona(req: Request, res: Response) {
       temperature: 0.8
     });
 
-    const persona = JSON.parse(response.choices[0].message.content);
+    const content = response.choices[0].message.content;
+    if (!content) {
+      throw new Error('No response content received');
+    }
+    
+    const persona = JSON.parse(content);
     res.json({ success: true, persona });
 
   } catch (error) {
@@ -186,7 +196,12 @@ export async function generateCoachingInsights(req: Request, res: Response) {
       temperature: 0.7
     });
 
-    const insights = JSON.parse(response.choices[0].message.content);
+    const content = response.choices[0].message.content;
+    if (!content) {
+      throw new Error('No response content received');
+    }
+    
+    const insights = JSON.parse(content);
     res.json({ success: true, insights });
 
   } catch (error) {
@@ -237,7 +252,12 @@ export async function generateLiveFeedback(req: Request, res: Response) {
       temperature: 0.6
     });
 
-    const feedback = JSON.parse(response.choices[0].message.content);
+    const content = response.choices[0].message.content;
+    if (!content) {
+      throw new Error('No response content received');
+    }
+    
+    const feedback = JSON.parse(content);
     res.json({ success: true, feedback: feedback.feedback });
 
   } catch (error) {
@@ -283,7 +303,12 @@ export async function personalizeTemplate(req: Request, res: Response) {
       temperature: 0.7
     });
 
-    const personalization = JSON.parse(response.choices[0].message.content);
+    const content = response.choices[0].message.content;
+    if (!content) {
+      throw new Error('No response content received');
+    }
+    
+    const personalization = JSON.parse(content);
     res.json({ success: true, ...personalization });
 
   } catch (error) {
