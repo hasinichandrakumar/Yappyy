@@ -224,7 +224,7 @@ export default function EnhancedAnalysisTab() {
                   <div className="space-y-4">
                     <div className="text-center">
                       <div className="text-3xl font-bold text-blue-800 mb-1">
-                        {Math.round(typedSessions.reduce((sum: number, s: any) => sum + (s.speakingPace || 145), 0) / typedSessions.length)} WPM
+                        {Math.round(typedSessions.reduce((sum: number, s: any) => sum + (s.speakingPace || 0), 0) / typedSessions.length)} WPM
                       </div>
                       <div className="text-sm text-blue-600">Average Words Per Minute</div>
                     </div>
@@ -374,11 +374,11 @@ export default function EnhancedAnalysisTab() {
                   </div>
                   <div className="text-center">
                     <div className="text-4xl font-bold text-blue-800 mb-2">
-                      {Math.round(typedSessions.reduce((sum: number, s: any) => sum + (s.eyeContactScore || 85), 0) / typedSessions.length)}%
+                      {Math.round(typedSessions.reduce((sum: number, s: any) => sum + (s.eyeContactScore || 0), 0) / typedSessions.length)}%
                     </div>
                     <div className="text-sm text-blue-600 mb-3">Engagement Level</div>
-                    <Progress value={85} className="h-2 bg-blue-200" />
-                    <div className="text-xs text-blue-700 mt-2">Excellent connection with audience</div>
+                    <Progress value={Math.round(typedSessions.reduce((sum: number, s: any) => sum + (s.eyeContactScore || 0), 0) / typedSessions.length)} className="h-2 bg-blue-200" />
+                    <div className="text-xs text-blue-700 mt-2">{Math.round(typedSessions.reduce((sum: number, s: any) => sum + (s.eyeContactScore || 0), 0) / typedSessions.length) > 80 ? 'Excellent connection with audience' : Math.round(typedSessions.reduce((sum: number, s: any) => sum + (s.eyeContactScore || 0), 0) / typedSessions.length) > 60 ? 'Good eye contact maintained' : 'Eye contact needs improvement'}</div>
                   </div>
                 </div>
 
@@ -390,7 +390,7 @@ export default function EnhancedAnalysisTab() {
                   </div>
                   <div className="text-center">
                     <div className="text-4xl font-bold text-emerald-800 mb-2">
-                      {Math.round(typedSessions.reduce((sum: number, s: any) => sum + (s.postureScore || 78), 0) / typedSessions.length)}%
+                      {Math.round(typedSessions.reduce((sum: number, s: any) => sum + (s.postureScore || 0), 0) / typedSessions.length)}%
                     </div>
                     <div className="text-sm text-emerald-600 mb-3">Confidence Score</div>
                     <Progress value={78} className="h-2 bg-emerald-200" />
@@ -406,7 +406,7 @@ export default function EnhancedAnalysisTab() {
                   </div>
                   <div className="text-center">
                     <div className="text-4xl font-bold text-purple-800 mb-2">
-                      {Math.round(typedSessions.reduce((sum: number, s: any) => sum + (s.gestureScore || 72), 0) / typedSessions.length)}%
+                      {Math.round(typedSessions.reduce((sum: number, s: any) => sum + (s.gestureScore || 0), 0) / typedSessions.length)}%
                     </div>
                     <div className="text-sm text-purple-600 mb-3">Natural Movement</div>
                     <Progress value={72} className="h-2 bg-purple-200" />
