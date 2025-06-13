@@ -10,7 +10,8 @@ import {
   generateSpeechPersona, 
   generateCoachingInsights, 
   generateLiveFeedback, 
-  personalizeTemplate 
+  personalizeTemplate,
+  generateSessionInsights
 } from "./openai-coaching";
 
 export async function registerRoutes(app: Express): Promise<Server> {

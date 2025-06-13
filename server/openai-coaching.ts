@@ -2,7 +2,7 @@ import OpenAI from 'openai';
 import { Request, Response } from 'express';
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || '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',
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 interface SessionData {
@@ -23,12 +23,119 @@ interface SessionData {
   }>;
 }
 
+export async function generateSessionInsights(req: Request, res: Response) {
+  try {
+    const { sessionId, userId, analysisType = 'single' } = req.body;
+    
+    // Import storage to get session data
+    const { storage } = await import('./storage');
+    
+    let sessions;
+    if (analysisType === 'all' || !sessionId) {
+      sessions = await storage.getUserPracticeSessions(userId);
+    } else {
+      const singleSession = await storage.getPracticeSession(parseInt(sessionId));
+      sessions = singleSession ? [singleSession] : [];
+    }
+
+    if (!sessions || sessions.length === 0) {
+      return res.status(404).json({ error: 'No sessions found' });
+    }
+
+    const analysisPrompt = `
+    You are an expert AI speech coach. Analyze the following practice session(s) and provide comprehensive insights.
+
+    Sessions Data:
+    ${sessions.map((session: any, index: number) => `
+    Session ${index + 1}:
+    - Name: ${session.name || 'Untitled Session'}
+    - Purpose: ${session.purpose || 'General Practice'}
+    - Date: ${new Date(session.createdAt).toLocaleDateString()}
+    - Duration: ${session.duration || 0} seconds
+    - Volume Score: ${session.volumeScore || 0}/100
+    - Clarity Score: ${session.clarityScore || 0}/100
+    - Pace Score: ${session.paceScore || 0}/100
+    - Filler Words: ${session.fillerWordCount || 0}
+    - Words Spoken: ${session.wordCount || 0}
+    - Transcript: ${session.transcript || 'No transcript available'}
+    `).join('\n')}
+
+    Analysis Type: ${analysisType === 'all' ? 'Multi-session trend analysis' : 'Single session deep dive'}
+
+    Provide comprehensive insights in this JSON structure:
+    {
+      "overallScore": 85,
+      "voiceAnalysis": {
+        "score": 88,
+        "strengths": ["Clear articulation", "Good pace control"],
+        "improvements": ["Reduce filler words", "Improve volume consistency"],
+        "insights": "Detailed paragraph about voice quality, pace, clarity trends"
+      },
+      "contentAnalysis": {
+        "score": 82,
+        "strengths": ["Well-structured", "Engaging examples"],
+        "improvements": ["Stronger conclusions", "Better transitions"],
+        "insights": "Detailed paragraph about content structure and effectiveness"
+      },
+      "bodyLanguageAnalysis": {
+        "score": 78,
+        "strengths": ["Good posture", "Natural gestures"],
+        "improvements": ["More eye contact", "Confident stance"],
+        "insights": "Detailed paragraph about presence and non-verbal communication"
+      },
+      "trends": {
+        "improving": ["voice clarity", "pace control"],
+        "declining": [],
+        "stable": ["content structure"]
+      },
+      "recommendations": [
+        {
+          "priority": "high",
+          "area": "voice",
+          "title": "Reduce Filler Words",
+          "description": "Practice pausing instead of using 'um' and 'uh'. Try the 3-second pause technique."
+        }
+      ],
+      "progressSummary": "Overall progress summary with encouraging insights based on actual session data"
+    }
+
+    Be specific, actionable, and focus on patterns observed in the actual session data.
+    `;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        { role: "system", content: "You are an expert AI speech coach providing detailed analysis and insights." },
+        { role: "user", content: analysisPrompt }
+      ],
+      response_format: { type: "json_object" },
+      max_tokens: 2000
+    });
+
+    const analysis = JSON.parse(response.choices[0].message.content || '{}');
+    
+    res.json({
+      success: true,
+      analysis,
+      sessionCount: sessions.length,
+      analysisType
+    });
+
+  } catch (error) {
+    console.error('Error generating session insights:', error);
+    res.status(500).json({ 
+      error: 'Failed to generate insights',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+}
+
 export async function generateComprehensiveAnalysis(req: Request, res: Response) {
   try {
     const sessionData: SessionData = req.body;
 
     const analysisPrompt = `
-    You are an expert speech coach analyzing a practice session. Provide a comprehensive analysis in JSON format.
+    You are an expert speech coach analyzing a practice session. Provide comprehensive analysis in JSON format.
 
     Session Details:
     - Name: ${sessionData.name}
@@ -45,224 +152,179 @@ export async function generateComprehensiveAnalysis(req: Request, res: Response)
 
     Provide analysis in this JSON structure:
     {
-      "bodyLanguage": "Detailed paragraph about body language observations and improvements",
-      "content": "Detailed paragraph about content structure, clarity, and effectiveness",
-      "voice": "Detailed paragraph about voice quality, modulation, pace, and delivery",
-      "overall": "Overall assessment focusing on how well the session achieved its stated purpose",
-      "purposeAlignment": number (0-100),
-      "improvements": ["specific actionable improvement 1", "improvement 2", "improvement 3"],
-      "strengths": ["specific strength 1", "strength 2", "strength 3"]
-    }
-
-    Be specific, actionable, and focus on how the performance relates to the stated session purpose.
-    `;
+      "bodyLanguage": "Detailed paragraph about body language observations",
+      "content": "Detailed paragraph about content structure and effectiveness",
+      "voice": "Detailed paragraph about voice quality and delivery",
+      "overall": "Overall assessment focusing on session purpose achievement",
+      "purposeAlignment": 85,
+      "improvements": ["specific improvement 1", "improvement 2"],
+      "strengths": ["specific strength 1", "strength 2"]
+    }`;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      model: "gpt-4o",
       messages: [
-        { role: "system", content: "You are an expert speech coach providing detailed, actionable feedback." },
+        { role: "system", content: "You are an expert speech coach." },
         { role: "user", content: analysisPrompt }
       ],
-      response_format: { type: "json_object" },
-      temperature: 0.7
+      response_format: { type: "json_object" }
     });
 
-    const content = response.choices[0].message.content;
-    if (!content) {
-      throw new Error('No response content received');
-    }
-    
-    const analysis = JSON.parse(content);
-    res.json({ success: true, analysis });
+    const analysis = JSON.parse(response.choices[0].message.content || '{}');
+    res.json(analysis);
 
   } catch (error) {
-    console.error('Error generating comprehensive analysis:', error);
+    console.error('Error generating analysis:', error);
     res.status(500).json({ error: 'Failed to generate analysis' });
   }
 }
 
 export async function generateSpeechPersona(req: Request, res: Response) {
   try {
-    const { userId, sessions } = req.body;
+    const { userId } = req.body;
+    const { storage } = await import('./storage');
+    
+    const sessions = await storage.getUserPracticeSessions(userId);
 
-    const personaPrompt = `
-    Based on multiple practice sessions, create a personalized speech persona for this user.
-
-    Session Data:
-    ${sessions.map((s: any, i: number) => `
-    Session ${i + 1}: ${s.name}
-    Purpose: ${s.purpose}
-    Metrics: Clarity ${s.metrics.clarity}%, Pace ${s.metrics.pace} WPM, Filler Words: ${s.metrics.fillerWords}
-    `).join('\n')}
-
-    Create a speech persona in JSON format:
-    {
-      "type": "persona_type_key",
-      "title": "The [Persona Name]",
-      "description": "2-3 sentence description of their speaking style and natural strengths",
-      "strengths": ["strength 1", "strength 2", "strength 3", "strength 4"],
-      "characteristics": ["characteristic 1", "characteristic 2", "characteristic 3", "characteristic 4"],
-      "communicationStyle": "Detailed paragraph about their unique communication approach",
-      "recommendations": ["personalized recommendation 1", "recommendation 2", "recommendation 3", "recommendation 4"],
-      "avatar": "single emoji that represents their persona",
-      "dnaInsights": [
-        {
-          "category": "Voice & Delivery",
-          "trait": "trait name",
-          "score": number (0-100),
-          "description": "what this score means for them",
-          "developmentTip": "specific tip for improvement"
-        }
-      ]
+    if (!sessions || sessions.length === 0) {
+      return res.status(404).json({ error: 'No sessions found' });
     }
 
-    Make it personal, encouraging, and based on actual patterns from their sessions.
+    const personaPrompt = `
+    Based on practice sessions, create a personalized speech persona for this user:
+
+    Sessions Data:
+    ${sessions.map((session: any, index: number) => `
+    Session ${index + 1}: ${session.name || 'Untitled'} - ${new Date(session.createdAt).toLocaleDateString()}
+    Purpose: ${session.purpose || 'General Practice'}
+    Duration: ${session.duration || 0}s
+    Scores - Volume: ${session.volumeScore || 0}, Clarity: ${session.clarityScore || 0}, Pace: ${session.paceScore || 0}
+    `).join('\n')}
+
+    Create a speech persona in this JSON format:
+    {
+      "speakerType": "The Confident Presenter",
+      "strengths": ["Natural storyteller", "Clear articulation"],
+      "challenges": ["Pacing consistency", "Volume control"],
+      "communicationStyle": "Detailed description of their unique speaking style",
+      "recommendations": ["Personalized tip 1", "Personalized tip 2"],
+      "confidenceLevel": 78,
+      "personalityTraits": ["Enthusiastic", "Detail-oriented"]
+    }
+
+    Make it personal, encouraging, and based on actual session patterns.
     `;
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
-        { role: "system", content: "You are a speech coach creating personalized speaking personas based on performance data." },
+        { role: "system", content: "You are a speech coach creating personalized profiles." },
         { role: "user", content: personaPrompt }
       ],
-      response_format: { type: "json_object" },
-      temperature: 0.8
+      response_format: { type: "json_object" }
     });
 
-    const content = response.choices[0].message.content;
-    if (!content) {
-      throw new Error('No response content received');
-    }
-    
-    const persona = JSON.parse(content);
-    res.json({ success: true, persona });
+    const persona = JSON.parse(response.choices[0].message.content || '{}');
+    res.json(persona);
 
   } catch (error) {
     console.error('Error generating speech persona:', error);
-    res.status(500).json({ error: 'Failed to generate persona' });
+    res.status(500).json({ error: 'Failed to generate speech persona' });
   }
 }
 
 export async function generateCoachingInsights(req: Request, res: Response) {
   try {
-    const { userId, sessions } = req.body;
+    const { userId, sessionId } = req.body;
+    const { storage } = await import('./storage');
+    
+    let sessions;
+    if (sessionId) {
+      const session = await storage.getPracticeSession(parseInt(sessionId));
+      sessions = session ? [session] : [];
+    } else {
+      sessions = await storage.getUserPracticeSessions(userId);
+    }
 
     const insightsPrompt = `
-    As an AI speech coach, analyze this user's progress across multiple sessions and provide coaching insights.
+    Generate coaching insights based on these practice sessions:
 
-    Sessions:
-    ${sessions.map((s: any, i: number) => `
-    Session ${i + 1}: ${s.name} (${s.date})
-    Purpose: ${s.purpose}
-    Duration: ${s.duration}s
-    Metrics: Clarity ${s.metrics.clarity}%, Pace ${s.metrics.pace}WPM, Volume ${s.metrics.volume}%
-    Filler Words: ${s.metrics.fillerWords}
-    Purpose Alignment: ${s.purposeAlignment}%
+    ${sessions.map((session: any) => `
+    Session: ${session.name || 'Untitled'} (${new Date(session.createdAt).toLocaleDateString()})
+    Purpose: ${session.purpose || 'General Practice'}
+    Transcript: ${session.transcript || 'No transcript'}
+    Metrics: Volume ${session.volumeScore || 0}, Clarity ${session.clarityScore || 0}, Pace ${session.paceScore || 0}
     `).join('\n')}
 
-    Provide coaching insights in JSON format:
+    Provide insights in JSON format:
     {
       "insights": [
         {
-          "category": "purpose_alignment|skill_development|behavioral_patterns|progress_tracking",
-          "title": "Insight title",
-          "description": "Detailed observation about their progress or patterns",
-          "recommendation": "Specific actionable recommendation",
-          "priority": "high|medium|low",
-          "sessionsAnalyzed": number
+          "category": "voice_control",
+          "title": "Voice Control Analysis",
+          "description": "Specific insights about voice patterns",
+          "recommendations": ["Actionable tip 1", "Actionable tip 2"]
         }
       ],
-      "progressTrends": [
-        {
-          "skill": "skill name",
-          "trend": "improving|declining|stable",
-          "change": number (percentage change),
-          "sessions": number,
-          "recommendation": "specific recommendation"
-        }
-      ]
+      "overallFeedback": "Comprehensive feedback paragraph",
+      "nextSteps": ["Next step 1", "Next step 2"]
     }
-
-    Focus on genuine patterns, progress tracking, and actionable coaching advice.
     `;
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
-        { role: "system", content: "You are an expert speech coach analyzing long-term progress and providing strategic guidance." },
+        { role: "system", content: "You are an AI speech coach providing actionable insights." },
         { role: "user", content: insightsPrompt }
       ],
-      response_format: { type: "json_object" },
-      temperature: 0.7
+      response_format: { type: "json_object" }
     });
 
-    const content = response.choices[0].message.content;
-    if (!content) {
-      throw new Error('No response content received');
-    }
-    
-    const insights = JSON.parse(content);
-    res.json({ success: true, insights });
+    const insights = JSON.parse(response.choices[0].message.content || '{}');
+    res.json(insights);
 
   } catch (error) {
     console.error('Error generating coaching insights:', error);
-    res.status(500).json({ error: 'Failed to generate insights' });
+    res.status(500).json({ error: 'Failed to generate coaching insights' });
   }
 }
 
 export async function generateLiveFeedback(req: Request, res: Response) {
   try {
-    const { sessionPurpose, currentMetrics, transcript, timestamp } = req.body;
+    const { metrics, transcript, timestamp } = req.body;
 
     const feedbackPrompt = `
-    Provide real-time coaching feedback for an ongoing speech practice session.
-
-    Session Purpose: ${sessionPurpose}
-    Current Time: ${timestamp} seconds
-    Current Metrics:
-    - Volume: ${currentMetrics.volume}%
-    - Clarity: ${currentMetrics.clarity}%
-    - Pace: ${currentMetrics.pace} WPM
-    - Filler Words: ${currentMetrics.fillerWords}
-
-    Recent Transcript: "${transcript}"
-
-    Generate 1-2 pieces of live feedback in JSON format:
+    Provide real-time coaching feedback:
+    
+    Current metrics:
+    - Volume: ${metrics.volume}%
+    - Clarity: ${metrics.clarity}%
+    - Pace: ${metrics.pace} WPM
+    - Recent transcript: "${transcript}"
+    
+    Give specific, immediate feedback in JSON:
     {
-      "feedback": [
-        {
-          "type": "content|voice|body_language|voice_modulation",
-          "message": "Brief, actionable feedback (max 15 words)",
-          "severity": "info|warning|success",
-          "timestamp": ${timestamp}
-        }
-      ]
+      "feedback": "Specific feedback message",
+      "type": "encouragement|correction|tip",
+      "priority": "high|medium|low"
     }
-
-    Focus on immediate, actionable advice related to their session purpose.
     `;
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
-        { role: "system", content: "You are a real-time speech coach providing brief, actionable feedback during practice sessions." },
+        { role: "system", content: "You are a real-time speech coach." },
         { role: "user", content: feedbackPrompt }
       ],
-      response_format: { type: "json_object" },
-      temperature: 0.6
+      response_format: { type: "json_object" }
     });
 
-    const content = response.choices[0].message.content;
-    if (!content) {
-      throw new Error('No response content received');
-    }
-    
-    const feedback = JSON.parse(content);
-    res.json({ success: true, feedback: feedback.feedback });
+    const feedback = JSON.parse(response.choices[0].message.content || '{}');
+    res.json({ ...feedback, timestamp });
 
   } catch (error) {
     console.error('Error generating live feedback:', error);
-    res.status(500).json({ error: 'Failed to generate feedback' });
+    res.status(500).json({ error: 'Failed to generate live feedback' });
   }
 }
 
@@ -271,45 +333,31 @@ export async function personalizeTemplate(req: Request, res: Response) {
     const { templateContent, userContext, personalizationRequest } = req.body;
 
     const personalizationPrompt = `
-    Personalize this speech template based on the user's request.
-
-    Original Template:
-    ${templateContent}
-
+    Personalize this speech template:
+    
+    Original Template: ${templateContent}
     User Context: ${userContext}
     Personalization Request: ${personalizationRequest}
-
-    Provide the personalized template in JSON format:
+    
+    Provide the personalized template in JSON:
     {
-      "personalizedContent": "The complete personalized template text",
-      "changes": ["description of change 1", "description of change 2"],
-      "suggestions": {
-        "voice": "Voice modulation advice for this content",
-        "body": "Body language suggestions",
-        "structure": "Content structure recommendations"
-      }
+      "personalizedContent": "Fully personalized template content",
+      "changes": ["Change 1", "Change 2"],
+      "explanation": "Brief explanation of personalization approach"
     }
-
-    Make it natural, relevant, and maintain the original template's effectiveness.
     `;
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
-        { role: "system", content: "You are a speech writing expert helping personalize presentation templates." },
+        { role: "system", content: "You are a speech writing assistant." },
         { role: "user", content: personalizationPrompt }
       ],
-      response_format: { type: "json_object" },
-      temperature: 0.7
+      response_format: { type: "json_object" }
     });
 
-    const content = response.choices[0].message.content;
-    if (!content) {
-      throw new Error('No response content received');
-    }
-    
-    const personalization = JSON.parse(content);
-    res.json({ success: true, ...personalization });
+    const result = JSON.parse(response.choices[0].message.content || '{}');
+    res.json(result);
 
   } catch (error) {
     console.error('Error personalizing template:', error);
