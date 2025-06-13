@@ -61,7 +61,7 @@ export default function ImprovedPracticePage() {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
-  // Initialize session name with sequential numbering
+  // Initialize session name with sequential numbering only once
   useEffect(() => {
     const initializeSessionName = async () => {
       if (!sessionName) {
@@ -76,7 +76,7 @@ export default function ImprovedPracticePage() {
       }
     };
     initializeSessionName();
-  }, [sessionName]);
+  }, []); // Remove sessionName dependency to prevent override loop
 
   // Eye contact detection function
   const detectEyeContact = useCallback(() => {
@@ -1021,10 +1021,7 @@ export default function ImprovedPracticePage() {
         const savedSession = await response.json();
         console.log('Session saved successfully:', savedSession);
         
-        // Update session name to reflect the saved session number
-        if (!sessionName.includes('Session')) {
-          setSessionName(`Session ${sessionNumber}`);
-        }
+        // Keep user's custom session name - don't override it
         
         toast({
           title: "Session Saved",
