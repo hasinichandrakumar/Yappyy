@@ -572,7 +572,7 @@ export default function ImprovedPracticePage() {
       {/* Main Practice Area */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Video Feed */}
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-3 space-y-4">
           <Card className="p-4">
             <div className="relative">
               <video
@@ -680,14 +680,37 @@ export default function ImprovedPracticePage() {
               </div>
             )}
           </Card>
+
+          {/* Practice Badges to Earn - Moved below video */}
+          <Card className="p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Trophy className="h-5 w-5 text-yellow-500" />
+              <h3 className="font-semibold">Badges to Earn</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                <div className="text-lg">🎯</div>
+                <div>
+                  <div className="font-medium text-gray-800">First Steps</div>
+                  <div className="text-xs text-gray-600">Complete your first practice session</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                <div className="text-lg">✨</div>
+                <div>
+                  <div className="font-medium text-gray-800">Clarity Champion</div>
+                  <div className="text-xs text-gray-600">Achieve 85% clarity score</div>
+                </div>
+              </div>
+            </div>
+          </Card>
         </div>
 
-        {/* Live Feedback Sidebar */}
-        <div className="space-y-4">
-          {/* Live AI Feedback with Timestamps */}
-          <Card className="p-4">
+        {/* Live Feedback Sidebar - Full height to match video */}
+        <div className="lg:col-span-1">
+          <Card className="p-4 h-full">
             <h3 className="font-semibold mb-3">Live AI Feedback</h3>
-            <div className="space-y-3 max-h-96 overflow-y-auto">
+            <div className="space-y-3 h-96 lg:h-[500px] overflow-y-auto">
               {liveFeedback.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-8">
                   Start recording to see live AI feedback with timestamps
@@ -714,50 +737,6 @@ export default function ImprovedPracticePage() {
                   </div>
                 ))
               )}
-            </div>
-          </Card>
-
-          {/* Practice Badges to Earn */}
-          <Card className="p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <Trophy className="h-5 w-5 text-yellow-500" />
-              <h3 className="font-semibold">Badges to Earn</h3>
-            </div>
-            <div className="space-y-3">
-              {[
-                { 
-                  name: "First Steps", 
-                  description: "Complete your first practice session", 
-                  difficulty: "Easy",
-                  color: "bg-green-100 text-green-800 border-green-200",
-                  icon: "🎯"
-                },
-                { 
-                  name: "Clarity Champion", 
-                  description: "Achieve 85% clarity score in a session", 
-                  difficulty: "Medium",
-                  color: "bg-yellow-100 text-yellow-800 border-yellow-200",
-                  icon: "✨"
-                }
-              ].map((badge, index) => (
-                <div key={index} className="flex items-start gap-3 p-3 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
-                  <div className="text-xl">{badge.icon}</div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-medium text-sm text-gray-900">{badge.name}</h4>
-                      <Badge className={`text-xs px-2 py-0.5 ${badge.color}`}>
-                        {badge.difficulty}
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-gray-600 leading-relaxed">{badge.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-              <p className="text-xs text-blue-700 font-medium">
-                Start practicing to unlock these achievements!
-              </p>
             </div>
           </Card>
         </div>
