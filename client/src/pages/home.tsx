@@ -100,30 +100,69 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="text-center mt-12">
-            <div className="mb-6">
-              <p className="text-lg font-semibold text-gray-800 mb-2">
-                That's why we coach
-              </p>
-              <div className="text-7xl md:text-8xl font-bold bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] bg-clip-text text-transparent mb-2">
-                100%
+          <div className="mt-16">
+            {/* Central 100% Statistic */}
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-100/50 to-transparent h-px top-1/2"></div>
+              <div className="flex justify-center">
+                <div className="bg-white px-8 py-6 rounded-3xl shadow-2xl border border-blue-100 relative">
+                  <div className="text-center">
+                    <p className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                      Complete Communication Coaching
+                    </p>
+                    <div className="relative">
+                      <div className="text-8xl md:text-9xl font-black bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] bg-clip-text text-transparent leading-none">
+                        100%
+                      </div>
+                      <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-br from-orange-400 to-red-500 rounded-full animate-pulse"></div>
+                    </div>
+                    <p className="text-lg font-bold text-gray-800 mt-2">
+                      of your communication skills
+                    </p>
+                  </div>
+                </div>
               </div>
-              <p className="text-xl font-bold text-gray-900">
-                of you
-              </p>
             </div>
-            <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-600">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-green-500" />
-                <span className="font-medium">Voice analysis & coaching</span>
+
+            {/* Feature Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 max-w-4xl mx-auto">
+              <div className="bg-white p-6 rounded-2xl shadow-lg border border-blue-100 hover:shadow-xl transition-all duration-300">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] rounded-xl flex items-center justify-center">
+                    <span className="text-white font-bold">7%</span>
+                  </div>
+                  <h4 className="font-bold text-gray-900">Words</h4>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
+                  <span className="text-sm font-medium text-gray-700">Voice analysis & coaching</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-green-500" />
-                <span className="font-medium">Tone & delivery feedback</span>
+
+              <div className="bg-white p-6 rounded-2xl shadow-lg border border-blue-100 hover:shadow-xl transition-all duration-300">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] rounded-xl flex items-center justify-center">
+                    <span className="text-white font-bold">38%</span>
+                  </div>
+                  <h4 className="font-bold text-gray-900">Tone</h4>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
+                  <span className="text-sm font-medium text-gray-700">Tone & delivery feedback</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-green-500" />
-                <span className="font-medium">Body language tracking</span>
+
+              <div className="bg-white p-6 rounded-2xl shadow-lg border border-blue-100 hover:shadow-xl transition-all duration-300">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] rounded-xl flex items-center justify-center">
+                    <span className="text-white font-bold">55%</span>
+                  </div>
+                  <h4 className="font-bold text-gray-900">Body Language</h4>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
+                  <span className="text-sm font-medium text-gray-700">Body language tracking</span>
+                </div>
               </div>
             </div>
           </div>
