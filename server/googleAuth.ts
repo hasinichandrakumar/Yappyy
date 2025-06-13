@@ -41,6 +41,24 @@ export async function setupGoogleAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
+  // Setup passport serialization for all authentication methods
+  passport.serializeUser((user: any, done) => {
+    console.log("Serializing user:", user.id);
+    done(null, user.id);
+  });
+
+  passport.deserializeUser(async (id: string, done) => {
+    try {
+      console.log("Deserializing user ID:", id);
+      const user = await storage.getUser(id);
+      console.log("Found user:", user ? "yes" : "no");
+      done(null, user);
+    } catch (error) {
+      console.error("Deserialize error:", error);
+      done(error, null);
+    }
+  });
+
   // Only setup Google OAuth if credentials are available
   if (hasGoogleCredentials) {
     // Google OAuth Strategy
@@ -82,22 +100,7 @@ export async function setupGoogleAuth(app: Express) {
       )
     );
 
-    passport.serializeUser((user: any, done) => {
-      console.log("Serializing user:", user.id);
-      done(null, user.id);
-    });
 
-    passport.deserializeUser(async (id: string, done) => {
-      try {
-        console.log("Deserializing user ID:", id);
-        const user = await storage.getUser(id);
-        console.log("Found user:", user ? "yes" : "no");
-        done(null, user);
-      } catch (error) {
-        console.error("Deserialize error:", error);
-        done(error, null);
-      }
-    });
 
     // Debug endpoint to check OAuth configuration
     app.get("/api/auth/debug", (req, res) => {
