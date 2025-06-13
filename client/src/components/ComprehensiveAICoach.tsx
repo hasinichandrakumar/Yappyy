@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Brain, TrendingUp, Target, Lightbulb, Calendar, Award, ChevronRight, MessageSquare, BarChart3 } from 'lucide-react';
+import { Brain, TrendingUp, Target, Lightbulb, Calendar, Award, ChevronRight, MessageSquare, BarChart3, Filter } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -39,7 +39,7 @@ interface SessionComparison {
 }
 
 export default function ComprehensiveAICoach() {
-  const [selectedSessionId, setSelectedSessionId] = useState<string>('');
+  const [selectedSession, setSelectedSession] = useState<string>('all');
   const [coachingInsights, setCoachingInsights] = useState<CoachingInsight[]>([]);
   const [progressTrends, setProgressTrends] = useState<ProgressTrend[]>([]);
   const [sessionComparisons, setSessionComparisons] = useState<SessionComparison[]>([]);
@@ -144,10 +144,21 @@ export default function ComprehensiveAICoach() {
     setSessionComparisons(mockSessionComparisons);
   }, []);
 
-  const { data: sessions } = useQuery({
+  // Fetch practice sessions for the session selector
+  const { data: sessions = [] } = useQuery({
     queryKey: ['/api/practice-sessions'],
-    enabled: true
   });
+
+  // Type guard for sessions
+  const typedSessions = Array.isArray(sessions) ? sessions : [];
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
 
   const generateComprehensiveAnalysis = async (sessionId: string) => {
     // This would call OpenAI API for comprehensive analysis
@@ -159,60 +170,40 @@ export default function ComprehensiveAICoach() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/30 p-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-lg border">
-        <div className="flex items-center justify-between">
+      <div className="mb-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2 flex items-center">
-              <Brain className="w-6 h-6 mr-2 text-purple-600" />
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-[#2563eb] to-[#22d3ee] bg-clip-text text-transparent">
               AI Speech Coach
-            </h2>
-            <p className="text-gray-600">Comprehensive analysis and personalized coaching based on your practice sessions</p>
+            </h1>
+            <p className="text-slate-600 mt-2">Comprehensive analysis and personalized coaching based on your practice sessions</p>
           </div>
-          <div className="text-right">
-            <div className="text-2xl font-bold text-purple-600">{mockSessionComparisons.length}</div>
-            <div className="text-sm text-gray-600">Sessions Analyzed</div>
+          
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-slate-500" />
+              <Select value={selectedSession} onValueChange={setSelectedSession}>
+                <SelectTrigger className="w-48 bg-white/80 backdrop-blur-sm border-slate-200">
+                  <SelectValue placeholder="Select session" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Sessions</SelectItem>
+                  {typedSessions.map((session: any) => (
+                    <SelectItem key={session.id} value={session.id.toString()}>
+                      {session.name || `Session ${session.id}`} - {formatDate(session.createdAt)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Session Selector */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Select Session for Deep Analysis</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center space-x-4">
-            <Select value={selectedSessionId} onValueChange={setSelectedSessionId}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Choose a session to analyze" />
-              </SelectTrigger>
-              <SelectContent>
-                {mockSessionComparisons.map((session) => (
-                  <SelectItem key={session.sessionId} value={session.sessionId}>
-                    <div className="flex items-center justify-between w-full">
-                      <span>{session.sessionName}</span>
-                      <Badge variant="outline" className="ml-2">
-                        {session.purposeAlignment}% aligned
-                      </Badge>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button 
-              onClick={() => selectedSessionId && generateComprehensiveAnalysis(selectedSessionId)}
-              disabled={!selectedSessionId}
-            >
-              Analyze Session
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
       <Tabs defaultValue="insights" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-3 bg-white/50 backdrop-blur-sm">
           <TabsTrigger value="insights">Coaching Insights</TabsTrigger>
           <TabsTrigger value="progress">Progress Tracking</TabsTrigger>
           <TabsTrigger value="comparison">Session Comparison</TabsTrigger>
@@ -220,7 +211,7 @@ export default function ComprehensiveAICoach() {
 
         <TabsContent value="insights" className="space-y-4">
           {coachingInsights.map((insight, index) => (
-            <Card key={index} className={`border-l-4 ${
+            <Card key={index} className={`border-l-4 bg-white/60 backdrop-blur-sm ${
               insight.priority === 'high' ? 'border-l-red-400' :
               insight.priority === 'medium' ? 'border-l-yellow-400' :
               'border-l-green-400'
