@@ -36,17 +36,13 @@ export default function HomePage() {
             <p className="text-xl md:text-2xl font-body text-slate-600 mb-8 max-w-3xl mx-auto">
               AI-powered speech coaching that transforms your communication skills through real-time feedback and personalized training
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex justify-center">
               <Link href="/dashboard">
                 <Button size="lg" className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white font-button shadow-lg hover:shadow-xl transition-all duration-300 px-8 py-4">
                   Start Practicing Now
                   <Mic className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-              <Button variant="outline" size="lg" className="border-blue-300 text-blue-700 hover:bg-blue-50 font-button px-8 py-4">
-                Watch Demo
-                <Video className="ml-2 h-5 w-5" />
-              </Button>
             </div>
           </div>
         </div>
