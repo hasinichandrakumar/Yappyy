@@ -107,64 +107,68 @@ export default function Home() {
   const advancedFeatures = [
     {
       icon: Brain,
-      title: "AI-Powered Speech Intelligence",
-      description: "Advanced neural networks analyze your vocal patterns, speech rhythm, and emotional delivery in real-time",
-      stats: "95% accuracy in identifying improvement areas",
+      title: "OpenAI-Powered Comprehensive Analysis",
+      description: "Real-time AI coaching with live feedback on content, voice modulation, body language, and delivery based on your session purpose",
+      stats: "Timestamped feedback during practice sessions",
       color: "from-purple-500 to-pink-500"
     },
     {
-      icon: Eye,
-      title: "Computer Vision Body Language",
-      description: "Real-time posture tracking, gesture analysis, and eye contact monitoring using advanced computer vision",
-      stats: "Track 50+ body language metrics simultaneously",
+      icon: Sparkles,
+      title: "Personalized Speech DNA",
+      description: "Generate your unique speaking persona after your first session with personalized development recommendations",
+      stats: "Fun persona analysis with actionable insights",
       color: "from-blue-500 to-[#0BF9EA]"
     },
     {
-      icon: Bot,
-      title: "Personalized AI Coach",
-      description: "Your dedicated AI speaking coach adapts to your learning style and provides contextual feedback",
-      stats: "Customized coaching for 10,000+ speech patterns",
+      icon: FileText,
+      title: "50+ Professional Templates",
+      description: "Complete template marketplace with TED talks, wedding speeches, job interviews, and business pitches with AI personalization",
+      stats: "Edit content and download as PDF",
       color: "from-green-500 to-emerald-500"
     },
     {
-      icon: BarChart3,
-      title: "Advanced Performance Analytics",
-      description: "Deep insights into your speaking trends, progress tracking, and predictive improvement forecasting",
-      stats: "Analyze 25+ speaking dimensions",
+      icon: Award,
+      title: "Engaging Badge System",
+      description: "Earn achievements based on real progress metrics with clear goals displayed on your practice page",
+      stats: "Track progress with celebration notifications",
       color: "from-orange-500 to-red-500"
     },
     {
-      icon: Lightbulb,
-      title: "Smart Content Enhancement",
-      description: "AI-powered content suggestions, structure optimization, and persuasion technique recommendations",
-      stats: "Increase speech impact by 40%",
+      icon: Volume2,
+      title: "Accurate Live Metrics",
+      description: "Monitor volume, clarity, pace, word count, and filler word detection with improved accuracy during practice sessions",
+      stats: "Real-time speech analysis with visual feedback",
       color: "from-yellow-500 to-orange-500"
     },
     {
-      icon: Globe,
-      title: "Cultural Communication Adaptation",
-      description: "Adapt your speaking style for global audiences with cultural context awareness and regional communication preferences",
-      stats: "Support for 25+ cultural communication styles",
+      icon: BarChart3,
+      title: "Session Storage & Playback",
+      description: "Store all practice sessions with comprehensive analysis, select any session to review recordings and detailed AI feedback",
+      stats: "Complete session history with progress tracking",
       color: "from-indigo-500 to-purple-500"
     }
   ];
 
   const speechTypes = [
-    "School Presentations",
-    "TED Talks", 
-    "Business Pitches",
-    "Conference Talks",
-    "Wedding Speeches",
+    "TED Talks",
+    "Wedding Speeches", 
     "Job Interviews",
+    "Business Pitches",
+    "School Presentations",
+    "Conference Keynotes",
     "Sales Presentations",
-    "Training Sessions"
+    "Training Sessions",
+    "Graduation Speeches",
+    "Podcast Interviews",
+    "Board Presentations",
+    "Product Launches"
   ];
 
   const metrics = [
-    { icon: Eye, label: "Eye Contact", value: "Real-time tracking" },
-    { icon: Volume2, label: "Voice Clarity", value: "AI-powered analysis" },
-    { icon: TrendingUp, label: "Speaking Pace", value: "Optimal WPM guidance" },
-    { icon: Brain, label: "Confidence Score", value: "Live assessment" }
+    { icon: Volume2, label: "Volume Level", value: "Real-time monitoring" },
+    { icon: Activity, label: "Voice Clarity", value: "Accurate percentage tracking" },
+    { icon: TrendingUp, label: "Speaking Pace", value: "Words per minute analysis" },
+    { icon: MessageCircle, label: "Filler Words", value: "Live detection & counting" }
   ];
 
   return (
@@ -271,7 +275,7 @@ export default function Home() {
               >
                 <Sparkles className="w-4 h-4" />
               </motion.div>
-              Powered by GPT-4 Turbo & MediaPipe Neural Networks
+              Powered by OpenAI GPT-4o & Advanced Speech Analysis
             </Badge>
           </motion.div>
           
@@ -315,8 +319,8 @@ export default function Home() {
             animate={isHeroInView ? { y: 0, opacity: 1 } : {}}
             transition={{ duration: 0.8, delay: 0.6 }}
           >
-            Transform your presentation skills with <span className="highlight-word">AI-powered</span> real-time feedback, intelligent coaching, 
-            and personalized improvement plans tailored to your <span className="highlight-word">speaking goals</span>.
+            Master public speaking with <span className="highlight-word">OpenAI-powered</span> comprehensive analysis, personalized Speech DNA generation, 
+            50+ professional templates, and <span className="highlight-word">real-time coaching</span> tailored to your session purpose.
           </motion.p>
           
           <motion.div 
