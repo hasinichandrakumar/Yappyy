@@ -298,6 +298,9 @@ export default function EnhancedBadgeSystem() {
   const [achievements, setAchievements] = useState<Achievement[]>(achievementData);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [showCelebration, setShowCelebration] = useState<Achievement | null>(null);
+  const [hoveredBadge, setHoveredBadge] = useState<string | null>(null);
+  const [pulsingBadges, setPulsingBadges] = useState<Set<string>>(new Set());
+  const [confettiActive, setConfettiActive] = useState(false);
   const [userStats, setUserStats] = useState({
     totalSessions: 0,
     currentStreak: 0,
@@ -333,9 +336,34 @@ export default function EnhancedBadgeSystem() {
       queryClient.invalidateQueries({ queryKey: ['/api/user-achievements'] });
       if (data.newlyUnlocked) {
         setShowCelebration(data.achievement);
+        setConfettiActive(true);
+        // Add pulsing effect to newly unlocked badge
+        setPulsingBadges(prev => {
+          const newArray = Array.from(prev);
+          newArray.push(data.achievement.id);
+          return new Set(newArray);
+        });
+        setTimeout(() => {
+          setConfettiActive(false);
+          setPulsingBadges(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(data.achievement.id);
+            return newSet;
+          });
+        }, 3000);
       }
     }
   });
+
+  // Fun achievement unlock celebration
+  const triggerCelebration = (achievement: Achievement) => {
+    setShowCelebration(achievement);
+    setConfettiActive(true);
+    setTimeout(() => {
+      setShowCelebration(null);
+      setConfettiActive(false);
+    }, 4000);
+  };
 
   // Calculate achievement progress based on user data
   useEffect(() => {
@@ -435,7 +463,7 @@ export default function EnhancedBadgeSystem() {
     <div className="space-y-6">
       {/* Header with Stats */}
       <div className="text-center space-y-4">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-[#2563eb] to-[#22d3ee] bg-clip-text text-transparent">
           Achievement Center
         </h1>
         <p className="text-gray-600">Track your speaking journey and earn rewards!</p>
