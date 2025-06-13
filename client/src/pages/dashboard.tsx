@@ -1,5 +1,5 @@
-import IntegratedDashboard from "@/components/IntegratedDashboard";
+import ImprovedPracticePage from "@/components/ImprovedPracticePage";
 
 export default function Dashboard() {
-  return <IntegratedDashboard />;
+  return <ImprovedPracticePage />;
 }

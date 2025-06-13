@@ -2,7 +2,7 @@ import OpenAI from 'openai';
 import { Request, Response } from 'express';
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY || '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',
 });
 
 interface SessionData {
