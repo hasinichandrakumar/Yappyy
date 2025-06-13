@@ -10,37 +10,35 @@ import { apiRequest } from '@/lib/queryClient';
 import { 
   BarChart3, 
   TrendingUp, 
-  TrendingDown, 
   Eye, 
   Mic, 
-  MessageSquare, 
   Clock, 
   Target,
   Award,
   Activity,
-  Volume2,
   Zap,
   CheckCircle,
   AlertTriangle,
   Info,
   Filter,
-  Loader2
+  Loader2,
+  Sparkles,
+  Brain,
+  Heart
 } from 'lucide-react';
 
 export default function EnhancedAnalysisTab() {
-  const [selectedTimeFrame, setSelectedTimeFrame] = useState('week');
   const [selectedSession, setSelectedSession] = useState('all');
   const [aiInsights, setAiInsights] = useState<any>(null);
 
-  // Fetch practice sessions for the session selector
+  // Fetch practice sessions
   const { data: sessions = [] } = useQuery({
     queryKey: ['/api/practice-sessions'],
   });
 
-  // Type guard for sessions
   const typedSessions = Array.isArray(sessions) ? sessions : [];
 
-  // Fetch user data for AI insights
+  // Fetch user data
   const { data: user } = useQuery({
     queryKey: ['/api/auth/user'],
   });
@@ -48,11 +46,12 @@ export default function EnhancedAnalysisTab() {
   // Generate session insights
   const { mutate: generateInsights, isPending: isGeneratingInsights } = useMutation({
     mutationFn: async ({ sessionId, analysisType }: { sessionId?: string; analysisType: string }) => {
-      return apiRequest('/api/openai/session-insights', 'POST', {
+      const response = await apiRequest('/api/openai/session-insights', 'POST', {
         sessionId: sessionId === 'all' ? null : sessionId,
         userId: (user as any)?.id || 'demo-user-123',
         analysisType: sessionId === 'all' ? 'all' : 'single'
       });
+      return response.json();
     },
     onSuccess: (data: any) => {
       setAiInsights(data.analysis);
@@ -62,7 +61,6 @@ export default function EnhancedAnalysisTab() {
     }
   });
 
-  // Generate insights when session selection changes
   useEffect(() => {
     if ((user as any)?.id && typedSessions.length > 0) {
       generateInsights({
@@ -98,78 +96,65 @@ export default function EnhancedAnalysisTab() {
   const sessionData = calculateSessionData();
 
   const getScoreColor = (score: number) => {
-    if (score >= 85) return 'text-green-600 bg-green-50';
-    if (score >= 70) return 'text-blue-600 bg-blue-50';
-    if (score >= 55) return 'text-yellow-600 bg-yellow-50';
-    return 'text-red-600 bg-red-50';
+    if (score >= 85) return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+    if (score >= 70) return 'bg-blue-50 text-blue-700 border-blue-200';
+    if (score >= 50) return 'bg-amber-50 text-amber-700 border-amber-200';
+    return 'bg-red-50 text-red-700 border-red-200';
   };
 
-  const getProgressColor = (score: number) => {
-    if (score >= 85) return 'bg-green-500';
-    if (score >= 70) return 'bg-blue-500';
-    if (score >= 55) return 'bg-yellow-500';
-    return 'bg-red-500';
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header Section */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Speaking Analysis</h1>
-          <p className="text-gray-600 mt-1">Comprehensive insights into your communication skills</p>
-        </div>
-        <div className="flex flex-col sm:flex-row gap-3">
-          {/* Session Filter */}
-          <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4 text-gray-500" />
-            <Select value={selectedSession} onValueChange={setSelectedSession}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Select session" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Sessions</SelectItem>
-                {typedSessions.slice(0, 10).map((session: any) => (
-                  <SelectItem key={session.id} value={session.id.toString()}>
-                    {session.name || `Session ${session.id}`} - {new Date(session.createdAt).toLocaleDateString()}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/30 p-6">
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-[#2563eb] to-[#22d3ee] bg-clip-text text-transparent">
+              Speaking Analysis
+            </h1>
+            <p className="text-slate-600 mt-2">Comprehensive insights into your communication performance</p>
           </div>
           
-          {/* Time Frame Filter */}
-          <div className="flex gap-2">
-            {['week', 'month', 'quarter'].map((timeframe) => (
-              <Button
-                key={timeframe}
-                variant={selectedTimeFrame === timeframe ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setSelectedTimeFrame(timeframe)}
-                className={selectedTimeFrame === timeframe ? 
-                  'bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] shadow-lg' : 
-                  'border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200'
-                }
-              >
-                {timeframe.charAt(0).toUpperCase() + timeframe.slice(1)}
-              </Button>
-            ))}
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-slate-500" />
+              <Select value={selectedSession} onValueChange={setSelectedSession}>
+                <SelectTrigger className="w-48 bg-white/80 backdrop-blur-sm border-slate-200">
+                  <SelectValue placeholder="Select session" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Sessions</SelectItem>
+                  {typedSessions.map((session: any) => (
+                    <SelectItem key={session.id} value={session.id.toString()}>
+                      {session.name || `Session ${session.id}`} - {formatDate(session.createdAt)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <Card className="p-6 bg-white/60 backdrop-blur-sm border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:bg-white/80">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Overall Score</p>
+              <p className="text-sm font-semibold text-slate-600 uppercase tracking-wide">Overall Score</p>
               <p className="text-4xl font-bold bg-gradient-to-br from-[#2563eb] to-[#22d3ee] bg-clip-text text-transparent">
                 {aiInsights?.overallScore || sessionData.averageScore || 0}
               </p>
               <div className="flex items-center mt-2">
                 {isGeneratingInsights ? (
-                  <Loader2 className="h-4 w-4 animate-spin text-gray-400 mr-1" />
+                  <Loader2 className="h-4 w-4 animate-spin text-slate-400 mr-1" />
                 ) : (
                   <TrendingUp className="h-4 w-4 text-emerald-500 mr-1" />
                 )}
@@ -187,9 +172,9 @@ export default function EnhancedAnalysisTab() {
         <Card className="p-6 bg-white/60 backdrop-blur-sm border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:bg-white/80">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Practice Time</p>
+              <p className="text-sm font-semibold text-slate-600 uppercase tracking-wide">Practice Time</p>
               <p className="text-4xl font-bold text-slate-700">{sessionData.totalMinutes}m</p>
-              <p className="text-sm font-medium text-gray-500">{sessionData.totalSessions} sessions completed</p>
+              <p className="text-sm font-medium text-slate-500">{sessionData.totalSessions} sessions completed</p>
             </div>
             <div className="h-14 w-14 bg-gradient-to-br from-slate-500 to-slate-600 rounded-2xl flex items-center justify-center shadow-lg">
               <Clock className="h-7 w-7 text-white" />
@@ -200,11 +185,11 @@ export default function EnhancedAnalysisTab() {
         <Card className="p-6 bg-white/60 backdrop-blur-sm border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:bg-white/80">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Latest Session</p>
-              <p className="text-4xl font-bold text-slate-700">
-                {typedSessions.length > 0 ? new Date(typedSessions[0].createdAt).toLocaleDateString() : 'None'}
+              <p className="text-sm font-semibold text-slate-600 uppercase tracking-wide">Latest Session</p>
+              <p className="text-2xl font-bold text-slate-700">
+                {typedSessions.length > 0 ? formatDate(typedSessions[0].createdAt) : 'None'}
               </p>
-              <p className="text-sm font-medium text-gray-500">
+              <p className="text-sm font-medium text-slate-500">
                 {typedSessions.length > 0 ? typedSessions[0].name || 'Practice Session' : 'Start practicing'}
               </p>
             </div>
@@ -217,12 +202,12 @@ export default function EnhancedAnalysisTab() {
         <Card className="p-6 bg-white/60 backdrop-blur-sm border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:bg-white/80">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Voice Quality</p>
+              <p className="text-sm font-semibold text-slate-600 uppercase tracking-wide">Voice Quality</p>
               <p className="text-4xl font-bold text-slate-700">
                 {aiInsights?.voiceAnalysis?.score || 
-                 (typedSessions.length > 0 ? Math.round(typedSessions.reduce((sum: number, s: any) => sum + (s.voiceClarity || 0), 0) / typedSessions.length) : 0)}
+                 (typedSessions.length > 0 ? Math.round(typedSessions.reduce((sum: number, s: any) => sum + (s.voiceClarity || 75), 0) / typedSessions.length) : 0)}
               </p>
-              <p className="text-sm font-medium text-gray-500">clarity score</p>
+              <p className="text-sm font-medium text-slate-500">clarity score</p>
             </div>
             <div className="h-14 w-14 bg-gradient-to-br from-slate-500 to-slate-600 rounded-2xl flex items-center justify-center shadow-lg">
               <Zap className="h-7 w-7 text-white" />
@@ -233,8 +218,8 @@ export default function EnhancedAnalysisTab() {
 
       {/* Detailed Analysis Tabs */}
       <Tabs defaultValue="voice" className="w-full">
-        <div className="w-full overflow-x-auto">
-          <TabsList className="inline-flex h-auto w-auto min-w-full bg-white/80 backdrop-blur-sm border border-gray-200/50 shadow-xl rounded-2xl p-2">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
+          <TabsList className="grid w-full lg:w-auto grid-cols-2 lg:grid-cols-4 gap-2 p-2 bg-white/60 backdrop-blur-sm border border-white/20 rounded-xl shadow-lg">
             <TabsTrigger value="voice" className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#2563eb] data-[state=active]:to-[#22d3ee] data-[state=active]:text-white data-[state=active]:shadow-lg whitespace-nowrap">
               <Mic className="h-4 w-4" />
               <span className="hidden sm:inline">Voice</span>
@@ -243,9 +228,9 @@ export default function EnhancedAnalysisTab() {
               <Eye className="h-4 w-4" />
               <span className="hidden sm:inline">Body Language</span>
             </TabsTrigger>
-            <TabsTrigger value="content" className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#2563eb] data-[state=active]:to-[#22d3ee] data-[state=active]:text-white data-[state=active]:shadow-lg whitespace-nowrap">
-              <MessageSquare className="h-4 w-4" />
-              <span className="hidden sm:inline">Content</span>
+            <TabsTrigger value="speech-dna" className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#2563eb] data-[state=active]:to-[#22d3ee] data-[state=active]:text-white data-[state=active]:shadow-lg whitespace-nowrap">
+              <Brain className="h-4 w-4" />
+              <span className="hidden sm:inline">Speech DNA</span>
             </TabsTrigger>
             <TabsTrigger value="trends" className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#2563eb] data-[state=active]:to-[#22d3ee] data-[state=active]:text-white data-[state=active]:shadow-lg whitespace-nowrap">
               <TrendingUp className="h-4 w-4" />
@@ -257,62 +242,84 @@ export default function EnhancedAnalysisTab() {
         {/* Voice Analysis */}
         <TabsContent value="voice" className="space-y-6">
           <Card className="p-8 bg-white/70 backdrop-blur-sm border border-white/30 shadow-xl">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">Voice Quality Analysis</h3>
+            <h3 className="text-2xl font-bold text-slate-900 mb-6">Voice Quality Analysis</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Speaking Pace</span>
-                  <Badge className={getScoreColor(mockData.voice.averageWPM <= 180 ? 85 : 65)}>
-                    {mockData.voice.averageWPM} WPM
-                  </Badge>
-                </div>
-                <Progress 
-                  value={(mockData.voice.averageWPM / 200) * 100} 
-                  className="h-2"
-                />
-                <p className="text-xs text-gray-500">
-                  Optimal range: {mockData.voice.optimalRange[0]}-{mockData.voice.optimalRange[1]} WPM
-                </p>
+              <div className="space-y-6">
+                {typedSessions.length > 0 ? (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-slate-700">Speaking Pace</span>
+                      <Badge className="bg-blue-50 text-blue-700 border-blue-200">
+                        {typedSessions[0]?.speakingPace || 140} WPM
+                      </Badge>
+                    </div>
+                    <Progress 
+                      value={((typedSessions[0]?.speakingPace || 140) / 200) * 100} 
+                      className="h-3 bg-slate-100"
+                    />
+                    <p className="text-xs text-slate-500">
+                      Optimal range: 120-180 WPM
+                    </p>
 
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Voice Clarity</span>
-                  <Badge className={getScoreColor(mockData.voice.clarity)}>
-                    {mockData.voice.clarity}%
-                  </Badge>
-                </div>
-                <Progress value={mockData.voice.clarity} className="h-2" />
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-slate-700">Voice Clarity</span>
+                      <Badge className="bg-blue-50 text-blue-700 border-blue-200">
+                        {typedSessions[0]?.voiceClarity || 85}%
+                      </Badge>
+                    </div>
+                    <Progress value={typedSessions[0]?.voiceClarity || 85} className="h-3 bg-slate-100" />
 
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Volume Control</span>
-                  <Badge className={getScoreColor(mockData.voice.volume)}>
-                    {mockData.voice.volume}%
-                  </Badge>
-                </div>
-                <Progress value={mockData.voice.volume} className="h-2" />
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-slate-700">Volume Control</span>
+                      <Badge className="bg-blue-50 text-blue-700 border-blue-200">
+                        {typedSessions[0]?.volumeConsistency || 78}%
+                      </Badge>
+                    </div>
+                    <Progress value={typedSessions[0]?.volumeConsistency || 78} className="h-3 bg-slate-100" />
+                  </>
+                ) : (
+                  <div className="text-center py-8">
+                    <Mic className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+                    <p className="text-slate-500">No voice analysis data available</p>
+                    <p className="text-sm text-slate-400 mt-2">Complete a practice session to see your voice analysis</p>
+                  </div>
+                )}
               </div>
               
               <div className="space-y-4">
-                <div className="p-4 bg-amber-50/80 backdrop-blur-sm rounded-xl border border-amber-200/50">
-                  <div className="flex items-center gap-2 mb-2">
-                    <AlertTriangle className="h-4 w-4 text-amber-600" />
-                    <span className="text-sm font-medium text-amber-800">Areas for Improvement</span>
-                  </div>
-                  <p className="text-sm text-amber-700">
-                    Detected {mockData.voice.fillerWords} filler words in recent sessions. 
-                    Practice pausing instead of using "um" and "uh".
-                  </p>
-                </div>
+                {aiInsights?.voiceAnalysis ? (
+                  <>
+                    <div className="p-4 bg-amber-50/80 backdrop-blur-sm rounded-xl border border-amber-200/50">
+                      <div className="flex items-center gap-2 mb-2">
+                        <AlertTriangle className="h-4 w-4 text-amber-600" />
+                        <span className="text-sm font-medium text-amber-800">Areas for Improvement</span>
+                      </div>
+                      <p className="text-sm text-amber-700">
+                        {aiInsights.voiceAnalysis.improvements || "Focus on maintaining consistent pace and reducing hesitations."}
+                      </p>
+                    </div>
 
-                <div className="p-4 bg-emerald-50/80 backdrop-blur-sm rounded-xl border border-emerald-200/50">
-                  <div className="flex items-center gap-2 mb-2">
-                    <CheckCircle className="h-4 w-4 text-emerald-600" />
-                    <span className="text-sm font-medium text-emerald-800">Strengths</span>
+                    <div className="p-4 bg-emerald-50/80 backdrop-blur-sm rounded-xl border border-emerald-200/50">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CheckCircle className="h-4 w-4 text-emerald-600" />
+                        <span className="text-sm font-medium text-emerald-800">Strengths</span>
+                      </div>
+                      <p className="text-sm text-emerald-700">
+                        {aiInsights.voiceAnalysis.strengths || "Your voice quality shows good potential for improvement."}
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <div className="p-4 bg-slate-50/80 backdrop-blur-sm rounded-xl border border-slate-200/50">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Info className="h-4 w-4 text-slate-600" />
+                      <span className="text-sm font-medium text-slate-800">AI Analysis</span>
+                    </div>
+                    <p className="text-sm text-slate-700">
+                      {isGeneratingInsights ? "Analyzing your voice patterns..." : "Complete more sessions for detailed AI insights"}
+                    </p>
                   </div>
-                  <p className="text-sm text-emerald-700">
-                    Your voice clarity has improved by {mockData.voice.improvement}% this {selectedTimeFrame}. 
-                    Great articulation and projection!
-                  </p>
-                </div>
+                )}
               </div>
             </div>
           </Card>
@@ -320,161 +327,291 @@ export default function EnhancedAnalysisTab() {
 
         {/* Body Language Analysis */}
         <TabsContent value="body-language" className="space-y-6">
-          <Card className="p-8 bg-gradient-to-br from-white to-gray-50/50 border-0 shadow-xl">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">Body Language & Presence</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-2xl border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-                <div className="h-12 w-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
-                  <Eye className="h-6 w-6 text-white" />
-                </div>
-                <div className="text-3xl font-bold bg-gradient-to-br from-blue-600 to-blue-700 bg-clip-text text-transparent">{mockData.bodyLanguage.eyeContact}%</div>
-                <div className="text-sm font-semibold text-blue-600 uppercase tracking-wide">Eye Contact</div>
-              </div>
-              <div className="text-center p-6 bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-2xl border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-                <div className="h-12 w-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
-                  <Activity className="h-6 w-6 text-white" />
-                </div>
-                <div className="text-3xl font-bold bg-gradient-to-br from-emerald-600 to-emerald-700 bg-clip-text text-transparent">{mockData.bodyLanguage.posture}%</div>
-                <div className="text-sm font-semibold text-emerald-600 uppercase tracking-wide">Posture</div>
-              </div>
-              <div className="text-center p-6 bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-2xl border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-                <div className="h-12 w-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
-                  <Award className="h-6 w-6 text-white" />
-                </div>
-                <div className="text-3xl font-bold bg-gradient-to-br from-purple-600 to-purple-700 bg-clip-text text-transparent">{mockData.bodyLanguage.gestures}%</div>
-                <div className="text-sm font-semibold text-purple-600 uppercase tracking-wide">Gestures</div>
-              </div>
-              <div className="text-center p-6 bg-gradient-to-br from-orange-50 to-orange-100/50 rounded-2xl border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-                <div className="h-12 w-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
-                  <TrendingUp className="h-6 w-6 text-white" />
-                </div>
-                <div className="text-3xl font-bold bg-gradient-to-br from-orange-600 to-orange-700 bg-clip-text text-transparent">{mockData.bodyLanguage.confidence}%</div>
-                <div className="text-sm font-semibold text-orange-600 uppercase tracking-wide">Confidence</div>
-              </div>
-            </div>
-
+          <Card className="p-8 bg-white/70 backdrop-blur-sm border border-white/30 shadow-xl">
+            <h3 className="text-2xl font-bold text-slate-900 mb-6">Body Language Analysis</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <h4 className="font-semibold text-gray-900">Performance Breakdown</h4>
-                {Object.entries(mockData.bodyLanguage).filter(([key]) => key !== 'improvement').map(([key, value]) => (
-                  <div key={key} className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-sm capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
-                      <span className="text-sm font-medium">{value}%</span>
+              <div className="space-y-6">
+                {typedSessions.length > 0 ? (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-slate-700">Eye Contact</span>
+                      <Badge className="bg-blue-50 text-blue-700 border-blue-200">
+                        {typedSessions[0]?.eyeContact || 76}%
+                      </Badge>
                     </div>
-                    <Progress value={value as number} className="h-2" />
-                  </div>
-                ))}
-              </div>
+                    <Progress value={typedSessions[0]?.eyeContact || 76} className="h-3 bg-slate-100" />
 
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-slate-700">Posture</span>
+                      <Badge className="bg-blue-50 text-blue-700 border-blue-200">
+                        {typedSessions[0]?.posture || 82}%
+                      </Badge>
+                    </div>
+                    <Progress value={typedSessions[0]?.posture || 82} className="h-3 bg-slate-100" />
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-slate-700">Gestures</span>
+                      <Badge className="bg-blue-50 text-blue-700 border-blue-200">
+                        {typedSessions[0]?.gestures || 71}%
+                      </Badge>
+                    </div>
+                    <Progress value={typedSessions[0]?.gestures || 71} className="h-3 bg-slate-100" />
+                  </>
+                ) : (
+                  <div className="text-center py-8">
+                    <Eye className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+                    <p className="text-slate-500">No body language data available</p>
+                    <p className="text-sm text-slate-400 mt-2">Complete a practice session to see your body language analysis</p>
+                  </div>
+                )}
+              </div>
+              
               <div className="space-y-4">
-                <h4 className="font-semibold text-gray-900">AI Insights</h4>
-                <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Info className="h-4 w-4 text-blue-600" />
-                    <span className="text-sm font-medium text-blue-800">Body Language Tips</span>
+                {aiInsights?.bodyLanguage ? (
+                  <>
+                    <div className="p-4 bg-amber-50/80 backdrop-blur-sm rounded-xl border border-amber-200/50">
+                      <div className="flex items-center gap-2 mb-2">
+                        <AlertTriangle className="h-4 w-4 text-amber-600" />
+                        <span className="text-sm font-medium text-amber-800">Areas for Improvement</span>
+                      </div>
+                      <p className="text-sm text-amber-700">
+                        {aiInsights.bodyLanguage.improvements || "Focus on maintaining eye contact and using purposeful gestures."}
+                      </p>
+                    </div>
+
+                    <div className="p-4 bg-emerald-50/80 backdrop-blur-sm rounded-xl border border-emerald-200/50">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CheckCircle className="h-4 w-4 text-emerald-600" />
+                        <span className="text-sm font-medium text-emerald-800">Strengths</span>
+                      </div>
+                      <p className="text-sm text-emerald-700">
+                        {aiInsights.bodyLanguage.strengths || "Your posture and presence show confidence."}
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <div className="p-4 bg-slate-50/80 backdrop-blur-sm rounded-xl border border-slate-200/50">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Info className="h-4 w-4 text-slate-600" />
+                      <span className="text-sm font-medium text-slate-800">AI Analysis</span>
+                    </div>
+                    <p className="text-sm text-slate-700">
+                      {isGeneratingInsights ? "Analyzing your body language..." : "Complete more sessions for detailed AI insights"}
+                    </p>
                   </div>
-                  <ul className="text-sm text-blue-700 space-y-1">
-                    <li>• Maintain eye contact for 3-5 seconds at a time</li>
-                    <li>• Use open gestures to appear more confident</li>
-                    <li>• Keep shoulders back and head level</li>
-                  </ul>
-                </div>
-                
-                <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                  <div className="flex items-center gap-2 mb-2">
-                    <TrendingUp className="h-4 w-4 text-green-600" />
-                    <span className="text-sm font-medium text-green-800">Progress Update</span>
-                  </div>
-                  <p className="text-sm text-green-700">
-                    Your body language has improved by {mockData.bodyLanguage.improvement}% overall. 
-                    Focus on gesture variety for even better results.
-                  </p>
-                </div>
+                )}
               </div>
             </div>
           </Card>
         </TabsContent>
 
-        {/* Content Analysis */}
-        <TabsContent value="content" className="space-y-6">
-          <Card className="p-8 bg-gradient-to-br from-white to-gray-50/50 border-0 shadow-xl">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">Content Quality Analysis</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
-                <div className="h-12 w-12 bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                  <MessageSquare className="h-6 w-6 text-white" />
-                </div>
-                <div className="text-4xl font-bold bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] bg-clip-text text-transparent mb-2">{mockData.content.structure}%</div>
-                <div className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Structure & Flow</div>
-                <Progress value={mockData.content.structure} className="h-2" />
+        {/* Speech DNA - Enhanced and Engaging */}
+        <TabsContent value="speech-dna" className="space-y-6">
+          <Card className="p-8 bg-gradient-to-br from-white/80 to-blue-50/40 backdrop-blur-sm border border-white/30 shadow-xl">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="h-12 w-12 bg-gradient-to-br from-[#2563eb] to-[#22d3ee] rounded-full flex items-center justify-center">
+                <Brain className="h-6 w-6 text-white" />
               </div>
-              <div className="text-center p-6 bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
-                <div className="h-12 w-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                  <Activity className="h-6 w-6 text-white" />
-                </div>
-                <div className="text-4xl font-bold bg-gradient-to-br from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-2">{mockData.content.engagement}%</div>
-                <div className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Audience Engagement</div>
-                <Progress value={mockData.content.engagement} className="h-2" />
-              </div>
-              <div className="text-center p-6 bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
-                <div className="h-12 w-12 bg-gradient-to-br from-purple-500 to-violet-500 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                  <Target className="h-6 w-6 text-white" />
-                </div>
-                <div className="text-4xl font-bold bg-gradient-to-br from-purple-600 to-violet-600 bg-clip-text text-transparent mb-2">{mockData.content.purposeAlignment}%</div>
-                <div className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Purpose Alignment</div>
-                <Progress value={mockData.content.purposeAlignment} className="h-2" />
+              <div>
+                <h3 className="text-2xl font-bold bg-gradient-to-r from-[#2563eb] to-[#22d3ee] bg-clip-text text-transparent">
+                  Your Speech DNA
+                </h3>
+                <p className="text-slate-600">Discover your unique communication style</p>
               </div>
             </div>
+
+            {typedSessions.length >= 3 ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="space-y-6">
+                  <div className="p-6 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl border border-blue-200/50">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Sparkles className="h-5 w-5 text-blue-600" />
+                      <h4 className="text-lg font-semibold text-blue-900">Communication Style</h4>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-blue-700">Analytical</span>
+                        <div className="flex-1 mx-3">
+                          <Progress value={Math.round((typedSessions.reduce((sum: number, s: any) => sum + (s.structureScore || 70), 0) / typedSessions.length) * 0.9)} className="h-2 bg-blue-100" />
+                        </div>
+                        <span className="text-sm font-medium text-blue-800">{Math.round((typedSessions.reduce((sum: number, s: any) => sum + (s.structureScore || 70), 0) / typedSessions.length) * 0.9)}%</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-blue-700">Expressive</span>
+                        <div className="flex-1 mx-3">
+                          <Progress value={Math.round((typedSessions.reduce((sum: number, s: any) => sum + (s.engagementScore || 60), 0) / typedSessions.length) * 0.8)} className="h-2 bg-blue-100" />
+                        </div>
+                        <span className="text-sm font-medium text-blue-800">{Math.round((typedSessions.reduce((sum: number, s: any) => sum + (s.engagementScore || 60), 0) / typedSessions.length) * 0.8)}%</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-blue-700">Supportive</span>
+                        <div className="flex-1 mx-3">
+                          <Progress value={Math.round((typedSessions.reduce((sum: number, s: any) => sum + (s.confidenceScore || 80), 0) / typedSessions.length) * 1.1)} className="h-2 bg-blue-100" />
+                        </div>
+                        <span className="text-sm font-medium text-blue-800">{Math.round((typedSessions.reduce((sum: number, s: any) => sum + (s.confidenceScore || 80), 0) / typedSessions.length) * 1.1)}%</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-6 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl border border-emerald-200/50">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Heart className="h-5 w-5 text-emerald-600" />
+                      <h4 className="text-lg font-semibold text-emerald-900">Emotional Intelligence</h4>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-emerald-700">{((typedSessions.reduce((sum: number, s: any) => sum + (s.empathyScore || 82), 0) / typedSessions.length) / 10).toFixed(1)}</div>
+                        <div className="text-xs text-emerald-600">Empathy Score</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-emerald-700">{((typedSessions.reduce((sum: number, s: any) => sum + (s.adaptabilityScore || 78), 0) / typedSessions.length) / 10).toFixed(1)}</div>
+                        <div className="text-xs text-emerald-600">Adaptability</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <div className="p-6 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border border-amber-200/50">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Award className="h-5 w-5 text-amber-600" />
+                      <h4 className="text-lg font-semibold text-amber-900">Your Speaker Archetype</h4>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-amber-700 mb-2">
+                        {sessionData.averageScore >= 85 ? 'The Expert' : 
+                         sessionData.averageScore >= 70 ? 'The Connector' : 
+                         sessionData.averageScore >= 55 ? 'The Storyteller' : 'The Learner'}
+                      </div>
+                      <p className="text-sm text-amber-600 mb-4">
+                        {sessionData.averageScore >= 85 ? 'You demonstrate mastery and command authority when speaking.' :
+                         sessionData.averageScore >= 70 ? 'You excel at building relationships and creating emotional connections.' :
+                         sessionData.averageScore >= 55 ? 'You engage audiences through compelling narratives and examples.' :
+                         'You are developing your unique voice and presentation skills.'}
+                      </p>
+                      <div className="flex flex-wrap gap-2 justify-center">
+                        {sessionData.averageScore >= 85 ? (
+                          <>
+                            <Badge className="bg-amber-100 text-amber-700 border-amber-300">Authoritative</Badge>
+                            <Badge className="bg-amber-100 text-amber-700 border-amber-300">Confident</Badge>
+                            <Badge className="bg-amber-100 text-amber-700 border-amber-300">Knowledgeable</Badge>
+                          </>
+                        ) : sessionData.averageScore >= 70 ? (
+                          <>
+                            <Badge className="bg-amber-100 text-amber-700 border-amber-300">Empathetic</Badge>
+                            <Badge className="bg-amber-100 text-amber-700 border-amber-300">Authentic</Badge>
+                            <Badge className="bg-amber-100 text-amber-700 border-amber-300">Engaging</Badge>
+                          </>
+                        ) : sessionData.averageScore >= 55 ? (
+                          <>
+                            <Badge className="bg-amber-100 text-amber-700 border-amber-300">Creative</Badge>
+                            <Badge className="bg-amber-100 text-amber-700 border-amber-300">Narrative</Badge>
+                            <Badge className="bg-amber-100 text-amber-700 border-amber-300">Relatable</Badge>
+                          </>
+                        ) : (
+                          <>
+                            <Badge className="bg-amber-100 text-amber-700 border-amber-300">Growing</Badge>
+                            <Badge className="bg-amber-100 text-amber-700 border-amber-300">Curious</Badge>
+                            <Badge className="bg-amber-100 text-amber-700 border-amber-300">Potential</Badge>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-6 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border border-slate-200/50">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Activity className="h-5 w-5 text-slate-600" />
+                      <h4 className="text-lg font-semibold text-slate-900">Growth Opportunities</h4>
+                    </div>
+                    <ul className="space-y-2 text-sm text-slate-700">
+                      {sessionData.averageScore < 70 && (
+                        <li className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-[#22d3ee] rounded-full"></div>
+                          Increase practice frequency to build confidence
+                        </li>
+                      )}
+                      {typedSessions.some((s: any) => (s.voiceClarity || 75) < 80) && (
+                        <li className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-[#22d3ee] rounded-full"></div>
+                          Focus on voice clarity and articulation
+                        </li>
+                      )}
+                      {typedSessions.some((s: any) => (s.speakingPace || 140) > 160) && (
+                        <li className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-[#22d3ee] rounded-full"></div>
+                          Practice pacing for better audience comprehension
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <Brain className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+                <h4 className="text-xl font-semibold text-slate-600 mb-2">Discover Your Speech DNA</h4>
+                <p className="text-slate-500 mb-6">Complete at least 3 practice sessions to unlock your personalized communication profile</p>
+                <div className="mb-4">
+                  <div className="text-lg font-medium text-slate-700">Progress: {typedSessions.length}/3 sessions</div>
+                  <Progress value={(typedSessions.length / 3) * 100} className="h-3 bg-slate-200 mt-2" />
+                </div>
+                <Button className="bg-gradient-to-r from-[#2563eb] to-[#22d3ee] text-white">
+                  Start Practicing
+                </Button>
+              </div>
+            )}
           </Card>
         </TabsContent>
 
         {/* Trends Analysis */}
         <TabsContent value="trends" className="space-y-6">
-          <Card className="p-8 bg-gradient-to-br from-white to-gray-50/50 border-0 shadow-xl">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">Performance Trends</h3>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div>
-                <h4 className="text-lg font-bold text-gray-800 mb-6">Category Performance</h4>
-                <div className="space-y-4">
-                  {mockData.trends.categories.map((category, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 bg-gradient-to-r from-white to-gray-50 rounded-xl border border-gray-100 shadow-md hover:shadow-lg transition-all duration-300">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-4 h-4 rounded-full shadow-lg ${category.trend === 'up' ? 'bg-gradient-to-br from-emerald-400 to-emerald-600' : 'bg-gradient-to-br from-red-400 to-red-600'}`}></div>
-                        <span className="font-semibold text-gray-800">{category.name}</span>
+          <Card className="p-8 bg-white/70 backdrop-blur-sm border border-white/30 shadow-xl">
+            <h3 className="text-2xl font-bold text-slate-900 mb-6">Performance Trends</h3>
+            {typedSessions.length > 0 ? (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {[
+                    { name: 'Voice Quality', value: typedSessions.reduce((sum: number, s: any) => sum + (s.voiceClarity || 75), 0) / typedSessions.length },
+                    { name: 'Body Language', value: typedSessions.reduce((sum: number, s: any) => sum + (s.posture || 70), 0) / typedSessions.length },
+                    { name: 'Content Quality', value: typedSessions.reduce((sum: number, s: any) => sum + (s.structureScore || 80), 0) / typedSessions.length },
+                    { name: 'Confidence', value: typedSessions.reduce((sum: number, s: any) => sum + (s.confidenceScore || 75), 0) / typedSessions.length }
+                  ].map((category, index) => (
+                    <div key={category.name} className="p-4 bg-slate-50/80 backdrop-blur-sm rounded-xl border border-slate-200/50">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-slate-700">{category.name}</span>
+                        <TrendingUp className="h-4 w-4 text-emerald-500" />
                       </div>
-                      <div className="flex items-center gap-3">
-                        {category.trend === 'up' ? (
-                          <div className="flex items-center gap-1 px-2 py-1 bg-emerald-100 rounded-lg">
-                            <TrendingUp className="h-4 w-4 text-emerald-600" />
-                            <span className="text-sm font-medium text-emerald-700">+{category.current - category.previous}</span>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-1 px-2 py-1 bg-red-100 rounded-lg">
-                            <TrendingDown className="h-4 w-4 text-red-600" />
-                            <span className="text-sm font-medium text-red-700">{category.current - category.previous}</span>
-                          </div>
-                        )}
-                        <span className="text-lg font-bold text-gray-900">{category.current}%</span>
-                      </div>
+                      <div className="text-2xl font-bold text-slate-800">{Math.round(category.value)}%</div>
+                      <div className="text-xs text-emerald-600">Across {typedSessions.length} sessions</div>
                     </div>
                   ))}
                 </div>
-              </div>
-              
-              <div>
-                <h4 className="text-lg font-bold text-gray-800 mb-6">Weekly Progress</h4>
-                <div className="space-y-3">
-                  {mockData.trends.last7Days.map((score, index) => (
-                    <div key={index} className="flex items-center gap-4 p-3 bg-gradient-to-r from-white to-gray-50 rounded-xl border border-gray-100">
-                      <span className="text-sm font-semibold text-gray-700 w-16">Day {index + 1}</span>
-                      <Progress value={score} className="flex-1 h-3" />
-                      <span className="text-sm font-bold text-gray-900 w-12">{score}%</span>
-                    </div>
-                  ))}
+                
+                <div className="p-6 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl border border-emerald-200/50">
+                  <h4 className="text-lg font-semibold text-emerald-900 mb-4">Recent Progress</h4>
+                  <div className="space-y-3">
+                    {typedSessions.slice(0, 3).map((session: any) => (
+                      <div key={session.id} className="flex items-center justify-between p-3 bg-white/60 rounded-lg">
+                        <div>
+                          <div className="font-medium text-slate-800">{session.name || `Session ${session.id}`}</div>
+                          <div className="text-sm text-slate-500">{formatDate(session.createdAt)}</div>
+                        </div>
+                        <Badge className={getScoreColor(session.confidenceScore || 75)}>
+                          {session.confidenceScore || 75}%
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="text-center py-8">
+                <TrendingUp className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+                <p className="text-slate-500">No trend data available</p>
+                <p className="text-sm text-slate-400 mt-2">Complete more sessions to see your progress trends</p>
+              </div>
+            )}
           </Card>
         </TabsContent>
       </Tabs>
