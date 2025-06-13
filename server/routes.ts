@@ -417,6 +417,139 @@ Be specific, actionable, and encouraging while maintaining professional coaching
     }
   });
 
+  // Template personalization endpoint
+  app.post("/api/personalize-template", requireAuth, async (req: any, res) => {
+    try {
+      const { template, userPreferences } = req.body;
+
+      if (!template) {
+        return res.status(400).json({ message: "Template data is required" });
+      }
+
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: `You are an expert speech writer and communication coach. Your task is to personalize speech templates while maintaining their structure and effectiveness. Focus on making the content more engaging, natural, and tailored to the user's preferences.
+
+Respond with JSON in this format:
+{
+  "personalizedContent": "the enhanced template content",
+  "changes": ["list of key improvements made"],
+  "tips": ["specific delivery tips for this personalized version"]
+}`
+            },
+            {
+              role: "user",
+              content: `Please personalize this speech template:
+
+Template Title: ${template.title}
+Template Category: ${template.category}
+Original Content: ${template.content}
+
+User Preferences: ${userPreferences}
+
+Make the template more engaging and personal while keeping the structure intact. Add specific examples, improve transitions, and make the language more natural and conversational.`
+            }
+          ],
+          temperature: 0.6,
+          response_format: { type: "json_object" }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`OpenAI API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const result = JSON.parse(data.choices[0].message.content);
+      res.json(result);
+    } catch (error: any) {
+      console.error("Error personalizing template:", error);
+      res.status(500).json({ message: "Failed to personalize template", error: error.message });
+    }
+  });
+
+  // Template feedback endpoint
+  app.post("/api/template-feedback", requireAuth, async (req: any, res) => {
+    try {
+      const { template, content } = req.body;
+
+      if (!template && !content) {
+        return res.status(400).json({ message: "Template or content is required" });
+      }
+
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: `You are a professional speech coach providing detailed feedback on speech templates and content. Analyze the structure, content quality, and delivery potential.
+
+Respond with JSON in this format:
+{
+  "structureScore": number (0-100),
+  "clarityScore": number (0-100),
+  "engagementScore": number (0-100),
+  "contentFeedback": {
+    "strengths": ["list of content strengths"],
+    "improvements": ["specific suggestions for improvement"],
+    "structureNotes": "analysis of speech structure"
+  },
+  "voiceTips": {
+    "paceRecommendations": "guidance on speaking pace",
+    "emphasisPoints": ["key phrases to emphasize"],
+    "pauseStrategy": "where to use strategic pauses"
+  },
+  "bodyLanguageTips": {
+    "postureGuidance": "posture recommendations",
+    "gestureIdeas": ["suggested gestures for key moments"],
+    "eyeContactStrategy": "eye contact guidance"
+  }
+}`
+            },
+            {
+              role: "user",
+              content: `Analyze this speech content and provide comprehensive feedback:
+
+Template/Content: ${content || template?.content}
+Category: ${template?.category || 'general'}
+Title: ${template?.title || 'Speech Content'}
+
+Provide detailed feedback on content structure, voice modulation advice, and body language recommendations.`
+            }
+          ],
+          temperature: 0.4,
+          response_format: { type: "json_object" }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`OpenAI API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const feedback = JSON.parse(data.choices[0].message.content);
+      res.json(feedback);
+    } catch (error: any) {
+      console.error("Error generating template feedback:", error);
+      res.status(500).json({ message: "Failed to generate template feedback", error: error.message });
+    }
+  });
+
   // Real-time transcription endpoint
   app.post("/api/transcribe", async (req, res) => {
     try {

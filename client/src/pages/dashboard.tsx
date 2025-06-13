@@ -12,13 +12,13 @@ import LiveTranscript from "@/components/LiveTranscript";
 import StreamlinedAICoach from "@/components/StreamlinedAICoach";
 import SessionStats from "@/components/SessionStats";
 import SessionHistory from "@/components/SessionHistory";
-import DetailedAnalysisWithSession from "@/components/DetailedAnalysisWithSession";
+import SimpleDetailedAnalysis from "@/components/SimpleDetailedAnalysis";
 import BodyLanguageAnalyzer from "@/components/BodyLanguageAnalyzer";
 import AdvancedSpeechAnalysis from "@/components/AdvancedSpeechAnalysis";
 import ImprovementSummary from "@/components/ImprovementSummary";
 import SpeechDNAWithSession from "@/components/SpeechDNAWithSession";
 import SpeechROIAnalyzer from "@/components/SpeechROIAnalyzer";
-import AICoachWithSession from "@/components/AICoachWithSession";
+import SimpleAICoach from "@/components/SimpleAICoach";
 import ScriptTemplates from "@/components/ScriptTemplates";
 import BadgeSystem from "@/components/BadgeSystem";
 import AIPracticeRoleplay from "@/components/AIPracticeRoleplay";
@@ -114,7 +114,7 @@ export default function Dashboard() {
           </TabsContent>
 
           <TabsContent value="improvement" className="space-y-6">
-            <AICoachWithSession />
+            <SimpleAICoach />
           </TabsContent>
 
           <TabsContent value="speech-dna" className="space-y-6">
@@ -122,7 +122,7 @@ export default function Dashboard() {
           </TabsContent>
 
           <TabsContent value="detailed" className="space-y-6">
-            <DetailedAnalysisWithSession />
+            <SimpleDetailedAnalysis />
           </TabsContent>
 
           <TabsContent value="body-language" className="space-y-6">
