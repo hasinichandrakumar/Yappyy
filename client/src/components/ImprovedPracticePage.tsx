@@ -144,13 +144,13 @@ export default function ImprovedPracticePage() {
             setTranscript(prev => prev + (prev ? ' ' : '') + result[0].transcript);
             
             // Count words in this segment
-            const words = result[0].transcript.split(' ').filter(word => word.trim().length > 0);
+            const words = result[0].transcript.split(' ').filter((word: string) => word.trim().length > 0);
             setWordCount(prev => prev + words.length);
             
             // Enhanced filler word detection
             const fillerWords = ['uh', 'um', 'er', 'ah', 'eh', 'like', 'you know', 'so', 'basically', 'actually', 'literally'];
             const lowerText = result[0].transcript.toLowerCase();
-            const detectedFillers = words.filter(word => 
+            const detectedFillers = words.filter((word: string) => 
               fillerWords.some(filler => word.toLowerCase().includes(filler))
             );
 
@@ -240,16 +240,16 @@ export default function ImprovedPracticePage() {
         description: `Session: ${sessionName} - Purpose: ${sessionPurpose || 'General practice'}`,
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Camera/microphone access error:', error);
       
       let errorMessage = "Camera and microphone access required for practice sessions";
       
-      if (error.name === 'NotAllowedError') {
+      if (error?.name === 'NotAllowedError') {
         errorMessage = "Please allow camera and microphone permissions in your browser settings";
-      } else if (error.name === 'NotFoundError') {
+      } else if (error?.name === 'NotFoundError') {
         errorMessage = "No camera or microphone found. Please connect devices and try again";
-      } else if (error.name === 'NotReadableError') {
+      } else if (error?.name === 'NotReadableError') {
         errorMessage = "Camera or microphone is being used by another application";
       }
       
