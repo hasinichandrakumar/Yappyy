@@ -102,29 +102,41 @@ export default function HomePage() {
 
           <div className="mt-16">
             {/* Central 100% Statistic */}
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-100/50 to-transparent h-px top-1/2"></div>
-              <div className="flex justify-center">
-                <div className="bg-white px-12 py-10 rounded-3xl shadow-2xl border border-blue-100 relative">
-                  <div className="text-center">
-                    <p className="text-lg font-bold text-gray-800 mb-4">
-                      That's why we coach
+            <div className="text-center">
+              <div className="inline-block relative">
+                <div className="bg-gradient-to-br from-white via-blue-50/30 to-white p-16 rounded-full shadow-2xl border-4 border-blue-100 relative overflow-hidden">
+                  {/* Background pattern */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-50/20 via-transparent to-cyan-50/20"></div>
+                  
+                  <div className="relative z-10">
+                    <p className="text-xl font-bold text-gray-700 mb-2">
+                      We coach
                     </p>
                     <div className="relative">
-                      <div className="text-8xl md:text-9xl font-black bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] bg-clip-text text-transparent leading-none">
+                      <div className="text-7xl md:text-8xl font-black bg-gradient-to-br from-[#1e40af] via-[#0ea5e9] to-[#06b6d4] bg-clip-text text-transparent leading-none tracking-tighter">
                         100%
                       </div>
-                      <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-br from-orange-400 to-red-500 rounded-full animate-pulse"></div>
+                      {/* Sparkle effects */}
+                      <div className="absolute -top-4 -left-4 w-4 h-4 bg-yellow-400 rounded-full animate-ping opacity-75"></div>
+                      <div className="absolute -bottom-2 -right-4 w-3 h-3 bg-cyan-400 rounded-full animate-pulse"></div>
+                      <div className="absolute top-1/2 -left-8 w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
                     </div>
-                    <p className="text-2xl font-bold text-gray-900 mt-4">
+                    <p className="text-2xl font-bold text-gray-800 mt-2">
                       of you
-                    </p>
-                    <p className="text-sm font-medium text-gray-600 uppercase tracking-wider mt-4">
-                      Complete Communication Coaching
                     </p>
                   </div>
                 </div>
+                
+                {/* Floating elements around the circle */}
+                <div className="absolute -top-6 left-1/4 w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-500 rounded-lg rotate-12 opacity-80 animate-float"></div>
+                <div className="absolute -bottom-4 right-1/4 w-6 h-6 bg-gradient-to-br from-cyan-400 to-cyan-500 rounded-full opacity-80 animate-float-delayed"></div>
+                <div className="absolute top-1/3 -right-8 w-4 h-8 bg-gradient-to-br from-sky-400 to-sky-500 rounded-full rotate-45 opacity-80 animate-float"></div>
+                <div className="absolute bottom-1/3 -left-6 w-10 h-4 bg-gradient-to-br from-blue-300 to-blue-400 rounded-full -rotate-12 opacity-80 animate-float-delayed"></div>
               </div>
+              
+              <p className="text-lg font-semibold text-gray-600 mt-8 max-w-md mx-auto">
+                Complete communication coaching across all aspects of your speaking skills
+              </p>
             </div>
           </div>
         </div>

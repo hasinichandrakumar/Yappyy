@@ -645,4 +645,31 @@
       filter: drop-shadow(0 0 12px rgba(11, 249, 234, 0.5));
     }
   }
+
+  /* Custom animations for 100% statistic floating elements */
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-10px) rotate(5deg);
+    }
+  }
+
+  @keyframes float-delayed {
+    0%, 100% {
+      transform: translateY(-5px) rotate(0deg);
+    }
+    50% {
+      transform: translateY(5px) rotate(-5deg);
+    }
+  }
+
+  .animate-float {
+    animation: float 4s ease-in-out infinite;
+  }
+
+  .animate-float-delayed {
+    animation: float-delayed 4s ease-in-out infinite 2s;
+  }
 }
