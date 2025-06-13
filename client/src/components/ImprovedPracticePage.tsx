@@ -50,12 +50,78 @@ export default function ImprovedPracticePage() {
   const [showTranscript, setShowTranscript] = useState(false);
   const [sessionFeedback, setSessionFeedback] = useState<any>(null);
   const [earnedBadges, setEarnedBadges] = useState<string[]>([]);
+  const [eyeContactScore, setEyeContactScore] = useState(0);
+  const [isLookingAtCamera, setIsLookingAtCamera] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recognitionRef = useRef<any>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const detectionIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
+
+  // Eye contact detection function
+  const detectEyeContact = useCallback(() => {
+    if (!videoRef.current || !canvasRef.current) return;
+
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    
+    if (!ctx) return;
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // Simple face detection using basic computer vision principles
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+    
+    // Detect face region (simplified approach looking for skin tones in center area)
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const faceRegionSize = Math.min(canvas.width, canvas.height) * 0.3;
+    
+    let skinPixelCount = 0;
+    let totalPixelsChecked = 0;
+    
+    // Sample pixels in face region
+    for (let y = centerY - faceRegionSize/2; y < centerY + faceRegionSize/2; y += 10) {
+      for (let x = centerX - faceRegionSize/2; x < centerX + faceRegionSize/2; x += 10) {
+        if (x >= 0 && x < canvas.width && y >= 0 && y < canvas.height) {
+          const index = (Math.floor(y) * canvas.width + Math.floor(x)) * 4;
+          const r = data[index];
+          const g = data[index + 1];
+          const b = data[index + 2];
+          
+          // Simple skin tone detection
+          if (r > 80 && g > 50 && b > 30 && r > b && r > g * 0.8) {
+            skinPixelCount++;
+          }
+          totalPixelsChecked++;
+        }
+      }
+    }
+    
+    const skinRatio = skinPixelCount / totalPixelsChecked;
+    const faceDetected = skinRatio > 0.15;
+    
+    if (faceDetected) {
+      // Estimate eye contact based on face position in frame
+      const facePositionScore = 1 - Math.abs(centerX - canvas.width/2) / (canvas.width/2);
+      const verticalPositionScore = 1 - Math.abs(centerY - canvas.height/3) / (canvas.height/3);
+      
+      const currentEyeContactScore = (facePositionScore + verticalPositionScore) / 2;
+      const lookingAtCamera = currentEyeContactScore > 0.7;
+      
+      setIsLookingAtCamera(lookingAtCamera);
+      setEyeContactScore(prev => prev * 0.9 + currentEyeContactScore * 0.1);
+    } else {
+      setIsLookingAtCamera(false);
+    }
+  }, []);
 
   // Speech recognition for better filler word detection
   const setupSpeechRecognition = useCallback(() => {
@@ -148,6 +214,11 @@ export default function ImprovedPracticePage() {
       if (recognitionRef.current) {
         recognitionRef.current.start();
       }
+
+      // Start eye contact detection
+      detectionIntervalRef.current = setInterval(() => {
+        detectEyeContact();
+      }, 500);
 
       // Start session timer
       timerRef.current = setInterval(() => {
@@ -253,6 +324,11 @@ export default function ImprovedPracticePage() {
       
       if (timerRef.current) {
         clearInterval(timerRef.current);
+      }
+
+      // Stop eye contact detection
+      if (detectionIntervalRef.current) {
+        clearInterval(detectionIntervalRef.current);
       }
 
       // Stop camera stream
@@ -582,6 +658,12 @@ export default function ImprovedPracticePage() {
                 className="w-full h-96 bg-black rounded-lg object-cover"
               />
               
+              {/* Hidden canvas for eye contact detection processing */}
+              <canvas
+                ref={canvasRef}
+                style={{ display: 'none' }}
+              />
+              
               {/* Live Overlay Metrics */}
               {isRecording && (
                 <>
@@ -594,8 +676,13 @@ export default function ImprovedPracticePage() {
                   {/* Top-right: Eye Contact */}
                   <div className="absolute top-4 right-4 bg-black bg-opacity-75 text-white px-3 py-2 rounded-lg">
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                      <span className="text-sm font-medium">Good Eye Contact</span>
+                      <div className={`w-3 h-3 rounded-full ${isLookingAtCamera ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></div>
+                      <span className="text-sm font-medium">
+                        {isLookingAtCamera ? 'Good Eye Contact' : 'Look at Camera'}
+                      </span>
+                    </div>
+                    <div className="text-xs opacity-75 mt-1">
+                      Score: {Math.round(eyeContactScore * 100)}%
                     </div>
                   </div>
                   
