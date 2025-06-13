@@ -31,24 +31,39 @@ export default function Dashboard() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-2 lg:grid-cols-5 gap-1 mb-8 h-auto p-1 bg-white border border-gray-200 shadow-sm rounded-xl">
-            <TabsTrigger value="practice" className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md">
+          <TabsList className="grid grid-cols-2 lg:grid-cols-5 gap-2 mb-8 h-auto p-2 bg-white border border-gray-200 shadow-sm rounded-xl">
+            <TabsTrigger 
+              value="practice" 
+              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
+            >
               <Mic className="w-5 h-5" />
               <span>Practice</span>
             </TabsTrigger>
-            <TabsTrigger value="analysis" className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md">
+            <TabsTrigger 
+              value="analysis" 
+              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
+            >
               <BarChart3 className="w-5 h-5" />
               <span>Analysis</span>
             </TabsTrigger>
-            <TabsTrigger value="ai-coach" className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md">
+            <TabsTrigger 
+              value="ai-coach" 
+              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
+            >
               <Brain className="w-5 h-5" />
               <span>AI Coach</span>
             </TabsTrigger>
-            <TabsTrigger value="templates" className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md">
+            <TabsTrigger 
+              value="templates" 
+              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
+            >
               <FileText className="w-5 h-5" />
               <span>Templates</span>
             </TabsTrigger>
-            <TabsTrigger value="achievements" className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md">
+            <TabsTrigger 
+              value="achievements" 
+              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
+            >
               <Trophy className="w-5 h-5" />
               <span>Progress</span>
             </TabsTrigger>

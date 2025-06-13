@@ -76,6 +76,7 @@ export interface IStorage {
   createPracticeSession(session: InsertPracticeSession): Promise<PracticeSession>;
   getPracticeSession(id: number): Promise<PracticeSession | undefined>;
   getUserPracticeSessions(userId: string): Promise<PracticeSession[]>;
+  deletePracticeSession(id: number): Promise<void>;
   
   // Coaching feedback operations
   addCoachingFeedback(feedback: InsertCoachingFeedback): Promise<CoachingFeedback>;

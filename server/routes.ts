@@ -318,6 +318,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete practice session
+  app.delete("/api/practice-sessions/:id", async (req: any, res) => {
+    try {
+      const sessionId = parseInt(req.params.id);
+      
+      if (isNaN(sessionId)) {
+        return res.status(400).json({ message: "Invalid session ID" });
+      }
+
+      // Delete the session from the database
+      await storage.deletePracticeSession(sessionId);
+      
+      res.json({ message: "Session deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting session:", error);
+      res.status(500).json({ message: "Failed to delete session" });
+    }
+  });
+
   // Create new practice session
   app.post("/api/practice-sessions", async (req: any, res) => {
     try {
