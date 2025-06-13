@@ -45,6 +45,9 @@ export default function ImprovedPracticePage() {
     { name: "Volume Control", progress: 0, target: 100 },
     { name: "Reduce Filler Words", progress: 0, target: 5 }
   ]);
+  const [transcript, setTranscript] = useState<string>('');
+  const [wordCount, setWordCount] = useState(0);
+  const [showTranscript, setShowTranscript] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -63,33 +66,49 @@ export default function ImprovedPracticePage() {
       recognition.lang = 'en-US';
 
       recognition.onresult = (event: any) => {
-        let transcript = '';
+        let latestTranscript = '';
         for (let i = event.resultIndex; i < event.results.length; i++) {
-          transcript += event.results[i][0].transcript;
-        }
-        
-        // Enhanced filler word detection
-        const fillerWords = ['uh', 'um', 'er', 'ah', 'eh', 'like', 'you know', 'so', 'basically', 'actually', 'literally'];
-        const words = transcript.toLowerCase().split(' ');
-        const detectedFillers = words.filter(word => 
-          fillerWords.some(filler => word.includes(filler))
-        );
+          const result = event.results[i];
+          if (result.isFinal) {
+            latestTranscript += result[0].transcript;
+            
+            // Update full transcript
+            setTranscript(prev => prev + (prev ? ' ' : '') + result[0].transcript);
+            
+            // Count words in this segment
+            const words = result[0].transcript.split(' ').filter(word => word.trim().length > 0);
+            setWordCount(prev => prev + words.length);
+            
+            // Enhanced filler word detection
+            const fillerWords = ['uh', 'um', 'er', 'ah', 'eh', 'like', 'you know', 'so', 'basically', 'actually', 'literally'];
+            const lowerText = result[0].transcript.toLowerCase();
+            const detectedFillers = words.filter(word => 
+              fillerWords.some(filler => word.toLowerCase().includes(filler))
+            );
 
-        if (detectedFillers.length > 0) {
-          const newFeedback: LiveFeedbackItem = {
-            id: Date.now().toString(),
-            timestamp: sessionDuration,
-            category: 'voice',
-            feedback: `Filler words detected: ${detectedFillers.join(', ')}. Try pausing instead.`,
-            severity: 'improvement'
-          };
-          setLiveFeedback(prev => [...prev, newFeedback]);
-          
-          setSessionMetrics(prev => ({
-            ...prev,
-            fillerWords: [...prev.fillerWords, ...detectedFillers],
-            wordsSpoken: words.length
-          }));
+            if (detectedFillers.length > 0) {
+              const newFeedback: LiveFeedbackItem = {
+                id: Date.now().toString(),
+                timestamp: sessionDuration,
+                category: 'voice',
+                feedback: `Filler words detected: ${detectedFillers.join(', ')}. Try pausing instead.`,
+                severity: 'improvement'
+              };
+              setLiveFeedback(prev => [...prev, newFeedback]);
+              
+              setSessionMetrics(prev => ({
+                ...prev,
+                fillerWords: [...prev.fillerWords, ...detectedFillers]
+              }));
+            }
+            
+            // Update metrics
+            setSessionMetrics(prev => ({
+              ...prev,
+              wordsSpoken: prev.wordsSpoken + words.length,
+              pace: Math.round((prev.wordsSpoken + words.length) / Math.max(sessionDuration / 60, 0.1))
+            }));
+          }
         }
       };
 
@@ -241,13 +260,14 @@ export default function ImprovedPracticePage() {
       }
 
       setIsRecording(false);
+      setShowTranscript(true);
       
       toast({
         title: "Session Completed",
-        description: "Practice session saved successfully",
+        description: `Practice session saved successfully. ${wordCount} words spoken.`,
       });
     }
-  }, [isRecording]);
+  }, [isRecording, wordCount]);
 
 
 
@@ -586,6 +606,95 @@ export default function ImprovedPracticePage() {
           </Card>
         </div>
       </div>
+
+      {/* Session Transcript Modal */}
+      {showTranscript && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <Card className="max-w-4xl w-full max-h-[80vh] overflow-hidden">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold">Session Transcript</h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowTranscript(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="text-center p-4 bg-blue-50 rounded-lg">
+                  <div className="text-3xl font-bold text-blue-600">{wordCount}</div>
+                  <div className="text-sm text-gray-600">Total Words</div>
+                </div>
+                <div className="text-center p-4 bg-green-50 rounded-lg">
+                  <div className="text-3xl font-bold text-green-600">{Math.round(wordCount / Math.max(sessionDuration / 60, 0.1))}</div>
+                  <div className="text-sm text-gray-600">Words Per Minute</div>
+                </div>
+                <div className="text-center p-4 bg-purple-50 rounded-lg">
+                  <div className="text-3xl font-bold text-purple-600">{formatTime(sessionDuration)}</div>
+                  <div className="text-sm text-gray-600">Session Duration</div>
+                </div>
+              </div>
+
+              <div className="border rounded-lg p-4 bg-gray-50 max-h-96 overflow-y-auto">
+                <h3 className="font-semibold mb-3">What You Said:</h3>
+                {transcript ? (
+                  <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">
+                    {transcript}
+                  </p>
+                ) : (
+                  <p className="text-gray-500 italic">
+                    No speech was detected during this session. Make sure your microphone is enabled and try speaking clearly.
+                  </p>
+                )}
+              </div>
+
+              <div className="flex justify-end gap-3 mt-6">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    navigator.clipboard.writeText(transcript);
+                    toast({
+                      title: "Copied to clipboard",
+                      description: "Transcript copied successfully",
+                    });
+                  }}
+                  disabled={!transcript}
+                >
+                  Copy Transcript
+                </Button>
+                <Button
+                  onClick={() => {
+                    // Reset session data
+                    setTranscript('');
+                    setWordCount(0);
+                    setSessionDuration(0);
+                    setLiveFeedback([]);
+                    setSessionMetrics({
+                      volume: 0,
+                      clarity: 0,
+                      pace: 0,
+                      wordsSpoken: 0,
+                      fillerWords: [],
+                      bodyLanguageScore: 0
+                    });
+                    setShowTranscript(false);
+                    
+                    toast({
+                      title: "New Session Ready",
+                      description: "Ready for your next practice session",
+                    });
+                  }}
+                >
+                  Start New Session
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
