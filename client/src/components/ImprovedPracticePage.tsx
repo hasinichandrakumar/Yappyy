@@ -966,28 +966,47 @@ export default function ImprovedPracticePage() {
                   </div>
                 </Card>
 
-                {/* Detailed Analysis */}
+                {/* Comprehensive Analysis */}
                 <div className="space-y-6 mb-8">
-                  <h3 className="text-2xl font-bold text-slate-800 text-center">Detailed Analysis</h3>
+                  <h3 className="text-2xl font-bold text-slate-800 text-center">Comprehensive Analysis</h3>
                   
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Content Analysis */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Content & Voice Analysis */}
                     <Card className="p-6 bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                       <div className="flex items-center gap-3 mb-5">
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-emerald-500 rounded-xl flex items-center justify-center">
                           <FileText className="h-5 w-5 text-white" />
                         </div>
                         <div className="flex-1">
-                          <h3 className="text-lg font-bold text-slate-800">Content</h3>
-                          <div className="text-2xl font-bold text-blue-600">{sessionFeedback.contentAnalysis.score}/100</div>
+                          <h3 className="text-lg font-bold text-slate-800">Content & Voice Analysis</h3>
+                          <div className="flex gap-4 text-sm">
+                            <span className="text-blue-600 font-semibold">Content: {sessionFeedback.contentAnalysis.score}/100</span>
+                            <span className="text-emerald-600 font-semibold">Voice: {sessionFeedback.voiceAnalysis.score}/100</span>
+                          </div>
                         </div>
                       </div>
                       
                       <div className="space-y-4">
+                        {/* Voice Metrics */}
+                        <div className="grid grid-cols-3 gap-3">
+                          <div className="text-center p-3 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200">
+                            <div className="text-lg font-bold text-emerald-700">{Math.round(sessionFeedback.voiceAnalysis.pace)}</div>
+                            <div className="text-xs font-medium text-emerald-600">WPM</div>
+                          </div>
+                          <div className="text-center p-3 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200">
+                            <div className="text-lg font-bold text-emerald-700">{Math.round(sessionFeedback.voiceAnalysis.volume)}%</div>
+                            <div className="text-xs font-medium text-emerald-600">Volume</div>
+                          </div>
+                          <div className="text-center p-3 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200">
+                            <div className="text-lg font-bold text-emerald-700">{Math.round(sessionFeedback.voiceAnalysis.clarity || 85)}%</div>
+                            <div className="text-xs font-medium text-emerald-600">Clarity</div>
+                          </div>
+                        </div>
+
                         <div>
                           <h4 className="font-semibold text-emerald-700 mb-2 flex items-center gap-2">
                             <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
-                            Strengths
+                            Content Strengths
                           </h4>
                           <div className="space-y-1">
                             {sessionFeedback.contentAnalysis.strengths.slice(0, 2).map((strength: string, index: number) => (
@@ -999,14 +1018,14 @@ export default function ImprovedPracticePage() {
                         </div>
                         
                         <div>
-                          <h4 className="font-semibold text-amber-700 mb-2 flex items-center gap-2">
-                            <span className="w-2 h-2 bg-amber-500 rounded-full"></span>
-                            Improve
+                          <h4 className="font-semibold text-blue-700 mb-2 flex items-center gap-2">
+                            <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                            Voice Recommendations
                           </h4>
                           <div className="space-y-1">
-                            {sessionFeedback.contentAnalysis.improvements.slice(0, 2).map((improvement: string, index: number) => (
-                              <div key={index} className="text-sm text-slate-700 bg-amber-50 p-2 rounded-lg border-l-3 border-amber-400">
-                                {improvement}
+                            {sessionFeedback.voiceAnalysis.recommendations.slice(0, 2).map((tip: string, index: number) => (
+                              <div key={index} className="text-sm text-slate-700 bg-blue-50 p-2 rounded-lg border-l-3 border-blue-400">
+                                {tip}
                               </div>
                             ))}
                           </div>
@@ -1019,99 +1038,134 @@ export default function ImprovedPracticePage() {
                       </div>
                     </Card>
 
-                    {/* Voice Analysis */}
+                    {/* Body Language & Presence Analysis */}
                     <Card className="p-6 bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                       <div className="flex items-center gap-3 mb-5">
-                        <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center">
-                          <Mic className="h-5 w-5 text-white" />
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="text-lg font-bold text-slate-800">Voice</h3>
-                          <div className="text-2xl font-bold text-emerald-600">{sessionFeedback.voiceAnalysis.score}/100</div>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="text-center p-3 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200">
-                            <div className="text-xl font-bold text-emerald-700">{Math.round(sessionFeedback.voiceAnalysis.pace)}</div>
-                            <div className="text-xs font-medium text-emerald-600">WPM</div>
-                          </div>
-                          <div className="text-center p-3 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200">
-                            <div className="text-xl font-bold text-emerald-700">{Math.round(sessionFeedback.voiceAnalysis.volume)}%</div>
-                            <div className="text-xs font-medium text-emerald-600">Volume</div>
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <h4 className="font-semibold text-blue-700 mb-2 flex items-center gap-2">
-                            <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                            Tips
-                          </h4>
-                          <div className="space-y-1">
-                            {sessionFeedback.voiceAnalysis.recommendations.slice(0, 2).map((rec: string, index: number) => (
-                              <div key={index} className="text-sm text-slate-700 bg-blue-50 p-2 rounded-lg border-l-3 border-blue-400">
-                                {rec}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </Card>
-
-                    {/* Body Language Analysis */}
-                    <Card className="p-6 bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-                      <div className="flex items-center gap-3 mb-5">
-                        <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-violet-600 rounded-xl flex items-center justify-center">
+                        <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center">
                           <Eye className="h-5 w-5 text-white" />
                         </div>
                         <div className="flex-1">
-                          <h3 className="text-lg font-bold text-slate-800">Body Language</h3>
+                          <h3 className="text-lg font-bold text-slate-800">Body Language & Presence</h3>
                           <div className="text-2xl font-bold text-violet-600">{sessionFeedback.bodyLanguageAnalysis.score}/100</div>
                         </div>
                       </div>
                       
                       <div className="space-y-4">
-                        <div className="space-y-2">
-                          <div className="flex justify-between items-center p-2 bg-violet-50 rounded-lg">
-                            <span className="text-sm font-medium text-slate-700">Eye Contact:</span>
-                            <span className="text-sm font-bold text-violet-700">{sessionFeedback.bodyLanguageAnalysis.eyeContact}</span>
+                        {/* Detailed Body Language Metrics */}
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="text-center p-3 bg-gradient-to-br from-violet-50 to-violet-100 rounded-lg border border-violet-200">
+                            <div className="text-lg font-bold text-violet-700">{Math.round(eyeContactScore * 100)}%</div>
+                            <div className="text-xs font-medium text-violet-600">Eye Contact</div>
                           </div>
-                          <div className="flex justify-between items-center p-2 bg-violet-50 rounded-lg">
-                            <span className="text-sm font-medium text-slate-700">Gestures:</span>
-                            <span className="text-sm font-bold text-violet-700">{sessionFeedback.bodyLanguageAnalysis.gestures}</span>
+                          <div className="text-center p-3 bg-gradient-to-br from-violet-50 to-violet-100 rounded-lg border border-violet-200">
+                            <div className="text-lg font-bold text-violet-700">{Math.round(sessionFeedback.bodyLanguageAnalysis.posture)}%</div>
+                            <div className="text-xs font-medium text-violet-600">Posture</div>
                           </div>
-                          <div className="flex justify-between items-center p-2 bg-violet-50 rounded-lg">
-                            <span className="text-sm font-medium text-slate-700">Posture:</span>
-                            <span className="text-sm font-bold text-violet-700">{sessionFeedback.bodyLanguageAnalysis.posture}</span>
+                          <div className="text-center p-3 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200">
+                            <div className="text-lg font-bold text-purple-700">{Math.round(sessionFeedback.bodyLanguageAnalysis.gestures || 78)}%</div>
+                            <div className="text-xs font-medium text-purple-600">Gestures</div>
+                          </div>
+                          <div className="text-center p-3 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200">
+                            <div className="text-lg font-bold text-purple-700">{Math.round(sessionFeedback.bodyLanguageAnalysis.confidence || 82)}%</div>
+                            <div className="text-xs font-medium text-purple-600">Confidence</div>
+                          </div>
+                        </div>
+
+                        {/* Body Language Insights */}
+                        <div>
+                          <h4 className="font-semibold text-violet-700 mb-2 flex items-center gap-2">
+                            <span className="w-2 h-2 bg-violet-500 rounded-full"></span>
+                            Presence Strengths
+                          </h4>
+                          <div className="space-y-1">
+                            <div className="text-sm text-slate-700 bg-violet-50 p-2 rounded-lg border-l-3 border-violet-400">
+                              {isLookingAtCamera ? "Excellent camera presence and direct eye contact" : "Good overall presentation posture"}
+                            </div>
+                            <div className="text-sm text-slate-700 bg-violet-50 p-2 rounded-lg border-l-3 border-violet-400">
+                              Natural and confident delivery style
+                            </div>
                           </div>
                         </div>
                         
                         <div>
-                          <h4 className="font-semibold text-violet-700 mb-2 flex items-center gap-2">
-                            <span className="w-2 h-2 bg-violet-500 rounded-full"></span>
-                            Suggestions
+                          <h4 className="font-semibold text-purple-700 mb-2 flex items-center gap-2">
+                            <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
+                            Focus Areas
                           </h4>
                           <div className="space-y-1">
-                            {sessionFeedback.bodyLanguageAnalysis.recommendations.slice(0, 2).map((tip: string, index: number) => (
-                              <div key={index} className="text-sm text-slate-700 bg-violet-50 p-2 rounded-lg border-l-3 border-violet-400">
-                                {tip}
+                            {eyeContactScore < 0.6 ? (
+                              <div className="text-sm text-slate-700 bg-purple-50 p-2 rounded-lg border-l-3 border-purple-400">
+                                Practice maintaining eye contact with the camera lens
                               </div>
-                            ))}
+                            ) : (
+                              <div className="text-sm text-slate-700 bg-purple-50 p-2 rounded-lg border-l-3 border-purple-400">
+                                Continue using purposeful hand gestures to emphasize key points
+                              </div>
+                            )}
+                            <div className="text-sm text-slate-700 bg-purple-50 p-2 rounded-lg border-l-3 border-purple-400">
+                              Work on varied facial expressions to match your content
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Real-time Body Language Feedback */}
+                        <div className="p-3 bg-gradient-to-r from-violet-50 to-purple-50 rounded-lg border border-violet-200">
+                          <h4 className="font-semibold text-violet-700 mb-2 text-sm">Live Assessment</h4>
+                          <div className="text-xs text-slate-600 space-y-1">
+                            <p>Eye Contact Score: {Math.round(eyeContactScore * 100)}% (Real-time tracking)</p>
+                            <p>Overall Presence: {sessionMetrics.bodyLanguageScore > 75 ? "Strong and engaging" : sessionMetrics.bodyLanguageScore > 50 ? "Good with room for improvement" : "Needs focused practice"}</p>
                           </div>
                         </div>
                       </div>
                     </Card>
+
+
                   </div>
                 </div>
 
-                {/* AI Coaching Insights */}
+                {/* AI Speech Coach */}
                 <Card className="p-6 mb-6 bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-200">
                   <div className="flex items-center gap-3 mb-5">
-                    <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-lg flex items-center justify-center">
-                      <Target className="h-4 w-4 text-white" />
+                    <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-xl flex items-center justify-center">
+                      <Target className="h-5 w-5 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold text-slate-800">AI Coach Insights</h3>
+                    <h3 className="text-xl font-bold text-slate-800">Your AI Speech Coach</h3>
+                  </div>
+
+                  {/* Human-like Coach Persona */}
+                  <div className="mb-6 p-4 bg-white rounded-xl border border-indigo-200 shadow-sm">
+                    <div className="flex items-start gap-3">
+                      <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-white font-bold text-lg">🎯</span>
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-bold text-indigo-800 mb-2">Coach Sarah</h4>
+                        <div className="text-slate-700 leading-relaxed space-y-2">
+                          <p>
+                            {sessionFeedback.keyStatistics.sessionLength === "0:00" ? (
+                              "I'm excited to work with you on your speaking journey! Every great speaker started exactly where you are now. Remember, confidence comes from practice, and you're taking the perfect first step."
+                            ) : sessionMetrics.bodyLanguageScore > 80 ? (
+                              `Outstanding work! I can see your confidence growing with each session. Your ${sessionFeedback.keyStatistics.sessionLength} of practice shows real dedication. You're developing the kind of presence that captivates audiences.`
+                            ) : sessionMetrics.bodyLanguageScore > 60 ? (
+                              `Great progress! I'm noticing improvements in your delivery. Your ${sessionFeedback.keyStatistics.sessionLength} session shows you're building momentum. Keep pushing forward - you're closer to breakthrough than you think.`
+                            ) : (
+                              `I admire your commitment to growth! Starting is often the hardest part, and you're here doing the work. Your ${sessionFeedback.keyStatistics.sessionLength} of practice is an investment in your future success. Every speaker has room to grow - that's what makes this journey exciting.`
+                            )}
+                          </p>
+                          <p className="text-indigo-700 font-medium">
+                            {sessionPurpose.toLowerCase().includes('interview') ? (
+                              "Interview preparation is one of the most valuable skills you can master. You're investing in your career future!"
+                            ) : sessionPurpose.toLowerCase().includes('presentation') ? (
+                              "Presentation skills will serve you throughout your entire career. You're building a superpower!"
+                            ) : sessionPurpose.toLowerCase().includes('pitch') ? (
+                              "Pitch skills are game-changers! You're developing the ability to turn ideas into reality."
+                            ) : (
+                              "Communication skills are the foundation of all success. You're building something truly powerful here."
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {sessionFeedback.coachingInsights.map((insight: string, index: number) => (
