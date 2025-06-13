@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertPracticeSessionSchema, insertCoachingFeedbackSchema } from "@shared/schema";
 import { setupGoogleAuth, requireAuth } from "./googleAuth";
+import { setupDemoAuth, demoAuth } from "./demo-auth";
 import { generateClubCoaching } from "./ai-coaching";
 import { 
   generateComprehensiveAnalysis, 
@@ -14,22 +15,14 @@ import {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
-  // Setup Google Authentication
+  // Setup Demo Authentication (simplified for demo environment)
+  setupDemoAuth(app);
+  
+  // Setup Google Authentication (fallback)
   await setupGoogleAuth(app);
 
-  // Auth routes
-  app.get('/api/auth/user', requireAuth, async (req: any, res) => {
-    try {
-      const user = req.user;
-      res.json(user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
-
   // Update user profile
-  app.patch('/api/user/profile', requireAuth, async (req: any, res) => {
+  app.patch('/api/user/profile', demoAuth, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const updates = req.body;

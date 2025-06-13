@@ -22,12 +22,12 @@ export function getSession() {
   });
   
   return session({
-    secret: process.env.SESSION_SECRET!,
+    secret: process.env.SESSION_SECRET || 'fallback-secret-key',
     store: sessionStore,
-    resave: false,
-    saveUninitialized: false,
+    resave: true,
+    saveUninitialized: true,
     cookie: {
-      httpOnly: true,
+      httpOnly: false, // Allow client-side access for debugging
       secure: false, // Set to false for Replit development environment
       maxAge: sessionTtl,
       sameSite: 'lax'
