@@ -527,7 +527,7 @@ export default function ImprovedPracticePage() {
       
       // Generate feedback and save session, but don't auto-reset
       setTimeout(async () => {
-        generateSessionFeedback();
+        await generateSessionFeedback();
         await saveSessionToDatabase();
         
         // Show the transcript/analysis modal
@@ -589,8 +589,86 @@ export default function ImprovedPracticePage() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // AI-powered content analysis functions
+  const generateContentStrengths = async (transcript: string, purpose: string) => {
+    if (!transcript || transcript.trim().length < 10) {
+      return ["Session too short for meaningful content analysis"];
+    }
+
+    try {
+      const response = await fetch('/api/ai-content-analysis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          transcript,
+          purpose,
+          analysisType: 'strengths'
+        })
+      });
+
+      if (response.ok) {
+        const analysis = await response.json();
+        return analysis.strengths || ["Clear communication maintained throughout session"];
+      }
+    } catch (error) {
+      console.error('AI content analysis failed:', error);
+    }
+
+    // Fallback to basic analysis if AI fails
+    const words = transcript.split(' ').filter(w => w.trim().length > 0);
+    const strengths = [];
+    
+    if (words.length > 50) strengths.push("Provided substantial content depth");
+    if (transcript.includes('because') || transcript.includes('therefore')) {
+      strengths.push("Used logical reasoning and explanations");
+    }
+    if (purpose && transcript.toLowerCase().includes(purpose.toLowerCase().split(' ')[0])) {
+      strengths.push("Stayed focused on stated purpose");
+    }
+    
+    return strengths.length > 0 ? strengths : ["Maintained clear communication"];
+  };
+
+  const generateContentImprovements = async (transcript: string, purpose: string) => {
+    if (!transcript || transcript.trim().length < 10) {
+      return ["Practice with longer sessions for more detailed feedback"];
+    }
+
+    try {
+      const response = await fetch('/api/ai-content-analysis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          transcript,
+          purpose,
+          analysisType: 'improvements'
+        })
+      });
+
+      if (response.ok) {
+        const analysis = await response.json();
+        return analysis.improvements || ["Continue practicing to develop stronger content"];
+      }
+    } catch (error) {
+      console.error('AI content analysis failed:', error);
+    }
+
+    // Fallback analysis
+    const words = transcript.split(' ').filter(w => w.trim().length > 0);
+    const improvements = [];
+    
+    if (words.length < 50) {
+      improvements.push("Develop ideas with more depth and specific examples");
+    }
+    if (!transcript.includes('because') && !transcript.includes('therefore')) {
+      improvements.push("Add more logical connections between ideas");
+    }
+    
+    return improvements.length > 0 ? improvements : ["Continue practicing to refine your delivery"];
+  };
+
   // Generate comprehensive AI feedback based on session data
-  const generateSessionFeedback = useCallback(() => {
+  const generateSessionFeedback = useCallback(async () => {
     // Analyze badges earned
     const badges = [];
     if (wordCount > 0) badges.push("First Steps");
@@ -601,107 +679,6 @@ export default function ImprovedPracticePage() {
     if (sessionDuration > 3600) badges.push("Marathon Speaker");
     
     setEarnedBadges(badges);
-
-    // Advanced content analysis based on purpose
-    const generateContentStrengths = (transcript: string, purpose: string) => {
-      const strengths = [];
-      const transcriptLower = transcript.toLowerCase();
-      const wordCount = transcript.split(' ').filter(w => w.trim().length > 0).length;
-      
-      // Purpose-specific analysis
-      if (purpose.toLowerCase().includes('interview')) {
-        if (transcriptLower.includes('experience') || transcriptLower.includes('accomplished')) {
-          strengths.push("Effectively highlighted relevant experience");
-        }
-        if (transcriptLower.includes('example') || transcriptLower.includes('instance')) {
-          strengths.push("Used concrete examples to demonstrate competencies");
-        }
-        if (transcriptLower.includes('result') || transcriptLower.includes('outcome')) {
-          strengths.push("Focused on measurable results and outcomes");
-        }
-        if (transcriptLower.includes('challenge') || transcriptLower.includes('problem')) {
-          strengths.push("Addressed challenges and problem-solving abilities");
-        }
-      } else if (purpose.toLowerCase().includes('presentation')) {
-        if (transcriptLower.includes('first') || transcriptLower.includes('next') || transcriptLower.includes('finally')) {
-          strengths.push("Used clear structural transitions");
-        }
-        if (transcriptLower.includes('data') || transcriptLower.includes('research') || transcriptLower.includes('study')) {
-          strengths.push("Incorporated supporting evidence and data");
-        }
-        if (transcriptLower.includes('audience') || transcriptLower.includes('you')) {
-          strengths.push("Maintained audience engagement and connection");
-        }
-      } else if (purpose.toLowerCase().includes('pitch')) {
-        if (transcriptLower.includes('problem') || transcriptLower.includes('solution')) {
-          strengths.push("Clearly defined problem and solution");
-        }
-        if (transcriptLower.includes('market') || transcriptLower.includes('opportunity')) {
-          strengths.push("Identified market opportunity effectively");
-        }
-        if (transcriptLower.includes('action') || transcriptLower.includes('next steps')) {
-          strengths.push("Included clear call-to-action");
-        }
-      }
-      
-      // General communication strengths
-      if (wordCount > 100) strengths.push("Developed ideas with appropriate depth");
-      if (transcriptLower.includes('because') || transcriptLower.includes('therefore') || transcriptLower.includes('since')) {
-        strengths.push("Provided logical reasoning and connections");
-      }
-      if ((transcriptLower.match(/\b(and|but|however|furthermore|moreover)\b/g) || []).length > 2) {
-        strengths.push("Used effective connecting words and transitions");
-      }
-      
-      return strengths.length > 0 ? strengths : ["Maintained clear communication throughout"];
-    };
-
-    const generateContentImprovements = (transcript: string, purpose: string) => {
-      const improvements = [];
-      const transcriptLower = transcript.toLowerCase();
-      const wordCount = transcript.split(' ').filter(w => w.trim().length > 0).length;
-      const sentenceCount = transcript.split(/[.!?]+/).filter(s => s.trim().length > 0).length;
-      
-      // Purpose-specific improvements
-      if (purpose.toLowerCase().includes('interview')) {
-        if (!transcriptLower.includes('example') && !transcriptLower.includes('instance')) {
-          improvements.push("Add specific examples using the STAR method (Situation, Task, Action, Result)");
-        }
-        if (!transcriptLower.includes('learn') && !transcriptLower.includes('grow')) {
-          improvements.push("Demonstrate growth mindset and eagerness to learn");
-        }
-        if (!transcriptLower.includes('question')) {
-          improvements.push("Prepare thoughtful questions about the role and company");
-        }
-      } else if (purpose.toLowerCase().includes('presentation')) {
-        if (!transcriptLower.includes('conclusion') && !transcriptLower.includes('summary')) {
-          improvements.push("Add a strong conclusion that reinforces key messages");
-        }
-        if (sentenceCount < 5) {
-          improvements.push("Develop main points with more detailed explanations");
-        }
-        if (!transcriptLower.includes('slide') && !transcriptLower.includes('chart')) {
-          improvements.push("Reference visual aids to enhance understanding");
-        }
-      } else if (purpose.toLowerCase().includes('pitch')) {
-        if (!transcriptLower.includes('unique') && !transcriptLower.includes('different')) {
-          improvements.push("Highlight your unique value proposition more clearly");
-        }
-        if (!transcriptLower.includes('timeline') && !transcriptLower.includes('plan')) {
-          improvements.push("Include implementation timeline and concrete next steps");
-        }
-      }
-      
-      // General improvements
-      if (wordCount < 50) {
-        improvements.push("Expand on key points with more specific details and examples");
-      }
-      if (wordCount > 300 && sentenceCount < 10) {
-        improvements.push("Break complex ideas into shorter, clearer sentences");
-      }
-      
-      return improvements.length > 0 ? improvements : ["Consider adding more storytelling elements to engage your audience"];
-    };
 
     const analyzePurposeAlignment = (transcript: string, purpose: string) => {
       if (!purpose) return "No specific purpose set - consider defining your goal for better targeted feedback";
@@ -902,12 +879,15 @@ export default function ImprovedPracticePage() {
     };
 
     // Generate AI feedback based on purpose and content
+    const contentStrengths = await generateContentStrengths(transcript, sessionPurpose);
+    const contentImprovements = await generateContentImprovements(transcript, sessionPurpose);
+    
     const feedback = {
       overallScore: Math.round((sessionMetrics.clarity + sessionMetrics.volume + sessionMetrics.bodyLanguageScore) / 3),
       contentAnalysis: {
         score: Math.round(85 + Math.random() * 15),
-        strengths: generateContentStrengths(transcript, sessionPurpose),
-        improvements: generateContentImprovements(transcript, sessionPurpose),
+        strengths: contentStrengths,
+        improvements: contentImprovements,
         purposeAlignment: analyzePurposeAlignment(transcript, sessionPurpose)
       },
       voiceAnalysis: {
