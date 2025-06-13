@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   BarChart3, 
   TrendingUp, 
@@ -19,11 +21,21 @@ import {
   Zap,
   CheckCircle,
   AlertTriangle,
-  Info
+  Info,
+  Filter
 } from 'lucide-react';
 
 export default function EnhancedAnalysisTab() {
   const [selectedTimeFrame, setSelectedTimeFrame] = useState('week');
+  const [selectedSession, setSelectedSession] = useState('all');
+
+  // Fetch practice sessions for the session selector
+  const { data: sessions = [] } = useQuery({
+    queryKey: ['/api/practice-sessions'],
+  });
+
+  // Type guard for sessions
+  const typedSessions = Array.isArray(sessions) ? sessions : [];
   
   // Mock data for demonstration - in real app this would come from the database
   const mockData = {
@@ -89,21 +101,42 @@ export default function EnhancedAnalysisTab() {
           <h1 className="text-3xl font-bold text-gray-900">Speaking Analysis</h1>
           <p className="text-gray-600 mt-1">Comprehensive insights into your communication skills</p>
         </div>
-        <div className="flex gap-2">
-          {['week', 'month', 'quarter'].map((timeframe) => (
-            <Button
-              key={timeframe}
-              variant={selectedTimeFrame === timeframe ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setSelectedTimeFrame(timeframe)}
-              className={selectedTimeFrame === timeframe ? 
-                'bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] hover:from-[#1d4ed8] hover:to-[#0284c7] shadow-lg' : 
-                'border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200'
-              }
-            >
-              {timeframe.charAt(0).toUpperCase() + timeframe.slice(1)}
-            </Button>
-          ))}
+        <div className="flex flex-col sm:flex-row gap-3">
+          {/* Session Filter */}
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4 text-gray-500" />
+            <Select value={selectedSession} onValueChange={setSelectedSession}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Select session" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Sessions</SelectItem>
+                {typedSessions.slice(0, 10).map((session: any) => (
+                  <SelectItem key={session.id} value={session.id.toString()}>
+                    {session.name || `Session ${session.id}`} - {new Date(session.createdAt).toLocaleDateString()}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {/* Time Frame Filter */}
+          <div className="flex gap-2">
+            {['week', 'month', 'quarter'].map((timeframe) => (
+              <Button
+                key={timeframe}
+                variant={selectedTimeFrame === timeframe ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSelectedTimeFrame(timeframe)}
+                className={selectedTimeFrame === timeframe ? 
+                  'bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] shadow-lg' : 
+                  'border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200'
+                }
+              >
+                {timeframe.charAt(0).toUpperCase() + timeframe.slice(1)}
+              </Button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -113,7 +146,7 @@ export default function EnhancedAnalysisTab() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Overall Score</p>
-              <p className="text-4xl font-bold bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] bg-clip-text text-transparent">{mockData.overall.averageScore}</p>
+              <p className="text-4xl font-bold bg-gradient-to-br from-[#2563eb] to-[#22d3ee] bg-clip-text text-transparent">{mockData.overall.averageScore}</p>
               <div className="flex items-center mt-2">
                 <TrendingUp className="h-4 w-4 text-emerald-500 mr-1" />
                 <span className="text-sm font-medium text-emerald-600">+{mockData.overall.improvement}% this {selectedTimeFrame}</span>
@@ -169,24 +202,26 @@ export default function EnhancedAnalysisTab() {
 
       {/* Detailed Analysis Tabs */}
       <Tabs defaultValue="voice" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 bg-white border border-gray-100 shadow-lg rounded-xl p-1">
-          <TabsTrigger value="voice" className="flex items-center gap-2 px-4 py-3 rounded-lg font-medium transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#1e40af] data-[state=active]:to-[#0ea5e9] data-[state=active]:text-white data-[state=active]:shadow-lg">
-            <Mic className="h-4 w-4" />
-            Voice
-          </TabsTrigger>
-          <TabsTrigger value="body-language" className="flex items-center gap-2 px-4 py-3 rounded-lg font-medium transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#1e40af] data-[state=active]:to-[#0ea5e9] data-[state=active]:text-white data-[state=active]:shadow-lg">
-            <Eye className="h-4 w-4" />
-            Body Language
-          </TabsTrigger>
-          <TabsTrigger value="content" className="flex items-center gap-2 px-4 py-3 rounded-lg font-medium transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#1e40af] data-[state=active]:to-[#0ea5e9] data-[state=active]:text-white data-[state=active]:shadow-lg">
-            <MessageSquare className="h-4 w-4" />
-            Content
-          </TabsTrigger>
-          <TabsTrigger value="trends" className="flex items-center gap-2 px-4 py-3 rounded-lg font-medium transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#1e40af] data-[state=active]:to-[#0ea5e9] data-[state=active]:text-white data-[state=active]:shadow-lg">
-            <TrendingUp className="h-4 w-4" />
-            Trends
-          </TabsTrigger>
-        </TabsList>
+        <div className="w-full overflow-x-auto">
+          <TabsList className="inline-flex h-auto w-auto min-w-full bg-white border border-gray-100 shadow-lg rounded-xl p-1">
+            <TabsTrigger value="voice" className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#2563eb] data-[state=active]:to-[#22d3ee] data-[state=active]:text-white data-[state=active]:shadow-lg whitespace-nowrap">
+              <Mic className="h-4 w-4" />
+              <span className="hidden sm:inline">Voice</span>
+            </TabsTrigger>
+            <TabsTrigger value="body-language" className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#2563eb] data-[state=active]:to-[#22d3ee] data-[state=active]:text-white data-[state=active]:shadow-lg whitespace-nowrap">
+              <Eye className="h-4 w-4" />
+              <span className="hidden sm:inline">Body Language</span>
+            </TabsTrigger>
+            <TabsTrigger value="content" className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#2563eb] data-[state=active]:to-[#22d3ee] data-[state=active]:text-white data-[state=active]:shadow-lg whitespace-nowrap">
+              <MessageSquare className="h-4 w-4" />
+              <span className="hidden sm:inline">Content</span>
+            </TabsTrigger>
+            <TabsTrigger value="trends" className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#2563eb] data-[state=active]:to-[#22d3ee] data-[state=active]:text-white data-[state=active]:shadow-lg whitespace-nowrap">
+              <TrendingUp className="h-4 w-4" />
+              <span className="hidden sm:inline">Trends</span>
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* Voice Analysis */}
         <TabsContent value="voice" className="space-y-6">
