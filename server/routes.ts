@@ -626,7 +626,7 @@ Provide detailed feedback on content structure, voice modulation advice, and bod
           updatedAchievement = await storage.addUserAchievement({
             userId,
             achievementType: achievementId,
-            achievementName: achievementId.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()),
+            achievementName: achievementId.replace('-', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
             description: `Achievement unlocked: ${achievementId}`,
             metadata: metadata || {}
           });
