@@ -214,6 +214,29 @@ export default function ImprovedPracticePage() {
     setupSpeechRecognition();
   }, [setupSpeechRecognition]);
 
+  // Initialize session name with next session number
+  useEffect(() => {
+    const initializeSessionName = async () => {
+      try {
+        const response = await fetch('/api/practice-sessions');
+        if (response.ok) {
+          const sessions = await response.json();
+          const nextNumber = sessions.length + 1;
+          setSessionName(`Session ${nextNumber}`);
+        } else {
+          setSessionName("Session 1");
+        }
+      } catch (error) {
+        console.error('Error fetching sessions:', error);
+        setSessionName("Session 1");
+      }
+    };
+
+    if (!sessionName) {
+      initializeSessionName();
+    }
+  }, [sessionName]);
+
   // Real-time metrics simulation
   useEffect(() => {
     if (!isRecording) return;
