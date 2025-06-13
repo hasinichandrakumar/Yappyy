@@ -76,7 +76,7 @@ export default function ImprovedPracticePage() {
       }
     };
     initializeSessionName();
-  }, []); // Remove sessionName dependency to prevent override loop
+  }, []); // Only run once on mount
 
   // Eye contact detection function
   const detectEyeContact = useCallback(() => {
@@ -214,28 +214,7 @@ export default function ImprovedPracticePage() {
     setupSpeechRecognition();
   }, [setupSpeechRecognition]);
 
-  // Initialize session name with next session number
-  useEffect(() => {
-    const initializeSessionName = async () => {
-      try {
-        const response = await fetch('/api/practice-sessions');
-        if (response.ok) {
-          const sessions = await response.json();
-          const nextNumber = sessions.length + 1;
-          setSessionName(`Session ${nextNumber}`);
-        } else {
-          setSessionName("Session 1");
-        }
-      } catch (error) {
-        console.error('Error fetching sessions:', error);
-        setSessionName("Session 1");
-      }
-    };
 
-    if (!sessionName) {
-      initializeSessionName();
-    }
-  }, [sessionName]);
 
   // Real-time metrics simulation
   useEffect(() => {
@@ -391,7 +370,7 @@ export default function ImprovedPracticePage() {
       fillerWords.some(filler => word.toLowerCase().includes(filler))
     );
 
-    const currentWPM = Math.round((wordCount / Math.max(sessionDuration / 60, 0.1)));
+    const currentWPM = sessionDuration > 0 ? Math.round((wordCount / (sessionDuration / 60))) : 0;
     
     let feedback: LiveFeedbackItem | null = null;
 
@@ -504,7 +483,8 @@ export default function ImprovedPracticePage() {
 
   // Update session metrics based on actual data
   const updateSessionMetrics = useCallback(() => {
-    const currentWPM = Math.round((wordCount / Math.max(sessionDuration / 60, 0.1)));
+    // Only calculate WPM if we have actual duration to avoid division issues
+    const currentWPM = sessionDuration > 0 ? Math.round((wordCount / (sessionDuration / 60))) : 0;
     const fillerAnalysis = analyzeFillerWords(transcript);
     
     setSessionMetrics(prev => ({
