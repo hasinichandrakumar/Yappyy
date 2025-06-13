@@ -422,7 +422,7 @@ export default function EnhancedAnalysisTab() {
                   </div>
                   <div className="text-center">
                     <div className="text-4xl font-bold text-orange-800 mb-2">
-                      {Math.round(typedSessions.reduce((sum: number, s: any) => sum + (s.expressionScore || 80), 0) / typedSessions.length)}%
+                      {Math.round(typedSessions.reduce((sum: number, s: any) => sum + (s.expressionScore || 0), 0) / typedSessions.length)}%
                     </div>
                     <div className="text-sm text-orange-600 mb-3">Emotional Expression</div>
                     <Progress value={80} className="h-2 bg-orange-200" />
