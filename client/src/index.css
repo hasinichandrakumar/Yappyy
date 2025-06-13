@@ -672,4 +672,20 @@
   .animate-float-delayed {
     animation: float-delayed 4s ease-in-out infinite 2s;
   }
+
+  /* Gentle pulse animation for 100% text */
+  @keyframes gentle-pulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.02);
+      opacity: 0.95;
+    }
+  }
+
+  .animate-gentle-pulse {
+    animation: gentle-pulse 3s ease-in-out infinite;
+  }
 }

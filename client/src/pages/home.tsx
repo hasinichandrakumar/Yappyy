@@ -104,34 +104,21 @@ export default function HomePage() {
             {/* Central 100% Statistic */}
             <div className="text-center">
               <div className="inline-block relative">
-                <div className="bg-gradient-to-br from-white via-blue-50/30 to-white p-16 rounded-full shadow-2xl border-4 border-blue-100 relative overflow-hidden">
-                  {/* Background pattern */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-50/20 via-transparent to-cyan-50/20"></div>
-                  
-                  <div className="relative z-10">
-                    <p className="text-xl font-bold text-gray-700 mb-2">
+                <div className="bg-white p-20 rounded-3xl shadow-xl border border-gray-200 relative transform hover:scale-105 transition-transform duration-500">
+                  <div className="text-center">
+                    <p className="text-xl font-bold text-gray-700 mb-4">
                       We coach
                     </p>
                     <div className="relative">
-                      <div className="text-7xl md:text-8xl font-black bg-gradient-to-br from-[#1e40af] via-[#0ea5e9] to-[#06b6d4] bg-clip-text text-transparent leading-none tracking-tighter">
+                      <div className="text-8xl md:text-9xl font-black bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] bg-clip-text text-transparent leading-none tracking-tighter animate-gentle-pulse">
                         100%
                       </div>
-                      {/* Sparkle effects */}
-                      <div className="absolute -top-4 -left-4 w-4 h-4 bg-yellow-400 rounded-full animate-ping opacity-75"></div>
-                      <div className="absolute -bottom-2 -right-4 w-3 h-3 bg-cyan-400 rounded-full animate-pulse"></div>
-                      <div className="absolute top-1/2 -left-8 w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
                     </div>
-                    <p className="text-2xl font-bold text-gray-800 mt-2">
+                    <p className="text-2xl font-bold text-gray-800 mt-4">
                       of you
                     </p>
                   </div>
                 </div>
-                
-                {/* Floating elements around the circle */}
-                <div className="absolute -top-6 left-1/4 w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-500 rounded-lg rotate-12 opacity-80 animate-float"></div>
-                <div className="absolute -bottom-4 right-1/4 w-6 h-6 bg-gradient-to-br from-cyan-400 to-cyan-500 rounded-full opacity-80 animate-float-delayed"></div>
-                <div className="absolute top-1/3 -right-8 w-4 h-8 bg-gradient-to-br from-sky-400 to-sky-500 rounded-full rotate-45 opacity-80 animate-float"></div>
-                <div className="absolute bottom-1/3 -left-6 w-10 h-4 bg-gradient-to-br from-blue-300 to-blue-400 rounded-full -rotate-12 opacity-80 animate-float-delayed"></div>
               </div>
               
               <p className="text-lg font-semibold text-gray-600 mt-8 max-w-md mx-auto">
