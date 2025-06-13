@@ -522,15 +522,15 @@ export default function ImprovedPracticePage() {
 
       setIsRecording(false);
       
-      // Generate feedback and save session, then completely reset
+      // Generate feedback and save session, but don't auto-reset
       setTimeout(async () => {
         generateSessionFeedback();
         await saveSessionToDatabase();
         
-        // Complete session reset after saving
-        setTimeout(() => {
-          resetSession();
-        }, 500);
+        // Show the transcript/analysis modal
+        setShowTranscript(true);
+        
+        // Don't auto-reset - let user manually close modal and start new session
       }, 100);
       
       toast({
@@ -1362,7 +1362,13 @@ export default function ImprovedPracticePage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => setShowTranscript(false)}
+                    onClick={() => {
+                      setShowTranscript(false);
+                      // Reset session when user closes the modal
+                      setTimeout(() => {
+                        resetSession();
+                      }, 300);
+                    }}
                     className="rounded-full h-10 w-10 hover:bg-gray-100"
                   >
                     <X className="h-5 w-5" />
