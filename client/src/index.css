@@ -37,37 +37,37 @@
   --logo-sky: 199 89% 48%; /* #0EA5E9 */
 }
 
-/* Professional Bold Font System */
+/* Modern & Friendly Bold Font System (Poppins) */
 .font-heading {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.015em;
   line-height: 1.2;
 }
 
 .font-display {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
   font-weight: 800;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.02em;
   line-height: 1.1;
 }
 
 .font-body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
   font-weight: 500;
   letter-spacing: -0.01em;
   line-height: 1.6;
 }
 
 .font-button {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
   font-weight: 600;
   letter-spacing: -0.01em;
 }
 
 /* FONT THEME OPTIONS - Choose your preferred style */
 
-/* OPTION 1: Ultra-Professional Bold (Inter - CURRENTLY ACTIVE) */
+/* OPTION 1: Ultra-Professional Bold (Inter) */
 /* Best for: Tech companies, professional services, modern brands */
 /* Features: Clean, readable, very professional, excellent at all sizes */
 
@@ -80,14 +80,9 @@
 .font-button { font-family: 'Montserrat', sans-serif; font-weight: 700; letter-spacing: -0.01em; }
 */
 
-/* OPTION 3: Modern & Friendly Bold (Replace above fonts with these) */
-/*
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800;900&display=swap');
-.font-heading { font-family: 'Poppins', sans-serif; font-weight: 700; letter-spacing: -0.015em; }
-.font-display { font-family: 'Poppins', sans-serif; font-weight: 800; letter-spacing: -0.02em; }
-.font-body { font-family: 'Poppins', sans-serif; font-weight: 500; letter-spacing: -0.01em; }
-.font-button { font-family: 'Poppins', sans-serif; font-weight: 600; letter-spacing: -0.01em; }
-*/
+/* OPTION 3: Modern & Friendly Bold (Poppins - CURRENTLY ACTIVE) */
+/* Best for: User-focused applications, approachable brands, modern design */
+/* Features: Rounded, friendly while maintaining professionalism */
 
 /* OPTION 4: Luxury Bold (Replace above fonts with these) */
 /*

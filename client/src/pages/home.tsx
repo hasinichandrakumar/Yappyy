@@ -16,7 +16,7 @@ export default function HomePage() {
             </div>
             <div className="flex items-center space-x-4">
               <Link href="/dashboard">
-                <Button className="bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] hover:from-[#1d4ed8] hover:to-[#0284c7] text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300">
+                <Button className="bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] hover:from-[#1d4ed8] hover:to-[#0284c7] text-white font-button shadow-lg hover:shadow-xl transition-all duration-300">
                   Dashboard
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
@@ -38,12 +38,12 @@ export default function HomePage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/dashboard">
-                <Button size="lg" className="bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] hover:from-[#1d4ed8] hover:to-[#0284c7] text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 px-8 py-4">
+                <Button size="lg" className="bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] hover:from-[#1d4ed8] hover:to-[#0284c7] text-white font-button shadow-lg hover:shadow-xl transition-all duration-300 px-8 py-4">
                   Start Practicing Now
                   <Mic className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-              <Button variant="outline" size="lg" className="border-blue-300 text-blue-700 hover:bg-blue-50 px-8 py-4">
+              <Button variant="outline" size="lg" className="border-blue-300 text-blue-700 hover:bg-blue-50 font-button px-8 py-4">
                 Watch Demo
                 <Video className="ml-2 h-5 w-5" />
               </Button>
