@@ -29,27 +29,27 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid grid-cols-3 lg:grid-cols-6 gap-2 mb-8 h-auto p-2 bg-white border border-gray-100 shadow-lg rounded-xl">
-            <TabsTrigger value="practice" className="flex flex-col items-center space-y-2 px-4 py-3 text-xs font-medium rounded-lg transition-all duration-300 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#1e40af] data-[state=active]:to-[#0ea5e9] data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:scale-105">
+            <TabsTrigger value="practice" className="flex flex-col items-center space-y-2 px-4 py-3 text-xs font-medium rounded-lg transition-all duration-300 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#2563eb] data-[state=active]:to-[#22d3ee] data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:scale-105">
               <BarChart3 className="w-5 h-5" />
               <span>Practice</span>
             </TabsTrigger>
-            <TabsTrigger value="analysis" className="flex flex-col items-center space-y-2 px-4 py-3 text-xs font-medium rounded-lg transition-all duration-300 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#1e40af] data-[state=active]:to-[#0ea5e9] data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:scale-105">
+            <TabsTrigger value="analysis" className="flex flex-col items-center space-y-2 px-4 py-3 text-xs font-medium rounded-lg transition-all duration-300 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#2563eb] data-[state=active]:to-[#22d3ee] data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:scale-105">
               <Brain className="w-5 h-5" />
               <span>Analysis</span>
             </TabsTrigger>
-            <TabsTrigger value="ai-coach" className="flex flex-col items-center space-y-2 px-4 py-3 text-xs font-medium rounded-lg transition-all duration-300 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#1e40af] data-[state=active]:to-[#0ea5e9] data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:scale-105">
+            <TabsTrigger value="ai-coach" className="flex flex-col items-center space-y-2 px-4 py-3 text-xs font-medium rounded-lg transition-all duration-300 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#2563eb] data-[state=active]:to-[#22d3ee] data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:scale-105">
               <Brain className="w-5 h-5" />
               <span>AI Coach</span>
             </TabsTrigger>
-            <TabsTrigger value="speech-dna" className="flex flex-col items-center space-y-2 px-4 py-3 text-xs font-medium rounded-lg transition-all duration-300 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#1e40af] data-[state=active]:to-[#0ea5e9] data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:scale-105">
+            <TabsTrigger value="speech-dna" className="flex flex-col items-center space-y-2 px-4 py-3 text-xs font-medium rounded-lg transition-all duration-300 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#2563eb] data-[state=active]:to-[#22d3ee] data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:scale-105">
               <Star className="w-5 h-5" />
               <span>Speech DNA</span>
             </TabsTrigger>
-            <TabsTrigger value="templates" className="flex flex-col items-center space-y-2 px-4 py-3 text-xs font-medium rounded-lg transition-all duration-300 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#1e40af] data-[state=active]:to-[#0ea5e9] data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:scale-105">
+            <TabsTrigger value="templates" className="flex flex-col items-center space-y-2 px-4 py-3 text-xs font-medium rounded-lg transition-all duration-300 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#2563eb] data-[state=active]:to-[#22d3ee] data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:scale-105">
               <FileText className="w-5 h-5" />
               <span>Templates</span>
             </TabsTrigger>
-            <TabsTrigger value="badges" className="flex flex-col items-center space-y-2 px-4 py-3 text-xs font-medium rounded-lg transition-all duration-300 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#1e40af] data-[state=active]:to-[#0ea5e9] data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:scale-105">
+            <TabsTrigger value="badges" className="flex flex-col items-center space-y-2 px-4 py-3 text-xs font-medium rounded-lg transition-all duration-300 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#2563eb] data-[state=active]:to-[#22d3ee] data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:scale-105">
               <Trophy className="w-5 h-5" />
               <span>Badges</span>
             </TabsTrigger>

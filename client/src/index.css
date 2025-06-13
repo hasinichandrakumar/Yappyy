@@ -247,9 +247,9 @@
   /* Gradient utilities matching logo colors */
   .gradient-bg {
     background: linear-gradient(135deg, 
-      #3b82f6 0%, 
-      #06b6d4 50%, 
-      #0ea5e9 100%);
+      #2563eb 0%, 
+      #22d3ee 50%, 
+      #06b6d4 100%);
   }
 
   .gradient-bg-light {
@@ -261,9 +261,9 @@
 
   .gradient-text {
     background: linear-gradient(135deg, 
-      #3b82f6 0%, 
-      #06b6d4 50%, 
-      #0ea5e9 100%);
+      #2563eb 0%, 
+      #22d3ee 50%, 
+      #06b6d4 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -271,9 +271,9 @@
 
   .yapup-gradient {
     background: linear-gradient(135deg, 
-      #0891b2 0%, 
-      #0ea5e9 20%, 
-      #06b6d4 40%, 
+      #2563eb 0%, 
+      #3b82f6 20%, 
+      #0ea5e9 40%, 
       #22d3ee 60%, 
       #67e8f9 80%, 
       #a5f3fc 100%);
@@ -526,9 +526,9 @@
 
   .gradient-text-secondary {
     background: linear-gradient(45deg, 
-      #3b82f6 0%, 
-      #06b6d4 50%, 
-      #0ea5e9 100%);
+      #2563eb 0%, 
+      #22d3ee 50%, 
+      #06b6d4 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -536,16 +536,16 @@
 
   .gradient-button {
     background: linear-gradient(135deg, 
-      #3b82f6 0%, 
-      #06b6d4 50%, 
-      #0ea5e9 100%);
+      #2563eb 0%, 
+      #22d3ee 50%, 
+      #06b6d4 100%);
     transition: all 0.3s ease;
   }
 
   .gradient-button:hover {
     background: linear-gradient(135deg, 
-      #2563eb 0%, 
-      #0891b2 50%, 
+      #1d4ed8 0%, 
+      #06b6d4 50%, 
       #0284c7 100%);
     transform: translateY(-2px);
     box-shadow: 0 10px 25px hsla(217, 91%, 60%, 0.3);
@@ -574,11 +574,11 @@
 
   .animated-gradient {
     background: linear-gradient(-45deg, 
+      #2563eb, 
+      #3b82f6, 
       #0ea5e9, 
-      #06b6d4, 
-      #14b8a6, 
-      #10b981, 
-      #22d3ee);
+      #22d3ee, 
+      #06b6d4);
     background-size: 400% 400%;
     animation: gradientShift 8s ease infinite;
   }
