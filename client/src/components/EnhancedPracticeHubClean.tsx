@@ -247,7 +247,7 @@ export default function EnhancedPracticeHubClean() {
         purpose: sessionData.purpose,
         transcript: sessionData.transcript,
         duration: sessionData.duration,
-        previousSessions: (practiceSessions as any[])?.slice(-3).map((session: any, index: number) => ({
+        previousSessions: Array.isArray(practiceSessions) ? practiceSessions.slice(-3).map((session: any, index: number) => ({
           sessionNumber: index + 1,
           date: new Date(session.createdAt).toLocaleDateString(),
           purpose: session.purpose || 'General Practice',
@@ -261,7 +261,7 @@ export default function EnhancedPracticeHubClean() {
           improvements: ['Better pacing', 'Clearer articulation'],
           challenges: ['Filler words', 'Eye contact'],
           breakthroughs: ['More confident delivery']
-        })),
+        })) : [],
         currentMetrics: {
           currentWPM: sessionData.wpm,
           fillerWords: sessionData.fillerWords || [],
@@ -288,7 +288,7 @@ export default function EnhancedPracticeHubClean() {
         console.log('World-class coaching generated:', coaching);
         
         // Add expert coaching insights to session data
-        setSessionData(prev => ({
+        setSessionData((prev: any) => ({
           ...prev,
           expertCoaching: coaching.coaching,
           coachProfile: coaching.coachProfile
