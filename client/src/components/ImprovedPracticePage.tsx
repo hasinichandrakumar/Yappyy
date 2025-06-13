@@ -100,16 +100,27 @@ export default function ImprovedPracticePage() {
   // Start camera and recording
   const startRecording = useCallback(async () => {
     try {
+      // Request permissions with better error handling
       const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: true, 
-        audio: true 
+        video: { 
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          facingMode: 'user'
+        }, 
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true
+        }
       });
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+        videoRef.current.play();
       }
 
-      const mediaRecorder = new MediaRecorder(stream);
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'video/webm;codecs=vp9'
+      });
       mediaRecorderRef.current = mediaRecorder;
       
       setupSpeechRecognition();
@@ -121,8 +132,8 @@ export default function ImprovedPracticePage() {
       timerRef.current = setInterval(() => {
         setSessionDuration(prev => prev + 1);
         
-        // Generate live feedback periodically
-        if (Math.random() > 0.85) { // 15% chance each second
+        // Generate live feedback periodically based on session purpose
+        if (Math.random() > 0.9) { // 10% chance each second for more realistic feedback
           generateLiveFeedback();
         }
         
@@ -134,18 +145,29 @@ export default function ImprovedPracticePage() {
       
       toast({
         title: "Recording Started",
-        description: `Session: ${sessionName}`,
+        description: `Session: ${sessionName} - Purpose: ${sessionPurpose || 'General practice'}`,
       });
 
     } catch (error) {
-      console.error('Camera error:', error);
+      console.error('Camera/microphone access error:', error);
+      
+      let errorMessage = "Camera and microphone access required for practice sessions";
+      
+      if (error.name === 'NotAllowedError') {
+        errorMessage = "Please allow camera and microphone permissions in your browser settings";
+      } else if (error.name === 'NotFoundError') {
+        errorMessage = "No camera or microphone found. Please connect devices and try again";
+      } else if (error.name === 'NotReadableError') {
+        errorMessage = "Camera or microphone is being used by another application";
+      }
+      
       toast({
-        title: "Camera Error",
-        description: "Please allow camera and microphone access",
+        title: "Media Access Error",
+        description: errorMessage,
         variant: "destructive"
       });
     }
-  }, [sessionName, setupSpeechRecognition]);
+  }, [sessionName, sessionPurpose, setupSpeechRecognition]);
 
   // Generate live AI feedback
   const generateLiveFeedback = useCallback(() => {
