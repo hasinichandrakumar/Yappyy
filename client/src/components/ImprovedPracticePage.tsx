@@ -456,7 +456,7 @@ export default function ImprovedPracticePage() {
     }));
   }, [wordCount, sessionDuration, transcript, eyeContactScore]);
 
-  // Stop recording
+  // Stop recording and reset session
   const stopRecording = useCallback(async () => {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
@@ -478,23 +478,69 @@ export default function ImprovedPracticePage() {
       if (videoRef.current?.srcObject) {
         const stream = videoRef.current.srcObject as MediaStream;
         stream.getTracks().forEach(track => track.stop());
+        videoRef.current.srcObject = null;
       }
 
       setIsRecording(false);
       
-      // Generate feedback and save session after recording ends
+      // Generate feedback and save session, then completely reset
       setTimeout(async () => {
         generateSessionFeedback();
         await saveSessionToDatabase();
-        setShowTranscript(true);
+        
+        // Complete session reset after saving
+        setTimeout(() => {
+          resetSession();
+        }, 500);
       }, 100);
       
       toast({
-        title: "Session Completed",
-        description: `Practice session saved successfully. ${wordCount} words spoken.`,
+        title: "Session Completed & Saved",
+        description: `Practice session saved successfully. ${wordCount} words spoken. Ready for next session.`,
       });
     }
   }, [isRecording, wordCount]);
+
+  // Complete session reset function
+  const resetSession = useCallback(async () => {
+    // Reset all session data
+    setTranscript('');
+    setWordCount(0);
+    setSessionDuration(0);
+    setLiveFeedback([]);
+    setSessionMetrics({
+      volume: 0,
+      clarity: 0,
+      pace: 0,
+      wordsSpoken: 0,
+      fillerWords: [],
+      bodyLanguageScore: 0
+    });
+    setSessionFeedback(null);
+    setEarnedBadges([]);
+    setShowTranscript(false);
+    setEyeContactScore(0);
+    setIsLookingAtCamera(false);
+    
+    // Reinitialize camera for fresh start
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          facingMode: 'user'
+        }, 
+        audio: false // Only video for preview
+      });
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play();
+      }
+    } catch (error) {
+      console.log('Camera access not available for preview');
+    }
+  }, []);
 
 
 
@@ -1455,23 +1501,7 @@ ${transcript}`;
                   </Button>
                   <Button
                     onClick={() => {
-                      // Reset session data
-                      setTranscript('');
-                      setWordCount(0);
-                      setSessionDuration(0);
-                      setLiveFeedback([]);
-                      setSessionMetrics({
-                        volume: 0,
-                        clarity: 0,
-                        pace: 0,
-                        wordsSpoken: 0,
-                        fillerWords: [],
-                        bodyLanguageScore: 0
-                      });
-                      setSessionFeedback(null);
-                      setEarnedBadges([]);
-                      setShowTranscript(false);
-                      
+                      resetSession();
                       toast({
                         title: "New Session Ready",
                         description: "Ready for your next practice session",
