@@ -140,23 +140,38 @@ export default function EnhancedAnalysisTab() {
               </SelectContent>
             </Select>
             {selectedSession !== 'all' && (
-              <Button
-                onClick={generateInsights}
-                disabled={isGeneratingInsights}
-                className="bg-gradient-to-r from-[#2563eb] to-[#22d3ee] text-white"
-              >
-                {isGeneratingInsights ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Analyzing...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    Generate AI Insights
-                  </>
-                )}
-              </Button>
+              <>
+                <Button
+                  onClick={generateInsights}
+                  disabled={isGeneratingInsights}
+                  className="bg-gradient-to-r from-[#2563eb] to-[#22d3ee] text-white"
+                >
+                  {isGeneratingInsights ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Generate AI Insights
+                    </>
+                  )}
+                </Button>
+                <Button
+                  onClick={handleDeleteSession}
+                  disabled={deleteSessionMutation.isPending}
+                  variant="outline"
+                  size="sm"
+                  className="border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
+                >
+                  {deleteSessionMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="h-4 w-4" />
+                  )}
+                </Button>
+              </>
             )}
           </div>
         </div>
