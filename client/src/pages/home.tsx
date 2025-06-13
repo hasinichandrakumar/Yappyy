@@ -16,7 +16,7 @@ export default function HomePage() {
             </div>
             <div className="flex items-center space-x-4">
               <Link href="/dashboard">
-                <Button className="bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] hover:from-[#1d4ed8] hover:to-[#0284c7] text-white font-button shadow-lg hover:shadow-xl transition-all duration-300">
+                <Button className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white font-button shadow-lg hover:shadow-xl transition-all duration-300">
                   Dashboard
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
@@ -30,7 +30,7 @@ export default function HomePage() {
       <section className="relative overflow-hidden py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-5xl md:text-7xl font-display text-transparent bg-clip-text bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] mb-6">
+            <h1 className="text-5xl md:text-7xl font-display text-transparent bg-clip-text bg-gradient-to-br from-[#2563eb] to-[#22d3ee] mb-6">
               Future Talks Here
             </h1>
             <p className="text-xl md:text-2xl font-body text-slate-600 mb-8 max-w-3xl mx-auto">
@@ -38,7 +38,7 @@ export default function HomePage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/dashboard">
-                <Button size="lg" className="bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] hover:from-[#1d4ed8] hover:to-[#0284c7] text-white font-button shadow-lg hover:shadow-xl transition-all duration-300 px-8 py-4">
+                <Button size="lg" className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white font-button shadow-lg hover:shadow-xl transition-all duration-300 px-8 py-4">
                   Start Practicing Now
                   <Mic className="ml-2 h-5 w-5" />
                 </Button>
@@ -68,7 +68,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             {/* Words - 7% */}
             <div className="text-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
-              <div className="text-6xl font-bold bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] bg-clip-text text-transparent mb-4">
+              <div className="text-6xl font-bold bg-gradient-to-br from-[#2563eb] to-[#22d3ee] bg-clip-text text-transparent mb-4">
                 7%
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Spoken Words</h3>
@@ -79,7 +79,7 @@ export default function HomePage() {
 
             {/* Tone - 38% */}
             <div className="text-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
-              <div className="text-6xl font-bold bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] bg-clip-text text-transparent mb-4">
+              <div className="text-6xl font-bold bg-gradient-to-br from-[#2563eb] to-[#22d3ee] bg-clip-text text-transparent mb-4">
                 38%
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Tone of Voice</h3>
@@ -90,7 +90,7 @@ export default function HomePage() {
 
             {/* Body Language - 55% */}
             <div className="text-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
-              <div className="text-6xl font-bold bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] bg-clip-text text-transparent mb-4">
+              <div className="text-6xl font-bold bg-gradient-to-br from-[#2563eb] to-[#22d3ee] bg-clip-text text-transparent mb-4">
                 55%
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Body Language</h3>
@@ -110,7 +110,7 @@ export default function HomePage() {
                       We coach
                     </p>
                     <div className="relative">
-                      <div className="text-7xl md:text-8xl font-black bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] bg-clip-text text-transparent leading-none tracking-tighter">
+                      <div className="text-7xl md:text-8xl font-black bg-gradient-to-br from-[#2563eb] to-[#22d3ee] bg-clip-text text-transparent leading-none tracking-tighter">
                         100%
                       </div>
                     </div>
