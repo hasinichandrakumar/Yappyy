@@ -9,15 +9,15 @@ import BodyLanguageAnalyzer from "@/components/BodyLanguageAnalyzer";
 import AdvancedSpeechAnalysis from "@/components/AdvancedSpeechAnalysis";
 import Enhanced50PlusTemplates from "@/components/Enhanced50PlusTemplates";
 import ImprovedBadgeSystem from "@/components/ImprovedBadgeSystem";
-import yappyyLogoPath from '@assets/yappyy-logo.svg';
+import yappyyLogoPath from '@assets/Untitled_design-11600-removebg-preview_1749744306540.png';
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("practice");
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-sky-50">
+    <div className="min-h-screen bg-white">
       {/* Header with Logo */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-blue-200 sticky top-0 z-50">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center h-16">
             <img src={yappyyLogoPath} alt="Yappyy" className="h-8" />
@@ -27,7 +27,7 @@ export default function Dashboard() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-4 lg:grid-cols-7 gap-1 mb-8 h-auto p-1 bg-white/60 backdrop-blur-md border border-blue-200">
+          <TabsList className="grid grid-cols-4 lg:grid-cols-7 gap-1 mb-8 h-auto p-1 bg-gray-50 border border-gray-200">
             <TabsTrigger value="practice" className="flex flex-col items-center space-y-1 px-2 py-2 text-xs data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-cyan-600 data-[state=active]:to-sky-600 data-[state=active]:text-white">
               <BarChart3 className="w-4 h-4" />
               <span>Practice</span>
