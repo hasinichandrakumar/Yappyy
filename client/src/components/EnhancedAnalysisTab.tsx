@@ -50,11 +50,15 @@ export default function EnhancedAnalysisTab() {
     
     setIsGeneratingInsights(true);
     try {
-      const response = await apiRequest('/api/generate-session-insights', {
+      const response = await fetch('/api/generate-session-insights', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ sessionId: selectedSession })
       });
-      setAiInsights(response);
+      const data = await response.json();
+      setAiInsights(data);
     } catch (error) {
       console.error('Failed to generate insights:', error);
     } finally {

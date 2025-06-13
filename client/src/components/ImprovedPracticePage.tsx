@@ -148,41 +148,117 @@ export default function ImprovedPracticePage() {
             setWordCount(prev => prev + words.length);
             
             // Enhanced filler word detection
-            const fillerWords = ['uh', 'um', 'er', 'ah', 'eh', 'like', 'you know', 'so', 'basically', 'actually', 'literally'];
-            const lowerText = result[0].transcript.toLowerCase();
-            const detectedFillers = words.filter((word: string) => 
-              fillerWords.some(filler => word.toLowerCase().includes(filler))
-            );
-
-            if (detectedFillers.length > 0) {
-              const newFeedback: LiveFeedbackItem = {
-                id: Date.now().toString(),
-                timestamp: sessionDuration,
-                category: 'voice',
-                feedback: `Filler words detected: ${detectedFillers.join(', ')}. Try pausing instead.`,
-                severity: 'improvement'
-              };
-              setLiveFeedback(prev => [...prev, newFeedback]);
-              
+            const fillerWords = ['um', 'uh', 'like', 'so', 'you know', 'actually', 'basically', 'literally'];
+            const newFillers: string[] = [];
+            
+            words.forEach((word: string) => {
+              const cleanWord = word.toLowerCase().replace(/[.,!?]/g, '');
+              if (fillerWords.includes(cleanWord)) {
+                newFillers.push(cleanWord);
+              }
+            });
+            
+            if (newFillers.length > 0) {
               setSessionMetrics(prev => ({
                 ...prev,
-                fillerWords: [...prev.fillerWords, ...detectedFillers]
+                fillerWords: [...prev.fillerWords, ...newFillers]
               }));
+              
+              // Generate live feedback for filler words
+              const feedback: LiveFeedbackItem = {
+                id: Date.now().toString(),
+                timestamp: Date.now(),
+                category: 'voice',
+                feedback: `Detected filler word: "${newFillers[0]}". Try pausing instead.`,
+                severity: 'warning'
+              };
+              setLiveFeedback(prev => [...prev.slice(-4), feedback]);
             }
-            
-            // Update metrics
-            setSessionMetrics(prev => ({
-              ...prev,
-              wordsSpoken: prev.wordsSpoken + words.length,
-              pace: Math.round((prev.wordsSpoken + words.length) / Math.max(sessionDuration / 60, 0.1))
-            }));
           }
+        }
+      };
+
+      recognition.onerror = (event: any) => {
+        console.error('Speech recognition error:', event.error);
+      };
+
+      recognition.onend = () => {
+        if (isRecording) {
+          recognition.start(); // Restart if still recording
         }
       };
 
       recognitionRef.current = recognition;
     }
-  }, [sessionDuration]);
+  }, [isRecording]);
+
+  // Initialize speech recognition on component mount
+  useEffect(() => {
+    setupSpeechRecognition();
+  }, [setupSpeechRecognition]);
+
+  // Real-time metrics simulation
+  useEffect(() => {
+    if (!isRecording) return;
+
+    const interval = setInterval(() => {
+      setSessionMetrics(prev => ({
+        ...prev,
+        volume: Math.round(Math.random() * 40 + 60), // 60-100
+        clarity: Math.round(Math.random() * 30 + 70), // 70-100
+        pace: Math.round(Math.random() * 40 + 120), // 120-160 WPM
+        bodyLanguageScore: Math.round(eyeContactScore * 100)
+      }));
+
+      // Update session goals progress
+      setCurrentGoals(prev => prev.map(goal => {
+        if (goal.name === "Volume Control") {
+          return { ...goal, progress: Math.min(goal.target, goal.progress + Math.random() * 10) };
+        }
+        if (goal.name === "Reduce Filler Words") {
+          const fillerCount = sessionMetrics.fillerWords.length;
+          return { ...goal, progress: Math.max(0, goal.target - fillerCount) };
+        }
+        return goal;
+      }));
+
+      // Generate periodic live feedback
+      if (Math.random() < 0.3) { // 30% chance every 2 seconds
+        const feedbackOptions = [
+          { category: 'voice' as const, feedback: 'Great pace and clarity!', severity: 'good' as const },
+          { category: 'body_language' as const, feedback: 'Excellent eye contact', severity: 'good' as const },
+          { category: 'content' as const, feedback: 'Clear and engaging delivery', severity: 'good' as const },
+          { category: 'voice' as const, feedback: 'Try varying your tone more', severity: 'improvement' as const },
+          { category: 'body_language' as const, feedback: 'Stand up straighter', severity: 'improvement' as const }
+        ];
+        
+        const randomFeedback = feedbackOptions[Math.floor(Math.random() * feedbackOptions.length)];
+        const feedback: LiveFeedbackItem = {
+          id: Date.now().toString(),
+          timestamp: Date.now(),
+          ...randomFeedback
+        };
+        setLiveFeedback(prev => [...prev.slice(-4), feedback]);
+      }
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [isRecording, eyeContactScore, sessionMetrics.fillerWords.length]);
+
+  // Session timer effect
+  useEffect(() => {
+    if (!isRecording) return;
+
+    timerRef.current = setInterval(() => {
+      setSessionDuration(prev => prev + 1);
+    }, 1000);
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [isRecording]);
 
   // Start camera and recording
   const startRecording = useCallback(async () => {
