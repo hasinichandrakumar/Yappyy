@@ -2,16 +2,15 @@ import { useState } from "react";
 import { Bell, User, BarChart3, Eye, Brain, Star, TrendingUp, FileText, Trophy, Volume2, HelpCircle } from "lucide-react";
 import yappyyLogo from "@assets/Untitled_design-11600-removebg-preview_1749744306540.png";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import EnhancedPracticeDashboard from "@/components/EnhancedPracticeDashboard";
-import SimpleAICoach from "@/components/SimpleAICoach";
-import SpeechDNAWithSession from "@/components/SpeechDNAWithSession";
-import SimpleDetailedAnalysis from "@/components/SimpleDetailedAnalysis";
+import NewPracticeDashboard from "@/components/NewPracticeDashboard";
+import ComprehensiveAICoach from "@/components/ComprehensiveAICoach";
+import PersonalizedSpeechDNA from "@/components/PersonalizedSpeechDNA";
+import ComprehensiveSessionAnalysis from "@/components/ComprehensiveSessionAnalysis";
 import BodyLanguageAnalyzer from "@/components/BodyLanguageAnalyzer";
 import AdvancedSpeechAnalysis from "@/components/AdvancedSpeechAnalysis";
 import SpeechROIAnalyzer from "@/components/SpeechROIAnalyzer";
 import EnhancedTemplateMarketplace from "@/components/EnhancedTemplateMarketplace";
 import EnhancedBadgeSystem from "@/components/EnhancedBadgeSystem";
-import HelpGuide from "@/components/HelpGuide";
 
 export default function IntegratedDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -43,7 +42,7 @@ export default function IntegratedDashboard() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-5 lg:grid-cols-9 gap-1 mb-8 gradient-card purple-border shadow-lg p-1 h-auto">
+          <TabsList className="grid grid-cols-5 lg:grid-cols-8 gap-1 mb-8 gradient-card purple-border shadow-lg p-1 h-auto">
             <TabsTrigger value="overview" className="flex flex-col items-center space-y-1 px-2 py-2 text-xs data-[state=active]:gradient-bg data-[state=active]:text-white">
               <BarChart3 className="w-4 h-4" />
               <span>Practice</span>
@@ -68,10 +67,6 @@ export default function IntegratedDashboard() {
               <Volume2 className="w-4 h-4" />
               <span>Deep Dive</span>
             </TabsTrigger>
-            <TabsTrigger value="roi-analyzer" className="flex flex-col items-center space-y-1 px-2 py-2 text-xs data-[state=active]:gradient-bg data-[state=active]:text-white">
-              <TrendingUp className="w-4 h-4" />
-              <span>Impact</span>
-            </TabsTrigger>
             <TabsTrigger value="templates" className="flex flex-col items-center space-y-1 px-2 py-2 text-xs data-[state=active]:gradient-bg data-[state=active]:text-white">
               <FileText className="w-4 h-4" />
               <span>Templates</span>
@@ -83,19 +78,19 @@ export default function IntegratedDashboard() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-8 pb-16">
-            <EnhancedPracticeDashboard />
+            <NewPracticeDashboard />
           </TabsContent>
 
           <TabsContent value="improvement" className="space-y-6">
-            <SimpleAICoach />
+            <ComprehensiveAICoach />
           </TabsContent>
 
           <TabsContent value="speech-dna" className="space-y-6">
-            <SpeechDNAWithSession />
+            <PersonalizedSpeechDNA />
           </TabsContent>
 
           <TabsContent value="detailed" className="space-y-6">
-            <SimpleDetailedAnalysis />
+            <ComprehensiveSessionAnalysis />
           </TabsContent>
 
           <TabsContent value="body-language" className="space-y-6">
@@ -104,10 +99,6 @@ export default function IntegratedDashboard() {
 
           <TabsContent value="speech-deep" className="space-y-6">
             <AdvancedSpeechAnalysis />
-          </TabsContent>
-
-          <TabsContent value="roi-analyzer" className="space-y-6">
-            <SpeechROIAnalyzer />
           </TabsContent>
 
           <TabsContent value="templates" className="space-y-6">
