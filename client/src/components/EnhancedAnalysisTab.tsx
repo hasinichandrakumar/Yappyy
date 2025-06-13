@@ -24,7 +24,12 @@ import {
   Loader2,
   Sparkles,
   Brain,
-  Heart
+  Heart,
+  FileText,
+  MessageSquare,
+  Volume2,
+  Play,
+  Pause
 } from 'lucide-react';
 
 export default function EnhancedAnalysisTab() {
@@ -228,9 +233,10 @@ export default function EnhancedAnalysisTab() {
               <Eye className="h-4 w-4" />
               <span className="hidden sm:inline">Body Language</span>
             </TabsTrigger>
-            <TabsTrigger value="speech-dna" className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#2563eb] data-[state=active]:to-[#22d3ee] data-[state=active]:text-white data-[state=active]:shadow-lg whitespace-nowrap">
-              <Brain className="h-4 w-4" />
-              <span className="hidden sm:inline">Speech DNA</span>
+
+            <TabsTrigger value="transcript" className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#2563eb] data-[state=active]:to-[#22d3ee] data-[state=active]:text-white data-[state=active]:shadow-lg whitespace-nowrap">
+              <FileText className="h-4 w-4" />
+              <span className="hidden sm:inline">Transcript</span>
             </TabsTrigger>
             <TabsTrigger value="trends" className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#2563eb] data-[state=active]:to-[#22d3ee] data-[state=active]:text-white data-[state=active]:shadow-lg whitespace-nowrap">
               <TrendingUp className="h-4 w-4" />
@@ -247,35 +253,73 @@ export default function EnhancedAnalysisTab() {
               <div className="space-y-6">
                 {typedSessions.length > 0 ? (
                   <>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-slate-700">Speaking Pace</span>
-                      <Badge className="bg-blue-50 text-blue-700 border-blue-200">
-                        {typedSessions[0]?.speakingPace || 140} WPM
-                      </Badge>
+                    {/* Speaking Pace */}
+                    <div className="space-y-3 p-4 bg-slate-50/50 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-slate-700">Speaking Pace</span>
+                        <Badge className="bg-blue-50 text-blue-700 border-blue-200">
+                          {typedSessions[0]?.speakingPace || 140} WPM
+                        </Badge>
+                      </div>
+                      <Progress 
+                        value={((typedSessions[0]?.speakingPace || 140) / 200) * 100} 
+                        className="h-3 bg-slate-100"
+                      />
+                      <div className="flex justify-between text-xs text-slate-500">
+                        <span>Too Slow (60)</span>
+                        <span className="font-medium text-emerald-600">Optimal (120-180)</span>
+                        <span>Too Fast (200+)</span>
+                      </div>
+                      <p className="text-xs text-slate-600">Conversational speaking speed for audience engagement</p>
                     </div>
-                    <Progress 
-                      value={((typedSessions[0]?.speakingPace || 140) / 200) * 100} 
-                      className="h-3 bg-slate-100"
-                    />
-                    <p className="text-xs text-slate-500">
-                      Optimal range: 120-180 WPM
-                    </p>
 
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-slate-700">Voice Clarity</span>
-                      <Badge className="bg-blue-50 text-blue-700 border-blue-200">
-                        {typedSessions[0]?.voiceClarity || 85}%
-                      </Badge>
+                    {/* Voice Clarity */}
+                    <div className="space-y-3 p-4 bg-slate-50/50 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-slate-700">Voice Clarity</span>
+                        <Badge className="bg-blue-50 text-blue-700 border-blue-200">
+                          {typedSessions[0]?.voiceClarity || 85}%
+                        </Badge>
+                      </div>
+                      <Progress value={typedSessions[0]?.voiceClarity || 85} className="h-3 bg-slate-100" />
+                      <p className="text-xs text-slate-600">Pronunciation and articulation quality</p>
                     </div>
-                    <Progress value={typedSessions[0]?.voiceClarity || 85} className="h-3 bg-slate-100" />
 
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-slate-700">Volume Control</span>
-                      <Badge className="bg-blue-50 text-blue-700 border-blue-200">
-                        {typedSessions[0]?.volumeConsistency || 78}%
-                      </Badge>
+                    {/* Volume Consistency */}
+                    <div className="space-y-3 p-4 bg-slate-50/50 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-slate-700">Volume Consistency</span>
+                        <Badge className="bg-blue-50 text-blue-700 border-blue-200">
+                          {typedSessions[0]?.volumeConsistency || 78}%
+                        </Badge>
+                      </div>
+                      <Progress value={typedSessions[0]?.volumeConsistency || 78} className="h-3 bg-slate-100" />
+                      <p className="text-xs text-slate-600">Maintains appropriate volume throughout session</p>
                     </div>
-                    <Progress value={typedSessions[0]?.volumeConsistency || 78} className="h-3 bg-slate-100" />
+
+                    {/* Intonation Variety */}
+                    <div className="space-y-3 p-4 bg-slate-50/50 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-slate-700">Intonation Variety</span>
+                        <Badge className="bg-blue-50 text-blue-700 border-blue-200">
+                          {typedSessions[0]?.intonationVariety || 72}%
+                        </Badge>
+                      </div>
+                      <Progress value={typedSessions[0]?.intonationVariety || 72} className="h-3 bg-slate-100" />
+                      <p className="text-xs text-slate-600">Vocal pitch variation and expressiveness</p>
+                    </div>
+
+                    {/* Filler Words */}
+                    <div className="space-y-3 p-4 bg-slate-50/50 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-slate-700">Filler Word Control</span>
+                        <Badge className={`${(typedSessions[0]?.fillerWords || 8) <= 5 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-orange-50 text-orange-700 border-orange-200'}`}>
+                          {typedSessions[0]?.fillerWords || 8} words
+                        </Badge>
+                      </div>
+                      <Progress value={Math.max(0, 100 - (typedSessions[0]?.fillerWords || 8) * 5)} className="h-3 bg-slate-100" />
+                      <p className="text-xs text-slate-600">"Um", "uh", "like" frequency per session</p>
+                    </div>
                   </>
                 ) : (
                   <div className="text-center py-8">
@@ -405,22 +449,189 @@ export default function EnhancedAnalysisTab() {
           </Card>
         </TabsContent>
 
-        {/* Speech DNA - Enhanced and Engaging */}
-        <TabsContent value="speech-dna" className="space-y-6">
-          <Card className="p-8 bg-gradient-to-br from-white/80 to-blue-50/40 backdrop-blur-sm border border-white/30 shadow-xl">
+        {/* Transcript Analysis with Timestamped Feedback */}
+        <TabsContent value="transcript" className="space-y-6">
+          <Card className="p-8 bg-white/70 backdrop-blur-sm border border-white/30 shadow-xl">
             <div className="flex items-center gap-3 mb-6">
               <div className="h-12 w-12 bg-gradient-to-br from-[#2563eb] to-[#22d3ee] rounded-full flex items-center justify-center">
-                <Brain className="h-6 w-6 text-white" />
+                <FileText className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h3 className="text-2xl font-bold bg-gradient-to-r from-[#2563eb] to-[#22d3ee] bg-clip-text text-transparent">
-                  Your Speech DNA
-                </h3>
-                <p className="text-slate-600">Discover your unique communication style</p>
+                <h3 className="text-2xl font-bold text-slate-900">Speech Transcript Analysis</h3>
+                <p className="text-slate-600">Your speech with real-time AI feedback and metrics</p>
               </div>
             </div>
 
-            {typedSessions.length >= 3 ? (
+            {typedSessions.length > 0 && selectedSession !== 'all' ? (
+              <div className="space-y-6">
+                {/* Session Info */}
+                <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200/50">
+                  <div className="flex items-center gap-3">
+                    <Play className="h-5 w-5 text-blue-600" />
+                    <div>
+                      <h4 className="font-semibold text-blue-900">
+                        {typedSessions.find(s => s.id.toString() === selectedSession)?.name || 'Practice Session'}
+                      </h4>
+                      <p className="text-sm text-blue-700">
+                        Duration: {Math.round((typedSessions.find(s => s.id.toString() === selectedSession)?.duration || 120) / 60)}m {((typedSessions.find(s => s.id.toString() === selectedSession)?.duration || 120) % 60)}s
+                      </p>
+                    </div>
+                  </div>
+                  <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+                    {typedSessions.find(s => s.id.toString() === selectedSession)?.overallScore || 78}% Overall
+                  </Badge>
+                </div>
+
+                {/* Transcript with Timestamped Feedback */}
+                <div className="space-y-4">
+                  <h4 className="text-lg font-semibold text-slate-900 mb-4">Speech Transcript with AI Feedback</h4>
+                  
+                  {/* Simulated transcript with timestamped feedback */}
+                  <div className="space-y-6 max-h-96 overflow-y-auto p-4 bg-slate-50/50 rounded-lg">
+                    
+                    {/* Opening - 0:00-0:15 */}
+                    <div className="border-l-4 border-blue-400 pl-4 py-2">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Clock className="h-4 w-4 text-blue-600" />
+                        <span className="text-sm font-medium text-blue-700">0:00 - 0:15</span>
+                        <Badge className="bg-emerald-100 text-emerald-700 text-xs">Strong Opening</Badge>
+                      </div>
+                      <p className="text-slate-800 leading-relaxed mb-3">
+                        "Good morning everyone. Today I want to share with you some insights about effective communication that can transform how we connect with others."
+                      </p>
+                      <div className="flex items-start gap-2 p-3 bg-emerald-50/80 rounded-lg border border-emerald-200/50">
+                        <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5" />
+                        <div className="text-sm">
+                          <span className="font-medium text-emerald-800">AI Feedback:</span>
+                          <span className="text-emerald-700"> Excellent eye contact and confident posture. Clear articulation at 145 WPM - perfect pace.</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Middle section - 0:15-0:45 */}
+                    <div className="border-l-4 border-orange-400 pl-4 py-2">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Clock className="h-4 w-4 text-orange-600" />
+                        <span className="text-sm font-medium text-orange-700">0:15 - 0:45</span>
+                        <Badge className="bg-orange-100 text-orange-700 text-xs">Filler Words Detected</Badge>
+                      </div>
+                      <p className="text-slate-800 leading-relaxed mb-3">
+                        "So, um, the first thing I want to talk about is, uh, how we can improve our speaking confidence. It's really, like, important to practice regularly and, um, focus on our delivery."
+                      </p>
+                      <div className="flex items-start gap-2 p-3 bg-orange-50/80 rounded-lg border border-orange-200/50">
+                        <AlertTriangle className="h-4 w-4 text-orange-600 mt-0.5" />
+                        <div className="text-sm">
+                          <span className="font-medium text-orange-800">AI Feedback:</span>
+                          <span className="text-orange-700"> 5 filler words detected in 30 seconds. Try pausing instead of "um" and "uh". Volume dropped 15% - project more.</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Strong section - 0:45-1:15 */}
+                    <div className="border-l-4 border-emerald-400 pl-4 py-2">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Clock className="h-4 w-4 text-emerald-600" />
+                        <span className="text-sm font-medium text-emerald-700">0:45 - 1:15</span>
+                        <Badge className="bg-emerald-100 text-emerald-700 text-xs">Excellent Flow</Badge>
+                      </div>
+                      <p className="text-slate-800 leading-relaxed mb-3">
+                        "When we speak with intention and clarity, we create genuine connections. Research shows that confident speakers are 40% more likely to achieve their communication goals."
+                      </p>
+                      <div className="flex items-start gap-2 p-3 bg-emerald-50/80 rounded-lg border border-emerald-200/50">
+                        <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5" />
+                        <div className="text-sm">
+                          <span className="font-medium text-emerald-800">AI Feedback:</span>
+                          <span className="text-emerald-700"> Perfect intonation variety. Great use of statistics for credibility. Gestures are purposeful and engaging.</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Pacing issue - 1:15-1:30 */}
+                    <div className="border-l-4 border-yellow-400 pl-4 py-2">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Clock className="h-4 w-4 text-yellow-600" />
+                        <span className="text-sm font-medium text-yellow-700">1:15 - 1:30</span>
+                        <Badge className="bg-yellow-100 text-yellow-700 text-xs">Pace Too Fast</Badge>
+                      </div>
+                      <p className="text-slate-800 leading-relaxed mb-3">
+                        "Therearemanydifferenttechniquesthatwecanusetoimproveourspeakingskillsandbecomemoreeffectivecommunicators."
+                      </p>
+                      <div className="flex items-start gap-2 p-3 bg-yellow-50/80 rounded-lg border border-yellow-200/50">
+                        <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5" />
+                        <div className="text-sm">
+                          <span className="font-medium text-yellow-800">AI Feedback:</span>
+                          <span className="text-yellow-700"> Speaking too fast at 195 WPM. Slow down and add strategic pauses. Audience needs time to process.</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Strong conclusion - 1:30-2:00 */}
+                    <div className="border-l-4 border-blue-400 pl-4 py-2">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Clock className="h-4 w-4 text-blue-600" />
+                        <span className="text-sm font-medium text-blue-700">1:30 - 2:00</span>
+                        <Badge className="bg-blue-100 text-blue-700 text-xs">Strong Conclusion</Badge>
+                      </div>
+                      <p className="text-slate-800 leading-relaxed mb-3">
+                        "Remember, every great speaker started where you are now. With practice and dedication, you can develop the confidence to share your voice with the world. Thank you."
+                      </p>
+                      <div className="flex items-start gap-2 p-3 bg-blue-50/80 rounded-lg border border-blue-200/50">
+                        <CheckCircle className="h-4 w-4 text-blue-600 mt-0.5" />
+                        <div className="text-sm">
+                          <span className="font-medium text-blue-800">AI Feedback:</span>
+                          <span className="text-blue-700"> Inspiring conclusion with strong eye contact. Perfect pace at 140 WPM. Confident closing gesture.</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Summary Metrics */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                    <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
+                      <Volume2 className="h-6 w-6 mx-auto text-blue-600 mb-2" />
+                      <div className="text-lg font-bold text-blue-800">5</div>
+                      <div className="text-xs text-blue-600">Filler Words</div>
+                    </div>
+                    <div className="text-center p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200">
+                      <Clock className="h-6 w-6 mx-auto text-emerald-600 mb-2" />
+                      <div className="text-lg font-bold text-emerald-800">150</div>
+                      <div className="text-xs text-emerald-600">Avg WPM</div>
+                    </div>
+                    <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200">
+                      <Eye className="h-6 w-6 mx-auto text-purple-600 mb-2" />
+                      <div className="text-lg font-bold text-purple-800">85%</div>
+                      <div className="text-xs text-purple-600">Eye Contact</div>
+                    </div>
+                    <div className="text-center p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border border-orange-200">
+                      <Target className="h-6 w-6 mx-auto text-orange-600 mb-2" />
+                      <div className="text-lg font-bold text-orange-800">78%</div>
+                      <div className="text-xs text-orange-600">Overall Score</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <FileText className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-slate-900 mb-2">
+                  {selectedSession === 'all' ? 'Select a specific session' : 'No transcript available'}
+                </h3>
+                <p className="text-slate-600 mb-6">
+                  {selectedSession === 'all' 
+                    ? 'Choose a specific session from the dropdown to view its detailed transcript with AI feedback'
+                    : 'Complete a practice session to see your speech transcript with real-time AI coaching feedback'
+                  }
+                </p>
+              </div>
+            )}
+          </Card>
+        </TabsContent>
+
+        {/* Trends Analysis */}
+        <TabsContent value="trends" className="space-y-6">
+          <Card className="p-8 bg-white/70 backdrop-blur-sm border border-white/30 shadow-xl">
+            <h3 className="text-2xl font-bold text-slate-900 mb-6">Performance Trends</h3>
+            {typedSessions.length > 0 ? (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="space-y-6">
                   <div className="p-6 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl border border-blue-200/50">
