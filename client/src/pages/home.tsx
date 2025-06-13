@@ -116,11 +116,14 @@ export default function HomePage() {
                   </div>
                 </div>
                 
-                {/* Floating elements around the circle */}
-                <div className="absolute -top-6 left-1/4 w-8 h-8 bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] rounded-lg rotate-12 opacity-80 animate-float"></div>
-                <div className="absolute -bottom-4 right-1/4 w-6 h-6 bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] rounded-full opacity-80 animate-float-delayed"></div>
-                <div className="absolute top-1/3 -right-8 w-4 h-8 bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] rounded-full rotate-45 opacity-80 animate-float"></div>
-                <div className="absolute bottom-1/3 -left-6 w-10 h-4 bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] rounded-full -rotate-12 opacity-80 animate-float-delayed"></div>
+                {/* Bubble decorations around the circle */}
+                <div className="absolute -top-6 left-1/4 w-8 h-8 bubble-decoration opacity-70"></div>
+                <div className="absolute -bottom-4 right-1/4 w-6 h-6 bubble-decoration opacity-60"></div>
+                <div className="absolute top-1/3 -left-8 w-5 h-5 bubble-decoration opacity-50"></div>
+                <div className="absolute bottom-1/3 -right-6 w-4 h-4 bubble-decoration opacity-65"></div>
+                <div className="absolute -top-2 right-1/3 w-3 h-3 bubble-decoration opacity-55"></div>
+                <div className="absolute top-1/2 -right-10 w-7 h-7 bubble-decoration opacity-45"></div>
+                <div className="absolute bottom-1/4 -left-10 w-9 h-9 bubble-decoration opacity-40"></div>
               </div>
               
               <p className="text-lg font-semibold text-gray-600 mt-8 max-w-md mx-auto">
