@@ -257,9 +257,10 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-4xl font-bold text-slate-800 mb-6">
+              <h2 className="text-4xl font-bold text-slate-800 mb-6 flex items-center gap-3 flex-wrap">
                 Why Choose
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-cyan-600 to-sky-600"> Yappyy?</span>
+                <img src={yappyyLogoPath} alt="Yappyy" className="h-10" />
+                ?
               </h2>
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
@@ -295,8 +296,10 @@ export default function HomePage() {
             <div className="relative">
               <div className="bg-gradient-to-br from-blue-600 via-cyan-600 to-sky-600 rounded-2xl p-8 text-white">
                 <h3 className="text-2xl font-bold mb-4">Ready to Transform Your Speaking?</h3>
-                <p className="mb-6 opacity-90">
-                  Join thousands of users who have already improved their communication skills with Yappyy's AI-powered coaching platform.
+                <p className="mb-6 opacity-90 flex items-center gap-2 flex-wrap">
+                  Join thousands of users who have already improved their communication skills with 
+                  <img src={yappyyLogoPath} alt="Yappyy" className="h-6 inline" />
+                  's AI-powered coaching platform.
                 </p>
                 <Link href="/dashboard">
                   <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50 font-semibold shadow-lg hover:shadow-xl transition-all duration-200">
@@ -315,8 +318,10 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <img src={yappyyLogoPath} alt="Yappyy" className="h-8 mx-auto mb-4 filter brightness-0 invert" />
-            <p className="text-slate-400">
-              © 2024 Yappyy. Empowering confident communication through AI.
+            <p className="text-slate-400 flex items-center justify-center gap-2 flex-wrap">
+              © 2024 
+              <img src={yappyyLogoPath} alt="Yappyy" className="h-5 inline filter brightness-0 invert" />
+              . Empowering confident communication through AI.
             </p>
           </div>
         </div>
