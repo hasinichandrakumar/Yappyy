@@ -110,7 +110,7 @@ export default function HomePage() {
                       We coach
                     </p>
                     <div className="relative">
-                      <div className="text-8xl md:text-9xl font-black bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] bg-clip-text text-transparent leading-none tracking-tighter animate-gentle-pulse">
+                      <div className="text-8xl md:text-9xl font-black bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] bg-clip-text text-transparent leading-none tracking-tighter">
                         100%
                       </div>
                     </div>
