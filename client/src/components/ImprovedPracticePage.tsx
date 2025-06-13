@@ -1139,7 +1139,7 @@ export default function ImprovedPracticePage() {
                         <span className="text-white font-bold text-lg">🎯</span>
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-bold text-indigo-800 mb-2">Coach Sarah</h4>
+                        <h4 className="font-bold text-indigo-800 mb-2">Your AI Coach</h4>
                         <div className="text-slate-700 leading-relaxed space-y-2">
                           <p>
                             {sessionFeedback.keyStatistics.sessionLength === "0:00" ? (
