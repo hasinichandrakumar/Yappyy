@@ -937,21 +937,7 @@ export default function ImprovedPracticePage() {
     setSessionFeedback(feedback);
   }, [transcript, wordCount, sessionDuration, sessionMetrics, sessionPurpose]);
 
-  const saveSessionName = () => {
-    setIsEditingName(false);
-    toast({
-      title: "Session Name Updated",
-      description: sessionName,
-    });
-  };
 
-  const savePurpose = () => {
-    setIsEditingPurpose(false);
-    toast({
-      title: "Session Purpose Updated",
-      description: "AI will use this to provide targeted feedback",
-    });
-  };
 
   // Save complete session data to database
   const saveSessionToDatabase = useCallback(async () => {
