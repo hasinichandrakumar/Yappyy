@@ -460,13 +460,142 @@ export default function EnhancedBadgeSystem() {
   const totalCount = achievements.length;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      {/* Confetti Animation */}
+      {confettiActive && (
+        <div className="fixed inset-0 pointer-events-none z-40">
+          {Array.from({ length: 50 }).map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-2 h-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full"
+              initial={{
+                x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000),
+                y: -10,
+                rotate: 0,
+                scale: Math.random() * 0.5 + 0.5
+              }}
+              animate={{
+                y: (typeof window !== 'undefined' ? window.innerHeight : 800) + 10,
+                rotate: 360,
+                x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000)
+              }}
+              transition={{
+                duration: Math.random() * 3 + 2,
+                ease: "easeOut"
+              }}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Celebration Modal */}
+      <AnimatePresence>
+        {showCelebration && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+            onClick={() => setShowCelebration(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.3, opacity: 0, y: 50, rotate: -10 }}
+              animate={{ 
+                scale: [0.3, 1.1, 1], 
+                opacity: 1, 
+                y: 0, 
+                rotate: [10, -5, 0] 
+              }}
+              exit={{ scale: 0.8, opacity: 0, y: 50 }}
+              transition={{ 
+                duration: 0.6, 
+                ease: "easeOut",
+                scale: { times: [0, 0.8, 1] }
+              }}
+              className="bg-white rounded-2xl p-8 max-w-md mx-4 text-center shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <motion.div
+                animate={{ 
+                  scale: [1, 1.2, 1],
+                  rotate: [0, 5, -5, 0]
+                }}
+                transition={{ 
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                className="mb-6"
+              >
+                <div className={`w-20 h-20 mx-auto rounded-full bg-gradient-to-br ${showCelebration.gradientFrom} ${showCelebration.gradientTo} flex items-center justify-center mb-4 shadow-lg`}>
+                  <span className="text-white text-3xl">{showCelebration.icon}</span>
+                </div>
+                <div className="text-4xl mb-2">🎉</div>
+                <h3 className="text-2xl font-bold bg-gradient-to-r from-[#2563eb] to-[#22d3ee] bg-clip-text text-transparent mb-2">
+                  Achievement Unlocked!
+                </h3>
+                <h4 className="text-xl font-semibold text-slate-700 mb-2">{showCelebration.name}</h4>
+                <p className="text-slate-600">{showCelebration.description}</p>
+              </motion.div>
+              
+              <div className="space-y-3 mb-6">
+                <motion.div 
+                  className="text-center"
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ duration: 1, repeat: Infinity }}
+                >
+                  <span className="text-3xl font-bold bg-gradient-to-r from-[#2563eb] to-[#22d3ee] bg-clip-text text-transparent">
+                    +{showCelebration.points}
+                  </span>
+                  <span className="text-slate-500 ml-1">points</span>
+                </motion.div>
+                <div className="flex flex-wrap gap-2 justify-center">
+                  {showCelebration.rewards.map((reward, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: index * 0.1 + 0.3 }}
+                    >
+                      <Badge variant="secondary" className="text-xs bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-700 border-blue-200">
+                        {reward}
+                      </Badge>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+              
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Button 
+                  onClick={() => setShowCelebration(null)} 
+                  className="w-full bg-gradient-to-r from-[#2563eb] to-[#22d3ee] text-white"
+                >
+                  Awesome! 🎊
+                </Button>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       {/* Header with Stats */}
       <div className="text-center space-y-4">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-[#2563eb] to-[#22d3ee] bg-clip-text text-transparent">
-          Achievement Center
-        </h1>
-        <p className="text-gray-600">Track your speaking journey and earn rewards!</p>
+        <div className="flex items-center justify-center gap-4 mb-2">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-[#2563eb] to-[#22d3ee] bg-clip-text text-transparent">
+            Achievement Center 🏆
+          </h1>
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => triggerCelebration(achievements.find(a => a.id === 'first-speech') || achievements[0])}
+            className="px-3 py-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-full text-sm font-medium shadow-lg hover:shadow-xl transition-all duration-200"
+          >
+            🎉 Demo Celebration
+          </motion.button>
+        </div>
+        <p className="text-slate-600">Track your speaking journey and earn rewards!</p>
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card className="p-4">
@@ -541,12 +670,36 @@ export default function EnhancedBadgeSystem() {
           <motion.div
             key={achievement.id}
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
+            animate={{ 
+              opacity: 1, 
+              y: 0,
+              scale: pulsingBadges.has(achievement.id) ? [1, 1.05, 1] : 1
+            }}
+            transition={{ 
+              duration: 0.3,
+              scale: { duration: 1, repeat: pulsingBadges.has(achievement.id) ? 3 : 0 }
+            }}
+            whileHover={{ 
+              scale: 1.02, 
+              y: -5,
+              transition: { duration: 0.2 }
+            }}
+            onHoverStart={() => setHoveredBadge(achievement.id)}
+            onHoverEnd={() => setHoveredBadge(null)}
           >
-            <Card className={`relative overflow-hidden transition-all duration-300 hover:shadow-lg ${
-              achievement.isUnlocked ? getRarityColor(achievement.rarity) : "opacity-75 bg-gray-50"
-            }`}>
+            <Card className={`relative overflow-hidden transition-all duration-300 cursor-pointer
+              ${achievement.isUnlocked 
+                ? `${getRarityColor(achievement.rarity)} hover:shadow-xl shadow-lg` 
+                : "opacity-75 bg-gray-50 hover:bg-gray-100 hover:shadow-md"
+              }
+              ${pulsingBadges.has(achievement.id) ? 'ring-4 ring-yellow-400 ring-opacity-75' : ''}
+              ${hoveredBadge === achievement.id ? 'transform-gpu' : ''}
+            `}
+            onClick={() => {
+              if (achievement.isUnlocked) {
+                triggerCelebration(achievement);
+              }
+            }}>
               {achievement.isUnlocked && (
                 <div className={`absolute top-0 right-0 w-16 h-16 bg-gradient-to-br ${achievement.gradientFrom} ${achievement.gradientTo} rounded-bl-full flex items-start justify-end p-2`}>
                   <CheckCircle className="h-4 w-4 text-white" />
@@ -555,11 +708,57 @@ export default function EnhancedBadgeSystem() {
               
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-3">
-                  <div className={`p-3 rounded-full ${achievement.isUnlocked ? `bg-gradient-to-br ${achievement.gradientFrom} ${achievement.gradientTo} text-white` : 'bg-gray-200 text-gray-400'}`}>
+                  <motion.div 
+                    className={`relative p-3 rounded-full ${achievement.isUnlocked ? `bg-gradient-to-br ${achievement.gradientFrom} ${achievement.gradientTo} text-white shadow-lg` : 'bg-gray-200 text-gray-400'}`}
+                    whileHover={achievement.isUnlocked ? { 
+                      scale: 1.1, 
+                      rotate: [0, -5, 5, 0],
+                      transition: { duration: 0.3 }
+                    } : {}}
+                  >
                     {achievement.isUnlocked ? achievement.icon : <Lock className="h-6 w-6" />}
-                  </div>
+                    {achievement.isUnlocked && hoveredBadge === achievement.id && (
+                      <motion.div
+                        className="absolute -top-1 -right-1 text-yellow-400"
+                        animate={{ 
+                          scale: [0.8, 1.2, 0.8],
+                          rotate: [0, 180, 360]
+                        }}
+                        transition={{ 
+                          duration: 1.5, 
+                          repeat: Infinity,
+                          ease: "easeInOut"
+                        }}
+                      >
+                        ✨
+                      </motion.div>
+                    )}
+                    {pulsingBadges.has(achievement.id) && (
+                      <motion.div
+                        className="absolute inset-0 rounded-full border-2 border-yellow-400"
+                        animate={{ 
+                          scale: [1, 1.4], 
+                          opacity: [0.8, 0] 
+                        }}
+                        transition={{ 
+                          duration: 1, 
+                          repeat: Infinity,
+                          ease: "easeOut"
+                        }}
+                      />
+                    )}
+                  </motion.div>
                   <div className="flex-1">
-                    <CardTitle className="text-lg">{achievement.name}</CardTitle>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      {achievement.name}
+                      {achievement.isUnlocked && (
+                        <span className="text-lg">
+                          {achievement.rarity === 'legendary' ? '👑' : 
+                           achievement.rarity === 'epic' ? '🌟' : 
+                           achievement.rarity === 'rare' ? '💎' : '🏅'}
+                        </span>
+                      )}
+                    </CardTitle>
                     <Badge className={getRarityBadge(achievement.rarity)}>
                       {achievement.rarity.toUpperCase()}
                     </Badge>
