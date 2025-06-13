@@ -47,13 +47,13 @@ function Router() {
 
   return (
     <Switch>
-      <Route path="/" component={Dashboard} />
+      <Route path="/" component={Home} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/profile" component={UserProfile} />
       <Route path="/profile/:section" component={UserProfile} />
       <Route path="/clubs" component={ClubsHub} />
       <Route path="/logo" component={LogoExport} />
-      <Route path="*" component={Dashboard} />
+      <Route path="*" component={Home} />
     </Switch>
   );
 }
