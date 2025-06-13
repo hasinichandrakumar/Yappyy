@@ -485,45 +485,17 @@ export default function ImprovedPracticePage() {
               {[
                 { 
                   name: "First Steps", 
-                  description: "Complete your first session", 
+                  description: "Complete your first practice session", 
                   difficulty: "Easy",
                   color: "bg-green-100 text-green-800 border-green-200",
                   icon: "🎯"
                 },
                 { 
-                  name: "Volume Master", 
-                  description: "Maintain good volume throughout", 
-                  difficulty: "Easy",
-                  color: "bg-green-100 text-green-800 border-green-200",
-                  icon: "🔊"
-                },
-                { 
                   name: "Clarity Champion", 
-                  description: "Achieve 85% clarity score", 
+                  description: "Achieve 85% clarity score in a session", 
                   difficulty: "Medium",
                   color: "bg-yellow-100 text-yellow-800 border-yellow-200",
                   icon: "✨"
-                },
-                { 
-                  name: "Filler Fighter", 
-                  description: "Use fewer than 5 filler words", 
-                  difficulty: "Medium",
-                  color: "bg-yellow-100 text-yellow-800 border-yellow-200",
-                  icon: "🎭"
-                },
-                { 
-                  name: "Purpose Driven", 
-                  description: "Complete 3 sessions with clear purposes", 
-                  difficulty: "Hard",
-                  color: "bg-red-100 text-red-800 border-red-200",
-                  icon: "🚀"
-                },
-                { 
-                  name: "Marathon Speaker", 
-                  description: "Practice for 60+ minutes total", 
-                  difficulty: "Hard",
-                  color: "bg-red-100 text-red-800 border-red-200",
-                  icon: "⏱️"
                 }
               ].map((badge, index) => (
                 <div key={index} className="flex items-start gap-3 p-3 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
