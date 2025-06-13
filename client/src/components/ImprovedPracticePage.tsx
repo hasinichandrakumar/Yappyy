@@ -436,14 +436,53 @@ export default function ImprovedPracticePage() {
     }
   }, [transcript, sessionDuration, wordCount, isLookingAtCamera, eyeContactScore, sessionPurpose]);
 
+  // Advanced filler word analysis
+  const analyzeFillerWords = useCallback((text: string) => {
+    const fillerPatterns = [
+      { word: 'uh', variants: ['uh', 'uhh', 'uhm'] },
+      { word: 'um', variants: ['um', 'umm', 'erm'] },
+      { word: 'er', variants: ['er', 'err', 'erm'] },
+      { word: 'ah', variants: ['ah', 'ahh'] },
+      { word: 'like', variants: ['like'] },
+      { word: 'you know', variants: ['you know', 'y\'know', 'ya know'] },
+      { word: 'so', variants: ['so'] },
+      { word: 'basically', variants: ['basically'] },
+      { word: 'actually', variants: ['actually'] },
+      { word: 'literally', variants: ['literally'] },
+      { word: 'kind of', variants: ['kind of', 'kinda'] },
+      { word: 'sort of', variants: ['sort of', 'sorta'] },
+      { word: 'I mean', variants: ['I mean', 'i mean'] },
+      { word: 'right', variants: ['right?', ', right'] },
+      { word: 'okay', variants: ['okay', 'ok'] }
+    ];
+
+    const words = text.toLowerCase().split(/\s+/).filter(w => w.trim().length > 0);
+    const detectedFillers: string[] = [];
+    const fillerCounts: { [key: string]: number } = {};
+
+    for (const pattern of fillerPatterns) {
+      for (const variant of pattern.variants) {
+        const count = words.filter(word => 
+          word.includes(variant) || 
+          text.toLowerCase().includes(variant)
+        ).length;
+        
+        if (count > 0) {
+          fillerCounts[pattern.word] = (fillerCounts[pattern.word] || 0) + count;
+          for (let i = 0; i < count; i++) {
+            detectedFillers.push(pattern.word);
+          }
+        }
+      }
+    }
+
+    return { detectedFillers, fillerCounts, totalFillers: detectedFillers.length };
+  }, []);
+
   // Update session metrics based on actual data
   const updateSessionMetrics = useCallback(() => {
     const currentWPM = Math.round((wordCount / Math.max(sessionDuration / 60, 0.1)));
-    const fillerWords = ['uh', 'um', 'er', 'ah', 'eh', 'like', 'you know', 'so', 'basically', 'actually', 'literally'];
-    const words = transcript.split(' ').filter(w => w.trim().length > 0);
-    const detectedFillers = words.filter(word => 
-      fillerWords.some(filler => word.toLowerCase().includes(filler))
-    );
+    const fillerAnalysis = analyzeFillerWords(transcript);
     
     setSessionMetrics(prev => ({
       ...prev,
@@ -451,10 +490,10 @@ export default function ImprovedPracticePage() {
       clarity: Math.min(100, Math.max(70, 85 + Math.random() * 15)),
       pace: currentWPM,
       wordsSpoken: wordCount,
-      fillerWords: detectedFillers,
+      fillerWords: fillerAnalysis.detectedFillers,
       bodyLanguageScore: Math.min(100, Math.max(50, (eyeContactScore * 60) + (Math.random() * 40)))
     }));
-  }, [wordCount, sessionDuration, transcript, eyeContactScore]);
+  }, [wordCount, sessionDuration, transcript, eyeContactScore, analyzeFillerWords]);
 
   // Stop recording and reset session
   const stopRecording = useCallback(async () => {
@@ -563,31 +602,105 @@ export default function ImprovedPracticePage() {
     
     setEarnedBadges(badges);
 
-    // Content analysis helpers
+    // Advanced content analysis based on purpose
     const generateContentStrengths = (transcript: string, purpose: string) => {
       const strengths = [];
-      if (transcript.length > 100) strengths.push("Good speech length and development");
-      if (transcript.includes("example") || transcript.includes("instance")) strengths.push("Used concrete examples");
-      if (transcript.includes("because") || transcript.includes("therefore")) strengths.push("Provided logical reasoning");
-      if (purpose && transcript.toLowerCase().includes(purpose.toLowerCase().split(' ')[0])) {
-        strengths.push("Stayed focused on stated purpose");
+      const transcriptLower = transcript.toLowerCase();
+      const wordCount = transcript.split(' ').filter(w => w.trim().length > 0).length;
+      
+      // Purpose-specific analysis
+      if (purpose.toLowerCase().includes('interview')) {
+        if (transcriptLower.includes('experience') || transcriptLower.includes('accomplished')) {
+          strengths.push("Effectively highlighted relevant experience");
+        }
+        if (transcriptLower.includes('example') || transcriptLower.includes('instance')) {
+          strengths.push("Used concrete examples to demonstrate competencies");
+        }
+        if (transcriptLower.includes('result') || transcriptLower.includes('outcome')) {
+          strengths.push("Focused on measurable results and outcomes");
+        }
+        if (transcriptLower.includes('challenge') || transcriptLower.includes('problem')) {
+          strengths.push("Addressed challenges and problem-solving abilities");
+        }
+      } else if (purpose.toLowerCase().includes('presentation')) {
+        if (transcriptLower.includes('first') || transcriptLower.includes('next') || transcriptLower.includes('finally')) {
+          strengths.push("Used clear structural transitions");
+        }
+        if (transcriptLower.includes('data') || transcriptLower.includes('research') || transcriptLower.includes('study')) {
+          strengths.push("Incorporated supporting evidence and data");
+        }
+        if (transcriptLower.includes('audience') || transcriptLower.includes('you')) {
+          strengths.push("Maintained audience engagement and connection");
+        }
+      } else if (purpose.toLowerCase().includes('pitch')) {
+        if (transcriptLower.includes('problem') || transcriptLower.includes('solution')) {
+          strengths.push("Clearly defined problem and solution");
+        }
+        if (transcriptLower.includes('market') || transcriptLower.includes('opportunity')) {
+          strengths.push("Identified market opportunity effectively");
+        }
+        if (transcriptLower.includes('action') || transcriptLower.includes('next steps')) {
+          strengths.push("Included clear call-to-action");
+        }
       }
-      return strengths.length > 0 ? strengths : ["Clear communication throughout the session"];
+      
+      // General communication strengths
+      if (wordCount > 100) strengths.push("Developed ideas with appropriate depth");
+      if (transcriptLower.includes('because') || transcriptLower.includes('therefore') || transcriptLower.includes('since')) {
+        strengths.push("Provided logical reasoning and connections");
+      }
+      if ((transcriptLower.match(/\b(and|but|however|furthermore|moreover)\b/g) || []).length > 2) {
+        strengths.push("Used effective connecting words and transitions");
+      }
+      
+      return strengths.length > 0 ? strengths : ["Maintained clear communication throughout"];
     };
 
     const generateContentImprovements = (transcript: string, purpose: string) => {
       const improvements = [];
-      if (transcript.length < 50) improvements.push("Consider expanding on your main points");
-      if (!transcript.includes("?") && purpose.includes("interview")) {
-        improvements.push("For interviews, consider asking thoughtful questions");
+      const transcriptLower = transcript.toLowerCase();
+      const wordCount = transcript.split(' ').filter(w => w.trim().length > 0).length;
+      const sentenceCount = transcript.split(/[.!?]+/).filter(s => s.trim().length > 0).length;
+      
+      // Purpose-specific improvements
+      if (purpose.toLowerCase().includes('interview')) {
+        if (!transcriptLower.includes('example') && !transcriptLower.includes('instance')) {
+          improvements.push("Add specific examples using the STAR method (Situation, Task, Action, Result)");
+        }
+        if (!transcriptLower.includes('learn') && !transcriptLower.includes('grow')) {
+          improvements.push("Demonstrate growth mindset and eagerness to learn");
+        }
+        if (!transcriptLower.includes('question')) {
+          improvements.push("Prepare thoughtful questions about the role and company");
+        }
+      } else if (purpose.toLowerCase().includes('presentation')) {
+        if (!transcriptLower.includes('conclusion') && !transcriptLower.includes('summary')) {
+          improvements.push("Add a strong conclusion that reinforces key messages");
+        }
+        if (sentenceCount < 5) {
+          improvements.push("Develop main points with more detailed explanations");
+        }
+        if (!transcriptLower.includes('slide') && !transcriptLower.includes('chart')) {
+          improvements.push("Reference visual aids to enhance understanding");
+        }
+      } else if (purpose.toLowerCase().includes('pitch')) {
+        if (!transcriptLower.includes('unique') && !transcriptLower.includes('different')) {
+          improvements.push("Highlight your unique value proposition more clearly");
+        }
+        if (!transcriptLower.includes('timeline') && !transcriptLower.includes('plan')) {
+          improvements.push("Include implementation timeline and concrete next steps");
+        }
       }
-      if (!transcript.includes("conclusion") && !transcript.includes("summary")) {
-        improvements.push("Add a strong closing or summary");
+      
+      // General improvements
+      if (wordCount < 50) {
+        improvements.push("Expand on key points with more specific details and examples");
       }
-      if (purpose && !transcript.toLowerCase().includes(purpose.toLowerCase().split(' ')[0])) {
-        improvements.push("Ensure content aligns more closely with your stated purpose");
+      if (wordCount > 300 && sentenceCount < 10) {
+        improvements.push("Break complex ideas into shorter, clearer sentences");
       }
-      return improvements.length > 0 ? improvements : ["Consider adding more specific details to strengthen your message"];
+      
+      return improvements.length > 0 ? improvements : ["Consider adding more storytelling elements to engage your audience"];
     };
 
     const analyzePurposeAlignment = (transcript: string, purpose: string) => {
@@ -604,11 +717,44 @@ export default function ImprovedPracticePage() {
 
     const generateVoiceRecommendations = (metrics: SessionMetrics) => {
       const recommendations = [];
-      if (metrics.pace < 120) recommendations.push("Try speaking slightly faster to maintain engagement");
-      if (metrics.pace > 180) recommendations.push("Slow down slightly for better comprehension");
-      if (metrics.volume < 60) recommendations.push("Increase your volume for better presence");
-      if (metrics.fillerWords.length > 5) recommendations.push("Practice pausing instead of using filler words");
-      return recommendations.length > 0 ? recommendations : ["Your voice delivery is well-balanced"];
+      const fillerAnalysis = analyzeFillerWords(transcript);
+      const fillerRate = (fillerAnalysis.totalFillers / Math.max(metrics.wordsSpoken, 1)) * 100;
+      
+      // Pace analysis
+      if (metrics.pace < 120) {
+        recommendations.push("Increase speaking pace to 140-160 WPM for better audience engagement");
+      } else if (metrics.pace > 180) {
+        recommendations.push("Reduce speaking pace to 140-160 WPM for optimal comprehension");
+      } else {
+        recommendations.push("Excellent speaking pace - maintaining 140-160 WPM range");
+      }
+      
+      // Filler word analysis with specific insights
+      if (fillerRate > 10) {
+        const topFillers = Object.entries(fillerAnalysis.fillerCounts)
+          .sort(([,a], [,b]) => b - a)
+          .slice(0, 3)
+          .map(([word, count]) => `"${word}" (${count}x)`);
+        recommendations.push(`High filler word usage (${fillerRate.toFixed(1)}%). Most frequent: ${topFillers.join(', ')}`);
+        recommendations.push("Practice strategic pauses instead of filler words - count 'one Mississippi' in your head");
+      } else if (fillerRate > 5) {
+        recommendations.push(`Moderate filler word usage (${fillerRate.toFixed(1)}%). Practice breath control and intentional pauses`);
+      } else {
+        recommendations.push(`Excellent filler word control (${fillerRate.toFixed(1)}%). Your speech flows naturally`);
+      }
+      
+      // Volume and clarity analysis
+      if (metrics.volume < 60) {
+        recommendations.push("Project your voice more - imagine speaking to someone in the back row");
+      } else if (metrics.volume > 85) {
+        recommendations.push("Moderate your volume slightly while maintaining energy and enthusiasm");
+      }
+      
+      if (metrics.clarity < 80) {
+        recommendations.push("Focus on articulation - practice tongue twisters and speak more deliberately");
+      }
+      
+      return recommendations;
     };
 
     const generateBodyLanguageRecommendations = () => {
@@ -623,44 +769,136 @@ export default function ImprovedPracticePage() {
 
     const generateCoachingInsights = (purpose: string, transcript: string, metrics: SessionMetrics) => {
       const insights = [];
+      const transcriptLower = transcript.toLowerCase();
+      const wordCount = transcript.split(' ').filter(w => w.trim().length > 0).length;
+      const fillerAnalysis = analyzeFillerWords(transcript);
+      const fillerRate = (fillerAnalysis.totalFillers / Math.max(metrics.wordsSpoken, 1)) * 100;
       
-      if (purpose && purpose.includes("interview")) {
-        insights.push("For interviews, focus on STAR method (Situation, Task, Action, Result) for better storytelling");
-        insights.push("Practice specific examples that demonstrate your key competencies");
-      } else if (purpose && purpose.includes("presentation")) {
-        insights.push("Structure your content with clear introduction, main points, and conclusion");
-        insights.push("Use transitions to guide your audience through your ideas");
-      } else if (purpose && purpose.includes("pitch")) {
-        insights.push("Lead with the problem you're solving, then present your solution");
-        insights.push("Include a clear call-to-action at the end");
+      // Purpose-specific coaching insights
+      if (purpose && purpose.toLowerCase().includes("interview")) {
+        if (!transcriptLower.includes('experience') && !transcriptLower.includes('accomplished')) {
+          insights.push("Strengthen your responses by leading with your most relevant experience and specific accomplishments");
+        }
+        if (fillerRate > 8) {
+          insights.push("In interviews, excessive filler words can undermine confidence. Practice the 'pause and breathe' technique");
+        }
+        if (metrics.pace < 130) {
+          insights.push("Interview responses benefit from slightly faster pace (130-150 WPM) to show enthusiasm and energy");
+        }
+        if (!transcriptLower.includes('question') && !transcriptLower.includes('learn')) {
+          insights.push("End strong by asking insightful questions that show genuine interest in the role and company culture");
+        }
+        insights.push("Use the STAR method consistently: describe the Situation, your Task, Actions taken, and measurable Results");
+      } else if (purpose && purpose.toLowerCase().includes("presentation")) {
+        if (!transcriptLower.includes('first') && !transcriptLower.includes('next') && !transcriptLower.includes('finally')) {
+          insights.push("Add clear signposting phrases ('First...', 'Next...', 'Finally...') to guide your audience through your structure");
+        }
+        if (wordCount < 100) {
+          insights.push("Presentations benefit from deeper development - aim for 150+ words per main point with supporting evidence");
+        }
+        if (!transcriptLower.includes('you') && !transcriptLower.includes('audience')) {
+          insights.push("Make your presentation more engaging by directly addressing your audience with 'you' statements");
+        }
+        if (metrics.pace > 170) {
+          insights.push("Slow down slightly in presentations - 140-160 WPM allows better comprehension of complex ideas");
+        }
+        insights.push("Include compelling data points and stories to support each main argument for maximum impact");
+      } else if (purpose && purpose.toLowerCase().includes("pitch")) {
+        if (!transcriptLower.includes('problem') || !transcriptLower.includes('solution')) {
+          insights.push("Lead with a compelling problem statement, then position your solution as the obvious answer");
+        }
+        if (!transcriptLower.includes('different') && !transcriptLower.includes('unique')) {
+          insights.push("Clearly articulate your unique value proposition - what makes you different from competitors?");
+        }
+        if (!transcriptLower.includes('action') && !transcriptLower.includes('next')) {
+          insights.push("End with a specific, concrete call-to-action that tells your audience exactly what to do next");
+        }
+        if (metrics.bodyLanguageScore < 70) {
+          insights.push("Pitches require high energy and confidence - work on dynamic gestures and strong eye contact");
+        }
+        insights.push("Use the problem-solution-benefit framework: What's broken? How you fix it? Why they should care?");
       } else {
-        insights.push("Consider your audience's perspective and tailor your message accordingly");
-        insights.push("Practice varying your tone and pace to maintain engagement");
+        // General purpose insights
+        if (fillerRate > 10) {
+          insights.push("Focus on eliminating filler words through deliberate practice with strategic pauses");
+        }
+        if (wordCount < 75) {
+          insights.push("Develop your ideas more fully - add specific examples and concrete details to strengthen your message");
+        }
+        if (!transcriptLower.includes('because') && !transcriptLower.includes('since')) {
+          insights.push("Strengthen your arguments by explicitly stating reasons and logical connections between ideas");
+        }
+        insights.push("Consider your audience's knowledge level and adjust your language and examples accordingly");
       }
       
-      return insights;
+      // Performance-based insights
+      if (sessionDuration < 60) {
+        insights.push("Practice longer sessions (2-3 minutes minimum) to build stamina and develop complete thoughts");
+      }
+      
+      return insights.slice(0, 4); // Limit to most relevant insights
     };
 
     const generateNextSteps = (purpose: string, metrics: SessionMetrics) => {
       const steps = [];
+      const fillerAnalysis = analyzeFillerWords(transcript);
+      const fillerRate = (fillerAnalysis.totalFillers / Math.max(metrics.wordsSpoken, 1)) * 100;
+      const wordCount = transcript.split(' ').filter(w => w.trim().length > 0).length;
       
-      if (metrics.fillerWords.length > 3) {
-        steps.push("Practice speaking with intentional pauses instead of filler words");
-      }
-      
-      if (metrics.pace < 120 || metrics.pace > 180) {
-        steps.push("Record yourself reading aloud to practice optimal speaking pace");
-      }
-      
-      if (purpose) {
-        steps.push(`Continue practicing with scenarios related to: ${purpose}`);
+      // Purpose-specific actionable next steps
+      if (purpose && purpose.toLowerCase().includes("interview")) {
+        steps.push("Research the company's recent news, values, and specific role requirements thoroughly");
+        steps.push("Prepare 5 STAR method stories covering leadership, problem-solving, teamwork, and conflict resolution");
+        if (metrics.pace < 130) {
+          steps.push("Practice speaking at 130-150 WPM using a timer while answering common interview questions");
+        }
+        steps.push("Prepare 3-5 thoughtful questions about role expectations, team dynamics, and company culture");
+        if (fillerRate > 8) {
+          steps.push("Master the 'pause and breathe' technique during mock interview sessions with a friend");
+        }
+      } else if (purpose && purpose.toLowerCase().includes("presentation")) {
+        steps.push("Create a detailed outline with compelling hook, 3 main points, supporting evidence, and memorable conclusion");
+        steps.push("Practice your opening 30 seconds until you can deliver it flawlessly without notes");
+        if (metrics.pace > 170) {
+          steps.push("Slow down to 140-160 WPM with deliberate pauses between major points for better comprehension");
+        }
+        steps.push("Rehearse with actual visual aids and practice smooth transitions between slides");
+        steps.push("Test your presentation with a small audience and gather specific, actionable feedback");
+      } else if (purpose && purpose.toLowerCase().includes("pitch")) {
+        steps.push("Refine your problem statement to be personally relatable to your target audience");
+        steps.push("Develop compelling proof points and customer testimonials to support your solution claims");
+        steps.push("Practice your pitch in exactly 60 seconds, 2 minutes, and 5 minutes for different contexts");
+        steps.push("Prepare confident, concise responses to common objections and challenging questions");
+        if (metrics.bodyLanguageScore < 70) {
+          steps.push("Work on dynamic gestures and confident posture by practicing in front of a mirror daily");
+        }
       } else {
-        steps.push("Set a specific purpose for your next practice session");
+        steps.push("Define a specific, measurable speaking goal for your next practice session");
+        steps.push("Choose a topic you're passionate about and practice explaining it clearly in exactly 2 minutes");
+        if (sessionDuration < 90) {
+          steps.push("Gradually increase session length to 3-5 minutes to build speaking stamina and depth");
+        }
+        steps.push("Record yourself weekly on the same topic to track tangible improvement over time");
       }
       
-      steps.push("Review your transcript to identify patterns in your speech");
+      // Performance-based actionable steps
+      if (fillerRate > 10) {
+        const topFiller = Object.entries(fillerAnalysis.fillerCounts)
+          .sort(([,a], [,b]) => b - a)[0];
+        if (topFiller) {
+          steps.push(`Focus on eliminating "${topFiller[0]}" (used ${topFiller[1]} times) - practice the 'count to 2' pause method`);
+        }
+      }
       
-      return steps;
+      if (metrics.volume < 60) {
+        steps.push("Practice diaphragmatic breathing exercises and vocal projection daily for 10 minutes");
+      }
+      
+      if (wordCount < 75) {
+        steps.push("Expand responses to 150+ words minimum with specific examples and concrete details");
+      }
+      
+      return steps.slice(0, 5);
     };
 
     // Generate AI feedback based on purpose and content
