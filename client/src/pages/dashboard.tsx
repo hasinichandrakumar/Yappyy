@@ -22,6 +22,10 @@ export default function Dashboard() {
               <BarChart3 className="w-4 h-4" />
               <span>Practice</span>
             </TabsTrigger>
+            <TabsTrigger value="analysis" className="flex flex-col items-center space-y-1 px-2 py-2 text-xs">
+              <Brain className="w-4 h-4" />
+              <span>Analysis</span>
+            </TabsTrigger>
             <TabsTrigger value="ai-coach" className="flex flex-col items-center space-y-1 px-2 py-2 text-xs">
               <Brain className="w-4 h-4" />
               <span>AI Coach</span>
@@ -29,10 +33,6 @@ export default function Dashboard() {
             <TabsTrigger value="speech-dna" className="flex flex-col items-center space-y-1 px-2 py-2 text-xs">
               <Star className="w-4 h-4" />
               <span>Speech DNA</span>
-            </TabsTrigger>
-            <TabsTrigger value="analysis" className="flex flex-col items-center space-y-1 px-2 py-2 text-xs">
-              <Brain className="w-4 h-4" />
-              <span>Analysis</span>
             </TabsTrigger>
             <TabsTrigger value="body-language" className="flex flex-col items-center space-y-1 px-2 py-2 text-xs">
               <Eye className="w-4 h-4" />
