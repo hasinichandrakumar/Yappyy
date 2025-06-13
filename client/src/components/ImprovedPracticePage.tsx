@@ -209,13 +209,44 @@ export default function ImprovedPracticePage() {
             const words = result[0].transcript.split(' ').filter((word: string) => word.trim().length > 0);
             setWordCount(prev => prev + words.length);
             
-            // Enhanced filler word detection
-            const fillerWords = ['um', 'uh', 'like', 'so', 'you know', 'actually', 'basically', 'literally'];
+            // Comprehensive filler word detection
+            const fillerWords = [
+              'um', 'uh', 'er', 'ah', 'eh', 'mm', 'hmm',
+              'like', 'so', 'well', 'okay', 'ok', 'right',
+              'you know', 'i mean', 'sort of', 'kind of',
+              'actually', 'basically', 'literally', 'obviously',
+              'essentially', 'definitely', 'absolutely',
+              'totally', 'really', 'very', 'quite',
+              'just', 'maybe', 'perhaps', 'anyway',
+              'whatever', 'somehow', 'meanwhile',
+              'furthermore', 'moreover', 'however',
+              'therefore', 'thus', 'hence',
+              'and stuff', 'or something', 'or whatever',
+              'and things', 'and all that'
+            ];
+            
+            const multiWordFillers = [
+              'you know', 'i mean', 'sort of', 'kind of',
+              'and stuff', 'or something', 'or whatever',
+              'and things', 'and all that'
+            ];
+            
             const newFillers: string[] = [];
             
+            // Check for multi-word fillers first
+            const transcript = words.join(' ').toLowerCase();
+            multiWordFillers.forEach(filler => {
+              const regex = new RegExp(`\\b${filler}\\b`, 'g');
+              const matches = transcript.match(regex);
+              if (matches) {
+                matches.forEach(() => newFillers.push(filler));
+              }
+            });
+            
+            // Check for single-word fillers
             words.forEach((word: string) => {
-              const cleanWord = word.toLowerCase().replace(/[.,!?]/g, '');
-              if (fillerWords.includes(cleanWord)) {
+              const cleanWord = word.toLowerCase().replace(/[.,!?;:]/g, '');
+              if (fillerWords.includes(cleanWord) && !multiWordFillers.some(mf => mf.includes(cleanWord))) {
                 newFillers.push(cleanWord);
               }
             });
@@ -355,22 +386,24 @@ export default function ImprovedPracticePage() {
         recognitionRef.current.start();
       }
 
-      // Start eye contact detection
+      // Start eye contact detection with optimized frequency
       detectionIntervalRef.current = setInterval(() => {
         detectEyeContact();
-      }, 500);
+      }, 250); // Increased frequency for smoother updates
 
-      // Start session timer
+      // Start session timer with optimized updates
       timerRef.current = setInterval(() => {
         setSessionDuration(prev => prev + 1);
         
-        // Generate live feedback periodically based on session purpose
-        if (Math.random() > 0.9) { // 10% chance each second for more realistic feedback
+        // Generate live feedback less frequently to reduce noise
+        if (Math.random() > 0.95) { // 5% chance each second for quality feedback
           generateLiveFeedback();
         }
         
-        // Update metrics
-        updateSessionMetrics();
+        // Update metrics every 2 seconds to prevent glitching
+        if (sessionDuration % 2 === 0) {
+          updateSessionMetrics();
+        }
       }, 1000);
 
       setIsRecording(true);
@@ -486,38 +519,89 @@ export default function ImprovedPracticePage() {
   // Advanced filler word analysis
   const analyzeFillerWords = useCallback((text: string) => {
     const fillerPatterns = [
-      { word: 'uh', variants: ['uh', 'uhh', 'uhm'] },
-      { word: 'um', variants: ['um', 'umm', 'erm'] },
-      { word: 'er', variants: ['er', 'err', 'erm'] },
-      { word: 'ah', variants: ['ah', 'ahh'] },
-      { word: 'like', variants: ['like'] },
-      { word: 'you know', variants: ['you know', 'y\'know', 'ya know'] },
-      { word: 'so', variants: ['so'] },
-      { word: 'basically', variants: ['basically'] },
-      { word: 'actually', variants: ['actually'] },
-      { word: 'literally', variants: ['literally'] },
-      { word: 'kind of', variants: ['kind of', 'kinda'] },
-      { word: 'sort of', variants: ['sort of', 'sorta'] },
-      { word: 'I mean', variants: ['I mean', 'i mean'] },
-      { word: 'right', variants: ['right?', ', right'] },
-      { word: 'okay', variants: ['okay', 'ok'] }
+      { word: 'uh', variants: ['uh', 'uhh', 'uhm', 'uhhh'] },
+      { word: 'um', variants: ['um', 'umm', 'erm', 'emmm'] },
+      { word: 'er', variants: ['er', 'err', 'erm', 'errr'] },
+      { word: 'ah', variants: ['ah', 'ahh', 'ahhh'] },
+      { word: 'eh', variants: ['eh', 'ehh'] },
+      { word: 'mm', variants: ['mm', 'mmm', 'hmm', 'hmmm'] },
+      { word: 'like', variants: ['like', 'likes'] },
+      { word: 'you know', variants: ['you know', 'y\'know', 'ya know', 'yknow'] },
+      { word: 'so', variants: ['so', 'soo'] },
+      { word: 'well', variants: ['well', 'welll'] },
+      { word: 'okay', variants: ['okay', 'ok', 'okayy'] },
+      { word: 'right', variants: ['right', 'right?', ', right', 'alright'] },
+      { word: 'basically', variants: ['basically', 'basicly'] },
+      { word: 'actually', variants: ['actually', 'actualy'] },
+      { word: 'literally', variants: ['literally', 'literaly'] },
+      { word: 'obviously', variants: ['obviously', 'obviosly'] },
+      { word: 'essentially', variants: ['essentially', 'esentially'] },
+      { word: 'definitely', variants: ['definitely', 'definately'] },
+      { word: 'absolutely', variants: ['absolutely', 'absolutly'] },
+      { word: 'totally', variants: ['totally', 'totaly'] },
+      { word: 'really', variants: ['really', 'realy'] },
+      { word: 'very', variants: ['very', 'verry'] },
+      { word: 'quite', variants: ['quite', 'quiet'] },
+      { word: 'just', variants: ['just', 'jus'] },
+      { word: 'maybe', variants: ['maybe', 'mayb'] },
+      { word: 'perhaps', variants: ['perhaps', 'perhap'] },
+      { word: 'anyway', variants: ['anyway', 'anyways'] },
+      { word: 'whatever', variants: ['whatever', 'whateva'] },
+      { word: 'somehow', variants: ['somehow', 'somhow'] },
+      { word: 'meanwhile', variants: ['meanwhile', 'meanwhil'] },
+      { word: 'furthermore', variants: ['furthermore', 'furthermor'] },
+      { word: 'moreover', variants: ['moreover', 'moreova'] },
+      { word: 'however', variants: ['however', 'howeva'] },
+      { word: 'therefore', variants: ['therefore', 'therefor'] },
+      { word: 'thus', variants: ['thus', 'thuss'] },
+      { word: 'hence', variants: ['hence', 'henc'] },
+      { word: 'kind of', variants: ['kind of', 'kinda', 'kind-of'] },
+      { word: 'sort of', variants: ['sort of', 'sorta', 'sort-of'] },
+      { word: 'i mean', variants: ['i mean', 'I mean', 'i-mean'] },
+      { word: 'you see', variants: ['you see', 'ya see', 'u see'] },
+      { word: 'and stuff', variants: ['and stuff', 'an stuff', 'n stuff'] },
+      { word: 'or something', variants: ['or something', 'or somethin', 'or sumthin'] },
+      { word: 'or whatever', variants: ['or whatever', 'or whateva', 'or whatevr'] },
+      { word: 'and things', variants: ['and things', 'an things', 'n things'] },
+      { word: 'and all that', variants: ['and all that', 'an all that', 'n all that'] }
     ];
 
     const words = text.toLowerCase().split(/\s+/).filter(w => w.trim().length > 0);
     const detectedFillers: string[] = [];
     const fillerCounts: { [key: string]: number } = {};
 
+    // First pass: Check for multi-word fillers in full text
+    const fullText = text.toLowerCase();
     for (const pattern of fillerPatterns) {
-      for (const variant of pattern.variants) {
-        const count = words.filter(word => 
-          word.includes(variant) || 
-          text.toLowerCase().includes(variant)
-        ).length;
-        
-        if (count > 0) {
-          fillerCounts[pattern.word] = (fillerCounts[pattern.word] || 0) + count;
-          for (let i = 0; i < count; i++) {
-            detectedFillers.push(pattern.word);
+      if (pattern.word.includes(' ')) {
+        for (const variant of pattern.variants) {
+          const regex = new RegExp(`\\b${variant.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+          const matches = fullText.match(regex);
+          if (matches) {
+            const count = matches.length;
+            fillerCounts[pattern.word] = (fillerCounts[pattern.word] || 0) + count;
+            for (let i = 0; i < count; i++) {
+              detectedFillers.push(pattern.word);
+            }
+          }
+        }
+      }
+    }
+
+    // Second pass: Check for single-word fillers
+    for (const pattern of fillerPatterns) {
+      if (!pattern.word.includes(' ')) {
+        for (const variant of pattern.variants) {
+          const count = words.filter(word => {
+            const cleanWord = word.replace(/[.,!?;:()]/g, '');
+            return cleanWord === variant || cleanWord === variant.replace('?', '');
+          }).length;
+          
+          if (count > 0) {
+            fillerCounts[pattern.word] = (fillerCounts[pattern.word] || 0) + count;
+            for (let i = 0; i < count; i++) {
+              detectedFillers.push(pattern.word);
+            }
           }
         }
       }
@@ -526,22 +610,29 @@ export default function ImprovedPracticePage() {
     return { detectedFillers, fillerCounts, totalFillers: detectedFillers.length };
   }, []);
 
-  // Update session metrics based on actual data
+  // Update session metrics with smooth transitions
   const updateSessionMetrics = useCallback(() => {
     // Only calculate WPM if we have actual duration to avoid division issues
     const currentWPM = sessionDuration > 0 ? Math.round((wordCount / (sessionDuration / 60))) : 0;
     const fillerAnalysis = analyzeFillerWords(transcript);
     
-    setSessionMetrics(prev => ({
-      ...prev,
-      volume: Math.min(100, Math.max(20, 60 + Math.random() * 30)), // Simulated but realistic
-      clarity: Math.min(100, Math.max(70, 85 + Math.random() * 15)),
-      pace: currentWPM,
-      wordsSpoken: wordCount,
-      fillerWords: fillerAnalysis.detectedFillers,
-      bodyLanguageScore: Math.min(100, Math.max(50, (eyeContactScore * 60) + (Math.random() * 40)))
-    }));
-  }, [wordCount, sessionDuration, transcript, eyeContactScore, analyzeFillerWords]);
+    setSessionMetrics(prev => {
+      // Smooth transitions for volume and clarity to prevent glitching
+      const targetVolume = Math.min(100, Math.max(20, 60 + Math.random() * 30));
+      const targetClarity = Math.min(100, Math.max(70, 85 + Math.random() * 15));
+      const targetBodyLanguage = Math.min(100, Math.max(50, (eyeContactScore * 60) + (postureScore * 0.4)));
+      
+      return {
+        ...prev,
+        volume: Math.round(prev.volume * 0.8 + targetVolume * 0.2), // Smooth transition
+        clarity: Math.round(prev.clarity * 0.8 + targetClarity * 0.2), // Smooth transition
+        pace: currentWPM,
+        wordsSpoken: wordCount,
+        fillerWords: fillerAnalysis.detectedFillers,
+        bodyLanguageScore: Math.round(prev.bodyLanguageScore * 0.9 + targetBodyLanguage * 0.1)
+      };
+    });
+  }, [wordCount, sessionDuration, transcript, eyeContactScore, postureScore, analyzeFillerWords]);
 
   // Stop recording and reset session
   const stopRecording = useCallback(async () => {
