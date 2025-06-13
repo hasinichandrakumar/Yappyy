@@ -213,143 +213,176 @@ export default function EnhancedAnalysisTab() {
               </div>
             </div>
 
-            {typedSessions.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Speaking Pace */}
-                <div className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Clock className="h-5 w-5 text-blue-600" />
-                    <h4 className="text-lg font-semibold text-blue-900">Speaking Pace</h4>
+{(() => {
+              // Filter sessions based on selection
+              const filteredSessions = selectedSession === 'all' 
+                ? typedSessions 
+                : typedSessions.filter((s: any) => s.id.toString() === selectedSession);
+              
+              const sessionCount = filteredSessions.length;
+              
+              if (typedSessions.length === 0) {
+                return (
+                  <div className="text-center py-12">
+                    <Mic className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-slate-900 mb-2">No voice data available</h3>
+                    <p className="text-slate-600">Complete a practice session to see your voice analysis</p>
                   </div>
-                  <div className="space-y-4">
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-blue-800 mb-1">
-                        {Math.round(typedSessions.reduce((sum: number, s: any) => sum + (s.speakingPace || 0), 0) / typedSessions.length)} WPM
-                      </div>
-                      <div className="text-sm text-blue-600">Average Words Per Minute</div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-blue-700">Optimal Range: 140-160 WPM</span>
-                        <span className="font-medium text-blue-800">Excellent</span>
-                      </div>
-                      <Progress value={85} className="h-2 bg-blue-200" />
-                    </div>
-                  </div>
-                </div>
+                );
+              }
 
-                {/* Voice Clarity */}
-                <div className="p-6 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl border border-emerald-200">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Volume2 className="h-5 w-5 text-emerald-600" />
-                    <h4 className="text-lg font-semibold text-emerald-900">Voice Clarity</h4>
+              if (sessionCount === 0) {
+                return (
+                  <div className="text-center py-12">
+                    <Info className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-slate-600 mb-2">No Session Selected</h3>
+                    <p className="text-slate-500">Select a session to view detailed analysis</p>
                   </div>
-                  <div className="space-y-4">
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-emerald-800 mb-1">
-                        {Math.round(typedSessions.reduce((sum: number, s: any) => sum + (s.clarityScore || 82), 0) / typedSessions.length)}%
-                      </div>
-                      <div className="text-sm text-emerald-600">Articulation Score</div>
+                );
+              }
+              
+              return (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Speaking Pace */}
+                  <div className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Clock className="h-5 w-5 text-blue-600" />
+                      <h4 className="text-lg font-semibold text-blue-900">Speaking Pace</h4>
                     </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-emerald-700">Clear pronunciation</span>
-                        <span className="font-medium text-emerald-800">Strong</span>
+                    <div className="space-y-4">
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-blue-800 mb-1">
+                          {Math.round(filteredSessions.reduce((sum: number, s: any) => sum + (s.speakingPace || s.averageWPM || 0), 0) / sessionCount)} WPM
+                        </div>
+                        <div className="text-sm text-blue-600">
+                          {selectedSession === 'all' ? 'Average Words Per Minute' : 'Session Words Per Minute'}
+                        </div>
                       </div>
-                      <Progress value={82} className="h-2 bg-emerald-200" />
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-blue-700">Optimal Range: 140-160 WPM</span>
+                          <span className="font-medium text-blue-800">Excellent</span>
+                        </div>
+                        <Progress value={85} className="h-2 bg-blue-200" />
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Volume Control */}
-                <div className="p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200">
-                  <div className="flex items-center gap-2 mb-4">
-                    <BarChart3 className="h-5 w-5 text-purple-600" />
-                    <h4 className="text-lg font-semibold text-purple-900">Volume Control</h4>
-                  </div>
-                  <div className="space-y-4">
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-purple-800 mb-1">
-                        {Math.round(typedSessions.reduce((sum: number, s: any) => sum + (s.volumeConsistency || 78), 0) / typedSessions.length)}%
-                      </div>
-                      <div className="text-sm text-purple-600">Consistency Score</div>
+                  {/* Voice Clarity */}
+                  <div className="p-6 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl border border-emerald-200">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Volume2 className="h-5 w-5 text-emerald-600" />
+                      <h4 className="text-lg font-semibold text-emerald-900">Voice Clarity</h4>
                     </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-purple-700">Volume variation</span>
-                        <span className="font-medium text-purple-800">Good</span>
+                    <div className="space-y-4">
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-emerald-800 mb-1">
+                          {Math.round(filteredSessions.reduce((sum: number, s: any) => sum + (s.clarityScore || 82), 0) / sessionCount)}%
+                        </div>
+                        <div className="text-sm text-emerald-600">Articulation Score</div>
                       </div>
-                      <Progress value={78} className="h-2 bg-purple-200" />
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-emerald-700">Clear pronunciation</span>
+                          <span className="font-medium text-emerald-800">Strong</span>
+                        </div>
+                        <Progress value={82} className="h-2 bg-emerald-200" />
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Intonation */}
-                <div className="p-6 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl border border-orange-200">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Activity className="h-5 w-5 text-orange-600" />
-                    <h4 className="text-lg font-semibold text-orange-900">Intonation Variety</h4>
-                  </div>
-                  <div className="space-y-4">
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-orange-800 mb-1">
-                        {Math.round(typedSessions.reduce((sum: number, s: any) => sum + (s.intonationScore || 75), 0) / typedSessions.length)}%
-                      </div>
-                      <div className="text-sm text-orange-600">Vocal Expression</div>
+                  {/* Volume Control */}
+                  <div className="p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200">
+                    <div className="flex items-center gap-2 mb-4">
+                      <BarChart3 className="h-5 w-5 text-purple-600" />
+                      <h4 className="text-lg font-semibold text-purple-900">Volume Control</h4>
                     </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-orange-700">Pitch variation</span>
-                        <span className="font-medium text-orange-800">Developing</span>
+                    <div className="space-y-4">
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-purple-800 mb-1">
+                          {Math.round(filteredSessions.reduce((sum: number, s: any) => sum + (s.volumeConsistency || 78), 0) / sessionCount)}%
+                        </div>
+                        <div className="text-sm text-purple-600">Consistency Score</div>
                       </div>
-                      <Progress value={75} className="h-2 bg-orange-200" />
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-purple-700">Volume variation</span>
+                          <span className="font-medium text-purple-800">Good</span>
+                        </div>
+                        <Progress value={78} className="h-2 bg-purple-200" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Intonation */}
+                  <div className="p-6 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl border border-orange-200">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Activity className="h-5 w-5 text-orange-600" />
+                      <h4 className="text-lg font-semibold text-orange-900">Intonation Variety</h4>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-orange-800 mb-1">
+                          {Math.round(filteredSessions.reduce((sum: number, s: any) => sum + (s.intonationScore || 75), 0) / sessionCount)}%
+                        </div>
+                        <div className="text-sm text-orange-600">Vocal Expression</div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-orange-700">Pitch variation</span>
+                          <span className="font-medium text-orange-800">Developing</span>
+                        </div>
+                        <Progress value={75} className="h-2 bg-orange-200" />
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <Mic className="h-16 w-16 text-slate-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-slate-900 mb-2">No voice data available</h3>
-                <p className="text-slate-600">Complete a practice session to see your voice analysis</p>
-              </div>
-            )}
+              );
+            })()}
 
             {/* Filler Words Analysis */}
-            {typedSessions.length > 0 && (
-              <div className="p-6 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border border-slate-200">
-                <div className="flex items-center gap-2 mb-4">
-                  <MessageSquare className="h-5 w-5 text-slate-600" />
-                  <h4 className="text-lg font-semibold text-slate-900">Filler Words Analysis</h4>
+            {(() => {
+              const filteredSessions = selectedSession === 'all' 
+                ? typedSessions 
+                : typedSessions.filter((s: any) => s.id.toString() === selectedSession);
+              
+              if (filteredSessions.length === 0) return null;
+              
+              return (
+                <div className="p-6 bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border border-slate-200">
+                  <div className="flex items-center gap-2 mb-4">
+                    <MessageSquare className="h-5 w-5 text-slate-600" />
+                    <h4 className="text-lg font-semibold text-slate-900">Filler Words Analysis</h4>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="text-center p-3 bg-white rounded-lg border border-slate-200">
+                      <div className="text-2xl font-bold text-blue-800 mb-1">
+                        {Math.round(filteredSessions.reduce((sum: number, s: any) => sum + (s.fillerWords || 0), 0) / filteredSessions.length)}
+                      </div>
+                      <div className="text-xs text-slate-600">"Um" Count</div>
+                    </div>
+                    <div className="text-center p-3 bg-white rounded-lg border border-slate-200">
+                      <div className="text-2xl font-bold text-emerald-800 mb-1">
+                        {Math.round(filteredSessions.reduce((sum: number, s: any) => sum + (s.fillerWordsUh || 0), 0) / filteredSessions.length)}
+                      </div>
+                      <div className="text-xs text-slate-600">"Uh" Count</div>
+                    </div>
+                    <div className="text-center p-3 bg-white rounded-lg border border-slate-200">
+                      <div className="text-2xl font-bold text-purple-800 mb-1">
+                        {Math.round(filteredSessions.reduce((sum: number, s: any) => sum + (s.fillerWordsLike || 0), 0) / filteredSessions.length)}
+                      </div>
+                      <div className="text-xs text-slate-600">"Like" Count</div>
+                    </div>
+                    <div className="text-center p-3 bg-white rounded-lg border border-slate-200">
+                      <div className="text-2xl font-bold text-orange-800 mb-1">
+                        {Math.round(filteredSessions.reduce((sum: number, s: any) => sum + (s.fillerWordsSo || 0), 0) / filteredSessions.length)}
+                      </div>
+                      <div className="text-xs text-slate-600">"So" Count</div>
+                    </div>
+                  </div>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="text-center p-3 bg-white rounded-lg border border-slate-200">
-                    <div className="text-2xl font-bold text-blue-800 mb-1">
-                      {Math.round(typedSessions.reduce((sum: number, s: any) => sum + (s.fillerWords || 8), 0) / typedSessions.length)}
-                    </div>
-                    <div className="text-xs text-slate-600">"Um" Count</div>
-                  </div>
-                  <div className="text-center p-3 bg-white rounded-lg border border-slate-200">
-                    <div className="text-2xl font-bold text-emerald-800 mb-1">
-                      {Math.round(typedSessions.reduce((sum: number, s: any) => sum + (s.fillerWordsUh || 5), 0) / typedSessions.length)}
-                    </div>
-                    <div className="text-xs text-slate-600">"Uh" Count</div>
-                  </div>
-                  <div className="text-center p-3 bg-white rounded-lg border border-slate-200">
-                    <div className="text-2xl font-bold text-purple-800 mb-1">
-                      {Math.round(typedSessions.reduce((sum: number, s: any) => sum + (s.fillerWordsLike || 3), 0) / typedSessions.length)}
-                    </div>
-                    <div className="text-xs text-slate-600">"Like" Count</div>
-                  </div>
-                  <div className="text-center p-3 bg-white rounded-lg border border-slate-200">
-                    <div className="text-2xl font-bold text-orange-800 mb-1">
-                      {Math.round(typedSessions.reduce((sum: number, s: any) => sum + (s.fillerWordsSo || 4), 0) / typedSessions.length)}
-                    </div>
-                    <div className="text-xs text-slate-600">"So" Count</div>
-                  </div>
-                </div>
-              </div>
-            )}
+              );
+            })()}
           </TabsContent>
 
           {/* Body Language Analysis */}
@@ -364,55 +397,79 @@ export default function EnhancedAnalysisTab() {
               </div>
             </div>
 
-            {typedSessions.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* Eye Contact */}
-                <div className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Eye className="h-5 w-5 text-blue-600" />
-                    <h4 className="text-lg font-semibold text-blue-900">Eye Contact</h4>
+{(() => {
+              const filteredSessions = selectedSession === 'all' 
+                ? typedSessions 
+                : typedSessions.filter((s: any) => s.id.toString() === selectedSession);
+              
+              const sessionCount = filteredSessions.length;
+              
+              if (sessionCount === 0) {
+                return (
+                  <div className="text-center py-12">
+                    <Info className="h-12 w-12 text-slate-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-slate-600 mb-2">No Session Selected</h3>
+                    <p className="text-slate-500">Select a session to view body language analysis</p>
                   </div>
-                  <div className="text-center">
-                    <div className="text-4xl font-bold text-blue-800 mb-2">
-                      {Math.round(typedSessions.reduce((sum: number, s: any) => sum + (s.eyeContactScore || 0), 0) / typedSessions.length)}%
+                );
+              }
+              
+              return (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {/* Eye Contact */}
+                  <div className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Eye className="h-5 w-5 text-blue-600" />
+                      <h4 className="text-lg font-semibold text-blue-900">Eye Contact</h4>
                     </div>
-                    <div className="text-sm text-blue-600 mb-3">Engagement Level</div>
-                    <Progress value={Math.round(typedSessions.reduce((sum: number, s: any) => sum + (s.eyeContactScore || 0), 0) / typedSessions.length)} className="h-2 bg-blue-200" />
-                    <div className="text-xs text-blue-700 mt-2">{Math.round(typedSessions.reduce((sum: number, s: any) => sum + (s.eyeContactScore || 0), 0) / typedSessions.length) > 80 ? 'Excellent connection with audience' : Math.round(typedSessions.reduce((sum: number, s: any) => sum + (s.eyeContactScore || 0), 0) / typedSessions.length) > 60 ? 'Good eye contact maintained' : 'Eye contact needs improvement'}</div>
+                    <div className="text-center">
+                      <div className="text-4xl font-bold text-blue-800 mb-2">
+                        {Math.round(filteredSessions.reduce((sum: number, s: any) => sum + (s.eyeContactScore || 0), 0) / sessionCount)}%
+                      </div>
+                      <div className="text-sm text-blue-600 mb-3">Engagement Level</div>
+                      <Progress value={Math.round(filteredSessions.reduce((sum: number, s: any) => sum + (s.eyeContactScore || 0), 0) / sessionCount)} className="h-2 bg-blue-200" />
+                      <div className="text-xs text-blue-700 mt-2">
+                        {(() => {
+                          const score = Math.round(filteredSessions.reduce((sum: number, s: any) => sum + (s.eyeContactScore || 0), 0) / sessionCount);
+                          if (score > 80) return 'Excellent connection with audience';
+                          if (score > 60) return 'Good eye contact maintained';
+                          return 'Eye contact needs improvement';
+                        })()}
+                      </div>
+                    </div>
                   </div>
-                </div>
 
-                {/* Posture */}
-                <div className="p-6 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl border border-emerald-200">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Activity className="h-5 w-5 text-emerald-600" />
-                    <h4 className="text-lg font-semibold text-emerald-900">Posture</h4>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-4xl font-bold text-emerald-800 mb-2">
-                      {Math.round(typedSessions.reduce((sum: number, s: any) => sum + (s.postureScore || 0), 0) / typedSessions.length)}%
+                  {/* Posture */}
+                  <div className="p-6 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl border border-emerald-200">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Activity className="h-5 w-5 text-emerald-600" />
+                      <h4 className="text-lg font-semibold text-emerald-900">Posture</h4>
                     </div>
-                    <div className="text-sm text-emerald-600 mb-3">Confidence Score</div>
-                    <Progress value={78} className="h-2 bg-emerald-200" />
-                    <div className="text-xs text-emerald-700 mt-2">Strong, confident stance</div>
+                    <div className="text-center">
+                      <div className="text-4xl font-bold text-emerald-800 mb-2">
+                        {Math.round(filteredSessions.reduce((sum: number, s: any) => sum + (s.postureScore || 0), 0) / sessionCount)}%
+                      </div>
+                      <div className="text-sm text-emerald-600 mb-3">Confidence Score</div>
+                      <Progress value={Math.round(filteredSessions.reduce((sum: number, s: any) => sum + (s.postureScore || 0), 0) / sessionCount)} className="h-2 bg-emerald-200" />
+                      <div className="text-xs text-emerald-700 mt-2">Strong, confident stance</div>
+                    </div>
                   </div>
-                </div>
 
-                {/* Gestures */}
-                <div className="p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Zap className="h-5 w-5 text-purple-600" />
-                    <h4 className="text-lg font-semibold text-purple-900">Gestures</h4>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-4xl font-bold text-purple-800 mb-2">
-                      {Math.round(typedSessions.reduce((sum: number, s: any) => sum + (s.gestureScore || 0), 0) / typedSessions.length)}%
+                  {/* Gestures */}
+                  <div className="p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Zap className="h-5 w-5 text-purple-600" />
+                      <h4 className="text-lg font-semibold text-purple-900">Gestures</h4>
                     </div>
-                    <div className="text-sm text-purple-600 mb-3">Natural Movement</div>
-                    <Progress value={72} className="h-2 bg-purple-200" />
-                    <div className="text-xs text-purple-700 mt-2">Good use of hand gestures</div>
+                    <div className="text-center">
+                      <div className="text-4xl font-bold text-purple-800 mb-2">
+                        {Math.round(filteredSessions.reduce((sum: number, s: any) => sum + (s.gestureScore || 0), 0) / sessionCount)}%
+                      </div>
+                      <div className="text-sm text-purple-600 mb-3">Natural Movement</div>
+                      <Progress value={Math.round(filteredSessions.reduce((sum: number, s: any) => sum + (s.gestureScore || 0), 0) / sessionCount)} className="h-2 bg-purple-200" />
+                      <div className="text-xs text-purple-700 mt-2">Good use of hand gestures</div>
+                    </div>
                   </div>
-                </div>
 
                 {/* Facial Expressions */}
                 <div className="p-6 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl border border-orange-200">
