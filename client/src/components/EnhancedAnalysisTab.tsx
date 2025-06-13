@@ -96,7 +96,10 @@ export default function EnhancedAnalysisTab() {
               variant={selectedTimeFrame === timeframe ? 'default' : 'outline'}
               size="sm"
               onClick={() => setSelectedTimeFrame(timeframe)}
-              className={selectedTimeFrame === timeframe ? 'bg-gradient-to-r from-blue-600 to-cyan-600' : ''}
+              className={selectedTimeFrame === timeframe ? 
+                'bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] hover:from-[#1d4ed8] hover:to-[#0284c7] shadow-lg' : 
+                'border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200'
+              }
             >
               {timeframe.charAt(0).toUpperCase() + timeframe.slice(1)}
             </Button>
@@ -105,58 +108,60 @@ export default function EnhancedAnalysisTab() {
       </div>
 
       {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="p-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="p-6 bg-gradient-to-br from-white to-blue-50/30 border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Overall Score</p>
-              <p className="text-3xl font-bold text-gray-900">{mockData.overall.averageScore}</p>
-              <div className="flex items-center mt-1">
-                <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-                <span className="text-sm text-green-600">+{mockData.overall.improvement}% this {selectedTimeFrame}</span>
+              <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Overall Score</p>
+              <p className="text-4xl font-bold bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] bg-clip-text text-transparent">{mockData.overall.averageScore}</p>
+              <div className="flex items-center mt-2">
+                <TrendingUp className="h-4 w-4 text-emerald-500 mr-1" />
+                <span className="text-sm font-medium text-emerald-600">+{mockData.overall.improvement}% this {selectedTimeFrame}</span>
               </div>
             </div>
-            <div className="h-12 w-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
-              <BarChart3 className="h-6 w-6 text-white" />
+            <div className="h-14 w-14 bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] rounded-2xl flex items-center justify-center shadow-lg">
+              <BarChart3 className="h-7 w-7 text-white" />
             </div>
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-6 bg-gradient-to-br from-white to-emerald-50/30 border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Practice Time</p>
-              <p className="text-3xl font-bold text-gray-900">{mockData.overall.totalMinutes}m</p>
-              <p className="text-sm text-gray-500">{mockData.overall.totalSessions} sessions</p>
+              <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Practice Time</p>
+              <p className="text-4xl font-bold bg-gradient-to-br from-emerald-600 to-teal-600 bg-clip-text text-transparent">{mockData.overall.totalMinutes}m</p>
+              <p className="text-sm font-medium text-gray-500">{mockData.overall.totalSessions} sessions completed</p>
             </div>
-            <div className="h-12 w-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
-              <Clock className="h-6 w-6 text-white" />
+            <div className="h-14 w-14 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center shadow-lg">
+              <Clock className="h-7 w-7 text-white" />
             </div>
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-6 bg-gradient-to-br from-white to-purple-50/30 border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Weekly Goal</p>
-              <p className="text-3xl font-bold text-gray-900">{mockData.overall.weeklyProgress}%</p>
-              <Progress value={mockData.overall.weeklyProgress} className="mt-2" />
+              <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Weekly Goal</p>
+              <p className="text-4xl font-bold bg-gradient-to-br from-purple-600 to-violet-600 bg-clip-text text-transparent">{mockData.overall.weeklyProgress}%</p>
+              <div className="mt-3">
+                <Progress value={mockData.overall.weeklyProgress} className="h-2 bg-purple-100" />
+              </div>
             </div>
-            <div className="h-12 w-12 bg-gradient-to-br from-purple-500 to-violet-500 rounded-xl flex items-center justify-center">
-              <Target className="h-6 w-6 text-white" />
+            <div className="h-14 w-14 bg-gradient-to-br from-purple-500 to-violet-500 rounded-2xl flex items-center justify-center shadow-lg">
+              <Target className="h-7 w-7 text-white" />
             </div>
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-6 bg-gradient-to-br from-white to-orange-50/30 border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Speaking Pace</p>
-              <p className="text-3xl font-bold text-gray-900">{mockData.voice.averageWPM}</p>
-              <p className="text-sm text-gray-500">words per minute</p>
+              <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Speaking Pace</p>
+              <p className="text-4xl font-bold bg-gradient-to-br from-orange-600 to-red-500 bg-clip-text text-transparent">{mockData.voice.averageWPM}</p>
+              <p className="text-sm font-medium text-gray-500">words per minute</p>
             </div>
-            <div className="h-12 w-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center">
-              <Zap className="h-6 w-6 text-white" />
+            <div className="h-14 w-14 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center shadow-lg">
+              <Zap className="h-7 w-7 text-white" />
             </div>
           </div>
         </Card>
@@ -164,20 +169,20 @@ export default function EnhancedAnalysisTab() {
 
       {/* Detailed Analysis Tabs */}
       <Tabs defaultValue="voice" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 bg-gray-50">
-          <TabsTrigger value="voice" className="flex items-center gap-2">
+        <TabsList className="grid w-full grid-cols-4 bg-white border border-gray-100 shadow-lg rounded-xl p-1">
+          <TabsTrigger value="voice" className="flex items-center gap-2 px-4 py-3 rounded-lg font-medium transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#1e40af] data-[state=active]:to-[#0ea5e9] data-[state=active]:text-white data-[state=active]:shadow-lg">
             <Mic className="h-4 w-4" />
             Voice
           </TabsTrigger>
-          <TabsTrigger value="body-language" className="flex items-center gap-2">
+          <TabsTrigger value="body-language" className="flex items-center gap-2 px-4 py-3 rounded-lg font-medium transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#1e40af] data-[state=active]:to-[#0ea5e9] data-[state=active]:text-white data-[state=active]:shadow-lg">
             <Eye className="h-4 w-4" />
             Body Language
           </TabsTrigger>
-          <TabsTrigger value="content" className="flex items-center gap-2">
+          <TabsTrigger value="content" className="flex items-center gap-2 px-4 py-3 rounded-lg font-medium transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#1e40af] data-[state=active]:to-[#0ea5e9] data-[state=active]:text-white data-[state=active]:shadow-lg">
             <MessageSquare className="h-4 w-4" />
             Content
           </TabsTrigger>
-          <TabsTrigger value="trends" className="flex items-center gap-2">
+          <TabsTrigger value="trends" className="flex items-center gap-2 px-4 py-3 rounded-lg font-medium transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#1e40af] data-[state=active]:to-[#0ea5e9] data-[state=active]:text-white data-[state=active]:shadow-lg">
             <TrendingUp className="h-4 w-4" />
             Trends
           </TabsTrigger>
@@ -185,8 +190,8 @@ export default function EnhancedAnalysisTab() {
 
         {/* Voice Analysis */}
         <TabsContent value="voice" className="space-y-6">
-          <Card className="p-6">
-            <h3 className="text-xl font-semibold mb-4">Voice Quality Analysis</h3>
+          <Card className="p-8 bg-gradient-to-br from-white to-gray-50/50 border-0 shadow-xl">
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">Voice Quality Analysis</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -249,28 +254,36 @@ export default function EnhancedAnalysisTab() {
 
         {/* Body Language Analysis */}
         <TabsContent value="body-language" className="space-y-6">
-          <Card className="p-6">
-            <h3 className="text-xl font-semibold mb-4">Body Language & Presence</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <Eye className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-blue-700">{mockData.bodyLanguage.eyeContact}%</div>
-                <div className="text-sm text-blue-600">Eye Contact</div>
+          <Card className="p-8 bg-gradient-to-br from-white to-gray-50/50 border-0 shadow-xl">
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">Body Language & Presence</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-2xl border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+                <div className="h-12 w-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
+                  <Eye className="h-6 w-6 text-white" />
+                </div>
+                <div className="text-3xl font-bold bg-gradient-to-br from-blue-600 to-blue-700 bg-clip-text text-transparent">{mockData.bodyLanguage.eyeContact}%</div>
+                <div className="text-sm font-semibold text-blue-600 uppercase tracking-wide">Eye Contact</div>
               </div>
-              <div className="text-center p-4 bg-green-50 rounded-lg">
-                <Activity className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-green-700">{mockData.bodyLanguage.posture}%</div>
-                <div className="text-sm text-green-600">Posture</div>
+              <div className="text-center p-6 bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-2xl border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+                <div className="h-12 w-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
+                  <Activity className="h-6 w-6 text-white" />
+                </div>
+                <div className="text-3xl font-bold bg-gradient-to-br from-emerald-600 to-emerald-700 bg-clip-text text-transparent">{mockData.bodyLanguage.posture}%</div>
+                <div className="text-sm font-semibold text-emerald-600 uppercase tracking-wide">Posture</div>
               </div>
-              <div className="text-center p-4 bg-purple-50 rounded-lg">
-                <Award className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-purple-700">{mockData.bodyLanguage.gestures}%</div>
-                <div className="text-sm text-purple-600">Gestures</div>
+              <div className="text-center p-6 bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-2xl border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+                <div className="h-12 w-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
+                  <Award className="h-6 w-6 text-white" />
+                </div>
+                <div className="text-3xl font-bold bg-gradient-to-br from-purple-600 to-purple-700 bg-clip-text text-transparent">{mockData.bodyLanguage.gestures}%</div>
+                <div className="text-sm font-semibold text-purple-600 uppercase tracking-wide">Gestures</div>
               </div>
-              <div className="text-center p-4 bg-orange-50 rounded-lg">
-                <TrendingUp className="h-8 w-8 text-orange-600 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-orange-700">{mockData.bodyLanguage.confidence}%</div>
-                <div className="text-sm text-orange-600">Confidence</div>
+              <div className="text-center p-6 bg-gradient-to-br from-orange-50 to-orange-100/50 rounded-2xl border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+                <div className="h-12 w-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
+                  <TrendingUp className="h-6 w-6 text-white" />
+                </div>
+                <div className="text-3xl font-bold bg-gradient-to-br from-orange-600 to-orange-700 bg-clip-text text-transparent">{mockData.bodyLanguage.confidence}%</div>
+                <div className="text-sm font-semibold text-orange-600 uppercase tracking-wide">Confidence</div>
               </div>
             </div>
 
@@ -319,29 +332,32 @@ export default function EnhancedAnalysisTab() {
 
         {/* Content Analysis */}
         <TabsContent value="content" className="space-y-6">
-          <Card className="p-6">
-            <h3 className="text-xl font-semibold mb-4">Content Quality Analysis</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="space-y-4">
-                <div className="text-center p-4 border rounded-lg">
-                  <div className="text-3xl font-bold text-blue-600">{mockData.content.structure}%</div>
-                  <div className="text-sm text-gray-600">Structure & Flow</div>
-                  <Progress value={mockData.content.structure} className="mt-2" />
+          <Card className="p-8 bg-gradient-to-br from-white to-gray-50/50 border-0 shadow-xl">
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">Content Quality Analysis</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
+                <div className="h-12 w-12 bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                  <MessageSquare className="h-6 w-6 text-white" />
                 </div>
+                <div className="text-4xl font-bold bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] bg-clip-text text-transparent mb-2">{mockData.content.structure}%</div>
+                <div className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Structure & Flow</div>
+                <Progress value={mockData.content.structure} className="h-2" />
               </div>
-              <div className="space-y-4">
-                <div className="text-center p-4 border rounded-lg">
-                  <div className="text-3xl font-bold text-green-600">{mockData.content.engagement}%</div>
-                  <div className="text-sm text-gray-600">Audience Engagement</div>
-                  <Progress value={mockData.content.engagement} className="mt-2" />
+              <div className="text-center p-6 bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
+                <div className="h-12 w-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                  <Activity className="h-6 w-6 text-white" />
                 </div>
+                <div className="text-4xl font-bold bg-gradient-to-br from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-2">{mockData.content.engagement}%</div>
+                <div className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Audience Engagement</div>
+                <Progress value={mockData.content.engagement} className="h-2" />
               </div>
-              <div className="space-y-4">
-                <div className="text-center p-4 border rounded-lg">
-                  <div className="text-3xl font-bold text-purple-600">{mockData.content.purposeAlignment}%</div>
-                  <div className="text-sm text-gray-600">Purpose Alignment</div>
-                  <Progress value={mockData.content.purposeAlignment} className="mt-2" />
+              <div className="text-center p-6 bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
+                <div className="h-12 w-12 bg-gradient-to-br from-purple-500 to-violet-500 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                  <Target className="h-6 w-6 text-white" />
                 </div>
+                <div className="text-4xl font-bold bg-gradient-to-br from-purple-600 to-violet-600 bg-clip-text text-transparent mb-2">{mockData.content.purposeAlignment}%</div>
+                <div className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Purpose Alignment</div>
+                <Progress value={mockData.content.purposeAlignment} className="h-2" />
               </div>
             </div>
           </Card>
@@ -349,28 +365,31 @@ export default function EnhancedAnalysisTab() {
 
         {/* Trends Analysis */}
         <TabsContent value="trends" className="space-y-6">
-          <Card className="p-6">
-            <h3 className="text-xl font-semibold mb-4">Performance Trends</h3>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card className="p-8 bg-gradient-to-br from-white to-gray-50/50 border-0 shadow-xl">
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">Performance Trends</h3>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <div>
-                <h4 className="font-semibold mb-4">Category Performance</h4>
+                <h4 className="text-lg font-bold text-gray-800 mb-6">Category Performance</h4>
                 <div className="space-y-4">
                   {mockData.trends.categories.map((category, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-3 h-3 rounded-full ${category.trend === 'up' ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                        <span className="font-medium">{category.name}</span>
+                    <div key={index} className="flex items-center justify-between p-4 bg-gradient-to-r from-white to-gray-50 rounded-xl border border-gray-100 shadow-md hover:shadow-lg transition-all duration-300">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-4 h-4 rounded-full shadow-lg ${category.trend === 'up' ? 'bg-gradient-to-br from-emerald-400 to-emerald-600' : 'bg-gradient-to-br from-red-400 to-red-600'}`}></div>
+                        <span className="font-semibold text-gray-800">{category.name}</span>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-3">
                         {category.trend === 'up' ? (
-                          <TrendingUp className="h-4 w-4 text-green-500" />
+                          <div className="flex items-center gap-1 px-2 py-1 bg-emerald-100 rounded-lg">
+                            <TrendingUp className="h-4 w-4 text-emerald-600" />
+                            <span className="text-sm font-medium text-emerald-700">+{category.current - category.previous}</span>
+                          </div>
                         ) : (
-                          <TrendingDown className="h-4 w-4 text-red-500" />
+                          <div className="flex items-center gap-1 px-2 py-1 bg-red-100 rounded-lg">
+                            <TrendingDown className="h-4 w-4 text-red-600" />
+                            <span className="text-sm font-medium text-red-700">{category.current - category.previous}</span>
+                          </div>
                         )}
-                        <span className="font-medium">{category.current}%</span>
-                        <span className="text-sm text-gray-500">
-                          ({category.trend === 'up' ? '+' : ''}{category.current - category.previous})
-                        </span>
+                        <span className="text-lg font-bold text-gray-900">{category.current}%</span>
                       </div>
                     </div>
                   ))}
@@ -378,13 +397,13 @@ export default function EnhancedAnalysisTab() {
               </div>
               
               <div>
-                <h4 className="font-semibold mb-4">Weekly Progress</h4>
-                <div className="space-y-2">
+                <h4 className="text-lg font-bold text-gray-800 mb-6">Weekly Progress</h4>
+                <div className="space-y-3">
                   {mockData.trends.last7Days.map((score, index) => (
-                    <div key={index} className="flex items-center gap-3">
-                      <span className="text-sm w-16">Day {index + 1}</span>
-                      <Progress value={score} className="flex-1" />
-                      <span className="text-sm w-8">{score}%</span>
+                    <div key={index} className="flex items-center gap-4 p-3 bg-gradient-to-r from-white to-gray-50 rounded-xl border border-gray-100">
+                      <span className="text-sm font-semibold text-gray-700 w-16">Day {index + 1}</span>
+                      <Progress value={score} className="flex-1 h-3" />
+                      <span className="text-sm font-bold text-gray-900 w-12">{score}%</span>
                     </div>
                   ))}
                 </div>
