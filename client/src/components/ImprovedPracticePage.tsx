@@ -275,85 +275,122 @@ export default function ImprovedPracticePage() {
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
-      {/* Session Header */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <h3 className="font-semibold">Session Name</h3>
-            {!isEditingName ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsEditingName(true)}
-              >
-                <Edit3 className="h-4 w-4" />
-              </Button>
-            ) : (
-              <div className="flex gap-1">
-                <Button variant="ghost" size="sm" onClick={saveSessionName}>
-                  <Save className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsEditingName(false)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
+      {/* Enhanced Session Header */}
+      <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-200">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Session Name Section */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                <FileText className="h-4 w-4 text-blue-600" />
               </div>
-            )}
+              <div className="flex-1">
+                <label className="text-sm font-medium text-gray-700 mb-1 block">Session Name</label>
+                {!isEditingName ? (
+                  <div className="flex items-center gap-2 group">
+                    <h2 className="text-xl font-semibold text-gray-900">{sessionName}</h2>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setIsEditingName(true)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <Edit3 className="h-4 w-4 text-blue-600" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Input
+                      value={sessionName}
+                      onChange={(e) => setSessionName(e.target.value)}
+                      placeholder="Enter a memorable session name"
+                      onKeyPress={(e) => e.key === 'Enter' && saveSessionName()}
+                      className="text-lg font-semibold border-blue-300 focus:border-blue-500"
+                      autoFocus
+                    />
+                    <Button variant="ghost" size="sm" onClick={saveSessionName} className="text-green-600">
+                      <Save className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setIsEditingName(false)}
+                      className="text-gray-500"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-          {isEditingName ? (
-            <Input
-              value={sessionName}
-              onChange={(e) => setSessionName(e.target.value)}
-              placeholder="Enter session name"
-              onKeyPress={(e) => e.key === 'Enter' && saveSessionName()}
-            />
-          ) : (
-            <p className="text-lg font-medium">{sessionName}</p>
-          )}
-        </Card>
 
-        <Card className="p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <h3 className="font-semibold">Session Purpose</h3>
-            {!isEditingPurpose ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsEditingPurpose(true)}
-              >
-                <Edit3 className="h-4 w-4" />
-              </Button>
-            ) : (
-              <div className="flex gap-1">
-                <Button variant="ghost" size="sm" onClick={savePurpose}>
-                  <Save className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsEditingPurpose(false)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
+          {/* Session Purpose Section */}
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mt-6">
+                <Target className="h-4 w-4 text-purple-600" />
               </div>
-            )}
+              <div className="flex-1">
+                <label className="text-sm font-medium text-gray-700 mb-1 block">Session Purpose</label>
+                {!isEditingPurpose ? (
+                  <div className="group">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1">
+                        {sessionPurpose ? (
+                          <p className="text-gray-800 leading-relaxed">{sessionPurpose}</p>
+                        ) : (
+                          <p className="text-gray-500 italic">
+                            Add a purpose to get targeted AI feedback
+                          </p>
+                        )}
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setIsEditingPurpose(true)}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                      >
+                        <Edit3 className="h-4 w-4 text-purple-600" />
+                      </Button>
+                    </div>
+                    {!sessionPurpose && (
+                      <div className="mt-2 text-xs text-blue-600 bg-blue-50 px-3 py-2 rounded-lg border border-blue-200">
+                        💡 Tip: Adding a purpose helps AI provide specific, targeted coaching feedback
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Textarea
+                      value={sessionPurpose}
+                      onChange={(e) => setSessionPurpose(e.target.value)}
+                      placeholder="What's your goal? (e.g., 'Practice for senior marketing manager interview at tech startup' or 'Improve quarterly presentation delivery')"
+                      rows={3}
+                      className="border-purple-300 focus:border-purple-500 resize-none"
+                      autoFocus
+                    />
+                    <div className="flex items-center gap-2">
+                      <Button variant="ghost" size="sm" onClick={savePurpose} className="text-green-600">
+                        <Save className="h-4 w-4 mr-1" />
+                        Save
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setIsEditingPurpose(false)}
+                        className="text-gray-500"
+                      >
+                        <X className="h-4 w-4 mr-1" />
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-          {isEditingPurpose ? (
-            <Textarea
-              value={sessionPurpose}
-              onChange={(e) => setSessionPurpose(e.target.value)}
-              placeholder="What's the purpose of this session? (e.g., job interview practice, presentation skills)"
-              rows={3}
-            />
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              {sessionPurpose || "Click edit to add session purpose for targeted AI feedback"}
-            </p>
-          )}
-        </Card>
+        </div>
       </div>
 
       {/* Main Practice Area */}
