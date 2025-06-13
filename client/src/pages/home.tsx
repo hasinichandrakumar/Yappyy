@@ -28,6 +28,16 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20">
+        {/* Floating Background Bubbles */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-20 left-10 w-12 h-12 bubble-decoration opacity-30"></div>
+          <div className="absolute top-32 right-16 w-8 h-8 bubble-decoration opacity-40"></div>
+          <div className="absolute top-48 left-1/4 w-6 h-6 bubble-decoration opacity-50"></div>
+          <div className="absolute bottom-32 right-20 w-10 h-10 bubble-decoration opacity-35"></div>
+          <div className="absolute bottom-48 left-20 w-4 h-4 bubble-decoration opacity-60"></div>
+          <div className="absolute top-1/2 right-1/3 w-14 h-14 bubble-decoration opacity-25"></div>
+          <div className="absolute bottom-20 left-1/3 w-7 h-7 bubble-decoration opacity-45"></div>
+        </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-5xl md:text-7xl font-display text-transparent bg-clip-text bg-gradient-to-br from-[#2563eb] to-[#22d3ee] mb-6">

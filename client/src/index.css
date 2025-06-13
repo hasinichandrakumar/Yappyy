@@ -688,7 +688,7 @@
     }
   }
 
-  /* Bubble-like decorative elements */
+  /* Bubble-like decorative elements with floating animation */
   .bubble-decoration {
     border-radius: 50%;
     background: linear-gradient(135deg, rgba(37, 99, 235, 0.6), rgba(34, 211, 238, 0.4));
@@ -697,6 +697,53 @@
       inset 0 2px 0 rgba(255, 255, 255, 0.4),
       inset 0 -2px 0 rgba(0, 0, 0, 0.1);
     backdrop-filter: blur(2px);
+    animation: float-bubble 6s ease-in-out infinite;
+  }
+
+  /* Floating bubble animation */
+  @keyframes float-bubble {
+    0%, 100% {
+      transform: translateY(0px) translateX(0px) scale(1);
+      opacity: 0.6;
+    }
+    25% {
+      transform: translateY(-10px) translateX(5px) scale(1.05);
+      opacity: 0.8;
+    }
+    50% {
+      transform: translateY(-5px) translateX(-8px) scale(0.95);
+      opacity: 0.7;
+    }
+    75% {
+      transform: translateY(8px) translateX(3px) scale(1.02);
+      opacity: 0.9;
+    }
+  }
+
+  /* Delayed animations for different bubbles */
+  .bubble-decoration:nth-child(1) {
+    animation-delay: 0s;
+    animation-duration: 7s;
+  }
+
+  .bubble-decoration:nth-child(2) {
+    animation-delay: 1.5s;
+    animation-duration: 5.5s;
+  }
+
+  .bubble-decoration:nth-child(3) {
+    animation-delay: 3s;
+    animation-duration: 6.5s;
+  }
+
+  .bubble-decoration:nth-child(4) {
+    animation-delay: 4.5s;
+    animation-duration: 8s;
+  }
+
+  .bubble-decoration:nth-child(5) {
+    animation-delay: 2s;
+    animation-duration: 9s;
   }
 
   /* Gentle pulse animation for 100% text */
