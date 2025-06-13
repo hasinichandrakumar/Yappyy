@@ -765,233 +765,297 @@ export default function ImprovedPracticePage() {
 
       {/* Comprehensive Session Feedback Modal */}
       {showTranscript && sessionFeedback && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="max-w-6xl w-full max-h-[90vh] overflow-y-auto">
-            <Card className="m-4">
-              <div className="p-6">
-                <div className="flex justify-between items-center mb-6">
-                  <div>
-                    <h2 className="text-3xl font-bold">Session Analysis</h2>
-                    <p className="text-gray-600">{sessionName}</p>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="max-w-5xl w-full max-h-[90vh] overflow-y-auto">
+            <Card className="border-0 shadow-2xl bg-gradient-to-br from-white to-gray-50">
+              <div className="p-8">
+                <div className="flex justify-between items-start mb-8">
+                  <div className="space-y-2">
+                    <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                      Session Complete!
+                    </h2>
+                    <p className="text-lg font-medium text-gray-700">{sessionName}</p>
+                    <p className="text-sm text-gray-500">Your personalized feedback is ready</p>
                   </div>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowTranscript(false)}
+                    className="rounded-full h-10 w-10 hover:bg-gray-100"
                   >
-                    <X className="h-4 w-4" />
+                    <X className="h-5 w-5" />
                   </Button>
                 </div>
 
                 {/* Overall Score & Badges */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                  <Card className="p-6 bg-gradient-to-r from-blue-50 to-purple-50">
-                    <h3 className="text-xl font-bold mb-4">Overall Performance</h3>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                  <Card className="p-6 bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600 text-white border-0 shadow-lg">
                     <div className="text-center">
-                      <div className="text-6xl font-bold text-blue-600 mb-2">{sessionFeedback.overallScore}</div>
-                      <div className="text-gray-600">Out of 100</div>
-                      <div className="mt-4 text-sm text-gray-700">
-                        {sessionFeedback.overallScore >= 90 ? "Excellent!" : 
-                         sessionFeedback.overallScore >= 75 ? "Great job!" :
-                         sessionFeedback.overallScore >= 60 ? "Good progress!" : "Keep practicing!"}
+                      <div className="text-5xl font-bold mb-2">{sessionFeedback.overallScore}</div>
+                      <div className="text-blue-100 mb-3">Overall Score</div>
+                      <div className="text-sm bg-white/20 rounded-full px-3 py-1 inline-block">
+                        {sessionFeedback.overallScore >= 90 ? "🎉 Excellent!" : 
+                         sessionFeedback.overallScore >= 75 ? "✨ Great job!" :
+                         sessionFeedback.overallScore >= 60 ? "📈 Good progress!" : "💪 Keep practicing!"}
                       </div>
                     </div>
                   </Card>
 
-                  <Card className="p-6">
-                    <h3 className="text-xl font-bold mb-4">Badges Earned</h3>
+                  <Card className="lg:col-span-2 p-6 bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Trophy className="h-6 w-6 text-amber-600" />
+                      <h3 className="text-xl font-bold text-amber-800">Achievements Unlocked</h3>
+                    </div>
                     {earnedBadges.length > 0 ? (
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                         {earnedBadges.map((badge, index) => (
-                          <div key={index} className="flex items-center gap-2 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-                            <Trophy className="h-5 w-5 text-yellow-600" />
-                            <span className="text-sm font-medium">{badge}</span>
+                          <div key={index} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-amber-200 shadow-sm">
+                            <div className="w-8 h-8 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full flex items-center justify-center">
+                              <Trophy className="h-4 w-4 text-white" />
+                            </div>
+                            <span className="font-medium text-gray-800">{badge}</span>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <p className="text-gray-500 text-center py-4">No badges earned this session. Keep practicing!</p>
+                      <div className="text-center py-8">
+                        <Trophy className="h-12 w-12 text-amber-300 mx-auto mb-3" />
+                        <p className="text-amber-700 font-medium">Ready to earn your first badge?</p>
+                        <p className="text-amber-600 text-sm">Keep practicing to unlock achievements!</p>
+                      </div>
                     )}
                   </Card>
                 </div>
 
                 {/* Key Statistics */}
-                <Card className="p-6 mb-6">
-                  <h3 className="text-xl font-bold mb-4">Key Statistics</h3>
+                <Card className="p-6 mb-6 bg-white border border-slate-200 shadow-sm">
+                  <h3 className="text-xl font-bold mb-6 text-slate-800">Session Overview</h3>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="text-center p-4 bg-blue-50 rounded-lg">
-                      <div className="text-2xl font-bold text-blue-600">{sessionFeedback.keyStatistics.totalWords}</div>
-                      <div className="text-sm text-gray-600">Total Words</div>
+                    <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
+                      <div className="text-3xl font-bold text-blue-700 mb-1">{sessionFeedback.keyStatistics.totalWords}</div>
+                      <div className="text-sm font-medium text-blue-600">Words Spoken</div>
                     </div>
-                    <div className="text-center p-4 bg-green-50 rounded-lg">
-                      <div className="text-2xl font-bold text-green-600">{sessionFeedback.keyStatistics.averageWPM}</div>
-                      <div className="text-sm text-gray-600">Words/Min</div>
+                    <div className="text-center p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl border border-emerald-200">
+                      <div className="text-3xl font-bold text-emerald-700 mb-1">{sessionFeedback.keyStatistics.averageWPM}</div>
+                      <div className="text-sm font-medium text-emerald-600">Words/Minute</div>
                     </div>
-                    <div className="text-center p-4 bg-purple-50 rounded-lg">
-                      <div className="text-2xl font-bold text-purple-600">{sessionFeedback.keyStatistics.sessionLength}</div>
-                      <div className="text-sm text-gray-600">Duration</div>
+                    <div className="text-center p-4 bg-gradient-to-br from-violet-50 to-violet-100 rounded-xl border border-violet-200">
+                      <div className="text-3xl font-bold text-violet-700 mb-1">{sessionFeedback.keyStatistics.sessionLength}</div>
+                      <div className="text-sm font-medium text-violet-600">Duration</div>
                     </div>
-                    <div className="text-center p-4 bg-orange-50 rounded-lg">
-                      <div className="text-2xl font-bold text-orange-600">{sessionFeedback.keyStatistics.fillerWordPercentage}%</div>
-                      <div className="text-sm text-gray-600">Filler Words</div>
+                    <div className="text-center p-4 bg-gradient-to-br from-rose-50 to-rose-100 rounded-xl border border-rose-200">
+                      <div className="text-3xl font-bold text-rose-700 mb-1">{sessionFeedback.keyStatistics.fillerWordPercentage}%</div>
+                      <div className="text-sm font-medium text-rose-600">Filler Words</div>
                     </div>
                   </div>
                 </Card>
 
                 {/* Detailed Analysis */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                  {/* Content Analysis */}
-                  <Card className="p-6">
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <FileText className="h-4 w-4 text-blue-600" />
-                      </div>
-                      <h3 className="text-lg font-bold">Content Analysis</h3>
-                      <div className="ml-auto text-lg font-bold text-blue-600">{sessionFeedback.contentAnalysis.score}/100</div>
-                    </div>
-                    
-                    <div className="space-y-4">
-                      <div>
-                        <h4 className="font-semibold text-green-700 mb-2">Strengths</h4>
-                        <ul className="text-sm space-y-1">
-                          {sessionFeedback.contentAnalysis.strengths.map((strength: string, index: number) => (
-                            <li key={index} className="text-gray-700">• {strength}</li>
-                          ))}
-                        </ul>
-                      </div>
-                      
-                      <div>
-                        <h4 className="font-semibold text-orange-700 mb-2">Areas for Improvement</h4>
-                        <ul className="text-sm space-y-1">
-                          {sessionFeedback.contentAnalysis.improvements.map((improvement: string, index: number) => (
-                            <li key={index} className="text-gray-700">• {improvement}</li>
-                          ))}
-                        </ul>
-                      </div>
-
-                      <div className="p-3 bg-gray-50 rounded-lg">
-                        <h4 className="font-semibold text-gray-700 mb-1">Purpose Alignment</h4>
-                        <p className="text-sm text-gray-600">{sessionFeedback.contentAnalysis.purposeAlignment}</p>
-                      </div>
-                    </div>
-                  </Card>
-
-                  {/* Voice Analysis */}
-                  <Card className="p-6">
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                        <Mic className="h-4 w-4 text-green-600" />
-                      </div>
-                      <h3 className="text-lg font-bold">Voice Analysis</h3>
-                      <div className="ml-auto text-lg font-bold text-green-600">{sessionFeedback.voiceAnalysis.score}/100</div>
-                    </div>
-                    
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="text-center p-2 bg-gray-50 rounded">
-                          <div className="font-bold">{Math.round(sessionFeedback.voiceAnalysis.pace)}</div>
-                          <div className="text-xs text-gray-600">WPM</div>
+                <div className="space-y-6 mb-8">
+                  <h3 className="text-2xl font-bold text-slate-800 text-center">Detailed Analysis</h3>
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Content Analysis */}
+                    <Card className="p-6 bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-center gap-3 mb-5">
+                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                          <FileText className="h-5 w-5 text-white" />
                         </div>
-                        <div className="text-center p-2 bg-gray-50 rounded">
-                          <div className="font-bold">{Math.round(sessionFeedback.voiceAnalysis.volume)}%</div>
-                          <div className="text-xs text-gray-600">Volume</div>
+                        <div className="flex-1">
+                          <h3 className="text-lg font-bold text-slate-800">Content</h3>
+                          <div className="text-2xl font-bold text-blue-600">{sessionFeedback.contentAnalysis.score}/100</div>
                         </div>
                       </div>
                       
-                      <div>
-                        <h4 className="font-semibold text-blue-700 mb-2">Recommendations</h4>
-                        <ul className="text-sm space-y-1">
-                          {sessionFeedback.voiceAnalysis.recommendations.map((rec: string, index: number) => (
-                            <li key={index} className="text-gray-700">• {rec}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  </Card>
+                      <div className="space-y-4">
+                        <div>
+                          <h4 className="font-semibold text-emerald-700 mb-2 flex items-center gap-2">
+                            <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
+                            Strengths
+                          </h4>
+                          <div className="space-y-1">
+                            {sessionFeedback.contentAnalysis.strengths.slice(0, 2).map((strength: string, index: number) => (
+                              <div key={index} className="text-sm text-slate-700 bg-emerald-50 p-2 rounded-lg border-l-3 border-emerald-400">
+                                {strength}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h4 className="font-semibold text-amber-700 mb-2 flex items-center gap-2">
+                            <span className="w-2 h-2 bg-amber-500 rounded-full"></span>
+                            Improve
+                          </h4>
+                          <div className="space-y-1">
+                            {sessionFeedback.contentAnalysis.improvements.slice(0, 2).map((improvement: string, index: number) => (
+                              <div key={index} className="text-sm text-slate-700 bg-amber-50 p-2 rounded-lg border-l-3 border-amber-400">
+                                {improvement}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
 
-                  {/* Body Language Analysis */}
-                  <Card className="p-6">
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                        <Eye className="h-4 w-4 text-purple-600" />
+                        <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                          <h4 className="font-semibold text-slate-700 mb-1 text-sm">Purpose Alignment</h4>
+                          <p className="text-xs text-slate-600">{sessionFeedback.contentAnalysis.purposeAlignment}</p>
+                        </div>
                       </div>
-                      <h3 className="text-lg font-bold">Body Language</h3>
-                      <div className="ml-auto text-lg font-bold text-purple-600">{sessionFeedback.bodyLanguageAnalysis.score}/100</div>
-                    </div>
-                    
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-sm">Eye Contact:</span>
-                          <span className="text-sm font-medium">{sessionFeedback.bodyLanguageAnalysis.eyeContact}</span>
+                    </Card>
+
+                    {/* Voice Analysis */}
+                    <Card className="p-6 bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-center gap-3 mb-5">
+                        <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center">
+                          <Mic className="h-5 w-5 text-white" />
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm">Gestures:</span>
-                          <span className="text-sm font-medium">{sessionFeedback.bodyLanguageAnalysis.gestures}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm">Posture:</span>
-                          <span className="text-sm font-medium">{sessionFeedback.bodyLanguageAnalysis.posture}</span>
+                        <div className="flex-1">
+                          <h3 className="text-lg font-bold text-slate-800">Voice</h3>
+                          <div className="text-2xl font-bold text-emerald-600">{sessionFeedback.voiceAnalysis.score}/100</div>
                         </div>
                       </div>
                       
-                      <div>
-                        <h4 className="font-semibold text-purple-700 mb-2">Tips</h4>
-                        <ul className="text-sm space-y-1">
-                          {sessionFeedback.bodyLanguageAnalysis.recommendations.map((tip: string, index: number) => (
-                            <li key={index} className="text-gray-700">• {tip}</li>
-                          ))}
-                        </ul>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="text-center p-3 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200">
+                            <div className="text-xl font-bold text-emerald-700">{Math.round(sessionFeedback.voiceAnalysis.pace)}</div>
+                            <div className="text-xs font-medium text-emerald-600">WPM</div>
+                          </div>
+                          <div className="text-center p-3 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200">
+                            <div className="text-xl font-bold text-emerald-700">{Math.round(sessionFeedback.voiceAnalysis.volume)}%</div>
+                            <div className="text-xs font-medium text-emerald-600">Volume</div>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h4 className="font-semibold text-blue-700 mb-2 flex items-center gap-2">
+                            <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                            Tips
+                          </h4>
+                          <div className="space-y-1">
+                            {sessionFeedback.voiceAnalysis.recommendations.slice(0, 2).map((rec: string, index: number) => (
+                              <div key={index} className="text-sm text-slate-700 bg-blue-50 p-2 rounded-lg border-l-3 border-blue-400">
+                                {rec}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </Card>
+                    </Card>
+
+                    {/* Body Language Analysis */}
+                    <Card className="p-6 bg-white border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-center gap-3 mb-5">
+                        <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-violet-600 rounded-xl flex items-center justify-center">
+                          <Eye className="h-5 w-5 text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-lg font-bold text-slate-800">Body Language</h3>
+                          <div className="text-2xl font-bold text-violet-600">{sessionFeedback.bodyLanguageAnalysis.score}/100</div>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center p-2 bg-violet-50 rounded-lg">
+                            <span className="text-sm font-medium text-slate-700">Eye Contact:</span>
+                            <span className="text-sm font-bold text-violet-700">{sessionFeedback.bodyLanguageAnalysis.eyeContact}</span>
+                          </div>
+                          <div className="flex justify-between items-center p-2 bg-violet-50 rounded-lg">
+                            <span className="text-sm font-medium text-slate-700">Gestures:</span>
+                            <span className="text-sm font-bold text-violet-700">{sessionFeedback.bodyLanguageAnalysis.gestures}</span>
+                          </div>
+                          <div className="flex justify-between items-center p-2 bg-violet-50 rounded-lg">
+                            <span className="text-sm font-medium text-slate-700">Posture:</span>
+                            <span className="text-sm font-bold text-violet-700">{sessionFeedback.bodyLanguageAnalysis.posture}</span>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h4 className="font-semibold text-violet-700 mb-2 flex items-center gap-2">
+                            <span className="w-2 h-2 bg-violet-500 rounded-full"></span>
+                            Suggestions
+                          </h4>
+                          <div className="space-y-1">
+                            {sessionFeedback.bodyLanguageAnalysis.recommendations.slice(0, 2).map((tip: string, index: number) => (
+                              <div key={index} className="text-sm text-slate-700 bg-violet-50 p-2 rounded-lg border-l-3 border-violet-400">
+                                {tip}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
                 </div>
 
                 {/* AI Coaching Insights */}
-                <Card className="p-6 mb-6">
-                  <h3 className="text-xl font-bold mb-4">AI Coach Insights</h3>
-                  <div className="space-y-3">
+                <Card className="p-6 mb-6 bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-200">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-lg flex items-center justify-center">
+                      <Target className="h-4 w-4 text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-800">AI Coach Insights</h3>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {sessionFeedback.coachingInsights.map((insight: string, index: number) => (
-                      <div key={index} className="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
-                        <p className="text-gray-700">{insight}</p>
+                      <div key={index} className="p-4 bg-white rounded-xl border border-indigo-200 shadow-sm">
+                        <div className="flex items-start gap-3">
+                          <div className="w-6 h-6 bg-indigo-500 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+                            {index + 1}
+                          </div>
+                          <p className="text-sm text-slate-700 leading-relaxed">{insight}</p>
+                        </div>
                       </div>
                     ))}
                   </div>
                 </Card>
 
                 {/* Next Steps */}
-                <Card className="p-6 mb-6">
-                  <h3 className="text-xl font-bold mb-4">Recommended Next Steps</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <Card className="p-6 mb-6 bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-green-600 rounded-lg flex items-center justify-center">
+                      <Target className="h-4 w-4 text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-800">Your Action Plan</h3>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {sessionFeedback.nextSteps.map((step: string, index: number) => (
-                      <div key={index} className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
-                        <div className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                      <div key={index} className="flex items-center gap-4 p-4 bg-white rounded-xl border border-emerald-200 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="w-8 h-8 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
                           {index + 1}
                         </div>
-                        <span className="text-sm text-gray-700">{step}</span>
+                        <span className="text-sm text-slate-700 font-medium">{step}</span>
                       </div>
                     ))}
                   </div>
                 </Card>
 
                 {/* Transcript */}
-                <Card className="p-6 mb-6">
-                  <h3 className="text-xl font-bold mb-4">Session Transcript</h3>
-                  <div className="border rounded-lg p-4 bg-gray-50 max-h-64 overflow-y-auto">
+                <Card className="p-6 mb-8 bg-slate-50 border border-slate-200">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-8 h-8 bg-gradient-to-br from-slate-500 to-slate-600 rounded-lg flex items-center justify-center">
+                      <FileText className="h-4 w-4 text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-800">What You Said</h3>
+                  </div>
+                  <div className="bg-white border border-slate-200 rounded-xl p-6 max-h-64 overflow-y-auto shadow-sm">
                     {transcript ? (
-                      <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">
+                      <p className="text-slate-700 leading-relaxed whitespace-pre-wrap text-sm">
                         {transcript}
                       </p>
                     ) : (
-                      <p className="text-gray-500 italic">
-                        No speech was detected during this session. Make sure your microphone is enabled and try speaking clearly.
-                      </p>
+                      <div className="text-center py-8">
+                        <Mic className="h-12 w-12 text-slate-300 mx-auto mb-3" />
+                        <p className="text-slate-500 font-medium">No speech detected</p>
+                        <p className="text-slate-400 text-sm mt-1">Make sure your microphone is enabled and speak clearly</p>
+                      </div>
                     )}
                   </div>
                 </Card>
 
                 {/* Action Buttons */}
-                <div className="flex justify-end gap-3">
+                <div className="flex flex-col sm:flex-row justify-center gap-4">
                   <Button
                     variant="outline"
                     onClick={() => {
@@ -1002,7 +1066,9 @@ export default function ImprovedPracticePage() {
                       });
                     }}
                     disabled={!transcript}
+                    className="flex items-center gap-2 px-6 py-3 border-slate-300 text-slate-700 hover:bg-slate-50 disabled:opacity-50"
                   >
+                    <FileText className="h-4 w-4" />
                     Copy Transcript
                   </Button>
                   <Button
@@ -1032,7 +1098,9 @@ ${transcript}`;
                         description: "Complete session report copied to clipboard",
                       });
                     }}
+                    className="flex items-center gap-2 px-6 py-3 border-indigo-300 text-indigo-700 hover:bg-indigo-50"
                   >
+                    <Target className="h-4 w-4" />
                     Copy Full Report
                   </Button>
                   <Button
@@ -1059,7 +1127,9 @@ ${transcript}`;
                         description: "Ready for your next practice session",
                       });
                     }}
+                    className="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
                   >
+                    <Play className="h-4 w-4" />
                     Start New Session
                   </Button>
                 </div>
