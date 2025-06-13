@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart3, Brain, Star, Eye, Volume2, FileText, Trophy } from "lucide-react";
-import EnhancedPracticeHubClean from "@/components/EnhancedPracticeHubClean";
+import ImprovedPracticePage from "@/components/ImprovedPracticePage";
 import ComprehensiveAICoach from "@/components/ComprehensiveAICoach";
 import PersonalizedSpeechDNA from "@/components/PersonalizedSpeechDNA";
 import ComprehensiveSessionAnalysis from "@/components/ComprehensiveSessionAnalysis";
@@ -56,7 +56,7 @@ export default function Dashboard() {
           </TabsList>
 
           <TabsContent value="practice" className="space-y-8 pb-16">
-            <EnhancedPracticeHubClean />
+            <ImprovedPracticePage />
           </TabsContent>
 
           <TabsContent value="ai-coach" className="space-y-6">
