@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useToast } from '@/hooks/use-toast';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -18,6 +19,7 @@ import {
   Activity,
   Zap,
   CheckCircle,
+  Trash2,
   AlertTriangle,
   Info,
   Filter,
@@ -36,6 +38,8 @@ export default function EnhancedAnalysisTab() {
   const [selectedSession, setSelectedSession] = useState('all');
   const [aiInsights, setAiInsights] = useState<any>(null);
   const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Fetch practice sessions
   const { data: sessions = [], isLoading } = useQuery({
@@ -43,6 +47,43 @@ export default function EnhancedAnalysisTab() {
   });
 
   const typedSessions = sessions as any[];
+
+  // Delete session mutation
+  const deleteSessionMutation = useMutation({
+    mutationFn: async (sessionId: number) => {
+      const response = await fetch(`/api/practice-sessions/${sessionId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete session');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/practice-sessions'] });
+      toast({
+        title: "Session deleted",
+        description: "Practice session has been successfully removed.",
+      });
+      // Reset selected session if it was deleted
+      if (selectedSession !== 'all') {
+        setSelectedSession('all');
+      }
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete session. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDeleteSession = () => {
+    if (selectedSession !== 'all') {
+      deleteSessionMutation.mutate(parseInt(selectedSession));
+    }
+  };
 
   // Generate AI insights for selected session
   const generateInsights = async () => {

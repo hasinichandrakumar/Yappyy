@@ -159,6 +159,12 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(practiceSessions.createdAt));
   }
 
+  async deletePracticeSession(id: number): Promise<void> {
+    await db
+      .delete(practiceSessions)
+      .where(eq(practiceSessions.id, id));
+  }
+
   // Coaching feedback operations
   async addCoachingFeedback(feedbackData: InsertCoachingFeedback): Promise<CoachingFeedback> {
     const [feedback] = await db

@@ -708,8 +708,6 @@ export default function ImprovedPracticePage() {
           facialExpression: Math.round(sessionMetrics.bodyLanguageScore)
         },
         
-        persuasivenessScore: sessionFeedback?.overallScore || Math.round(sessionMetrics.bodyLanguageScore * 0.8),
-        
         // Live feedback data
         liveFeedback: liveFeedback.map(item => ({
           timestamp: item.timestamp,
