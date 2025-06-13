@@ -1229,6 +1229,11 @@ Respond with detailed analysis in JSON format:
   // AI Club Coaching endpoint
   app.post("/api/club-coaching", requireAuth, generateClubCoaching);
 
+  // World-class AI coaching system
+  app.post('/api/world-class-coaching', demoAuth, generateWorldClassCoaching);
+  app.post('/api/live-empathic-feedback', demoAuth, generateLiveEmpathicFeedback);
+  app.post('/api/update-speaking-profile', demoAuth, updateUserSpeakingProfile);
+
   const httpServer = createServer(app);
   return httpServer;
 }

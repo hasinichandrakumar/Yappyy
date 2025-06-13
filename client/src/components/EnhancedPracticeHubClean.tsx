@@ -247,7 +247,7 @@ export default function EnhancedPracticeHubClean() {
         purpose: sessionData.purpose,
         transcript: sessionData.transcript,
         duration: sessionData.duration,
-        previousSessions: practiceSessions.slice(-3).map((session: any, index: number) => ({
+        previousSessions: (practiceSessions as any[])?.slice(-3).map((session: any, index: number) => ({
           sessionNumber: index + 1,
           date: new Date(session.createdAt).toLocaleDateString(),
           purpose: session.purpose || 'General Practice',
