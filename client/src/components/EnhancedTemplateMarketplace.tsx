@@ -1004,70 +1004,108 @@ Visit: https://yappyy.com
   };
 
   const renderCreateTemplate = () => (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Create Custom Template</h2>
-        <Button onClick={() => setShowCreateTemplate(false)} variant="outline">
-          Back to Templates
+        <div>
+          <h2 className="text-3xl font-bold">Create Your Own Template</h2>
+          <p className="text-gray-600 mt-2">Build a custom speech template from scratch</p>
+        </div>
+        <Button 
+          onClick={() => setShowCreateTemplate(false)} 
+          variant="outline"
+          size="lg"
+          className="text-base"
+        >
+          ← Back to Templates
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-4">
-          <div>
-            <label className="text-sm font-medium">Template Title</label>
-            <Input
-              value={customTemplate.title}
-              onChange={(e) => setCustomTemplate(prev => ({ ...prev, title: e.target.value }))}
-              placeholder="Enter template title"
-            />
-          </div>
-          
-          <div>
-            <label className="text-sm font-medium">Category</label>
-            <select 
-              className="w-full p-2 border rounded-md"
-              value={customTemplate.category}
-              onChange={(e) => setCustomTemplate(prev => ({ ...prev, category: e.target.value }))}
-            >
-              {templateCategories.slice(1).map(cat => (
-                <option key={cat.id} value={cat.id}>{cat.label}</option>
-              ))}
-            </select>
-          </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="space-y-6">
+          <Card className="p-6">
+            <h3 className="text-lg font-semibold mb-4">Template Details</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="text-base font-medium block mb-2">What's your speech about?</label>
+                <Input
+                  value={customTemplate.title}
+                  onChange={(e) => setCustomTemplate(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="e.g., My Product Launch Pitch"
+                  className="text-base"
+                />
+              </div>
+              
+              <div>
+                <label className="text-base font-medium block mb-2">What type of speech is this?</label>
+                <select 
+                  className="w-full p-3 border rounded-md text-base"
+                  value={customTemplate.category}
+                  onChange={(e) => setCustomTemplate(prev => ({ ...prev, category: e.target.value }))}
+                >
+                  {templateCategories.slice(1).map(cat => (
+                    <option key={cat.id} value={cat.id}>{cat.label}</option>
+                  ))}
+                </select>
+              </div>
 
-          <div>
-            <label className="text-sm font-medium">Description</label>
-            <Textarea
-              value={customTemplate.description}
-              onChange={(e) => setCustomTemplate(prev => ({ ...prev, description: e.target.value }))}
-              placeholder="Describe your template's purpose and audience"
-              rows={3}
-            />
-          </div>
+              <div>
+                <label className="text-base font-medium block mb-2">Tell us more about this speech</label>
+                <Textarea
+                  value={customTemplate.description}
+                  onChange={(e) => setCustomTemplate(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="What's the purpose? Who's your audience? What should they feel or do after hearing your speech?"
+                  rows={4}
+                  className="text-base"
+                />
+              </div>
+            </div>
+          </Card>
         </div>
 
-        <div className="space-y-4">
-          <div>
-            <label className="text-sm font-medium">Template Content</label>
-            <Textarea
-              value={customTemplate.content}
-              onChange={(e) => setCustomTemplate(prev => ({ ...prev, content: e.target.value }))}
-              placeholder="Enter your template structure and content..."
-              className="min-h-[200px] font-mono text-sm"
-            />
-          </div>
-          
-          <div className="flex gap-2">
-            <Button className="flex-1">
-              <Save className="h-4 w-4 mr-2" />
-              Save Template
-            </Button>
-            <Button variant="outline">
-              <Sparkles className="h-4 w-4 mr-2" />
-              AI Enhance
-            </Button>
-          </div>
+        <div className="space-y-6">
+          <Card className="p-6">
+            <h3 className="text-lg font-semibold mb-4">Write Your Speech</h3>
+            <div className="space-y-4">
+              <Textarea
+                value={customTemplate.content}
+                onChange={(e) => setCustomTemplate(prev => ({ ...prev, content: e.target.value }))}
+                placeholder="Start writing your speech here...
+
+Tips:
+- Begin with a strong opening
+- Organize your main points clearly  
+- End with a memorable conclusion
+- Use [brackets] for parts you'll customize later"
+                className="min-h-[300px] text-base"
+              />
+              
+              <div className="flex gap-3">
+                <Button 
+                  className="flex-1 text-base font-medium"
+                  size="lg"
+                  disabled={!customTemplate.title || !customTemplate.content}
+                >
+                  <Save className="h-5 w-5 mr-2" />
+                  Save My Template
+                </Button>
+                <Button 
+                  variant="outline"
+                  size="lg"
+                  className="text-base font-medium"
+                  disabled={!customTemplate.content}
+                >
+                  <Sparkles className="h-5 w-5 mr-2" />
+                  AI Help
+                </Button>
+              </div>
+              
+              {customTemplate.title && customTemplate.content && (
+                <p className="text-sm text-green-600 text-center">
+                  Ready to save! Your template will be available in your personal collection.
+                </p>
+              )}
+            </div>
+          </Card>
         </div>
       </div>
     </div>
@@ -1087,11 +1125,15 @@ Visit: https://yappyy.com
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Speech Templates</h1>
-          <p className="text-gray-600">Choose from 50+ professional templates</p>
+          <p className="text-gray-600">Choose from 50+ ready-to-use speech templates</p>
         </div>
-        <Button onClick={() => setShowCreateTemplate(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Create Template
+        <Button 
+          onClick={() => setShowCreateTemplate(true)}
+          size="lg"
+          className="text-base font-medium bg-blue-600 hover:bg-blue-700"
+        >
+          <Plus className="h-5 w-5 mr-2" />
+          Create Your Own
         </Button>
       </div>
 
