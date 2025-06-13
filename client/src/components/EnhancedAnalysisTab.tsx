@@ -1,11 +1,12 @@
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { apiRequest } from '@/lib/queryClient';
 import { 
   BarChart3, 
   TrendingUp, 
@@ -22,12 +23,14 @@ import {
   CheckCircle,
   AlertTriangle,
   Info,
-  Filter
+  Filter,
+  Loader2
 } from 'lucide-react';
 
 export default function EnhancedAnalysisTab() {
   const [selectedTimeFrame, setSelectedTimeFrame] = useState('week');
   const [selectedSession, setSelectedSession] = useState('all');
+  const [aiInsights, setAiInsights] = useState<any>(null);
 
   // Fetch practice sessions for the session selector
   const { data: sessions = [] } = useQuery({
@@ -36,48 +39,63 @@ export default function EnhancedAnalysisTab() {
 
   // Type guard for sessions
   const typedSessions = Array.isArray(sessions) ? sessions : [];
-  
-  // Mock data for demonstration - in real app this would come from the database
-  const mockData = {
-    overall: {
-      totalSessions: 24,
-      totalMinutes: 180,
-      averageScore: 82,
-      improvement: 15,
-      weeklyGoal: 120,
-      weeklyProgress: 75
+
+  // Fetch user data for AI insights
+  const { data: user } = useQuery({
+    queryKey: ['/api/auth/user'],
+  });
+
+  // Generate session insights
+  const { mutate: generateInsights, isPending: isGeneratingInsights } = useMutation({
+    mutationFn: async ({ sessionId, analysisType }: { sessionId?: string; analysisType: string }) => {
+      return apiRequest('/api/openai/session-insights', 'POST', {
+        sessionId: sessionId === 'all' ? null : sessionId,
+        userId: (user as any)?.id || 'demo-user-123',
+        analysisType: sessionId === 'all' ? 'all' : 'single'
+      });
     },
-    voice: {
-      averageWPM: 145,
-      optimalRange: [120, 180],
-      clarity: 88,
-      volume: 75,
-      fillerWords: 12,
-      improvement: 8
+    onSuccess: (data: any) => {
+      setAiInsights(data.analysis);
     },
-    bodyLanguage: {
-      eyeContact: 76,
-      posture: 82,
-      gestures: 71,
-      confidence: 79,
-      improvement: 12
-    },
-    content: {
-      structure: 85,
-      engagement: 78,
-      purposeAlignment: 92,
-      improvement: 5
-    },
-    trends: {
-      last7Days: [68, 72, 75, 78, 80, 82, 85],
-      categories: [
-        { name: 'Voice Quality', current: 85, previous: 78, trend: 'up' },
-        { name: 'Body Language', current: 77, previous: 82, trend: 'down' },
-        { name: 'Content Quality', current: 88, previous: 85, trend: 'up' },
-        { name: 'Confidence', current: 79, previous: 74, trend: 'up' }
-      ]
+    onError: (error) => {
+      console.error('Error generating insights:', error);
     }
+  });
+
+  // Generate insights when session selection changes
+  useEffect(() => {
+    if ((user as any)?.id && typedSessions.length > 0) {
+      generateInsights({
+        sessionId: selectedSession,
+        analysisType: selectedSession === 'all' ? 'all' : 'single'
+      });
+    }
+  }, [selectedSession, (user as any)?.id, typedSessions.length]);
+  
+  // Calculate real data from sessions
+  const calculateSessionData = () => {
+    if (!typedSessions.length) {
+      return {
+        totalSessions: 0,
+        totalMinutes: 0,
+        averageScore: 0,
+        recentSessions: []
+      };
+    }
+
+    const totalMinutes = typedSessions.reduce((sum: number, session: any) => sum + (session.duration || 0), 0) / 60;
+    const averageScore = typedSessions.reduce((sum: number, session: any) => 
+      sum + (session.confidenceScore || 0), 0) / typedSessions.length;
+
+    return {
+      totalSessions: typedSessions.length,
+      totalMinutes: Math.round(totalMinutes),
+      averageScore: Math.round(averageScore),
+      recentSessions: typedSessions.slice(0, 5)
+    };
   };
+
+  const sessionData = calculateSessionData();
 
   const getScoreColor = (score: number) => {
     if (score >= 85) return 'text-green-600 bg-green-50';
@@ -146,13 +164,21 @@ export default function EnhancedAnalysisTab() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Overall Score</p>
-              <p className="text-4xl font-bold bg-gradient-to-br from-[#2563eb] to-[#22d3ee] bg-clip-text text-transparent">{mockData.overall.averageScore}</p>
+              <p className="text-4xl font-bold bg-gradient-to-br from-[#2563eb] to-[#22d3ee] bg-clip-text text-transparent">
+                {aiInsights?.overallScore || sessionData.averageScore || 0}
+              </p>
               <div className="flex items-center mt-2">
-                <TrendingUp className="h-4 w-4 text-emerald-500 mr-1" />
-                <span className="text-sm font-medium text-emerald-600">+{mockData.overall.improvement}% this {selectedTimeFrame}</span>
+                {isGeneratingInsights ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-gray-400 mr-1" />
+                ) : (
+                  <TrendingUp className="h-4 w-4 text-emerald-500 mr-1" />
+                )}
+                <span className="text-sm font-medium text-emerald-600">
+                  {isGeneratingInsights ? 'Analyzing...' : `Based on ${sessionData.totalSessions} sessions`}
+                </span>
               </div>
             </div>
-            <div className="h-14 w-14 bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] rounded-2xl flex items-center justify-center shadow-lg">
+            <div className="h-14 w-14 bg-gradient-to-br from-[#2563eb] to-[#22d3ee] rounded-2xl flex items-center justify-center shadow-lg">
               <BarChart3 className="h-7 w-7 text-white" />
             </div>
           </div>
@@ -162,8 +188,8 @@ export default function EnhancedAnalysisTab() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Practice Time</p>
-              <p className="text-4xl font-bold text-slate-700">{mockData.overall.totalMinutes}m</p>
-              <p className="text-sm font-medium text-gray-500">{mockData.overall.totalSessions} sessions completed</p>
+              <p className="text-4xl font-bold text-slate-700">{sessionData.totalMinutes}m</p>
+              <p className="text-sm font-medium text-gray-500">{sessionData.totalSessions} sessions completed</p>
             </div>
             <div className="h-14 w-14 bg-gradient-to-br from-slate-500 to-slate-600 rounded-2xl flex items-center justify-center shadow-lg">
               <Clock className="h-7 w-7 text-white" />
@@ -174,11 +200,13 @@ export default function EnhancedAnalysisTab() {
         <Card className="p-6 bg-white/60 backdrop-blur-sm border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:bg-white/80">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Weekly Goal</p>
-              <p className="text-4xl font-bold text-slate-700">{mockData.overall.weeklyProgress}%</p>
-              <div className="mt-3">
-                <Progress value={mockData.overall.weeklyProgress} className="h-2 bg-gray-100" />
-              </div>
+              <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Latest Session</p>
+              <p className="text-4xl font-bold text-slate-700">
+                {typedSessions.length > 0 ? new Date(typedSessions[0].createdAt).toLocaleDateString() : 'None'}
+              </p>
+              <p className="text-sm font-medium text-gray-500">
+                {typedSessions.length > 0 ? typedSessions[0].name || 'Practice Session' : 'Start practicing'}
+              </p>
             </div>
             <div className="h-14 w-14 bg-gradient-to-br from-slate-500 to-slate-600 rounded-2xl flex items-center justify-center shadow-lg">
               <Target className="h-7 w-7 text-white" />
@@ -189,9 +217,12 @@ export default function EnhancedAnalysisTab() {
         <Card className="p-6 bg-white/60 backdrop-blur-sm border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:bg-white/80">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Speaking Pace</p>
-              <p className="text-4xl font-bold text-slate-700">{mockData.voice.averageWPM}</p>
-              <p className="text-sm font-medium text-gray-500">words per minute</p>
+              <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Voice Quality</p>
+              <p className="text-4xl font-bold text-slate-700">
+                {aiInsights?.voiceAnalysis?.score || 
+                 (typedSessions.length > 0 ? Math.round(typedSessions.reduce((sum: number, s: any) => sum + (s.voiceClarity || 0), 0) / typedSessions.length) : 0)}
+              </p>
+              <p className="text-sm font-medium text-gray-500">clarity score</p>
             </div>
             <div className="h-14 w-14 bg-gradient-to-br from-slate-500 to-slate-600 rounded-2xl flex items-center justify-center shadow-lg">
               <Zap className="h-7 w-7 text-white" />

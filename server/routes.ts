@@ -829,6 +829,7 @@ Provide specific, actionable coaching tips to improve this presentation. Focus o
   app.post('/api/openai/coaching-insights', generateCoachingInsights);
   app.post('/api/openai/live-feedback', generateLiveFeedback);
   app.post('/api/openai/personalize-template', personalizeTemplate);
+  app.post('/api/openai/session-insights', demoAuth, generateSessionInsights);
 
   // Analyze posture from image (simplified text-based analysis)
   app.post("/api/analyze-posture", async (req, res) => {
