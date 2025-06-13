@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Mic, Video, Square, Play, Pause, Edit3, Save, X, Trophy, FileText, Target } from 'lucide-react';
+import { Mic, Video, Square, Play, Pause, Edit3, Save, X, Trophy, FileText, Target, Eye } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface LiveFeedbackItem {
@@ -48,6 +48,8 @@ export default function ImprovedPracticePage() {
   const [transcript, setTranscript] = useState<string>('');
   const [wordCount, setWordCount] = useState(0);
   const [showTranscript, setShowTranscript] = useState(false);
+  const [sessionFeedback, setSessionFeedback] = useState<any>(null);
+  const [earnedBadges, setEarnedBadges] = useState<string[]>([]);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -267,7 +269,7 @@ export default function ImprovedPracticePage() {
         description: `Practice session saved successfully. ${wordCount} words spoken.`,
       });
     }
-  }, [isRecording, wordCount]);
+  }, [isRecording, wordCount, generateSessionFeedback]);
 
 
 
@@ -276,6 +278,8 @@ export default function ImprovedPracticePage() {
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
+
+
 
   const saveSessionName = () => {
     setIsEditingName(false);
@@ -607,92 +611,309 @@ export default function ImprovedPracticePage() {
         </div>
       </div>
 
-      {/* Session Transcript Modal */}
-      {showTranscript && (
+      {/* Comprehensive Session Feedback Modal */}
+      {showTranscript && sessionFeedback && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <Card className="max-w-4xl w-full max-h-[80vh] overflow-hidden">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold">Session Transcript</h2>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowTranscript(false)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div className="text-center p-4 bg-blue-50 rounded-lg">
-                  <div className="text-3xl font-bold text-blue-600">{wordCount}</div>
-                  <div className="text-sm text-gray-600">Total Words</div>
+          <div className="max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+            <Card className="m-4">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <div>
+                    <h2 className="text-3xl font-bold">Session Analysis</h2>
+                    <p className="text-gray-600">{sessionName}</p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowTranscript(false)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
                 </div>
-                <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <div className="text-3xl font-bold text-green-600">{Math.round(wordCount / Math.max(sessionDuration / 60, 0.1))}</div>
-                  <div className="text-sm text-gray-600">Words Per Minute</div>
-                </div>
-                <div className="text-center p-4 bg-purple-50 rounded-lg">
-                  <div className="text-3xl font-bold text-purple-600">{formatTime(sessionDuration)}</div>
-                  <div className="text-sm text-gray-600">Session Duration</div>
-                </div>
-              </div>
 
-              <div className="border rounded-lg p-4 bg-gray-50 max-h-96 overflow-y-auto">
-                <h3 className="font-semibold mb-3">What You Said:</h3>
-                {transcript ? (
-                  <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">
-                    {transcript}
-                  </p>
-                ) : (
-                  <p className="text-gray-500 italic">
-                    No speech was detected during this session. Make sure your microphone is enabled and try speaking clearly.
-                  </p>
-                )}
-              </div>
+                {/* Overall Score & Badges */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                  <Card className="p-6 bg-gradient-to-r from-blue-50 to-purple-50">
+                    <h3 className="text-xl font-bold mb-4">Overall Performance</h3>
+                    <div className="text-center">
+                      <div className="text-6xl font-bold text-blue-600 mb-2">{sessionFeedback.overallScore}</div>
+                      <div className="text-gray-600">Out of 100</div>
+                      <div className="mt-4 text-sm text-gray-700">
+                        {sessionFeedback.overallScore >= 90 ? "Excellent!" : 
+                         sessionFeedback.overallScore >= 75 ? "Great job!" :
+                         sessionFeedback.overallScore >= 60 ? "Good progress!" : "Keep practicing!"}
+                      </div>
+                    </div>
+                  </Card>
 
-              <div className="flex justify-end gap-3 mt-6">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    navigator.clipboard.writeText(transcript);
-                    toast({
-                      title: "Copied to clipboard",
-                      description: "Transcript copied successfully",
-                    });
-                  }}
-                  disabled={!transcript}
-                >
-                  Copy Transcript
-                </Button>
-                <Button
-                  onClick={() => {
-                    // Reset session data
-                    setTranscript('');
-                    setWordCount(0);
-                    setSessionDuration(0);
-                    setLiveFeedback([]);
-                    setSessionMetrics({
-                      volume: 0,
-                      clarity: 0,
-                      pace: 0,
-                      wordsSpoken: 0,
-                      fillerWords: [],
-                      bodyLanguageScore: 0
-                    });
-                    setShowTranscript(false);
+                  <Card className="p-6">
+                    <h3 className="text-xl font-bold mb-4">Badges Earned</h3>
+                    {earnedBadges.length > 0 ? (
+                      <div className="grid grid-cols-2 gap-3">
+                        {earnedBadges.map((badge, index) => (
+                          <div key={index} className="flex items-center gap-2 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                            <Trophy className="h-5 w-5 text-yellow-600" />
+                            <span className="text-sm font-medium">{badge}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 text-center py-4">No badges earned this session. Keep practicing!</p>
+                    )}
+                  </Card>
+                </div>
+
+                {/* Key Statistics */}
+                <Card className="p-6 mb-6">
+                  <h3 className="text-xl font-bold mb-4">Key Statistics</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="text-center p-4 bg-blue-50 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-600">{sessionFeedback.keyStatistics.totalWords}</div>
+                      <div className="text-sm text-gray-600">Total Words</div>
+                    </div>
+                    <div className="text-center p-4 bg-green-50 rounded-lg">
+                      <div className="text-2xl font-bold text-green-600">{sessionFeedback.keyStatistics.averageWPM}</div>
+                      <div className="text-sm text-gray-600">Words/Min</div>
+                    </div>
+                    <div className="text-center p-4 bg-purple-50 rounded-lg">
+                      <div className="text-2xl font-bold text-purple-600">{sessionFeedback.keyStatistics.sessionLength}</div>
+                      <div className="text-sm text-gray-600">Duration</div>
+                    </div>
+                    <div className="text-center p-4 bg-orange-50 rounded-lg">
+                      <div className="text-2xl font-bold text-orange-600">{sessionFeedback.keyStatistics.fillerWordPercentage}%</div>
+                      <div className="text-sm text-gray-600">Filler Words</div>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Detailed Analysis */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                  {/* Content Analysis */}
+                  <Card className="p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <FileText className="h-4 w-4 text-blue-600" />
+                      </div>
+                      <h3 className="text-lg font-bold">Content Analysis</h3>
+                      <div className="ml-auto text-lg font-bold text-blue-600">{sessionFeedback.contentAnalysis.score}/100</div>
+                    </div>
                     
-                    toast({
-                      title: "New Session Ready",
-                      description: "Ready for your next practice session",
-                    });
-                  }}
-                >
-                  Start New Session
-                </Button>
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="font-semibold text-green-700 mb-2">Strengths</h4>
+                        <ul className="text-sm space-y-1">
+                          {sessionFeedback.contentAnalysis.strengths.map((strength: string, index: number) => (
+                            <li key={index} className="text-gray-700">• {strength}</li>
+                          ))}
+                        </ul>
+                      </div>
+                      
+                      <div>
+                        <h4 className="font-semibold text-orange-700 mb-2">Areas for Improvement</h4>
+                        <ul className="text-sm space-y-1">
+                          {sessionFeedback.contentAnalysis.improvements.map((improvement: string, index: number) => (
+                            <li key={index} className="text-gray-700">• {improvement}</li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div className="p-3 bg-gray-50 rounded-lg">
+                        <h4 className="font-semibold text-gray-700 mb-1">Purpose Alignment</h4>
+                        <p className="text-sm text-gray-600">{sessionFeedback.contentAnalysis.purposeAlignment}</p>
+                      </div>
+                    </div>
+                  </Card>
+
+                  {/* Voice Analysis */}
+                  <Card className="p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                        <Mic className="h-4 w-4 text-green-600" />
+                      </div>
+                      <h3 className="text-lg font-bold">Voice Analysis</h3>
+                      <div className="ml-auto text-lg font-bold text-green-600">{sessionFeedback.voiceAnalysis.score}/100</div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="text-center p-2 bg-gray-50 rounded">
+                          <div className="font-bold">{Math.round(sessionFeedback.voiceAnalysis.pace)}</div>
+                          <div className="text-xs text-gray-600">WPM</div>
+                        </div>
+                        <div className="text-center p-2 bg-gray-50 rounded">
+                          <div className="font-bold">{Math.round(sessionFeedback.voiceAnalysis.volume)}%</div>
+                          <div className="text-xs text-gray-600">Volume</div>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <h4 className="font-semibold text-blue-700 mb-2">Recommendations</h4>
+                        <ul className="text-sm space-y-1">
+                          {sessionFeedback.voiceAnalysis.recommendations.map((rec: string, index: number) => (
+                            <li key={index} className="text-gray-700">• {rec}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </Card>
+
+                  {/* Body Language Analysis */}
+                  <Card className="p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <Eye className="h-4 w-4 text-purple-600" />
+                      </div>
+                      <h3 className="text-lg font-bold">Body Language</h3>
+                      <div className="ml-auto text-lg font-bold text-purple-600">{sessionFeedback.bodyLanguageAnalysis.score}/100</div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-sm">Eye Contact:</span>
+                          <span className="text-sm font-medium">{sessionFeedback.bodyLanguageAnalysis.eyeContact}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm">Gestures:</span>
+                          <span className="text-sm font-medium">{sessionFeedback.bodyLanguageAnalysis.gestures}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm">Posture:</span>
+                          <span className="text-sm font-medium">{sessionFeedback.bodyLanguageAnalysis.posture}</span>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <h4 className="font-semibold text-purple-700 mb-2">Tips</h4>
+                        <ul className="text-sm space-y-1">
+                          {sessionFeedback.bodyLanguageAnalysis.recommendations.map((tip: string, index: number) => (
+                            <li key={index} className="text-gray-700">• {tip}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </Card>
+                </div>
+
+                {/* AI Coaching Insights */}
+                <Card className="p-6 mb-6">
+                  <h3 className="text-xl font-bold mb-4">AI Coach Insights</h3>
+                  <div className="space-y-3">
+                    {sessionFeedback.coachingInsights.map((insight: string, index: number) => (
+                      <div key={index} className="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                        <p className="text-gray-700">{insight}</p>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+
+                {/* Next Steps */}
+                <Card className="p-6 mb-6">
+                  <h3 className="text-xl font-bold mb-4">Recommended Next Steps</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {sessionFeedback.nextSteps.map((step: string, index: number) => (
+                      <div key={index} className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+                        <div className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                          {index + 1}
+                        </div>
+                        <span className="text-sm text-gray-700">{step}</span>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+
+                {/* Transcript */}
+                <Card className="p-6 mb-6">
+                  <h3 className="text-xl font-bold mb-4">Session Transcript</h3>
+                  <div className="border rounded-lg p-4 bg-gray-50 max-h-64 overflow-y-auto">
+                    {transcript ? (
+                      <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">
+                        {transcript}
+                      </p>
+                    ) : (
+                      <p className="text-gray-500 italic">
+                        No speech was detected during this session. Make sure your microphone is enabled and try speaking clearly.
+                      </p>
+                    )}
+                  </div>
+                </Card>
+
+                {/* Action Buttons */}
+                <div className="flex justify-end gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      navigator.clipboard.writeText(transcript);
+                      toast({
+                        title: "Copied to clipboard",
+                        description: "Transcript copied successfully",
+                      });
+                    }}
+                    disabled={!transcript}
+                  >
+                    Copy Transcript
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      const report = `Session Analysis Report
+Session: ${sessionName}
+Purpose: ${sessionPurpose || 'General practice'}
+
+Overall Score: ${sessionFeedback.overallScore}/100
+Total Words: ${sessionFeedback.keyStatistics.totalWords}
+Duration: ${sessionFeedback.keyStatistics.sessionLength}
+Average WPM: ${sessionFeedback.keyStatistics.averageWPM}
+
+Content Score: ${sessionFeedback.contentAnalysis.score}/100
+Voice Score: ${sessionFeedback.voiceAnalysis.score}/100
+Body Language Score: ${sessionFeedback.bodyLanguageAnalysis.score}/100
+
+Badges Earned: ${earnedBadges.join(', ') || 'None'}
+
+Transcript:
+${transcript}`;
+                      
+                      navigator.clipboard.writeText(report);
+                      toast({
+                        title: "Report copied",
+                        description: "Complete session report copied to clipboard",
+                      });
+                    }}
+                  >
+                    Copy Full Report
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      // Reset session data
+                      setTranscript('');
+                      setWordCount(0);
+                      setSessionDuration(0);
+                      setLiveFeedback([]);
+                      setSessionMetrics({
+                        volume: 0,
+                        clarity: 0,
+                        pace: 0,
+                        wordsSpoken: 0,
+                        fillerWords: [],
+                        bodyLanguageScore: 0
+                      });
+                      setSessionFeedback(null);
+                      setEarnedBadges([]);
+                      setShowTranscript(false);
+                      
+                      toast({
+                        title: "New Session Ready",
+                        description: "Ready for your next practice session",
+                      });
+                    }}
+                  >
+                    Start New Session
+                  </Button>
+                </div>
               </div>
-            </div>
-          </Card>
+            </Card>
+          </div>
         </div>
       )}
     </div>
