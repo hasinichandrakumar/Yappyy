@@ -937,8 +937,6 @@ export default function ImprovedPracticePage() {
     setSessionFeedback(feedback);
   }, [transcript, wordCount, sessionDuration, sessionMetrics, sessionPurpose]);
 
-
-
   // Save complete session data to database
   const saveSessionToDatabase = useCallback(async () => {
     try {
@@ -1024,6 +1022,24 @@ export default function ImprovedPracticePage() {
       });
     }
   }, [sessionFeedback, liveFeedback, earnedBadges, sessionName, sessionPurpose, sessionDuration, transcript, wordCount, sessionMetrics, isLookingAtCamera]);
+
+  // Save session name
+  const saveSessionName = () => {
+    setIsEditingName(false);
+    toast({
+      title: "Session Name Updated",
+      description: sessionName,
+    });
+  };
+
+  // Save session purpose
+  const savePurpose = () => {
+    setIsEditingPurpose(false);
+    toast({
+      title: "Session Purpose Updated", 
+      description: "AI will use this to provide targeted feedback",
+    });
+  };
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
