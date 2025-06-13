@@ -604,7 +604,7 @@ Provide detailed feedback on content structure, voice modulation advice, and bod
         },
         'speech-master': () => sessions.length >= 25,
         'perfect-score': () => {
-          const maxScore = Math.max(...sessions.map(s => s.overallScore || 0));
+          const maxScore = Math.max(...sessions.map(s => s.confidenceScore || 0));
           return maxScore >= 100;
         }
       };
@@ -613,14 +613,14 @@ Provide detailed feedback on content structure, voice modulation advice, and bod
       const shouldUnlock = achievementCriteria[achievementId as keyof typeof achievementCriteria];
       if (shouldUnlock && shouldUnlock()) {
         // Check if not already unlocked
-        const existingAchievement = currentAchievements.find(a => a.achievementId === achievementId);
+        const existingAchievement = currentAchievements.find(a => a.achievementType === achievementId);
         if (!existingAchievement) {
           // Unlock achievement
           updatedAchievement = await storage.addUserAchievement({
             userId,
-            achievementId,
-            unlockedAt: new Date(),
-            progress: 100,
+            achievementType: achievementId,
+            achievementName: achievementId.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()),
+            description: `Achievement unlocked: ${achievementId}`,
             metadata: metadata || {}
           });
           newlyUnlocked = true;

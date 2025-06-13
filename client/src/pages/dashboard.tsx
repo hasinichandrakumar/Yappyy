@@ -19,6 +19,7 @@ import ImprovementSummary from "@/components/ImprovementSummary";
 import SpeechDNAWithSession from "@/components/SpeechDNAWithSession";
 import SpeechROIAnalyzer from "@/components/SpeechROIAnalyzer";
 import SimpleAICoach from "@/components/SimpleAICoach";
+import AICoachComprehensive from "@/components/AICoachComprehensive";
 import ScriptTemplates from "@/components/ScriptTemplates";
 import EnhancedBadgeSystem from "@/components/EnhancedBadgeSystem";
 import AIPracticeRoleplay from "@/components/AIPracticeRoleplay";

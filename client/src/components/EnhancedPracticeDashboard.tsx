@@ -195,12 +195,17 @@ export default function EnhancedPracticeDashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto p-6">
+        {/* Badge Goals Section */}
+        <div className="mb-8">
+          <PracticeGoalsWithBadges />
+        </div>
+
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Practice Hub</h1>
-              <p className="text-gray-600 mt-1">Advanced AI-powered speech coaching platform</p>
+              <p className="text-gray-600 mt-1">Complete goals to earn badges and improve your speaking</p>
             </div>
             {sessionData.goal && (
               <Card className="p-4">
