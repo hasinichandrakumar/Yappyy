@@ -18,6 +18,7 @@ import {
   generateLiveEmpathicFeedback, 
   updateUserSpeakingProfile 
 } from "./world-class-ai-coach";
+import { analyzeContent } from "./ai-content-analysis";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -615,6 +616,9 @@ Provide detailed feedback on content structure, voice modulation advice, and bod
       res.status(500).json({ message: "Failed to generate template feedback", error: error.message });
     }
   });
+
+  // AI Content Analysis endpoint
+  app.post("/api/ai-content-analysis", demoAuth, analyzeContent);
 
   // User achievements endpoint
   app.get("/api/user-achievements", requireAuth, async (req: any, res) => {

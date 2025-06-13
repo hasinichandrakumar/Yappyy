@@ -52,6 +52,9 @@ export default function ImprovedPracticePage() {
   const [earnedBadges, setEarnedBadges] = useState<string[]>([]);
   const [eyeContactScore, setEyeContactScore] = useState(0);
   const [isLookingAtCamera, setIsLookingAtCamera] = useState(false);
+  const [postureScore, setPostureScore] = useState(0);
+  const [shoulderAlignment, setShoulderAlignment] = useState("neutral");
+  const [headPosition, setHeadPosition] = useState("centered");
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -135,8 +138,50 @@ export default function ImprovedPracticePage() {
       
       setIsLookingAtCamera(lookingAtCamera);
       setEyeContactScore(prev => prev * 0.9 + currentEyeContactScore * 0.1);
+      
+      // Analyze posture based on face/body position
+      const shoulderRegionY = centerY + faceRegionSize * 0.8;
+      let leftShoulderBrightness = 0;
+      let rightShoulderBrightness = 0;
+      let shoulderPixelCount = 0;
+      
+      // Sample shoulder region for posture analysis
+      for (let y = shoulderRegionY - 20; y < shoulderRegionY + 20; y += 5) {
+        for (let x = centerX - faceRegionSize; x < centerX + faceRegionSize; x += 10) {
+          if (x >= 0 && x < canvas.width && y >= 0 && y < canvas.height) {
+            const index = (Math.floor(y) * canvas.width + Math.floor(x)) * 4;
+            const brightness = (data[index] + data[index + 1] + data[index + 2]) / 3;
+            
+            if (x < centerX) {
+              leftShoulderBrightness += brightness;
+            } else {
+              rightShoulderBrightness += brightness;
+            }
+            shoulderPixelCount++;
+          }
+        }
+      }
+      
+      // Calculate shoulder alignment
+      const shoulderSymmetry = shoulderPixelCount > 0 ? 
+        1 - Math.abs(leftShoulderBrightness - rightShoulderBrightness) / (leftShoulderBrightness + rightShoulderBrightness) : 0;
+      
+      // Calculate head position relative to center
+      const headCenteredness = 1 - Math.abs(centerX - canvas.width/2) / (canvas.width/4);
+      
+      // Overall posture score (0-100)
+      const postureScore = Math.round((shoulderSymmetry * 50) + (headCenteredness * 30) + (verticalPositionScore * 20));
+      setPostureScore(Math.max(0, Math.min(100, postureScore)));
+      
+      // Set alignment descriptions
+      setShoulderAlignment(shoulderSymmetry > 0.8 ? "aligned" : shoulderSymmetry > 0.6 ? "slightly-tilted" : "tilted");
+      setHeadPosition(headCenteredness > 0.8 ? "centered" : headCenteredness > 0.6 ? "slightly-off" : "off-center");
+      
     } else {
       setIsLookingAtCamera(false);
+      setPostureScore(0);
+      setShoulderAlignment("not-detected");
+      setHeadPosition("not-detected");
     }
   }, []);
 
