@@ -21,6 +21,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup Google Authentication (fallback)
   await setupGoogleAuth(app);
 
+  // Template personalization route
+  app.post('/api/openai/personalize-template', demoAuth, async (req: any, res) => {
+    try {
+      const { template, userRequest } = req.body;
+      
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY || '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'}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are an expert speech writing coach. Personalize and enhance speech templates while maintaining their core structure and effectiveness.'
+            },
+            {
+              role: 'user',
+              content: `Please personalize this speech template based on the user request: "${userRequest}"\n\nTemplate: ${template.title}\nCategory: ${template.category}\nContent:\n${template.content}\n\nMake it more engaging, personalized, and effective while keeping the same structure.`
+            }
+          ],
+          response_format: { type: "json_object" },
+          temperature: 0.7
+        })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        const content = JSON.parse(result.choices[0].message.content);
+        res.json({ personalizedContent: content.personalizedContent || template.content });
+      } else {
+        res.status(500).json({ error: 'Failed to personalize template' });
+      }
+    } catch (error) {
+      console.error('Template personalization error:', error);
+      res.status(500).json({ error: 'Failed to personalize template' });
+    }
+  });
+
   // Update user profile
   app.patch('/api/user/profile', demoAuth, async (req: any, res) => {
     try {

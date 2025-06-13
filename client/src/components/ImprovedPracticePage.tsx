@@ -220,41 +220,14 @@ export default function ImprovedPracticePage() {
 
       setIsRecording(false);
       
-      // Generate comprehensive AI analysis
-      await generateSessionAnalysis();
-      
       toast({
         title: "Session Completed",
-        description: "Generating AI analysis...",
+        description: "Practice session saved successfully",
       });
     }
   }, [isRecording]);
 
-  // Generate comprehensive session analysis with OpenAI
-  const generateSessionAnalysis = useCallback(async () => {
-    try {
-      const sessionData = {
-        name: sessionName,
-        purpose: sessionPurpose,
-        duration: sessionDuration,
-        metrics: sessionMetrics,
-        liveFeedback
-      };
 
-      const response = await fetch('/api/openai/comprehensive-analysis', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(sessionData)
-      });
-
-      if (response.ok) {
-        const analysis = await response.json();
-        console.log('AI Analysis generated:', analysis);
-      }
-    } catch (error) {
-      console.error('Error generating analysis:', error);
-    }
-  }, [sessionName, sessionPurpose, sessionDuration, sessionMetrics, liveFeedback]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

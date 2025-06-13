@@ -9,8 +9,8 @@ import ComprehensiveSessionAnalysis from "@/components/ComprehensiveSessionAnaly
 import BodyLanguageAnalyzer from "@/components/BodyLanguageAnalyzer";
 import AdvancedSpeechAnalysis from "@/components/AdvancedSpeechAnalysis";
 import SpeechROIAnalyzer from "@/components/SpeechROIAnalyzer";
-import EnhancedTemplateMarketplace from "@/components/EnhancedTemplateMarketplace";
-import EnhancedBadgeSystem from "@/components/EnhancedBadgeSystem";
+import Enhanced50PlusTemplates from "@/components/Enhanced50PlusTemplates";
+import ImprovedBadgeSystem from "@/components/ImprovedBadgeSystem";
 
 export default function IntegratedDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -102,11 +102,11 @@ export default function IntegratedDashboard() {
           </TabsContent>
 
           <TabsContent value="templates" className="space-y-6">
-            <EnhancedTemplateMarketplace />
+            <Enhanced50PlusTemplates />
           </TabsContent>
 
           <TabsContent value="badges" className="space-y-6">
-            <EnhancedBadgeSystem />
+            <ImprovedBadgeSystem />
           </TabsContent>
         </Tabs>
       </div>
