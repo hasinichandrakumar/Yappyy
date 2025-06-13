@@ -556,10 +556,7 @@ export default function ImprovedPracticePage() {
         // Don't auto-reset - let user manually close modal and start new session
       }, 100);
       
-      toast({
-        title: "Session Completed & Saved",
-        description: `Practice session saved successfully. ${wordCount} words spoken. Ready for next session.`,
-      });
+      // Removed annoying achievement popup notification
     }
   }, [isRecording, wordCount]);
 
@@ -1095,7 +1092,16 @@ export default function ImprovedPracticePage() {
                       value={sessionName}
                       onChange={(e) => setSessionName(e.target.value)}
                       placeholder="Enter a memorable session name"
-                      onKeyPress={(e) => e.key === 'Enter' && saveSessionName()}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          saveSessionName();
+                        }
+                        if (e.key === 'Escape') {
+                          e.preventDefault();
+                          setIsEditingName(false);
+                        }
+                      }}
                       className="text-lg font-semibold border-blue-300 focus:border-blue-500"
                       autoFocus
                     />
