@@ -943,10 +943,13 @@ export default function ImprovedPracticePage() {
         recommendations: generateVoiceRecommendations(sessionMetrics)
       },
       bodyLanguageAnalysis: {
-        score: Math.round(sessionMetrics.bodyLanguageScore),
-        eyeContact: Math.random() > 0.3 ? "Good" : "Needs Improvement",
-        gestures: Math.random() > 0.5 ? "Natural" : "Limited",
-        posture: Math.random() > 0.4 ? "Confident" : "Could be more upright",
+        score: Math.round((sessionMetrics.bodyLanguageScore + postureScore) / 2),
+        eyeContact: eyeContactScore > 0.7 ? "Excellent" : eyeContactScore > 0.5 ? "Good" : "Needs Improvement",
+        gestures: "Natural", // Could be enhanced with gesture detection
+        posture: postureScore > 80 ? "Excellent posture" : postureScore > 60 ? "Good posture" : "Could be more upright",
+        shoulderAlignment: shoulderAlignment,
+        headPosition: headPosition,
+        postureScore: Math.round(postureScore),
         recommendations: generateBodyLanguageRecommendations()
       },
       keyStatistics: {
@@ -1233,10 +1236,13 @@ export default function ImprovedPracticePage() {
                     </div>
                   </div>
                   
-                  {/* Bottom-left: Gestures */}
+                  {/* Bottom-left: Posture Analysis */}
                   <div className="absolute bottom-20 left-4 bg-black bg-opacity-75 text-white px-3 py-2 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <div className="text-sm font-medium">✋ Natural Gestures</div>
+                    <div className="text-sm font-medium">📐 Posture: {Math.round(postureScore)}%</div>
+                    <div className="text-xs opacity-75">
+                      {shoulderAlignment === "aligned" ? "✓ Shoulders aligned" : 
+                       shoulderAlignment === "slightly-tilted" ? "⚠ Slightly tilted" : 
+                       "⚠ Check alignment"}
                     </div>
                   </div>
                   
