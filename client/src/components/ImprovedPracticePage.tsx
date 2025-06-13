@@ -293,7 +293,7 @@ export default function ImprovedPracticePage() {
                       variant="ghost"
                       size="sm"
                       onClick={() => setIsEditingName(true)}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="opacity-60 group-hover:opacity-100 transition-opacity hover:bg-blue-50"
                     >
                       <Edit3 className="h-4 w-4 text-blue-600" />
                     </Button>
@@ -349,7 +349,7 @@ export default function ImprovedPracticePage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => setIsEditingPurpose(true)}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                        className="opacity-60 group-hover:opacity-100 transition-opacity flex-shrink-0 hover:bg-purple-50"
                       >
                         <Edit3 className="h-4 w-4 text-purple-600" />
                       </Button>
