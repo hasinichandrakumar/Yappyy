@@ -27,7 +27,7 @@ interface SessionMetrics {
 
 export default function ImprovedPracticePage() {
   const [isRecording, setIsRecording] = useState(false);
-  const [sessionName, setSessionName] = useState("New Practice Session");
+  const [sessionName, setSessionName] = useState("");
   const [sessionPurpose, setSessionPurpose] = useState("");
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingPurpose, setIsEditingPurpose] = useState(false);
@@ -60,6 +60,23 @@ export default function ImprovedPracticePage() {
   const detectionIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
+
+  // Initialize session name with sequential numbering
+  useEffect(() => {
+    const initializeSessionName = async () => {
+      if (!sessionName) {
+        try {
+          const response = await fetch('/api/practice-sessions');
+          const sessions = await response.json();
+          const sessionNumber = Array.isArray(sessions) ? sessions.length + 1 : 1;
+          setSessionName(`Session ${sessionNumber}`);
+        } catch (error) {
+          setSessionName("Session 1");
+        }
+      }
+    };
+    initializeSessionName();
+  }, [sessionName]);
 
   // Eye contact detection function
   const detectEyeContact = useCallback(() => {
@@ -662,22 +679,15 @@ export default function ImprovedPracticePage() {
 
       const sessionData = {
         userId: 'demo-user',
-        sessionName: sessionName || `Session ${sessionNumber}`,
-        purpose: sessionPurpose || 'General Practice',
         duration: sessionDuration,
-        transcript: transcript,
-        wordCount: wordCount,
-        wpm: Math.round(wordCount / Math.max(sessionDuration / 60, 0.1)),
+        averageWPM: Math.round(wordCount / Math.max(sessionDuration / 60, 0.1)),
         confidenceScore: sessionMetrics.bodyLanguageScore,
         voiceClarity: sessionMetrics.clarity,
-        volume: sessionMetrics.volume,
-        fillerWords: sessionMetrics.fillerWords,
-        pauseCount: Math.floor(sessionDuration / 15), // Estimate pauses
+        fillerWords: sessionMetrics.fillerWords.length,
+        pauseCount: Math.floor(sessionDuration / 15),
         eyeContactScore: isLookingAtCamera ? "Excellent" : "Good",
-        postureScore: Math.round(sessionMetrics.bodyLanguageScore * 0.9),
-        
-        // AI Analysis data
-        coachingTips: sessionFeedback?.coachingInsights || [],
+        transcript: transcript,
+        coachingTips: sessionFeedback?.coachingInsights || ["Good practice session", "Keep improving"],
         aiAnalysis: {
           overallScore: sessionFeedback?.overallScore || 0,
           strengths: sessionFeedback?.contentAnalysis?.strengths || [],
@@ -709,8 +719,8 @@ export default function ImprovedPracticePage() {
         })),
         
         // Session metadata
-        createdAt: new Date(),
-        earnedBadges: earnedBadges
+        videoBlob: null,
+        persuasivenessScore: sessionFeedback?.overallScore || Math.round(sessionMetrics.bodyLanguageScore * 0.8)
       };
 
       const response = await fetch('/api/practice-sessions', {
