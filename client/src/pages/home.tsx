@@ -52,6 +52,76 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* 7-38-55 Rule Statistics Section */}
+      <section className="py-16 bg-gradient-to-br from-blue-50 to-cyan-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Why Communication is More Than Just Words
+            </h2>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              Research shows that effective communication involves much more than what you say. 
+              The 7-38-55 rule reveals the true breakdown of how people perceive your message.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            {/* Words - 7% */}
+            <div className="text-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
+              <div className="text-6xl font-bold bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] bg-clip-text text-transparent mb-4">
+                7%
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Spoken Words</h3>
+              <p className="text-gray-600">
+                Only 7% of communication impact comes from the actual words you speak
+              </p>
+            </div>
+
+            {/* Tone - 38% */}
+            <div className="text-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
+              <div className="text-6xl font-bold bg-gradient-to-br from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-4">
+                38%
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Tone of Voice</h3>
+              <p className="text-gray-600">
+                38% comes from your vocal delivery, pace, volume, and inflection
+              </p>
+            </div>
+
+            {/* Body Language - 55% */}
+            <div className="text-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
+              <div className="text-6xl font-bold bg-gradient-to-br from-purple-600 to-violet-600 bg-clip-text text-transparent mb-4">
+                55%
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Body Language</h3>
+              <p className="text-gray-600">
+                55% of your message impact comes from posture, gestures, and eye contact
+              </p>
+            </div>
+          </div>
+
+          <div className="text-center mt-12">
+            <p className="text-lg font-semibold text-gray-800 mb-4">
+              That's why Yappyy trains all three aspects of communication
+            </p>
+            <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-600">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-green-500" />
+                <span>Voice analysis & coaching</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-green-500" />
+                <span>Tone & delivery feedback</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-green-500" />
+                <span>Body language tracking</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
