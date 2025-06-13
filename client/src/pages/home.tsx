@@ -104,21 +104,27 @@ export default function HomePage() {
             {/* Central 100% Statistic */}
             <div className="text-center">
               <div className="inline-block relative">
-                <div className="bg-white p-20 rounded-3xl shadow-xl border border-gray-200 relative transform hover:scale-105 transition-transform duration-500">
+                <div className="bg-white p-16 rounded-full shadow-2xl border-4 border-blue-100 relative overflow-hidden">
                   <div className="text-center">
-                    <p className="text-xl font-bold text-gray-700 mb-4">
+                    <p className="text-xl font-bold text-gray-700 mb-2">
                       We coach
                     </p>
                     <div className="relative">
-                      <div className="text-8xl md:text-9xl font-black bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] bg-clip-text text-transparent leading-none tracking-tighter">
+                      <div className="text-7xl md:text-8xl font-black bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] bg-clip-text text-transparent leading-none tracking-tighter">
                         100%
                       </div>
                     </div>
-                    <p className="text-2xl font-bold text-gray-800 mt-4">
+                    <p className="text-2xl font-bold text-gray-800 mt-2">
                       of you
                     </p>
                   </div>
                 </div>
+                
+                {/* Floating elements around the circle */}
+                <div className="absolute -top-6 left-1/4 w-8 h-8 bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] rounded-lg rotate-12 opacity-80 animate-float"></div>
+                <div className="absolute -bottom-4 right-1/4 w-6 h-6 bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] rounded-full opacity-80 animate-float-delayed"></div>
+                <div className="absolute top-1/3 -right-8 w-4 h-8 bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] rounded-full rotate-45 opacity-80 animate-float"></div>
+                <div className="absolute bottom-1/3 -left-6 w-10 h-4 bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] rounded-full -rotate-12 opacity-80 animate-float-delayed"></div>
               </div>
               
               <p className="text-lg font-semibold text-gray-600 mt-8 max-w-md mx-auto">
