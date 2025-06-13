@@ -168,19 +168,9 @@ export default function AnalysisOverview() {
             <div className="text-center">
               <BarChart3 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-gray-900 mb-2">No Analysis Data Yet</h3>
-              <p className="text-gray-600 mb-6 max-w-md mx-auto">
+              <p className="text-gray-600 max-w-md mx-auto">
                 Complete your first practice session to see detailed performance analytics and insights.
               </p>
-              <Button 
-                onClick={() => {
-                  // Switch to practice tab
-                  const practiceTab = document.querySelector('[data-value="practice"]') as HTMLElement;
-                  practiceTab?.click();
-                }}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                Start First Practice Session
-              </Button>
             </div>
           </CardContent>
         </Card>

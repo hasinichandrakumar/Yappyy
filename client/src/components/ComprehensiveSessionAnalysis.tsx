@@ -133,7 +133,7 @@ export default function ComprehensiveSessionAnalysis({ selectedSessionId }: Sess
         <div className="text-center">
           <BarChart3 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">No Session Selected</h3>
-          <p className="text-gray-600">Start a practice session to see detailed analysis</p>
+          <p className="text-gray-600">Select a session from the dropdown above to view detailed analysis</p>
         </div>
       </div>
     );
