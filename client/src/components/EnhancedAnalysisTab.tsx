@@ -142,7 +142,7 @@ export default function EnhancedAnalysisTab() {
 
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="p-6 bg-gradient-to-br from-white to-blue-50/30 border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+        <Card className="p-6 bg-white/60 backdrop-blur-sm border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:bg-white/80">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Overall Score</p>
@@ -158,42 +158,42 @@ export default function EnhancedAnalysisTab() {
           </div>
         </Card>
 
-        <Card className="p-6 bg-gradient-to-br from-white to-emerald-50/30 border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+        <Card className="p-6 bg-white/60 backdrop-blur-sm border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:bg-white/80">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Practice Time</p>
-              <p className="text-4xl font-bold bg-gradient-to-br from-emerald-600 to-teal-600 bg-clip-text text-transparent">{mockData.overall.totalMinutes}m</p>
+              <p className="text-4xl font-bold text-slate-700">{mockData.overall.totalMinutes}m</p>
               <p className="text-sm font-medium text-gray-500">{mockData.overall.totalSessions} sessions completed</p>
             </div>
-            <div className="h-14 w-14 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center shadow-lg">
+            <div className="h-14 w-14 bg-gradient-to-br from-slate-500 to-slate-600 rounded-2xl flex items-center justify-center shadow-lg">
               <Clock className="h-7 w-7 text-white" />
             </div>
           </div>
         </Card>
 
-        <Card className="p-6 bg-gradient-to-br from-white to-purple-50/30 border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+        <Card className="p-6 bg-white/60 backdrop-blur-sm border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:bg-white/80">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Weekly Goal</p>
-              <p className="text-4xl font-bold bg-gradient-to-br from-purple-600 to-violet-600 bg-clip-text text-transparent">{mockData.overall.weeklyProgress}%</p>
+              <p className="text-4xl font-bold text-slate-700">{mockData.overall.weeklyProgress}%</p>
               <div className="mt-3">
-                <Progress value={mockData.overall.weeklyProgress} className="h-2 bg-purple-100" />
+                <Progress value={mockData.overall.weeklyProgress} className="h-2 bg-gray-100" />
               </div>
             </div>
-            <div className="h-14 w-14 bg-gradient-to-br from-purple-500 to-violet-500 rounded-2xl flex items-center justify-center shadow-lg">
+            <div className="h-14 w-14 bg-gradient-to-br from-slate-500 to-slate-600 rounded-2xl flex items-center justify-center shadow-lg">
               <Target className="h-7 w-7 text-white" />
             </div>
           </div>
         </Card>
 
-        <Card className="p-6 bg-gradient-to-br from-white to-orange-50/30 border-0 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+        <Card className="p-6 bg-white/60 backdrop-blur-sm border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:bg-white/80">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Speaking Pace</p>
-              <p className="text-4xl font-bold bg-gradient-to-br from-orange-600 to-red-500 bg-clip-text text-transparent">{mockData.voice.averageWPM}</p>
+              <p className="text-4xl font-bold text-slate-700">{mockData.voice.averageWPM}</p>
               <p className="text-sm font-medium text-gray-500">words per minute</p>
             </div>
-            <div className="h-14 w-14 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center shadow-lg">
+            <div className="h-14 w-14 bg-gradient-to-br from-slate-500 to-slate-600 rounded-2xl flex items-center justify-center shadow-lg">
               <Zap className="h-7 w-7 text-white" />
             </div>
           </div>
@@ -203,7 +203,7 @@ export default function EnhancedAnalysisTab() {
       {/* Detailed Analysis Tabs */}
       <Tabs defaultValue="voice" className="w-full">
         <div className="w-full overflow-x-auto">
-          <TabsList className="inline-flex h-auto w-auto min-w-full bg-white border border-gray-100 shadow-lg rounded-xl p-1">
+          <TabsList className="inline-flex h-auto w-auto min-w-full bg-white/80 backdrop-blur-sm border border-gray-200/50 shadow-xl rounded-2xl p-2">
             <TabsTrigger value="voice" className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#2563eb] data-[state=active]:to-[#22d3ee] data-[state=active]:text-white data-[state=active]:shadow-lg whitespace-nowrap">
               <Mic className="h-4 w-4" />
               <span className="hidden sm:inline">Voice</span>
@@ -225,7 +225,7 @@ export default function EnhancedAnalysisTab() {
 
         {/* Voice Analysis */}
         <TabsContent value="voice" className="space-y-6">
-          <Card className="p-8 bg-gradient-to-br from-white to-gray-50/50 border-0 shadow-xl">
+          <Card className="p-8 bg-white/70 backdrop-blur-sm border border-white/30 shadow-xl">
             <h3 className="text-2xl font-bold text-gray-900 mb-6">Voice Quality Analysis</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
@@ -261,23 +261,23 @@ export default function EnhancedAnalysisTab() {
               </div>
               
               <div className="space-y-4">
-                <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                <div className="p-4 bg-amber-50/80 backdrop-blur-sm rounded-xl border border-amber-200/50">
                   <div className="flex items-center gap-2 mb-2">
-                    <AlertTriangle className="h-4 w-4 text-orange-600" />
-                    <span className="text-sm font-medium text-orange-800">Areas for Improvement</span>
+                    <AlertTriangle className="h-4 w-4 text-amber-600" />
+                    <span className="text-sm font-medium text-amber-800">Areas for Improvement</span>
                   </div>
-                  <p className="text-sm text-orange-700">
+                  <p className="text-sm text-amber-700">
                     Detected {mockData.voice.fillerWords} filler words in recent sessions. 
                     Practice pausing instead of using "um" and "uh".
                   </p>
                 </div>
 
-                <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                <div className="p-4 bg-emerald-50/80 backdrop-blur-sm rounded-xl border border-emerald-200/50">
                   <div className="flex items-center gap-2 mb-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span className="text-sm font-medium text-green-800">Strengths</span>
+                    <CheckCircle className="h-4 w-4 text-emerald-600" />
+                    <span className="text-sm font-medium text-emerald-800">Strengths</span>
                   </div>
-                  <p className="text-sm text-green-700">
+                  <p className="text-sm text-emerald-700">
                     Your voice clarity has improved by {mockData.voice.improvement}% this {selectedTimeFrame}. 
                     Great articulation and projection!
                   </p>

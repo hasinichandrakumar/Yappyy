@@ -16,7 +16,7 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("practice");
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
       {/* Header with Logo */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -28,7 +28,7 @@ export default function Dashboard() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-3 lg:grid-cols-6 gap-2 mb-8 h-auto p-2 bg-white border border-gray-100 shadow-lg rounded-xl">
+          <TabsList className="grid grid-cols-3 lg:grid-cols-6 gap-2 mb-8 h-auto p-3 bg-white/80 backdrop-blur-sm border border-gray-200/50 shadow-xl rounded-2xl">
             <TabsTrigger value="practice" className="flex flex-col items-center space-y-2 px-4 py-3 text-xs font-medium rounded-lg transition-all duration-300 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#2563eb] data-[state=active]:to-[#22d3ee] data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:scale-105">
               <BarChart3 className="w-5 h-5" />
               <span>Practice</span>
