@@ -394,9 +394,9 @@ export default function ImprovedPracticePage() {
       </div>
 
       {/* Main Practice Area */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Video Feed */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-3">
           <Card className="p-4">
             <div className="relative">
               <video
@@ -405,6 +405,39 @@ export default function ImprovedPracticePage() {
                 muted
                 className="w-full h-96 bg-black rounded-lg object-cover"
               />
+              
+              {/* Live Overlay Metrics */}
+              {isRecording && (
+                <>
+                  {/* Top-left: WPM */}
+                  <div className="absolute top-4 left-4 bg-black bg-opacity-75 text-white px-3 py-2 rounded-lg">
+                    <div className="text-lg font-bold">{Math.round(sessionMetrics.pace)} WPM</div>
+                    <div className="text-xs opacity-90">Words per minute</div>
+                  </div>
+                  
+                  {/* Top-right: Eye Contact */}
+                  <div className="absolute top-4 right-4 bg-black bg-opacity-75 text-white px-3 py-2 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                      <span className="text-sm font-medium">Good Eye Contact</span>
+                    </div>
+                  </div>
+                  
+                  {/* Bottom-left: Gestures */}
+                  <div className="absolute bottom-20 left-4 bg-black bg-opacity-75 text-white px-3 py-2 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <div className="text-sm font-medium">✋ Natural Gestures</div>
+                    </div>
+                  </div>
+                  
+                  {/* Bottom-right: Volume Level */}
+                  <div className="absolute bottom-20 right-4 bg-black bg-opacity-75 text-white px-3 py-2 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <div className="text-sm font-medium">🔊 {Math.round(sessionMetrics.volume)}%</div>
+                    </div>
+                  </div>
+                </>
+              )}
               
               {/* Recording Controls */}
               <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
@@ -440,7 +473,7 @@ export default function ImprovedPracticePage() {
 
               {/* Recording Indicator */}
               {isRecording && (
-                <div className="absolute top-4 left-4">
+                <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
                   <div className="flex items-center gap-2 bg-red-500 text-white px-3 py-1 rounded-full">
                     <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
                     Recording
@@ -475,6 +508,39 @@ export default function ImprovedPracticePage() {
 
         {/* Live Feedback Sidebar */}
         <div className="space-y-4">
+          {/* Live AI Feedback with Timestamps */}
+          <Card className="p-4">
+            <h3 className="font-semibold mb-3">Live AI Feedback</h3>
+            <div className="space-y-3 max-h-96 overflow-y-auto">
+              {liveFeedback.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-8">
+                  Start recording to see live AI feedback with timestamps
+                </p>
+              ) : (
+                liveFeedback.slice(-10).reverse().map((feedback) => (
+                  <div
+                    key={feedback.id}
+                    className={`p-3 rounded-lg border-l-4 ${
+                      feedback.severity === 'good' ? 'border-green-500 bg-green-50' :
+                      feedback.severity === 'warning' ? 'border-yellow-500 bg-yellow-50' :
+                      'border-blue-500 bg-blue-50'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                        {feedback.category.replace('_', ' ')}
+                      </span>
+                      <span className="text-xs text-gray-400 font-mono bg-white px-2 py-1 rounded">
+                        {formatTime(feedback.timestamp)}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-700">{feedback.feedback}</p>
+                  </div>
+                ))
+              )}
+            </div>
+          </Card>
+
           {/* Practice Badges to Earn */}
           <Card className="p-4">
             <div className="flex items-center gap-2 mb-3">
@@ -514,37 +580,8 @@ export default function ImprovedPracticePage() {
             </div>
             <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
               <p className="text-xs text-blue-700 font-medium">
-                💡 Start practicing to unlock these achievements!
+                Start practicing to unlock these achievements!
               </p>
-            </div>
-          </Card>
-
-          {/* Live Feedback */}
-          <Card className="p-4">
-            <h3 className="font-semibold mb-3">Live AI Feedback</h3>
-            <div className="space-y-3 max-h-96 overflow-y-auto">
-              {liveFeedback.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  Start recording to receive live feedback
-                </p>
-              ) : (
-                liveFeedback.slice(-10).reverse().map((feedback) => (
-                  <div key={feedback.id} className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <Badge
-                        variant={feedback.severity === 'good' ? 'default' : 'secondary'}
-                        className="text-xs"
-                      >
-                        {feedback.category.replace('_', ' ')}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">
-                        {formatTime(feedback.timestamp)}
-                      </span>
-                    </div>
-                    <p className="text-sm">{feedback.feedback}</p>
-                  </div>
-                ))
-              )}
             </div>
           </Card>
         </div>
