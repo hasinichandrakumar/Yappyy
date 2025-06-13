@@ -13,6 +13,11 @@ import {
   personalizeTemplate,
   generateSessionInsights
 } from "./openai-coaching";
+import { 
+  generateWorldClassCoaching, 
+  generateLiveEmpathicFeedback, 
+  updateUserSpeakingProfile 
+} from "./world-class-ai-coach";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
