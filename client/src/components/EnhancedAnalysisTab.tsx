@@ -96,10 +96,10 @@ export default function EnhancedAnalysisTab() {
   const sessionData = calculateSessionData();
 
   const getScoreColor = (score: number) => {
-    if (score >= 85) return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-    if (score >= 70) return 'bg-blue-50 text-blue-700 border-blue-200';
-    if (score >= 50) return 'bg-amber-50 text-amber-700 border-amber-200';
-    return 'bg-red-50 text-red-700 border-red-200';
+    if (score >= 85) return 'bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-700 border-emerald-200';
+    if (score >= 70) return 'bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-700 border-blue-200';
+    if (score >= 50) return 'bg-gradient-to-r from-orange-50 to-yellow-50 text-orange-700 border-orange-200';
+    return 'bg-gradient-to-r from-slate-50 to-gray-50 text-slate-700 border-slate-200';
   };
 
   const formatDate = (dateString: string) => {
@@ -369,12 +369,12 @@ export default function EnhancedAnalysisTab() {
               <div className="space-y-4">
                 {aiInsights?.bodyLanguage ? (
                   <>
-                    <div className="p-4 bg-amber-50/80 backdrop-blur-sm rounded-xl border border-amber-200/50">
+                    <div className="p-4 bg-gradient-to-r from-orange-50/80 to-yellow-50/80 backdrop-blur-sm rounded-xl border border-orange-200/50">
                       <div className="flex items-center gap-2 mb-2">
-                        <AlertTriangle className="h-4 w-4 text-amber-600" />
-                        <span className="text-sm font-medium text-amber-800">Areas for Improvement</span>
+                        <AlertTriangle className="h-4 w-4 text-orange-600" />
+                        <span className="text-sm font-medium text-orange-800">Areas for Improvement</span>
                       </div>
-                      <p className="text-sm text-amber-700">
+                      <p className="text-sm text-orange-700">
                         {aiInsights.bodyLanguage.improvements || "Focus on maintaining eye contact and using purposeful gestures."}
                       </p>
                     </div>

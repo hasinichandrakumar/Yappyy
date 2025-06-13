@@ -235,7 +235,7 @@ export default function ComprehensiveAICoach() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-gray-700">{insight.description}</p>
-                <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
+                <div className="bg-gradient-to-r from-blue-50/80 to-cyan-50/80 p-4 rounded-lg border-l-4 border-blue-400 backdrop-blur-sm">
                   <div className="flex items-start space-x-2">
                     <Lightbulb className="w-5 h-5 text-blue-600 mt-0.5" />
                     <div>
@@ -252,7 +252,7 @@ export default function ComprehensiveAICoach() {
         <TabsContent value="progress" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {progressTrends.map((trend, index) => (
-              <Card key={index}>
+              <Card key={index} className="bg-white/60 backdrop-blur-sm">
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg">{trend.skill}</CardTitle>
@@ -284,7 +284,7 @@ export default function ComprehensiveAICoach() {
                         {trend.trend}
                       </Badge>
                     </div>
-                    <div className="bg-gray-50 p-3 rounded">
+                    <div className="bg-gradient-to-r from-slate-50/80 to-blue-50/80 p-3 rounded backdrop-blur-sm">
                       <p className="text-sm text-gray-700">{trend.recommendation}</p>
                     </div>
                   </div>
