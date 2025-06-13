@@ -79,7 +79,7 @@ export default function HomePage() {
 
             {/* Tone - 38% */}
             <div className="text-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
-              <div className="text-6xl font-bold bg-gradient-to-br from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-4">
+              <div className="text-6xl font-bold bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] bg-clip-text text-transparent mb-4">
                 38%
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Tone of Voice</h3>
@@ -90,7 +90,7 @@ export default function HomePage() {
 
             {/* Body Language - 55% */}
             <div className="text-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
-              <div className="text-6xl font-bold bg-gradient-to-br from-purple-600 to-violet-600 bg-clip-text text-transparent mb-4">
+              <div className="text-6xl font-bold bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] bg-clip-text text-transparent mb-4">
                 55%
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Body Language</h3>
@@ -102,7 +102,7 @@ export default function HomePage() {
 
           <div className="text-center mt-12">
             <p className="text-lg font-semibold text-gray-800 mb-4">
-              That's why Yappyy trains all three aspects of communication
+              That's why we coach 100% of you
             </p>
             <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-600">
               <div className="flex items-center gap-2">
