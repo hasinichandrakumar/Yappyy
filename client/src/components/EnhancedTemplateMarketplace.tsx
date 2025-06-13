@@ -1151,21 +1151,24 @@ Tips:
       </div>
 
       {/* Category Filters */}
-      <div className="flex flex-wrap gap-2">
-        {templateCategories.map((category) => {
-          const IconComponent = category.icon;
-          return (
-            <Button
-              key={category.id}
-              variant={selectedCategory === category.id ? "default" : "outline"}
-              onClick={() => setSelectedCategory(category.id)}
-              className="flex items-center gap-2"
-            >
-              <IconComponent className="h-4 w-4" />
-              {category.label}
-            </Button>
-          );
-        })}
+      <div className="w-full overflow-x-auto">
+        <div className="flex gap-2 min-w-max pb-2">
+          {templateCategories.map((category) => {
+            const IconComponent = category.icon;
+            return (
+              <Button
+                key={category.id}
+                variant={selectedCategory === category.id ? "default" : "outline"}
+                onClick={() => setSelectedCategory(category.id)}
+                className="flex items-center gap-2 whitespace-nowrap flex-shrink-0"
+              >
+                <IconComponent className="h-4 w-4" />
+                <span className="hidden sm:inline">{category.label}</span>
+                <span className="sm:hidden">{category.label.split(' ')[0]}</span>
+              </Button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Results Summary */}
