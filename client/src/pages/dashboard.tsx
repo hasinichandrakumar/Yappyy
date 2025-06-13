@@ -20,8 +20,9 @@ import SpeechDNAWithSession from "@/components/SpeechDNAWithSession";
 import SpeechROIAnalyzer from "@/components/SpeechROIAnalyzer";
 import SimpleAICoach from "@/components/SimpleAICoach";
 import ScriptTemplates from "@/components/ScriptTemplates";
-import BadgeSystem from "@/components/BadgeSystem";
+import EnhancedBadgeSystem from "@/components/EnhancedBadgeSystem";
 import AIPracticeRoleplay from "@/components/AIPracticeRoleplay";
+import PracticeGoalsWithBadges from "@/components/PracticeGoalsWithBadges";
 import BodyCueTimeline from "@/components/BodyCueTimeline";
 import SpeechFingerprintGenerator from "@/components/SpeechFingerprintGenerator";
 import AdvancedPracticeHub from "@/components/AdvancedPracticeHub";
@@ -148,7 +149,7 @@ export default function Dashboard() {
           </TabsContent>
 
           <TabsContent value="badges" className="space-y-6">
-            <BadgeSystem />
+            <EnhancedBadgeSystem />
           </TabsContent>
 
           <TabsContent value="help" className="space-y-6">

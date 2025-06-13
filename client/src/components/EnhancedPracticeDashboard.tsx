@@ -7,6 +7,7 @@ import PracticePathwaySelection from "./PracticePathwaySelection";
 import SpeechInputSelector from "./SpeechInputSelector";
 import EnhancedPracticeHubClean from "./EnhancedPracticeHubClean";
 import LVIEFeedbackEngine from "./LVIEFeedbackEngine";
+import PracticeGoalsWithBadges from "./PracticeGoalsWithBadges";
 import { 
   Target, 
   FileText, 

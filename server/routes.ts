@@ -550,6 +550,153 @@ Provide detailed feedback on content structure, voice modulation advice, and bod
     }
   });
 
+  // User achievements endpoint
+  app.get("/api/user-achievements", requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user?.replit?.id || req.user?.id || 'demo-user';
+      const achievements = await storage.getUserAchievements(userId);
+      res.json(achievements);
+    } catch (error) {
+      console.error("Error fetching user achievements:", error);
+      res.status(500).json({ error: "Failed to fetch achievements" });
+    }
+  });
+
+  // Update achievement progress
+  app.post("/api/achievements/update", requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.user?.replit?.id || req.user?.id || 'demo-user';
+      const { achievementId, progress, metadata } = req.body;
+
+      // Get current user sessions and calculate progress
+      const sessions = await storage.getUserPracticeSessions(userId);
+      const currentAchievements = await storage.getUserAchievements(userId);
+      
+      let newlyUnlocked = false;
+      let updatedAchievement = null;
+
+      // Check if achievement should be unlocked based on real user data
+      const achievementCriteria = {
+        'first-speech': () => sessions.length >= 1,
+        'dedicated-speaker': () => sessions.length >= 5,
+        'consistency-champion': () => {
+          // Calculate streak from sessions
+          const today = new Date();
+          let streak = 0;
+          const sortedSessions = sessions
+            .map(s => new Date(s.createdAt))
+            .sort((a, b) => b.getTime() - a.getTime());
+          
+          for (let i = 0; i < sortedSessions.length; i++) {
+            const sessionDate = sortedSessions[i];
+            const daysDiff = Math.floor((today.getTime() - sessionDate.getTime()) / (1000 * 60 * 60 * 24));
+            if (daysDiff === i) {
+              streak++;
+            } else {
+              break;
+            }
+          }
+          return streak >= 3;
+        },
+        'confident-speaker': () => {
+          const maxConfidence = Math.max(...sessions.map(s => s.confidenceScore || 0));
+          return maxConfidence >= 80;
+        },
+        'speech-master': () => sessions.length >= 25,
+        'perfect-score': () => {
+          const maxScore = Math.max(...sessions.map(s => s.overallScore || 0));
+          return maxScore >= 100;
+        }
+      };
+
+      // Check if achievement should be unlocked
+      const shouldUnlock = achievementCriteria[achievementId as keyof typeof achievementCriteria];
+      if (shouldUnlock && shouldUnlock()) {
+        // Check if not already unlocked
+        const existingAchievement = currentAchievements.find(a => a.achievementId === achievementId);
+        if (!existingAchievement) {
+          // Unlock achievement
+          updatedAchievement = await storage.addUserAchievement({
+            userId,
+            achievementId,
+            unlockedAt: new Date(),
+            progress: 100,
+            metadata: metadata || {}
+          });
+          newlyUnlocked = true;
+        }
+      }
+
+      res.json({
+        success: true,
+        newlyUnlocked,
+        achievement: updatedAchievement
+      });
+    } catch (error: any) {
+      console.error("Error updating achievement:", error);
+      res.status(500).json({ message: "Failed to update achievement", error: error.message });
+    }
+  });
+
+  // Speech coaching chat endpoint (OpenAI only)
+  app.post("/api/speech-coaching-chat", requireAuth, async (req: any, res) => {
+    try {
+      const { message, transcript, purpose, chatHistory } = req.body;
+
+      if (!message) {
+        return res.status(400).json({ message: "Message is required" });
+      }
+
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: `You are an expert speech coach with years of experience helping people improve their public speaking skills. You provide personalized, actionable advice based on the user's practice sessions and specific questions.
+
+Key guidelines:
+- Be encouraging and supportive while providing honest feedback
+- Give specific, actionable recommendations
+- Reference the user's transcript and session data when relevant
+- Tailor advice to their speech purpose (${purpose || 'general presentation'})
+- Keep responses conversational and helpful
+- Focus on practical improvements they can implement immediately
+
+Session context:
+- Purpose: ${purpose || 'general presentation'}
+- Transcript: ${transcript || 'No transcript available'}
+- Chat history: ${JSON.stringify(chatHistory || [])}`
+            },
+            {
+              role: "user",
+              content: message
+            }
+          ],
+          temperature: 0.7,
+          max_tokens: 500
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`OpenAI API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const aiResponse = data.choices[0].message.content;
+      
+      res.json({ response: aiResponse });
+    } catch (error: any) {
+      console.error("Error in speech coaching chat:", error);
+      res.status(500).json({ message: "Failed to get coaching response", error: error.message });
+    }
+  });
+
   // Real-time transcription endpoint
   app.post("/api/transcribe", async (req, res) => {
     try {
