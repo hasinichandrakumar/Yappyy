@@ -101,21 +101,29 @@ export default function HomePage() {
           </div>
 
           <div className="text-center mt-12">
-            <p className="text-lg font-semibold text-gray-800 mb-4">
-              That's why we coach 100% of you
-            </p>
-            <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-600">
+            <div className="mb-6">
+              <p className="text-lg font-semibold text-gray-800 mb-2">
+                That's why we coach
+              </p>
+              <div className="text-7xl md:text-8xl font-bold bg-gradient-to-br from-[#1e40af] to-[#0ea5e9] bg-clip-text text-transparent mb-2">
+                100%
+              </div>
+              <p className="text-xl font-bold text-gray-900">
+                of you
+              </p>
+            </div>
+            <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-600">
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-green-500" />
-                <span>Voice analysis & coaching</span>
+                <span className="font-medium">Voice analysis & coaching</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-green-500" />
-                <span>Tone & delivery feedback</span>
+                <span className="font-medium">Tone & delivery feedback</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-green-500" />
-                <span>Body language tracking</span>
+                <span className="font-medium">Body language tracking</span>
               </div>
             </div>
           </div>
