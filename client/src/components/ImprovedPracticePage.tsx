@@ -186,6 +186,38 @@ export default function ImprovedPracticePage() {
     }
   }, []);
 
+  // Function to highlight filler words in transcript
+  const highlightFillerWords = useCallback((text: string) => {
+    if (!text) return text;
+    
+    const fillerWords = [
+      'um', 'uh', 'er', 'ah', 'eh', 'mm', 'hmm',
+      'like', 'so', 'well', 'okay', 'ok', 'right',
+      'you know', 'i mean', 'sort of', 'kind of',
+      'actually', 'basically', 'literally', 'obviously',
+      'essentially', 'definitely', 'absolutely',
+      'totally', 'really', 'very', 'quite',
+      'just', 'maybe', 'perhaps', 'anyway',
+      'whatever', 'somehow', 'meanwhile',
+      'furthermore', 'moreover', 'however',
+      'therefore', 'thus', 'hence',
+      'and stuff', 'or something', 'or whatever',
+      'and things', 'and all that'
+    ];
+
+    let highlightedText = text;
+    
+    // Sort fillers by length (longest first) to avoid partial matches
+    const sortedFillers = fillerWords.sort((a, b) => b.length - a.length);
+    
+    sortedFillers.forEach(filler => {
+      const regex = new RegExp(`\\b${filler.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+      highlightedText = highlightedText.replace(regex, `<span class="bg-red-200 text-red-800 px-1 rounded font-medium">${filler}</span>`);
+    });
+    
+    return highlightedText;
+  }, []);
+
   // OpenAI Realtime Vision Analysis
   const analyzeVideoFrameWithAI = useCallback(async () => {
     if (!videoRef.current || !canvasRef.current || !isRecording) return;
@@ -1900,9 +1932,10 @@ export default function ImprovedPracticePage() {
                   </div>
                   <div className="bg-white border border-slate-200 rounded-xl p-6 max-h-64 overflow-y-auto shadow-sm">
                     {transcript ? (
-                      <p className="text-slate-700 leading-relaxed whitespace-pre-wrap text-sm">
-                        {transcript}
-                      </p>
+                      <div 
+                        className="text-slate-700 leading-relaxed whitespace-pre-wrap text-sm"
+                        dangerouslySetInnerHTML={{ __html: highlightFillerWords(transcript) }}
+                      />
                     ) : (
                       <div className="text-center py-8">
                         <Mic className="h-12 w-12 text-slate-300 mx-auto mb-3" />
