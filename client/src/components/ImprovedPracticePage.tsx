@@ -264,28 +264,21 @@ export default function ImprovedPracticePage() {
             
             // Count words in this segment
             const words = result[0].transcript.split(' ').filter((word: string) => word.trim().length > 0);
-            setWordCount(prev => {
-              const newWordCount = prev + words.length;
+            setWordCount(prev => prev + words.length);
+            
+            // Update WPM immediately with current session duration
+            setSessionMetrics(prevMetrics => {
+              const newWordCount = prevMetrics.wordsSpoken + words.length;
+              const elapsed = Math.max(1, sessionDuration);
+              const currentWPM = Math.round((newWordCount / elapsed) * 60);
               
-              // Calculate current time elapsed in seconds
-              const currentTime = Date.now();
-              const startTime = sessionStartTime.current || currentTime;
-              const elapsed = Math.max(1, Math.floor((currentTime - startTime) / 1000));
+              console.log('WPM Update:', { newWordCount, elapsed, currentWPM, sessionDuration });
               
-              // Update WPM immediately when new words are detected
-              const currentWPM = elapsed >= 10 ? 
-                Math.round((newWordCount / (elapsed / 60))) :
-                Math.round((newWordCount / elapsed) * 60);
-              
-              console.log('WPM Debug:', { newWordCount, elapsed, currentWPM }); // Debug log
-              
-              setSessionMetrics(prevMetrics => ({
+              return {
                 ...prevMetrics,
                 pace: currentWPM,
                 wordsSpoken: newWordCount
-              }));
-              
-              return newWordCount;
+              };
             });
             
             // Comprehensive filler word detection
@@ -483,8 +476,21 @@ export default function ImprovedPracticePage() {
         updateSessionMetrics();
       }, 1000);
 
-      // Initialize session start time for accurate WPM calculation
+      // Initialize session start time and reset metrics for accurate WPM calculation
       sessionStartTime.current = Date.now();
+      setSessionDuration(0);
+      setWordCount(0);
+      setTranscript('');
+      
+      // Reset session metrics to start fresh
+      setSessionMetrics({
+        volume: 50,
+        clarity: 50,
+        pace: 0,
+        wordsSpoken: 0,
+        fillerWords: [],
+        bodyLanguageScore: 50
+      });
       
       setIsRecording(true);
       
@@ -692,28 +698,24 @@ export default function ImprovedPracticePage() {
 
   // Update session metrics with proper WPM calculation
   const updateSessionMetrics = useCallback(() => {
-    // Calculate WPM: ensure we have at least 10 seconds for meaningful calculation
-    let currentWPM = 0;
-    if (sessionDuration >= 10) {
-      currentWPM = Math.round((wordCount / (sessionDuration / 60)));
-    } else if (sessionDuration > 0 && wordCount > 0) {
-      // For early seconds, estimate based on current rate
-      currentWPM = Math.round((wordCount / sessionDuration) * 60);
-    }
-    
     const fillerAnalysis = analyzeFillerWords(transcript);
     
     setSessionMetrics(prev => {
+      // Calculate WPM using current word count and session duration
+      const currentWPM = sessionDuration > 0 ? Math.round((wordCount / sessionDuration) * 60) : 0;
+      
       // Smooth transitions for volume and clarity to prevent glitching
       const targetVolume = Math.min(100, Math.max(20, 60 + Math.random() * 30));
       const targetClarity = Math.min(100, Math.max(70, 85 + Math.random() * 15));
       const targetBodyLanguage = Math.min(100, Math.max(50, (eyeContactScore * 60) + (postureScore * 0.4)));
       
+      console.log('Timer WPM Update:', { wordCount, sessionDuration, currentWPM });
+      
       return {
         ...prev,
-        volume: Math.round(prev.volume * 0.8 + targetVolume * 0.2), // Smooth transition
-        clarity: Math.round(prev.clarity * 0.8 + targetClarity * 0.2), // Smooth transition
-        pace: currentWPM, // Direct update for real-time WPM
+        volume: Math.round(prev.volume * 0.8 + targetVolume * 0.2),
+        clarity: Math.round(prev.clarity * 0.8 + targetClarity * 0.2),
+        pace: currentWPM, // Real-time WPM calculation
         wordsSpoken: wordCount,
         fillerWords: fillerAnalysis.detectedFillers,
         bodyLanguageScore: Math.round(prev.bodyLanguageScore * 0.9 + targetBodyLanguage * 0.1)
