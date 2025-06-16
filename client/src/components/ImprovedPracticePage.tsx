@@ -186,6 +186,126 @@ export default function ImprovedPracticePage() {
     }
   }, []);
 
+  // Format timestamp for display (seconds to mm:ss)
+  const formatTime = useCallback((seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  }, []);
+
+  // Generate personalized live feedback based on real metrics
+  const generatePersonalizedLiveFeedback = useCallback(() => {
+    const currentWPM = sessionMetrics.pace;
+    const fillerCount = sessionMetrics.fillerWords.length;
+    const eyeContactPercentage = Math.round(eyeContactScore * 100);
+    const bodyLanguageScore = sessionMetrics.bodyLanguageScore;
+    const sessionTime = sessionDuration;
+
+    let feedback: LiveFeedbackItem | null = null;
+
+    // Pace-based feedback
+    if (currentWPM > 180) {
+      feedback = {
+        id: Date.now().toString(),
+        timestamp: sessionTime,
+        category: 'voice',
+        feedback: `Speaking at ${currentWPM} WPM - consider slowing down for better audience comprehension`,
+        severity: 'warning'
+      };
+    } else if (currentWPM < 120 && currentWPM > 0) {
+      feedback = {
+        id: Date.now().toString(),
+        timestamp: sessionTime,
+        category: 'voice',
+        feedback: `At ${currentWPM} WPM - you can speak with more energy and pace`,
+        severity: 'improvement'
+      };
+    } else if (currentWPM >= 140 && currentWPM <= 160) {
+      feedback = {
+        id: Date.now().toString(),
+        timestamp: sessionTime,
+        category: 'voice',
+        feedback: `Perfect pace at ${currentWPM} WPM - ideal for audience engagement`,
+        severity: 'good'
+      };
+    }
+
+    // Eye contact feedback
+    if (eyeContactPercentage > 85) {
+      feedback = {
+        id: Date.now().toString(),
+        timestamp: sessionTime,
+        category: 'body_language',
+        feedback: `Excellent eye contact at ${eyeContactPercentage}% - you're connecting well with your audience`,
+        severity: 'good'
+      };
+    } else if (eyeContactPercentage < 50) {
+      feedback = {
+        id: Date.now().toString(),
+        timestamp: sessionTime,
+        category: 'body_language',
+        feedback: `Eye contact at ${eyeContactPercentage}% - look directly at the camera more often`,
+        severity: 'warning'
+      };
+    }
+
+    // Filler word feedback (specific to session progress)
+    if (fillerCount > 0 && sessionTime > 30) {
+      const fillerRate = Math.round((fillerCount / sessionTime) * 60);
+      if (fillerRate > 3) {
+        feedback = {
+          id: Date.now().toString(),
+          timestamp: sessionTime,
+          category: 'voice',
+          feedback: `${fillerCount} filler words detected (${fillerRate}/min) - practice strategic pauses`,
+          severity: 'warning'
+        };
+      }
+    }
+
+    // Body language feedback
+    if (bodyLanguageScore > 80) {
+      feedback = {
+        id: Date.now().toString(),
+        timestamp: sessionTime,
+        category: 'body_language',
+        feedback: `Strong presence with ${bodyLanguageScore}% body language score - you look confident and engaged`,
+        severity: 'good'
+      };
+    } else if (bodyLanguageScore < 60) {
+      feedback = {
+        id: Date.now().toString(),
+        timestamp: sessionTime,
+        category: 'body_language',
+        feedback: `Body language at ${bodyLanguageScore}% - check your posture and maintain energy`,
+        severity: 'improvement'
+      };
+    }
+
+    // Session progress feedback
+    if (sessionTime === 60) {
+      feedback = {
+        id: Date.now().toString(),
+        timestamp: sessionTime,
+        category: 'content',
+        feedback: `One minute milestone! You've spoken ${wordCount} words - keep the momentum going`,
+        severity: 'good'
+      };
+    } else if (sessionTime === 120) {
+      feedback = {
+        id: Date.now().toString(),
+        timestamp: sessionTime,
+        category: 'content',
+        feedback: `Two minutes in - strong endurance! Your average pace is ${Math.round(wordCount / 2)} words per minute`,
+        severity: 'good'
+      };
+    }
+
+    if (feedback) {
+      setLiveFeedback(prev => [...prev.slice(-4), feedback]);
+    }
+  }, [sessionMetrics, eyeContactScore, sessionDuration, wordCount]);
+
   // Function to highlight filler words in transcript
   const highlightFillerWords = useCallback((text: string) => {
     if (!text) return text;
@@ -361,12 +481,20 @@ export default function ImprovedPracticePage() {
                 fillerWords: [...prev.fillerWords, ...newFillers]
               }));
               
-              // Generate live feedback for filler words
+              // Generate personalized live feedback for filler words
+              const fillerFeedbackMessages = [
+                `Try replacing "${newFillers[0]}" with a brief pause to sound more confident`,
+                `Consider slowing down instead of using "${newFillers[0]}" - your content is strong`,
+                `"${newFillers[0]}" detected - take a breath and continue with authority`,
+                `Replace "${newFillers[0]}" with silence - your audience will appreciate the clarity`,
+                `Strong content! Just eliminate "${newFillers[0]}" for more polished delivery`
+              ];
+              
               const feedback: LiveFeedbackItem = {
                 id: Date.now().toString(),
-                timestamp: Date.now(),
+                timestamp: sessionDuration, // Use actual session time
                 category: 'voice',
-                feedback: `Detected filler word: "${newFillers[0]}". Try pausing instead.`,
+                feedback: fillerFeedbackMessages[Math.floor(Math.random() * fillerFeedbackMessages.length)],
                 severity: 'warning'
               };
               setLiveFeedback(prev => [...prev.slice(-4), feedback]);
@@ -421,28 +549,14 @@ export default function ImprovedPracticePage() {
         return goal;
       }));
 
-      // Generate periodic live feedback
-      if (Math.random() < 0.3) { // 30% chance every 2 seconds
-        const feedbackOptions = [
-          { category: 'voice' as const, feedback: 'Great pace and clarity!', severity: 'good' as const },
-          { category: 'body_language' as const, feedback: 'Excellent eye contact', severity: 'good' as const },
-          { category: 'content' as const, feedback: 'Clear and engaging delivery', severity: 'good' as const },
-          { category: 'voice' as const, feedback: 'Try varying your tone more', severity: 'improvement' as const },
-          { category: 'body_language' as const, feedback: 'Stand up straighter', severity: 'improvement' as const }
-        ];
-        
-        const randomFeedback = feedbackOptions[Math.floor(Math.random() * feedbackOptions.length)];
-        const feedback: LiveFeedbackItem = {
-          id: Date.now().toString(),
-          timestamp: Date.now(),
-          ...randomFeedback
-        };
-        setLiveFeedback(prev => [...prev.slice(-4), feedback]);
+      // Generate personalized live feedback based on actual metrics
+      if (Math.random() < 0.25) { // 25% chance every 2 seconds for quality feedback
+        generatePersonalizedLiveFeedback();
       }
     }, 2000);
 
     return () => clearInterval(interval);
-  }, [isRecording, eyeContactScore, sessionMetrics.fillerWords.length]);
+  }, [isRecording, eyeContactScore, sessionMetrics.fillerWords.length, generatePersonalizedLiveFeedback]);
 
   // Session timer effect
   useEffect(() => {
@@ -840,11 +954,7 @@ export default function ImprovedPracticePage() {
 
 
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
+
 
   // AI-powered content analysis functions
   const generateContentStrengths = async (transcript: string, purpose: string) => {
