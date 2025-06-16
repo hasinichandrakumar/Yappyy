@@ -63,6 +63,9 @@ export default function ImprovedPracticePage() {
   const detectionIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const sessionStartTime = useRef<number | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const microphoneRef = useRef<MediaStreamAudioSourceNode | null>(null);
   const { toast } = useToast();
 
   // Initialize session name with sequential numbering only once
@@ -183,6 +186,36 @@ export default function ImprovedPracticePage() {
       setPostureScore(0);
       setShoulderAlignment("not-detected");
       setHeadPosition("not-detected");
+    }
+  }, []);
+
+  // Real-time volume detection
+  const detectVolume = useCallback(() => {
+    if (!analyserRef.current) return 0;
+
+    const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
+    analyserRef.current.getByteFrequencyData(dataArray);
+    
+    const sum = dataArray.reduce((acc, value) => acc + value, 0);
+    const average = sum / dataArray.length;
+    return Math.round((average / 255) * 100);
+  }, []);
+
+  // Setup audio analysis for real-time volume
+  const setupAudioAnalysis = useCallback((stream: MediaStream) => {
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const analyser = audioContext.createAnalyser();
+      const microphone = audioContext.createMediaStreamSource(stream);
+      
+      analyser.fftSize = 256;
+      microphone.connect(analyser);
+      
+      audioContextRef.current = audioContext;
+      analyserRef.current = analyser;
+      microphoneRef.current = microphone;
+    } catch (error) {
+      console.error('Audio analysis setup failed:', error);
     }
   }, []);
 
@@ -524,23 +557,26 @@ export default function ImprovedPracticePage() {
 
 
 
-  // Real-time metrics simulation
+  // Real-time metrics update with actual audio analysis
   useEffect(() => {
     if (!isRecording) return;
 
     const interval = setInterval(() => {
+      // Get real-time volume from audio analysis
+      const currentVolume = detectVolume();
+      
+      // Update metrics with real values
       setSessionMetrics(prev => ({
         ...prev,
-        volume: Math.round(Math.random() * 40 + 60), // 60-100
-        clarity: Math.round(Math.random() * 30 + 70), // 70-100
-        pace: Math.round(Math.random() * 40 + 120), // 120-160 WPM
-        bodyLanguageScore: Math.round(eyeContactScore * 100)
+        volume: currentVolume,
+        clarity: Math.min(100, Math.max(70, 85 + (currentVolume - 50) * 0.3)), // Volume affects clarity
+        bodyLanguageScore: Math.round(eyeContactScore * 60 + postureScore * 0.4)
       }));
 
       // Update session goals progress
       setCurrentGoals(prev => prev.map(goal => {
         if (goal.name === "Volume Control") {
-          return { ...goal, progress: Math.min(goal.target, goal.progress + Math.random() * 10) };
+          return { ...goal, progress: Math.min(goal.target, currentVolume) };
         }
         if (goal.name === "Reduce Filler Words") {
           const fillerCount = sessionMetrics.fillerWords.length;
@@ -553,10 +589,10 @@ export default function ImprovedPracticePage() {
       if (Math.random() < 0.25) { // 25% chance every 2 seconds for quality feedback
         generatePersonalizedLiveFeedback();
       }
-    }, 2000);
+    }, 1000); // Update every second for responsive metrics
 
     return () => clearInterval(interval);
-  }, [isRecording, eyeContactScore, sessionMetrics.fillerWords.length, generatePersonalizedLiveFeedback]);
+  }, [isRecording, eyeContactScore, postureScore, sessionMetrics.fillerWords.length, generatePersonalizedLiveFeedback, detectVolume]);
 
   // Session timer effect
   useEffect(() => {
@@ -593,6 +629,9 @@ export default function ImprovedPracticePage() {
         videoRef.current.srcObject = stream;
         videoRef.current.play();
       }
+
+      // Setup audio analysis for real-time volume detection
+      setupAudioAnalysis(stream);
 
       const mediaRecorder = new MediaRecorder(stream, {
         mimeType: 'video/webm;codecs=vp9'
@@ -885,6 +924,19 @@ export default function ImprovedPracticePage() {
       // Stop eye contact detection
       if (detectionIntervalRef.current) {
         clearInterval(detectionIntervalRef.current);
+      }
+
+      // Cleanup audio analysis
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+        audioContextRef.current = null;
+      }
+      if (analyserRef.current) {
+        analyserRef.current = null;
+      }
+      if (microphoneRef.current) {
+        microphoneRef.current.disconnect();
+        microphoneRef.current = null;
       }
 
       // Stop camera stream
