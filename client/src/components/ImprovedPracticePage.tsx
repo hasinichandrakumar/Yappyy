@@ -557,30 +557,28 @@ export default function ImprovedPracticePage() {
             // Update full transcript
             setTranscript(prev => prev + (prev ? ' ' : '') + result[0].transcript);
             
-            // Count words and update metrics immediately
+            // Count words and update all metrics atomically
             const words = result[0].transcript.split(' ').filter((word: string) => word.trim().length > 0);
-            
-            setWordCount(prev => {
-              const newWordCount = prev + words.length;
-              return newWordCount;
-            });
-
-            // Calculate and update WPM immediately
+            const newWordCount = wordCount + words.length;
             const elapsed = Math.max(1, sessionDuration);
-            const currentWPM = elapsed > 0 ? Math.round(((wordCount + words.length) / elapsed) * 60) : 0;
+            const currentWPM = elapsed > 0 ? Math.round((newWordCount / elapsed) * 60) : 0;
             
             console.log('🎤 Speech detected:', { 
               wordsAdded: words.length, 
-              totalWords: wordCount + words.length, 
+              totalWords: newWordCount, 
               elapsed, 
               currentWPM, 
               sessionDuration 
             });
             
+            // Update word count
+            setWordCount(newWordCount);
+            
+            // Update session metrics immediately
             setSessionMetrics(prevMetrics => ({
               ...prevMetrics,
               pace: currentWPM,
-              wordsSpoken: wordCount + words.length
+              wordsSpoken: newWordCount
             }));
             
             // Comprehensive filler word detection
@@ -674,7 +672,7 @@ export default function ImprovedPracticePage() {
 
 
 
-  // Real-time metrics update with comprehensive logging
+  // Real-time metrics update with synchronized state
   useEffect(() => {
     if (!isRecording) return;
 
@@ -682,11 +680,11 @@ export default function ImprovedPracticePage() {
       // Get real-time volume from audio analysis
       const currentVolume = detectVolume();
       
-      // Calculate WPM based on current word count and duration
+      // Calculate WPM based on current session duration and word count
       const elapsed = Math.max(1, sessionDuration);
       const currentWPM = elapsed > 0 ? Math.round((wordCount / elapsed) * 60) : 0;
       
-      // Update metrics with real values
+      // Update all metrics in one atomic operation
       setSessionMetrics(prev => {
         const newMetrics = {
           ...prev,
@@ -698,10 +696,10 @@ export default function ImprovedPracticePage() {
         };
         
         console.log('📊 Live Metrics Update:', {
-          volume: currentVolume,
+          volume: Math.round(currentVolume),
           WPM: currentWPM,
-          wordCount,
-          elapsed,
+          wordCount: wordCount,
+          sessionDuration: sessionDuration,
           eyeContactScore: Math.round(eyeContactScore),
           postureScore: Math.round(postureScore),
           fillerWords: prev.fillerWords.length,
@@ -711,41 +709,27 @@ export default function ImprovedPracticePage() {
         return newMetrics;
       });
 
-      // Update session goals progress
+      // Update session goals with current metrics
       setCurrentGoals(prev => prev.map(goal => {
         if (goal.name === "Volume Control") {
           return { ...goal, progress: Math.min(goal.target, currentVolume) };
         }
         if (goal.name === "Reduce Filler Words") {
-          const fillerCount = sessionMetrics.fillerWords.length;
-          return { ...goal, progress: Math.max(0, goal.target - fillerCount) };
+          return { ...goal, progress: Math.max(0, goal.target - sessionMetrics.fillerWords.length) };
         }
         return goal;
       }));
 
-      // Generate personalized live feedback based on actual metrics
-      if (Math.random() < 0.25) {
+      // Generate personalized live feedback
+      if (Math.random() < 0.2) {
         generatePersonalizedLiveFeedback();
       }
-    }, 1000);
+    }, 500); // Update every 500ms for smoother metrics
 
     return () => clearInterval(interval);
-  }, [isRecording, eyeContactScore, postureScore, sessionMetrics.fillerWords.length, generatePersonalizedLiveFeedback, detectVolume, wordCount, sessionDuration]);
+  }, [isRecording, eyeContactScore, postureScore, generatePersonalizedLiveFeedback, detectVolume, wordCount, sessionDuration, sessionMetrics.fillerWords.length]);
 
-  // Session timer effect
-  useEffect(() => {
-    if (!isRecording) return;
-
-    timerRef.current = setInterval(() => {
-      setSessionDuration(prev => prev + 1);
-    }, 1000);
-
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-    };
-  }, [isRecording]);
+  // Consolidated session timer - removed duplicate to fix WPM calculation
 
   // Start camera and recording
   const startRecording = useCallback(async () => {
@@ -786,17 +770,9 @@ export default function ImprovedPracticePage() {
         analyzeVideoFrameWithAI();
       }, 2000); // Analyze every 2 seconds for real-time AI vision feedback
 
-      // Start session timer with optimized updates
+      // Start session timer only - metrics handled by separate useEffect
       timerRef.current = setInterval(() => {
         setSessionDuration(prev => prev + 1);
-        
-        // Generate live feedback less frequently to reduce noise
-        if (Math.random() > 0.95) { // 5% chance each second for quality feedback
-          generateLiveFeedback();
-        }
-        
-        // Update metrics every second for real-time WPM
-        updateSessionMetrics();
       }, 1000);
 
       // Initialize session start time and reset metrics for accurate WPM calculation
