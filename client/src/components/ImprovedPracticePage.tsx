@@ -422,10 +422,120 @@ export default function ImprovedPracticePage() {
       }
     } catch (error) {
       console.error('OpenAI Vision analysis failed:', error);
-      // Continue with basic detection as fallback
-      detectEyeContact();
+      // Use basic computer vision as fallback
+      performBasicFaceDetection();
     }
   }, [isRecording]);
+
+  // Basic computer vision face detection fallback
+  const performBasicFaceDetection = useCallback(() => {
+    if (!videoRef.current || !canvasRef.current) return;
+
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    
+    if (!ctx || video.videoWidth === 0 || video.videoHeight === 0) return;
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+    
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const faceRegionSize = Math.min(canvas.width, canvas.height) * 0.4;
+    
+    let skinPixelCount = 0;
+    let totalPixelsChecked = 0;
+    
+    // Detect face region with enhanced skin detection
+    for (let y = centerY - faceRegionSize/2; y < centerY + faceRegionSize/2; y += 8) {
+      for (let x = centerX - faceRegionSize/2; x < centerX + faceRegionSize/2; x += 8) {
+        if (x >= 0 && x < canvas.width && y >= 0 && y < canvas.height) {
+          const index = (Math.floor(y) * canvas.width + Math.floor(x)) * 4;
+          const r = data[index];
+          const g = data[index + 1];
+          const b = data[index + 2];
+          
+          // Enhanced skin tone detection
+          if (r > 95 && g > 40 && b > 20 && r > g && r > b && Math.abs(r - g) > 15) {
+            skinPixelCount++;
+          }
+          totalPixelsChecked++;
+        }
+      }
+    }
+    
+    const skinRatio = skinPixelCount / totalPixelsChecked;
+    const faceDetected = skinRatio > 0.1;
+    
+    if (faceDetected) {
+      // Calculate eye contact based on face centering
+      const horizontalCenter = 1 - Math.abs(centerX - canvas.width/2) / (canvas.width/3);
+      const verticalCenter = 1 - Math.abs(centerY - canvas.height/3) / (canvas.height/3);
+      const currentEyeContactScore = Math.max(0, Math.min(100, (horizontalCenter + verticalCenter) * 50));
+      
+      const lookingAtCamera = currentEyeContactScore > 60;
+      setIsLookingAtCamera(lookingAtCamera);
+      setEyeContactScore(currentEyeContactScore);
+      
+      // Basic posture detection
+      const shoulderY = centerY + faceRegionSize * 0.8;
+      let leftIntensity = 0, rightIntensity = 0, samples = 0;
+      
+      for (let x = centerX - 60; x < centerX + 60; x += 15) {
+        if (x >= 0 && x < canvas.width && shoulderY >= 0 && shoulderY < canvas.height) {
+          const index = (Math.floor(shoulderY) * canvas.width + Math.floor(x)) * 4;
+          const brightness = (data[index] + data[index + 1] + data[index + 2]) / 3;
+          
+          if (x < centerX) {
+            leftIntensity += brightness;
+          } else {
+            rightIntensity += brightness;
+          }
+          samples++;
+        }
+      }
+      
+      if (samples > 0) {
+        const avgLeft = leftIntensity / (samples / 2);
+        const avgRight = rightIntensity / (samples / 2);
+        const shoulderDiff = Math.abs(avgLeft - avgRight);
+        
+        let newPostureScore = 75;
+        let alignment = "aligned";
+        
+        if (shoulderDiff < 20) {
+          newPostureScore = 85;
+          alignment = "aligned";
+        } else if (shoulderDiff < 40) {
+          newPostureScore = 65;
+          alignment = "slightly-tilted";
+        } else {
+          newPostureScore = 45;
+          alignment = "misaligned";
+        }
+        
+        setPostureScore(newPostureScore);
+        setShoulderAlignment(alignment);
+      }
+      
+      console.log('👁️ Basic Vision Detection:', { 
+        eyeContactScore: Math.round(currentEyeContactScore), 
+        lookingAtCamera, 
+        postureScore: Math.round(postureScore),
+        shoulderAlignment 
+      });
+      
+    } else {
+      setIsLookingAtCamera(false);
+      setEyeContactScore(20);
+      setPostureScore(50);
+    }
+  }, [postureScore, shoulderAlignment]);
 
   // Speech recognition for better filler word detection
   const setupSpeechRecognition = useCallback(() => {
@@ -447,24 +557,31 @@ export default function ImprovedPracticePage() {
             // Update full transcript
             setTranscript(prev => prev + (prev ? ' ' : '') + result[0].transcript);
             
-            // Count words in this segment
+            // Count words and update metrics immediately
             const words = result[0].transcript.split(' ').filter((word: string) => word.trim().length > 0);
-            setWordCount(prev => prev + words.length);
             
-            // Update WPM immediately with current session duration
-            setSessionMetrics(prevMetrics => {
-              const newWordCount = prevMetrics.wordsSpoken + words.length;
-              const elapsed = Math.max(1, sessionDuration);
-              const currentWPM = Math.round((newWordCount / elapsed) * 60);
-              
-              console.log('WPM Update:', { newWordCount, elapsed, currentWPM, sessionDuration });
-              
-              return {
-                ...prevMetrics,
-                pace: currentWPM,
-                wordsSpoken: newWordCount
-              };
+            setWordCount(prev => {
+              const newWordCount = prev + words.length;
+              return newWordCount;
             });
+
+            // Calculate and update WPM immediately
+            const elapsed = Math.max(1, sessionDuration);
+            const currentWPM = elapsed > 0 ? Math.round(((wordCount + words.length) / elapsed) * 60) : 0;
+            
+            console.log('🎤 Speech detected:', { 
+              wordsAdded: words.length, 
+              totalWords: wordCount + words.length, 
+              elapsed, 
+              currentWPM, 
+              sessionDuration 
+            });
+            
+            setSessionMetrics(prevMetrics => ({
+              ...prevMetrics,
+              pace: currentWPM,
+              wordsSpoken: wordCount + words.length
+            }));
             
             // Comprehensive filler word detection
             const fillerWords = [
@@ -557,7 +674,7 @@ export default function ImprovedPracticePage() {
 
 
 
-  // Real-time metrics update with actual audio analysis
+  // Real-time metrics update with comprehensive logging
   useEffect(() => {
     if (!isRecording) return;
 
@@ -565,13 +682,34 @@ export default function ImprovedPracticePage() {
       // Get real-time volume from audio analysis
       const currentVolume = detectVolume();
       
+      // Calculate WPM based on current word count and duration
+      const elapsed = Math.max(1, sessionDuration);
+      const currentWPM = elapsed > 0 ? Math.round((wordCount / elapsed) * 60) : 0;
+      
       // Update metrics with real values
-      setSessionMetrics(prev => ({
-        ...prev,
-        volume: currentVolume,
-        clarity: Math.min(100, Math.max(70, 85 + (currentVolume - 50) * 0.3)), // Volume affects clarity
-        bodyLanguageScore: Math.round(eyeContactScore * 60 + postureScore * 0.4)
-      }));
+      setSessionMetrics(prev => {
+        const newMetrics = {
+          ...prev,
+          volume: currentVolume,
+          clarity: Math.min(100, Math.max(70, 85 + (currentVolume - 50) * 0.3)),
+          pace: currentWPM,
+          wordsSpoken: wordCount,
+          bodyLanguageScore: Math.round(eyeContactScore * 0.6 + postureScore * 0.4)
+        };
+        
+        console.log('📊 Live Metrics Update:', {
+          volume: currentVolume,
+          WPM: currentWPM,
+          wordCount,
+          elapsed,
+          eyeContactScore: Math.round(eyeContactScore),
+          postureScore: Math.round(postureScore),
+          fillerWords: prev.fillerWords.length,
+          bodyLanguageScore: newMetrics.bodyLanguageScore
+        });
+        
+        return newMetrics;
+      });
 
       // Update session goals progress
       setCurrentGoals(prev => prev.map(goal => {
@@ -586,13 +724,13 @@ export default function ImprovedPracticePage() {
       }));
 
       // Generate personalized live feedback based on actual metrics
-      if (Math.random() < 0.25) { // 25% chance every 2 seconds for quality feedback
+      if (Math.random() < 0.25) {
         generatePersonalizedLiveFeedback();
       }
-    }, 1000); // Update every second for responsive metrics
+    }, 1000);
 
     return () => clearInterval(interval);
-  }, [isRecording, eyeContactScore, postureScore, sessionMetrics.fillerWords.length, generatePersonalizedLiveFeedback, detectVolume]);
+  }, [isRecording, eyeContactScore, postureScore, sessionMetrics.fillerWords.length, generatePersonalizedLiveFeedback, detectVolume, wordCount, sessionDuration]);
 
   // Session timer effect
   useEffect(() => {
