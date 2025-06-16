@@ -207,7 +207,24 @@ export default function ImprovedPracticePage() {
             
             // Count words in this segment
             const words = result[0].transcript.split(' ').filter((word: string) => word.trim().length > 0);
-            setWordCount(prev => prev + words.length);
+            setWordCount(prev => {
+              const newWordCount = prev + words.length;
+              
+              // Update WPM immediately when new words are detected
+              if (sessionDuration > 0) {
+                const currentWPM = sessionDuration >= 10 ? 
+                  Math.round((newWordCount / (sessionDuration / 60))) :
+                  Math.round((newWordCount / sessionDuration) * 60);
+                
+                setSessionMetrics(prevMetrics => ({
+                  ...prevMetrics,
+                  pace: currentWPM,
+                  wordsSpoken: newWordCount
+                }));
+              }
+              
+              return newWordCount;
+            });
             
             // Comprehensive filler word detection
             const fillerWords = [
@@ -400,10 +417,8 @@ export default function ImprovedPracticePage() {
           generateLiveFeedback();
         }
         
-        // Update metrics every 2 seconds to prevent glitching
-        if (sessionDuration % 2 === 0) {
-          updateSessionMetrics();
-        }
+        // Update metrics every second for real-time WPM
+        updateSessionMetrics();
       }, 1000);
 
       setIsRecording(true);
@@ -610,10 +625,17 @@ export default function ImprovedPracticePage() {
     return { detectedFillers, fillerCounts, totalFillers: detectedFillers.length };
   }, []);
 
-  // Update session metrics with smooth transitions
+  // Update session metrics with proper WPM calculation
   const updateSessionMetrics = useCallback(() => {
-    // Only calculate WPM if we have actual duration to avoid division issues
-    const currentWPM = sessionDuration > 0 ? Math.round((wordCount / (sessionDuration / 60))) : 0;
+    // Calculate WPM: ensure we have at least 10 seconds for meaningful calculation
+    let currentWPM = 0;
+    if (sessionDuration >= 10) {
+      currentWPM = Math.round((wordCount / (sessionDuration / 60)));
+    } else if (sessionDuration > 0 && wordCount > 0) {
+      // For early seconds, estimate based on current rate
+      currentWPM = Math.round((wordCount / sessionDuration) * 60);
+    }
+    
     const fillerAnalysis = analyzeFillerWords(transcript);
     
     setSessionMetrics(prev => {
@@ -626,7 +648,7 @@ export default function ImprovedPracticePage() {
         ...prev,
         volume: Math.round(prev.volume * 0.8 + targetVolume * 0.2), // Smooth transition
         clarity: Math.round(prev.clarity * 0.8 + targetClarity * 0.2), // Smooth transition
-        pace: currentWPM,
+        pace: currentWPM, // Direct update for real-time WPM
         wordsSpoken: wordCount,
         fillerWords: fillerAnalysis.detectedFillers,
         bodyLanguageScore: Math.round(prev.bodyLanguageScore * 0.9 + targetBodyLanguage * 0.1)
