@@ -186,6 +186,62 @@ export default function ImprovedPracticePage() {
     }
   }, []);
 
+  // OpenAI Realtime Vision Analysis
+  const analyzeVideoFrameWithAI = useCallback(async () => {
+    if (!videoRef.current || !canvasRef.current || !isRecording) return;
+
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    
+    if (!ctx) return;
+
+    try {
+      // Capture current frame
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // Convert canvas to base64 image for API
+      const imageData = canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
+      
+      // Call OpenAI Vision API for comprehensive analysis
+      const response = await fetch('/api/vision/analyze-frame', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          imageData,
+          analysisType: 'comprehensive'
+        })
+      });
+
+      if (response.ok) {
+        const analysis = await response.json();
+        
+        // Update all visual metrics with OpenAI analysis
+        setEyeContactScore(analysis.eyeContactScore / 100);
+        setPostureScore(analysis.postureScore);
+        setIsLookingAtCamera(analysis.isLookingAtCamera);
+        setShoulderAlignment(analysis.shoulderAlignment);
+        setHeadPosition(analysis.headPosition);
+        
+        // Update body language score in session metrics
+        setSessionMetrics(prev => ({
+          ...prev,
+          bodyLanguageScore: analysis.bodyLanguageScore
+        }));
+
+        console.log('OpenAI Vision Analysis:', analysis);
+      }
+    } catch (error) {
+      console.error('OpenAI Vision analysis failed:', error);
+      // Continue with basic detection as fallback
+      detectEyeContact();
+    }
+  }, [isRecording]);
+
   // Speech recognition for better filler word detection
   const setupSpeechRecognition = useCallback(() => {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -409,10 +465,10 @@ export default function ImprovedPracticePage() {
         recognitionRef.current.start();
       }
 
-      // Start eye contact detection with optimized frequency
+      // Start OpenAI Realtime Vision analysis with optimized frequency
       detectionIntervalRef.current = setInterval(() => {
-        detectEyeContact();
-      }, 250); // Increased frequency for smoother updates
+        analyzeVideoFrameWithAI();
+      }, 2000); // Analyze every 2 seconds for real-time AI vision feedback
 
       // Start session timer with optimized updates
       timerRef.current = setInterval(() => {
