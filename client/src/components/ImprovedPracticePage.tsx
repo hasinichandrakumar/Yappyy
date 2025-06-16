@@ -62,6 +62,7 @@ export default function ImprovedPracticePage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const detectionIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const sessionStartTime = useRef<number | null>(null);
   const { toast } = useToast();
 
   // Initialize session name with sequential numbering only once
@@ -210,18 +211,23 @@ export default function ImprovedPracticePage() {
             setWordCount(prev => {
               const newWordCount = prev + words.length;
               
+              // Calculate current time elapsed in seconds
+              const currentTime = Date.now();
+              const startTime = sessionStartTime.current || currentTime;
+              const elapsed = Math.max(1, Math.floor((currentTime - startTime) / 1000));
+              
               // Update WPM immediately when new words are detected
-              if (sessionDuration > 0) {
-                const currentWPM = sessionDuration >= 10 ? 
-                  Math.round((newWordCount / (sessionDuration / 60))) :
-                  Math.round((newWordCount / sessionDuration) * 60);
-                
-                setSessionMetrics(prevMetrics => ({
-                  ...prevMetrics,
-                  pace: currentWPM,
-                  wordsSpoken: newWordCount
-                }));
-              }
+              const currentWPM = elapsed >= 10 ? 
+                Math.round((newWordCount / (elapsed / 60))) :
+                Math.round((newWordCount / elapsed) * 60);
+              
+              console.log('WPM Debug:', { newWordCount, elapsed, currentWPM }); // Debug log
+              
+              setSessionMetrics(prevMetrics => ({
+                ...prevMetrics,
+                pace: currentWPM,
+                wordsSpoken: newWordCount
+              }));
               
               return newWordCount;
             });
@@ -421,6 +427,9 @@ export default function ImprovedPracticePage() {
         updateSessionMetrics();
       }, 1000);
 
+      // Initialize session start time for accurate WPM calculation
+      sessionStartTime.current = Date.now();
+      
       setIsRecording(true);
       
       toast({
