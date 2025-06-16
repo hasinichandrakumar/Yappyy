@@ -19,6 +19,7 @@ import {
   updateUserSpeakingProfile 
 } from "./world-class-ai-coach";
 import { analyzeContent } from "./ai-content-analysis";
+import { analyzeVideoFrame, analyzePosture, analyzeEyeContact } from "./openai-realtime-vision";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -858,6 +859,11 @@ Provide specific, actionable coaching tips to improve this presentation. Focus o
   app.post('/api/openai/live-feedback', generateLiveFeedback);
   app.post('/api/openai/personalize-template', personalizeTemplate);
   app.post('/api/openai/session-insights', demoAuth, generateSessionInsights);
+
+  // OpenAI Realtime Vision Analysis
+  app.post("/api/vision/analyze-frame", demoAuth, analyzeVideoFrame);
+  app.post("/api/vision/analyze-posture", demoAuth, analyzePosture);
+  app.post("/api/vision/analyze-eye-contact", demoAuth, analyzeEyeContact);
 
   // Analyze posture from image (simplified text-based analysis)
   app.post("/api/analyze-posture", async (req, res) => {
