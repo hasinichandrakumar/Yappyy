@@ -1790,21 +1790,44 @@ export default function ImprovedPracticePage() {
             {isRecording && (
               <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold">{Math.round(sessionMetrics.volume)}%</div>
-                  <div className="text-sm text-muted-foreground">Volume</div>
+                  <div className="text-2xl font-bold text-blue-600">{wordCount}</div>
+                  <div className="text-sm text-muted-foreground">Words</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold">{Math.round(sessionMetrics.clarity)}%</div>
-                  <div className="text-sm text-muted-foreground">Clarity</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold">{Math.round(sessionMetrics.pace)}</div>
+                  <div className="text-2xl font-bold text-green-600">{sessionMetrics.pace || 0}</div>
                   <div className="text-sm text-muted-foreground">WPM</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold">{sessionMetrics.fillerWords.length}</div>
+                  <div className="text-2xl font-bold text-red-600">{sessionMetrics.fillerWords?.length || 0}</div>
                   <div className="text-sm text-muted-foreground">Filler Words</div>
                 </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-purple-600">{Math.round(eyeContactScore)}%</div>
+                  <div className="text-sm text-muted-foreground">Eye Contact</div>
+                </div>
+              </div>
+            )}
+
+            {/* Enhanced Live Feedback */}
+            {isRecording && liveFeedback.length > 0 && (
+              <div className="mt-4 space-y-2 max-h-32 overflow-y-auto">
+                {liveFeedback.slice(-3).map((feedback) => (
+                  <div
+                    key={feedback.id}
+                    className={`p-3 rounded-lg text-sm ${
+                      feedback.severity === 'good' 
+                        ? 'bg-green-50 text-green-800 border border-green-200'
+                        : feedback.severity === 'warning'
+                        ? 'bg-yellow-50 text-yellow-800 border border-yellow-200'
+                        : 'bg-blue-50 text-blue-800 border border-blue-200'
+                    }`}
+                  >
+                    <div className="font-medium">{feedback.feedback}</div>
+                    <div className="text-xs opacity-70 mt-1">
+                      {Math.floor(feedback.timestamp / 1000)}s - {feedback.category}
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </Card>
