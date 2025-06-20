@@ -521,21 +521,23 @@ export default function ImprovedPracticePage() {
         
         setPostureScore(newPostureScore);
         setShoulderAlignment(alignment);
+        
+        console.log('👁️ Live Vision Detection Update:', { 
+          eyeContactScore: Math.round(currentEyeContactScore), 
+          lookingAtCamera, 
+          postureScore: newPostureScore,
+          shoulderAlignment: alignment,
+          skinRatio: Math.round(skinRatio * 100) + '%'
+        });
       }
-      
-      console.log('👁️ Basic Vision Detection:', { 
-        eyeContactScore: Math.round(currentEyeContactScore), 
-        lookingAtCamera, 
-        postureScore: Math.round(postureScore),
-        shoulderAlignment 
-      });
       
     } else {
       setIsLookingAtCamera(false);
       setEyeContactScore(20);
       setPostureScore(50);
+      console.log('👁️ No face detected - resetting metrics');
     }
-  }, [postureScore, shoulderAlignment]);
+  }, []);
 
   // Speech recognition for better filler word detection
   const setupSpeechRecognition = useCallback(() => {
@@ -584,21 +586,17 @@ export default function ImprovedPracticePage() {
               return newWordCount;
             });
             
-            // Comprehensive filler word detection
-            const fillerWords = [
-              'um', 'uh', 'er', 'ah', 'eh', 'mm', 'hmm',
+            // Enhanced filler word detection with priority for uh/um
+            const primaryFillers = ['um', 'uh', 'er', 'ah', 'eh', 'mm', 'hmm'];
+            const secondaryFillers = [
               'like', 'so', 'well', 'okay', 'ok', 'right',
-              'you know', 'i mean', 'sort of', 'kind of',
               'actually', 'basically', 'literally', 'obviously',
               'essentially', 'definitely', 'absolutely',
               'totally', 'really', 'very', 'quite',
               'just', 'maybe', 'perhaps', 'anyway',
-              'whatever', 'somehow', 'meanwhile',
-              'furthermore', 'moreover', 'however',
-              'therefore', 'thus', 'hence',
-              'and stuff', 'or something', 'or whatever',
-              'and things', 'and all that'
+              'whatever', 'somehow', 'meanwhile'
             ];
+            const allSingleFillers = [...primaryFillers, ...secondaryFillers];
             
             const multiWordFillers = [
               'you know', 'i mean', 'sort of', 'kind of',
@@ -607,21 +605,33 @@ export default function ImprovedPracticePage() {
             ];
             
             const newFillers: string[] = [];
+            const fullTranscript = words.join(' ').toLowerCase();
             
-            // Check for multi-word fillers first
-            const transcript = words.join(' ').toLowerCase();
+            // Enhanced detection for uh/um with phonetic variations
+            const uhUmVariations = /\b(um+|uh+|uhm+|umm+|er+|ah+)\b/g;
+            const uhUmMatches = fullTranscript.match(uhUmVariations);
+            if (uhUmMatches) {
+              uhUmMatches.forEach(match => {
+                newFillers.push(match);
+                console.log('🎯 Primary filler detected:', match);
+              });
+            }
+            
+            // Check for multi-word fillers
             multiWordFillers.forEach(filler => {
               const regex = new RegExp(`\\b${filler}\\b`, 'g');
-              const matches = transcript.match(regex);
+              const matches = fullTranscript.match(regex);
               if (matches) {
                 matches.forEach(() => newFillers.push(filler));
               }
             });
             
-            // Check for single-word fillers
+            // Check for other single-word fillers (excluding already found uh/um)
             words.forEach((word: string) => {
               const cleanWord = word.toLowerCase().replace(/[.,!?;:]/g, '');
-              if (fillerWords.includes(cleanWord) && !multiWordFillers.some(mf => mf.includes(cleanWord))) {
+              if (allSingleFillers.includes(cleanWord) && 
+                  !primaryFillers.some(pf => cleanWord.includes(pf)) &&
+                  !multiWordFillers.some(mf => mf.includes(cleanWord))) {
                 newFillers.push(cleanWord);
               }
             });
@@ -1065,6 +1075,90 @@ export default function ImprovedPracticePage() {
       setLastFeedbackTime(sessionDuration);
     }
   }, [sessionDuration, sessionMetrics, transcript, wordCount, eyeContactScore, sessionPurpose, userBaseline, feedbackHistory, lastFeedbackTime]);
+
+  // Real-time video analysis for eye contact and posture
+  useEffect(() => {
+    if (!isRecording || !videoRef.current || !canvasRef.current) return;
+
+    const videoAnalysisInterval = setInterval(() => {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      const ctx = canvas?.getContext('2d');
+      
+      if (!ctx || !video || video.videoWidth === 0) return;
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const faceSize = Math.min(canvas.width, canvas.height) * 0.25;
+      
+      let skinPixels = 0;
+      let totalPixels = 0;
+      
+      // Face detection
+      for (let y = centerY - faceSize; y < centerY + faceSize; y += 8) {
+        for (let x = centerX - faceSize; x < centerX + faceSize; x += 8) {
+          if (x >= 0 && x < canvas.width && y >= 0 && y < canvas.height) {
+            const i = (Math.floor(y) * canvas.width + Math.floor(x)) * 4;
+            const r = data[i], g = data[i + 1], b = data[i + 2];
+            
+            if (r > 80 && g > 50 && b > 40 && r > g && r > b) {
+              skinPixels++;
+            }
+            totalPixels++;
+          }
+        }
+      }
+      
+      const skinRatio = skinPixels / totalPixels;
+      const faceDetected = skinRatio > 0.1;
+      
+      if (faceDetected) {
+        // Eye contact calculation
+        const horizontalCenter = 1 - Math.abs(centerX - canvas.width/2) / (canvas.width/3);
+        const verticalCenter = 1 - Math.abs(centerY - canvas.height/2.2) / (canvas.height/3);
+        const eyeContact = Math.max(0, Math.min(100, (horizontalCenter + verticalCenter) * 50));
+        
+        setEyeContactScore(eyeContact);
+        setIsLookingAtCamera(eyeContact > 60);
+        
+        // Posture analysis
+        const shoulderY = centerY + faceSize * 1.8;
+        let leftBrightness = 0, rightBrightness = 0, samples = 0;
+        
+        for (let x = centerX - faceSize; x < centerX + faceSize; x += 12) {
+          if (x >= 0 && x < canvas.width && shoulderY >= 0 && shoulderY < canvas.height) {
+            const i = (Math.floor(shoulderY) * canvas.width + Math.floor(x)) * 4;
+            const brightness = (data[i] + data[i + 1] + data[i + 2]) / 3;
+            
+            if (x < centerX) leftBrightness += brightness;
+            else rightBrightness += brightness;
+            samples++;
+          }
+        }
+        
+        if (samples > 0) {
+          const balance = 1 - Math.abs(leftBrightness - rightBrightness) / (leftBrightness + rightBrightness || 1);
+          const posture = Math.max(50, Math.min(100, balance * 100));
+          
+          setPostureScore(posture);
+          setShoulderAlignment(balance > 0.85 ? "aligned" : balance > 0.7 ? "slightly-tilted" : "misaligned");
+        }
+      } else {
+        setEyeContactScore(30);
+        setPostureScore(50);
+        setIsLookingAtCamera(false);
+      }
+    }, 1000);
+
+    return () => clearInterval(videoAnalysisInterval);
+  }, [isRecording]);
 
   // Real-time metrics update with synchronized state
   useEffect(() => {
