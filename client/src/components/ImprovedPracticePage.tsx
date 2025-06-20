@@ -930,6 +930,142 @@ export default function ImprovedPracticePage() {
     }
   }, [sessionDuration, sessionPurpose, sessionMetrics.fillerWords.length, feedbackHistory, lastFeedbackTime]);
 
+  // Generate contextual performance feedback based on user patterns and session analysis
+  const generateContextualPerformanceFeedback = useCallback(() => {
+    // Avoid feedback flooding - minimum 15 seconds between general feedback
+    if (sessionDuration - lastFeedbackTime < 15) return;
+
+    const currentVolume = sessionMetrics.volume;
+    const currentWPM = sessionMetrics.pace;
+    const fillerCount = sessionMetrics.fillerWords.length;
+    const sessionMinutes = Math.floor(sessionDuration / 60);
+    const recentTranscript = transcript.split(' ').slice(-15).join(' ').toLowerCase();
+    
+    let feedback: LiveFeedbackItem | null = null;
+
+    // Update user baseline for personalized comparisons
+    setUserBaseline(prev => ({
+      avgWPM: prev.sessionCount > 0 ? (prev.avgWPM + currentWPM) / 2 : currentWPM,
+      avgVolume: prev.sessionCount > 0 ? (prev.avgVolume + currentVolume) / 2 : currentVolume,
+      fillerRate: prev.sessionCount > 0 ? (prev.fillerRate + fillerCount) / 2 : fillerCount,
+      sessionCount: prev.sessionCount + 1
+    }));
+
+    // Content-based feedback - analyze what user is actually saying
+    if (recentTranscript.includes('data') || recentTranscript.includes('research') || recentTranscript.includes('study')) {
+      feedback = {
+        id: Date.now().toString(),
+        timestamp: sessionDuration,
+        category: 'content',
+        feedback: 'Strong evidence-based approach - credible speakers use data effectively',
+        severity: 'good'
+      };
+    } else if (recentTranscript.includes('because') || recentTranscript.includes('therefore') || recentTranscript.includes('since')) {
+      feedback = {
+        id: Date.now().toString(),
+        timestamp: sessionDuration,
+        category: 'content',
+        feedback: 'Excellent logical flow - your reasoning connects ideas persuasively',
+        severity: 'good'
+      };
+    } else if (recentTranscript.includes('imagine') || recentTranscript.includes('picture') || recentTranscript.includes('envision')) {
+      feedback = {
+        id: Date.now().toString(),
+        timestamp: sessionDuration,
+        category: 'engagement',
+        feedback: 'Great visualization technique - helps audience connect emotionally',
+        severity: 'good'
+      };
+    }
+
+    // Performance trend analysis
+    else if (currentWPM > userBaseline.avgWPM + 20 && userBaseline.avgWPM > 0) {
+      feedback = {
+        id: Date.now().toString(),
+        timestamp: sessionDuration,
+        category: 'voice',
+        feedback: 'Higher energy than usual - great for keeping audience engaged',
+        severity: 'good'
+      };
+    } else if (currentVolume < userBaseline.avgVolume - 15 && userBaseline.avgVolume > 0) {
+      feedback = {
+        id: Date.now().toString(),
+        timestamp: sessionDuration,
+        category: 'voice',
+        feedback: 'Energy seems lower than your baseline - project more confidence',
+        severity: 'improvement'
+      };
+    }
+
+    // Session progress feedback
+    else if (sessionMinutes >= 2 && wordCount > 200) {
+      feedback = {
+        id: Date.now().toString(),
+        timestamp: sessionDuration,
+        category: 'engagement',
+        feedback: `Strong momentum at ${sessionMinutes} minutes - maintaining excellent focus`,
+        severity: 'good'
+      };
+    } else if (sessionMinutes >= 3 && eyeContactScore > 70) {
+      feedback = {
+        id: Date.now().toString(),
+        timestamp: sessionDuration,
+        category: 'body_language',
+        feedback: 'Sustained eye contact shows confidence - audience feels connected',
+        severity: 'good'
+      };
+    }
+
+    // Purpose-specific performance analysis
+    else if (sessionPurpose) {
+      const purpose = sessionPurpose.toLowerCase();
+      
+      if (purpose.includes('sales') && recentTranscript.includes('value')) {
+        feedback = {
+          id: Date.now().toString(),
+          timestamp: sessionDuration,
+          category: 'content',
+          feedback: 'Perfect sales focus on value - compelling for decision makers',
+          severity: 'good'
+        };
+      } else if (purpose.includes('interview') && currentWPM >= 120 && currentWPM <= 150) {
+        feedback = {
+          id: Date.now().toString(),
+          timestamp: sessionDuration,
+          category: 'voice',
+          feedback: 'Ideal interview pace - shows thoughtfulness and control',
+          severity: 'good'
+        };
+      } else if (purpose.includes('presentation') && eyeContactScore > 60) {
+        feedback = {
+          id: Date.now().toString(),
+          timestamp: sessionDuration,
+          category: 'body_language',
+          feedback: 'Strong presentation presence - commanding audience attention',
+          severity: 'good'
+        };
+      }
+    }
+
+    // Adaptive encouragement based on session length
+    else if (sessionMinutes >= 4 && !feedbackHistory.some(f => f.includes('endurance'))) {
+      feedback = {
+        id: Date.now().toString(),
+        timestamp: sessionDuration,
+        category: 'engagement',
+        feedback: 'Excellent speaking endurance - maintaining quality throughout',
+        severity: 'good'
+      };
+    }
+
+    // Only provide feedback if it's new and relevant
+    if (feedback && !feedbackHistory.includes(feedback.feedback)) {
+      setLiveFeedback(prev => [...prev.slice(-4), feedback]);
+      setFeedbackHistory(prev => [...prev.slice(-9), feedback.feedback]);
+      setLastFeedbackTime(sessionDuration);
+    }
+  }, [sessionDuration, sessionMetrics, transcript, wordCount, eyeContactScore, sessionPurpose, userBaseline, feedbackHistory, lastFeedbackTime]);
+
   // Real-time metrics update with synchronized state
   useEffect(() => {
     if (!isRecording) return;
