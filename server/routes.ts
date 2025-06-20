@@ -20,6 +20,7 @@ import {
 } from "./world-class-ai-coach";
 import { analyzeContent } from "./ai-content-analysis";
 import { analyzeVideoFrame, analyzePosture, analyzeEyeContact } from "./openai-realtime-vision";
+import { transcribeWithAnalytics } from "./deepgram-speech";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -617,6 +618,9 @@ Provide detailed feedback on content structure, voice modulation advice, and bod
       res.status(500).json({ message: "Failed to generate template feedback", error: error.message });
     }
   });
+
+  // Speech transcription with analytics endpoint
+  app.post("/api/deepgram-transcribe", demoAuth, transcribeWithAnalytics);
 
   // AI Content Analysis endpoint
   app.post("/api/ai-content-analysis", demoAuth, analyzeContent);
