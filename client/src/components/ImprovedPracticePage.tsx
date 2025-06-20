@@ -632,23 +632,10 @@ export default function ImprovedPracticePage() {
                 fillerWords: [...prev.fillerWords, ...newFillers]
               }));
               
-              // Generate personalized live feedback for filler words
-              const fillerFeedbackMessages = [
-                `Try replacing "${newFillers[0]}" with a brief pause to sound more confident`,
-                `Consider slowing down instead of using "${newFillers[0]}" - your content is strong`,
-                `"${newFillers[0]}" detected - take a breath and continue with authority`,
-                `Replace "${newFillers[0]}" with silence - your audience will appreciate the clarity`,
-                `Strong content! Just eliminate "${newFillers[0]}" for more polished delivery`
-              ];
-              
-              const feedback: LiveFeedbackItem = {
-                id: Date.now().toString(),
-                timestamp: sessionDuration, // Use actual session time
-                category: 'voice',
-                feedback: fillerFeedbackMessages[Math.floor(Math.random() * fillerFeedbackMessages.length)],
-                severity: 'warning'
-              };
-              setLiveFeedback(prev => [...prev.slice(-4), feedback]);
+              // Generate intelligent, non-repetitive feedback for filler words
+              if (typeof generateIntelligentFillerFeedback === 'function') {
+                generateIntelligentFillerFeedback(newFillers[0], newFillers.length);
+              }
             }
           }
         }
@@ -877,6 +864,72 @@ export default function ImprovedPracticePage() {
     }
   }, [sessionPurpose, sessionDuration, sessionMetrics.pace, sessionMetrics.bodyLanguageScore]);
 
+  // Track user patterns for intelligent, non-repetitive feedback
+  const [feedbackHistory, setFeedbackHistory] = useState<string[]>([]);
+  const [lastFeedbackTime, setLastFeedbackTime] = useState(0);
+  const [userBaseline, setUserBaseline] = useState({
+    avgWPM: 0,
+    avgVolume: 0,
+    fillerRate: 0,
+    sessionCount: 0
+  });
+
+  // Generate intelligent, non-repetitive feedback for filler words
+  const generateIntelligentFillerFeedback = useCallback((fillerWord: string, count: number) => {
+    // Avoid flooding with feedback - minimum 10 seconds between filler feedback
+    if (sessionDuration - lastFeedbackTime < 10) return;
+
+    const sessionMinutes = Math.floor(sessionDuration / 60);
+    const currentFillerRate = sessionMetrics.fillerWords.length / Math.max(1, sessionMinutes);
+    
+    let feedbackMessage = '';
+    let severity: 'good' | 'warning' | 'improvement' = 'warning';
+
+    // Context-aware feedback based on session purpose
+    if (sessionPurpose) {
+      const purpose = sessionPurpose.toLowerCase();
+      
+      if (purpose.includes('interview')) {
+        feedbackMessage = `In interviews, pause thoughtfully instead of "${fillerWord}" - shows consideration`;
+      } else if (purpose.includes('presentation')) {
+        feedbackMessage = `For presentations, silence is powerful - replace "${fillerWord}" with confident pauses`;
+      } else if (purpose.includes('sales') || purpose.includes('pitch')) {
+        feedbackMessage = `"${fillerWord}" weakens your pitch - trust your expertise with clear delivery`;
+      } else if (purpose.includes('story') || purpose.includes('narrative')) {
+        feedbackMessage = `In storytelling, "${fillerWord}" breaks the spell - let your story flow naturally`;
+      } else if (purpose.includes('leadership') || purpose.includes('meeting')) {
+        feedbackMessage = `Leaders command attention - replace "${fillerWord}" with authoritative pauses`;
+      } else {
+        // Varied general feedback based on content and context
+        const contextualFeedback = [
+          `"${fillerWord}" detected - your content is strong, deliver it clearly`,
+          `Replace "${fillerWord}" with a breath - your ideas deserve confident expression`,
+          `Notice "${fillerWord}" creeping in - slow down and trust your knowledge`,
+          `Strong points coming through! Just eliminate "${fillerWord}" for impact`
+        ];
+        feedbackMessage = contextualFeedback[feedbackHistory.length % contextualFeedback.length];
+      }
+    } else {
+      feedbackMessage = `"${fillerWord}" noticed - pause instead for more polished delivery`;
+    }
+
+    // Check if this feedback type was recently given
+    const recentFeedback = feedbackHistory.slice(-3);
+    if (!recentFeedback.some(f => f.includes(fillerWord) || f.includes('filler'))) {
+      const feedback: LiveFeedbackItem = {
+        id: Date.now().toString(),
+        timestamp: sessionDuration,
+        category: 'content',
+        feedback: feedbackMessage,
+        severity
+      };
+
+      setLiveFeedback(prev => [...prev.slice(-4), feedback]);
+      setFeedbackHistory(prev => [...prev.slice(-9), feedbackMessage]);
+      setLastFeedbackTime(sessionDuration);
+    }
+  }, [sessionDuration, sessionPurpose, sessionMetrics.fillerWords.length, feedbackHistory, lastFeedbackTime]);
+
   // Real-time metrics update with synchronized state
   useEffect(() => {
     if (!isRecording) return;
@@ -925,9 +978,9 @@ export default function ImprovedPracticePage() {
         return goal;
       }));
 
-      // Generate personalized live feedback
-      if (Math.random() < 0.2) {
-        generatePersonalizedLiveFeedback();
+      // Generate intelligent, varied feedback
+      if (Math.random() < 0.15) {
+        generateContextualPerformanceFeedback();
       }
     }, 500); // Update every 500ms for smoother metrics
 
