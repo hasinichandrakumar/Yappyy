@@ -675,6 +675,208 @@ export default function ImprovedPracticePage() {
 
 
 
+  // Enhanced intelligent feedback based on purpose detection
+  const generateIntelligentPurposeFeedback = useCallback((text: string, wordCount: number, fillerCount: number) => {
+    if (!sessionPurpose) return;
+    
+    const purpose = sessionPurpose.toLowerCase();
+    const recentWords = text.toLowerCase();
+    let feedback: LiveFeedbackItem | null = null;
+
+    // Sales & Business Development
+    if (purpose.includes('sales') || purpose.includes('pitch') || purpose.includes('persuade') || purpose.includes('convince')) {
+      if (recentWords.includes('benefit') || recentWords.includes('value') || recentWords.includes('roi') || recentWords.includes('save')) {
+        feedback = {
+          id: Date.now().toString(),
+          timestamp: sessionDuration,
+          category: 'content',
+          feedback: 'Excellent focus on benefits and value proposition - key to persuasive sales pitches',
+          severity: 'good'
+        };
+      } else if (sessionMetrics.pace < 130 && sessionMetrics.pace > 0) {
+        feedback = {
+          id: Date.now().toString(),
+          timestamp: sessionDuration,
+          category: 'voice',
+          feedback: 'For sales presentations, increase energy - aim for 140-160 WPM to build excitement',
+          severity: 'improvement'
+        };
+      }
+    }
+    
+    // Job Interviews & Career
+    else if (purpose.includes('interview') || purpose.includes('job') || purpose.includes('career') || purpose.includes('hiring')) {
+      if (recentWords.includes('example') || recentWords.includes('experience') || recentWords.includes('situation')) {
+        feedback = {
+          id: Date.now().toString(),
+          timestamp: sessionDuration,
+          category: 'content',
+          feedback: 'Excellent use of specific examples - interviewers love concrete evidence',
+          severity: 'good'
+        };
+      } else if (sessionMetrics.pace > 170) {
+        feedback = {
+          id: Date.now().toString(),
+          timestamp: sessionDuration,
+          category: 'voice',
+          feedback: 'Slow down for interviews - measured pace shows thoughtfulness and control',
+          severity: 'warning'
+        };
+      }
+    }
+    
+    // Presentations & Public Speaking
+    else if (purpose.includes('presentation') || purpose.includes('keynote') || purpose.includes('conference') || purpose.includes('speaking')) {
+      if (recentWords.includes('first') || recentWords.includes('second') || recentWords.includes('next') || recentWords.includes('finally')) {
+        feedback = {
+          id: Date.now().toString(),
+          timestamp: sessionDuration,
+          category: 'content',
+          feedback: 'Perfect signposting - clear structure helps audience follow your presentation',
+          severity: 'good'
+        };
+      } else if (fillerCount > 0) {
+        feedback = {
+          id: Date.now().toString(),
+          timestamp: sessionDuration,
+          category: 'content',
+          feedback: 'For presentations, minimize filler words - use strategic pauses for emphasis',
+          severity: 'warning'
+        };
+      }
+    }
+    
+    // Leadership & Management
+    else if (purpose.includes('leadership') || purpose.includes('team') || purpose.includes('meeting') || purpose.includes('management')) {
+      if (recentWords.includes('we') || recentWords.includes('our team') || recentWords.includes('together')) {
+        feedback = {
+          id: Date.now().toString(),
+          timestamp: sessionDuration,
+          category: 'content',
+          feedback: 'Excellent inclusive language - builds team unity and collaboration',
+          severity: 'good'
+        };
+      } else if (sessionMetrics.bodyLanguageScore > 80) {
+        feedback = {
+          id: Date.now().toString(),
+          timestamp: sessionDuration,
+          category: 'body_language',
+          feedback: 'Strong executive presence - confident posture commands attention',
+          severity: 'good'
+        };
+      }
+    }
+    
+    // Training & Education
+    else if (purpose.includes('training') || purpose.includes('workshop') || purpose.includes('lesson') || purpose.includes('teach')) {
+      if (sessionMetrics.pace < 140) {
+        feedback = {
+          id: Date.now().toString(),
+          timestamp: sessionDuration,
+          category: 'voice',
+          feedback: 'Perfect teaching pace - allows time for information processing',
+          severity: 'good'
+        };
+      } else if (recentWords.includes('example') || recentWords.includes('let me show') || recentWords.includes('imagine')) {
+        feedback = {
+          id: Date.now().toString(),
+          timestamp: sessionDuration,
+          category: 'content',
+          feedback: 'Excellent use of examples - makes complex concepts accessible',
+          severity: 'good'
+        };
+      }
+    }
+    
+    // Networking & Social
+    else if (purpose.includes('networking') || purpose.includes('elevator') || purpose.includes('introduction') || purpose.includes('social')) {
+      if (recentWords.includes('help') || recentWords.includes('connect') || recentWords.includes('collaborate')) {
+        feedback = {
+          id: Date.now().toString(),
+          timestamp: sessionDuration,
+          category: 'content',
+          feedback: 'Great networking language - focuses on mutual value and connection',
+          severity: 'good'
+        };
+      } else if (sessionMetrics.pace >= 140 && sessionMetrics.pace <= 160) {
+        feedback = {
+          id: Date.now().toString(),
+          timestamp: sessionDuration,
+          category: 'voice',
+          feedback: 'Perfect networking pace - energetic but not rushed',
+          severity: 'good'
+        };
+      }
+    }
+    
+    // Storytelling & Narrative
+    else if (purpose.includes('story') || purpose.includes('narrative') || purpose.includes('anecdote') || purpose.includes('experience')) {
+      if (recentWords.includes('then') || recentWords.includes('suddenly') || recentWords.includes('moment')) {
+        feedback = {
+          id: Date.now().toString(),
+          timestamp: sessionDuration,
+          category: 'content',
+          feedback: 'Great narrative flow - transition words keep listeners engaged',
+          severity: 'good'
+        };
+      } else if (sessionMetrics.pace > 160) {
+        feedback = {
+          id: Date.now().toString(),
+          timestamp: sessionDuration,
+          category: 'voice',
+          feedback: 'Slow down for storytelling - let dramatic moments breathe',
+          severity: 'improvement'
+        };
+      }
+    }
+
+    // Customer Service & Support
+    else if (purpose.includes('customer') || purpose.includes('service') || purpose.includes('support') || purpose.includes('complaint')) {
+      if (recentWords.includes('understand') || recentWords.includes('help') || recentWords.includes('solution')) {
+        feedback = {
+          id: Date.now().toString(),
+          timestamp: sessionDuration,
+          category: 'content',
+          feedback: 'Excellent customer service language - shows empathy and commitment to helping',
+          severity: 'good'
+        };
+      } else if (sessionMetrics.pace < 130) {
+        feedback = {
+          id: Date.now().toString(),
+          timestamp: sessionDuration,
+          category: 'voice',
+          feedback: 'Good customer service pace - calm delivery shows patience and care',
+          severity: 'good'
+        };
+      }
+    }
+
+    // Technical & Product Demos
+    else if (purpose.includes('technical') || purpose.includes('demo') || purpose.includes('product') || purpose.includes('feature')) {
+      if (recentWords.includes('step') || recentWords.includes('process') || recentWords.includes('function')) {
+        feedback = {
+          id: Date.now().toString(),
+          timestamp: sessionDuration,
+          category: 'content',
+          feedback: 'Good technical communication - step-by-step approach aids comprehension',
+          severity: 'good'
+        };
+      } else if (sessionMetrics.pace < 130) {
+        feedback = {
+          id: Date.now().toString(),
+          timestamp: sessionDuration,
+          category: 'voice',
+          feedback: 'Perfect technical explanation pace - allows time to process complex information',
+          severity: 'good'
+        };
+      }
+    }
+
+    if (feedback) {
+      setLiveFeedback(prev => [...prev.slice(-4), feedback]);
+    }
+  }, [sessionPurpose, sessionDuration, sessionMetrics.pace, sessionMetrics.bodyLanguageScore]);
+
   // Real-time metrics update with synchronized state
   useEffect(() => {
     if (!isRecording) return;
