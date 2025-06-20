@@ -559,27 +559,30 @@ export default function ImprovedPracticePage() {
             
             // Count words and update all metrics atomically
             const words = result[0].transcript.split(' ').filter((word: string) => word.trim().length > 0);
-            const newWordCount = wordCount + words.length;
-            const elapsed = Math.max(1, sessionDuration);
-            const currentWPM = elapsed > 0 ? Math.round((newWordCount / elapsed) * 60) : 0;
             
-            console.log('🎤 Speech detected:', { 
-              wordsAdded: words.length, 
-              totalWords: newWordCount, 
-              elapsed, 
-              currentWPM, 
-              sessionDuration 
+            // Update word count first
+            setWordCount(prev => {
+              const newWordCount = prev + words.length;
+              const elapsed = Math.max(1, sessionDuration);
+              const currentWPM = elapsed > 0 ? Math.round((newWordCount / elapsed) * 60) : 0;
+              
+              console.log('🎤 Speech detected:', { 
+                wordsAdded: words.length, 
+                totalWords: newWordCount, 
+                elapsed, 
+                currentWPM, 
+                sessionDuration 
+              });
+              
+              // Update session metrics with new values
+              setSessionMetrics(prevMetrics => ({
+                ...prevMetrics,
+                pace: currentWPM,
+                wordsSpoken: newWordCount
+              }));
+              
+              return newWordCount;
             });
-            
-            // Update word count
-            setWordCount(newWordCount);
-            
-            // Update session metrics immediately
-            setSessionMetrics(prevMetrics => ({
-              ...prevMetrics,
-              pace: currentWPM,
-              wordsSpoken: newWordCount
-            }));
             
             // Comprehensive filler word detection
             const fillerWords = [
