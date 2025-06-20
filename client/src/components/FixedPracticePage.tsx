@@ -99,7 +99,7 @@ export default function FixedPracticePage() {
             // Detect filler words
             const fillerWords = ['um', 'uh', 'er', 'ah', 'like', 'so', 'you know', 'i mean'];
             let fillerCount = 0;
-            words.forEach(word => {
+            words.forEach((word: string) => {
               if (fillerWords.includes(word.toLowerCase().replace(/[.,!?]/g, ''))) {
                 fillerCount++;
               }
