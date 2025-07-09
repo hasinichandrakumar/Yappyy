@@ -39,6 +39,8 @@ export default function SimplifiedPracticePage() {
   const [isEditingPurpose, setIsEditingPurpose] = useState(false);
   const [sessionDuration, setSessionDuration] = useState(0);
   const [transcript, setTranscript] = useState<string>('');
+  const [interimTranscript, setInterimTranscript] = useState<string>('');
+  const [showLiveTranscript, setShowLiveTranscript] = useState(true);
 
   // Simplified metrics
   const [metrics, setMetrics] = useState<SimplifiedMetrics>({
@@ -93,20 +95,33 @@ export default function SimplifiedPracticePage() {
 
     recognition.onresult = (event: any) => {
       let finalTranscript = '';
+      let interimText = '';
       
       for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
         if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript + ' ';
+          finalTranscript += transcript + ' ';
+        } else {
+          interimText += transcript;
         }
       }
 
+      // Update interim transcript for live display
+      setInterimTranscript(interimText);
+
       if (finalTranscript.trim()) {
         setTranscript(prev => prev + finalTranscript);
+        setInterimTranscript(''); // Clear interim when we get final
         
-        // Simple filler word detection
-        const fillerWords = ['um', 'uh', 'like', 'so', 'you know', 'i mean'];
+        // Enhanced filler word detection
+        const fillerWords = [
+          'um', 'uh', 'uhm', 'er', 'ah', 'mm', 'hmm',
+          'like', 'so', 'well', 'okay', 'right', 'actually', 'basically',
+          'you know', 'i mean', 'kind of', 'sort of', 'i guess'
+        ];
+        
         const detectedFillers = fillerWords.filter(word => 
-          finalTranscript.toLowerCase().includes(word)
+          finalTranscript.toLowerCase().includes(word.toLowerCase())
         );
         
         if (detectedFillers.length > 0) {
@@ -124,11 +139,22 @@ export default function SimplifiedPracticePage() {
         }
 
         // Calculate WPM
-        const wordCount = (transcript + finalTranscript).split(' ').length;
+        const fullText = transcript + finalTranscript;
+        const wordCount = fullText.trim().split(/\s+/).filter(word => word.length > 0).length;
         const timeInMinutes = sessionDuration / 60;
         const wpm = timeInMinutes > 0 ? Math.round(wordCount / timeInMinutes) : 0;
         
         setMetrics(prev => ({ ...prev, wordsPerMinute: wpm }));
+
+        // Provide encouraging feedback for good pace
+        if (wpm >= 120 && wpm <= 180) {
+          setLiveFeedback(prev => [...prev.slice(-4), {
+            id: Date.now().toString(),
+            message: `Great speaking pace at ${wpm} WPM!`,
+            type: 'success',
+            timestamp: Date.now()
+          }]);
+        }
       }
     };
 
@@ -307,6 +333,16 @@ export default function SimplifiedPracticePage() {
                     Stop ({Math.floor(sessionDuration / 60)}:{(sessionDuration % 60).toString().padStart(2, '0')})
                   </Button>
                 )}
+                
+                {/* Live Transcript Toggle */}
+                <Button
+                  variant="outline"
+                  onClick={() => setShowLiveTranscript(!showLiveTranscript)}
+                  className="flex items-center gap-2"
+                >
+                  <FileText className="w-4 h-4" />
+                  {showLiveTranscript ? 'Hide' : 'Show'} Transcript
+                </Button>
               </div>
             </div>
           </CardHeader>
@@ -450,13 +486,78 @@ export default function SimplifiedPracticePage() {
           </div>
         </div>
 
-        {/* Transcript */}
-        {transcript && (
+        {/* Live Transcript Panel */}
+        {showLiveTranscript && (
+          <Card className="border-2 border-blue-200">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-5 h-5" />
+                  Live Transcript
+                  {isRecording && (
+                    <Badge variant="secondary" className="ml-2">
+                      <Activity className="w-3 h-3 mr-1" />
+                      Live
+                    </Badge>
+                  )}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowLiveTranscript(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  ×
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="bg-white border-2 border-gray-100 p-4 rounded-lg max-h-60 overflow-y-auto">
+                {transcript || interimTranscript ? (
+                  <div className="text-sm leading-relaxed">
+                    <span className="text-gray-900">
+                      {transcript}
+                    </span>
+                    {interimTranscript && (
+                      <span className="text-gray-400 italic">
+                        {interimTranscript}
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center text-gray-500 py-8">
+                    {isRecording ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <Activity className="w-4 h-4 animate-pulse" />
+                        <span>Listening for speech...</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center gap-2">
+                        <Mic className="w-4 h-4" />
+                        <span>Start recording to see live transcript</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              
+              {transcript && (
+                <div className="mt-4 flex justify-between items-center text-xs text-gray-600">
+                  <span>Words: {transcript.split(' ').filter(w => w.length > 0).length}</span>
+                  <span>Characters: {transcript.length}</span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Original Transcript Display for Non-Live View */}
+        {!showLiveTranscript && transcript && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="w-5 h-5" />
-                Live Transcript
+                Session Transcript
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -482,4 +583,11 @@ export default function SimplifiedPracticePage() {
       </div>
     </div>
   );
+
+  // Helper function to format time
+  function formatTime(seconds: number): string {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }
 }
