@@ -85,19 +85,23 @@ export class ContentAnalysisEngine {
   }
   
   async analyzeContent(transcript: string, purpose: SpeechPurpose, sessionDuration: number): Promise<ContentAnalysisResult> {
+    console.log('🔍 Content Analysis Engine - Starting analysis:', { 
+      transcriptLength: transcript.length, 
+      purpose: purpose.type,
+      duration: sessionDuration
+    });
+
     if (!transcript || transcript.trim().length < 10) {
       return this.getDefaultAnalysis();
     }
     
-    // Perform comprehensive analysis
-    const [
-      structureAnalysis,
-      persuasivenessAnalysis,
-      coherenceAnalysis,
-      audienceAlignmentAnalysis,
-      purposeAlignmentAnalysis
-    ] = await Promise.all([
-      this.analyzeStructure(transcript, purpose),
+    try {
+      // Perform comprehensive analysis with error handling
+      const structureAnalysis = this.analyzeStructure(transcript, purpose);
+      const persuasivenessAnalysis = this.analyzePersuasiveness(transcript, purpose);
+      const coherenceAnalysis = this.analyzeCoherence(transcript);
+      const audienceAlignmentAnalysis = this.analyzeAudienceAlignment(transcript, purpose);
+      const purposeAlignmentAnalysis = this.analyzePurposeAlignment(transcript, purpose);
       this.analyzePersuasiveness(transcript, purpose),
       this.analyzeCoherence(transcript),
       this.analyzeAudienceAlignment(transcript, purpose),
