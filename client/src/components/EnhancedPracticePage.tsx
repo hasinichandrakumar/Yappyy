@@ -911,8 +911,25 @@ export default function EnhancedPracticePage() {
                                 <div key={emotion} className="flex justify-between text-sm">
                                   <span className="capitalize">{emotion}</span>
                                   <span>{Math.round(intensity * 100)}%</span>
+                                  <div className="w-16 h-1 bg-gray-200 rounded ml-2">
+                                    <div 
+                                      className="h-full bg-blue-500 rounded" 
+                                      style={{ width: `${intensity * 100}%` }}
+                                    />
+                                  </div>
                                 </div>
                               ))}
+                            </div>
+                            
+                            {/* Advanced Expression Analysis */}
+                            <div className="mt-3 p-2 bg-purple-50 rounded">
+                              <p className="text-xs font-medium mb-1">Advanced Analysis</p>
+                              <div className="grid grid-cols-2 gap-1 text-xs">
+                                <div>Confidence: {metrics.bodyLanguage.facialExpressions.expressions?.confidence || 0}%</div>
+                                <div>Engagement: {metrics.bodyLanguage.facialExpressions.expressions?.engagement || 0}%</div>
+                                <div>Authenticity: {metrics.bodyLanguage.facialExpressions.expressions?.authenticity || 0}%</div>
+                                <div>Enthusiasm: {metrics.bodyLanguage.facialExpressions.expressions?.enthusiasm || 0}%</div>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -962,13 +979,27 @@ export default function EnhancedPracticePage() {
                     ) : (
                       <div className="text-center py-8">
                         <Camera className="w-12 h-12 mx-auto mb-4 text-purple-600" />
-                        <p className="text-lg font-semibold">Body Language Analysis</p>
-                        <p className="text-gray-600">Computer vision analysis will appear during recording</p>
+                        <p className="text-lg font-semibold">Facial Expression Analysis</p>
+                        <p className="text-gray-600">AI-powered emotion detection will appear during recording</p>
+                        
+                        {/* System Status */}
+                        <div className="mt-4 p-3 bg-purple-50 rounded-lg">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm font-medium">TensorFlow System:</span>
+                            <Badge variant={tensorFlowSystem.current ? "default" : "secondary"}>
+                              {tensorFlowSystem.current ? "Loaded" : "Loading..."}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-gray-600 mt-1">
+                            Face-API.js emotion detection with 7 emotional states
+                          </p>
+                        </div>
                       </div>
                     )}
                   </TabsContent>
 
                   <TabsContent value="emotion" className="space-y-4">
+                    {/* Core Emotional Analysis */}
                     <div className="grid grid-cols-2 gap-4">
                       {Object.entries(metrics.emotion).map(([emotion, value]) => (
                         <div key={emotion}>
@@ -980,11 +1011,75 @@ export default function EnhancedPracticePage() {
                         </div>
                       ))}
                     </div>
+
+                    {/* Detailed Facial Expression Analysis */}
+                    {metrics.bodyLanguage.facialExpressions && (
+                      <Card className="p-4">
+                        <h3 className="font-semibold mb-3">Facial Expression Breakdown</h3>
+                        <div className="grid grid-cols-2 gap-3">
+                          {Object.entries(metrics.bodyLanguage.facialExpressions.emotions).map(([emotion, intensity]) => (
+                            <div key={emotion} className="flex items-center justify-between">
+                              <span className="text-sm capitalize">{emotion}</span>
+                              <div className="flex items-center gap-2">
+                                <div className="w-20 h-2 bg-gray-200 rounded-full">
+                                  <div 
+                                    className={`h-full rounded-full ${
+                                      emotion === 'happy' ? 'bg-green-500' :
+                                      emotion === 'sad' ? 'bg-blue-500' :
+                                      emotion === 'angry' ? 'bg-red-500' :
+                                      emotion === 'fearful' ? 'bg-orange-500' :
+                                      emotion === 'surprised' ? 'bg-yellow-500' :
+                                      emotion === 'disgusted' ? 'bg-purple-500' :
+                                      'bg-gray-500'
+                                    }`}
+                                    style={{ width: `${Math.min(100, intensity * 100)}%` }}
+                                  />
+                                </div>
+                                <span className="text-xs font-medium w-8">
+                                  {Math.round(intensity * 100)}%
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        
+                        {/* Derived Emotional Intelligence Metrics */}
+                        <div className="mt-4 p-3 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg">
+                          <p className="font-medium text-sm mb-2">Emotional Intelligence Analysis</p>
+                          <div className="grid grid-cols-2 gap-3 text-xs">
+                            <div>
+                              <span className="text-gray-600">Confidence Level:</span>
+                              <div className="font-semibold text-green-600">
+                                {metrics.bodyLanguage.facialExpressions.expressions?.confidence || 0}%
+                              </div>
+                            </div>
+                            <div>
+                              <span className="text-gray-600">Engagement:</span>
+                              <div className="font-semibold text-blue-600">
+                                {metrics.bodyLanguage.facialExpressions.expressions?.engagement || 0}%
+                              </div>
+                            </div>
+                            <div>
+                              <span className="text-gray-600">Authenticity:</span>
+                              <div className="font-semibold text-purple-600">
+                                {metrics.bodyLanguage.facialExpressions.expressions?.authenticity || 0}%
+                              </div>
+                            </div>
+                            <div>
+                              <span className="text-gray-600">Nervousness:</span>
+                              <div className="font-semibold text-orange-600">
+                                {metrics.bodyLanguage.facialExpressions.expressions?.nervousness || 0}%
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
+                    )}
                     
-                    {/* Micro-expressions */}
+                    {/* Emotional Intelligence Feedback */}
                     {metrics.bodyLanguage.facialExpressions?.expressions && (
                       <div>
-                        <p className="font-semibold mb-2">Emotional Intelligence</p>
+                        <p className="font-semibold mb-2">Emotional Intelligence Feedback</p>
                         <div className="bg-blue-50 p-4 rounded-lg">
                           <p className="text-sm">
                             Your authenticity score is {Math.round(metrics.emotion.authenticity)}%. 
@@ -992,9 +1087,73 @@ export default function EnhancedPracticePage() {
                              metrics.emotion.authenticity > 60 ? ' Good natural delivery.' : 
                              ' Try to be more natural and relaxed.'}
                           </p>
+                          {metrics.bodyLanguage.facialExpressions.expressions.nervousness > 50 && (
+                            <p className="text-sm mt-2 text-orange-700">
+                              💡 Try deep breathing exercises to reduce visible nervousness.
+                            </p>
+                          )}
+                          {metrics.bodyLanguage.facialExpressions.expressions.engagement < 40 && (
+                            <p className="text-sm mt-2 text-blue-700">
+                              💡 Increase your emotional expression to better engage your audience.
+                            </p>
+                          )}
                         </div>
                       </div>
                     )}
+
+                    {/* Facial Expression Debugger */}
+                    <div className="mt-4">
+                      <Card className="p-4 bg-purple-50">
+                        <div className="flex justify-between items-center mb-3">
+                          <h3 className="font-semibold flex items-center gap-2">
+                            <Camera className="w-4 h-4" />
+                            Facial Expression Analysis Debug
+                          </h3>
+                          <Badge variant={metrics.bodyLanguage.facialExpressions ? "default" : "secondary"}>
+                            {metrics.bodyLanguage.facialExpressions ? "Active" : "Initializing"}
+                          </Badge>
+                        </div>
+
+                        {/* TensorFlow System Status */}
+                        <div className="grid grid-cols-3 gap-3 mb-4 text-sm">
+                          <div className="text-center">
+                            <div className="font-medium">System Status</div>
+                            <div className="text-green-600">
+                              {tensorFlowSystem.current ? "✅ Ready" : "⏳ Loading"}
+                            </div>
+                          </div>
+                          <div className="text-center">
+                            <div className="font-medium">Face Detection</div>
+                            <div className="text-blue-600">
+                              {metrics.bodyLanguage.facialExpressions ? "Active" : "Waiting"}
+                            </div>
+                          </div>
+                          <div className="text-center">
+                            <div className="font-medium">Model Type</div>
+                            <div className="text-purple-600">Face-API.js</div>
+                          </div>
+                        </div>
+
+                        {/* Manual Emotion Test */}
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full"
+                          onClick={async () => {
+                            if (tensorFlowSystem.current && videoRef.current && canvasRef.current) {
+                              const testResult = await tensorFlowSystem.current.analyzeFrame(canvasRef.current, videoRef.current);
+                              console.log('Manual expression test:', testResult);
+                            }
+                          }}
+                        >
+                          Test Facial Expression Analysis
+                        </Button>
+
+                        <p className="text-xs text-gray-600 mt-2 text-center">
+                          Real-time emotion analysis with 7 core expressions + advanced psychological indicators
+                        </p>
+                      </Card>
+                    </div>
                   </TabsContent>
 
                   <TabsContent value="content" className="space-y-4">
