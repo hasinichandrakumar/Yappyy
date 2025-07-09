@@ -133,6 +133,7 @@ export default function EnhancedPracticePage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const recognitionRef = useRef<any>(null);
   const { toast } = useToast();
 
   // Deep Learning Coach Hook
@@ -180,6 +181,9 @@ export default function EnhancedPracticePage() {
           width: window.innerWidth * 0.4,
           height: window.innerHeight * 0.4
         });
+
+        // Initialize Speech Recognition for Enhanced Filler Word Detection
+        setupSpeechRecognition();
 
         console.log('🚀 Enhanced AI systems initialized');
       } catch (error) {
@@ -245,6 +249,180 @@ export default function EnhancedPracticePage() {
 
     return () => clearInterval(analysisInterval);
   }, [isRecording]);
+
+  // Enhanced Speech Recognition with Comprehensive Filler Word Detection
+  const setupSpeechRecognition = useCallback(() => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      console.warn('Speech recognition not supported in this browser');
+      return;
+    }
+
+    const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+    const recognition = new SpeechRecognition();
+
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => {
+      console.log('🎤 Speech recognition started');
+    };
+
+    recognition.onresult = (event: any) => {
+      let finalTranscript = '';
+      let interimTranscript = '';
+      
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript + ' ';
+        } else {
+          interimTranscript += transcript;
+        }
+      }
+
+      // Update transcript
+      setTranscript(prev => {
+        const updated = prev + finalTranscript;
+        
+        // Enhanced filler word detection on final transcript
+        if (finalTranscript.trim()) {
+          const detectedFillers = detectEnhancedFillerWords(finalTranscript);
+          if (detectedFillers.length > 0) {
+            setMetrics(prevMetrics => ({
+              ...prevMetrics,
+              content: {
+                ...prevMetrics.content,
+                fillerWords: [...prevMetrics.content.fillerWords, ...detectedFillers]
+              }
+            }));
+            
+            // Show real-time feedback for filler words
+            detectedFillers.forEach(filler => {
+              const feedbackItem: EnhancedLiveFeedback = {
+                id: `filler-${Date.now()}-${Math.random()}`,
+                timestamp: Date.now(),
+                category: 'content',
+                feedback: `Filler word detected: "${filler}"`,
+                severity: 'warning',
+                confidence: 0.9,
+                actionable: 'Pause instead of using filler words - take a breath and continue with confidence'
+              };
+              
+              setLiveFeedback(prev => [...prev.slice(-9), feedbackItem]);
+            });
+          }
+        }
+        
+        return updated;
+      });
+
+      // Calculate WPM in real-time
+      const wordCount = (transcript + finalTranscript).split(' ').filter(word => word.length > 0).length;
+      const timeElapsed = sessionDuration > 0 ? sessionDuration / 60 : 0.1;
+      const currentWPM = Math.round(wordCount / timeElapsed);
+      
+      setMetrics(prev => ({
+        ...prev,
+        content: {
+          ...prev.content,
+          wordCount,
+          wpmData: {
+            ...prev.content.wpmData,
+            currentWPM,
+            recentWords: (transcript + finalTranscript).split(' ').filter(word => word.length > 0)
+          }
+        }
+      }));
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error);
+      if (event.error !== 'no-speech') {
+        // Automatically restart recognition if it fails (except for no-speech)
+        setTimeout(() => {
+          if (isRecording && recognitionRef.current) {
+            try {
+              recognitionRef.current.start();
+            } catch (error) {
+              console.log('Recognition restart failed:', error);
+            }
+          }
+        }, 1000);
+      }
+    };
+
+    recognition.onend = () => {
+      // Automatically restart recognition if still recording
+      if (isRecording) {
+        setTimeout(() => {
+          try {
+            recognition.start();
+          } catch (error) {
+            console.log('Recognition restart failed:', error);
+          }
+        }, 100);
+      }
+    };
+
+    recognitionRef.current = recognition;
+  }, [isRecording, sessionDuration, transcript]);
+
+  // Enhanced Filler Word Detection Function
+  const detectEnhancedFillerWords = useCallback((text: string): string[] => {
+    const detectedFillers: string[] = [];
+    
+    // Comprehensive filler word patterns
+    const singleWordFillers = [
+      'um', 'uh', 'er', 'erm', 'ah', 'eh', 'oh', 'hmm', 'mhm',
+      'like', 'so', 'well', 'actually', 'basically', 'literally', 'obviously', 
+      'right', 'okay', 'alright', 'yeah', 'yep', 'yup', 'nah', 'nope',
+      'kinda', 'sorta', 'anyway', 'meanwhile', 'whatever', 'stuff', 'things',
+      'totally', 'really', 'super', 'pretty', 'quite', 'very'
+    ];
+    
+    const phraseFillers = [
+      'you know', 'i mean', 'you see', 'kind of', 'sort of', 
+      'and uh', 'and um', 'but uh', 'but um', 'so uh', 'so um',
+      'uh huh', 'mm hmm', 'oh well', 'i guess', 'i think',
+      'to be honest', 'if you will', 'as it were', 'per se'
+    ];
+    
+    // Normalize text
+    const normalizedText = text.toLowerCase()
+      .replace(/[.,!?;:'"()]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    
+    const words = normalizedText.split(' ').filter(word => word.length > 0);
+    
+    // Check for phrase fillers first
+    for (let i = 0; i < words.length - 1; i++) {
+      const twoWords = `${words[i]} ${words[i + 1]}`;
+      const threeWords = i < words.length - 2 ? `${words[i]} ${words[i + 1]} ${words[i + 2]}` : '';
+      
+      if (phraseFillers.includes(twoWords)) {
+        detectedFillers.push(twoWords);
+        i++; // Skip next word since it's part of the phrase
+      } else if (threeWords && phraseFillers.includes(threeWords)) {
+        detectedFillers.push(threeWords);
+        i += 2; // Skip next two words
+      } else if (singleWordFillers.includes(words[i])) {
+        detectedFillers.push(words[i]);
+      }
+    }
+    
+    // Check last word if not already processed
+    if (words.length > 0) {
+      const lastWord = words[words.length - 1];
+      if (singleWordFillers.includes(lastWord)) {
+        detectedFillers.push(lastWord);
+      }
+    }
+    
+    return detectedFillers;
+  }, []);
 
   // Comprehensive real-time analysis
   const performComprehensiveAnalysis = useCallback(async () => {
@@ -527,6 +705,16 @@ export default function EnhancedPracticePage() {
 
       setIsRecording(true);
 
+      // Start speech recognition for transcript and filler word detection
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.start();
+          console.log('🎤 Speech recognition started for filler word detection');
+        } catch (error) {
+          console.error('Failed to start speech recognition:', error);
+        }
+      }
+
       // Start session timer
       const startTime = Date.now();
       const timer = setInterval(() => {
@@ -550,6 +738,16 @@ export default function EnhancedPracticePage() {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
+    }
+
+    // Stop speech recognition
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+        console.log('🎤 Speech recognition stopped');
+      } catch (error) {
+        console.error('Failed to stop speech recognition:', error);
+      }
     }
 
     setIsRecording(false);
