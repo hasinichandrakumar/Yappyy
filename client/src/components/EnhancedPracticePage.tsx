@@ -270,31 +270,32 @@ export default function EnhancedPracticePage() {
     };
 
     recognition.onresult = (event: any) => {
-      let finalTranscript = '';
-      let interimTranscript = '';
-      
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript;
-        if (event.results[i].isFinal) {
-          finalTranscript += transcript + ' ';
-        } else {
-          interimTranscript += transcript;
-        }
-      }
-
-      // Update transcript
-      setTranscript(prev => {
-        const updated = prev + finalTranscript;
+      try {
+        let finalTranscript = '';
         
-        // Enhanced filler word detection on final transcript
+        if (!event.results) return;
+        
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          if (!event.results[i] || !event.results[i][0]) continue;
+          
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript + ' ';
+          }
+        }
+
+        // Update transcript and detect filler words
         if (finalTranscript.trim()) {
+          setTranscript(prev => prev + finalTranscript);
+          
+          // Enhanced filler word detection
           const detectedFillers = detectEnhancedFillerWords(finalTranscript);
           if (detectedFillers.length > 0) {
             setMetrics(prevMetrics => ({
               ...prevMetrics,
               content: {
                 ...prevMetrics.content,
-                fillerWords: [...prevMetrics.content.fillerWords, ...detectedFillers]
+                fillerWords: [...(prevMetrics.content.fillerWords || []), ...detectedFillers]
               }
             }));
             
@@ -314,51 +315,22 @@ export default function EnhancedPracticePage() {
             });
           }
         }
-        
-        return updated;
-      });
-
-      // Calculate WPM in real-time
-      const wordCount = (transcript + finalTranscript).split(' ').filter(word => word.length > 0).length;
-      const timeElapsed = sessionDuration > 0 ? sessionDuration / 60 : 0.1;
-      const currentWPM = Math.round(wordCount / timeElapsed);
-      
-      setMetrics(prev => ({
-        ...prev,
-        content: {
-          ...prev.content,
-          wordCount,
-          wpmData: {
-            ...prev.content.wpmData,
-            currentWPM,
-            recentWords: (transcript + finalTranscript).split(' ').filter(word => word.length > 0)
-          }
-        }
-      }));
+      } catch (error) {
+        console.error('Speech recognition processing error:', error);
+      }
     };
 
     recognition.onerror = (event: any) => {
       console.error('Speech recognition error:', event.error);
-      if (event.error !== 'no-speech') {
-        // Automatically restart recognition if it fails (except for no-speech)
-        setTimeout(() => {
-          if (isRecording && recognitionRef.current) {
-            try {
-              recognitionRef.current.start();
-            } catch (error) {
-              console.log('Recognition restart failed:', error);
-            }
-          }
-        }, 1000);
-      }
     };
 
     recognition.onend = () => {
-      // Automatically restart recognition if still recording
       if (isRecording) {
         setTimeout(() => {
           try {
-            recognition.start();
+            if (recognitionRef.current) {
+              recognitionRef.current.start();
+            }
           } catch (error) {
             console.log('Recognition restart failed:', error);
           }
@@ -367,7 +339,7 @@ export default function EnhancedPracticePage() {
     };
 
     recognitionRef.current = recognition;
-  }, [isRecording, sessionDuration, transcript]);
+  }, []);
 
   // Enhanced Filler Word Detection Function
   const detectEnhancedFillerWords = useCallback((text: string): string[] => {
