@@ -22,12 +22,15 @@ import {
 import { analyzeContent } from "./ai-content-analysis";
 import { analyzeVideoFrame, analyzePosture, analyzeEyeContact } from "./openai-realtime-vision";
 import { transcribeWithAnalytics } from "./deepgram-speech";
+import { processMultiModalAnalysis } from "./advanced-ai-orchestrator";
+import { analyzeVoiceQuality, analyzeFillerWords } from "./advanced-voice-engine";
+import { RealTimeProcessingEngine } from "./realtime-processing-engine";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const server = createServer(app);
   
-  // Initialize Real-Time Session Manager
-  const sessionManager = new RealTimeSessionManager(server);
+  // Initialize Enhanced Real-Time Processing Engine
+  const processingEngine = new RealTimeProcessingEngine(server);
   
   // Setup Demo Authentication (simplified for demo environment)
   setupDemoAuth(app);
@@ -1271,6 +1274,19 @@ Respond with detailed analysis in JSON format:
   app.post('/api/world-class-coaching', demoAuth, generateWorldClassCoaching);
   app.post('/api/live-empathic-feedback', demoAuth, generateLiveEmpathicFeedback);
   app.post('/api/update-speaking-profile', demoAuth, updateUserSpeakingProfile);
+
+  // Advanced Multi-Modal AI Routes - Enhanced Backend Architecture
+  app.post("/api/multi-modal-analysis", processMultiModalAnalysis);
+  app.post("/api/voice-quality-analysis", analyzeVoiceQuality);
+  app.post("/api/filler-words-analysis", analyzeFillerWords);
+  
+  // Performance monitoring endpoint
+  app.get("/api/performance-metrics", (req, res) => {
+    const metrics = processingEngine.getOverallPerformance();
+    res.json({ success: true, metrics });
+  });
+
+  console.log('🚀 Enhanced Backend Architecture - Multi-Modal AI Processing Pipeline initialized');
 
   const httpServer = createServer(app);
   return httpServer;
