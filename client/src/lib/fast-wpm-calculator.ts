@@ -4,7 +4,7 @@ export interface WPMData {
   averageWPM: number;
   peakWPM: number;
   recentWords: string[];
-  timeStamps: number[];
+  timeSegments: number[];
 }
 
 export class FastWPMCalculator {
@@ -24,7 +24,7 @@ export class FastWPMCalculator {
       averageWPM: currentWPM,
       peakWPM: currentWPM,
       recentWords: newWords,
-      timeStamps: this.timestamps
+      timeSegments: this.timestamps
     };
   }
 

@@ -1,12 +1,11 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Mic, BarChart3, Brain, FileText, Trophy, Target } from "lucide-react";
-import EnhancedPracticePage from "@/components/EnhancedPracticePage";
-import ComprehensiveAICoach from "@/components/ComprehensiveAICoach";
-import PersonalizedSpeechDNA from "@/components/PersonalizedSpeechDNA";
-import Enhanced50PlusTemplates from "@/components/Enhanced50PlusTemplates";
-import ImprovedBadgeSystem from "@/components/ImprovedBadgeSystem";
-import EnhancedAnalysisTab from "@/components/EnhancedAnalysisTab";
+import SimplePracticePage from "@/components/SimplePracticePage";
+import SimpleAICoach from "@/components/SimpleAICoach";
+import SimpleAnalysisTab from "@/components/SimpleAnalysisTab";
+import SimpleTemplates from "@/components/SimpleTemplates";
+import SimpleBadgeSystem from "@/components/SimpleBadgeSystem";
 import yappyyLogoPath from '@assets/Untitled_design-11600-removebg-preview_1749744306540.png';
 
 export default function Dashboard() {
@@ -70,26 +69,23 @@ export default function Dashboard() {
           </TabsList>
 
           <TabsContent value="practice" className="space-y-8 pb-16">
-            <EnhancedPracticePage />
+            <SimplePracticePage />
           </TabsContent>
 
           <TabsContent value="analysis" className="space-y-6">
-            <EnhancedAnalysisTab />
+            <SimpleAnalysisTab />
           </TabsContent>
 
           <TabsContent value="ai-coach" className="space-y-6">
-            <ComprehensiveAICoach />
+            <SimpleAICoach />
           </TabsContent>
 
           <TabsContent value="templates" className="space-y-6">
-            <Enhanced50PlusTemplates />
+            <SimpleTemplates />
           </TabsContent>
 
           <TabsContent value="achievements" className="space-y-6">
-            <div className="grid gap-6">
-              <ImprovedBadgeSystem />
-              <PersonalizedSpeechDNA />
-            </div>
+            <SimpleBadgeSystem />
           </TabsContent>
         </Tabs>
       </div>
