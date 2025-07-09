@@ -158,6 +158,14 @@ export default function EnhancedPracticePage() {
 
         // Initialize WebGazer Eye Tracking
         webGazerTracking.current = new WebGazerEyeTracking();
+        
+        // Set target region for eye contact (center area of video)
+        webGazerTracking.current.setTargetRegion({
+          x: window.innerWidth * 0.3,
+          y: window.innerHeight * 0.3,
+          width: window.innerWidth * 0.4,
+          height: window.innerHeight * 0.4
+        });
 
         console.log('🚀 Enhanced AI systems initialized');
       } catch (error) {
@@ -238,7 +246,7 @@ export default function EnhancedPracticePage() {
       ] = await Promise.all([
         mediaPipeSystem.current?.processResults ? Promise.resolve(null) : Promise.resolve(null),
         tensorFlowSystem.current?.analyzeFrame(canvasRef.current!, videoRef.current!) || Promise.resolve(null),
-        webGazerTracking.current?.analyzeEyeContact({ x: 320, y: 240, width: 100, height: 100 }) || Promise.resolve(null),
+        webGazerTracking.current?.analyzeEyeContact() || null,
         realTimeCoach.current?.analyzeFrame(canvasRef.current!.getContext('2d')!.getImageData(0, 0, 640, 480)) || Promise.resolve(null)
       ]);
 
@@ -914,6 +922,41 @@ export default function EnhancedPracticePage() {
                           <p className="font-semibold">Gesture Effectiveness</p>
                           <Progress value={metrics.bodyLanguage.gestureEffectiveness} className="mt-2" />
                           <p className="text-sm text-gray-600 mt-1">{Math.round(metrics.bodyLanguage.gestureEffectiveness)}% effective gestures</p>
+                        </div>
+
+                        {/* Eye Tracking Status & Debug */}
+                        <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                          <div className="flex justify-between items-center mb-2">
+                            <p className="font-semibold">Eye Tracking System</p>
+                            <Badge variant={webGazerTracking.current?.isReady() ? "default" : "secondary"}>
+                              {webGazerTracking.current?.isReady() ? "Active" : "Initializing"}
+                            </Badge>
+                          </div>
+                          <div className="grid grid-cols-3 gap-3 text-sm">
+                            <div>
+                              <span className="text-gray-600">Data Points:</span>
+                              <div className="font-medium">{webGazerTracking.current?.getGazeDataCount() || 0}</div>
+                            </div>
+                            <div>
+                              <span className="text-gray-600">Gaze Stability:</span>
+                              <div className="font-medium">{metrics.bodyLanguage.gazeAnalysis?.gazeStability || 0}%</div>
+                            </div>
+                            <div>
+                              <span className="text-gray-600">Attention Score:</span>
+                              <div className="font-medium">{metrics.bodyLanguage.gazeAnalysis?.attentionScore || 0}%</div>
+                            </div>
+                          </div>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="mt-3 w-full"
+                            onClick={() => {
+                              webGazerTracking.current?.recalibrate();
+                              console.log('Eye tracking recalibration initiated');
+                            }}
+                          >
+                            Recalibrate Eye Tracking
+                          </Button>
                         </div>
                       </div>
                     ) : (
