@@ -286,48 +286,6 @@ export class TensorFlowVisionSystem {
       nervousness: Math.max(0, Math.min(100, nervousness)),
       enthusiasm: Math.max(0, Math.min(100, enthusiasm))
     };
-    // Advanced emotion interpretation for public speaking
-    const confidence = Math.max(0, Math.min(100, 
-      (emotions.happy * 40) + 
-      (emotions.neutral * 30) + 
-      (emotions.surprised * 20) - 
-      (emotions.fearful * 30) - 
-      (emotions.sad * 20)
-    ));
-
-    const engagement = Math.max(0, Math.min(100,
-      (emotions.happy * 35) + 
-      (emotions.surprised * 25) + 
-      (emotions.neutral * 20) - 
-      (emotions.neutral * 10) // Too much neutral can indicate disengagement
-    ));
-
-    const authenticity = Math.max(0, Math.min(100,
-      100 - (Math.abs(emotions.happy - 0.3) * 100) - // Natural level of happiness
-      (emotions.disgusted * 50) - 
-      (emotions.angry * 40)
-    ));
-
-    const nervousness = Math.max(0, Math.min(100,
-      (emotions.fearful * 60) + 
-      (emotions.sad * 30) + 
-      (emotions.angry * 20) + 
-      (emotions.surprised * 15)
-    ));
-
-    const enthusiasm = Math.max(0, Math.min(100,
-      (emotions.happy * 50) + 
-      (emotions.surprised * 30) + 
-      (confidence * 0.2)
-    ));
-
-    return {
-      confidence: Math.round(confidence),
-      engagement: Math.round(engagement),
-      authenticity: Math.round(authenticity),
-      nervousness: Math.round(nervousness),
-      enthusiasm: Math.round(enthusiasm)
-    };
   }
 
   private interpretGestureData(gestureData: Float32Array): GestureRecognition {
