@@ -139,8 +139,10 @@ export default function EnhancedPracticePage() {
   const {
     isAnalyzing: isCoachAnalyzing,
     currentCoaching,
+    advancedCoaching,
     userProgress: learningProgress,
     getAdaptiveCoaching,
+    getAdvancedPublicSpeakingCoach,
     getUserLearningProgress,
     convertToSessionMetrics,
     submitFeedback
@@ -1622,6 +1624,113 @@ export default function EnhancedPracticePage() {
                             <p>Deep learning coach will provide personalized insights after your session</p>
                           </div>
                         )}
+                        
+                        {/* Advanced Coaching Results Display */}
+                        {advancedCoaching && (
+                          <div className="mt-4 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200">
+                            <div className="flex items-center justify-between mb-3">
+                              <h4 className="font-semibold text-sm">Advanced Public Speaking Analysis</h4>
+                              <Badge variant="default" className="bg-purple-600">
+                                Neural Network {Math.round(advancedCoaching.neuralNetworkConfidence * 100)}%
+                              </Badge>
+                            </div>
+                            
+                            {/* Coaching Personality */}
+                            <div className="mb-3">
+                              <span className="text-xs font-medium text-gray-600">Coaching Style: </span>
+                              <Badge variant="outline" className="capitalize">
+                                {advancedCoaching.coachingPersonality}
+                              </Badge>
+                            </div>
+                            
+                            {/* Motivational Coaching */}
+                            <div className="mb-3 p-3 bg-green-50 rounded-lg border-l-4 border-green-500">
+                              <p className="text-sm font-medium text-green-800">
+                                {advancedCoaching.motivationalCoaching.encouragementMessage}
+                              </p>
+                            </div>
+                            
+                            {/* Immediate Coaching by Category */}
+                            <div className="grid grid-cols-2 gap-2 mb-3">
+                              <div>
+                                <p className="text-xs font-medium text-purple-600 mb-1">Vocal</p>
+                                <ul className="text-xs space-y-1">
+                                  {advancedCoaching.immediateCoaching.vocal.slice(0, 2).map((tip, idx) => (
+                                    <li key={idx} className="flex items-start gap-1">
+                                      <span className="text-purple-500">•</span>
+                                      <span>{tip}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                              <div>
+                                <p className="text-xs font-medium text-blue-600 mb-1">Physical</p>
+                                <ul className="text-xs space-y-1">
+                                  {advancedCoaching.immediateCoaching.physical.slice(0, 2).map((tip, idx) => (
+                                    <li key={idx} className="flex items-start gap-1">
+                                      <span className="text-blue-500">•</span>
+                                      <span>{tip}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            </div>
+                            
+                            {/* Performance Prediction */}
+                            <div className="p-3 bg-white rounded-lg border">
+                              <div className="flex justify-between items-center mb-2">
+                                <span className="text-xs font-medium">Readiness Score</span>
+                                <span className="text-lg font-bold text-purple-600">
+                                  {advancedCoaching.performancePrediction.readinessScore}%
+                                </span>
+                              </div>
+                              <Progress value={advancedCoaching.performancePrediction.readinessScore} className="h-2" />
+                            </div>
+                            
+                            {/* Strategic Recommendations */}
+                            <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+                              <p className="text-xs font-medium text-blue-600 mb-1">Next Session Focus</p>
+                              <p className="text-xs text-blue-700">
+                                {advancedCoaching.strategicRecommendations.nextSession}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Advanced Coaching Test Button */}
+                        <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="font-medium text-sm">Advanced Public Speaking Coach</h4>
+                            <Badge variant="secondary">Neural Network</Badge>
+                          </div>
+                          <p className="text-xs text-gray-600 mb-3">
+                            Test the advanced AI coaching system with sophisticated speech pattern analysis
+                          </p>
+                          <Button 
+                            size="sm" 
+                            className="w-full"
+                            onClick={async () => {
+                              const testMetrics = convertToSessionMetrics('test-session', metrics);
+                              try {
+                                const result = await getAdvancedPublicSpeakingCoach(testMetrics, 'presentation', 'This is helpful');
+                                console.log('🧠 Advanced Coaching Result:', result);
+                                toast({
+                                  title: "Advanced Coaching Generated",
+                                  description: "Check the console for detailed coaching results",
+                                });
+                              } catch (error) {
+                                console.error('Advanced coaching test failed:', error);
+                                toast({
+                                  title: "Test Failed",
+                                  description: "Check console for details",
+                                  variant: "destructive"
+                                });
+                              }
+                            }}
+                          >
+                            Test Advanced Coaching
+                          </Button>
+                        </div>
                       </div>
                     </ScrollArea>
                   </TabsContent>
