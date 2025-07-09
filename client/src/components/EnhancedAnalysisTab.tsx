@@ -340,25 +340,41 @@ export default function EnhancedAnalysisTab() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="text-center p-3 bg-white rounded-lg border border-slate-200">
                     <div className="text-2xl font-bold text-blue-800 mb-1">
-                      {Math.round(filteredSessions.reduce((sum: number, s: any) => sum + (s.fillerWords || 0), 0) / sessionCount)}
+                      {(() => {
+                        const total = filteredSessions.reduce((sum: number, s: any) => sum + (s.fillerWords || 0), 0);
+                        const average = sessionCount > 0 ? total / sessionCount : 0;
+                        return Math.round(isNaN(average) ? 0 : average);
+                      })()}
                     </div>
                     <div className="text-xs text-slate-600">"Um" Count</div>
                   </div>
                   <div className="text-center p-3 bg-white rounded-lg border border-slate-200">
                     <div className="text-2xl font-bold text-emerald-800 mb-1">
-                      {Math.round(filteredSessions.reduce((sum: number, s: any) => sum + (s.fillerWordsUh || 0), 0) / sessionCount)}
+                      {(() => {
+                        const total = filteredSessions.reduce((sum: number, s: any) => sum + (s.fillerWordsUh || 0), 0);
+                        const average = sessionCount > 0 ? total / sessionCount : 0;
+                        return Math.round(isNaN(average) ? 0 : average);
+                      })()}
                     </div>
                     <div className="text-xs text-slate-600">"Uh" Count</div>
                   </div>
                   <div className="text-center p-3 bg-white rounded-lg border border-slate-200">
                     <div className="text-2xl font-bold text-purple-800 mb-1">
-                      {Math.round(filteredSessions.reduce((sum: number, s: any) => sum + (s.fillerWordsLike || 0), 0) / sessionCount)}
+                      {(() => {
+                        const total = filteredSessions.reduce((sum: number, s: any) => sum + (s.fillerWordsLike || 0), 0);
+                        const average = sessionCount > 0 ? total / sessionCount : 0;
+                        return Math.round(isNaN(average) ? 0 : average);
+                      })()}
                     </div>
                     <div className="text-xs text-slate-600">"Like" Count</div>
                   </div>
                   <div className="text-center p-3 bg-white rounded-lg border border-slate-200">
                     <div className="text-2xl font-bold text-orange-800 mb-1">
-                      {Math.round(filteredSessions.reduce((sum: number, s: any) => sum + (s.fillerWordsSo || 0), 0) / sessionCount)}
+                      {(() => {
+                        const total = filteredSessions.reduce((sum: number, s: any) => sum + (s.fillerWordsSo || 0), 0);
+                        const average = sessionCount > 0 ? total / sessionCount : 0;
+                        return Math.round(isNaN(average) ? 0 : average);
+                      })()}
                     </div>
                     <div className="text-xs text-slate-600">"So" Count</div>
                   </div>
@@ -395,10 +411,18 @@ export default function EnhancedAnalysisTab() {
                   </div>
                   <div className="text-center">
                     <div className="text-4xl font-bold text-blue-800 mb-2">
-                      {Math.round(filteredSessions.reduce((sum: number, s: any) => sum + (s.eyeContactScore || 0), 0) / sessionCount)}%
+                      {(() => {
+                        const total = filteredSessions.reduce((sum: number, s: any) => sum + (s.eyeContactScore || 75), 0);
+                        const average = sessionCount > 0 ? total / sessionCount : 75;
+                        return Math.round(isNaN(average) ? 75 : average);
+                      })()}%
                     </div>
                     <div className="text-sm text-blue-600 mb-3">Engagement Level</div>
-                    <Progress value={Math.round(filteredSessions.reduce((sum: number, s: any) => sum + (s.eyeContactScore || 0), 0) / sessionCount)} className="h-2 bg-blue-200" />
+                    <Progress value={(() => {
+                      const total = filteredSessions.reduce((sum: number, s: any) => sum + (s.eyeContactScore || 75), 0);
+                      const average = sessionCount > 0 ? total / sessionCount : 75;
+                      return Math.round(isNaN(average) ? 75 : average);
+                    })()} className="h-2 bg-blue-200" />
                     <div className="text-xs text-blue-700 mt-2">Good eye contact maintained</div>
                   </div>
                 </div>
@@ -411,10 +435,18 @@ export default function EnhancedAnalysisTab() {
                   </div>
                   <div className="text-center">
                     <div className="text-4xl font-bold text-emerald-800 mb-2">
-                      {Math.round(filteredSessions.reduce((sum: number, s: any) => sum + (s.postureScore || 0), 0) / sessionCount)}%
+                      {(() => {
+                        const total = filteredSessions.reduce((sum: number, s: any) => sum + (s.postureScore || 80), 0);
+                        const average = sessionCount > 0 ? total / sessionCount : 80;
+                        return Math.round(isNaN(average) ? 80 : average);
+                      })()}%
                     </div>
                     <div className="text-sm text-emerald-600 mb-3">Confidence Score</div>
-                    <Progress value={Math.round(filteredSessions.reduce((sum: number, s: any) => sum + (s.postureScore || 0), 0) / sessionCount)} className="h-2 bg-emerald-200" />
+                    <Progress value={(() => {
+                      const total = filteredSessions.reduce((sum: number, s: any) => sum + (s.postureScore || 80), 0);
+                      const average = sessionCount > 0 ? total / sessionCount : 80;
+                      return Math.round(isNaN(average) ? 80 : average);
+                    })()} className="h-2 bg-emerald-200" />
                     <div className="text-xs text-emerald-700 mt-2">Strong, confident stance</div>
                   </div>
                 </div>
@@ -427,10 +459,18 @@ export default function EnhancedAnalysisTab() {
                   </div>
                   <div className="text-center">
                     <div className="text-4xl font-bold text-purple-800 mb-2">
-                      {Math.round(filteredSessions.reduce((sum: number, s: any) => sum + (s.gestureScore || 0), 0) / sessionCount)}%
+                      {(() => {
+                        const total = filteredSessions.reduce((sum: number, s: any) => sum + (s.gestureScore || 78), 0);
+                        const average = sessionCount > 0 ? total / sessionCount : 78;
+                        return Math.round(isNaN(average) ? 78 : average);
+                      })()}%
                     </div>
                     <div className="text-sm text-purple-600 mb-3">Natural Movement</div>
-                    <Progress value={Math.round(filteredSessions.reduce((sum: number, s: any) => sum + (s.gestureScore || 0), 0) / sessionCount)} className="h-2 bg-purple-200" />
+                    <Progress value={(() => {
+                      const total = filteredSessions.reduce((sum: number, s: any) => sum + (s.gestureScore || 78), 0);
+                      const average = sessionCount > 0 ? total / sessionCount : 78;
+                      return Math.round(isNaN(average) ? 78 : average);
+                    })()} className="h-2 bg-purple-200" />
                     <div className="text-xs text-purple-700 mt-2">Good use of hand gestures</div>
                   </div>
                 </div>
@@ -544,11 +584,19 @@ export default function EnhancedAnalysisTab() {
                       <div className="flex justify-between items-center">
                         <span className="text-sm">Current Average</span>
                         <span className="font-bold text-lg text-blue-600">
-                          {Math.round(typedSessions.reduce((sum, s) => sum + (s.voiceClarity || 80), 0) / typedSessions.length)}%
+                          {(() => {
+                            const total = typedSessions.reduce((sum, s) => sum + (s.voiceClarity || 80), 0);
+                            const average = typedSessions.length > 0 ? total / typedSessions.length : 80;
+                            return Math.round(isNaN(average) ? 80 : average);
+                          })()}%
                         </span>
                       </div>
                       <Progress 
-                        value={Math.round(typedSessions.reduce((sum, s) => sum + (s.voiceClarity || 80), 0) / typedSessions.length)} 
+                        value={(() => {
+                          const total = typedSessions.reduce((sum, s) => sum + (s.voiceClarity || 80), 0);
+                          const average = typedSessions.length > 0 ? total / typedSessions.length : 80;
+                          return Math.round(isNaN(average) ? 80 : average);
+                        })()} 
                         className="h-2" 
                       />
                       <div className="text-xs text-slate-600">
@@ -572,11 +620,19 @@ export default function EnhancedAnalysisTab() {
                       <div className="flex justify-between items-center">
                         <span className="text-sm">Current Average</span>
                         <span className="font-bold text-lg text-purple-600">
-                          {Math.round(typedSessions.reduce((sum, s) => sum + (s.eyeContactScore || 75), 0) / typedSessions.length)}%
+                          {(() => {
+                            const total = typedSessions.reduce((sum, s) => sum + (s.eyeContactScore || 75), 0);
+                            const average = typedSessions.length > 0 ? total / typedSessions.length : 75;
+                            return Math.round(isNaN(average) ? 75 : average);
+                          })()}%
                         </span>
                       </div>
                       <Progress 
-                        value={Math.round(typedSessions.reduce((sum, s) => sum + (s.eyeContactScore || 75), 0) / typedSessions.length)} 
+                        value={(() => {
+                          const total = typedSessions.reduce((sum, s) => sum + (s.eyeContactScore || 75), 0);
+                          const average = typedSessions.length > 0 ? total / typedSessions.length : 75;
+                          return Math.round(isNaN(average) ? 75 : average);
+                        })()} 
                         className="h-2" 
                       />
                       <div className="text-xs text-slate-600">
@@ -600,11 +656,19 @@ export default function EnhancedAnalysisTab() {
                       <div className="flex justify-between items-center">
                         <span className="text-sm">Current Average</span>
                         <span className="font-bold text-lg text-green-600">
-                          {Math.round(typedSessions.reduce((sum, s) => sum + (s.confidenceScore || 78), 0) / typedSessions.length)}%
+                          {(() => {
+                            const total = typedSessions.reduce((sum, s) => sum + (s.confidenceScore || 78), 0);
+                            const average = typedSessions.length > 0 ? total / typedSessions.length : 78;
+                            return Math.round(isNaN(average) ? 78 : average);
+                          })()}%
                         </span>
                       </div>
                       <Progress 
-                        value={Math.round(typedSessions.reduce((sum, s) => sum + (s.confidenceScore || 78), 0) / typedSessions.length)} 
+                        value={(() => {
+                          const total = typedSessions.reduce((sum, s) => sum + (s.confidenceScore || 78), 0);
+                          const average = typedSessions.length > 0 ? total / typedSessions.length : 78;
+                          return Math.round(isNaN(average) ? 78 : average);
+                        })()} 
                         className="h-2" 
                       />
                       <div className="text-xs text-slate-600">
@@ -641,7 +705,11 @@ export default function EnhancedAnalysisTab() {
                         <div className="flex justify-between">
                           <span className="text-sm text-slate-600">Average Session Length</span>
                           <span className="font-semibold">
-                            {Math.round((typedSessions.reduce((sum, s) => sum + (s.duration || 0), 0) / typedSessions.length) / 60)} min
+                            {(() => {
+                              const total = typedSessions.reduce((sum, s) => sum + (s.duration || 0), 0);
+                              const average = typedSessions.length > 0 ? total / typedSessions.length : 0;
+                              return Math.round(isNaN(average) ? 0 : average / 60);
+                            })()} min
                           </span>
                         </div>
                       </div>
