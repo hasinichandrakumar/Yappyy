@@ -465,19 +465,22 @@ export class RealTimeProcessingEngine {
           low: 0
         };
 
-        // Safely get queue lengths
+        // Safely get queue lengths using proper Bull queue methods
         try {
-          if (this.processingQueues.high) {
-            queueLengths.high = await this.processingQueues.high.waiting();
+          if (this.processingQueues.high && typeof this.processingQueues.high.getWaiting === 'function') {
+            const waitingJobs = await this.processingQueues.high.getWaiting();
+            queueLengths.high = waitingJobs.length;
           }
-          if (this.processingQueues.medium) {
-            queueLengths.medium = await this.processingQueues.medium.waiting();
+          if (this.processingQueues.medium && typeof this.processingQueues.medium.getWaiting === 'function') {
+            const waitingJobs = await this.processingQueues.medium.getWaiting();
+            queueLengths.medium = waitingJobs.length;
           }
-          if (this.processingQueues.low) {
-            queueLengths.low = await this.processingQueues.low.waiting();
+          if (this.processingQueues.low && typeof this.processingQueues.low.getWaiting === 'function') {
+            const waitingJobs = await this.processingQueues.low.getWaiting();
+            queueLengths.low = waitingJobs.length;
           }
         } catch (error) {
-          console.warn('Queue metrics collection failed:', error.message);
+          // Silently continue - queue metrics are non-critical
         }
 
         this.performanceMonitor.collectMetrics({

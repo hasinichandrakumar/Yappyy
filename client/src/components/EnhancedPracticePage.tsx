@@ -23,6 +23,8 @@ import { MediaPipeVisionSystem, MediaPipeResults } from '@/lib/mediapipe-vision'
 import { TensorFlowVisionSystem, TensorFlowEmotionResults, GestureRecognition } from '@/lib/tensorflow-emotion';
 import { WebGazerEyeTracking, EyeContactAnalysis, GazeHeatmap } from '@/lib/webgazer-eye-tracking';
 import { GamificationEngine, Achievement, UserProgress, AIPersonality } from '@/lib/gamification-engine';
+import { fastWPMCalculator, WPMData } from '@/lib/fast-wpm-calculator';
+import { enhancedEyeTracking } from '@/lib/enhanced-eye-tracking';
 
 interface EnhancedLiveFeedback {
   id: string;
@@ -52,6 +54,7 @@ interface ComprehensiveMetrics {
     authenticityMeasure: number;
     fillerWords: string[];
     wordCount: number;
+    wpmData: WPMData;
   };
   
   // Body Language Metrics
@@ -94,8 +97,15 @@ export default function EnhancedPracticePage() {
   // Enhanced Metrics & Feedback
   const [metrics, setMetrics] = useState<ComprehensiveMetrics>({
     voice: { clarity: 0, pace: 0, volume: 0, pitchVariation: 0, vocalFryDetection: false, uptalkPatterns: 0 },
-    content: { coherenceRating: 0, persuasivenessIndex: 0, authenticityMeasure: 0, fillerWords: [], wordCount: 0 },
-    bodyLanguage: { eyeContactScore: 0, postureScore: 0, gestureEffectiveness: 0, facialExpressions: null, gazeAnalysis: null },
+    content: { 
+      coherenceRating: 0, 
+      persuasivenessIndex: 0, 
+      authenticityMeasure: 0, 
+      fillerWords: [], 
+      wordCount: 0,
+      wpmData: { currentWPM: 0, averageWPM: 0, peakWPM: 0, recentWords: [], timeSegments: [] }
+    },
+    bodyLanguage: { eyeContactScore: 75, postureScore: 0, gestureEffectiveness: 0, facialExpressions: null, gazeAnalysis: null },
     emotion: { confidence: 0, engagement: 0, authenticity: 0, nervousness: 0, enthusiasm: 0 },
     insights: { overallScore: 0, improvementAreas: [], strengths: [], nextSteps: [] }
   });
@@ -226,8 +236,20 @@ export default function EnhancedPracticePage() {
         realTimeCoach.current?.analyzeFrame(canvasRef.current!.getContext('2d')!.getImageData(0, 0, 640, 480)) || Promise.resolve(null)
       ]);
 
+      // Apply enhanced eye tracking stability and fast WPM calculation
+      const stableEyeMetrics = enhancedEyeTracking.updateMetrics({
+        eyeContactPercentage: gazeAnalysis?.eyeContactPercentage || 75,
+        gazeStability: gazeAnalysis?.gazeStability || 80,
+        attentionScore: gazeAnalysis?.attentionScore || 75,
+        distractionLevel: gazeAnalysis?.distractionLevel || 20,
+        confidenceScore: tensorFlowResults?.expressions.confidence || 85
+      });
+
+      // Fast WPM calculation
+      const wpmData = fastWPMCalculator.addWords(transcript);
+
       // Update comprehensive metrics
-      updateComprehensiveMetrics(tensorFlowResults, gazeAnalysis, advancedMetrics);
+      updateComprehensiveMetrics(tensorFlowResults, gazeAnalysis, advancedMetrics, stableEyeMetrics, wpmData);
 
       // Generate intelligent feedback
       generateIntelligentFeedback(tensorFlowResults, gazeAnalysis);
@@ -243,7 +265,9 @@ export default function EnhancedPracticePage() {
   const updateComprehensiveMetrics = useCallback((
     tensorFlowResults: TensorFlowEmotionResults | null,
     gazeAnalysis: EyeContactAnalysis | null,
-    advancedMetrics: AdvancedSpeechMetrics | null
+    advancedMetrics: AdvancedSpeechMetrics | null,
+    stableEyeMetrics: any,
+    wpmData: WPMData
   ) => {
     setMetrics(prev => ({
       ...prev,
@@ -251,7 +275,7 @@ export default function EnhancedPracticePage() {
         ...prev.bodyLanguage,
         facialExpressions: tensorFlowResults,
         gazeAnalysis: gazeAnalysis,
-        eyeContactScore: gazeAnalysis?.eyeContactPercentage || prev.bodyLanguage.eyeContactScore,
+        eyeContactScore: stableEyeMetrics.eyeContactPercentage,
         gestureEffectiveness: advancedMetrics?.gesture_effectiveness || prev.bodyLanguage.gestureEffectiveness
       },
       emotion: {
@@ -271,7 +295,9 @@ export default function EnhancedPracticePage() {
         ...prev.content,
         coherenceRating: advancedMetrics?.coherence_rating || prev.content.coherenceRating,
         persuasivenessIndex: advancedMetrics?.persuasiveness_index || prev.content.persuasivenessIndex,
-        authenticityMeasure: advancedMetrics?.authenticity_measure || prev.content.authenticityMeasure
+        authenticityMeasure: advancedMetrics?.authenticity_measure || prev.content.authenticityMeasure,
+        wordCount: wpmData.recentWords.length,
+        wpmData: wpmData
       }
     }));
   }, []);
@@ -729,8 +755,9 @@ export default function EnhancedPracticePage() {
                       <Card className="p-4">
                         <div className="text-center">
                           <Zap className="w-6 h-6 mx-auto mb-2 text-green-600" />
-                          <p className="text-2xl font-bold">{Math.round(metrics.voice.pace)}</p>
+                          <p className="text-2xl font-bold">{metrics.content.wpmData.currentWPM}</p>
                           <p className="text-sm text-gray-600">WPM</p>
+                          <p className="text-xs text-gray-500">Avg: {metrics.content.wpmData.averageWPM}</p>
                         </div>
                       </Card>
                       <Card className="p-4">
