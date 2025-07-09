@@ -23,7 +23,9 @@ import { analyzeContent } from "./ai-content-analysis";
 import { analyzeVideoFrame, analyzePosture, analyzeEyeContact } from "./openai-realtime-vision";
 import { transcribeWithAnalytics } from "./deepgram-speech";
 import { processMultiModalAnalysis } from "./advanced-ai-orchestrator";
-import { analyzeVoiceQuality, analyzeFillerWords } from "./advanced-voice-engine";
+import { analyzeVoiceQuality, analyzeFillerWords, generateVoiceCoaching } from "./advanced-voice-engine";
+import { processUltraAdvancedAnalysis } from "./ultra-advanced-ai-engine";
+import { processRealTimeFrame, getPerformanceMetrics } from "./realtime-processing-engine";
 import { RealTimeProcessingEngine } from "./realtime-processing-engine";
 import { processContentAnalysis } from "./content-analysis-api";
 import { getAdaptiveCoaching, getUserLearningProgress, getAdvancedPublicSpeakingCoaching } from "./deep-learning-coach";
@@ -1296,8 +1298,22 @@ Respond with detailed analysis in JSON format:
   app.post("/api/advanced-public-speaking-coach", demoAuth, getAdvancedPublicSpeakingCoaching);
   app.get("/api/user-learning-progress/:userId", demoAuth, getUserLearningProgress);
 
+  // ======= ULTRA-ADVANCED AI ENDPOINTS =======
+  
+  // Ultra-Advanced Multi-Modal Analysis
+  app.post("/api/ultra-advanced-analysis", demoAuth, processUltraAdvancedAnalysis);
+  
+  // Real-Time Processing Engine
+  app.post("/api/real-time-frame", demoAuth, processRealTimeFrame);
+  
+  // Advanced Voice Analysis (Enhanced versions)
+  app.post("/api/voice-coaching-enhanced", demoAuth, generateVoiceCoaching);
+
   console.log('🚀 Enhanced Backend Architecture - Multi-Modal AI Processing Pipeline initialized');
   console.log('🧠 Deep Learning Coach system initialized');
+  console.log('⚡ Ultra-Advanced AI Processing Engine activated');
+  console.log('🎤 Professional Voice Analysis Engine ready');
+  console.log('🚀 Real-Time Sub-100ms Processing Engine online');
 
   const httpServer = createServer(app);
   return httpServer;
