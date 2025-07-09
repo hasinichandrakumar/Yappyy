@@ -288,8 +288,36 @@ export default function EnhancedPracticePage() {
         if (finalTranscript.trim()) {
           setTranscript(prev => prev + finalTranscript);
           
-          // Enhanced filler word detection
-          const detectedFillers = detectEnhancedFillerWords(finalTranscript);
+          // Enhanced filler word detection - inline function to avoid timing issues
+          const detectedFillers = (() => {
+            const fillers: string[] = [];
+            const singleWordFillers = ['um', 'uh', 'er', 'like', 'so', 'well', 'actually', 'basically', 'literally', 'right', 'okay'];
+            const phraseFillers = ['you know', 'i mean', 'kind of', 'sort of'];
+            
+            const normalizedText = finalTranscript.toLowerCase().replace(/[.,!?;:'"()]/g, ' ').replace(/\s+/g, ' ').trim();
+            const words = normalizedText.split(' ').filter(word => word.length > 0);
+            
+            // Check for phrase fillers first
+            for (let i = 0; i < words.length - 1; i++) {
+              const twoWords = `${words[i]} ${words[i + 1]}`;
+              if (phraseFillers.includes(twoWords)) {
+                fillers.push(twoWords);
+                i++; // Skip next word
+              } else if (singleWordFillers.includes(words[i])) {
+                fillers.push(words[i]);
+              }
+            }
+            
+            // Check last word
+            if (words.length > 0) {
+              const lastWord = words[words.length - 1];
+              if (singleWordFillers.includes(lastWord)) {
+                fillers.push(lastWord);
+              }
+            }
+            
+            return fillers;
+          })();
           if (detectedFillers.length > 0) {
             setMetrics(prevMetrics => ({
               ...prevMetrics,
@@ -339,61 +367,6 @@ export default function EnhancedPracticePage() {
     };
 
     recognitionRef.current = recognition;
-  }, []);
-
-  // Enhanced Filler Word Detection Function
-  const detectEnhancedFillerWords = useCallback((text: string): string[] => {
-    const detectedFillers: string[] = [];
-    
-    // Comprehensive filler word patterns
-    const singleWordFillers = [
-      'um', 'uh', 'er', 'erm', 'ah', 'eh', 'oh', 'hmm', 'mhm',
-      'like', 'so', 'well', 'actually', 'basically', 'literally', 'obviously', 
-      'right', 'okay', 'alright', 'yeah', 'yep', 'yup', 'nah', 'nope',
-      'kinda', 'sorta', 'anyway', 'meanwhile', 'whatever', 'stuff', 'things',
-      'totally', 'really', 'super', 'pretty', 'quite', 'very'
-    ];
-    
-    const phraseFillers = [
-      'you know', 'i mean', 'you see', 'kind of', 'sort of', 
-      'and uh', 'and um', 'but uh', 'but um', 'so uh', 'so um',
-      'uh huh', 'mm hmm', 'oh well', 'i guess', 'i think',
-      'to be honest', 'if you will', 'as it were', 'per se'
-    ];
-    
-    // Normalize text
-    const normalizedText = text.toLowerCase()
-      .replace(/[.,!?;:'"()]/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-    
-    const words = normalizedText.split(' ').filter(word => word.length > 0);
-    
-    // Check for phrase fillers first
-    for (let i = 0; i < words.length - 1; i++) {
-      const twoWords = `${words[i]} ${words[i + 1]}`;
-      const threeWords = i < words.length - 2 ? `${words[i]} ${words[i + 1]} ${words[i + 2]}` : '';
-      
-      if (phraseFillers.includes(twoWords)) {
-        detectedFillers.push(twoWords);
-        i++; // Skip next word since it's part of the phrase
-      } else if (threeWords && phraseFillers.includes(threeWords)) {
-        detectedFillers.push(threeWords);
-        i += 2; // Skip next two words
-      } else if (singleWordFillers.includes(words[i])) {
-        detectedFillers.push(words[i]);
-      }
-    }
-    
-    // Check last word if not already processed
-    if (words.length > 0) {
-      const lastWord = words[words.length - 1];
-      if (singleWordFillers.includes(lastWord)) {
-        detectedFillers.push(lastWord);
-      }
-    }
-    
-    return detectedFillers;
   }, []);
 
   // Comprehensive real-time analysis
