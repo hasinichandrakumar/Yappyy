@@ -1057,13 +1057,11 @@ export default function EnhancedPracticePage() {
           </Alert>
         )}
 
-        {/* Main Content Grid */}
+        {/* Simplified Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
-          {/* Video Feed and Live Metrics */}
-          <div className="lg:col-span-2 space-y-4">
-            
-            {/* Video Feed */}
+          {/* Video Feed */}
+          <div className="lg:col-span-2">
             <Card className="relative overflow-hidden">
               <CardContent className="p-0">
                 <div className="relative aspect-video bg-gray-900 rounded-lg overflow-hidden">
@@ -1078,45 +1076,19 @@ export default function EnhancedPracticePage() {
                     className="absolute inset-0 w-full h-full pointer-events-none opacity-75"
                   />
                   
-                  {/* Live Status Indicators */}
+                  {/* Simplified Live Status */}
                   {isRecording && (
-                    <div className="absolute top-4 left-4 flex gap-2">
+                    <div className="absolute top-4 left-4">
                       <Badge variant="destructive" className="animate-pulse">
                         <Activity className="w-3 h-3 mr-1" />
-                        LIVE
+                        RECORDING {Math.floor(sessionDuration / 60)}:{(sessionDuration % 60).toString().padStart(2, '0')}
                       </Badge>
-                      <Badge variant="secondary">
-                        {Math.floor(sessionDuration / 60)}:{(sessionDuration % 60).toString().padStart(2, '0')}
-                      </Badge>
-                    </div>
-                  )}
-
-                  {/* Real-time Metrics Overlay */}
-                  {isRecording && (
-                    <div className="absolute top-4 right-4 space-y-2">
-                      <div className="bg-black/70 text-white px-3 py-2 rounded-lg text-sm">
-                        <div className="flex items-center gap-2">
-                          <Eye className="w-4 h-4" />
-                          <span>Eye Contact: {Math.min(100, Math.max(0, Math.round(metrics.bodyLanguage.eyeContactScore || 75)))}%</span>
-                        </div>
-                      </div>
-                      <div className="bg-black/70 text-white px-3 py-2 rounded-lg text-sm">
-                        <div className="flex items-center gap-2">
-                          <TrendingUp className="w-4 h-4" />
-                          <span>Confidence: {Math.round(metrics.emotion.confidence)}%</span>
-                        </div>
-                      </div>
-                      <div className="bg-black/70 text-white px-3 py-2 rounded-lg text-sm">
-                        <div className="flex items-center gap-2">
-                          <Users className="w-4 h-4" />
-                          <span>Engagement: {Math.round(metrics.emotion.engagement)}%</span>
-                        </div>
-                      </div>
                     </div>
                   )}
                 </div>
               </CardContent>
             </Card>
+          </div>
 
             {/* Enhanced Metrics Dashboard */}
             <Card>
