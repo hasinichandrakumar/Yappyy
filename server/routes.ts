@@ -25,6 +25,7 @@ import { transcribeWithAnalytics } from "./deepgram-speech";
 import { processMultiModalAnalysis } from "./advanced-ai-orchestrator";
 import { analyzeVoiceQuality, analyzeFillerWords } from "./advanced-voice-engine";
 import { RealTimeProcessingEngine } from "./realtime-processing-engine";
+import { processContentAnalysis } from "./content-analysis-api";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const server = createServer(app);
@@ -632,6 +633,9 @@ Provide detailed feedback on content structure, voice modulation advice, and bod
 
   // AI Content Analysis endpoint
   app.post("/api/ai-content-analysis", demoAuth, analyzeContent);
+
+  // Enhanced Content Analysis endpoint
+  app.post("/api/content-analysis", demoAuth, processContentAnalysis);
 
   // User achievements endpoint
   app.get("/api/user-achievements", requireAuth, async (req: any, res) => {

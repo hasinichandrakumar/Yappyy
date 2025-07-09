@@ -25,6 +25,7 @@ import { WebGazerEyeTracking, EyeContactAnalysis, GazeHeatmap } from '@/lib/webg
 import { GamificationEngine, Achievement, UserProgress, AIPersonality } from '@/lib/gamification-engine';
 import { fastWPMCalculator, WPMData } from '@/lib/fast-wpm-calculator';
 import { enhancedEyeTracking } from '@/lib/enhanced-eye-tracking';
+import { contentAnalysisEngine, ContentAnalysisResult, SpeechPurpose } from '@/lib/content-analysis-engine';
 
 interface EnhancedLiveFeedback {
   id: string;
@@ -121,6 +122,11 @@ export default function EnhancedPracticePage() {
   const [showAdvancedMetrics, setShowAdvancedMetrics] = useState(false);
   const [showGazeHeatmap, setShowGazeHeatmap] = useState(false);
   const [isCalibrating, setIsCalibrating] = useState(false);
+
+  // Content Analysis State
+  const [speechPurpose, setSpeechPurpose] = useState<SpeechPurpose | null>(null);
+  const [contentAnalysis, setContentAnalysis] = useState<ContentAnalysisResult | null>(null);
+  const [showContentAnalysis, setShowContentAnalysis] = useState(false);
 
   // Refs for Advanced Systems
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -247,6 +253,41 @@ export default function EnhancedPracticePage() {
 
       // Fast WPM calculation
       const wpmData = fastWPMCalculator.addWords(transcript);
+
+      // Content analysis based on speech purpose
+      if (speechPurpose && transcript.length > 50) {
+        try {
+          // Use backend AI-powered content analysis
+          const response = await fetch('/api/content-analysis', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              transcript,
+              speechPurpose,
+              sessionDuration,
+              sessionId: `session-${Date.now()}`
+            })
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success) {
+              setContentAnalysis(data.analysis);
+            }
+          } else {
+            // Fallback to client-side analysis
+            const analysisResult = await contentAnalysisEngine.analyzeContent(transcript, speechPurpose, sessionDuration);
+            setContentAnalysis(analysisResult);
+          }
+        } catch (error) {
+          console.error('Content analysis error:', error);
+          // Fallback to client-side analysis
+          const analysisResult = await contentAnalysisEngine.analyzeContent(transcript, speechPurpose, sessionDuration);
+          setContentAnalysis(analysisResult);
+        }
+      }
 
       // Update comprehensive metrics
       updateComprehensiveMetrics(tensorFlowResults, gazeAnalysis, advancedMetrics, stableEyeMetrics, wpmData);
@@ -735,11 +776,12 @@ export default function EnhancedPracticePage() {
               </CardHeader>
               <CardContent>
                 <Tabs value={activeTab} onValueChange={setActiveTab}>
-                  <TabsList className="grid w-full grid-cols-4">
+                  <TabsList className="grid w-full grid-cols-5">
                     <TabsTrigger value="live">Live Metrics</TabsTrigger>
                     <TabsTrigger value="voice">Voice Analysis</TabsTrigger>
                     <TabsTrigger value="body">Body Language</TabsTrigger>
                     <TabsTrigger value="emotion">Emotions</TabsTrigger>
+                    <TabsTrigger value="content">Content Analysis</TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="live" className="space-y-4">
@@ -910,6 +952,151 @@ export default function EnhancedPracticePage() {
                         </div>
                       </div>
                     )}
+                  </TabsContent>
+
+                  <TabsContent value="content" className="space-y-4">
+                    <div className="space-y-4">
+                      {/* Speech Purpose Selection */}
+                      <Card className="p-4">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="font-semibold">Speech Purpose</h3>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => setShowContentAnalysis(!showContentAnalysis)}
+                          >
+                            {showContentAnalysis ? 'Hide' : 'Show'} Analysis
+                          </Button>
+                        </div>
+                        
+                        <div className="grid grid-cols-3 gap-2">
+                          {contentAnalysisEngine.getAllPurposeTemplates().map((purpose) => (
+                            <Button
+                              key={purpose.type}
+                              variant={speechPurpose?.type === purpose.type ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setSpeechPurpose(purpose)}
+                            >
+                              {purpose.type.charAt(0).toUpperCase() + purpose.type.slice(1)}
+                            </Button>
+                          ))}
+                        </div>
+                        
+                        {speechPurpose && (
+                          <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                            <p className="text-sm font-medium">{speechPurpose.description}</p>
+                            <p className="text-xs text-gray-600 mt-1">
+                              Audience: {speechPurpose.audience}
+                            </p>
+                          </div>
+                        )}
+                      </Card>
+
+                      {/* Content Analysis Results */}
+                      {showContentAnalysis && contentAnalysis && (
+                        <Card className="p-4">
+                          <h3 className="font-semibold mb-4">Content Analysis Results</h3>
+                          
+                          {/* Overall Score */}
+                          <div className="mb-4">
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="text-sm font-medium">Overall Content Score</span>
+                              <span className="text-2xl font-bold text-blue-600">
+                                {contentAnalysis.overallScore}%
+                              </span>
+                            </div>
+                            <Progress value={contentAnalysis.overallScore} className="h-2" />
+                          </div>
+
+                          {/* Detailed Scores */}
+                          <div className="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                              <div className="flex justify-between text-sm mb-1">
+                                <span>Structure</span>
+                                <span>{contentAnalysis.structureScore}%</span>
+                              </div>
+                              <Progress value={contentAnalysis.structureScore} className="h-1" />
+                            </div>
+                            <div>
+                              <div className="flex justify-between text-sm mb-1">
+                                <span>Persuasiveness</span>
+                                <span>{contentAnalysis.persuasivenessScore}%</span>
+                              </div>
+                              <Progress value={contentAnalysis.persuasivenessScore} className="h-1" />
+                            </div>
+                            <div>
+                              <div className="flex justify-between text-sm mb-1">
+                                <span>Coherence</span>
+                                <span>{contentAnalysis.coherenceScore}%</span>
+                              </div>
+                              <Progress value={contentAnalysis.coherenceScore} className="h-1" />
+                            </div>
+                            <div>
+                              <div className="flex justify-between text-sm mb-1">
+                                <span>Audience Alignment</span>
+                                <span>{contentAnalysis.audienceAlignmentScore}%</span>
+                              </div>
+                              <Progress value={contentAnalysis.audienceAlignmentScore} className="h-1" />
+                            </div>
+                          </div>
+
+                          {/* Key Insights */}
+                          {contentAnalysis.keyInsights.length > 0 && (
+                            <div className="mb-4">
+                              <h4 className="font-medium text-sm mb-2">Key Insights</h4>
+                              <div className="space-y-1">
+                                {contentAnalysis.keyInsights.map((insight, idx) => (
+                                  <div key={idx} className="flex items-start gap-2">
+                                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-1.5 flex-shrink-0" />
+                                    <p className="text-sm text-gray-700">{insight}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Improvement Areas */}
+                          {contentAnalysis.improvementAreas.length > 0 && (
+                            <div className="mb-4">
+                              <h4 className="font-medium text-sm mb-2">Areas for Improvement</h4>
+                              <div className="space-y-1">
+                                {contentAnalysis.improvementAreas.map((area, idx) => (
+                                  <div key={idx} className="flex items-start gap-2">
+                                    <div className="w-2 h-2 bg-orange-500 rounded-full mt-1.5 flex-shrink-0" />
+                                    <p className="text-sm text-gray-700">{area}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Recommendations */}
+                          {contentAnalysis.recommendations.length > 0 && (
+                            <div>
+                              <h4 className="font-medium text-sm mb-2">Recommendations</h4>
+                              <div className="space-y-1">
+                                {contentAnalysis.recommendations.map((rec, idx) => (
+                                  <div key={idx} className="flex items-start gap-2">
+                                    <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5 flex-shrink-0" />
+                                    <p className="text-sm text-gray-700">{rec}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </Card>
+                      )}
+
+                      {/* Transcript Display */}
+                      <Card className="p-4">
+                        <h3 className="font-semibold mb-2">Live Transcript</h3>
+                        <ScrollArea className="h-32">
+                          <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                            {transcript || "Start speaking to see your transcript..."}
+                          </p>
+                        </ScrollArea>
+                      </Card>
+                    </div>
                   </TabsContent>
                 </Tabs>
               </CardContent>
