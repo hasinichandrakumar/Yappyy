@@ -82,6 +82,18 @@ export const practiceSessions = pgTable("practice_sessions", {
   transcript: text("transcript").notNull(),
   coachingTips: text("coaching_tips").array().notNull(),
   videoBlob: text("video_blob"), // base64 encoded video data
+  
+  // Analysis tab compatible fields
+  clarityScore: real("clarity_score"),
+  volumeConsistency: real("volume_consistency"),
+  intonationScore: real("intonation_score"),
+  postureScore: real("posture_score"),
+  fillerWordsUh: integer("filler_words_uh").default(0),
+  fillerWordsLike: integer("filler_words_like").default(0),
+  fillerWordsSo: integer("filler_words_so").default(0),
+  name: varchar("name"),
+  purpose: text("purpose"),
+  
   // Advanced AI analysis fields
   aiAnalysis: jsonb("ai_analysis"), // Comprehensive AI analysis results
   speechPatterns: jsonb("speech_patterns"), // Pause analysis, intonation, articulation
