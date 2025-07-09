@@ -80,45 +80,56 @@ export class RealTimeProcessingEngine {
         host: process.env.REDIS_HOST || 'localhost',
         port: parseInt(process.env.REDIS_PORT || '6379'),
         retryDelayOnFailover: 100,
-        maxRetriesPerRequest: 3,
-        lazyConnect: true
+        maxRetriesPerRequest: 1,
+        lazyConnect: true,
+        connectTimeout: 2000,
+        commandTimeout: 2000
+      });
+      
+      // Suppress Redis error events since we have fallback
+      this.redis.on('error', () => {
+        // Silent fallback to memory cache
       });
       
       await this.redis.ping();
       this.cache.L2 = this.redis;
       console.log('🚀 Redis connected for ultra-fast caching');
     } catch (error) {
-      console.warn('Redis unavailable, using memory fallback:', error);
+      console.log('💾 Using memory cache (Redis unavailable)');
       this.cache.L2 = null;
     }
   }
   
   private initializeQueue() {
     try {
-      this.processingQueue = new Bull('speech-analysis', {
-        redis: this.redis ? {
-          host: process.env.REDIS_HOST || 'localhost',
-          port: parseInt(process.env.REDIS_PORT || '6379')
-        } : undefined,
-        defaultJobOptions: {
-          removeOnComplete: 100,
-          removeOnFail: 50,
-          attempts: 3,
-          backoff: {
-            type: 'exponential',
-            delay: 2000
+      if (this.cache.L2) {
+        this.processingQueue = new Bull('speech-analysis', {
+          redis: {
+            host: process.env.REDIS_HOST || 'localhost',
+            port: parseInt(process.env.REDIS_PORT || '6379')
+          },
+          defaultJobOptions: {
+            removeOnComplete: 100,
+            removeOnFail: 50,
+            attempts: 3,
+            backoff: {
+              type: 'exponential',
+              delay: 2000
+            }
           }
-        }
-      });
-      
-      // High-priority processor for real-time analysis
-      this.processingQueue.process('high-priority', 10, this.processHighPriorityJob.bind(this));
-      this.processingQueue.process('medium-priority', 5, this.processMediumPriorityJob.bind(this));
-      this.processingQueue.process('low-priority', 2, this.processLowPriorityJob.bind(this));
-      
-      console.log('📊 Queue processors initialized with optimized concurrency');
+        });
+        
+        // High-priority processor for real-time analysis
+        this.processingQueue.process('high-priority', 10, this.processHighPriorityJob.bind(this));
+        this.processingQueue.process('medium-priority', 5, this.processMediumPriorityJob.bind(this));
+        this.processingQueue.process('low-priority', 2, this.processLowPriorityJob.bind(this));
+        
+        console.log('📊 Queue processors initialized with optimized concurrency');
+      } else {
+        console.log('📋 Using direct processing (queue unavailable)');
+      }
     } catch (error) {
-      console.warn('Queue initialization failed, using direct processing:', error);
+      console.log('📋 Using direct processing (queue unavailable)');
     }
   }
   
