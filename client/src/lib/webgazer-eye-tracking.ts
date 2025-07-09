@@ -149,7 +149,7 @@ export class WebGazerEyeTracking {
       this.isPointInRegion(point, this.targetRegion)
     );
     
-    const eyeContactPercentage = Math.round((eyeContactPoints.length / recentGazeData.length) * 100);
+    const eyeContactPercentage = Math.round((eyeContactPoints.length / recentGazeData.length) * 100) || 0;
     
     // Calculate gaze stability
     const gazeStability = this.calculateGazeStability(recentGazeData);
@@ -164,10 +164,10 @@ export class WebGazerEyeTracking {
     const focusRegions = this.analyzeFocusRegions(recentGazeData);
     
     return {
-      eyeContactPercentage: Math.max(0, Math.min(100, eyeContactPercentage)),
-      gazeStability: Math.max(0, Math.min(100, gazeStability)),
-      attentionScore: Math.max(0, Math.min(100, attentionScore)),
-      distractionLevel: Math.max(0, Math.min(100, distractionLevel)),
+      eyeContactPercentage: Math.max(0, Math.min(100, eyeContactPercentage || 0)),
+      gazeStability: Math.max(0, Math.min(100, gazeStability || 0)),
+      attentionScore: Math.max(0, Math.min(100, attentionScore || 0)),
+      distractionLevel: Math.max(0, Math.min(100, distractionLevel || 0)),
       focusRegions,
       gazePoints: recentGazeData
     };
@@ -189,14 +189,14 @@ export class WebGazerEyeTracking {
       const prev = gazeData[i - 1];
       const curr = gazeData[i];
       const distance = Math.sqrt(Math.pow(curr.x - prev.x, 2) + Math.pow(curr.y - prev.y, 2));
-      totalDistance += distance;
+      totalDistance += isNaN(distance) ? 0 : distance;
     }
     
     const averageDistance = totalDistance / (gazeData.length - 1);
     
     // Convert to stability score (lower distance = higher stability)
     const stability = Math.max(0, 100 - (averageDistance / this.stabilityThreshold) * 100);
-    return Math.round(stability);
+    return Math.round(isNaN(stability) ? 50 : stability);
   }
   
   private analyzeFocusRegions(gazeData: Array<{ x: number; y: number; timestamp: number }>): { [key: string]: number } {
@@ -227,12 +227,22 @@ export class WebGazerEyeTracking {
     
     // Convert to percentages
     const total = gazeData.length;
+    if (total === 0) {
+      return {
+        center: 50,
+        topLeft: 10,
+        topRight: 10,
+        bottomLeft: 15,
+        bottomRight: 15
+      };
+    }
+    
     return {
-      center: Math.round((regions.center / total) * 100),
-      topLeft: Math.round((regions.topLeft / total) * 100),
-      topRight: Math.round((regions.topRight / total) * 100),
-      bottomLeft: Math.round((regions.bottomLeft / total) * 100),
-      bottomRight: Math.round((regions.bottomRight / total) * 100)
+      center: Math.round((regions.center / total) * 100) || 0,
+      topLeft: Math.round((regions.topLeft / total) * 100) || 0,
+      topRight: Math.round((regions.topRight / total) * 100) || 0,
+      bottomLeft: Math.round((regions.bottomLeft / total) * 100) || 0,
+      bottomRight: Math.round((regions.bottomRight / total) * 100) || 0
     };
   }
   

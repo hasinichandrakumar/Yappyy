@@ -339,7 +339,11 @@ export default function EnhancedPracticePage() {
         ...prev.bodyLanguage,
         facialExpressions: tensorFlowResults || prev.bodyLanguage.facialExpressions,
         gazeAnalysis: gazeAnalysis || prev.bodyLanguage.gazeAnalysis,
-        eyeContactScore: Math.min(100, Math.max(0, gazeAnalysis?.eyeContactPercentage || stableEyeMetrics.eyeContactPercentage || 75)),
+        eyeContactScore: Math.min(100, Math.max(0, 
+          !isNaN(gazeAnalysis?.eyeContactPercentage) ? gazeAnalysis.eyeContactPercentage :
+          !isNaN(stableEyeMetrics?.eyeContactPercentage) ? stableEyeMetrics.eyeContactPercentage :
+          75
+        )),
         gestureEffectiveness: advancedMetrics?.gesture_effectiveness || 78,
         postureScore: 82 + Math.random() * 15 // Simulated for now
       },
@@ -374,8 +378,10 @@ export default function EnhancedPracticePage() {
     const feedbackItems: EnhancedLiveFeedback[] = [];
     const timestamp = Date.now();
 
-    // Eye contact feedback with better guidance
-    const eyeContactPercentage = Math.min(100, Math.max(0, gazeAnalysis?.eyeContactPercentage || 75));
+    // Eye contact feedback with better guidance  
+    const eyeContactPercentage = Math.min(100, Math.max(0, 
+      !isNaN(gazeAnalysis?.eyeContactPercentage) ? gazeAnalysis.eyeContactPercentage : 75
+    ));
     
     if (eyeContactPercentage < 40) {
       feedbackItems.push({
@@ -773,7 +779,7 @@ export default function EnhancedPracticePage() {
                       <div className="bg-black/70 text-white px-3 py-2 rounded-lg text-sm">
                         <div className="flex items-center gap-2">
                           <Eye className="w-4 h-4" />
-                          <span>Eye Contact: {Math.min(100, Math.max(0, Math.round(metrics.bodyLanguage.eyeContactScore)))}%</span>
+                          <span>Eye Contact: {Math.min(100, Math.max(0, Math.round(metrics.bodyLanguage.eyeContactScore || 75)))}%</span>
                         </div>
                       </div>
                       <div className="bg-black/70 text-white px-3 py-2 rounded-lg text-sm">
@@ -860,7 +866,7 @@ export default function EnhancedPracticePage() {
                       <Card className="p-4">
                         <div className="text-center">
                           <Eye className="w-6 h-6 mx-auto mb-2 text-purple-600" />
-                          <p className="text-2xl font-bold">{Math.min(100, Math.max(0, Math.round(metrics.bodyLanguage.eyeContactScore)))}%</p>
+                          <p className="text-2xl font-bold">{Math.min(100, Math.max(0, Math.round(metrics.bodyLanguage.eyeContactScore || 75)))}%</p>
                           <p className="text-sm text-gray-600">Eye Contact</p>
                           <p className="text-xs text-gray-500">Look at camera</p>
                         </div>
