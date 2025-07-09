@@ -29,6 +29,7 @@ import { processRealTimeFrame, getPerformanceMetrics } from "./realtime-processi
 import { RealTimeProcessingEngine } from "./realtime-processing-engine";
 import { processContentAnalysis } from "./content-analysis-api";
 import { getAdaptiveCoaching, getUserLearningProgress, getAdvancedPublicSpeakingCoaching } from "./deep-learning-coach";
+import { peppyDeepLearningAnalysis, peppyConversation } from "./peppy-deep-learning-coach";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const server = createServer(app);
@@ -639,6 +640,36 @@ Provide detailed feedback on content structure, voice modulation advice, and bod
 
   // Enhanced Content Analysis endpoint
   app.post("/api/content-analysis", demoAuth, processContentAnalysis);
+  
+  // Peppy Deep Learning AI Coach API
+  app.post("/api/peppy-deep-learning-analysis", demoAuth, peppyDeepLearningAnalysis);
+  app.post("/api/peppy-conversation", demoAuth, peppyConversation);
+  
+  // User progress endpoint for Peppy
+  app.get("/api/user-progress", demoAuth, async (req: any, res) => {
+    try {
+      const userId = req.user?.id || 'demo-user';
+      const sessions = await storage.getUserPracticeSessions(userId);
+      
+      // Calculate progress metrics
+      const totalSessions = sessions.length;
+      const averageScore = sessions.length > 0 ? 
+        sessions.reduce((sum, s) => sum + (s.confidenceScore || 0), 0) / sessions.length : 0;
+      
+      const progress = {
+        totalSessions,
+        averageScore: Math.round(averageScore),
+        recentSessions: sessions.slice(-5),
+        improvementTrend: sessions.length > 1 ? 
+          (sessions[sessions.length - 1]?.confidenceScore || 0) - (sessions[0]?.confidenceScore || 0) : 0
+      };
+      
+      res.json(progress);
+    } catch (error) {
+      console.error("Error fetching user progress:", error);
+      res.status(500).json({ error: "Failed to fetch user progress" });
+    }
+  });
 
   // User achievements endpoint
   app.get("/api/user-achievements", requireAuth, async (req: any, res) => {

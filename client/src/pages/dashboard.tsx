@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Mic, BarChart3, Brain, FileText, Trophy, Target } from "lucide-react";
 import SimplifiedPracticePage from "@/components/SimplifiedPracticePage";
-import ComprehensiveAICoach from "@/components/ComprehensiveAICoach";
+import PeppyAICoach from "@/components/PeppyAICoach";
 import PersonalizedSpeechDNA from "@/components/PersonalizedSpeechDNA";
 import Enhanced50PlusTemplates from "@/components/Enhanced50PlusTemplates";
 import ImprovedBadgeSystem from "@/components/ImprovedBadgeSystem";
@@ -78,7 +78,7 @@ export default function Dashboard() {
           </TabsContent>
 
           <TabsContent value="ai-coach" className="space-y-6">
-            <ComprehensiveAICoach />
+            <PeppyAICoach />
           </TabsContent>
 
           <TabsContent value="templates" className="space-y-6">

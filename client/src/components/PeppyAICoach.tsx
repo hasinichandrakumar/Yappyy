@@ -1,0 +1,634 @@
+// Peppy AI Coach - Deep Learning Parrot Coach with Hyperpersonalization
+import React, { useState, useEffect, useRef } from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { 
+  Brain, TrendingUp, Target, Sparkles, Heart, 
+  Award, MessageCircle, BarChart3, Zap, Star,
+  ChevronRight, Play, Pause, Volume2, Mic
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+interface PeppyPersonality {
+  adaptiveStyle: 'encouraging' | 'challenging' | 'analytical' | 'nurturing';
+  userPreferences: {
+    feedbackTone: 'positive' | 'balanced' | 'direct';
+    focusAreas: string[];
+    motivationStyle: 'achievement' | 'growth' | 'connection';
+  };
+  learningModel: {
+    sessionPatterns: any[];
+    progressTrends: any[];
+    personalizedInsights: any[];
+  };
+}
+
+interface NeuralNetworkAnalysis {
+  confidenceScore: number;
+  improvementVelocity: number;
+  personalizedGoals: {
+    shortTerm: { goal: string; progress: number; priority: 'high' | 'medium' | 'low' }[];
+    mediumTerm: { goal: string; progress: number; priority: 'high' | 'medium' | 'low' }[];
+    longTerm: { goal: string; progress: number; priority: 'high' | 'medium' | 'low' }[];
+  };
+  adaptiveRecommendations: string[];
+  encouragementMessages: string[];
+  personalityInsights: {
+    communicationStyle: string;
+    strengthsProfile: string[];
+    growthAreas: string[];
+  };
+}
+
+interface PeppyResponse {
+  message: string;
+  emotion: 'excited' | 'encouraging' | 'proud' | 'thoughtful' | 'supportive';
+  personalizedTips: string[];
+  progressCelebration?: string;
+  nextStepGuidance: string;
+}
+
+export default function PeppyAICoach() {
+  const [peppyPersonality, setPeppyPersonality] = useState<PeppyPersonality>({
+    adaptiveStyle: 'encouraging',
+    userPreferences: {
+      feedbackTone: 'positive',
+      focusAreas: ['confidence', 'clarity', 'engagement'],
+      motivationStyle: 'growth'
+    },
+    learningModel: {
+      sessionPatterns: [],
+      progressTrends: [],
+      personalizedInsights: []
+    }
+  });
+
+  const [neuralAnalysis, setNeuralAnalysis] = useState<NeuralNetworkAnalysis | null>(null);
+  const [peppyResponse, setPeppyResponse] = useState<PeppyResponse | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [conversationHistory, setConversationHistory] = useState<any[]>([]);
+  const [userMessage, setUserMessage] = useState('');
+  const [peppyAnimation, setPeppyAnimation] = useState('idle');
+  const [isListening, setIsListening] = useState(false);
+  const queryClient = useQueryClient();
+
+  // Get user sessions for personalization
+  const { data: sessions, isLoading: sessionsLoading } = useQuery({
+    queryKey: ['/api/practice-sessions'],
+    enabled: true
+  });
+
+  // Get user progress data
+  const { data: userProgress } = useQuery({
+    queryKey: ['/api/user-progress'],
+    enabled: true
+  });
+
+  // Deep learning analysis mutation
+  const analyzeWithPeppyMutation = useMutation({
+    mutationFn: async (analysisData: any) => {
+      return apiRequest('/api/peppy-deep-learning-analysis', {
+        method: 'POST',
+        body: JSON.stringify({
+          sessions: sessions || [],
+          userProgress: userProgress || {},
+          personalityProfile: peppyPersonality,
+          analysisType: 'comprehensive_neural_network',
+          adaptiveRequest: analysisData
+        })
+      });
+    },
+    onSuccess: (data) => {
+      setNeuralAnalysis(data.neuralAnalysis);
+      setPeppyResponse(data.peppyResponse);
+      setPeppyAnimation('excited');
+      setTimeout(() => setPeppyAnimation('idle'), 2000);
+    }
+  });
+
+  // Peppy conversation mutation
+  const conversationMutation = useMutation({
+    mutationFn: async (message: string) => {
+      return apiRequest('/api/peppy-conversation', {
+        method: 'POST',
+        body: JSON.stringify({
+          message,
+          conversationHistory,
+          userPersonality: peppyPersonality,
+          currentProgress: neuralAnalysis,
+          sessions: sessions?.slice(-3) || []
+        })
+      });
+    },
+    onSuccess: (data) => {
+      const newConversation = {
+        id: Date.now(),
+        userMessage,
+        peppyResponse: data.response,
+        timestamp: new Date(),
+        emotion: data.emotion
+      };
+      setConversationHistory(prev => [...prev, newConversation]);
+      setUserMessage('');
+      setPeppyAnimation(data.emotion);
+      setTimeout(() => setPeppyAnimation('idle'), 2000);
+    }
+  });
+
+  // Initialize Peppy analysis on component mount
+  useEffect(() => {
+    if (sessions && sessions.length > 0 && !neuralAnalysis) {
+      handleInitialAnalysis();
+    }
+  }, [sessions]);
+
+  // Update Peppy's personality based on user interactions
+  useEffect(() => {
+    if (sessions && sessions.length > 3) {
+      const sessionPatterns = analyzeSessions(sessions);
+      setPeppyPersonality(prev => ({
+        ...prev,
+        learningModel: {
+          ...prev.learningModel,
+          sessionPatterns,
+          progressTrends: calculateProgressTrends(sessions)
+        }
+      }));
+    }
+  }, [sessions]);
+
+  const handleInitialAnalysis = () => {
+    setIsAnalyzing(true);
+    analyzeWithPeppyMutation.mutate({
+      type: 'initial_comprehensive_analysis',
+      focus: 'full_personality_assessment'
+    });
+    setIsAnalyzing(false);
+  };
+
+  const analyzeSessions = (sessions: any[]) => {
+    // Neural network pattern analysis
+    return sessions.map(session => ({
+      sessionId: session.id,
+      patterns: {
+        confidenceProgression: session.overallScore || 0,
+        speakingPace: session.wpm || 0,
+        engagementLevel: session.engagementScore || 0,
+        improvementAreas: session.improvementAreas || []
+      },
+      personalizedMetrics: {
+        voiceConfidence: session.voiceClarity || 0,
+        bodyLanguage: session.postureScore || 0,
+        contentQuality: session.contentScore || 0
+      }
+    }));
+  };
+
+  const calculateProgressTrends = (sessions: any[]) => {
+    const recent = sessions.slice(-5);
+    return {
+      overallImprovement: recent.reduce((acc, s) => acc + (s.overallScore || 0), 0) / recent.length,
+      consistencyScore: calculateConsistency(recent),
+      strengthsEmergence: identifyEmergingStrengths(recent),
+      adaptiveRecommendations: generateAdaptiveRecommendations(recent)
+    };
+  };
+
+  const calculateConsistency = (sessions: any[]) => {
+    if (sessions.length < 2) return 0;
+    const scores = sessions.map(s => s.overallScore || 0);
+    const average = scores.reduce((a, b) => a + b, 0) / scores.length;
+    const variance = scores.reduce((acc, score) => acc + Math.pow(score - average, 2), 0) / scores.length;
+    return Math.max(0, 100 - Math.sqrt(variance));
+  };
+
+  const identifyEmergingStrengths = (sessions: any[]) => {
+    const strengths = sessions.flatMap(s => s.strengths || []);
+    const strengthCounts = strengths.reduce((acc, strength) => {
+      acc[strength] = (acc[strength] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    
+    return Object.entries(strengthCounts)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 3)
+      .map(([strength]) => strength);
+  };
+
+  const generateAdaptiveRecommendations = (sessions: any[]) => {
+    const latestSession = sessions[sessions.length - 1];
+    const recommendations = [];
+    
+    if (latestSession?.overallScore < 70) {
+      recommendations.push("Focus on building foundational confidence through shorter practice sessions");
+    }
+    if (latestSession?.wpm < 120) {
+      recommendations.push("Practice dynamic speaking exercises to increase energy and pace");
+    }
+    if (latestSession?.engagementScore < 75) {
+      recommendations.push("Work on audience connection through storytelling techniques");
+    }
+    
+    return recommendations;
+  };
+
+  const handleConversation = () => {
+    if (userMessage.trim() && !conversationMutation.isPending) {
+      conversationMutation.mutate(userMessage);
+    }
+  };
+
+  const handleVoiceInput = () => {
+    setIsListening(!isListening);
+    // Voice input logic would go here
+  };
+
+  const getPeppyAvatarStyle = () => {
+    const baseStyle = "w-24 h-24 rounded-full border-4 border-blue-200 bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-2xl font-bold transition-all duration-300";
+    
+    switch(peppyAnimation) {
+      case 'excited': return baseStyle + " animate-bounce scale-110";
+      case 'encouraging': return baseStyle + " animate-pulse";
+      case 'proud': return baseStyle + " scale-105 ring-4 ring-yellow-300";
+      case 'thoughtful': return baseStyle + " animate-pulse";
+      default: return baseStyle;
+    }
+  };
+
+  const getEmotionColor = (emotion: string) => {
+    switch(emotion) {
+      case 'excited': return 'text-yellow-600';
+      case 'encouraging': return 'text-green-600';
+      case 'proud': return 'text-purple-600';
+      case 'thoughtful': return 'text-blue-600';
+      default: return 'text-gray-600';
+    }
+  };
+
+  if (sessionsLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Peppy is analyzing your progress...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-6">
+      <div className="max-w-7xl mx-auto">
+        
+        {/* Peppy Header */}
+        <div className="text-center mb-8">
+          <motion.div 
+            className={getPeppyAvatarStyle()}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            🦜
+          </motion.div>
+          <h1 className="text-4xl font-bold text-gray-800 mt-4">Meet Peppy</h1>
+          <p className="text-lg text-gray-600 mt-2">Your Deep Learning AI Speech Coach</p>
+          <Badge variant="outline" className="mt-2">
+            Neural Network v3.0 • Hyperpersonalized Coaching
+          </Badge>
+        </div>
+
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          {/* Left Column - Peppy Chat & Personality */}
+          <div className="lg:col-span-1 space-y-6">
+            
+            {/* Live Conversation with Peppy */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageCircle className="w-5 h-5 text-blue-600" />
+                  Chat with Peppy
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  
+                  {/* Peppy's Latest Response */}
+                  {peppyResponse && (
+                    <motion.div 
+                      className="bg-blue-50 p-4 rounded-lg"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="text-2xl">🦜</div>
+                        <div className="flex-1">
+                          <div className={`text-sm font-medium mb-1 ${getEmotionColor(peppyResponse.emotion)}`}>
+                            Peppy feels {peppyResponse.emotion}
+                          </div>
+                          <p className="text-sm text-gray-700 mb-3">{peppyResponse.message}</p>
+                          {peppyResponse.personalizedTips.length > 0 && (
+                            <div className="space-y-1">
+                              <div className="text-xs font-medium text-gray-600">Personalized Tips:</div>
+                              {peppyResponse.personalizedTips.map((tip, idx) => (
+                                <div key={idx} className="text-xs text-gray-600 flex items-start gap-1">
+                                  <Sparkles className="w-3 h-3 mt-0.5 text-yellow-500 flex-shrink-0" />
+                                  {tip}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {/* Conversation History */}
+                  <div className="max-h-40 overflow-y-auto space-y-2">
+                    {conversationHistory.slice(-3).map((conv) => (
+                      <div key={conv.id} className="space-y-2">
+                        <div className="bg-gray-100 p-2 rounded text-sm">
+                          <span className="font-medium">You:</span> {conv.userMessage}
+                        </div>
+                        <div className="bg-blue-50 p-2 rounded text-sm">
+                          <span className="font-medium text-blue-600">Peppy:</span> {conv.peppyResponse.message}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Input Area */}
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={userMessage}
+                      onChange={(e) => setUserMessage(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleConversation()}
+                      placeholder="Ask Peppy anything about your progress..."
+                      className="flex-1 p-2 border rounded-lg text-sm"
+                    />
+                    <Button 
+                      size="sm" 
+                      onClick={handleVoiceInput}
+                      variant={isListening ? "default" : "outline"}
+                    >
+                      <Mic className="w-4 h-4" />
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      onClick={handleConversation}
+                      disabled={!userMessage.trim() || conversationMutation.isPending}
+                    >
+                      Send
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Peppy's Personality Profile */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Brain className="w-5 h-5 text-purple-600" />
+                  Peppy's Neural Profile
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <div>
+                    <div className="text-sm font-medium mb-1">Coaching Style</div>
+                    <Badge variant="outline" className="capitalize">{peppyPersonality.adaptiveStyle}</Badge>
+                  </div>
+                  
+                  <div>
+                    <div className="text-sm font-medium mb-1">Learning Adaptation</div>
+                    <Progress value={85} className="h-2" />
+                    <div className="text-xs text-gray-600 mt-1">85% personalized to your style</div>
+                  </div>
+                  
+                  <div>
+                    <div className="text-sm font-medium mb-1">Session Patterns Analyzed</div>
+                    <div className="text-lg font-bold text-blue-600">
+                      {peppyPersonality.learningModel.sessionPatterns.length}
+                    </div>
+                  </div>
+                </div>
+
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full"
+                  onClick={() => analyzeWithPeppyMutation.mutate({ type: 'personality_update' })}
+                >
+                  <Zap className="w-4 h-4 mr-2" />
+                  Update Peppy's Intelligence
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Right Column - Neural Analysis & Progress */}
+          <div className="lg:col-span-2 space-y-6">
+            
+            {/* Neural Network Analysis */}
+            {neuralAnalysis && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Brain className="w-5 h-5 text-green-600" />
+                    Deep Learning Analysis
+                    <Badge variant="outline" className="ml-auto">
+                      Confidence: {neuralAnalysis.confidenceScore}%
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Tabs defaultValue="goals" className="w-full">
+                    <TabsList className="grid w-full grid-cols-4">
+                      <TabsTrigger value="goals">Goals</TabsTrigger>
+                      <TabsTrigger value="progress">Progress</TabsTrigger>
+                      <TabsTrigger value="insights">Insights</TabsTrigger>
+                      <TabsTrigger value="recommendations">Tips</TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="goals" className="space-y-4">
+                      <div className="space-y-4">
+                        <div>
+                          <h4 className="font-semibold mb-2 flex items-center gap-2">
+                            <Target className="w-4 h-4 text-red-500" />
+                            Short-term Goals
+                          </h4>
+                          <div className="space-y-2">
+                            {neuralAnalysis.personalizedGoals.shortTerm.map((goal, idx) => (
+                              <div key={idx} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                                <span className="text-sm">{goal.goal}</span>
+                                <div className="flex items-center gap-2">
+                                  <Progress value={goal.progress} className="w-20 h-2" />
+                                  <Badge variant={goal.priority === 'high' ? 'destructive' : goal.priority === 'medium' ? 'default' : 'secondary'}>
+                                    {goal.priority}
+                                  </Badge>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h4 className="font-semibold mb-2 flex items-center gap-2">
+                            <Target className="w-4 h-4 text-yellow-500" />
+                            Medium-term Goals
+                          </h4>
+                          <div className="space-y-2">
+                            {neuralAnalysis.personalizedGoals.mediumTerm.map((goal, idx) => (
+                              <div key={idx} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                                <span className="text-sm">{goal.goal}</span>
+                                <div className="flex items-center gap-2">
+                                  <Progress value={goal.progress} className="w-20 h-2" />
+                                  <Badge variant={goal.priority === 'high' ? 'destructive' : 'secondary'}>
+                                    {goal.priority}
+                                  </Badge>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="progress" className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="text-center p-4 bg-blue-50 rounded-lg">
+                          <div className="text-2xl font-bold text-blue-600 mb-2">
+                            {neuralAnalysis.improvementVelocity}%
+                          </div>
+                          <div className="text-sm text-gray-600">Improvement Velocity</div>
+                        </div>
+                        <div className="text-center p-4 bg-green-50 rounded-lg">
+                          <div className="text-2xl font-bold text-green-600 mb-2">
+                            {neuralAnalysis.confidenceScore}%
+                          </div>
+                          <div className="text-sm text-gray-600">Neural Confidence</div>
+                        </div>
+                      </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="insights" className="space-y-4">
+                      <div className="space-y-3">
+                        <div className="p-3 bg-purple-50 rounded-lg">
+                          <div className="font-medium text-purple-800 mb-2">Communication Style</div>
+                          <p className="text-sm text-purple-700">
+                            {neuralAnalysis.personalityInsights.communicationStyle}
+                          </p>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div className="p-3 bg-green-50 rounded-lg">
+                            <div className="font-medium text-green-800 mb-2">Strengths Profile</div>
+                            <ul className="text-sm text-green-700 space-y-1">
+                              {neuralAnalysis.personalityInsights.strengthsProfile.map((strength, idx) => (
+                                <li key={idx} className="flex items-center gap-2">
+                                  <Star className="w-3 h-3 text-yellow-500" />
+                                  {strength}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                          
+                          <div className="p-3 bg-yellow-50 rounded-lg">
+                            <div className="font-medium text-yellow-800 mb-2">Growth Areas</div>
+                            <ul className="text-sm text-yellow-700 space-y-1">
+                              {neuralAnalysis.personalityInsights.growthAreas.map((area, idx) => (
+                                <li key={idx} className="flex items-center gap-2">
+                                  <TrendingUp className="w-3 h-3 text-blue-500" />
+                                  {area}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="recommendations" className="space-y-4">
+                      <div className="space-y-3">
+                        {neuralAnalysis.adaptiveRecommendations.map((rec, idx) => (
+                          <div key={idx} className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
+                            <ChevronRight className="w-4 h-4 mt-1 text-blue-600" />
+                            <span className="text-sm text-blue-800">{rec}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Encouragement & Motivation */}
+            {neuralAnalysis && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Heart className="w-5 h-5 text-red-500" />
+                    Peppy's Encouragement
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {neuralAnalysis.encouragementMessages.map((message, idx) => (
+                      <motion.div
+                        key={idx}
+                        className="p-3 bg-gradient-to-r from-pink-50 to-purple-50 rounded-lg border border-pink-200"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: idx * 0.1 }}
+                      >
+                        <div className="flex items-start gap-2">
+                          <span className="text-lg">🦜</span>
+                          <p className="text-sm text-purple-800">{message}</p>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex justify-center gap-4 mt-8">
+          <Button 
+            size="lg" 
+            onClick={handleInitialAnalysis}
+            disabled={isAnalyzing || analyzeWithPeppyMutation.isPending}
+          >
+            {isAnalyzing ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Peppy is thinking...
+              </>
+            ) : (
+              <>
+                <Brain className="w-5 h-5 mr-2" />
+                Get Fresh Analysis
+              </>
+            )}
+          </Button>
+          
+          <Button variant="outline" size="lg" onClick={() => window.location.href = '/practice'}>
+            <Play className="w-5 h-5 mr-2" />
+            Start Practice Session
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
