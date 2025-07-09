@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { RealTimeSessionManager } from "./redis-realtime";
 import { insertPracticeSessionSchema, insertCoachingFeedbackSchema } from "@shared/schema";
 import { setupGoogleAuth, requireAuth } from "./googleAuth";
 import { setupDemoAuth, demoAuth } from "./demo-auth";
@@ -23,6 +24,10 @@ import { analyzeVideoFrame, analyzePosture, analyzeEyeContact } from "./openai-r
 import { transcribeWithAnalytics } from "./deepgram-speech";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  const server = createServer(app);
+  
+  // Initialize Real-Time Session Manager
+  const sessionManager = new RealTimeSessionManager(server);
   
   // Setup Demo Authentication (simplified for demo environment)
   setupDemoAuth(app);
