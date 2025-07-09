@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Mic, BarChart3, Brain, FileText, Trophy, Target } from "lucide-react";
-import SimplePracticePage from "@/components/SimplePracticePage";
-import SimpleAICoach from "@/components/SimpleAICoach";
-import SimpleAnalysisTab from "@/components/SimpleAnalysisTab";
-import SimpleTemplates from "@/components/SimpleTemplates";
-import SimpleBadgeSystem from "@/components/SimpleBadgeSystem";
+import EnhancedPracticePage from "@/components/EnhancedPracticePage";
+import ComprehensiveAICoach from "@/components/ComprehensiveAICoach";
+import PersonalizedSpeechDNA from "@/components/PersonalizedSpeechDNA";
+import Enhanced50PlusTemplates from "@/components/Enhanced50PlusTemplates";
+import ImprovedBadgeSystem from "@/components/ImprovedBadgeSystem";
+import EnhancedAnalysisTab from "@/components/EnhancedAnalysisTab";
 import yappyyLogoPath from '@assets/Untitled_design-11600-removebg-preview_1749744306540.png';
 
 export default function Dashboard() {
@@ -69,23 +70,26 @@ export default function Dashboard() {
           </TabsList>
 
           <TabsContent value="practice" className="space-y-8 pb-16">
-            <SimplePracticePage />
+            <EnhancedPracticePage />
           </TabsContent>
 
           <TabsContent value="analysis" className="space-y-6">
-            <SimpleAnalysisTab />
+            <EnhancedAnalysisTab />
           </TabsContent>
 
           <TabsContent value="ai-coach" className="space-y-6">
-            <SimpleAICoach />
+            <ComprehensiveAICoach />
           </TabsContent>
 
           <TabsContent value="templates" className="space-y-6">
-            <SimpleTemplates />
+            <Enhanced50PlusTemplates />
           </TabsContent>
 
           <TabsContent value="achievements" className="space-y-6">
-            <SimpleBadgeSystem />
+            <div className="grid gap-6">
+              <ImprovedBadgeSystem />
+              <PersonalizedSpeechDNA />
+            </div>
           </TabsContent>
         </Tabs>
       </div>
