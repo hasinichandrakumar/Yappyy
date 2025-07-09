@@ -16,6 +16,7 @@ interface SessionDataViewerProps {
   metrics: any;
   contentAnalysis: any;
   isRecording: boolean;
+  onContentAnalysisUpdate?: (analysis: any) => void;
 }
 
 export function SessionDataViewer({
@@ -23,10 +24,15 @@ export function SessionDataViewer({
   sessionDuration,
   metrics,
   contentAnalysis,
-  isRecording
+  isRecording,
+  onContentAnalysisUpdate
 }: SessionDataViewerProps) {
   const [selectedTab, setSelectedTab] = useState<string>('transcript');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [localContentAnalysis, setLocalContentAnalysis] = useState(contentAnalysis);
+  
+  // Use local state or prop
+  const currentContentAnalysis = localContentAnalysis || contentAnalysis;
 
   // Calculate session statistics
   const wordCount = transcript.split(' ').filter(word => word.length > 0).length;
@@ -83,6 +89,43 @@ export function SessionDataViewer({
       if (response.ok) {
         const data = await response.json();
         console.log('Fresh content analysis:', data);
+        
+        // Transform API response to match component expectations
+        if (data.success && data.analysis) {
+          const transformedAnalysis = {
+            overallScore: data.analysis.overallScore,
+            structure: {
+              clarity: data.analysis.structureScore,
+              organization: data.analysis.structureScore,
+              flow: data.analysis.coherenceScore
+            },
+            persuasiveness: {
+              impact: data.analysis.persuasivenessScore,
+              conviction: data.analysis.persuasivenessScore,
+              callToAction: data.analysis.audienceAlignmentScore
+            },
+            coherence: {
+              consistency: data.analysis.coherenceScore,
+              logicalFlow: data.analysis.coherenceScore,
+              topicRelevance: data.analysis.purposeAlignment
+            },
+            audienceAlignment: {
+              appropriateness: data.analysis.audienceAlignmentScore,
+              engagement: data.analysis.audienceAlignmentScore,
+              relatability: data.analysis.purposeAlignment
+            },
+            feedback: data.analysis.keyInsights || [],
+            strengths: data.analysis.strengths || [],
+            improvements: data.analysis.improvementAreas || []
+          };
+          
+          // Update parent component if callback provided, otherwise update local state
+          if (onContentAnalysisUpdate) {
+            onContentAnalysisUpdate(transformedAnalysis);
+          } else {
+            setLocalContentAnalysis(transformedAnalysis);
+          }
+        }
       }
     } catch (error) {
       console.error('Analysis error:', error);
@@ -180,7 +223,7 @@ export function SessionDataViewer({
         </TabsContent>
 
         <TabsContent value="content" className="space-y-4">
-          {contentAnalysis ? (
+          {currentContentAnalysis ? (
             <div className="grid gap-4">
               <Card className="p-4">
                 <h3 className="font-semibold mb-3">Content Analysis Results</h3>
@@ -191,15 +234,15 @@ export function SessionDataViewer({
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span>Clarity</span>
-                        <span>{contentAnalysis.structure?.clarity || 0}%</span>
+                        <span>{currentContentAnalysis.structure?.clarity || 0}%</span>
                       </div>
-                      <Progress value={contentAnalysis.structure?.clarity || 0} className="h-2" />
+                      <Progress value={currentContentAnalysis.structure?.clarity || 0} className="h-2" />
                       
                       <div className="flex justify-between text-sm">
                         <span>Organization</span>
-                        <span>{contentAnalysis.structure?.organization || 0}%</span>
+                        <span>{currentContentAnalysis.structure?.organization || 0}%</span>
                       </div>
-                      <Progress value={contentAnalysis.structure?.organization || 0} className="h-2" />
+                      <Progress value={currentContentAnalysis.structure?.organization || 0} className="h-2" />
                     </div>
                   </div>
                   
@@ -208,15 +251,15 @@ export function SessionDataViewer({
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span>Impact</span>
-                        <span>{contentAnalysis.persuasiveness?.impact || 0}%</span>
+                        <span>{currentContentAnalysis.persuasiveness?.impact || 0}%</span>
                       </div>
-                      <Progress value={contentAnalysis.persuasiveness?.impact || 0} className="h-2" />
+                      <Progress value={currentContentAnalysis.persuasiveness?.impact || 0} className="h-2" />
                       
                       <div className="flex justify-between text-sm">
                         <span>Conviction</span>
-                        <span>{contentAnalysis.persuasiveness?.conviction || 0}%</span>
+                        <span>{currentContentAnalysis.persuasiveness?.conviction || 0}%</span>
                       </div>
-                      <Progress value={contentAnalysis.persuasiveness?.conviction || 0} className="h-2" />
+                      <Progress value={currentContentAnalysis.persuasiveness?.conviction || 0} className="h-2" />
                     </div>
                   </div>
                 </div>
@@ -224,19 +267,19 @@ export function SessionDataViewer({
                 <div className="mt-4">
                   <h4 className="font-medium mb-2">Overall Score</h4>
                   <div className="flex items-center gap-3">
-                    <Progress value={contentAnalysis.overallScore || 0} className="flex-1 h-3" />
+                    <Progress value={currentContentAnalysis.overallScore || 0} className="flex-1 h-3" />
                     <Badge variant="outline" className="text-lg">
-                      {contentAnalysis.overallScore || 0}%
+                      {currentContentAnalysis.overallScore || 0}%
                     </Badge>
                   </div>
                 </div>
 
-                {contentAnalysis.feedback && (
+                {currentContentAnalysis.feedback && (
                   <div className="mt-4">
                     <h4 className="font-medium mb-2">AI Feedback</h4>
                     <div className="bg-blue-50 p-3 rounded-lg">
                       <ul className="text-sm space-y-1">
-                        {contentAnalysis.feedback.map((item: string, idx: number) => (
+                        {currentContentAnalysis.feedback.map((item: string, idx: number) => (
                           <li key={idx}>• {item}</li>
                         ))}
                       </ul>
