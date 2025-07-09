@@ -339,7 +339,7 @@ export default function EnhancedPracticePage() {
         ...prev.bodyLanguage,
         facialExpressions: tensorFlowResults || prev.bodyLanguage.facialExpressions,
         gazeAnalysis: gazeAnalysis || prev.bodyLanguage.gazeAnalysis,
-        eyeContactScore: gazeAnalysis?.eyeContactPercentage || stableEyeMetrics.eyeContactPercentage || 75,
+        eyeContactScore: Math.min(100, Math.max(0, gazeAnalysis?.eyeContactPercentage || stableEyeMetrics.eyeContactPercentage || 75)),
         gestureEffectiveness: advancedMetrics?.gesture_effectiveness || 78,
         postureScore: 82 + Math.random() * 15 // Simulated for now
       },
@@ -374,16 +374,38 @@ export default function EnhancedPracticePage() {
     const feedbackItems: EnhancedLiveFeedback[] = [];
     const timestamp = Date.now();
 
-    // Eye contact feedback
-    if (gazeAnalysis && gazeAnalysis.eyeContactPercentage < 50) {
+    // Eye contact feedback with better guidance
+    const eyeContactPercentage = Math.min(100, Math.max(0, gazeAnalysis?.eyeContactPercentage || 75));
+    
+    if (eyeContactPercentage < 40) {
       feedbackItems.push({
         id: `eyecontact-${timestamp}`,
         timestamp,
         category: 'body_language',
-        feedback: `Eye contact at ${Math.round(gazeAnalysis.eyeContactPercentage)}% - look directly at the camera more`,
+        feedback: `Low eye contact at ${eyeContactPercentage}% - Look directly at your camera lens`,
+        severity: 'critical',
+        confidence: 0.9,
+        actionable: 'Imagine speaking to a friend through the camera. Place a small arrow near your lens as a reminder.'
+      });
+    } else if (eyeContactPercentage < 60) {
+      feedbackItems.push({
+        id: `eyecontact-${timestamp}`,
+        timestamp,
+        category: 'body_language',
+        feedback: `Eye contact at ${eyeContactPercentage}% - Aim for 60-80% for optimal connection`,
         severity: 'warning',
-        confidence: gazeAnalysis.attentionScore / 100,
-        actionable: 'Focus your gaze on the camera lens for better connection'
+        confidence: 0.8,
+        actionable: 'Practice looking at the camera lens more frequently, especially during key points'
+      });
+    } else if (eyeContactPercentage > 80) {
+      feedbackItems.push({
+        id: `eyecontact-${timestamp}`,
+        timestamp,
+        category: 'body_language',
+        feedback: `Excellent eye contact at ${eyeContactPercentage}%! Your audience feels connected`,
+        severity: 'excellent',
+        confidence: 0.9,
+        actionable: 'Perfect! Maintain this level of camera focus for maximum impact'
       });
     }
 
@@ -692,6 +714,15 @@ export default function EnhancedPracticePage() {
           </CardHeader>
         </Card>
 
+        {/* Eye Contact Guidance */}
+        <Alert className="border-green-200 bg-green-50 mb-4">
+          <Eye className="h-4 w-4" />
+          <AlertDescription>
+            <strong>💡 Pro Tip:</strong> Look directly at your camera lens to maintain eye contact with your audience. 
+            This builds trust and connection. Good eye contact should be 60-80% of your speaking time.
+          </AlertDescription>
+        </Alert>
+
         {/* Calibration Alert */}
         {isCalibrating && (
           <Alert className="border-blue-200 bg-blue-50">
@@ -742,7 +773,7 @@ export default function EnhancedPracticePage() {
                       <div className="bg-black/70 text-white px-3 py-2 rounded-lg text-sm">
                         <div className="flex items-center gap-2">
                           <Eye className="w-4 h-4" />
-                          <span>Eye Contact: {Math.round(metrics.bodyLanguage.eyeContactScore)}%</span>
+                          <span>Eye Contact: {Math.min(100, Math.max(0, Math.round(metrics.bodyLanguage.eyeContactScore)))}%</span>
                         </div>
                       </div>
                       <div className="bg-black/70 text-white px-3 py-2 rounded-lg text-sm">
@@ -829,8 +860,9 @@ export default function EnhancedPracticePage() {
                       <Card className="p-4">
                         <div className="text-center">
                           <Eye className="w-6 h-6 mx-auto mb-2 text-purple-600" />
-                          <p className="text-2xl font-bold">{Math.round(metrics.bodyLanguage.eyeContactScore)}%</p>
+                          <p className="text-2xl font-bold">{Math.min(100, Math.max(0, Math.round(metrics.bodyLanguage.eyeContactScore)))}%</p>
                           <p className="text-sm text-gray-600">Eye Contact</p>
+                          <p className="text-xs text-gray-500">Look at camera</p>
                         </div>
                       </Card>
                       <Card className="p-4">
