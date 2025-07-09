@@ -26,6 +26,7 @@ import { processMultiModalAnalysis } from "./advanced-ai-orchestrator";
 import { analyzeVoiceQuality, analyzeFillerWords } from "./advanced-voice-engine";
 import { RealTimeProcessingEngine } from "./realtime-processing-engine";
 import { processContentAnalysis } from "./content-analysis-api";
+import { getAdaptiveCoaching, getUserLearningProgress } from "./deep-learning-coach";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const server = createServer(app);
@@ -1290,7 +1291,12 @@ Respond with detailed analysis in JSON format:
     res.json({ success: true, metrics });
   });
 
+  // Deep Learning Coach endpoints
+  app.post("/api/deep-learning-coach", demoAuth, getAdaptiveCoaching);
+  app.get("/api/user-learning-progress/:userId", demoAuth, getUserLearningProgress);
+
   console.log('🚀 Enhanced Backend Architecture - Multi-Modal AI Processing Pipeline initialized');
+  console.log('🧠 Deep Learning Coach system initialized');
 
   const httpServer = createServer(app);
   return httpServer;

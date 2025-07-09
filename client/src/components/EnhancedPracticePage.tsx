@@ -26,6 +26,7 @@ import { GamificationEngine, Achievement, UserProgress, AIPersonality } from '@/
 import { fastWPMCalculator, WPMData } from '@/lib/fast-wpm-calculator';
 import { enhancedEyeTracking } from '@/lib/enhanced-eye-tracking';
 import { contentAnalysisEngine, ContentAnalysisResult, SpeechPurpose } from '@/lib/content-analysis-engine-fixed';
+import { useDeepLearningCoach } from '@/hooks/useDeepLearningCoach';
 
 interface EnhancedLiveFeedback {
   id: string;
@@ -133,6 +134,17 @@ export default function EnhancedPracticePage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const { toast } = useToast();
+
+  // Deep Learning Coach Hook
+  const {
+    isAnalyzing: isCoachAnalyzing,
+    currentCoaching,
+    userProgress: learningProgress,
+    getAdaptiveCoaching,
+    getUserLearningProgress,
+    convertToSessionMetrics,
+    submitFeedback
+  } = useDeepLearningCoach();
 
   // Advanced AI Systems
   const realTimeCoach = useRef<RealTimeCoach | null>(null);
@@ -546,9 +558,17 @@ export default function EnhancedPracticePage() {
     // Save session to database
     await saveSessionToDatabase();
 
+    // Get deep learning coach insights
+    const sessionMetrics = convertToSessionMetrics(
+      `session-${Date.now()}`,
+      metrics
+    );
+    
+    await getAdaptiveCoaching(sessionMetrics);
+
     toast({
       title: "Session Complete",
-      description: "Generating your comprehensive analysis...",
+      description: "Generating your comprehensive analysis with AI coaching...",
       duration: 3000
     });
   }, []);
@@ -1487,7 +1507,7 @@ export default function EnhancedPracticePage() {
           {/* Live Feedback and Achievements Panel */}
           <div className="space-y-4">
             
-            {/* Live AI Feedback */}
+            {/* Live AI Feedback with Deep Learning Coach */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -1496,36 +1516,116 @@ export default function EnhancedPracticePage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ScrollArea className="h-64">
-                  <div className="space-y-3">
-                    {liveFeedback.length > 0 ? liveFeedback.map((feedback) => (
-                      <Alert key={feedback.id} className={`
-                        ${feedback.severity === 'excellent' ? 'border-green-200 bg-green-50' :
-                          feedback.severity === 'good' ? 'border-blue-200 bg-blue-50' :
-                          feedback.severity === 'warning' ? 'border-yellow-200 bg-yellow-50' :
-                          'border-red-200 bg-red-50'}
-                      `}>
-                        <AlertDescription>
-                          <div className="flex justify-between items-start mb-1">
-                            <Badge variant="outline" className="capitalize">
-                              {feedback.category.replace('_', ' ')}
-                            </Badge>
-                            <span className="text-xs text-gray-500">
-                              {Math.round(feedback.confidence * 100)}% confidence
-                            </span>
+                <Tabs defaultValue="live" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="live">Live Feedback</TabsTrigger>
+                    <TabsTrigger value="coach">AI Coach</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="live" className="mt-4">
+                    <ScrollArea className="h-64">
+                      <div className="space-y-3">
+                        {liveFeedback.length > 0 ? liveFeedback.map((feedback) => (
+                          <Alert key={feedback.id} className={`
+                            ${feedback.severity === 'excellent' ? 'border-green-200 bg-green-50' :
+                              feedback.severity === 'good' ? 'border-blue-200 bg-blue-50' :
+                              feedback.severity === 'warning' ? 'border-yellow-200 bg-yellow-50' :
+                              'border-red-200 bg-red-50'}
+                          `}>
+                            <AlertDescription>
+                              <div className="flex justify-between items-start mb-1">
+                                <Badge variant="outline" className="capitalize">
+                                  {feedback.category.replace('_', ' ')}
+                                </Badge>
+                                <span className="text-xs text-gray-500">
+                                  {Math.round(feedback.confidence * 100)}% confidence
+                                </span>
+                              </div>
+                              <p className="text-sm font-medium">{feedback.feedback}</p>
+                              <p className="text-xs text-gray-600 mt-1">{feedback.actionable}</p>
+                            </AlertDescription>
+                          </Alert>
+                        )) : (
+                          <div className="text-center py-8 text-gray-500">
+                            <Brain className="w-8 h-8 mx-auto mb-2" />
+                            <p>AI feedback will appear during your practice session</p>
                           </div>
-                          <p className="text-sm font-medium">{feedback.feedback}</p>
-                          <p className="text-xs text-gray-600 mt-1">{feedback.actionable}</p>
-                        </AlertDescription>
-                      </Alert>
-                    )) : (
-                      <div className="text-center py-8 text-gray-500">
-                        <Brain className="w-8 h-8 mx-auto mb-2" />
-                        <p>AI feedback will appear during your practice session</p>
+                        )}
                       </div>
-                    )}
-                  </div>
-                </ScrollArea>
+                    </ScrollArea>
+                  </TabsContent>
+                  
+                  <TabsContent value="coach" className="mt-4">
+                    <ScrollArea className="h-64">
+                      <div className="space-y-3">
+                        {isCoachAnalyzing ? (
+                          <div className="text-center py-8">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                            <p className="text-sm text-gray-600">Deep learning coach is analyzing your session...</p>
+                          </div>
+                        ) : currentCoaching ? (
+                          <div className="space-y-4">
+                            {/* Confidence Level */}
+                            <div className="p-3 bg-blue-50 rounded-lg">
+                              <div className="flex justify-between items-center mb-2">
+                                <span className="text-sm font-medium">Coach Confidence</span>
+                                <span className="text-sm font-bold text-blue-600">{Math.round(currentCoaching.confidenceLevel * 100)}%</span>
+                              </div>
+                              <Progress value={currentCoaching.confidenceLevel * 100} className="h-2" />
+                            </div>
+
+                            {/* Motivational Message */}
+                            <div className="p-3 bg-green-50 rounded-lg border-l-4 border-green-500">
+                              <p className="text-sm font-medium text-green-800">{currentCoaching.motivationalMessage}</p>
+                            </div>
+
+                            {/* Immediate Coaching */}
+                            <div>
+                              <h4 className="font-medium text-sm mb-2">Immediate Coaching</h4>
+                              <div className="space-y-1">
+                                {currentCoaching.immediateCoaching.map((tip, idx) => (
+                                  <div key={idx} className="flex items-start gap-2">
+                                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-1.5 flex-shrink-0" />
+                                    <p className="text-sm text-gray-700">{tip}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Personalized Tips */}
+                            <div>
+                              <h4 className="font-medium text-sm mb-2">Personalized Tips</h4>
+                              <div className="space-y-1">
+                                {currentCoaching.personalizedTips.map((tip, idx) => (
+                                  <div key={idx} className="flex items-start gap-2">
+                                    <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5 flex-shrink-0" />
+                                    <p className="text-sm text-gray-700">{tip}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Next Step */}
+                            <div className="p-3 bg-purple-50 rounded-lg">
+                              <h4 className="font-medium text-sm mb-1">Next Step</h4>
+                              <p className="text-sm text-gray-700">{currentCoaching.nextStepRecommendation}</p>
+                            </div>
+
+                            {/* Adaptation Reason */}
+                            <div className="text-xs text-gray-500 p-2 bg-gray-50 rounded">
+                              <strong>AI Adaptation:</strong> {currentCoaching.adaptationReason}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-center py-8 text-gray-500">
+                            <Brain className="w-8 h-8 mx-auto mb-2" />
+                            <p>Deep learning coach will provide personalized insights after your session</p>
+                          </div>
+                        )}
+                      </div>
+                    </ScrollArea>
+                  </TabsContent>
+                </Tabs>
               </CardContent>
             </Card>
 
