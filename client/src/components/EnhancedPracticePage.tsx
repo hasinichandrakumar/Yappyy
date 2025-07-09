@@ -27,6 +27,7 @@ import { fastWPMCalculator, WPMData } from '@/lib/fast-wpm-calculator';
 import { enhancedEyeTracking } from '@/lib/enhanced-eye-tracking';
 import { contentAnalysisEngine, ContentAnalysisResult, SpeechPurpose } from '@/lib/content-analysis-engine-fixed';
 import { useDeepLearningCoach } from '@/hooks/useDeepLearningCoach';
+import { SessionDataViewer } from '@/components/SessionDataViewer';
 
 interface EnhancedLiveFeedback {
   id: string;
