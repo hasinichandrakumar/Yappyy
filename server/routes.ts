@@ -642,6 +642,184 @@ Provide detailed feedback on content structure, voice modulation advice, and bod
   // Enhanced Content Analysis endpoint
   app.post("/api/content-analysis", demoAuth, processContentAnalysis);
   
+  // Hyperpersonalized AI Transcript Analysis endpoint
+  app.post("/api/hyperpersonalized-transcript-analysis", demoAuth, async (req: any, res) => {
+    try {
+      const { transcript, purpose, duration, sessionType, userProfile } = req.body;
+
+      if (!transcript || transcript.length < 20) {
+        return res.status(400).json({ 
+          message: "Valid transcript content is required (minimum 20 characters)" 
+        });
+      }
+
+      // Build comprehensive context for hyperpersonalized analysis
+      const context = {
+        sessionPurpose: purpose || 'General speaking practice',
+        sessionDuration: duration || 120,
+        sessionType: sessionType || 'practice',
+        userExperience: userProfile?.experience || 'intermediate',
+        userGoals: userProfile?.goals || []
+      };
+
+      // OpenAI Analysis (Primary Engine)
+      const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+          messages: [
+            {
+              role: "system",
+              content: `You are an expert public speaking coach with 20+ years of experience providing hyperpersonalized feedback. Analyze the user's speech transcript considering their specific purpose, experience level, and goals.
+
+HYPERPERSONALIZATION FACTORS:
+- Session Purpose: ${context.sessionPurpose}
+- Duration: ${Math.round(context.sessionDuration / 60)} minutes
+- Experience Level: ${context.userExperience}
+- User Goals: ${context.userGoals.join(', ') || 'General improvement'}
+
+Provide comprehensive, actionable feedback that directly relates to their purpose and experience level. 
+
+Respond with JSON in this exact format:
+{
+  "overallScore": number (0-100),
+  "purposeAlignment": {
+    "score": number (0-100),
+    "analysis": "how well the speech aligned with the stated purpose"
+  },
+  "strengths": [
+    "specific strength 1 related to their purpose",
+    "specific strength 2 with actionable praise",
+    "specific strength 3 acknowledging their experience level"
+  ],
+  "improvements": [
+    "targeted improvement 1 for their purpose",
+    "specific improvement 2 with clear next steps",
+    "personalized improvement 3 based on their goals"
+  ],
+  "recommendations": [
+    {
+      "category": "Content",
+      "suggestion": "specific content recommendation for their purpose",
+      "priority": "high|medium|low"
+    },
+    {
+      "category": "Delivery",
+      "suggestion": "delivery technique specific to their experience level",
+      "priority": "high|medium|low"
+    },
+    {
+      "category": "Engagement",
+      "suggestion": "engagement strategy for their session type",
+      "priority": "high|medium|low"
+    }
+  ],
+  "nextSteps": [
+    "immediate action 1 for next practice session",
+    "short-term goal aligned with their purpose",
+    "long-term development recommendation"
+  ],
+  "personalizedInsights": {
+    "communicationStyle": "assessment of their natural style",
+    "improvementTrend": "positive observation about their development",
+    "coachingNote": "encouraging note from coach perspective"
+  }
+}`
+            },
+            {
+              role: "user",
+              content: `Please provide hyperpersonalized coaching feedback for this speech:
+
+TRANSCRIPT:
+${transcript}
+
+SESSION CONTEXT:
+- Purpose: ${context.sessionPurpose}
+- Duration: ${Math.round(context.sessionDuration / 60)} minutes ${context.sessionDuration % 60} seconds
+- Type: ${context.sessionType}
+- Speaker Experience: ${context.userExperience}
+- Goals: ${context.userGoals.join(', ') || 'General speaking improvement'}
+
+Analyze how effectively they achieved their stated purpose, provide specific feedback tailored to their experience level, and offer actionable recommendations that align with their goals. Be encouraging yet specific about areas for growth.`
+            }
+          ],
+          temperature: 0.6,
+          response_format: { type: "json_object" }
+        })
+      });
+
+      if (!openaiResponse.ok) {
+        throw new Error(`OpenAI API error: ${openaiResponse.status}`);
+      }
+
+      const openaiData = await openaiResponse.json();
+      const primaryAnalysis = JSON.parse(openaiData.choices[0].message.content);
+
+      // Anthropic Analysis (Secondary Engine for Enhanced Insights)
+      let anthropicInsights = null;
+      if (process.env.ANTHROPIC_API_KEY) {
+        try {
+          const anthropicResponse = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${process.env.ANTHROPIC_API_KEY}`,
+              'Content-Type': 'application/json',
+              'anthropic-version': '2023-06-01'
+            },
+            body: JSON.stringify({
+              model: "claude-3-5-sonnet-20241022",
+              max_tokens: 1000,
+              messages: [
+                {
+                  role: "user",
+                  content: `As a world-class communication expert, provide additional insights for this speech analysis:
+
+Purpose: ${context.sessionPurpose}
+Transcript: ${transcript}
+
+Focus on emotional intelligence, authenticity assessment, and advanced communication strategies. Provide 3-5 unique insights that complement traditional coaching feedback.
+
+Respond with JSON: {"additionalInsights": ["insight1", "insight2", "insight3"], "authenticityScore": number, "emotionalIntelligence": "assessment"}`
+                }
+              ]
+            })
+          });
+
+          if (anthropicResponse.ok) {
+            const anthropicData = await anthropicResponse.json();
+            anthropicInsights = JSON.parse(anthropicData.content[0].text);
+          }
+        } catch (error) {
+          console.log('Anthropic analysis unavailable, continuing with OpenAI analysis');
+        }
+      }
+
+      // Combine analyses for comprehensive feedback
+      const comprehensiveFeedback = {
+        ...primaryAnalysis,
+        enhancedInsights: anthropicInsights,
+        analysisMetadata: {
+          timestamp: new Date().toISOString(),
+          engines: anthropicInsights ? ['OpenAI GPT-4o', 'Anthropic Claude-3.5-Sonnet'] : ['OpenAI GPT-4o'],
+          personalizationFactors: context
+        }
+      };
+
+      res.json(comprehensiveFeedback);
+
+    } catch (error: any) {
+      console.error("Hyperpersonalized transcript analysis error:", error);
+      res.status(500).json({ 
+        message: "Failed to generate hyperpersonalized analysis", 
+        error: error.message 
+      });
+    }
+  });
+  
   // Peppy Deep Learning AI Coach API
   app.post("/api/peppy-deep-learning-analysis", demoAuth, peppyDeepLearningAnalysis);
   app.post("/api/peppy-conversation", demoAuth, peppyConversation);
