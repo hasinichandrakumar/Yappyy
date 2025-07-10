@@ -398,46 +398,77 @@ export default function PeppyAICoach() {
       <div className="max-w-7xl mx-auto">
         
         {/* Authentication Header */}
-        <div className="flex justify-end mb-6">
-          {isLoading ? (
-            <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-          ) : isAuthenticated && user ? (
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-3 px-4 py-2 bg-white rounded-lg shadow-md">
-                {user.profileImageUrl ? (
-                  <img 
-                    src={user.profileImageUrl} 
-                    alt={user.firstName || "User"} 
-                    className="w-8 h-8 rounded-full border-2 border-blue-200"
-                  />
-                ) : (
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                    {(user.firstName || user.email || "U").charAt(0).toUpperCase()}
+        <div className="flex justify-between items-center mb-8">
+          <div className="flex items-center gap-4">
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Yappyy
+            </h2>
+            <Badge className="bg-green-100 text-green-800 border-green-200">
+              Beta
+            </Badge>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            {isLoading ? (
+              <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            ) : isAuthenticated && user ? (
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3 px-4 py-2 bg-white rounded-lg shadow-md border border-gray-200">
+                  {user.profileImageUrl ? (
+                    <img 
+                      src={user.profileImageUrl} 
+                      alt={user.firstName || "User"} 
+                      className="w-8 h-8 rounded-full border-2 border-blue-200 object-cover"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                      {(user.firstName || user.email || "U").charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium text-gray-700">
+                      {user.firstName || user.email?.split('@')[0] || "User"}
+                    </span>
+                    {user.id === 'demo-user-123' && (
+                      <span className="text-xs text-gray-500">Demo User</span>
+                    )}
                   </div>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.location.href = '/api/auth/logout'}
+                  className="flex items-center gap-2 border-gray-300 hover:bg-gray-50"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sign Out
+                </Button>
+                {user.id === 'demo-user-123' && (
+                  <Button
+                    onClick={() => window.location.href = '/api/auth/google'}
+                    className="flex items-center gap-3 bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 shadow-md hover:shadow-lg transition-all duration-200"
+                  >
+                    <SiGoogle className="w-4 h-4" />
+                    Try Google Sign-In
+                  </Button>
                 )}
-                <span className="text-sm font-medium text-gray-700">
-                  {user.firstName || user.email?.split('@')[0] || "User"}
-                </span>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => window.location.href = '/api/auth/logout'}
-                className="flex items-center gap-2 border-gray-300 hover:bg-gray-50"
-              >
-                <LogOut className="w-4 h-4" />
-                Sign Out
-              </Button>
-            </div>
-          ) : (
-            <Button
-              onClick={() => window.location.href = '/api/auth/google'}
-              className="flex items-center gap-3 bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 px-6 py-2 shadow-md hover:shadow-lg transition-all duration-200"
-            >
-              <SiGoogle className="w-5 h-5 text-red-500" />
-              Sign in with Google
-            </Button>
-          )}
+            ) : (
+              <div className="flex items-center gap-3">
+                <div className="text-right">
+                  <p className="text-sm text-gray-600">Welcome to Yappyy!</p>
+                  <p className="text-xs text-gray-500">Sign in to save your progress</p>
+                </div>
+                <Button
+                  onClick={() => window.location.href = '/api/auth/google'}
+                  className="flex items-center gap-3 bg-white text-gray-700 border-2 border-blue-300 hover:bg-blue-50 hover:border-blue-400 px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-200 font-medium"
+                >
+                  <SiGoogle className="w-5 h-5 text-red-500" />
+                  Sign in with Google
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
         
         {/* Enhanced Peppy Header */}
