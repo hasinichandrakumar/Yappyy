@@ -10,8 +10,9 @@ import { apiRequest } from '@/lib/queryClient';
 import { 
   Brain, TrendingUp, Target, Sparkles, Heart, 
   Award, MessageCircle, BarChart3, Zap, Star,
-  ChevronRight, Play, Pause, Volume2, Mic
+  ChevronRight, Play, Pause, Volume2, Mic, LogIn, LogOut, User
 } from 'lucide-react';
+import { SiGoogle } from 'react-icons/si';
 import { motion, AnimatePresence } from 'framer-motion';
 // Removed Rive React wrapper - using native Rive canvas instead
 
@@ -133,7 +134,10 @@ interface PeppyResponse {
   nextStepGuidance: string;
 }
 
+import { useAuth } from '@/hooks/useAuth';
+
 export default function PeppyAICoach() {
+  const { user, isAuthenticated, isLoading } = useAuth();
   const [peppyPersonality, setPeppyPersonality] = useState<PeppyPersonality>({
     adaptiveStyle: 'encouraging',
     userPreferences: {
@@ -392,6 +396,49 @@ export default function PeppyAICoach() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-6">
       <div className="max-w-7xl mx-auto">
+        
+        {/* Authentication Header */}
+        <div className="flex justify-end mb-6">
+          {isLoading ? (
+            <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          ) : isAuthenticated && user ? (
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3 px-4 py-2 bg-white rounded-lg shadow-md">
+                {user.profileImageUrl ? (
+                  <img 
+                    src={user.profileImageUrl} 
+                    alt={user.firstName || "User"} 
+                    className="w-8 h-8 rounded-full border-2 border-blue-200"
+                  />
+                ) : (
+                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                    {(user.firstName || user.email || "U").charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <span className="text-sm font-medium text-gray-700">
+                  {user.firstName || user.email?.split('@')[0] || "User"}
+                </span>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.location.href = '/api/auth/logout'}
+                className="flex items-center gap-2 border-gray-300 hover:bg-gray-50"
+              >
+                <LogOut className="w-4 h-4" />
+                Sign Out
+              </Button>
+            </div>
+          ) : (
+            <Button
+              onClick={() => window.location.href = '/api/auth/google'}
+              className="flex items-center gap-3 bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 px-6 py-2 shadow-md hover:shadow-lg transition-all duration-200"
+            >
+              <SiGoogle className="w-5 h-5 text-red-500" />
+              Sign in with Google
+            </Button>
+          )}
+        </div>
         
         {/* Enhanced Peppy Header */}
         <div className="text-center mb-16 relative overflow-hidden">
