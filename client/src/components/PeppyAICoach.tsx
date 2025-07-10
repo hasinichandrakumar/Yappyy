@@ -438,10 +438,10 @@ export default function PeppyAICoach() {
         )}
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           
           {/* Left Column - Enhanced Peppy Chat & Personality */}
-          <div className="lg:col-span-1 space-y-6">
+          <div className="lg:col-span-2 space-y-6">
             
             {/* Enhanced Live Conversation with Peppy */}
             <motion.div
@@ -512,7 +512,7 @@ export default function PeppyAICoach() {
                   )}
 
                   {/* Input Area */}
-                  <div className="border-t pt-4 mt-4">
+                  <div className="border-t pt-5 mt-5">
                     <div className="flex gap-3">
                       <input
                         type="text"
@@ -520,21 +520,21 @@ export default function PeppyAICoach() {
                         onChange={(e) => setUserMessage(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && handleConversation()}
                         placeholder="Ask Peppy anything about your progress..."
-                        className="flex-1 p-3 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="flex-1 p-4 border-2 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 hover:bg-white"
                       />
                       <Button 
-                        size="sm" 
+                        size="lg" 
                         onClick={handleVoiceInput}
                         variant={isListening ? "default" : "outline"}
-                        className="px-3"
+                        className="px-4 py-4 border-2 hover:scale-105 transition-all duration-200"
                       >
-                        <Mic className="w-4 h-4" />
+                        <Mic className="w-5 h-5" />
                       </Button>
                       <Button 
-                        size="sm" 
+                        size="lg" 
                         onClick={handleConversation}
                         disabled={!userMessage.trim() || conversationMutation.isPending}
-                        className="bg-blue-500 hover:bg-blue-600 text-white px-4"
+                        className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-4 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
                       >
                         Send
                       </Button>
@@ -616,7 +616,7 @@ export default function PeppyAICoach() {
           </div>
 
           {/* Right Column - Neural Analysis & Progress */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-3 space-y-6">
             
             {/* Enhanced Neural Network Analysis */}
             {neuralAnalysis && (
