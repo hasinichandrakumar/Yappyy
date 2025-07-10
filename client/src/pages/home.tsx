@@ -69,7 +69,7 @@ export default function HomePage() {
                   </Button>
                 </Link>
               ) : (
-                <div className="flex flex-col sm:flex-row gap-4 items-center">
+                <div className="flex flex-col gap-4 items-center">
                   <Button
                     size="lg"
                     onClick={() => window.location.href = '/api/auth/google'}
@@ -78,7 +78,7 @@ export default function HomePage() {
                     Start Learning Now
                     <Mic className="ml-2 h-5 w-5" />
                   </Button>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-500 text-center">
                     Free to use • Save your progress • Personalized coaching
                   </p>
                 </div>
