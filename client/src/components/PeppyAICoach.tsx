@@ -13,17 +13,16 @@ import {
   ChevronRight, Play, Pause, Volume2, Mic
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useRive, useStateMachineInput } from '@rive-app/react-canvas';
+// Removed Rive React wrapper - using native Rive canvas instead
 
-// Peppy Parrot Animated SVG Component (Working Animation)
-const PeppyParrot = ({ isAnimated = false, mood = 'happy', size = 'large' }: { 
+// Peppy Parrot Native Rive Component
+const PeppyParrot = ({ isAnimated = true, mood = 'happy', size = 'large' }: { 
   isAnimated?: boolean; 
   mood?: 'happy' | 'thinking' | 'excited' | 'encouraging' | 'proud' | 'thoughtful'; 
   size?: 'small' | 'medium' | 'large' 
 }) => {
-  const [eyeBlink, setEyeBlink] = useState(false);
-  const [wingFlap, setWingFlap] = useState(false);
-  const [headBob, setHeadBob] = useState(0);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const riveInstanceRef = useRef<any>(null);
 
   const sizeClasses = {
     small: 'w-20 h-20',
@@ -31,126 +30,66 @@ const PeppyParrot = ({ isAnimated = false, mood = 'happy', size = 'large' }: {
     large: 'w-48 h-48'
   };
 
-  // Animation effects
-  useEffect(() => {
-    if (isAnimated) {
-      // Eye blinking animation
-      const blinkInterval = setInterval(() => {
-        setEyeBlink(true);
-        setTimeout(() => setEyeBlink(false), 150);
-      }, 2000 + Math.random() * 1000);
-
-      // Wing flapping animation
-      const flapInterval = setInterval(() => {
-        setWingFlap(true);
-        setTimeout(() => setWingFlap(false), 300);
-      }, 1500 + Math.random() * 500);
-
-      // Head bobbing animation
-      const bobInterval = setInterval(() => {
-        setHeadBob(prev => (prev + 1) % 360);
-      }, 100);
-
-      return () => {
-        clearInterval(blinkInterval);
-        clearInterval(flapInterval);
-        clearInterval(bobInterval);
-      };
-    }
-  }, [isAnimated]);
-
-  const moodColors = {
-    happy: { body: '#10B981', accent: '#34D399', beak: '#F59E0B' },
-    thinking: { body: '#3B82F6', accent: '#60A5FA', beak: '#F59E0B' },
-    excited: { body: '#F59E0B', accent: '#FBBF24', beak: '#EF4444' },
-    encouraging: { body: '#10B981', accent: '#6EE7B7', beak: '#F59E0B' },
-    proud: { body: '#8B5CF6', accent: '#A78BFA', beak: '#F59E0B' },
-    thoughtful: { body: '#6366F1', accent: '#818CF8', beak: '#F59E0B' }
+  const sizePixels = {
+    small: { width: 80, height: 80 },
+    medium: { width: 128, height: 128 },
+    large: { width: 192, height: 192 }
   };
 
-  const colors = moodColors[mood];
-  const headY = 70 + Math.sin(headBob * 0.1) * 2; // Gentle head bobbing
+  useEffect(() => {
+    if (canvasRef.current && typeof window !== 'undefined' && (window as any).rive) {
+      console.log('🎯 Initializing Rive animation...');
+      
+      const canvas = canvasRef.current;
+      const { width, height } = sizePixels[size];
+      
+      // Set canvas size
+      canvas.width = width;
+      canvas.height = height;
+      
+      try {
+        // Cleanup previous instance
+        if (riveInstanceRef.current) {
+          riveInstanceRef.current.cleanup();
+        }
+
+        // Create new Rive instance using the native canvas API
+        riveInstanceRef.current = new (window as any).rive.Rive({
+          src: '/assets/bird-4_1752167343494.riv',
+          canvas: canvas,
+          autoplay: true,
+          onLoad: () => {
+            console.log('🚀 Rive animation loaded successfully!');
+            if (riveInstanceRef.current) {
+              riveInstanceRef.current.resizeDrawingSurfaceToCanvas();
+            }
+          },
+          onLoadError: (error: any) => {
+            console.error('❌ Rive animation load error:', error);
+          }
+        });
+        
+      } catch (error) {
+        console.error('❌ Error creating Rive instance:', error);
+      }
+    }
+
+    // Cleanup on unmount
+    return () => {
+      if (riveInstanceRef.current) {
+        riveInstanceRef.current.cleanup();
+        riveInstanceRef.current = null;
+      }
+    };
+  }, [size]);
 
   return (
     <div className={`${sizeClasses[size]} mx-auto ${isAnimated ? 'transition-transform duration-300 hover:scale-110' : ''}`}>
-      <svg viewBox="0 0 200 200" className="w-full h-full">
-        {/* Body */}
-        <ellipse 
-          cx="100" 
-          cy="120" 
-          rx="45" 
-          ry="55" 
-          fill={colors.body}
-          className={isAnimated ? 'animate-pulse' : ''}
-        />
-        
-        {/* Head with bobbing animation */}
-        <circle 
-          cx="100" 
-          cy={headY} 
-          r="35" 
-          fill={colors.body}
-          style={{
-            transition: isAnimated ? 'cy 0.1s ease-in-out' : 'none'
-          }}
-        />
-        
-        {/* Beak */}
-        <polygon 
-          points="85,75 75,82 85,89" 
-          fill={colors.beak}
-          transform={`translate(0, ${headY - 70})`}
-        />
-        
-        {/* Eyes with blinking */}
-        <circle cx="90" cy={headY - 5} r="8" fill="white" />
-        <circle cx="110" cy={headY - 5} r="8" fill="white" />
-        <circle 
-          cx="90" 
-          cy={headY - 5} 
-          r={eyeBlink ? 1 : 5} 
-          fill="#1F2937"
-          style={{ transition: 'r 0.1s ease-in-out' }}
-        />
-        <circle 
-          cx="110" 
-          cy={headY - 5} 
-          r={eyeBlink ? 1 : 5} 
-          fill="#1F2937"
-          style={{ transition: 'r 0.1s ease-in-out' }}
-        />
-        
-        {/* Wings with flapping animation */}
-        <ellipse 
-          cx="115" 
-          cy="110" 
-          rx="15" 
-          ry="25" 
-          fill={colors.accent}
-          transform={wingFlap ? 'rotate(10 115 110)' : 'rotate(0 115 110)'}
-          style={{ 
-            transition: 'transform 0.3s ease-in-out',
-            transformOrigin: '115px 110px'
-          }}
-        />
-        
-        {/* Tail feathers */}
-        <ellipse cx="145" cy="130" rx="8" ry="20" fill={colors.accent} transform="rotate(30 145 130)" />
-        <ellipse cx="150" cy="125" rx="8" ry="18" fill={colors.body} transform="rotate(45 150 125)" />
-        
-        {/* Feet */}
-        <ellipse cx="90" cy="175" rx="8" ry="4" fill={colors.beak} />
-        <ellipse cx="110" cy="175" rx="8" ry="4" fill={colors.beak} />
-        
-        {/* Crown feathers for excited/proud moods */}
-        {(mood === 'excited' || mood === 'proud') && (
-          <g transform={`translate(0, ${headY - 70})`}>
-            <path d="M85 35 L90 25 L95 35" fill={colors.accent} />
-            <path d="M95 30 L100 20 L105 30" fill={colors.accent} />
-            <path d="M105 35 L110 25 L115 35" fill={colors.accent} />
-          </g>
-        )}
-      </svg>
+      <canvas 
+        ref={canvasRef}
+        className="w-full h-full rounded-lg"
+        style={{ imageRendering: 'crisp-edges' }}
+      />
     </div>
   );
 };
