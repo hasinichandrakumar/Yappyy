@@ -32,10 +32,32 @@ const PeppyParrot = ({ isAnimated = false, mood = 'happy', size = 'large' }: {
   // Use the Rive animation with error handling
   const { rive, RiveComponent } = useRive({
     src: '/assets/bird-4_1752166045497.riv',
-    autoplay: isAnimated,
-    onLoad: () => setHasError(false),
-    onLoadError: () => setHasError(true),
+    autoplay: true, // Always autoplay for animation
+    layout: 'fill', // Make sure animation fills container
+    onLoad: () => {
+      setHasError(false);
+      console.log('Rive animation loaded successfully');
+      // Try to play all available animations
+      if (rive) {
+        rive.play();
+      }
+    },
+    onLoadError: (error) => {
+      setHasError(true);
+      console.error('Rive animation failed to load:', error);
+    },
   });
+
+  // Control animation playback
+  useEffect(() => {
+    if (rive) {
+      if (isAnimated) {
+        rive.play();
+      } else {
+        rive.pause();
+      }
+    }
+  }, [rive, isAnimated]);
 
   // Try to get state machine inputs for mood control if available
   const moodInput = useStateMachineInput(rive, 'State Machine 1', 'mood');
