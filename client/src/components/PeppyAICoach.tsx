@@ -13,79 +13,52 @@ import {
   ChevronRight, Play, Pause, Volume2, Mic
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRive, useStateMachineInput } from '@rive-app/react-canvas';
 
-// Peppy Parrot SVG Component
+// Peppy Parrot Rive Component
 const PeppyParrot = ({ isAnimated = false, mood = 'happy', size = 'large' }: { 
   isAnimated?: boolean; 
   mood?: 'happy' | 'thinking' | 'excited' | 'encouraging' | 'proud' | 'thoughtful'; 
   size?: 'small' | 'medium' | 'large' 
 }) => {
-  const [eyeBlink, setEyeBlink] = useState(false);
-
-  useEffect(() => {
-    if (isAnimated) {
-      const blinkInterval = setInterval(() => {
-        setEyeBlink(true);
-        setTimeout(() => setEyeBlink(false), 150);
-      }, 2000);
-      return () => clearInterval(blinkInterval);
-    }
-  }, [isAnimated]);
-
-  const moodColors = {
-    happy: { body: '#10B981', accent: '#34D399', eye: '#1F2937' },
-    thinking: { body: '#3B82F6', accent: '#60A5FA', eye: '#1F2937' },
-    excited: { body: '#F59E0B', accent: '#FBBF24', eye: '#1F2937' },
-    encouraging: { body: '#10B981', accent: '#6EE7B7', eye: '#1F2937' },
-    proud: { body: '#8B5CF6', accent: '#A78BFA', eye: '#1F2937' },
-    thoughtful: { body: '#6366F1', accent: '#818CF8', eye: '#1F2937' }
-  };
-
-  const colors = moodColors[mood];
   const sizeClasses = {
     small: 'w-16 h-16',
     medium: 'w-24 h-24', 
     large: 'w-32 h-32'
   };
 
+  // Use the Rive animation
+  const { rive, RiveComponent } = useRive({
+    src: '/assets/bird-3_1752165654771.riv',
+    autoplay: isAnimated,
+    // We'll use the default state machine or artboard
+  });
+
+  // Try to get state machine inputs for mood control if available
+  const moodInput = useStateMachineInput(rive, 'State Machine 1', 'mood');
+  
+  // Update mood when it changes
+  useEffect(() => {
+    if (moodInput && mood) {
+      // Map moods to animation states
+      const moodMap: Record<string, number> = {
+        happy: 0,
+        thinking: 1,
+        excited: 2,
+        encouraging: 3,
+        proud: 4,
+        thoughtful: 5
+      };
+      
+      if (moodMap[mood] !== undefined) {
+        moodInput.value = moodMap[mood];
+      }
+    }
+  }, [mood, moodInput]);
+
   return (
     <div className={`${sizeClasses[size]} mx-auto ${isAnimated ? 'transition-transform duration-300 hover:scale-110' : ''}`}>
-      <svg viewBox="0 0 200 200" className="w-full h-full">
-        {/* Body */}
-        <ellipse cx="100" cy="120" rx="45" ry="55" fill={colors.body} />
-        
-        {/* Head */}
-        <circle cx="100" cy="70" r="35" fill={colors.body} />
-        
-        {/* Beak */}
-        <polygon points="85,75 75,82 85,89" fill="#F59E0B" />
-        
-        {/* Eyes */}
-        <circle cx="90" cy="65" r="8" fill="white" />
-        <circle cx="110" cy="65" r="8" fill="white" />
-        <circle cx="90" cy="65" r={eyeBlink ? 1 : 5} fill={colors.eye} />
-        <circle cx="110" cy="65" r={eyeBlink ? 1 : 5} fill={colors.eye} />
-        
-        {/* Wing */}
-        <ellipse cx="115" cy="110" rx="15" ry="25" fill={colors.accent} />
-        
-        {/* Tail feathers */}
-        <ellipse cx="145" cy="130" rx="8" ry="20" fill={colors.accent} transform="rotate(30 145 130)" />
-        <ellipse cx="150" cy="125" rx="8" ry="18" fill={colors.body} transform="rotate(45 150 125)" />
-        
-        {/* Feet */}
-        <ellipse cx="90" cy="175" rx="8" ry="4" fill="#F59E0B" />
-        <ellipse cx="110" cy="175" rx="8" ry="4" fill="#F59E0B" />
-        
-        {/* Crown feathers (when excited or proud) */}
-        {(mood === 'excited' || mood === 'proud') && (
-          <>
-            <path d="M85 35 L90 25 L95 35" fill={colors.accent} />
-            <path d="M95 30 L100 20 L105 30" fill={colors.accent} />
-            <path d="M105 35 L110 25 L115 35" fill={colors.accent} />
-          </>
-        )}
-      </svg>
+      <RiveComponent className="w-full h-full" />
     </div>
   );
 };
