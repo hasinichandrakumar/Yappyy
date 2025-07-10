@@ -29,9 +29,8 @@ export default function HomePage() {
               ) : (
                 <Button
                   onClick={() => window.location.href = '/api/auth/google'}
-                  className="flex items-center gap-2 bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 px-6 py-2 rounded-md shadow-sm hover:shadow-md transition-all duration-200 font-medium"
+                  className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white font-button shadow-lg hover:shadow-xl transition-all duration-300 px-6 py-2"
                 >
-                  <SiGoogle className="w-4 h-4" />
                   Start Learning Here
                 </Button>
               )}
@@ -73,9 +72,8 @@ export default function HomePage() {
                   <Button
                     size="lg"
                     onClick={() => window.location.href = '/api/auth/google'}
-                    className="flex items-center gap-2 bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 px-8 py-4 rounded-md shadow-sm hover:shadow-md transition-all duration-200 font-medium text-lg"
+                    className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white font-button shadow-lg hover:shadow-xl transition-all duration-300 px-8 py-4 text-lg"
                   >
-                    <SiGoogle className="w-5 h-5" />
                     Start Learning Here
                   </Button>
                   <p className="text-sm text-gray-500 text-center">
