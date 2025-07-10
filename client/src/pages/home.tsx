@@ -2,9 +2,13 @@ import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Mic, Video, Trophy, Target, BarChart3, Users, ArrowRight, CheckCircle, Brain, Zap, Cpu, Eye } from 'lucide-react';
+import { SiGoogle } from 'react-icons/si';
+import { useAuth } from '@/hooks/useAuth';
 import yappyyLogoPath from '@assets/Untitled_design-11600-removebg-preview_1749744306540.png';
 
 export default function HomePage() {
+  const { isAuthenticated, isLoading, user } = useAuth();
+
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
@@ -15,12 +19,42 @@ export default function HomePage() {
               <img src={yappyyLogoPath} alt="Yappyy" className="h-8" />
             </div>
             <div className="flex items-center space-x-4">
-              <Link href="/dashboard">
-                <Button className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white font-button shadow-lg hover:shadow-xl transition-all duration-300">
-                  Dashboard
-                  <ArrowRight className="ml-2 h-4 w-4" />
+              {isLoading ? (
+                <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+              ) : isAuthenticated && user ? (
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center gap-2">
+                    {user.profileImageUrl ? (
+                      <img 
+                        src={user.profileImageUrl} 
+                        alt={user.firstName || "User"} 
+                        className="w-6 h-6 rounded-full border border-gray-300"
+                      />
+                    ) : (
+                      <div className="w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                        {(user.firstName || user.email || "U").charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <span className="text-sm text-gray-700">
+                      {user.firstName || user.email?.split('@')[0] || "User"}
+                    </span>
+                  </div>
+                  <Link href="/dashboard">
+                    <Button className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white font-button shadow-lg hover:shadow-xl transition-all duration-300">
+                      Dashboard
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </Link>
+                </div>
+              ) : (
+                <Button
+                  onClick={() => window.location.href = '/api/auth/google'}
+                  className="flex items-center gap-3 bg-white text-gray-700 border-2 border-blue-300 hover:bg-blue-50 hover:border-blue-400 px-6 py-2 shadow-lg hover:shadow-xl transition-all duration-200 font-medium"
+                >
+                  <SiGoogle className="w-4 h-4 text-red-500" />
+                  Sign in with Google
                 </Button>
-              </Link>
+              )}
             </div>
           </div>
         </div>
@@ -47,12 +81,28 @@ export default function HomePage() {
               AI-powered speech coaching that transforms your communication skills through real-time feedback and personalized training
             </p>
             <div className="flex justify-center">
-              <Link href="/dashboard">
-                <Button size="lg" className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white font-button shadow-lg hover:shadow-xl transition-all duration-300 px-8 py-4">
-                  Start Practicing Now
-                  <Mic className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
+              {isAuthenticated ? (
+                <Link href="/dashboard">
+                  <Button size="lg" className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white font-button shadow-lg hover:shadow-xl transition-all duration-300 px-8 py-4">
+                    Start Practicing Now
+                    <Mic className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+              ) : (
+                <div className="flex flex-col sm:flex-row gap-4 items-center">
+                  <Button
+                    size="lg"
+                    onClick={() => window.location.href = '/api/auth/google'}
+                    className="flex items-center gap-3 bg-white text-gray-700 border-2 border-blue-300 hover:bg-blue-50 hover:border-blue-400 px-8 py-4 shadow-lg hover:shadow-xl transition-all duration-200 font-medium text-lg"
+                  >
+                    <SiGoogle className="w-5 h-5 text-red-500" />
+                    Sign in with Google to Start
+                  </Button>
+                  <p className="text-sm text-gray-500">
+                    Free to use • Save your progress • Personalized coaching
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
