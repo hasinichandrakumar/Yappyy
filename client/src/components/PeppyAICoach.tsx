@@ -286,58 +286,159 @@ export default function PeppyAICoach() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-6">
       <div className="max-w-7xl mx-auto">
         
-        {/* Peppy Header */}
-        <div className="text-center mb-8">
+        {/* Enhanced Peppy Header */}
+        <div className="text-center mb-12 relative">
+          {/* Background decorative elements */}
+          <div className="absolute inset-0 -z-10">
+            <div className="absolute top-0 left-1/4 w-32 h-32 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+            <div className="absolute top-0 right-1/4 w-32 h-32 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+            <div className="absolute bottom-0 left-1/3 w-32 h-32 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+          </div>
+          
           <motion.div 
-            className={getPeppyAvatarStyle()}
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.5 }}
+            className="relative w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 p-1 shadow-2xl"
+            initial={{ scale: 0, rotate: -180 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
           >
-            🦜
+            <div className="w-full h-full bg-white rounded-full flex items-center justify-center text-5xl shadow-inner">
+              🦜
+            </div>
+            {/* Floating AI indicators */}
+            <motion.div 
+              className="absolute -top-2 -right-2 w-8 h-8 bg-green-400 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg"
+              animate={{ y: [-2, 2, -2] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              AI
+            </motion.div>
+            <motion.div 
+              className="absolute -bottom-2 -left-2 w-6 h-6 bg-blue-400 rounded-full flex items-center justify-center text-white text-xs shadow-lg"
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+            >
+              🧠
+            </motion.div>
           </motion.div>
-          <h1 className="text-4xl font-bold text-gray-800 mt-4">Meet Peppy</h1>
-          <p className="text-lg text-gray-600 mt-2">Your Deep Learning AI Speech Coach</p>
-          <Badge variant="outline" className="mt-2 bg-gradient-to-r from-blue-100 to-purple-100">
-            Neural Network v3.0 • Multi-Modal Analysis • Hyperpersonalized Coaching
-          </Badge>
+          
+          <motion.h1 
+            className="text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            Meet Peppy
+          </motion.h1>
+          
+          <motion.p 
+            className="text-xl text-gray-600 mb-4 font-medium"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
+            Your Revolutionary Deep Learning AI Speech Coach
+          </motion.p>
+          
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+          >
+            <Badge className="px-6 py-2 text-sm bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 shadow-lg">
+              <Brain className="w-4 h-4 mr-2" />
+              Neural Network v3.0 • Multi-Modal Analysis • Transformer Models
+            </Badge>
+          </motion.div>
         </div>
 
-        {/* Analysis Loading State */}
+        {/* Enhanced Analysis Loading State */}
         {!neuralAnalysis && !isAnalyzing && sessions && sessions.length > 0 && (
-          <Card className="mb-6">
-            <CardContent className="text-center py-8">
-              <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white text-2xl">
-                🦜
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Peppy is Ready to Analyze!</h3>
-              <p className="text-gray-600 mb-4">Let me perform a deep learning analysis of your speaking progress using advanced neural networks</p>
-              <Button onClick={handleInitialAnalysis} size="lg" className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
-                <Brain className="w-5 h-5 mr-2" />
-                Start Neural Analysis
-              </Button>
-            </CardContent>
-          </Card>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <Card className="mb-8 overflow-hidden bg-gradient-to-br from-white to-blue-50 border-2 border-blue-200 shadow-xl">
+              <CardContent className="text-center py-12 relative">
+                {/* Background pattern */}
+                <div className="absolute inset-0 opacity-5">
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600" style={{
+                    backgroundImage: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%239C92AC" fill-opacity="0.1"%3E%3Ccircle cx="30" cy="30" r="3"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")'
+                  }}></div>
+                </div>
+                
+                <motion.div 
+                  className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white text-3xl shadow-2xl relative"
+                  animate={{ rotate: [0, 5, -5, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  🦜
+                  <div className="absolute -inset-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full blur opacity-30 animate-pulse"></div>
+                </motion.div>
+                
+                <h3 className="text-2xl font-bold text-gray-800 mb-3">Peppy is Ready for Deep Analysis!</h3>
+                <p className="text-gray-600 mb-6 max-w-2xl mx-auto text-lg">
+                  Let me analyze your speaking patterns using advanced neural networks, transformer models, and LSTM networks for the most personalized coaching experience
+                </p>
+                
+                <Button 
+                  onClick={handleInitialAnalysis} 
+                  size="lg" 
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 text-lg font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
+                >
+                  <Brain className="w-6 h-6 mr-3" />
+                  Activate Neural Analysis
+                  <Sparkles className="w-5 h-5 ml-3" />
+                </Button>
+                
+                <div className="flex justify-center gap-8 mt-8 text-sm text-gray-500">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                    8 Attention Heads
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
+                    LSTM Networks
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-pink-500 rounded-full animate-pulse"></div>
+                    Transformer Models
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
         )}
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
-          {/* Left Column - Peppy Chat & Personality */}
+          {/* Left Column - Enhanced Peppy Chat & Personality */}
           <div className="lg:col-span-1 space-y-6">
             
-            {/* Live Conversation with Peppy */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MessageCircle className="w-5 h-5 text-blue-600" />
-                  Chat with Peppy
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+            {/* Enhanced Live Conversation with Peppy */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              <Card className="bg-gradient-to-br from-white to-blue-50 border-blue-200 shadow-lg hover:shadow-xl transition-all duration-300">
+                <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg">
+                  <CardTitle className="flex items-center gap-3">
+                    <div className="relative">
+                      <MessageCircle className="w-6 h-6" />
+                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                    </div>
+                    Chat with Peppy
+                    <Badge className="ml-auto bg-white/20 text-white border-white/30">
+                      Live AI
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
                 <div className="space-y-4">
                   
                   {/* Peppy's Latest Response */}
@@ -410,67 +511,97 @@ export default function PeppyAICoach() {
                     </Button>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </motion.div>
 
-            {/* Peppy's Personality Profile */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Brain className="w-5 h-5 text-purple-600" />
-                  Peppy's Neural Profile
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <div>
-                    <div className="text-sm font-medium mb-1">Coaching Style</div>
-                    <Badge variant="outline" className="capitalize">{peppyPersonality.adaptiveStyle}</Badge>
-                  </div>
-                  
-                  <div>
-                    <div className="text-sm font-medium mb-1">Learning Adaptation</div>
-                    <Progress value={85} className="h-2" />
-                    <div className="text-xs text-gray-600 mt-1">85% personalized to your style</div>
-                  </div>
-                  
-                  <div>
-                    <div className="text-sm font-medium mb-1">Session Patterns Analyzed</div>
-                    <div className="text-lg font-bold text-blue-600">
-                      {peppyPersonality.learningModel.sessionPatterns.length}
+            {/* Enhanced Peppy's Personality Profile */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              <Card className="bg-gradient-to-br from-white to-purple-50 border-purple-200 shadow-lg hover:shadow-xl transition-all duration-300">
+                <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-t-lg">
+                  <CardTitle className="flex items-center gap-3">
+                    <Brain className="w-6 h-6" />
+                    Peppy's Neural Profile
+                    <Badge className="ml-auto bg-white/20 text-white border-white/30">
+                      v3.0
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6 p-6">
+                <div className="space-y-4">
+                  <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-purple-700 mb-2">
+                      <Star className="w-4 h-4" />
+                      Coaching Style
                     </div>
+                    <Badge className="capitalize bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0">
+                      {peppyPersonality.adaptiveStyle}
+                    </Badge>
+                  </div>
+                  
+                  <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-blue-700 mb-3">
+                      <TrendingUp className="w-4 h-4" />
+                      Neural Adaptation Level
+                    </div>
+                    <div className="relative">
+                      <Progress value={85} className="h-3 bg-blue-100" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full opacity-80" style={{ width: '85%' }}></div>
+                    </div>
+                    <div className="text-xs text-blue-600 mt-2 font-medium">85% personalized to your unique speaking style</div>
+                  </div>
+                  
+                  <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-green-700 mb-2">
+                      <BarChart3 className="w-4 h-4" />
+                      Session Patterns Analyzed
+                    </div>
+                    <div className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                      {peppyPersonality.learningModel.sessionPatterns.length || sessions?.length || 0}
+                    </div>
+                    <div className="text-xs text-green-600">Neural patterns learned</div>
                   </div>
                 </div>
 
                 <Button 
-                  variant="outline" 
                   size="sm" 
-                  className="w-full"
+                  className="w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
                   onClick={() => analyzeWithPeppyMutation.mutate({ type: 'personality_update' })}
                 >
                   <Zap className="w-4 h-4 mr-2" />
-                  Update Peppy's Intelligence
+                  Enhance Neural Intelligence
+                  <Sparkles className="w-4 h-4 ml-2" />
                 </Button>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </motion.div>
           </div>
 
           {/* Right Column - Neural Analysis & Progress */}
           <div className="lg:col-span-2 space-y-6">
             
-            {/* Neural Network Analysis */}
+            {/* Enhanced Neural Network Analysis */}
             {neuralAnalysis && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Brain className="w-5 h-5 text-green-600" />
-                    Deep Learning Analysis
-                    <Badge variant="outline" className="ml-auto">
-                      Confidence: {neuralAnalysis.confidenceScore}%
-                    </Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+              >
+                <Card className="bg-gradient-to-br from-white to-green-50 border-green-200 shadow-xl">
+                  <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-t-lg">
+                    <CardTitle className="flex items-center gap-3">
+                      <Brain className="w-6 h-6" />
+                      Deep Learning Analysis
+                      <Badge className="ml-auto bg-white/20 text-white border-white/30">
+                        Confidence: {neuralAnalysis.confidenceScore}%
+                      </Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6">
                   <Tabs defaultValue="goals" className="w-full">
                     <TabsList className="grid w-full grid-cols-4">
                       <TabsTrigger value="goals">Goals</TabsTrigger>
@@ -588,8 +719,9 @@ export default function PeppyAICoach() {
                       </div>
                     </TabsContent>
                   </Tabs>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </motion.div>
             )}
 
             {/* Encouragement & Motivation */}
