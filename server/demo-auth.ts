@@ -166,7 +166,7 @@ export function setupDemoAuth(app: Express) {
   // Simple auth check route
   app.get("/api/auth/user", async (req: any, res) => {
     try {
-      // Check session
+      // Check session first
       if (req.session?.userId) {
         const user = await storage.getUser(req.session.userId);
         if (user) {
@@ -175,13 +175,12 @@ export function setupDemoAuth(app: Express) {
         }
       }
       
-      // Fallback to demo user for demo environment
-      const demoUser = await storage.getUser("demo-user-123");
-      if (demoUser) {
-        req.user = demoUser;
-        return res.json(demoUser);
+      // Check if user is authenticated via passport (Google OAuth)
+      if (req.user) {
+        return res.json(req.user);
       }
       
+      // Return 401 if no authentication found - don't auto-login demo user
       res.status(401).json({ message: "Authentication required" });
     } catch (error) {
       console.error("Auth check error:", error);
