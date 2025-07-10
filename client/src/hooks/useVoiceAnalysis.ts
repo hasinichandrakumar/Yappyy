@@ -49,9 +49,9 @@ export function useVoiceAnalysis(): VoiceAnalysisResult {
       analyserRef.current = audioContextRef.current.createAnalyser();
       microphoneRef.current = audioContextRef.current.createMediaStreamSource(stream);
 
-      // Configure analyser
-      analyserRef.current.fftSize = 2048;
-      analyserRef.current.smoothingTimeConstant = 0.8;
+      // Configure analyser for faster processing
+      analyserRef.current.fftSize = 1024; // Smaller for faster processing
+      analyserRef.current.smoothingTimeConstant = 0.3; // Less smoothing for faster response
       
       const bufferLength = analyserRef.current.frequencyBinCount;
       dataArrayRef.current = new Uint8Array(bufferLength);
@@ -71,31 +71,40 @@ export function useVoiceAnalysis(): VoiceAnalysisResult {
       return;
     }
 
-    // Get frequency data
+    // Get frequency data with faster processing
     analyserRef.current.getByteFrequencyData(dataArrayRef.current);
     
-    // Calculate volume level
-    const volume = calculateVolume(dataArrayRef.current);
+    // Calculate metrics with optimized algorithms
+    const volume = calculateVolumeFast(dataArrayRef.current);
+    const pitchData = calculatePitchFast(dataArrayRef.current);
+    const confidence = calculateConfidenceFast(volume, pitchData.frequency);
+    const voiceStability = calculateStabilityFast();
+    
+    // Update states immediately for faster UI response
     setVolumeLevel(volume);
-
-    // Calculate pitch and clarity
-    const pitchData = calculatePitch(dataArrayRef.current);
     setPitch(pitchData.frequency);
     setVoiceClarity(pitchData.clarity);
-
-    // Calculate confidence based on volume consistency and pitch stability
-    const confidence = calculateConfidence(volume, pitchData.frequency);
     setConfidenceScore(confidence);
-
-    // Calculate stability
-    const voiceStability = calculateStability();
     setStability(voiceStability);
 
-    // Update history
-    updateHistory(volume, pitchData.frequency);
+    // Update history less frequently to reduce overhead
+    if (Date.now() % 3 === 0) { // Update history every 3rd frame
+      updateHistory(volume, pitchData.frequency);
+    }
 
-    // Continue analysis
+    // Continue analysis with reduced frequency for better performance
     animationFrameRef.current = requestAnimationFrame(analyzeAudio);
+  };
+
+  // Fast optimized calculation methods
+  const calculateVolumeFast = (dataArray: Uint8Array): number => {
+    let sum = 0;
+    // Sample every 4th element for speed
+    for (let i = 0; i < dataArray.length; i += 4) {
+      sum += dataArray[i];
+    }
+    const average = sum / (dataArray.length / 4);
+    return Math.min(100, (average / 128) * 100);
   };
 
   const calculateVolume = (dataArray: Uint8Array): number => {
@@ -105,6 +114,29 @@ export function useVoiceAnalysis(): VoiceAnalysisResult {
     }
     const average = sum / dataArray.length;
     return Math.min(100, (average / 128) * 100);
+  };
+
+  const calculatePitchFast = (dataArray: Uint8Array): { frequency: number; clarity: number } => {
+    // Simplified pitch detection for speed
+    let maxValue = 0;
+    let maxIndex = 0;
+    
+    // Find peak frequency bin (simplified approach)
+    for (let i = 10; i < Math.min(dataArray.length / 4, 200); i++) {
+      if (dataArray[i] > maxValue) {
+        maxValue = dataArray[i];
+        maxIndex = i;
+      }
+    }
+    
+    const sampleRate = audioContextRef.current?.sampleRate || 44100;
+    const frequency = (maxIndex * sampleRate) / (2 * dataArray.length);
+    const clarity = Math.min(100, (maxValue / 255) * 100);
+    
+    return { 
+      frequency: Math.round(frequency), 
+      clarity: clarity 
+    };
   };
 
   const calculatePitch = (dataArray: Uint8Array): { frequency: number; clarity: number } => {
@@ -203,6 +235,35 @@ export function useVoiceAnalysis(): VoiceAnalysisResult {
     return Math.min(1, signalToNoise / 10);
   };
 
+  const calculateConfidenceFast = (volume: number, pitch: number): number => {
+    // Fast confidence calculation
+    let confidence = 0;
+
+    // Volume contribution (optimal range 20-80)
+    if (volume >= 20 && volume <= 80) {
+      confidence += 40;
+    } else if (volume >= 10 && volume <= 90) {
+      confidence += 20;
+    }
+
+    // Pitch contribution (human voice range roughly 80-1000 Hz)
+    if (pitch >= 80 && pitch <= 1000) {
+      confidence += 30;
+    } else if (pitch >= 50 && pitch <= 1200) {
+      confidence += 15;
+    }
+
+    // Quick stability check (last 5 values only)
+    const recentVolumes = volumeHistoryRef.current.slice(-5);
+    if (recentVolumes.length >= 3) {
+      const avgVolume = recentVolumes.reduce((a, b) => a + b, 0) / recentVolumes.length;
+      const isStable = recentVolumes.every(v => Math.abs(v - avgVolume) < 20);
+      if (isStable) confidence += 30;
+    }
+
+    return Math.min(100, confidence);
+  };
+
   const calculateConfidence = (volume: number, pitch: number): number => {
     // Confidence based on consistent volume and stable pitch
     let confidence = 0;
@@ -235,6 +296,22 @@ export function useVoiceAnalysis(): VoiceAnalysisResult {
     }
 
     return Math.min(100, confidence);
+  };
+
+  const calculateStabilityFast = (): number => {
+    const recentVolumes = volumeHistoryRef.current.slice(-10);
+    const recentPitches = pitchHistoryRef.current.slice(-10);
+
+    if (recentVolumes.length < 5) return 0;
+
+    // Fast stability calculation using range instead of variance
+    const volumeRange = Math.max(...recentVolumes) - Math.min(...recentVolumes);
+    const pitchRange = Math.max(...recentPitches) - Math.min(...recentPitches);
+
+    const volumeStability = Math.max(0, 100 - volumeRange);
+    const pitchStability = Math.max(0, 100 - (pitchRange / 10));
+
+    return (volumeStability + pitchStability) / 2;
   };
 
   const calculateStability = (): number => {
