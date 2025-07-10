@@ -29,60 +29,32 @@ const PeppyParrot = ({ isAnimated = false, mood = 'happy', size = 'large' }: {
     large: 'w-48 h-48'
   };
 
-  // Use the Rive animation with error handling
-  const { rive, RiveComponent } = useRive({
-    src: '/assets/bird-4_1752166045497.riv',
-    autoplay: true, // Always autoplay for animation
-    layout: 'fill', // Make sure animation fills container
-    onLoad: () => {
-      setHasError(false);
-      console.log('Rive animation loaded successfully');
-      // Try to play all available animations
-      if (rive) {
-        rive.play();
-      }
-    },
-    onLoadError: (error) => {
-      setHasError(true);
-      console.error('Rive animation failed to load:', error);
-    },
-  });
-
-  // Control animation playback
-  useEffect(() => {
-    if (rive) {
-      if (isAnimated) {
-        rive.play();
-      } else {
-        rive.pause();
-      }
-    }
-  }, [rive, isAnimated]);
-
-  // Try to get state machine inputs for mood control if available
-  const moodInput = useStateMachineInput(rive, 'State Machine 1', 'mood');
+  // Try to use Rive animation but fallback gracefully
+  let rive = null;
+  let RiveComponent = null;
   
-  // Update mood when it changes
-  useEffect(() => {
-    if (moodInput && mood) {
-      // Map moods to animation states
-      const moodMap: Record<string, number> = {
-        happy: 0,
-        thinking: 1,
-        excited: 2,
-        encouraging: 3,
-        proud: 4,
-        thoughtful: 5
-      };
-      
-      if (moodMap[mood] !== undefined) {
-        moodInput.value = moodMap[mood];
-      }
-    }
-  }, [mood, moodInput]);
+  try {
+    const riveHook = useRive({
+      src: '/assets/bird-4_1752166045497.riv',
+      autoplay: true,
+      onLoad: () => {
+        setHasError(false);
+        console.log('Rive animation loaded successfully');
+      },
+      onLoadError: (error) => {
+        setHasError(true);
+        console.error('Rive animation failed to load:', error);
+      },
+    });
+    rive = riveHook.rive;
+    RiveComponent = riveHook.RiveComponent;
+  } catch (error) {
+    console.error('Rive hook error:', error);
+    setHasError(true);
+  }
 
-  // Fallback SVG if RIV fails to load
-  if (hasError) {
+  // Fallback SVG if RIV fails to load or has errors
+  if (hasError || !RiveComponent) {
     const moodColors = {
       happy: { body: '#10B981', accent: '#34D399' },
       thinking: { body: '#3B82F6', accent: '#60A5FA' },
