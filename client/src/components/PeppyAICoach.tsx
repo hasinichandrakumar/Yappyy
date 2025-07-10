@@ -142,10 +142,14 @@ export default function PeppyAICoach() {
 
   // Initialize Peppy analysis on component mount
   useEffect(() => {
-    if (sessions && sessions.length > 0 && !neuralAnalysis) {
-      handleInitialAnalysis();
+    if (sessions && sessions.length > 0 && !neuralAnalysis && !isAnalyzing) {
+      // Auto-trigger analysis after a brief delay to let the UI render
+      const timer = setTimeout(() => {
+        handleInitialAnalysis();
+      }, 1000);
+      return () => clearTimeout(timer);
     }
-  }, [sessions]);
+  }, [sessions, neuralAnalysis, isAnalyzing]);
 
   // Update Peppy's personality based on user interactions
   useEffect(() => {
@@ -297,10 +301,27 @@ export default function PeppyAICoach() {
           </motion.div>
           <h1 className="text-4xl font-bold text-gray-800 mt-4">Meet Peppy</h1>
           <p className="text-lg text-gray-600 mt-2">Your Deep Learning AI Speech Coach</p>
-          <Badge variant="outline" className="mt-2">
-            Neural Network v3.0 • Hyperpersonalized Coaching
+          <Badge variant="outline" className="mt-2 bg-gradient-to-r from-blue-100 to-purple-100">
+            Neural Network v3.0 • Multi-Modal Analysis • Hyperpersonalized Coaching
           </Badge>
         </div>
+
+        {/* Analysis Loading State */}
+        {!neuralAnalysis && !isAnalyzing && sessions && sessions.length > 0 && (
+          <Card className="mb-6">
+            <CardContent className="text-center py-8">
+              <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white text-2xl">
+                🦜
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Peppy is Ready to Analyze!</h3>
+              <p className="text-gray-600 mb-4">Let me perform a deep learning analysis of your speaking progress using advanced neural networks</p>
+              <Button onClick={handleInitialAnalysis} size="lg" className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
+                <Brain className="w-5 h-5 mr-2" />
+                Start Neural Analysis
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
