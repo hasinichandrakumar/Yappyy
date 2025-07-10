@@ -32,7 +32,7 @@ export default function HomePage() {
                   className="flex items-center gap-2 bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 px-6 py-2 rounded-md shadow-sm hover:shadow-md transition-all duration-200 font-medium"
                 >
                   <SiGoogle className="w-4 h-4" />
-                  Sign in
+                  Start Learning Here
                 </Button>
               )}
             </div>
@@ -76,7 +76,7 @@ export default function HomePage() {
                     className="flex items-center gap-2 bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 px-8 py-4 rounded-md shadow-sm hover:shadow-md transition-all duration-200 font-medium text-lg"
                   >
                     <SiGoogle className="w-5 h-5" />
-                    Sign in
+                    Start Learning Here
                   </Button>
                   <p className="text-sm text-gray-500 text-center">
                     Free to use • Save your progress • Personalized coaching
