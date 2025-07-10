@@ -11,21 +11,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Top Sign-In Banner */}
-      {!isAuthenticated && (
-        <div className="bg-gradient-to-r from-[#2563eb] to-[#22d3ee] py-3">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-center items-center">
-            <Button
-              onClick={() => window.location.href = '/api/auth/google'}
-              className="flex items-center gap-2 bg-white text-gray-700 hover:bg-gray-50 px-6 py-2 rounded-full shadow-md hover:shadow-lg transition-all duration-200 font-medium"
-            >
-              <SiGoogle className="w-4 h-4 text-red-500" />
-              Sign in with Google - Start Free
-            </Button>
-          </div>
-        </div>
-      )}
-      
       {/* Navigation */}
       <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
