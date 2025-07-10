@@ -639,71 +639,112 @@ export default function PeppyAICoach() {
               </Card>
             </motion.div>
 
-            {/* Enhanced Peppy's Personality Profile */}
+            {/* Enhanced Neural Feedback System */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              <Card className="bg-gradient-to-br from-white to-purple-50 border-purple-200 shadow-lg hover:shadow-xl transition-all duration-300">
-                <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-t-lg">
+              <Card className="bg-gradient-to-br from-white to-orange-50 border-orange-200 shadow-lg hover:shadow-xl transition-all duration-300">
+                <CardHeader className="bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-t-lg">
                   <CardTitle className="flex items-center gap-3">
                     <Brain className="w-6 h-6" />
-                    Peppy's Neural Profile
+                    Neural Network Feedback
                     <Badge className="ml-auto bg-white/20 text-white border-white/30">
-                      v3.0
+                      Deep Learning
                     </Badge>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6">
-                  <div className="space-y-6">
-                    <div className="p-5 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-100">
-                      <div className="flex items-center gap-2 text-sm font-semibold text-purple-700 mb-3">
-                        <Star className="w-4 h-4" />
-                        Coaching Style
-                      </div>
-                      <Badge className="capitalize bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0 px-3 py-1.5">
-                        {peppyPersonality.adaptiveStyle}
-                      </Badge>
-                    </div>
-                    
-                    <div className="p-5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
-                      <div className="flex items-center gap-2 text-sm font-semibold text-blue-700 mb-4">
-                        <TrendingUp className="w-4 h-4" />
-                        Neural Adaptation Level
-                      </div>
-                      <div className="relative mb-3">
-                        <Progress value={85} className="h-3 bg-blue-100" />
-                        <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full opacity-80" style={{ width: '85%' }}></div>
-                      </div>
-                      <div className="text-sm text-blue-600 font-medium">85% personalized to your unique speaking style</div>
-                    </div>
-                    
-                    <div className="p-5 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-100">
-                      <div className="flex items-center gap-2 text-sm font-semibold text-green-700 mb-3">
-                        <BarChart3 className="w-4 h-4" />
-                        Session Patterns Analyzed
-                      </div>
-                      <div className="text-center py-2">
-                        <div className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-1">
-                          {peppyPersonality.learningModel.sessionPatterns.length || sessions?.length || 0}
+                  {neuralAnalysis ? (
+                    <div className="space-y-6">
+                      {/* Performance Overview */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="text-center p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+                          <div className="text-2xl font-bold text-green-600 mb-1">
+                            {neuralAnalysis.confidenceScore}%
+                          </div>
+                          <div className="text-xs text-gray-600">Confidence</div>
                         </div>
-                        <div className="text-sm text-green-600">Neural patterns learned</div>
+                        <div className="text-center p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200">
+                          <div className="text-2xl font-bold text-blue-600 mb-1">
+                            {neuralAnalysis.improvementVelocity}%
+                          </div>
+                          <div className="text-xs text-gray-600">Growth Rate</div>
+                        </div>
+                      </div>
+
+                      {/* Key Insights */}
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-orange-700">
+                          <Sparkles className="w-4 h-4" />
+                          AI Analysis
+                        </div>
+                        
+                        {/* Communication Style Feedback */}
+                        <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                          <div className="text-sm font-medium text-purple-800 mb-2">Communication Style</div>
+                          <p className="text-sm text-purple-700">
+                            {neuralAnalysis.personalityInsights.communicationStyle}
+                          </p>
+                        </div>
+
+                        {/* Strengths */}
+                        <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                          <div className="text-sm font-medium text-green-800 mb-2 flex items-center gap-2">
+                            <Star className="w-4 h-4" />
+                            Your Strengths
+                          </div>
+                          <div className="space-y-1">
+                            {neuralAnalysis.personalityInsights.strengthsProfile.slice(0, 2).map((strength, idx) => (
+                              <div key={idx} className="text-sm text-green-700 flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                                {strength}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Growth Areas */}
+                        <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                          <div className="text-sm font-medium text-yellow-800 mb-2 flex items-center gap-2">
+                            <Target className="w-4 h-4" />
+                            Focus Areas
+                          </div>
+                          <div className="space-y-1">
+                            {neuralAnalysis.personalityInsights.growthAreas.slice(0, 2).map((area, idx) => (
+                              <div key={idx} className="text-sm text-yellow-700 flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full"></div>
+                                {area}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Top Recommendations */}
+                        <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                          <div className="text-sm font-medium text-blue-800 mb-2 flex items-center gap-2">
+                            <Zap className="w-4 h-4" />
+                            Next Steps
+                          </div>
+                          <div className="space-y-1">
+                            {neuralAnalysis.adaptiveRecommendations.slice(0, 2).map((rec, idx) => (
+                              <div key={idx} className="text-sm text-blue-700 flex items-start gap-2">
+                                <ChevronRight className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                                {rec}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-
-                  <div className="mt-6">
-                    <Button 
-                      size="lg" 
-                      className="w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 py-3"
-                      onClick={() => analyzeWithPeppyMutation.mutate({ type: 'personality_update' })}
-                    >
-                      <Zap className="w-5 h-5 mr-2" />
-                      Enhance Neural Intelligence
-                      <Sparkles className="w-5 h-5 ml-2" />
-                    </Button>
-                  </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <Brain className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-600 mb-2 text-sm">Neural feedback will appear here</p>
+                      <p className="text-xs text-gray-500">Advanced AI insights ready after analysis</p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </motion.div>
@@ -730,13 +771,61 @@ export default function PeppyAICoach() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-6">
-                  <Tabs defaultValue="goals" className="w-full">
-                    <TabsList className="grid w-full grid-cols-4 mb-6">
+                  <Tabs defaultValue="feedback" className="w-full">
+                    <TabsList className="grid w-full grid-cols-3 mb-6">
+                      <TabsTrigger value="feedback">Feedback</TabsTrigger>
                       <TabsTrigger value="goals">Goals</TabsTrigger>
-                      <TabsTrigger value="progress">Progress</TabsTrigger>
                       <TabsTrigger value="insights">Insights</TabsTrigger>
-                      <TabsTrigger value="recommendations">Tips</TabsTrigger>
                     </TabsList>
+                    
+                    <TabsContent value="feedback" className="space-y-4 mt-4">
+                      <div className="space-y-4">
+                        {/* Detailed AI Feedback */}
+                        <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                          <div className="font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                            <Brain className="w-4 h-4" />
+                            Neural Network Analysis
+                          </div>
+                          <div className="space-y-3">
+                            <div className="text-sm text-blue-700">
+                              <strong>Confidence Pattern:</strong> Your speaking confidence has increased by {neuralAnalysis.improvementVelocity}% based on neural analysis of voice patterns, body language, and content structure.
+                            </div>
+                            <div className="text-sm text-blue-700">
+                              <strong>Communication Style:</strong> {neuralAnalysis.personalityInsights.communicationStyle}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Actionable Recommendations */}
+                        <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+                          <div className="font-semibold text-green-800 mb-3 flex items-center gap-2">
+                            <Target className="w-4 h-4" />
+                            AI Recommendations
+                          </div>
+                          <div className="space-y-2">
+                            {neuralAnalysis.adaptiveRecommendations.map((rec, idx) => (
+                              <div key={idx} className="text-sm text-green-700 flex items-start gap-2">
+                                <ChevronRight className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                                {rec}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Encouragement */}
+                        {neuralAnalysis.encouragementMessages.length > 0 && (
+                          <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200">
+                            <div className="font-semibold text-purple-800 mb-2 flex items-center gap-2">
+                              <Heart className="w-4 h-4" />
+                              AI Motivation
+                            </div>
+                            <p className="text-sm text-purple-700 italic">
+                              "{neuralAnalysis.encouragementMessages[0]}"
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </TabsContent>
                     
                     <TabsContent value="goals" className="space-y-6 mt-4">
                       <div className="space-y-6">
