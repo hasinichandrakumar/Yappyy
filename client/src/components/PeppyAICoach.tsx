@@ -21,65 +21,28 @@ const PeppyParrot = ({ isAnimated = false, mood = 'happy', size = 'large' }: {
   mood?: 'happy' | 'thinking' | 'excited' | 'encouraging' | 'proud' | 'thoughtful'; 
   size?: 'small' | 'medium' | 'large' 
 }) => {
-  const [hasError, setHasError] = useState(false);
-  
   const sizeClasses = {
     small: 'w-20 h-20',
     medium: 'w-32 h-32', 
     large: 'w-48 h-48'
   };
 
-  // Try to use Rive animation but fallback gracefully
-  let rive = null;
-  let RiveComponent = null;
-  
-  try {
-    const riveHook = useRive({
-      src: '/assets/bird-4_1752166045497.riv',
-      autoplay: true,
-      onLoad: () => {
-        setHasError(false);
-        console.log('Rive animation loaded successfully');
-      },
-      onLoadError: (error) => {
-        setHasError(true);
-        console.error('Rive animation failed to load:', error);
-      },
-    });
-    rive = riveHook.rive;
-    RiveComponent = riveHook.RiveComponent;
-  } catch (error) {
-    console.error('Rive hook error:', error);
-    setHasError(true);
-  }
+  // Direct Rive implementation - always try the animation first
+  const { rive, RiveComponent } = useRive({
+    src: '/assets/bird-4_1752166045497.riv',
+    autoplay: true,
+    layout: 'fitContain',
+    onLoad: () => console.log('🎯 Rive animation loaded and should be animating'),
+    onLoadError: (err) => console.error('❌ Rive load error:', err)
+  });
 
-  // Fallback SVG if RIV fails to load or has errors
-  if (hasError || !RiveComponent) {
-    const moodColors = {
-      happy: { body: '#10B981', accent: '#34D399' },
-      thinking: { body: '#3B82F6', accent: '#60A5FA' },
-      excited: { body: '#F59E0B', accent: '#FBBF24' },
-      encouraging: { body: '#10B981', accent: '#6EE7B7' },
-      proud: { body: '#8B5CF6', accent: '#A78BFA' },
-      thoughtful: { body: '#6366F1', accent: '#818CF8' }
-    };
-    const colors = moodColors[mood];
-    
-    return (
-      <div className={`${sizeClasses[size]} mx-auto ${isAnimated ? 'transition-transform duration-300 hover:scale-110' : ''}`}>
-        <svg viewBox="0 0 200 200" className="w-full h-full">
-          <ellipse cx="100" cy="120" rx="45" ry="55" fill={colors.body} />
-          <circle cx="100" cy="70" r="35" fill={colors.body} />
-          <polygon points="85,75 75,82 85,89" fill="#F59E0B" />
-          <circle cx="90" cy="65" r="8" fill="white" />
-          <circle cx="110" cy="65" r="8" fill="white" />
-          <circle cx="90" cy="65" r="5" fill="#1F2937" />
-          <circle cx="110" cy="65" r="5" fill="#1F2937" />
-          <ellipse cx="115" cy="110" rx="15" ry="25" fill={colors.accent} />
-        </svg>
-      </div>
-    );
-  }
+  // Force animation to play
+  useEffect(() => {
+    if (rive) {
+      console.log('🚀 Starting Rive animation');
+      rive.play();
+    }
+  }, [rive]);
 
   return (
     <div className={`${sizeClasses[size]} mx-auto ${isAnimated ? 'transition-transform duration-300 hover:scale-110' : ''}`}>
