@@ -19,33 +19,13 @@ export default function HomePage() {
               <img src={yappyyLogoPath} alt="Yappyy" className="h-8" />
             </div>
             <div className="flex items-center space-x-4">
-              {isLoading ? (
-                <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-              ) : isAuthenticated && user ? (
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center gap-2">
-                    {user.profileImageUrl ? (
-                      <img 
-                        src={user.profileImageUrl} 
-                        alt={user.firstName || "User"} 
-                        className="w-6 h-6 rounded-full border border-gray-300"
-                      />
-                    ) : (
-                      <div className="w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                        {(user.firstName || user.email || "U").charAt(0).toUpperCase()}
-                      </div>
-                    )}
-                    <span className="text-sm text-gray-700">
-                      {user.firstName || user.email?.split('@')[0] || "User"}
-                    </span>
-                  </div>
-                  <Link href="/dashboard">
-                    <Button className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white font-button shadow-lg hover:shadow-xl transition-all duration-300">
-                      Dashboard
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </Link>
-                </div>
+              {isAuthenticated ? (
+                <Link href="/dashboard">
+                  <Button className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white font-button shadow-lg hover:shadow-xl transition-all duration-300">
+                    Dashboard
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
               ) : (
                 <Button
                   onClick={() => window.location.href = '/api/auth/google'}
