@@ -73,10 +73,10 @@ export default function HomePage() {
                   <Button
                     size="lg"
                     onClick={() => window.location.href = '/api/auth/google'}
-                    className="flex items-center gap-3 bg-white text-gray-700 border-2 border-blue-300 hover:bg-blue-50 hover:border-blue-400 px-8 py-4 shadow-lg hover:shadow-xl transition-all duration-200 font-medium text-lg"
+                    className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white font-button shadow-lg hover:shadow-xl transition-all duration-300 px-8 py-4 text-lg"
                   >
-                    <SiGoogle className="w-5 h-5 text-red-500" />
-                    Sign in with Google to Start
+                    Start Learning Now
+                    <Mic className="ml-2 h-5 w-5" />
                   </Button>
                   <p className="text-sm text-gray-500">
                     Free to use • Save your progress • Personalized coaching
