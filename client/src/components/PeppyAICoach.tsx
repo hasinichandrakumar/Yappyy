@@ -166,13 +166,18 @@ export default function PeppyAICoach() {
     }
   }, [sessions]);
 
-  const handleInitialAnalysis = () => {
+  const handleInitialAnalysis = async () => {
     setIsAnalyzing(true);
-    analyzeWithPeppyMutation.mutate({
-      type: 'initial_comprehensive_analysis',
-      focus: 'full_personality_assessment'
-    });
-    setIsAnalyzing(false);
+    try {
+      await analyzeWithPeppyMutation.mutateAsync({
+        type: 'initial_comprehensive_analysis',
+        focus: 'full_personality_assessment'
+      });
+    } catch (error) {
+      console.error('Analysis failed:', error);
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const analyzeSessions = (sessions: any[]) => {
@@ -241,9 +246,28 @@ export default function PeppyAICoach() {
     return recommendations;
   };
 
-  const handleConversation = () => {
+  const handleConversation = async () => {
     if (userMessage.trim() && !conversationMutation.isPending) {
-      conversationMutation.mutate(userMessage);
+      try {
+        await conversationMutation.mutateAsync(userMessage);
+      } catch (error) {
+        console.error('Conversation failed:', error);
+        // Show user-friendly error message
+        const errorConversation = {
+          id: Date.now(),
+          userMessage,
+          peppyResponse: {
+            message: "I'm having trouble connecting right now. Please try again in a moment!",
+            emotion: 'thoughtful',
+            personalizedTips: [],
+            nextStepGuidance: "Check your connection and try again."
+          },
+          timestamp: new Date(),
+          emotion: 'thoughtful'
+        };
+        setConversationHistory(prev => [...prev, errorConversation]);
+        setUserMessage('');
+      }
     }
   };
 
@@ -472,43 +496,49 @@ export default function PeppyAICoach() {
                   )}
 
                   {/* Conversation History */}
-                  <div className="max-h-40 overflow-y-auto space-y-2">
-                    {conversationHistory.slice(-3).map((conv) => (
-                      <div key={conv.id} className="space-y-2">
-                        <div className="bg-gray-100 p-2 rounded text-sm">
-                          <span className="font-medium">You:</span> {conv.userMessage}
+                  {conversationHistory.length > 0 && (
+                    <div className="max-h-32 overflow-y-auto space-y-3 mb-4">
+                      {conversationHistory.slice(-3).map((conv) => (
+                        <div key={conv.id} className="space-y-2">
+                          <div className="bg-gray-100 p-3 rounded-lg text-sm">
+                            <span className="font-medium">You:</span> {conv.userMessage}
+                          </div>
+                          <div className="bg-blue-50 p-3 rounded-lg text-sm">
+                            <span className="font-medium text-blue-600">Peppy:</span> {conv.peppyResponse.message}
+                          </div>
                         </div>
-                        <div className="bg-blue-50 p-2 rounded text-sm">
-                          <span className="font-medium text-blue-600">Peppy:</span> {conv.peppyResponse.message}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
 
                   {/* Input Area */}
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={userMessage}
-                      onChange={(e) => setUserMessage(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && handleConversation()}
-                      placeholder="Ask Peppy anything about your progress..."
-                      className="flex-1 p-2 border rounded-lg text-sm"
-                    />
-                    <Button 
-                      size="sm" 
-                      onClick={handleVoiceInput}
-                      variant={isListening ? "default" : "outline"}
-                    >
-                      <Mic className="w-4 h-4" />
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      onClick={handleConversation}
-                      disabled={!userMessage.trim() || conversationMutation.isPending}
-                    >
-                      Send
-                    </Button>
+                  <div className="border-t pt-4 mt-4">
+                    <div className="flex gap-3">
+                      <input
+                        type="text"
+                        value={userMessage}
+                        onChange={(e) => setUserMessage(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && handleConversation()}
+                        placeholder="Ask Peppy anything about your progress..."
+                        className="flex-1 p-3 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                      <Button 
+                        size="sm" 
+                        onClick={handleVoiceInput}
+                        variant={isListening ? "default" : "outline"}
+                        className="px-3"
+                      >
+                        <Mic className="w-4 h-4" />
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        onClick={handleConversation}
+                        disabled={!userMessage.trim() || conversationMutation.isPending}
+                        className="bg-blue-500 hover:bg-blue-600 text-white px-4"
+                      >
+                        Send
+                      </Button>
+                    </div>
                   </div>
                 </div>
                 </CardContent>
@@ -756,14 +786,15 @@ export default function PeppyAICoach() {
           </div>
         </div>
 
-        {/* Action Buttons */}
+        {/* Enhanced Action Buttons */}
         <div className="flex justify-center gap-4 mt-8">
           <Button 
             size="lg" 
             onClick={handleInitialAnalysis}
             disabled={isAnalyzing || analyzeWithPeppyMutation.isPending}
+            className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
           >
-            {isAnalyzing ? (
+            {isAnalyzing || analyzeWithPeppyMutation.isPending ? (
               <>
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                 Peppy is thinking...
@@ -776,7 +807,12 @@ export default function PeppyAICoach() {
             )}
           </Button>
           
-          <Button variant="outline" size="lg" onClick={() => window.location.href = '/practice'}>
+          <Button 
+            variant="outline" 
+            size="lg" 
+            onClick={() => window.location.href = '/practice'}
+            className="border-2 border-blue-500 text-blue-600 hover:bg-blue-50 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+          >
             <Play className="w-5 h-5 mr-2" />
             Start Practice Session
           </Button>
