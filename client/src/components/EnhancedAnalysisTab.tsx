@@ -337,46 +337,141 @@ export default function EnhancedAnalysisTab() {
                   <MessageSquare className="h-5 w-5 text-slate-600" />
                   <h4 className="text-lg font-semibold text-slate-900">Filler Words Analysis</h4>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="text-center p-3 bg-white rounded-lg border border-slate-200">
-                    <div className="text-2xl font-bold text-blue-800 mb-1">
-                      {(() => {
-                        const total = filteredSessions.reduce((sum: number, s: any) => sum + (s.fillerWords || 0), 0);
-                        const average = sessionCount > 0 ? total / sessionCount : 0;
-                        return Math.round(isNaN(average) ? 0 : average);
+                <div className="grid grid-cols-3 gap-4">
+                  {(() => {
+                    // Extract all filler words from sessions and count occurrences
+                    const fillerWordCounts: { [key: string]: number } = {};
+                    
+                    filteredSessions.forEach((session: any) => {
+                      // Handle different data structures for filler words
+                      let sessionFillers: string[] = [];
+                      
+                      if (session.fillerWordsDetailed && Array.isArray(session.fillerWordsDetailed)) {
+                        sessionFillers = session.fillerWordsDetailed;
+                      } else if (session.fillerWords && typeof session.fillerWords === 'number') {
+                        // Legacy: if it's just a count, assume it's "um"
+                        for (let i = 0; i < session.fillerWords; i++) {
+                          sessionFillers.push('um');
+                        }
+                      } else if (session.transcript) {
+                        // Extract from transcript
+                        const transcript = session.transcript.toLowerCase();
+                        const fillerPatterns = [
+                          { word: 'um', regex: /\bum+\b/g },
+                          { word: 'uh', regex: /\buh+\b/g },
+                          { word: 'like', regex: /\blike\b/g },
+                          { word: 'so', regex: /\bso\b/g },
+                          { word: 'well', regex: /\bwell\b/g },
+                          { word: 'actually', regex: /\bactually\b/g },
+                          { word: 'basically', regex: /\bbasically\b/g },
+                          { word: 'you know', regex: /\byou know\b/g },
+                          { word: 'i mean', regex: /\bi mean\b/g },
+                          { word: 'kind of', regex: /\bkind of\b/g },
+                          { word: 'sort of', regex: /\bsort of\b/g }
+                        ];
+                        
+                        fillerPatterns.forEach(pattern => {
+                          const matches = transcript.match(pattern.regex);
+                          if (matches) {
+                            for (let i = 0; i < matches.length; i++) {
+                              sessionFillers.push(pattern.word);
+                            }
+                          }
+                        });
+                      }
+                      
+                      // Count occurrences
+                      sessionFillers.forEach(filler => {
+                        fillerWordCounts[filler] = (fillerWordCounts[filler] || 0) + 1;
+                      });
+                    });
+                    
+                    // Get top 3 most used filler words
+                    const sortedFillers = Object.entries(fillerWordCounts)
+                      .sort(([,a], [,b]) => b - a)
+                      .slice(0, 3);
+                    
+                    // If no fillers found, show default structure
+                    if (sortedFillers.length === 0) {
+                      return [
+                        { word: 'um', count: 0, color: 'blue' },
+                        { word: 'uh', count: 0, color: 'emerald' },
+                        { word: 'like', count: 0, color: 'purple' }
+                      ].map((item, index) => (
+                        <div key={index} className="text-center p-3 bg-white rounded-lg border border-slate-200">
+                          <div className={`text-2xl font-bold text-${item.color}-800 mb-1`}>
+                            {item.count}
+                          </div>
+                          <div className="text-xs text-slate-600 capitalize">"{item.word}" Count</div>
+                        </div>
+                      ));
+                    }
+                    
+                    // Color palette for top fillers
+                    const colors = ['blue', 'emerald', 'purple', 'orange', 'red'];
+                    
+                    return sortedFillers.map(([filler, count], index) => (
+                      <div key={filler} className="text-center p-3 bg-white rounded-lg border border-slate-200">
+                        <div className={`text-2xl font-bold text-${colors[index] || 'slate'}-800 mb-1`}>
+                          {count}
+                        </div>
+                        <div className="text-xs text-slate-600 capitalize">
+                          "{filler}" Count
+                        </div>
+                        <div className={`text-xs mt-1 px-2 py-0.5 rounded-full inline-block bg-${colors[index] || 'slate'}-100 text-${colors[index] || 'slate'}-700`}>
+                          #{index + 1} Most Used
+                        </div>
+                      </div>
+                    ));
+                  })()}
+                </div>
+                
+                {/* Summary Statistics */}
+                <div className="mt-4 p-4 bg-white rounded-lg border border-slate-200">
+                  <div className="text-center">
+                    <div className="text-lg font-semibold text-slate-800 mb-1">
+                      Total Filler Words: {(() => {
+                        const fillerWordCounts: { [key: string]: number } = {};
+                        filteredSessions.forEach((session: any) => {
+                          let sessionFillers: string[] = [];
+                          if (session.fillerWordsDetailed && Array.isArray(session.fillerWordsDetailed)) {
+                            sessionFillers = session.fillerWordsDetailed;
+                          } else if (session.fillerWords && typeof session.fillerWords === 'number') {
+                            for (let i = 0; i < session.fillerWords; i++) {
+                              sessionFillers.push('um');
+                            }
+                          } else if (session.transcript) {
+                            const transcript = session.transcript.toLowerCase();
+                            const fillerPatterns = [
+                              { word: 'um', regex: /\bum+\b/g },
+                              { word: 'uh', regex: /\buh+\b/g },
+                              { word: 'like', regex: /\blike\b/g },
+                              { word: 'so', regex: /\bso\b/g },
+                              { word: 'well', regex: /\bwell\b/g },
+                              { word: 'actually', regex: /\bactually\b/g },
+                              { word: 'basically', regex: /\bbasically\b/g },
+                              { word: 'you know', regex: /\byou know\b/g },
+                              { word: 'i mean', regex: /\bi mean\b/g }
+                            ];
+                            fillerPatterns.forEach(pattern => {
+                              const matches = transcript.match(pattern.regex);
+                              if (matches) {
+                                for (let i = 0; i < matches.length; i++) {
+                                  sessionFillers.push(pattern.word);
+                                }
+                              }
+                            });
+                          }
+                          sessionFillers.forEach(filler => {
+                            fillerWordCounts[filler] = (fillerWordCounts[filler] || 0) + 1;
+                          });
+                        });
+                        return Object.values(fillerWordCounts).reduce((sum, count) => sum + count, 0);
                       })()}
                     </div>
-                    <div className="text-xs text-slate-600">"Um" Count</div>
-                  </div>
-                  <div className="text-center p-3 bg-white rounded-lg border border-slate-200">
-                    <div className="text-2xl font-bold text-emerald-800 mb-1">
-                      {(() => {
-                        const total = filteredSessions.reduce((sum: number, s: any) => sum + (s.fillerWordsUh || 0), 0);
-                        const average = sessionCount > 0 ? total / sessionCount : 0;
-                        return Math.round(isNaN(average) ? 0 : average);
-                      })()}
+                    <div className="text-sm text-slate-600">
+                      {selectedSession === 'all' ? 'Across all sessions' : 'In selected session'}
                     </div>
-                    <div className="text-xs text-slate-600">"Uh" Count</div>
-                  </div>
-                  <div className="text-center p-3 bg-white rounded-lg border border-slate-200">
-                    <div className="text-2xl font-bold text-purple-800 mb-1">
-                      {(() => {
-                        const total = filteredSessions.reduce((sum: number, s: any) => sum + (s.fillerWordsLike || 0), 0);
-                        const average = sessionCount > 0 ? total / sessionCount : 0;
-                        return Math.round(isNaN(average) ? 0 : average);
-                      })()}
-                    </div>
-                    <div className="text-xs text-slate-600">"Like" Count</div>
-                  </div>
-                  <div className="text-center p-3 bg-white rounded-lg border border-slate-200">
-                    <div className="text-2xl font-bold text-orange-800 mb-1">
-                      {(() => {
-                        const total = filteredSessions.reduce((sum: number, s: any) => sum + (s.fillerWordsSo || 0), 0);
-                        const average = sessionCount > 0 ? total / sessionCount : 0;
-                        return Math.round(isNaN(average) ? 0 : average);
-                      })()}
-                    </div>
-                    <div className="text-xs text-slate-600">"So" Count</div>
                   </div>
                 </div>
               </div>
