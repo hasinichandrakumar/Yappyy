@@ -14,6 +14,82 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// Peppy Parrot SVG Component
+const PeppyParrot = ({ isAnimated = false, mood = 'happy', size = 'large' }: { 
+  isAnimated?: boolean; 
+  mood?: 'happy' | 'thinking' | 'excited' | 'encouraging' | 'proud' | 'thoughtful'; 
+  size?: 'small' | 'medium' | 'large' 
+}) => {
+  const [eyeBlink, setEyeBlink] = useState(false);
+
+  useEffect(() => {
+    if (isAnimated) {
+      const blinkInterval = setInterval(() => {
+        setEyeBlink(true);
+        setTimeout(() => setEyeBlink(false), 150);
+      }, 2000);
+      return () => clearInterval(blinkInterval);
+    }
+  }, [isAnimated]);
+
+  const moodColors = {
+    happy: { body: '#10B981', accent: '#34D399', eye: '#1F2937' },
+    thinking: { body: '#3B82F6', accent: '#60A5FA', eye: '#1F2937' },
+    excited: { body: '#F59E0B', accent: '#FBBF24', eye: '#1F2937' },
+    encouraging: { body: '#10B981', accent: '#6EE7B7', eye: '#1F2937' },
+    proud: { body: '#8B5CF6', accent: '#A78BFA', eye: '#1F2937' },
+    thoughtful: { body: '#6366F1', accent: '#818CF8', eye: '#1F2937' }
+  };
+
+  const colors = moodColors[mood];
+  const sizeClasses = {
+    small: 'w-16 h-16',
+    medium: 'w-24 h-24', 
+    large: 'w-32 h-32'
+  };
+
+  return (
+    <div className={`${sizeClasses[size]} mx-auto ${isAnimated ? 'transition-transform duration-300 hover:scale-110' : ''}`}>
+      <svg viewBox="0 0 200 200" className="w-full h-full">
+        {/* Body */}
+        <ellipse cx="100" cy="120" rx="45" ry="55" fill={colors.body} />
+        
+        {/* Head */}
+        <circle cx="100" cy="70" r="35" fill={colors.body} />
+        
+        {/* Beak */}
+        <polygon points="85,75 75,82 85,89" fill="#F59E0B" />
+        
+        {/* Eyes */}
+        <circle cx="90" cy="65" r="8" fill="white" />
+        <circle cx="110" cy="65" r="8" fill="white" />
+        <circle cx="90" cy="65" r={eyeBlink ? 1 : 5} fill={colors.eye} />
+        <circle cx="110" cy="65" r={eyeBlink ? 1 : 5} fill={colors.eye} />
+        
+        {/* Wing */}
+        <ellipse cx="115" cy="110" rx="15" ry="25" fill={colors.accent} />
+        
+        {/* Tail feathers */}
+        <ellipse cx="145" cy="130" rx="8" ry="20" fill={colors.accent} transform="rotate(30 145 130)" />
+        <ellipse cx="150" cy="125" rx="8" ry="18" fill={colors.body} transform="rotate(45 150 125)" />
+        
+        {/* Feet */}
+        <ellipse cx="90" cy="175" rx="8" ry="4" fill="#F59E0B" />
+        <ellipse cx="110" cy="175" rx="8" ry="4" fill="#F59E0B" />
+        
+        {/* Crown feathers (when excited or proud) */}
+        {(mood === 'excited' || mood === 'proud') && (
+          <>
+            <path d="M85 35 L90 25 L95 35" fill={colors.accent} />
+            <path d="M95 30 L100 20 L105 30" fill={colors.accent} />
+            <path d="M105 35 L110 25 L115 35" fill={colors.accent} />
+          </>
+        )}
+      </svg>
+    </div>
+  );
+};
+
 interface PeppyPersonality {
   adaptiveStyle: 'encouraging' | 'challenging' | 'analytical' | 'nurturing';
   userPreferences: {
@@ -323,13 +399,14 @@ export default function PeppyAICoach() {
           </div>
           
           <motion.div 
-            className="relative w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 p-1 shadow-2xl"
+            className="relative mb-6"
             initial={{ scale: 0, rotate: -180 }}
             animate={{ scale: 1, rotate: 0 }}
             transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
           >
-            <div className="w-full h-full bg-white rounded-full flex items-center justify-center text-5xl shadow-inner">
-              🦜
+            <div className="relative">
+              <PeppyParrot isAnimated={true} mood={peppyAnimation as any} size="large" />
+              <div className="absolute -inset-4 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 rounded-full blur opacity-30 animate-pulse"></div>
             </div>
             {/* Floating AI indicators */}
             <motion.div 
@@ -395,11 +472,11 @@ export default function PeppyAICoach() {
                 </div>
                 
                 <motion.div 
-                  className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white text-3xl shadow-2xl relative"
+                  className="mx-auto mb-6 relative"
                   animate={{ rotate: [0, 5, -5, 0] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 >
-                  🦜
+                  <PeppyParrot isAnimated={true} mood="thinking" size="medium" />
                   <div className="absolute -inset-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full blur opacity-30 animate-pulse"></div>
                 </motion.div>
                 
@@ -473,7 +550,9 @@ export default function PeppyAICoach() {
                       animate={{ opacity: 1, y: 0 }}
                     >
                       <div className="flex items-start gap-3">
-                        <div className="text-2xl">🦜</div>
+                        <div className="w-12 h-12 flex-shrink-0">
+                          <PeppyParrot isAnimated={false} mood={peppyResponse.emotion as any} size="small" />
+                        </div>
                         <div className="flex-1">
                           <div className={`text-sm font-medium mb-1 ${getEmotionColor(peppyResponse.emotion)}`}>
                             Peppy feels {peppyResponse.emotion}
