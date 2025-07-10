@@ -21,17 +21,20 @@ const PeppyParrot = ({ isAnimated = false, mood = 'happy', size = 'large' }: {
   mood?: 'happy' | 'thinking' | 'excited' | 'encouraging' | 'proud' | 'thoughtful'; 
   size?: 'small' | 'medium' | 'large' 
 }) => {
+  const [hasError, setHasError] = useState(false);
+  
   const sizeClasses = {
-    small: 'w-16 h-16',
-    medium: 'w-24 h-24', 
-    large: 'w-32 h-32'
+    small: 'w-20 h-20',
+    medium: 'w-32 h-32', 
+    large: 'w-48 h-48'
   };
 
-  // Use the Rive animation
+  // Use the Rive animation with error handling
   const { rive, RiveComponent } = useRive({
-    src: '/assets/bird-3_1752165654771.riv',
+    src: '/assets/bird-4_1752166045497.riv',
     autoplay: isAnimated,
-    // We'll use the default state machine or artboard
+    onLoad: () => setHasError(false),
+    onLoadError: () => setHasError(true),
   });
 
   // Try to get state machine inputs for mood control if available
@@ -55,6 +58,34 @@ const PeppyParrot = ({ isAnimated = false, mood = 'happy', size = 'large' }: {
       }
     }
   }, [mood, moodInput]);
+
+  // Fallback SVG if RIV fails to load
+  if (hasError) {
+    const moodColors = {
+      happy: { body: '#10B981', accent: '#34D399' },
+      thinking: { body: '#3B82F6', accent: '#60A5FA' },
+      excited: { body: '#F59E0B', accent: '#FBBF24' },
+      encouraging: { body: '#10B981', accent: '#6EE7B7' },
+      proud: { body: '#8B5CF6', accent: '#A78BFA' },
+      thoughtful: { body: '#6366F1', accent: '#818CF8' }
+    };
+    const colors = moodColors[mood];
+    
+    return (
+      <div className={`${sizeClasses[size]} mx-auto ${isAnimated ? 'transition-transform duration-300 hover:scale-110' : ''}`}>
+        <svg viewBox="0 0 200 200" className="w-full h-full">
+          <ellipse cx="100" cy="120" rx="45" ry="55" fill={colors.body} />
+          <circle cx="100" cy="70" r="35" fill={colors.body} />
+          <polygon points="85,75 75,82 85,89" fill="#F59E0B" />
+          <circle cx="90" cy="65" r="8" fill="white" />
+          <circle cx="110" cy="65" r="8" fill="white" />
+          <circle cx="90" cy="65" r="5" fill="#1F2937" />
+          <circle cx="110" cy="65" r="5" fill="#1F2937" />
+          <ellipse cx="115" cy="110" rx="15" ry="25" fill={colors.accent} />
+        </svg>
+      </div>
+    );
+  }
 
   return (
     <div className={`${sizeClasses[size]} mx-auto ${isAnimated ? 'transition-transform duration-300 hover:scale-110' : ''}`}>
@@ -363,39 +394,48 @@ export default function PeppyAICoach() {
       <div className="max-w-7xl mx-auto">
         
         {/* Enhanced Peppy Header */}
-        <div className="text-center mb-12 relative">
-          {/* Background decorative elements */}
+        <div className="text-center mb-16 relative overflow-hidden">
+          {/* Enhanced background decorative elements */}
           <div className="absolute inset-0 -z-10">
-            <div className="absolute top-0 left-1/4 w-32 h-32 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-            <div className="absolute top-0 right-1/4 w-32 h-32 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-            <div className="absolute bottom-0 left-1/3 w-32 h-32 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+            <div className="absolute top-0 left-1/4 w-40 h-40 bg-gradient-to-br from-blue-300 to-blue-400 rounded-full mix-blend-multiply filter blur-2xl opacity-60 animate-blob"></div>
+            <div className="absolute top-0 right-1/4 w-40 h-40 bg-gradient-to-br from-purple-300 to-purple-400 rounded-full mix-blend-multiply filter blur-2xl opacity-60 animate-blob animation-delay-2000"></div>
+            <div className="absolute bottom-0 left-1/3 w-40 h-40 bg-gradient-to-br from-pink-300 to-pink-400 rounded-full mix-blend-multiply filter blur-2xl opacity-60 animate-blob animation-delay-4000"></div>
+            <div className="absolute top-1/2 right-1/3 w-32 h-32 bg-gradient-to-br from-yellow-300 to-orange-300 rounded-full mix-blend-multiply filter blur-2xl opacity-50 animate-blob animation-delay-6000"></div>
           </div>
           
           <motion.div 
-            className="relative mb-6"
+            className="relative mb-8"
             initial={{ scale: 0, rotate: -180 }}
             animate={{ scale: 1, rotate: 0 }}
             transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
           >
-            <div className="relative">
-              <PeppyParrot isAnimated={true} mood={peppyAnimation as any} size="large" />
-              <div className="absolute -inset-4 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 rounded-full blur opacity-30 animate-pulse"></div>
+            <div className="relative flex justify-center">
+              <div className="relative">
+                <PeppyParrot isAnimated={true} mood={peppyAnimation as any} size="large" />
+                {/* Enhanced multilayer glow effects */}
+                <div className="absolute -inset-8 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 rounded-full blur-xl opacity-40 animate-pulse"></div>
+                <div className="absolute -inset-12 bg-gradient-to-r from-cyan-300 via-violet-400 to-rose-400 rounded-full blur-2xl opacity-20 animate-pulse animation-delay-1000"></div>
+                {/* Floating sparkles */}
+                <div className="absolute -top-6 -right-6 w-4 h-4 bg-yellow-400 rounded-full animate-ping"></div>
+                <div className="absolute -bottom-4 -left-4 w-3 h-3 bg-pink-400 rounded-full animate-ping animation-delay-500"></div>
+                <div className="absolute top-1/2 -right-8 w-2 h-2 bg-blue-400 rounded-full animate-ping animation-delay-1000"></div>
+                {/* Floating AI indicators */}
+                <motion.div 
+                  className="absolute -top-2 -right-2 w-8 h-8 bg-green-400 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg"
+                  animate={{ y: [-2, 2, -2] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  AI
+                </motion.div>
+                <motion.div 
+                  className="absolute -bottom-2 -left-2 w-6 h-6 bg-blue-400 rounded-full flex items-center justify-center text-white text-xs shadow-lg"
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                >
+                  🧠
+                </motion.div>
+              </div>
             </div>
-            {/* Floating AI indicators */}
-            <motion.div 
-              className="absolute -top-2 -right-2 w-8 h-8 bg-green-400 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg"
-              animate={{ y: [-2, 2, -2] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              AI
-            </motion.div>
-            <motion.div 
-              className="absolute -bottom-2 -left-2 w-6 h-6 bg-blue-400 rounded-full flex items-center justify-center text-white text-xs shadow-lg"
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-            >
-              🧠
-            </motion.div>
           </motion.div>
           
           <motion.h1 
