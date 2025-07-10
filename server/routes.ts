@@ -30,6 +30,7 @@ import { RealTimeProcessingEngine } from "./realtime-processing-engine";
 import { processContentAnalysis } from "./content-analysis-api";
 import { getAdaptiveCoaching, getUserLearningProgress, getAdvancedPublicSpeakingCoaching } from "./deep-learning-coach";
 import { peppyDeepLearningAnalysis, peppyConversation } from "./peppy-deep-learning-coach";
+import { advancedNeuralAnalysis } from "./peppy-deep-learning-engine";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const server = createServer(app);
@@ -644,6 +645,7 @@ Provide detailed feedback on content structure, voice modulation advice, and bod
   // Peppy Deep Learning AI Coach API
   app.post("/api/peppy-deep-learning-analysis", demoAuth, peppyDeepLearningAnalysis);
   app.post("/api/peppy-conversation", demoAuth, peppyConversation);
+  app.post("/api/advanced-neural-analysis", demoAuth, advancedNeuralAnalysis);
   
   // User progress endpoint for Peppy
   app.get("/api/user-progress", demoAuth, async (req: any, res) => {
