@@ -163,7 +163,7 @@ export function setupDemoAuth(app: Express) {
     }
   });
 
-  // Simple auth check route
+  // Simple auth check route - should return null for unauthenticated users, not 401
   app.get("/api/auth/user", async (req: any, res) => {
     try {
       // Check session first
@@ -180,11 +180,11 @@ export function setupDemoAuth(app: Express) {
         return res.json(req.user);
       }
       
-      // Return 401 if no authentication found - don't auto-login demo user
-      res.status(401).json({ message: "Authentication required" });
+      // Return null if no authentication found (this allows the frontend to show the landing page)
+      res.json(null);
     } catch (error) {
       console.error("Auth check error:", error);
-      res.status(401).json({ message: "Authentication required" });
+      res.json(null);
     }
   });
 
