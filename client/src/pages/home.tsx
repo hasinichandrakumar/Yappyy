@@ -1,7 +1,7 @@
 import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Mic, Video, Trophy, Target, BarChart3, Users, ArrowRight, CheckCircle } from 'lucide-react';
+import { Mic, Video, Trophy, Target, BarChart3, Users, ArrowRight, CheckCircle, Brain, Zap, Cpu, Eye } from 'lucide-react';
 import yappyyLogoPath from '@assets/Untitled_design-11600-removebg-preview_1749744306540.png';
 
 export default function HomePage() {
@@ -223,6 +223,116 @@ export default function HomePage() {
                 Your personal AI coach provides encouragement, tracks your progress, and offers personalized guidance.
               </p>
             </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Deep Learning Technology Section */}
+      <section className="py-20 bg-gradient-to-br from-purple-50 via-blue-50 to-cyan-50 relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-20 left-10 w-16 h-16 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-50 animate-blob"></div>
+          <div className="absolute top-40 right-20 w-20 h-20 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-50 animate-blob animation-delay-2000"></div>
+          <div className="absolute bottom-32 left-20 w-12 h-12 bg-cyan-200 rounded-full mix-blend-multiply filter blur-xl opacity-50 animate-blob animation-delay-4000"></div>
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-3 bg-white/60 backdrop-blur-sm rounded-full px-6 py-3 mb-6 border border-purple-200">
+              <Brain className="h-5 w-5 text-purple-600" />
+              <span className="text-sm font-semibold text-purple-700">Revolutionary AI Technology</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-slate-800 mb-6">
+              Powered by
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600"> Deep Learning Neural Networks</span>
+            </h2>
+            <p className="text-xl text-slate-600 max-w-4xl mx-auto">
+              Experience the most advanced AI speech coaching technology with multi-modal processing, transformer models, and real-time neural analysis
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+            {/* Neural Network Architecture */}
+            <Card className="p-6 bg-white/80 backdrop-blur-sm border border-purple-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+              <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center mb-4 mx-auto">
+                <Brain className="h-7 w-7 text-white" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-800 mb-3 text-center">Multi-Layer Neural Networks</h3>
+              <p className="text-slate-600 text-sm text-center">
+                8 attention heads, 256-dimensional transformer models with LSTM networks for personalized learning
+              </p>
+            </Card>
+
+            {/* Real-Time Processing */}
+            <Card className="p-6 bg-white/80 backdrop-blur-sm border border-blue-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+              <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center mb-4 mx-auto">
+                <Zap className="h-7 w-7 text-white" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-800 mb-3 text-center">Sub-100ms Processing</h3>
+              <p className="text-slate-600 text-sm text-center">
+                Lightning-fast analysis with multi-layer caching and parallel processing for instant feedback
+              </p>
+            </Card>
+
+            {/* Dual AI Models */}
+            <Card className="p-6 bg-white/80 backdrop-blur-sm border border-cyan-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+              <div className="w-14 h-14 bg-gradient-to-br from-cyan-500 to-purple-500 rounded-xl flex items-center justify-center mb-4 mx-auto">
+                <Cpu className="h-7 w-7 text-white" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-800 mb-3 text-center">Dual AI Engine</h3>
+              <p className="text-slate-600 text-sm text-center">
+                OpenAI GPT-4o + Anthropic Claude Sonnet 4 for cross-validation and maximum accuracy
+              </p>
+            </Card>
+
+            {/* Advanced Analytics */}
+            <Card className="p-6 bg-white/80 backdrop-blur-sm border border-green-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+              <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-blue-500 rounded-xl flex items-center justify-center mb-4 mx-auto">
+                <Eye className="h-7 w-7 text-white" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-800 mb-3 text-center">Advanced Voice Analytics</h3>
+              <p className="text-slate-600 text-sm text-center">
+                40+ filler word patterns, spectral analysis, and prosodic feature extraction
+              </p>
+            </Card>
+          </div>
+
+          {/* Technical Specifications */}
+          <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-8 border border-purple-200">
+            <h3 className="text-2xl font-bold text-slate-800 mb-8 text-center">Enterprise-Grade AI Architecture</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-purple-600 mb-2">256D</div>
+                <div className="text-sm font-semibold text-slate-700 mb-1">Transformer Model</div>
+                <div className="text-xs text-slate-600">Multi-head attention with 8 attention heads for pattern recognition</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-blue-600 mb-2">64U</div>
+                <div className="text-sm font-semibold text-slate-700 mb-1">LSTM Networks</div>
+                <div className="text-xs text-slate-600">Sequential learning for personality analysis and behavioral patterns</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-cyan-600 mb-2">128F</div>
+                <div className="text-sm font-semibold text-slate-700 mb-1">CNN Filters</div>
+                <div className="text-xs text-slate-600">Convolutional networks for advanced voice pattern recognition</div>
+              </div>
+            </div>
+            
+            <div className="mt-8 text-center">
+              <div className="inline-flex items-center gap-4 bg-gradient-to-r from-purple-100 to-blue-100 rounded-full px-6 py-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm font-medium text-slate-700">Neural Learning</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm font-medium text-slate-700">Real-Time Adaptation</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm font-medium text-slate-700">Continuous Learning</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
