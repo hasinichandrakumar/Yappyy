@@ -11,6 +11,7 @@ import PersonalizedSpeechDNA from "@/components/PersonalizedSpeechDNA";
 import Enhanced50PlusTemplates from "@/components/Enhanced50PlusTemplates";
 import ImprovedBadgeSystem from "@/components/ImprovedBadgeSystem";
 import EnhancedAnalysisTab from "@/components/EnhancedAnalysisTab";
+import ProfilePage from "@/components/ProfilePage";
 import yappyyLogoPath from '@assets/Untitled_design-11600-removebg-preview_1749744306540.png';
 
 export default function Dashboard() {
@@ -19,6 +20,10 @@ export default function Dashboard() {
 
   const handleLogout = () => {
     window.location.href = "/api/auth/logout";
+  };
+
+  const handleProfileClick = () => {
+    setActiveTab("profile");
   };
 
   const getInitials = (firstName?: string, lastName?: string) => {
@@ -67,11 +72,11 @@ export default function Dashboard() {
                       </div>
                     </div>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="cursor-pointer">
+                    <DropdownMenuItem className="cursor-pointer" onClick={handleProfileClick}>
                       <User className="mr-2 h-4 w-4" />
                       <span>Profile</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="cursor-pointer">
+                    <DropdownMenuItem className="cursor-pointer" onClick={handleProfileClick}>
                       <Settings className="mr-2 h-4 w-4" />
                       <span>Settings</span>
                     </DropdownMenuItem>
@@ -90,7 +95,7 @@ export default function Dashboard() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-2 lg:grid-cols-5 gap-2 mb-8 h-auto p-2 bg-white border border-gray-200 shadow-sm rounded-xl">
+          <TabsList className="grid grid-cols-2 lg:grid-cols-6 gap-2 mb-8 h-auto p-2 bg-white border border-gray-200 shadow-sm rounded-xl">
             <TabsTrigger 
               value="practice" 
               className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
@@ -126,6 +131,13 @@ export default function Dashboard() {
               <Trophy className="w-5 h-5" />
               <span>Progress</span>
             </TabsTrigger>
+            <TabsTrigger 
+              value="profile" 
+              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
+            >
+              <User className="w-5 h-5" />
+              <span>Profile</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="practice" className="space-y-8 pb-16">
@@ -149,6 +161,10 @@ export default function Dashboard() {
               <ImprovedBadgeSystem />
               <PersonalizedSpeechDNA />
             </div>
+          </TabsContent>
+
+          <TabsContent value="profile" className="space-y-8 pb-16">
+            <ProfilePage />
           </TabsContent>
         </Tabs>
       </div>
