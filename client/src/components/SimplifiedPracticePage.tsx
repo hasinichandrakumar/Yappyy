@@ -32,6 +32,13 @@ interface SimplifiedMetrics {
     vocalFryDetection: boolean;
     uptalkPatterns: number;
   };
+  bodyLanguage: {
+    eyeContactScore: number;
+    gestureEffectiveness: number;
+    postureConfidence: number;
+    facialExpressions: number;
+    overallPresence: number;
+  };
 }
 
 interface LiveFeedback {
@@ -71,6 +78,13 @@ export default function SimplifiedPracticePage() {
       pitchVariation: 75,
       vocalFryDetection: false,
       uptalkPatterns: 0
+    },
+    bodyLanguage: {
+      eyeContactScore: 0,
+      gestureEffectiveness: 0,
+      postureConfidence: 0,
+      facialExpressions: 0,
+      overallPresence: 0
     }
   });
 
@@ -104,14 +118,14 @@ export default function SimplifiedPracticePage() {
     const multiWordFillers = ['you know', 'i mean', 'kind of', 'sort of', 'i guess', 'you see'];
     multiWordFillers.forEach(phrase => {
       const regex = new RegExp(`\\b${phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
-      highlightedText = highlightedText.replace(regex, `<mark class="bg-red-200 px-1 rounded">$&</mark>`);
+      highlightedText = highlightedText.replace(regex, `<span style="background-color: #fecaca; padding: 2px 4px; border-radius: 3px; color: #dc2626; font-weight: 500;">$&</span>`);
     });
     
-    // Then highlight single word fillers
+    // Then highlight single word fillers  
     const singleFillers = fillerWords.filter(word => !multiWordFillers.includes(word));
     singleFillers.forEach(word => {
       const regex = new RegExp(`\\b${word}\\b`, 'gi');
-      highlightedText = highlightedText.replace(regex, `<mark class="bg-red-200 px-1 rounded">$&</mark>`);
+      highlightedText = highlightedText.replace(regex, `<span style="background-color: #fecaca; padding: 2px 4px; border-radius: 3px; color: #dc2626; font-weight: 500;">$&</span>`);
     });
     
     return highlightedText;
@@ -455,6 +469,13 @@ export default function SimplifiedPracticePage() {
           pitchVariation: 75,
           vocalFryDetection: false,
           uptalkPatterns: 0
+        },
+        bodyLanguage: {
+          eyeContactScore: 0,
+          gestureEffectiveness: 0,
+          postureConfidence: 0,
+          facialExpressions: 0,
+          overallPresence: 0
         }
       });
       
@@ -488,6 +509,24 @@ export default function SimplifiedPracticePage() {
             ...prev.voice,
             clarity: Math.min(85, Math.max(0, 
               Math.floor(progressFactor * (50 + Math.random() * 30))
+            ))
+          },
+          bodyLanguage: {
+            ...prev.bodyLanguage,
+            eyeContactScore: Math.min(85, Math.max(0, 
+              Math.floor(progressFactor * (55 + Math.random() * 25))
+            )),
+            gestureEffectiveness: Math.min(90, Math.max(0, 
+              Math.floor(progressFactor * (60 + Math.random() * 25))
+            )),
+            postureConfidence: Math.min(85, Math.max(0, 
+              Math.floor(progressFactor * (50 + Math.random() * 30))
+            )),
+            facialExpressions: Math.min(80, Math.max(0, 
+              Math.floor(progressFactor * (45 + Math.random() * 30))
+            )),
+            overallPresence: Math.min(85, Math.max(0, 
+              Math.floor(progressFactor * (55 + Math.random() * 25))
             ))
           }
         }));
@@ -546,6 +585,13 @@ export default function SimplifiedPracticePage() {
           pitchVariation: 75,
           vocalFryDetection: false,
           uptalkPatterns: 0
+        },
+        bodyLanguage: {
+          eyeContactScore: 0,
+          gestureEffectiveness: 0,
+          postureConfidence: 0,
+          facialExpressions: 0,
+          overallPresence: 0
         }
       });
     }, 1000); // Small delay to allow final session save
