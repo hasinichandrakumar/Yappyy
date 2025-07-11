@@ -323,7 +323,7 @@ export default function SimplifiedPracticePage() {
               {/* Recording Controls */}
               <div className="flex gap-2">
                 {!isRecording ? (
-                  <Button onClick={startRecording} className="bg-red-600 hover:bg-red-700">
+                  <Button onClick={startRecording} className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white shadow-lg hover:shadow-xl transition-all duration-300">
                     <Mic className="w-5 h-5 mr-2" />
                     Start Practice
                   </Button>
