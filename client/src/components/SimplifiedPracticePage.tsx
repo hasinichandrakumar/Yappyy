@@ -21,6 +21,17 @@ interface SimplifiedMetrics {
   wordsPerMinute: number;
   fillerWordCount: number;
   clarity: number;
+  voice: {
+    clarity: number;
+    pace: number;
+    volume: number;
+    intonation: number;
+    fillerCount: number;
+    pauseEffectiveness: number;
+    pitchVariation: number;
+    vocalFryDetection: boolean;
+    uptalkPatterns: number;
+  };
 }
 
 interface LiveFeedback {
@@ -49,7 +60,18 @@ export default function SimplifiedPracticePage() {
     engagement: 0,
     wordsPerMinute: 0,
     fillerWordCount: 0,
-    clarity: 0
+    clarity: 0,
+    voice: {
+      clarity: 0,
+      pace: 0,
+      volume: 85,
+      intonation: 75,
+      fillerCount: 0,
+      pauseEffectiveness: 80,
+      pitchVariation: 75,
+      vocalFryDetection: false,
+      uptalkPatterns: 0
+    }
   });
 
   // Live feedback
@@ -65,6 +87,35 @@ export default function SimplifiedPracticePage() {
   const transcriptRef = useRef<string>('');
   const interimTranscriptRef = useRef<string>('');
   const { toast } = useToast();
+
+  // Function to highlight filler words in transcript
+  const highlightFillerWords = (text: string) => {
+    const fillerWords = [
+      'um', 'uh', 'uhm', 'umm', 'er', 'err', 'ah', 'eh', 'mm', 'hmm',
+      'like', 'so', 'well', 'okay', 'ok', 'right', 'actually', 'basically',
+      'literally', 'obviously', 'essentially', 'definitely', 'absolutely',
+      'totally', 'really', 'very', 'quite', 'just', 'maybe', 'perhaps', 'anyway',
+      'you know', 'i mean', 'kind of', 'sort of', 'i guess', 'you see'
+    ];
+
+    let highlightedText = text;
+    
+    // Highlight multi-word fillers first
+    const multiWordFillers = ['you know', 'i mean', 'kind of', 'sort of', 'i guess', 'you see'];
+    multiWordFillers.forEach(phrase => {
+      const regex = new RegExp(`\\b${phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+      highlightedText = highlightedText.replace(regex, `<mark class="bg-red-200 px-1 rounded">$&</mark>`);
+    });
+    
+    // Then highlight single word fillers
+    const singleFillers = fillerWords.filter(word => !multiWordFillers.includes(word));
+    singleFillers.forEach(word => {
+      const regex = new RegExp(`\\b${word}\\b`, 'gi');
+      highlightedText = highlightedText.replace(regex, `<mark class="bg-red-200 px-1 rounded">$&</mark>`);
+    });
+    
+    return highlightedText;
+  };
 
   // Initialize session name
   useEffect(() => {
@@ -186,7 +237,11 @@ export default function SimplifiedPracticePage() {
               console.log(`📊 Updating filler count to: ${analysis.totalFillers}`);
               setMetrics(prev => ({
                 ...prev,
-                fillerWordCount: analysis.totalFillers
+                fillerWordCount: analysis.totalFillers,
+                voice: {
+                  ...prev.voice,
+                  fillerCount: analysis.totalFillers
+                }
               }));
               
               if (analysis.totalFillers > 0) {
@@ -215,7 +270,11 @@ export default function SimplifiedPracticePage() {
               
               setMetrics(prev => ({
                 ...prev,
-                fillerWordCount: fullFillerCount
+                fillerWordCount: fullFillerCount,
+                voice: {
+                  ...prev.voice,
+                  fillerCount: fullFillerCount
+                }
               }));
               
               const uniqueFillers = [...new Set(detectedFillers)];
@@ -367,7 +426,14 @@ export default function SimplifiedPracticePage() {
           const wpm = timeInMinutes > 0 && wordCount > 0 ? Math.round(wordCount / timeInMinutes) : 0;
           
           console.log(`🔄 Live WPM update: ${wordCount} words in ${elapsedSeconds}s = ${wpm} WPM`);
-          setMetrics(prev => ({ ...prev, wordsPerMinute: wpm }));
+          setMetrics(prev => ({ 
+            ...prev, 
+            wordsPerMinute: wpm,
+            voice: {
+              ...prev.voice,
+              pace: wpm
+            }
+          }));
         }
       }, 1000);
 
@@ -378,7 +444,18 @@ export default function SimplifiedPracticePage() {
         engagement: 0,
         wordsPerMinute: 0,
         fillerWordCount: 0,
-        clarity: 0
+        clarity: 0,
+        voice: {
+          clarity: 0,
+          pace: 0,
+          volume: 85,
+          intonation: 75,
+          fillerCount: 0,
+          pauseEffectiveness: 80,
+          pitchVariation: 75,
+          vocalFryDetection: false,
+          uptalkPatterns: 0
+        }
       });
       
       // Reset transcript refs
@@ -406,7 +483,13 @@ export default function SimplifiedPracticePage() {
           )),
           clarity: Math.min(85, Math.max(0, 
             Math.floor(progressFactor * (50 + Math.random() * 30))
-          ))
+          )),
+          voice: {
+            ...prev.voice,
+            clarity: Math.min(85, Math.max(0, 
+              Math.floor(progressFactor * (50 + Math.random() * 30))
+            ))
+          }
         }));
       }, 3000);
 
@@ -452,7 +535,18 @@ export default function SimplifiedPracticePage() {
         engagement: 0,
         wordsPerMinute: 0,
         fillerWordCount: 0,
-        clarity: 0
+        clarity: 0,
+        voice: {
+          clarity: 0,
+          pace: 0,
+          volume: 85,
+          intonation: 75,
+          fillerCount: 0,
+          pauseEffectiveness: 80,
+          pitchVariation: 75,
+          vocalFryDetection: false,
+          uptalkPatterns: 0
+        }
       });
     }, 1000); // Small delay to allow final session save
 
@@ -753,12 +847,15 @@ export default function SimplifiedPracticePage() {
               <div className="bg-white border-2 border-gray-100 p-4 rounded-lg max-h-60 overflow-y-auto">
                 {transcript || interimTranscript ? (
                   <div className="text-sm leading-relaxed">
-                    <span className="text-gray-900">
-                      {transcript}
-                    </span>
+                    <span 
+                      className="text-gray-900"
+                      dangerouslySetInnerHTML={{ 
+                        __html: highlightFillerWords(transcript) 
+                      }}
+                    />
                     {interimTranscript && (
                       <span className="text-gray-400 italic">
-                        {interimTranscript}
+                        {' ' + interimTranscript}
                       </span>
                     )}
                   </div>
