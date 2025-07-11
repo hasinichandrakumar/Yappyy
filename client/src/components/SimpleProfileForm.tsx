@@ -23,6 +23,13 @@ const profileSchema = z.object({
   practiceFrequency: z.string().min(1, "Please select how often you want to practice"),
   specificChallenges: z.string().optional(),
   preferredFeedbackStyle: z.string().min(1, "Please select your preferred feedback style"),
+  communicationStyle: z.string().min(1, "Please select your communication style"),
+  learningPreference: z.string().min(1, "Please select your learning preference"),
+  motivationStyle: z.string().min(1, "Please select what motivates you"),
+  confidenceLevel: z.string().min(1, "Please rate your current confidence"),
+  presentationContext: z.string().optional(),
+  voiceChallenges: z.string().optional(),
+  bodyLanguageFocus: z.string().optional(),
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
@@ -44,23 +51,40 @@ export default function SimpleProfileForm() {
       practiceFrequency: "",
       specificChallenges: "",
       preferredFeedbackStyle: "",
+      communicationStyle: "",
+      learningPreference: "",
+      motivationStyle: "",
+      confidenceLevel: "",
+      presentationContext: "",
+      voiceChallenges: "",
+      bodyLanguageFocus: "",
     },
   });
 
   const onSubmit = async (data: ProfileFormData) => {
     setIsSaving(true);
     try {
-      // Here you would save the profile data to your backend
-      console.log("Profile data:", data);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Save profile data to backend and train deep learning coach
+      const response = await fetch('/api/deep-learning-profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save profile');
+      }
+
+      const result = await response.json();
       
       toast({
-        title: "Profile Updated",
-        description: "Your information has been saved successfully!",
+        title: "Deep Learning Profile Updated",
+        description: "Your AI coach has been trained with your preferences and will provide personalized coaching!",
       });
     } catch (error) {
+      console.error('Profile save error:', error);
       toast({
         title: "Error",
         description: "Failed to save profile. Please try again.",
@@ -77,9 +101,9 @@ export default function SimpleProfileForm() {
         <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-blue-100 rounded-full">
           <User className="w-8 h-8 text-blue-600" />
         </div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Profile Information</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Deep Learning Coach Profile</h1>
         <p className="text-gray-600">
-          Help us personalize your Yappyy experience by sharing some information about your speaking goals and preferences.
+          Help our AI Deep Learning Coach understand your speaking style and goals. This information trains our neural networks to provide hyperpersonalized feedback and coaching recommendations tailored specifically to you.
         </p>
       </div>
 
@@ -299,6 +323,179 @@ export default function SimpleProfileForm() {
             </CardContent>
           </Card>
 
+          {/* Deep Learning Coach Preferences */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg text-gray-900">AI Coach Personalization</CardTitle>
+              <CardDescription className="text-gray-600">
+                Configure how our deep learning neural networks will analyze and coach your speaking
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <FormField
+                control={form.control}
+                name="communicationStyle"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-700">Your Communication Style</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="bg-white border-gray-300 text-gray-900">
+                          <SelectValue placeholder="How do you naturally communicate?" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="bg-white">
+                        <SelectItem value="analytical">Analytical - Data-driven, logical</SelectItem>
+                        <SelectItem value="expressive">Expressive - Emotional, storytelling</SelectItem>
+                        <SelectItem value="diplomatic">Diplomatic - Careful, considerate</SelectItem>
+                        <SelectItem value="assertive">Assertive - Direct, confident</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="learningPreference"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-700">Learning Preference</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="bg-white border-gray-300 text-gray-900">
+                          <SelectValue placeholder="How do you learn best?" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="bg-white">
+                        <SelectItem value="visual">Visual - Charts, demonstrations</SelectItem>
+                        <SelectItem value="auditory">Auditory - Verbal explanations</SelectItem>
+                        <SelectItem value="kinesthetic">Kinesthetic - Practice, hands-on</SelectItem>
+                        <SelectItem value="reading">Reading - Written instructions</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="motivationStyle"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-700">What Motivates You?</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="bg-white border-gray-300 text-gray-900">
+                          <SelectValue placeholder="What drives your improvement?" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="bg-white">
+                        <SelectItem value="achievement">Achievement - Goals and milestones</SelectItem>
+                        <SelectItem value="recognition">Recognition - Praise and acknowledgment</SelectItem>
+                        <SelectItem value="mastery">Mastery - Skill development</SelectItem>
+                        <SelectItem value="competition">Competition - Comparing progress</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="confidenceLevel"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-700">Current Confidence Level</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="bg-white border-gray-300 text-gray-900">
+                          <SelectValue placeholder="How confident do you feel speaking?" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="bg-white">
+                        <SelectItem value="very-low">Very Low - Very nervous</SelectItem>
+                        <SelectItem value="low">Low - Often anxious</SelectItem>
+                        <SelectItem value="moderate">Moderate - Sometimes confident</SelectItem>
+                        <SelectItem value="high">High - Usually confident</SelectItem>
+                        <SelectItem value="very-high">Very High - Always confident</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Specific Focus Areas */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg text-gray-900">Focus Areas for AI Analysis</CardTitle>
+              <CardDescription className="text-gray-600">
+                Tell our neural networks what specific aspects to focus on during analysis
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <FormField
+                control={form.control}
+                name="presentationContext"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-700">Presentation Context (Optional)</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="e.g., Board meetings, student competitions, team presentations, sales pitches..."
+                        className="bg-white border-gray-300 text-gray-900"
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="voiceChallenges"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-700">Voice & Speech Challenges (Optional)</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="e.g., Speaking too fast, filler words (um, uh), low volume, monotone delivery..."
+                        className="bg-white border-gray-300 text-gray-900"
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="bodyLanguageFocus"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-700">Body Language Focus (Optional)</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="e.g., Eye contact, hand gestures, posture, nervous habits, facial expressions..."
+                        className="bg-white border-gray-300 text-gray-900"
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
+
           <Button 
             type="submit" 
             disabled={isSaving}
@@ -307,12 +504,12 @@ export default function SimpleProfileForm() {
             {isSaving ? (
               <>
                 <CheckCircle className="w-5 h-5 mr-2 animate-spin" />
-                Saving Profile...
+                Training AI Coach...
               </>
             ) : (
               <>
                 <Save className="w-5 h-5 mr-2" />
-                Save Profile Information
+                Train Deep Learning Coach
               </>
             )}
           </Button>

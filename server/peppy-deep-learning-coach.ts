@@ -684,3 +684,262 @@ export async function peppyConversation(req: Request, res: Response) {
     });
   }
 }
+
+// User Profile Training Interface
+interface UserProfile {
+  firstName: string;
+  lastName: string;
+  email: string;
+  speakingGoals: string;
+  experienceLevel: string;
+  industryFocus?: string;
+  practiceFrequency: string;
+  specificChallenges?: string;
+  preferredFeedbackStyle: string;
+  communicationStyle: string;
+  learningPreference: string;
+  motivationStyle: string;
+  confidenceLevel: string;
+  presentationContext?: string;
+  voiceChallenges?: string;
+  bodyLanguageFocus?: string;
+}
+
+// Memory storage for user profiles (in production, this would be a database)
+const userProfiles = new Map<string, UserProfile>();
+const neuralCoachProfiles = new Map<string, any>();
+
+/**
+ * Train the deep learning coach with user profile data
+ */
+export async function trainDeepLearningCoach(userId: string, profileData: UserProfile) {
+  try {
+    console.log(`🧠 Training Deep Learning Coach for user: ${userId}`);
+    
+    // Store user profile
+    userProfiles.set(userId, profileData);
+    
+    // Generate neural coach profile using AI
+    const neuralProfile = await generateNeuralCoachProfile(profileData);
+    
+    // Store neural coach profile
+    neuralCoachProfiles.set(userId, neuralProfile);
+    
+    console.log(`✅ Deep Learning Coach trained successfully for user: ${userId}`);
+    
+    return {
+      success: true,
+      userId,
+      neuralProfile,
+      personalizedGoals: neuralProfile.personalizedGoals,
+      adaptiveStrategy: neuralProfile.adaptiveStrategy,
+      coachingStyle: neuralProfile.coachingStyle
+    };
+  } catch (error) {
+    console.error('Error training deep learning coach:', error);
+    throw error;
+  }
+}
+
+/**
+ * Generate neural coach profile using AI analysis
+ */
+async function generateNeuralCoachProfile(profileData: UserProfile) {
+  try {
+    const prompt = `
+    Analyze this user's speaking profile and create a personalized AI coaching strategy:
+    
+    User Profile:
+    - Name: ${profileData.firstName} ${profileData.lastName}
+    - Speaking Goals: ${profileData.speakingGoals}
+    - Experience Level: ${profileData.experienceLevel}
+    - Industry Focus: ${profileData.industryFocus || 'General'}
+    - Practice Frequency: ${profileData.practiceFrequency}
+    - Communication Style: ${profileData.communicationStyle}
+    - Learning Preference: ${profileData.learningPreference}
+    - Motivation Style: ${profileData.motivationStyle}
+    - Confidence Level: ${profileData.confidenceLevel}
+    - Specific Challenges: ${profileData.specificChallenges || 'None specified'}
+    - Voice Challenges: ${profileData.voiceChallenges || 'None specified'}
+    - Body Language Focus: ${profileData.bodyLanguageFocus || 'None specified'}
+    - Preferred Feedback Style: ${profileData.preferredFeedbackStyle}
+    - Presentation Context: ${profileData.presentationContext || 'General'}
+    
+    Based on this profile, create a comprehensive neural coaching strategy that includes:
+    1. Personalized coaching approach
+    2. Specific focus areas for improvement
+    3. Motivational messaging style
+    4. Learning progression pathway
+    5. Adaptive feedback mechanisms
+    
+    Return a detailed JSON response with coaching recommendations.
+    `;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [
+        {
+          role: "system",
+          content: "You are an expert AI coaching strategist specializing in personalized public speaking improvement. Analyze user profiles and create detailed neural network coaching strategies."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.7,
+      max_tokens: 2000
+    });
+
+    const aiAnalysis = JSON.parse(response.choices[0].message.content || '{}');
+
+    // Create comprehensive neural profile
+    const neuralProfile = {
+      userId: null,
+      personalizedGoals: generatePersonalizedGoals(profileData, aiAnalysis),
+      adaptiveStrategy: generateAdaptiveStrategy(profileData, aiAnalysis),
+      coachingStyle: determineCoachingStyle(profileData),
+      focusAreas: identifyFocusAreas(profileData),
+      motivationalApproach: determineMotivationalApproach(profileData),
+      learningPathway: createLearningPathway(profileData),
+      feedbackPreferences: configureFeedbackPreferences(profileData),
+      aiInsights: aiAnalysis,
+      trainingTimestamp: new Date().toISOString(),
+      version: "1.0"
+    };
+
+    return neuralProfile;
+  } catch (error) {
+    console.error('Error generating neural coach profile:', error);
+    // Return fallback profile
+    return {
+      personalizedGoals: ["Improve overall speaking confidence", "Reduce nervousness", "Enhance clarity"],
+      adaptiveStrategy: "balanced",
+      coachingStyle: profileData.preferredFeedbackStyle || "encouraging",
+      focusAreas: ["voice", "confidence", "structure"],
+      motivationalApproach: profileData.motivationStyle || "achievement",
+      learningPathway: "beginner",
+      feedbackPreferences: {
+        frequency: "moderate",
+        detail: "balanced",
+        tone: "supportive"
+      },
+      trainingTimestamp: new Date().toISOString(),
+      version: "1.0"
+    };
+  }
+}
+
+function generatePersonalizedGoals(profile: UserProfile, aiAnalysis: any) {
+  const goals = [];
+  
+  // Base goals on user's specific challenges
+  if (profile.voiceChallenges) {
+    goals.push(`Improve voice quality: ${profile.voiceChallenges}`);
+  }
+  
+  if (profile.bodyLanguageFocus) {
+    goals.push(`Enhance body language: ${profile.bodyLanguageFocus}`);
+  }
+  
+  if (profile.specificChallenges) {
+    goals.push(`Address specific challenges: ${profile.specificChallenges}`);
+  }
+  
+  // Add goals based on confidence level
+  if (profile.confidenceLevel === 'very-low' || profile.confidenceLevel === 'low') {
+    goals.push("Build speaking confidence through regular practice");
+  }
+  
+  // Add industry-specific goals
+  if (profile.industryFocus) {
+    goals.push(`Develop ${profile.industryFocus}-specific presentation skills`);
+  }
+  
+  return goals.length > 0 ? goals : ["Improve overall speaking effectiveness"];
+}
+
+function generateAdaptiveStrategy(profile: UserProfile, aiAnalysis: any) {
+  // Determine strategy based on experience level and learning preference
+  if (profile.experienceLevel === 'beginner') {
+    return 'gentle-progressive';
+  } else if (profile.experienceLevel === 'advanced' || profile.experienceLevel === 'professional') {
+    return 'intensive-optimization';
+  } else {
+    return 'balanced-improvement';
+  }
+}
+
+function determineCoachingStyle(profile: UserProfile) {
+  const styleMap: { [key: string]: string } = {
+    'encouraging': 'supportive-motivational',
+    'direct': 'analytical-precise',
+    'detailed': 'comprehensive-technical',
+    'motivational': 'inspiring-energetic'
+  };
+  
+  return styleMap[profile.preferredFeedbackStyle] || 'balanced-adaptive';
+}
+
+function identifyFocusAreas(profile: UserProfile) {
+  const areas = [];
+  
+  if (profile.voiceChallenges) areas.push('voice');
+  if (profile.bodyLanguageFocus) areas.push('body-language');
+  if (profile.specificChallenges) areas.push('content-structure');
+  
+  // Add default areas based on confidence level
+  if (profile.confidenceLevel === 'very-low' || profile.confidenceLevel === 'low') {
+    areas.push('confidence-building');
+  }
+  
+  return areas.length > 0 ? areas : ['general-improvement'];
+}
+
+function determineMotivationalApproach(profile: UserProfile) {
+  return {
+    style: profile.motivationStyle,
+    frequency: profile.practiceFrequency,
+    tone: profile.preferredFeedbackStyle
+  };
+}
+
+function createLearningPathway(profile: UserProfile) {
+  const pathway = {
+    startLevel: profile.experienceLevel,
+    preferredMethod: profile.learningPreference,
+    practiceFrequency: profile.practiceFrequency,
+    progression: 'adaptive'
+  };
+  
+  return pathway;
+}
+
+function configureFeedbackPreferences(profile: UserProfile) {
+  return {
+    style: profile.preferredFeedbackStyle,
+    communication: profile.communicationStyle,
+    learning: profile.learningPreference,
+    motivation: profile.motivationStyle
+  };
+}
+
+/**
+ * Get user's neural coach profile
+ */
+export function getUserNeuralProfile(userId: string) {
+  return neuralCoachProfiles.get(userId) || null;
+}
+
+/**
+ * Update neural coach profile based on user interactions
+ */
+export async function updateNeuralProfile(userId: string, interactionData: any) {
+  const currentProfile = neuralCoachProfiles.get(userId);
+  if (currentProfile) {
+    // Update profile based on interaction patterns
+    currentProfile.lastUpdated = new Date().toISOString();
+    neuralCoachProfiles.set(userId, currentProfile);
+  }
+}

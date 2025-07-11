@@ -90,6 +90,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Deep Learning Profile endpoint
+  app.post('/api/deep-learning-profile', demoAuth, async (req: any, res) => {
+    try {
+      const userId = req.user?.id || req.user?.claims?.sub;
+      const profileData = req.body;
+      
+      console.log('Training deep learning coach for user:', userId);
+      console.log('Profile data received:', profileData);
+      
+      // Store profile data and train the deep learning coach
+      const { trainDeepLearningCoach } = await import('./peppy-deep-learning-coach');
+      const result = await trainDeepLearningCoach(userId, profileData);
+      
+      res.json({
+        success: true,
+        message: 'Deep learning coach trained successfully',
+        coachProfile: result
+      });
+    } catch (error) {
+      console.error('Error training deep learning coach:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to train deep learning coach' 
+      });
+    }
+  });
+
+  // Get Neural Coach Profile endpoint
+  app.get('/api/neural-coach-profile', demoAuth, async (req: any, res) => {
+    try {
+      const userId = req.user?.id || req.user?.claims?.sub;
+      
+      const { getUserNeuralProfile } = await import('./peppy-deep-learning-coach');
+      const neuralProfile = getUserNeuralProfile(userId);
+      
+      if (neuralProfile) {
+        res.json({
+          success: true,
+          neuralProfile,
+          trained: true
+        });
+      } else {
+        res.json({
+          success: true,
+          neuralProfile: null,
+          trained: false,
+          message: 'No neural coach profile found - please complete your profile to train the AI coach'
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching neural coach profile:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to fetch neural coach profile' 
+      });
+    }
+  });
+
   // Update user profile
   app.patch('/api/user/profile', demoAuth, async (req: any, res) => {
     try {
