@@ -300,18 +300,18 @@ const FIFTY_PLUS_TEMPLATES: Template[] = [
 
   // More Job Interview Templates (15 total)
   {
-    id: 'behavioral-interview',
-    title: 'Behavioral Interview Responses - STAR Method',
+    id: 'behavioral-interview-advanced',
+    title: 'Advanced Behavioral Interview Responses',
     category: 'job-interviews',
-    description: 'Structure answers using Situation, Task, Action, Result',
-    duration: '2-3 minutes per question',
-    difficulty: 'Intermediate',
-    content: `Common Questions and STAR Framework:\n\n1. "Tell me about a time you overcame a challenge"\nSituation: Set the context\nTask: Explain your responsibility\nAction: Describe what you did\nResult: Share the outcome\n\n2. "Describe a time you worked in a team"\nSituation: Team project or challenge\nTask: Your role in the team\nAction: How you contributed\nResult: Team success achieved\n\n3. "Give an example of leadership"\nSituation: Leadership opportunity\nTask: What needed to be done\nAction: How you led the team\nResult: Positive outcome\n\n4. "How do you handle conflict?"\nSituation: Workplace conflict\nTask: Resolution needed\nAction: Steps you took\nResult: Successful resolution\n\nKey Tips:\n- Use specific examples\n- Quantify results when possible\n- Show growth and learning\n- Keep responses concise but detailed`,
-    tags: ['interview', 'behavioral', 'STAR', 'method'],
-    popularity: 95,
-    contentAdvice: 'Prepare 5-7 strong STAR examples. Practice transitions.',
-    voiceAdvice: 'Speak confidently and clearly. Maintain steady pace.',
-    bodyLanguageAdvice: 'Use gestures to emphasize points. Maintain eye contact.'
+    description: 'Master complex behavioral questions with detailed STAR examples',
+    duration: '3-4 minutes per question',
+    difficulty: 'Advanced',
+    content: `Advanced Behavioral Questions:\n\n1. "Tell me about a time you failed and what you learned"\nSituation: Set the context of the failure\nTask: Explain what you were trying to achieve\nAction: Describe your approach and what went wrong\nResult: Share lessons learned and how you improved\n\n2. "Describe a time you had to influence without authority"\nSituation: Need to influence peers or seniors\nTask: What outcome you needed to achieve\nAction: Persuasion strategies you used\nResult: Successful influence and long-term impact\n\n3. "Give an example of handling a difficult customer/stakeholder"\nSituation: Challenging relationship context\nTask: What resolution was needed\nAction: Your approach to de-escalation and solution\nResult: Relationship improvement and business impact\n\n4. "How do you handle competing priorities?"\nSituation: Multiple urgent demands\nTask: What needed to be balanced\nAction: Your prioritization framework\nResult: Successful delivery of all objectives\n\nAdvanced Tips:\n- Show emotional intelligence\n- Demonstrate strategic thinking\n- Include quantified business impact\n- Show long-term relationship building`,
+    tags: ['interview', 'behavioral', 'advanced', 'leadership'],
+    popularity: 97,
+    contentAdvice: 'Focus on complex scenarios showing leadership and judgment.',
+    voiceAdvice: 'Show thoughtfulness and strategic thinking. Use confident tone.',
+    bodyLanguageAdvice: 'Use executive presence. Show analytical thinking through gestures.'
   },
   {
     id: 'technical-interview',
@@ -344,32 +344,32 @@ const FIFTY_PLUS_TEMPLATES: Template[] = [
 
   // More School Presentation Templates (18 total)
   {
-    id: 'science-fair-project',
-    title: 'Science Fair Project Presentation',
+    id: 'advanced-science-project',
+    title: 'Advanced Science Project Presentation',
     category: 'school',
-    description: 'Present your scientific research and findings',
-    duration: '5-8 minutes',
-    difficulty: 'Intermediate',
-    content: `Science Fair Structure:\n\n1. Title & Introduction\n- Project title and your name\n- Why you chose this topic\n- Hook to grab attention\n\n2. Problem Statement\n- What question are you answering?\n- Why is this important?\n- What did you expect to find?\n\n3. Hypothesis\n- Your educated guess\n- Based on what background research?\n- Clear, testable prediction\n\n4. Materials & Methods\n- What you used\n- Step-by-step procedure\n- Variables and controls\n\n5. Results\n- What happened?\n- Data and observations\n- Charts, graphs, photos\n\n6. Analysis\n- What do your results mean?\n- Was your hypothesis correct?\n- Patterns and trends\n\n7. Conclusion\n- Answer to your question\n- What you learned\n- Future research ideas\n\n8. Real-world Applications\n- How can this be used?\n- Impact on society\n- Future possibilities`,
-    tags: ['school', 'science', 'research', 'presentation'],
-    popularity: 91,
-    contentAdvice: 'Use clear data visualizations. Explain scientific concepts simply.',
-    voiceAdvice: 'Speak with enthusiasm for your discovery. Explain clearly.',
-    bodyLanguageAdvice: 'Point to visuals. Use gestures to explain processes.'
+    description: 'Present complex scientific research with professional methodology',
+    duration: '8-12 minutes',
+    difficulty: 'Advanced',
+    content: `Advanced Science Presentation:\n\n1. Abstract & Overview\n- Project summary in 30 seconds\n- Key findings preview\n- Significance statement\n\n2. Literature Review\n- Previous research in this area\n- How your work builds on existing knowledge\n- Research gap you're addressing\n\n3. Methodology & Design\n- Experimental design rationale\n- Control variables and constants\n- Statistical considerations\n- Potential limitations\n\n4. Data Collection & Analysis\n- Raw data presentation\n- Statistical analysis methods\n- Error analysis and uncertainty\n- Reproducibility considerations\n\n5. Results & Discussion\n- Key findings with statistical significance\n- Comparison to hypothesis\n- Unexpected results and explanations\n- Implications of findings\n\n6. Future Research\n- Limitations of current study\n- Recommended next steps\n- Broader research questions\n\n7. Real-World Impact\n- Applications in industry or medicine\n- Societal benefits\n- Policy implications\n\nQ&A Preparation:\n- Anticipate technical questions\n- Prepare detailed explanations\n- Know your limitations`,
+    tags: ['school', 'science', 'advanced', 'research'],
+    popularity: 94,
+    contentAdvice: 'Show deep understanding of scientific method. Use precise terminology.',
+    voiceAdvice: 'Speak with scientific authority. Explain complex concepts clearly.',
+    bodyLanguageAdvice: 'Use precise gestures. Show confidence in your research.'
   },
   {
-    id: 'book-report-presentation',
-    title: 'Book Report Presentation',
+    id: 'literary-analysis-presentation',
+    title: 'Advanced Literary Analysis Presentation',
     category: 'school',
-    description: 'Present your analysis of a book you\'ve read',
-    duration: '3-5 minutes',
-    difficulty: 'Beginner',
-    content: `Book Report Structure:\n\n1. Introduction\n- Book title and author\n- Genre and publication info\n- Why you chose this book\n\n2. Plot Summary\n- Main characters\n- Setting (time and place)\n- Brief plot overview (no spoilers!)\n- Conflict and resolution\n\n3. Character Analysis\n- Main character description\n- Character development\n- Favorite character and why\n\n4. Themes & Messages\n- Main themes in the book\n- Author's message\n- Lessons learned\n\n5. Personal Response\n- What you liked most\n- What you didn't like\n- Favorite scene or quote\n\n6. Recommendation\n- Who would enjoy this book?\n- Rating out of 10\n- Why others should read it\n\n7. Visual Aid\n- Show the book cover\n- Draw favorite scene\n- Create character map\n\nClosing:\n- Summarize your thoughts\n- Encourage others to read\n- Answer questions`,
-    tags: ['school', 'book', 'literature', 'analysis'],
-    popularity: 88,
-    contentAdvice: 'Show genuine enthusiasm for reading. Include personal connections.',
-    voiceAdvice: 'Vary tone when describing different parts. Show excitement.',
-    bodyLanguageAdvice: 'Hold the book. Use expressions to show emotions.'
+    description: 'Deep literary analysis with critical thinking and interpretation',
+    duration: '6-10 minutes',
+    difficulty: 'Advanced',
+    content: `Literary Analysis Structure:\n\n1. Introduction & Thesis\n- Book title, author, and publication context\n- Your analytical thesis statement\n- Preview of main arguments\n\n2. Historical & Cultural Context\n- When and where the book was written\n- Social and political influences\n- Author's background and perspective\n\n3. Literary Devices & Techniques\n- Symbolism and metaphors\n- Narrative structure and point of view\n- Language and style analysis\n\n4. Character Development & Psychology\n- Complex character analysis\n- Character motivations and conflicts\n- Archetypal patterns\n\n5. Thematic Analysis\n- Major themes and their development\n- How themes connect to real world\n- Author's commentary on society\n\n6. Critical Perspectives\n- Different interpretations of the work\n- Scholarly criticism and debate\n- Your original insights\n\n7. Personal Reflection & Evaluation\n- How the work affected you\n- Relevance to contemporary issues\n- Assessment of literary merit\n\n8. Conclusion\n- Restate thesis with evidence\n- Broader significance of the work\n- Final interpretive insight`,
+    tags: ['school', 'literature', 'analysis', 'critical-thinking'],
+    popularity: 91,
+    contentAdvice: 'Support arguments with textual evidence. Show original thinking.',
+    voiceAdvice: 'Speak with intellectual confidence. Use analytical tone.',
+    bodyLanguageAdvice: 'Use scholarly gestures. Show deep engagement with ideas.'
   },
   {
     id: 'history-presentation',
@@ -388,18 +388,18 @@ const FIFTY_PLUS_TEMPLATES: Template[] = [
 
   // More Business Presentation Templates (20 total)
   {
-    id: 'quarterly-business-review',
-    title: 'Quarterly Business Review (QBR)',
+    id: 'annual-business-review',
+    title: 'Annual Business Review & Strategy',
     category: 'business',
-    description: 'Present quarterly performance and strategic updates',
-    duration: '30-45 minutes',
+    description: 'Comprehensive annual performance and strategic planning presentation',
+    duration: '45-60 minutes',
     difficulty: 'Advanced',
-    content: `QBR Structure:\n\n1. Executive Summary\n- Key achievements this quarter\n- Critical metrics overview\n- Strategic priorities\n\n2. Financial Performance\n- Revenue vs. targets\n- Profit margins\n- Cost analysis\n- Budget variance\n\n3. Operational Metrics\n- KPI dashboard\n- Performance trends\n- Efficiency improvements\n\n4. Market Analysis\n- Industry trends\n- Competitive landscape\n- Market share\n\n5. Customer Insights\n- Customer satisfaction\n- Retention rates\n- New customer acquisition\n\n6. Team Performance\n- Headcount updates\n- Productivity metrics\n- Development initiatives\n\n7. Challenges & Risks\n- Current obstacles\n- Risk mitigation\n- Lessons learned\n\n8. Next Quarter Priorities\n- Strategic initiatives\n- Resource allocation\n- Success metrics\n\n9. Action Items\n- Specific commitments\n- Ownership assignments\n- Timeline for delivery`,
-    tags: ['business', 'quarterly', 'performance', 'strategy'],
-    popularity: 94,
-    contentAdvice: 'Use data-driven insights. Balance achievements with challenges.',
-    voiceAdvice: 'Speak with confidence about results. Be honest about challenges.',
-    bodyLanguageAdvice: 'Use authoritative gestures. Show leadership presence.'
+    content: `Annual Review Structure:\n\n1. Year in Review\n- Major accomplishments and milestones\n- Key metrics and performance indicators\n- Challenges overcome and lessons learned\n\n2. Financial Analysis\n- Annual revenue and profit analysis\n- Year-over-year growth trends\n- Cost optimization achievements\n- ROI on major investments\n\n3. Market Position\n- Market share evolution\n- Competitive analysis and positioning\n- Industry trends and disruptions\n- Customer segment performance\n\n4. Operational Excellence\n- Process improvements implemented\n- Technology upgrades and impact\n- Quality metrics and customer satisfaction\n- Supply chain optimization\n\n5. Team & Culture\n- Organizational growth and development\n- Employee satisfaction and retention\n- Leadership development programs\n- Cultural initiatives and impact\n\n6. Strategic Initiatives\n- Major projects completed\n- Innovation and R&D outcomes\n- Partnership and collaboration results\n- Digital transformation progress\n\n7. Future Strategy\n- 3-year strategic vision\n- Market opportunities and threats\n- Investment priorities\n- Growth targets and milestones\n\n8. Implementation Roadmap\n- Quarterly milestones\n- Resource allocation\n- Risk management plan\n- Success metrics and accountability`,
+    tags: ['business', 'annual', 'strategy', 'planning'],
+    popularity: 96,
+    contentAdvice: 'Show strategic vision and long-term thinking. Use comprehensive data.',
+    voiceAdvice: 'Speak with executive authority. Show confidence in strategy.',
+    bodyLanguageAdvice: 'Use commanding presence. Show strategic leadership.'
   },
   {
     id: 'product-launch-presentation',
@@ -432,18 +432,18 @@ const FIFTY_PLUS_TEMPLATES: Template[] = [
 
   // More Motivational Speech Templates (12 total)
   {
-    id: 'overcoming-adversity',
-    title: 'Overcoming Adversity - Rise Above Challenges',
+    id: 'breakthrough-mindset',
+    title: 'Breakthrough Mindset - Unlocking Your Potential',
     category: 'motivational',
-    description: 'Inspire others to overcome life\'s challenges',
-    duration: '10-15 minutes',
-    difficulty: 'Intermediate',
-    content: `Motivational Structure:\n\n1. Opening Story\n- Personal or compelling example\n- Moment of deepest challenge\n- Feeling of hopelessness\n\n2. The Universal Truth\n- Everyone faces adversity\n- Challenges are opportunities\n- Growth comes from struggle\n\n3. Personal Journey\n- Your specific challenge\n- How you felt\n- What you learned\n\n4. The Turning Point\n- Moment of decision\n- Choosing to fight back\n- First steps forward\n\n5. Strategies That Work\n- Mindset shifts\n- Practical steps\n- Support systems\n\n6. The Transformation\n- How you changed\n- New strengths discovered\n- Unexpected benefits\n\n7. Call to Action\n- Face your challenges\n- Take one step today\n- Never give up\n\n8. Inspiring Close\n- Powerful quote or story\n- Vision of their potential\n- Belief in their ability\n\nKey Messages:\n- You are stronger than you know\n- Every setback is a setup for a comeback\n- Your current chapter is not your final story`,
-    tags: ['motivational', 'adversity', 'resilience', 'inspiration'],
-    popularity: 95,
-    contentAdvice: 'Share authentic struggles. Focus on hope and possibility.',
-    voiceAdvice: 'Build emotional intensity. Use power and passion.',
-    bodyLanguageAdvice: 'Use strong, uplifting gestures. Show determination.'
+    description: 'Transform limiting beliefs and achieve breakthrough results',
+    duration: '12-18 minutes',
+    difficulty: 'Advanced',
+    content: `Breakthrough Structure:\n\n1. The Invisible Barriers\n- What holds most people back\n- The power of limiting beliefs\n- Why potential stays locked away\n\n2. The Breakthrough Moment\n- Personal story of transformation\n- When you realized what was possible\n- The shift in thinking that changed everything\n\n3. The Science of Breakthroughs\n- How the brain creates limitations\n- Neuroplasticity and change\n- Evidence-based transformation\n\n4. The Breakthrough Framework\n- Identify limiting patterns\n- Challenge existing beliefs\n- Create new neural pathways\n- Reinforce positive changes\n\n5. Real-World Applications\n- Career breakthrough examples\n- Relationship transformations\n- Health and wellness changes\n- Financial mindset shifts\n\n6. The Breakthrough Lifestyle\n- Daily practices for growth\n- Surrounding yourself with possibility\n- Continuous learning and adaptation\n- Celebrating progress and setbacks\n\n7. Your Breakthrough Plan\n- Identify your biggest limitation\n- Create your transformation strategy\n- Build your support system\n- Take breakthrough action\n\n8. The Ripple Effect\n- How your breakthrough inspires others\n- Creating breakthrough communities\n- Leaving a legacy of possibility\n\nClosing Challenge:\n- What breakthrough is waiting for you?\n- What would you attempt if you knew you couldn't fail?\n- Your breakthrough starts now`,
+    tags: ['motivational', 'breakthrough', 'mindset', 'transformation'],
+    popularity: 93,
+    contentAdvice: 'Use scientific backing for claims. Include practical frameworks.',
+    voiceAdvice: 'Build excitement about possibility. Show conviction.',
+    bodyLanguageAdvice: 'Use expansive, breakthrough gestures. Show transformation energy.'
   },
   {
     id: 'dream-achievement',
