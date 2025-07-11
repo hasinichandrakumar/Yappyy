@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/hooks/useAuth";
 import { Settings, Bell, Volume2, Eye, Mic, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 const settingsSchema = z.object({
   notifications: z.boolean(),
@@ -51,18 +52,8 @@ export default function AppSettings() {
   const onSubmit = async (data: SettingsFormData) => {
     setIsSaving(true);
     try {
-      // Save settings to backend
-      const response = await fetch('/api/user-settings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to save settings');
-      }
+      // Save settings to backend using apiRequest
+      await apiRequest('/api/user-settings', 'POST', data);
 
       toast({
         title: "Settings Updated",

@@ -12,6 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useAuth } from "@/hooks/useAuth";
 import { User, Save, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 const profileSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -64,30 +65,21 @@ export default function SimpleProfileForm() {
   const onSubmit = async (data: ProfileFormData) => {
     setIsSaving(true);
     try {
-      // Save profile data to backend and train deep learning coach
-      const response = await fetch('/api/deep-learning-profile', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to save profile');
-      }
-
+      // Submit profile data to train the deep learning coach using apiRequest
+      const response = await apiRequest('/api/deep-learning-profile', 'POST', data);
       const result = await response.json();
-      
+
       toast({
-        title: "Deep Learning Profile Updated",
-        description: "Your AI coach has been trained with your preferences and will provide personalized coaching!",
+        title: "Deep Learning Coach Trained!",
+        description: "Your AI coach has been personalized with your profile data and is ready to provide targeted feedback!",
       });
+
+      console.log('Deep learning coach trained:', result);
     } catch (error) {
-      console.error('Profile save error:', error);
+      console.error('Profile submission error:', error);
       toast({
         title: "Error",
-        description: "Failed to save profile. Please try again.",
+        description: "Failed to train your AI coach. Please try again.",
         variant: "destructive",
       });
     } finally {

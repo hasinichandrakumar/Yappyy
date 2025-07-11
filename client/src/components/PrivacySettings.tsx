@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import { Shield, Eye, Database, Download, Trash2, Lock, Globe, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 const privacySchema = z.object({
   dataCollection: z.boolean(),
@@ -53,18 +54,8 @@ export default function PrivacySettings() {
   const onSubmit = async (data: PrivacyFormData) => {
     setIsSaving(true);
     try {
-      // Save privacy settings to backend
-      const response = await fetch('/api/privacy-settings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to save privacy settings');
-      }
+      // Save privacy settings to backend using apiRequest
+      await apiRequest('/api/privacy-settings', 'POST', data);
 
       toast({
         title: "Privacy Settings Updated",
@@ -84,16 +75,7 @@ export default function PrivacySettings() {
 
   const handleDataExport = async () => {
     try {
-      const response = await fetch('/api/export-data', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to export data');
-      }
+      const response = await apiRequest('/api/export-data', 'POST', {});
 
       // Trigger download
       const blob = await response.blob();
