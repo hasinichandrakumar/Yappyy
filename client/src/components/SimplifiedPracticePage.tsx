@@ -62,6 +62,8 @@ export default function SimplifiedPracticePage() {
   const recognitionRef = useRef<any>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const metricsTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const transcriptRef = useRef<string>('');
+  const interimTranscriptRef = useRef<string>('');
   const { toast } = useToast();
 
   // Initialize session name
@@ -117,10 +119,16 @@ export default function SimplifiedPracticePage() {
 
       // Update interim transcript for live display
       setInterimTranscript(interimText);
+      interimTranscriptRef.current = interimText; // Update ref for real-time access
 
       if (finalTranscript.trim()) {
-        setTranscript(prev => prev + finalTranscript);
+        setTranscript(prev => {
+          const newTranscript = prev + finalTranscript;
+          transcriptRef.current = newTranscript; // Update ref for real-time access
+          return newTranscript;
+        });
         setInterimTranscript(''); // Clear interim when we get final
+        interimTranscriptRef.current = ''; // Clear ref too
         
         // Comprehensive filler word detection with precise pattern matching
         const singleFillerWords = [
@@ -175,6 +183,7 @@ export default function SimplifiedPracticePage() {
               console.log('🎯 Advanced filler analysis:', analysis);
               
               // Update the total filler count for the entire session
+              console.log(`📊 Updating filler count to: ${analysis.totalFillers}`);
               setMetrics(prev => ({
                 ...prev,
                 fillerWordCount: analysis.totalFillers
@@ -224,38 +233,10 @@ export default function SimplifiedPracticePage() {
           }
         }
 
-        // Calculate WPM using the complete transcript
-        const fullText = transcript + ' ' + finalTranscript;
-        const wordCount = fullText.trim().split(/\s+/).filter(word => word.length > 0).length;
-        const timeInMinutes = sessionDuration / 60;
-        const wpm = timeInMinutes > 0 ? Math.round(wordCount / timeInMinutes) : 0;
-        
-        // Update metrics with live WPM
-        setMetrics(prev => ({ ...prev, wordsPerMinute: wpm }));
+        // Calculate WPM using the complete transcript (after updating it)
+        // Note: We'll update WPM in the interval timer for real-time updates
 
-        // Enhanced live feedback generation
-        if (wpm >= 120 && wpm <= 180) {
-          setLiveFeedback(prev => [...prev.slice(-4), {
-            id: Date.now().toString(),
-            message: `Great speaking pace at ${wpm} WPM!`,
-            type: 'success',
-            timestamp: Date.now()
-          }]);
-        } else if (wpm > 200) {
-          setLiveFeedback(prev => [...prev.slice(-4), {
-            id: Date.now().toString(),
-            message: `Speaking too fast at ${wpm} WPM - try slowing down`,
-            type: 'warning',
-            timestamp: Date.now()
-          }]);
-        } else if (wpm < 100 && wpm > 0) {
-          setLiveFeedback(prev => [...prev.slice(-4), {
-            id: Date.now().toString(),
-            message: `Speaking slowly at ${wpm} WPM - consider increasing pace`,
-            type: 'info',
-            timestamp: Date.now()
-          }]);
-        }
+        // Enhanced live feedback will be generated separately in a useEffect
 
         // Generate body language insights
         if (sessionDuration > 10 && sessionDuration % 15 === 0) {
@@ -304,6 +285,52 @@ export default function SimplifiedPracticePage() {
     recognitionRef.current = recognition;
   }, [sessionDuration, transcript]);
 
+  // WPM-based feedback system
+  useEffect(() => {
+    if (isRecording && metrics.wordsPerMinute > 0) {
+      const wpm = metrics.wordsPerMinute;
+      
+      if (wpm >= 120 && wpm <= 180) {
+        setLiveFeedback(prev => {
+          // Avoid duplicate messages
+          const lastMessage = prev[prev.length - 1];
+          if (lastMessage && lastMessage.message.includes(`${wpm} WPM`)) return prev;
+          
+          return [...prev.slice(-4), {
+            id: Date.now().toString(),
+            message: `Great speaking pace at ${wpm} WPM!`,
+            type: 'success',
+            timestamp: Date.now()
+          }];
+        });
+      } else if (wpm > 200) {
+        setLiveFeedback(prev => {
+          const lastMessage = prev[prev.length - 1];
+          if (lastMessage && lastMessage.message.includes('too fast')) return prev;
+          
+          return [...prev.slice(-4), {
+            id: Date.now().toString(),
+            message: `Speaking too fast at ${wpm} WPM - try slowing down`,
+            type: 'warning',
+            timestamp: Date.now()
+          }];
+        });
+      } else if (wpm < 100 && wpm > 0 && sessionDuration > 10) {
+        setLiveFeedback(prev => {
+          const lastMessage = prev[prev.length - 1];
+          if (lastMessage && lastMessage.message.includes('slowly')) return prev;
+          
+          return [...prev.slice(-4), {
+            id: Date.now().toString(),
+            message: `Speaking slowly at ${wpm} WPM - consider increasing pace`,
+            type: 'info',
+            timestamp: Date.now()
+          }];
+        });
+      }
+    }
+  }, [metrics.wordsPerMinute, isRecording, sessionDuration]);
+
   // Start recording
   const startRecording = useCallback(async () => {
     try {
@@ -332,18 +359,19 @@ export default function SimplifiedPracticePage() {
         const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
         setSessionDuration(elapsedSeconds);
         
-        // Calculate WPM in real-time based on current transcript
-        if (elapsedSeconds > 5) { // Wait at least 5 seconds for meaningful calculation
-          const currentTranscript = transcript + ' ' + interimTranscript;
+        // Calculate WPM in real-time based on current transcript using refs
+        if (elapsedSeconds > 3) { // Wait at least 3 seconds for meaningful calculation
+          const currentTranscript = transcriptRef.current + ' ' + interimTranscriptRef.current;
           const wordCount = currentTranscript.trim().split(/\s+/).filter(word => word.length > 0).length;
           const timeInMinutes = elapsedSeconds / 60;
-          const wpm = timeInMinutes > 0 ? Math.round(wordCount / timeInMinutes) : 0;
+          const wpm = timeInMinutes > 0 && wordCount > 0 ? Math.round(wordCount / timeInMinutes) : 0;
           
+          console.log(`🔄 Live WPM update: ${wordCount} words in ${elapsedSeconds}s = ${wpm} WPM`);
           setMetrics(prev => ({ ...prev, wordsPerMinute: wpm }));
         }
       }, 1000);
 
-      // Initialize metrics with starting values when recording begins
+      // Initialize metrics and refs with starting values when recording begins
       setMetrics({
         eyeContact: 0,
         confidence: 0,
@@ -352,6 +380,12 @@ export default function SimplifiedPracticePage() {
         fillerWordCount: 0,
         clarity: 0
       });
+      
+      // Reset transcript refs
+      transcriptRef.current = '';
+      interimTranscriptRef.current = '';
+      setTranscript('');
+      setInterimTranscript('');
 
       // Gradually build up realistic metrics as the session progresses
       let metricsUpdateCount = 0;
