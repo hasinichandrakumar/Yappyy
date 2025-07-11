@@ -4,7 +4,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Mic, BarChart3, Brain, FileText, Trophy, Target, User, LogOut, Settings } from "lucide-react";
+import { Mic, BarChart3, Brain, FileText, Trophy, Target, User, LogOut, Settings, Shield } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import SimplifiedPracticePage from "@/components/SimplifiedPracticePage";
 import PeppyAICoach from "@/components/PeppyAICoach";
@@ -13,11 +13,15 @@ import Enhanced50PlusTemplates from "@/components/Enhanced50PlusTemplates";
 import ImprovedBadgeSystem from "@/components/ImprovedBadgeSystem";
 import EnhancedAnalysisTab from "@/components/EnhancedAnalysisTab";
 import SimpleProfileForm from "@/components/SimpleProfileForm";
+import AppSettings from "@/components/AppSettings";
+import PrivacySettings from "@/components/PrivacySettings";
 import yappyyLogoPath from '@assets/Untitled_design-11600-removebg-preview_1749744306540.png';
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("practice");
   const [showProfile, setShowProfile] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
   const { user } = useAuth();
 
   const handleLogout = () => {
@@ -26,6 +30,14 @@ export default function Dashboard() {
 
   const handleProfileClick = () => {
     setShowProfile(true);
+  };
+
+  const handleSettingsClick = () => {
+    setShowSettings(true);
+  };
+
+  const handlePrivacyClick = () => {
+    setShowPrivacy(true);
   };
 
   const getInitials = (firstName?: string, lastName?: string) => {
@@ -78,9 +90,13 @@ export default function Dashboard() {
                       <User className="mr-2 h-4 w-4" />
                       <span>Profile</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="cursor-pointer" onClick={handleProfileClick}>
+                    <DropdownMenuItem className="cursor-pointer" onClick={handleSettingsClick}>
                       <Settings className="mr-2 h-4 w-4" />
                       <span>Settings</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="cursor-pointer" onClick={handlePrivacyClick}>
+                      <Shield className="mr-2 h-4 w-4" />
+                      <span>Privacy</span>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem className="cursor-pointer text-red-600" onClick={handleLogout}>
@@ -165,6 +181,20 @@ export default function Dashboard() {
       <Dialog open={showProfile} onOpenChange={setShowProfile}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
           <SimpleProfileForm />
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Modal */}
+      <Dialog open={showSettings} onOpenChange={setShowSettings}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <AppSettings />
+        </DialogContent>
+      </Dialog>
+
+      {/* Privacy Modal */}
+      <Dialog open={showPrivacy} onOpenChange={setShowPrivacy}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <PrivacySettings />
         </DialogContent>
       </Dialog>
     </div>

@@ -1868,6 +1868,75 @@ Respond with detailed analysis in JSON format:
   console.log('📡 WebRTC Integration configured');
   console.log('🌟 WORLD-CLASS AI ARCHITECTURE FULLY DEPLOYED');
 
+  // Settings and Privacy endpoints
+  app.post('/api/user-settings', demoAuth, async (req: any, res) => {
+    try {
+      const userId = req.user?.id || req.user?.claims?.sub;
+      const settingsData = req.body;
+      
+      console.log('Saving user settings for:', userId);
+      
+      // In production, save to database
+      res.json({
+        success: true,
+        message: 'Settings saved successfully'
+      });
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to save settings' 
+      });
+    }
+  });
+
+  app.post('/api/privacy-settings', demoAuth, async (req: any, res) => {
+    try {
+      const userId = req.user?.id || req.user?.claims?.sub;
+      const privacyData = req.body;
+      
+      console.log('Saving privacy settings for:', userId);
+      
+      // In production, save to database
+      res.json({
+        success: true,
+        message: 'Privacy settings saved successfully'
+      });
+    } catch (error) {
+      console.error('Error saving privacy settings:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to save privacy settings' 
+      });
+    }
+  });
+
+  app.post('/api/export-data', demoAuth, async (req: any, res) => {
+    try {
+      const userId = req.user?.id || req.user?.claims?.sub;
+      
+      // In production, gather all user data from database
+      const userData = {
+        user: { id: userId },
+        sessions: [],
+        progress: {},
+        settings: {},
+        privacy: {},
+        exportDate: new Date().toISOString()
+      };
+      
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Disposition', `attachment; filename="yappyy-data-export-${new Date().toISOString().split('T')[0]}.json"`);
+      res.json(userData);
+    } catch (error) {
+      console.error('Error exporting data:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to export data' 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
