@@ -36,6 +36,9 @@ import { multiModalFusion } from "./multi-modal-fusion";
 import { enhancedVoiceSynthesis } from "./enhanced-voice-synthesis";
 import { webrtcIntegration } from "./webrtc-integration";
 import { advancedComputerVision } from "./advanced-computer-vision";
+import { enhancedNeuralPipeline } from "./enhanced-neural-pipeline";
+import { graphqlHTTP } from 'express-graphql';
+import neuralGraphQL from './graphql-schema';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const server = createServer(app);
@@ -977,6 +980,59 @@ RESPONSE FORMAT: Provide conversational coaching followed by specific neural ana
   });
   
   app.post("/api/advanced-neural-analysis", demoAuth, advancedNeuralAnalysis);
+  
+  // GraphQL endpoint for flexible neural data queries
+  app.use('/api/graphql', demoAuth, graphqlHTTP({
+    schema: neuralGraphQL.schema,
+    rootValue: neuralGraphQL.resolvers,
+    graphiql: true, // Enable GraphQL playground in development
+  }));
+  
+  // Enhanced Neural Pipeline endpoints
+  app.post('/api/neural-pipeline/stream', demoAuth, async (req: any, res) => {
+    try {
+      const userId = req.user?.id || req.user?.claims?.sub || 'demo-user';
+      const { sessionId, realTimeData } = req.body;
+      
+      const context = {
+        userId,
+        sessionId: sessionId || `session_${Date.now()}`,
+        timestamp: Date.now(),
+        realTimeData: {
+          voiceBuffer: new Float32Array(realTimeData.voiceBuffer || []),
+          videoFrame: realTimeData.videoFrame,
+          textBuffer: realTimeData.textBuffer || ''
+        }
+      };
+      
+      const result = await enhancedNeuralPipeline.processStreamingData(context);
+      
+      res.json({
+        success: true,
+        ...result,
+        timestamp: Date.now()
+      });
+      
+    } catch (error) {
+      console.error('Enhanced neural pipeline error:', error);
+      res.status(500).json({ error: 'Failed to process streaming data' });
+    }
+  });
+  
+  // Performance metrics endpoint
+  app.get('/api/neural-pipeline/metrics', demoAuth, async (req: any, res) => {
+    try {
+      const metrics = enhancedNeuralPipeline.getPerformanceMetrics();
+      res.json({
+        success: true,
+        metrics,
+        timestamp: Date.now()
+      });
+    } catch (error) {
+      console.error('Performance metrics error:', error);
+      res.status(500).json({ error: 'Failed to fetch performance metrics' });
+    }
+  });
   
   // Neural Analysis endpoint for practice session integration
   app.get('/api/neural-analysis/:userId', demoAuth, async (req: any, res) => {
