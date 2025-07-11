@@ -883,10 +883,133 @@ Respond with JSON: {"additionalInsights": ["insight1", "insight2", "insight3"], 
     }
   });
   
-  // Peppy Deep Learning AI Coach API
+  // Enhanced Peppy Deep Learning AI Coach API with Session Integration
   app.post("/api/peppy-deep-learning-analysis", demoAuth, peppyDeepLearningAnalysis);
-  app.post("/api/peppy-conversation", demoAuth, peppyConversation);
+  
+  // Enhanced Peppy Conversation endpoint with Neural Analysis
+  app.post('/api/peppy-conversation', demoAuth, async (req: any, res) => {
+    try {
+      const { message, currentGoal, sessionData, analysisContext } = req.body;
+      const userId = req.user?.id || req.user?.claims?.sub || 'demo-user';
+      
+      console.log('🧠 Processing neural conversation for user:', userId);
+      console.log('📊 Session data context:', {
+        totalSessions: analysisContext?.totalSessions || 0,
+        voiceModulation: analysisContext?.voiceModulation || 0,
+        bodyLanguage: analysisContext?.bodyLanguage || 0,
+        contentStructure: analysisContext?.contentStructure || 0
+      });
+      
+      // Get user's neural profile
+      const { getUserNeuralProfile } = await import('./peppy-deep-learning-coach');
+      const neuralProfile = await getUserNeuralProfile(userId);
+      
+      // Enhanced conversation context
+      const conversationContext = {
+        conversationHistory: [],
+        userPersonality: neuralProfile || {},
+        currentProgress: analysisContext || {},
+        recentSessions: sessionData || [],
+        currentGoal,
+        neuralAnalysis: {
+          sessionsAnalyzed: analysisContext?.totalSessions || 0,
+          voiceModulation: analysisContext?.voiceModulation || 0,
+          bodyLanguage: analysisContext?.bodyLanguage || 0,
+          contentStructure: analysisContext?.contentStructure || 75
+        }
+      };
+      
+      // Generate neural response using OpenAI with practice session context
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o',
+          messages: [
+            {
+              role: 'system',
+              content: `You are Peppy, a deep learning AI speech coach that continuously learns from user practice sessions. 
+
+NEURAL NETWORK CONTEXT:
+- Total Sessions Analyzed: ${conversationContext.neuralAnalysis.sessionsAnalyzed}
+- Voice Modulation Score: ${conversationContext.neuralAnalysis.voiceModulation}/100
+- Body Language Score: ${conversationContext.neuralAnalysis.bodyLanguage}/100  
+- Content Structure Score: ${conversationContext.neuralAnalysis.contentStructure}/100
+- Current Goal: ${currentGoal || 'General improvement'}
+
+COACHING PERSONALITY: You are encouraging, analytical, and data-driven. Always reference specific practice session data when giving feedback. Use neural network terminology naturally and provide detailed analysis on voice modulation, body language, and content structure based on their specific purpose.
+
+RESPONSE FORMAT: Provide conversational coaching followed by specific neural analysis insights and actionable recommendations based on their practice data.`
+            },
+            {
+              role: 'user',
+              content: message
+            }
+          ],
+          temperature: 0.7,
+          max_tokens: 800
+        })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        const aiResponse = result.choices[0].message.content;
+        
+        res.json({
+          coaching: aiResponse,
+          analysis: {
+            insights: `Based on ${conversationContext.neuralAnalysis.sessionsAnalyzed} practice sessions, neural patterns show focused improvement in ${currentGoal || 'communication skills'}.`,
+            recommendations: `Continue leveraging your strongest areas while addressing the 2-3 patterns identified by the neural network.`,
+            sessionsAnalyzed: conversationContext.neuralAnalysis.sessionsAnalyzed,
+            confidence: Math.min(95, 60 + (conversationContext.neuralAnalysis.sessionsAnalyzed * 5))
+          }
+        });
+      } else {
+        throw new Error('OpenAI API request failed');
+      }
+    } catch (error) {
+      console.error('Enhanced Peppy conversation error:', error);
+      res.status(500).json({ error: 'Failed to process neural conversation' });
+    }
+  });
+  
   app.post("/api/advanced-neural-analysis", demoAuth, advancedNeuralAnalysis);
+  
+  // Neural Analysis endpoint for practice session integration
+  app.get('/api/neural-analysis/:userId', demoAuth, async (req: any, res) => {
+    try {
+      const userId = req.params.userId || req.user?.id || req.user?.claims?.sub;
+      const sessions = await storage.getUserPracticeSessions(userId);
+      
+      const { analyzeSessionData } = await import('./neural-session-integration');
+      
+      const context = {
+        voiceModulation: sessions.length > 0 ? sessions.reduce((sum, s) => sum + (s.voiceClarity || 0), 0) / sessions.length : 0,
+        bodyLanguage: sessions.length > 0 ? sessions.reduce((sum, s) => sum + (s.gestureScore || 0), 0) / sessions.length : 0,
+        contentStructure: sessions.length > 0 ? sessions.reduce((sum, s) => sum + (s.coherenceScore || 75), 0) / sessions.length : 75,
+        totalSessions: sessions.length,
+        recentPerformance: sessions.slice(-6)
+      };
+      
+      const analysis = await analyzeSessionData(sessions.slice(-10), context);
+      
+      res.json({
+        success: true,
+        analysis,
+        metadata: {
+          userId,
+          sessionsAnalyzed: sessions.length,
+          lastUpdate: new Date().toISOString()
+        }
+      });
+    } catch (error) {
+      console.error('Neural analysis error:', error);
+      res.status(500).json({ error: 'Failed to generate neural analysis' });
+    }
+  });
   
   // User progress endpoint for Peppy
   app.get("/api/user-progress", demoAuth, async (req: any, res) => {
