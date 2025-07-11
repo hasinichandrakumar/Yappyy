@@ -696,31 +696,7 @@ export default function PeppyAICoachRedesigned() {
               </CardContent>
             </Card>
 
-            {/* Quick Coaching Actions */}
-            <Card className="bg-white/70 backdrop-blur-sm border-purple-200">
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-3 text-purple-700 text-lg">
-                  <Sparkles className="w-6 h-6" />
-                  Quick Actions
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="space-y-3">
-                  <Button variant="outline" size="default" className="w-full justify-start h-12 text-base">
-                    <Play className="w-5 h-5 mr-3" />
-                    Practice Session
-                  </Button>
-                  <Button variant="outline" size="default" className="w-full justify-start h-12 text-base">
-                    <Trophy className="w-5 h-5 mr-3" />
-                    View Progress
-                  </Button>
-                  <Button variant="outline" size="default" className="w-full justify-start h-12 text-base">
-                    <Settings className="w-5 h-5 mr-3" />
-                    Update Goals
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+
           </div>
         </div>
       </div>
