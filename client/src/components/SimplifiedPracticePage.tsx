@@ -157,14 +157,15 @@ export default function SimplifiedPracticePage() {
           }
         });
         
-        // Enhanced backend filler word analysis
-        if (finalTranscript.trim().length > 10) {
+        // Enhanced backend filler word analysis for the complete transcript
+        const fullTranscript = transcript + ' ' + finalTranscript;
+        if (fullTranscript.trim().length > 10) {
           try {
             const response = await fetch('/api/analyze-filler-words', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                transcript: finalTranscript,
+                transcript: fullTranscript,
                 duration: sessionDuration
               })
             });
@@ -173,9 +174,10 @@ export default function SimplifiedPracticePage() {
               const analysis = await response.json();
               console.log('🎯 Advanced filler analysis:', analysis);
               
+              // Update the total filler count for the entire session
               setMetrics(prev => ({
                 ...prev,
-                fillerWordCount: prev.fillerWordCount + analysis.totalFillers
+                fillerWordCount: analysis.totalFillers
               }));
               
               if (analysis.totalFillers > 0) {
@@ -196,9 +198,15 @@ export default function SimplifiedPracticePage() {
             if (detectedFillers.length > 0) {
               console.log('🎯 Local filler words detected:', detectedFillers);
               
+              // Count fillers in the full transcript
+              const fullFillerCount = fullTranscript.toLowerCase().split(/\s+/).filter(word => {
+                const cleanWord = word.replace(/[.,!?;:'"()]/g, '');
+                return singleFillerWords.includes(cleanWord);
+              }).length;
+              
               setMetrics(prev => ({
                 ...prev,
-                fillerWordCount: prev.fillerWordCount + detectedFillers.length
+                fillerWordCount: fullFillerCount
               }));
               
               const uniqueFillers = [...new Set(detectedFillers)];
@@ -216,12 +224,13 @@ export default function SimplifiedPracticePage() {
           }
         }
 
-        // Calculate WPM
-        const fullText = transcript + finalTranscript;
+        // Calculate WPM using the complete transcript
+        const fullText = transcript + ' ' + finalTranscript;
         const wordCount = fullText.trim().split(/\s+/).filter(word => word.length > 0).length;
         const timeInMinutes = sessionDuration / 60;
         const wpm = timeInMinutes > 0 ? Math.round(wordCount / timeInMinutes) : 0;
         
+        // Update metrics with live WPM
         setMetrics(prev => ({ ...prev, wordsPerMinute: wpm }));
 
         // Enhanced live feedback generation
@@ -317,10 +326,21 @@ export default function SimplifiedPracticePage() {
 
       setIsRecording(true);
 
-      // Start timer
+      // Start timer with real-time WPM calculation
       const startTime = Date.now();
       timerRef.current = setInterval(() => {
-        setSessionDuration(Math.floor((Date.now() - startTime) / 1000));
+        const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+        setSessionDuration(elapsedSeconds);
+        
+        // Calculate WPM in real-time based on current transcript
+        if (elapsedSeconds > 5) { // Wait at least 5 seconds for meaningful calculation
+          const currentTranscript = transcript + ' ' + interimTranscript;
+          const wordCount = currentTranscript.trim().split(/\s+/).filter(word => word.length > 0).length;
+          const timeInMinutes = elapsedSeconds / 60;
+          const wpm = timeInMinutes > 0 ? Math.round(wordCount / timeInMinutes) : 0;
+          
+          setMetrics(prev => ({ ...prev, wordsPerMinute: wpm }));
+        }
       }, 1000);
 
       // Initialize metrics with starting values when recording begins
@@ -365,7 +385,7 @@ export default function SimplifiedPracticePage() {
         variant: "destructive"
       });
     }
-  }, [setupSpeechRecognition, toast]);
+  }, [setupSpeechRecognition, toast, transcript, interimTranscript]);
 
   // Stop recording
   const stopRecording = useCallback(async () => {
