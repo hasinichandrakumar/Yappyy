@@ -59,6 +59,41 @@ export default function HomePage() {
             <p className="text-xl md:text-2xl font-body text-slate-600 mb-8 max-w-3xl mx-auto">
               AI-powered speech coaching that transforms your communication skills through real-time feedback and personalized training
             </p>
+            
+            {/* Inspiring Message for Children */}
+            <div className="mt-12 mb-8 max-w-4xl mx-auto">
+              <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-8 shadow-lg">
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6 text-center">
+                  Every child has a voice that deserves to be heard.
+                </h2>
+                <div className="space-y-4 text-lg text-gray-700 leading-relaxed">
+                  <p className="text-center">
+                    Our AI public speaking coach isn't just about giving speeches — it's about giving kids the courage to stand up, speak out, and share their ideas with the world.
+                  </p>
+                  
+                  <p className="text-center">
+                    When kids learn to speak with confidence, they feel seen and valued.
+                    They discover that their words can spark change in their schools, their communities, and beyond.
+                    They learn that they can inspire others, stand up for what's right, and make a real difference — no matter how small they start.
+                  </p>
+                  
+                  <p className="text-center">
+                    Most importantly, public speaking gives kids the wings to follow their dreams.
+                    It opens doors to new opportunities and helps them believe in themselves, even when no one else does.
+                  </p>
+                  
+                  <div className="text-center mt-6 p-4 bg-white/70 rounded-lg">
+                    <p className="text-xl font-semibold text-blue-700 mb-2">
+                      💙 Our AI coach is here to be that quiet cheerleader in their pocket — helping them practice, grow, and shine, one word at a time.
+                    </p>
+                    <p className="text-lg font-medium text-gray-800">
+                      Because every child deserves to feel heard.<br/>
+                      Every child deserves to know that their voice can change the world.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div className="flex justify-center">
               {isAuthenticated ? (
                 <Link href="/dashboard">
