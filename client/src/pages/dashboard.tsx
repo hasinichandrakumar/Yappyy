@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Mic, BarChart3, Brain, FileText, Trophy, Target, User, LogOut, Settings } from "lucide-react";
@@ -16,6 +17,7 @@ import yappyyLogoPath from '@assets/Untitled_design-11600-removebg-preview_17497
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("practice");
+  const [showProfile, setShowProfile] = useState(false);
   const { user } = useAuth();
 
   const handleLogout = () => {
@@ -23,7 +25,7 @@ export default function Dashboard() {
   };
 
   const handleProfileClick = () => {
-    setActiveTab("profile");
+    setShowProfile(true);
   };
 
   const getInitials = (firstName?: string, lastName?: string) => {
@@ -95,7 +97,7 @@ export default function Dashboard() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-2 lg:grid-cols-6 gap-2 mb-8 h-auto p-2 bg-white border border-gray-200 shadow-sm rounded-xl">
+          <TabsList className="grid grid-cols-2 lg:grid-cols-5 gap-2 mb-8 h-auto p-2 bg-white border border-gray-200 shadow-sm rounded-xl">
             <TabsTrigger 
               value="practice" 
               className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
@@ -131,13 +133,6 @@ export default function Dashboard() {
               <Trophy className="w-5 h-5" />
               <span>Progress</span>
             </TabsTrigger>
-            <TabsTrigger 
-              value="profile" 
-              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
-            >
-              <User className="w-5 h-5" />
-              <span>Profile</span>
-            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="practice" className="space-y-8 pb-16">
@@ -163,11 +158,18 @@ export default function Dashboard() {
             </div>
           </TabsContent>
 
-          <TabsContent value="profile" className="space-y-8 pb-16">
-            <ProfilePage />
-          </TabsContent>
         </Tabs>
       </div>
+
+      {/* Profile Modal */}
+      <Dialog open={showProfile} onOpenChange={setShowProfile}>
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Profile & Settings</DialogTitle>
+          </DialogHeader>
+          <ProfilePage />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
