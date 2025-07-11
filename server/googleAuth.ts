@@ -164,6 +164,25 @@ export async function setupGoogleAuth(app: Express) {
     });
   }
 
+  // Auth check endpoint - returns current user or null
+  app.get("/api/auth/user", async (req: any, res) => {
+    try {
+      console.log("Auth check - req.user:", req.user ? "exists" : "null");
+      console.log("Auth check - isAuthenticated():", req.isAuthenticated ? req.isAuthenticated() : "no function");
+      
+      if (req.isAuthenticated && req.isAuthenticated() && req.user) {
+        console.log("Returning authenticated user:", req.user.id);
+        return res.json(req.user);
+      }
+      
+      console.log("No authenticated user found, returning null");
+      res.json(null);
+    } catch (error) {
+      console.error("Auth check error:", error);
+      res.json(null);
+    }
+  });
+
   // Demo authentication for development/testing
   app.get("/api/auth/demo", async (req, res) => {
     try {

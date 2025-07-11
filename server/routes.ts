@@ -43,11 +43,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize Enhanced Real-Time Processing Engine
   const processingEngine = new RealTimeProcessingEngine(server);
   
-  // Setup Demo Authentication (simplified for demo environment)
-  setupDemoAuth(app);
-  
-  // Setup Google Authentication (fallback)
+  // Setup Google Authentication first (primary auth system)
   await setupGoogleAuth(app);
+  
+  // Setup Demo Authentication (fallback for development)
+  setupDemoAuth(app);
 
   // Template personalization route
   app.post('/api/openai/personalize-template', demoAuth, async (req: any, res) => {

@@ -163,43 +163,7 @@ export function setupDemoAuth(app: Express) {
     }
   });
 
-  // Simple auth check route - should return null for unauthenticated users, not 401
-  app.get("/api/auth/user", async (req: any, res) => {
-    try {
-      console.log("Auth check - req.user:", req.user ? "exists" : "null");
-      console.log("Auth check - req.session?.userId:", req.session?.userId);
-      console.log("Auth check - req.isAuthenticated():", req.isAuthenticated ? req.isAuthenticated() : "no function");
-      
-      // Check if user is authenticated via passport (Google OAuth) first
-      if (req.isAuthenticated && req.isAuthenticated() && req.user) {
-        console.log("Returning authenticated user:", req.user.id);
-        return res.json(req.user);
-      }
-      
-      // Check session for demo auth
-      if (req.session?.userId) {
-        const user = await storage.getUser(req.session.userId);
-        if (user) {
-          console.log("Returning session user:", user.id);
-          req.user = user;
-          return res.json(user);
-        }
-      }
-      
-      // Check if req.user exists without session (fallback)
-      if (req.user) {
-        console.log("Returning req.user:", req.user.id);
-        return res.json(req.user);
-      }
-      
-      console.log("No authenticated user found, returning null");
-      // Return null if no authentication found (this allows the frontend to show the landing page)
-      res.json(null);
-    } catch (error) {
-      console.error("Auth check error:", error);
-      res.json(null);
-    }
-  });
+  // Note: /api/auth/user endpoint is handled by Google auth setup in googleAuth.ts
 
   // Logout route
   app.get("/api/auth/logout", (req: any, res) => {
