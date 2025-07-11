@@ -224,12 +224,64 @@ export default function SimplifiedPracticePage() {
         
         setMetrics(prev => ({ ...prev, wordsPerMinute: wpm }));
 
-        // Provide encouraging feedback for good pace
+        // Enhanced live feedback generation
         if (wpm >= 120 && wpm <= 180) {
           setLiveFeedback(prev => [...prev.slice(-4), {
             id: Date.now().toString(),
             message: `Great speaking pace at ${wpm} WPM!`,
             type: 'success',
+            timestamp: Date.now()
+          }]);
+        } else if (wpm > 200) {
+          setLiveFeedback(prev => [...prev.slice(-4), {
+            id: Date.now().toString(),
+            message: `Speaking too fast at ${wpm} WPM - try slowing down`,
+            type: 'warning',
+            timestamp: Date.now()
+          }]);
+        } else if (wpm < 100 && wpm > 0) {
+          setLiveFeedback(prev => [...prev.slice(-4), {
+            id: Date.now().toString(),
+            message: `Speaking slowly at ${wpm} WPM - consider increasing pace`,
+            type: 'info',
+            timestamp: Date.now()
+          }]);
+        }
+
+        // Generate body language insights
+        if (sessionDuration > 10 && sessionDuration % 15 === 0) {
+          const bodyLanguageTips = [
+            "Keep your shoulders relaxed and avoid hunching",
+            "Use natural hand gestures to emphasize points",
+            "Maintain good posture - stand or sit up straight",
+            "Smile naturally to appear more engaging",
+            "Use the 'triangle technique' - look at different points"
+          ];
+          
+          const randomTip = bodyLanguageTips[Math.floor(Math.random() * bodyLanguageTips.length)];
+          setLiveFeedback(prev => [...prev.slice(-4), {
+            id: Date.now().toString(),
+            message: `Body Language Tip: ${randomTip}`,
+            type: 'info',
+            timestamp: Date.now()
+          }]);
+        }
+
+        // Voice quality insights
+        if (finalTranscript.length > 50 && sessionDuration % 20 === 0) {
+          const voiceTips = [
+            "Vary your pitch to avoid monotone delivery",
+            "Use pauses for emphasis instead of filler words",
+            "Project your voice from your diaphragm",
+            "Speak with conviction and confidence",
+            "Practice breathing exercises for better control"
+          ];
+          
+          const randomVoiceTip = voiceTips[Math.floor(Math.random() * voiceTips.length)];
+          setLiveFeedback(prev => [...prev.slice(-4), {
+            id: Date.now().toString(),
+            message: `Voice Tip: ${randomVoiceTip}`,
+            type: 'info',
             timestamp: Date.now()
           }]);
         }
@@ -514,43 +566,52 @@ export default function SimplifiedPracticePage() {
           {/* Key Stats */}
           <div className="space-y-4">
             
-            {/* Live Metrics */}
+            {/* Live Feedback Insights */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Live Metrics</CardTitle>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5" />
+                  Live Insights
+                </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium flex items-center gap-1">
-                      <Eye className="w-4 h-4" />
-                      Eye Contact
-                    </span>
-                    <span className="text-sm font-bold">{Math.round(metrics.eyeContact)}%</span>
+              <CardContent className="space-y-3">
+                {liveFeedback.length === 0 ? (
+                  <div className="text-center text-gray-500 py-4">
+                    <Activity className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">Start speaking to get live feedback</p>
                   </div>
-                  <Progress value={metrics.eyeContact} className="h-2" />
-                </div>
+                ) : (
+                  liveFeedback.slice(-3).map((feedback) => (
+                    <div 
+                      key={feedback.id}
+                      className={`p-3 rounded-lg border-l-4 ${
+                        feedback.type === 'success' 
+                          ? 'bg-green-50 border-green-400 text-green-800' 
+                          : feedback.type === 'warning'
+                          ? 'bg-yellow-50 border-yellow-400 text-yellow-800'
+                          : 'bg-blue-50 border-blue-400 text-blue-800'
+                      }`}
+                    >
+                      <p className="text-sm font-medium">{feedback.message}</p>
+                      <p className="text-xs opacity-75 mt-1">
+                        {new Date(feedback.timestamp).toLocaleTimeString()}
+                      </p>
+                    </div>
+                  ))
+                )}
                 
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium flex items-center gap-1">
-                      <TrendingUp className="w-4 h-4" />
-                      Confidence
-                    </span>
-                    <span className="text-sm font-bold">{Math.round(metrics.confidence)}%</span>
+                {/* Quick Stats */}
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <div className="grid grid-cols-2 gap-4 text-center">
+                    <div>
+                      <div className="text-2xl font-bold text-blue-600">{metrics.wordsPerMinute}</div>
+                      <div className="text-xs text-gray-500">WPM</div>
+                    </div>
+                    <div>
+                      <div className="text-2xl font-bold text-red-600">{metrics.fillerWordCount}</div>
+                      <div className="text-xs text-gray-500">Fillers</div>
+                    </div>
                   </div>
-                  <Progress value={metrics.confidence} className="h-2" />
-                </div>
-                
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium flex items-center gap-1">
-                      <Users className="w-4 h-4" />
-                      Engagement
-                    </span>
-                    <span className="text-sm font-bold">{Math.round(metrics.engagement)}%</span>
-                  </div>
-                  <Progress value={metrics.engagement} className="h-2" />
                 </div>
               </CardContent>
             </Card>
