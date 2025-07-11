@@ -8,6 +8,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useAuth } from "@/hooks/useAuth";
 import { Shield, Eye, Database, Download, Trash2, Lock, Globe, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -93,12 +94,37 @@ export default function PrivacySettings() {
         description: "Your data has been exported and downloaded successfully!",
       });
     } catch (error) {
+      console.error('Data export error:', error);
       toast({
         title: "Export Failed",
         description: "Failed to export your data. Please try again.",
         variant: "destructive",
       });
     }
+  };
+
+  const handleDataDeletion = async () => {
+    try {
+      await apiRequest('/api/delete-user-data', 'DELETE', {});
+      
+      toast({
+        title: "Data Deleted",
+        description: "All your data has been permanently deleted. You will be logged out.",
+      });
+      
+      // Log out user after deletion
+      setTimeout(() => {
+        window.location.href = '/api/auth/logout';
+      }, 2000);
+    } catch (error) {
+      console.error('Data deletion error:', error);
+      toast({
+        title: "Deletion Failed",
+        description: "Failed to delete your data. Please try again.",
+        variant: "destructive",
+      });
+    }
+    setShowDataDeletion(false);
   };
 
   return (
@@ -387,6 +413,34 @@ export default function PrivacySettings() {
           </Button>
         </form>
       </Form>
+
+      {/* Data Deletion Confirmation Dialog */}
+      <AlertDialog open={showDataDeletion} onOpenChange={setShowDataDeletion}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete All Data</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action will permanently delete all your data including:
+              <ul className="list-disc list-inside mt-2 space-y-1">
+                <li>Practice sessions and recordings</li>
+                <li>Progress analytics and insights</li>
+                <li>Profile and settings</li>
+                <li>AI coach personalization</li>
+              </ul>
+              This action cannot be undone. Are you sure you want to proceed?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDataDeletion}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Yes, Delete Everything
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

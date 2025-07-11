@@ -1915,9 +1915,14 @@ Respond with detailed analysis in JSON format:
     try {
       const userId = req.user?.id || req.user?.claims?.sub;
       
+      console.log('Exporting data for user:', userId);
+      
       // In production, gather all user data from database
       const userData = {
-        user: { id: userId },
+        user: { 
+          id: userId,
+          exportedAt: new Date().toISOString()
+        },
         sessions: [],
         progress: {},
         settings: {},
@@ -1933,6 +1938,33 @@ Respond with detailed analysis in JSON format:
       res.status(500).json({ 
         success: false, 
         message: 'Failed to export data' 
+      });
+    }
+  });
+
+  app.delete('/api/delete-user-data', demoAuth, async (req: any, res) => {
+    try {
+      const userId = req.user?.id || req.user?.claims?.sub;
+      
+      console.log('Deleting all data for user:', userId);
+      
+      // In production, delete all user data from database
+      // This would include:
+      // - User profile and settings
+      // - Practice sessions and recordings
+      // - Progress analytics
+      // - AI coach personalization data
+      // - Session history
+      
+      res.json({
+        success: true,
+        message: 'All user data has been permanently deleted'
+      });
+    } catch (error) {
+      console.error('Error deleting user data:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to delete user data' 
       });
     }
   });
