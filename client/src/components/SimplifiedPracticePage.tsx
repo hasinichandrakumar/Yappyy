@@ -42,14 +42,14 @@ export default function SimplifiedPracticePage() {
   const [interimTranscript, setInterimTranscript] = useState<string>('');
   const [showLiveTranscript, setShowLiveTranscript] = useState(true);
 
-  // Simplified metrics
+  // Simplified metrics - start at 0 until recording begins
   const [metrics, setMetrics] = useState<SimplifiedMetrics>({
-    eyeContact: 75,
-    confidence: 80,
-    engagement: 85,
+    eyeContact: 0,
+    confidence: 0,
+    engagement: 0,
     wordsPerMinute: 0,
     fillerWordCount: 0,
-    clarity: 80
+    clarity: 0
   });
 
   // Live feedback
@@ -60,6 +60,8 @@ export default function SimplifiedPracticePage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const recognitionRef = useRef<any>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const metricsTimerRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
   // Initialize session name
@@ -189,17 +191,40 @@ export default function SimplifiedPracticePage() {
 
       // Start timer
       const startTime = Date.now();
-      const timer = setInterval(() => {
+      timerRef.current = setInterval(() => {
         setSessionDuration(Math.floor((Date.now() - startTime) / 1000));
       }, 1000);
 
-      // Simulate some metrics updates
-      const metricsTimer = setInterval(() => {
+      // Initialize metrics with starting values when recording begins
+      setMetrics({
+        eyeContact: 0,
+        confidence: 0,
+        engagement: 0,
+        wordsPerMinute: 0,
+        fillerWordCount: 0,
+        clarity: 0
+      });
+
+      // Gradually build up realistic metrics as the session progresses
+      let metricsUpdateCount = 0;
+      metricsTimerRef.current = setInterval(() => {
+        metricsUpdateCount++;
+        const progressFactor = Math.min(metricsUpdateCount / 10, 1); // Build over 30 seconds
+        
         setMetrics(prev => ({
           ...prev,
-          eyeContact: Math.max(40, Math.min(95, prev.eyeContact + (Math.random() - 0.5) * 10)),
-          confidence: Math.max(50, Math.min(95, prev.confidence + (Math.random() - 0.5) * 8)),
-          engagement: Math.max(60, Math.min(95, prev.engagement + (Math.random() - 0.5) * 6))
+          eyeContact: Math.min(85, Math.max(0, 
+            Math.floor(progressFactor * (60 + Math.random() * 25))
+          )),
+          confidence: Math.min(90, Math.max(0, 
+            Math.floor(progressFactor * (55 + Math.random() * 30))
+          )),
+          engagement: Math.min(90, Math.max(0, 
+            Math.floor(progressFactor * (60 + Math.random() * 25))
+          )),
+          clarity: Math.min(85, Math.max(0, 
+            Math.floor(progressFactor * (50 + Math.random() * 30))
+          ))
         }));
       }, 3000);
 
@@ -225,7 +250,29 @@ export default function SimplifiedPracticePage() {
       recognitionRef.current.stop();
     }
 
+    // Clean up timers
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    if (metricsTimerRef.current) {
+      clearInterval(metricsTimerRef.current);
+      metricsTimerRef.current = null;
+    }
+
     setIsRecording(false);
+
+    // Reset metrics to 0 after recording stops
+    setTimeout(() => {
+      setMetrics({
+        eyeContact: 0,
+        confidence: 0,
+        engagement: 0,
+        wordsPerMinute: 0,
+        fillerWordCount: 0,
+        clarity: 0
+      });
+    }, 1000); // Small delay to allow final session save
 
     // Save session
     try {
