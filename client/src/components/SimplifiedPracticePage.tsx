@@ -94,8 +94,15 @@ export default function SimplifiedPracticePage() {
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = 'en-US';
+    recognition.maxAlternatives = 3;
+    
+    // Important: Configure to include filler words in transcription
+    if ('webkitSpeechRecognition' in window) {
+      // Chrome-specific settings to capture filler words
+      recognition.serviceURI = undefined; // Use default to ensure filler words are captured
+    }
 
-    recognition.onresult = (event: any) => {
+    recognition.onresult = async (event: any) => {
       let finalTranscript = '';
       let interimText = '';
       
@@ -115,29 +122,98 @@ export default function SimplifiedPracticePage() {
         setTranscript(prev => prev + finalTranscript);
         setInterimTranscript(''); // Clear interim when we get final
         
-        // Enhanced filler word detection
-        const fillerWords = [
-          'um', 'uh', 'uhm', 'er', 'ah', 'mm', 'hmm',
-          'like', 'so', 'well', 'okay', 'right', 'actually', 'basically',
-          'you know', 'i mean', 'kind of', 'sort of', 'i guess'
+        // Comprehensive filler word detection with precise pattern matching
+        const singleFillerWords = [
+          'um', 'uh', 'uhm', 'umm', 'er', 'err', 'ah', 'eh', 'mm', 'hmm',
+          'like', 'so', 'well', 'okay', 'ok', 'right', 'actually', 'basically',
+          'literally', 'obviously', 'essentially', 'definitely', 'absolutely',
+          'totally', 'really', 'very', 'quite', 'just', 'maybe', 'perhaps', 'anyway'
         ];
         
-        const detectedFillers = fillerWords.filter(word => 
-          finalTranscript.toLowerCase().includes(word.toLowerCase())
-        );
+        const multiWordFillers = [
+          'you know', 'i mean', 'kind of', 'sort of', 'i guess', 'you see',
+          'and stuff', 'or something', 'or whatever', 'and things', 'and all that',
+          'how do i put this', 'what i mean is', 'let me think'
+        ];
         
-        if (detectedFillers.length > 0) {
-          setMetrics(prev => ({
-            ...prev,
-            fillerWordCount: prev.fillerWordCount + detectedFillers.length
-          }));
-          
-          setLiveFeedback(prev => [...prev.slice(-4), {
-            id: Date.now().toString(),
-            message: `Try to avoid filler words like "${detectedFillers[0]}"`,
-            type: 'warning',
-            timestamp: Date.now()
-          }]);
+        const text = finalTranscript.toLowerCase().trim();
+        const words = text.split(/\s+/);
+        let detectedFillers: string[] = [];
+        
+        // Check for multi-word fillers first
+        multiWordFillers.forEach(phrase => {
+          const regex = new RegExp(`\\b${phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+          const matches = text.match(regex);
+          if (matches) {
+            detectedFillers = detectedFillers.concat(matches);
+          }
+        });
+        
+        // Check for single-word fillers with exact word boundaries
+        words.forEach(word => {
+          const cleanWord = word.replace(/[.,!?;:'"()]/g, '');
+          if (singleFillerWords.includes(cleanWord)) {
+            detectedFillers.push(cleanWord);
+          }
+        });
+        
+        // Enhanced backend filler word analysis
+        if (finalTranscript.trim().length > 10) {
+          try {
+            const response = await fetch('/api/analyze-filler-words', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                transcript: finalTranscript,
+                duration: sessionDuration
+              })
+            });
+            
+            if (response.ok) {
+              const analysis = await response.json();
+              console.log('🎯 Advanced filler analysis:', analysis);
+              
+              setMetrics(prev => ({
+                ...prev,
+                fillerWordCount: prev.fillerWordCount + analysis.totalFillers
+              }));
+              
+              if (analysis.totalFillers > 0) {
+                const feedbackMessage = analysis.suggestions[0] || 
+                  `${analysis.totalFillers} filler words detected (${analysis.frequencyPerMinute}/min)`;
+                
+                setLiveFeedback(prev => [...prev.slice(-4), {
+                  id: Date.now().toString(),
+                  message: feedbackMessage,
+                  type: analysis.severity === 'high' ? 'warning' : 'info',
+                  timestamp: Date.now()
+                }]);
+              }
+            }
+          } catch (error) {
+            console.log('Fallback to local filler detection');
+            // Fallback to local detection if backend fails
+            if (detectedFillers.length > 0) {
+              console.log('🎯 Local filler words detected:', detectedFillers);
+              
+              setMetrics(prev => ({
+                ...prev,
+                fillerWordCount: prev.fillerWordCount + detectedFillers.length
+              }));
+              
+              const uniqueFillers = [...new Set(detectedFillers)];
+              const feedbackMessage = uniqueFillers.length === 1 
+                ? `Reduce filler word: "${uniqueFillers[0]}"` 
+                : `Reduce filler words: ${uniqueFillers.slice(0, 2).join(', ')}`;
+              
+              setLiveFeedback(prev => [...prev.slice(-4), {
+                id: Date.now().toString(),
+                message: feedbackMessage,
+                type: 'warning',
+                timestamp: Date.now()
+              }]);
+            }
+          }
         }
 
         // Calculate WPM

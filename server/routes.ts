@@ -263,6 +263,124 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
 
+  // Comprehensive filler word detection endpoint
+  app.post('/api/analyze-filler-words', async (req: any, res) => {
+    try {
+      const { transcript, duration = 10 } = req.body;
+      
+      if (!transcript) {
+        return res.status(400).json({ error: 'Transcript is required' });
+      }
+      
+      console.log('🎯 Analyzing filler words in transcript:', transcript.substring(0, 100) + '...');
+      
+      // Enhanced filler word patterns
+      const singleFillers = [
+        'um', 'uh', 'uhm', 'umm', 'er', 'err', 'ah', 'eh', 'mm', 'hmm',
+        'like', 'so', 'well', 'okay', 'ok', 'right', 'actually', 'basically',
+        'literally', 'obviously', 'essentially', 'definitely', 'absolutely',
+        'totally', 'really', 'very', 'quite', 'just', 'maybe', 'perhaps', 'anyway'
+      ];
+      
+      const multiWordFillers = [
+        'you know', 'i mean', 'kind of', 'sort of', 'i guess', 'you see',
+        'and stuff', 'or something', 'or whatever', 'and things', 'and all that',
+        'how do i put this', 'what i mean is', 'let me think', 'let me see'
+      ];
+      
+      const text = transcript.toLowerCase().trim();
+      const words = text.split(/\s+/);
+      let detectedFillers: { word: string; count: number; positions: number[] }[] = [];
+      let totalCount = 0;
+      
+      // Analyze multi-word fillers
+      multiWordFillers.forEach(phrase => {
+        const regex = new RegExp(`\\b${phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+        const matches = [...text.matchAll(regex)];
+        if (matches.length > 0) {
+          const positions = matches.map(match => match.index || 0);
+          detectedFillers.push({
+            word: phrase,
+            count: matches.length,
+            positions
+          });
+          totalCount += matches.length;
+        }
+      });
+      
+      // Analyze single-word fillers
+      const fillerCounts: { [key: string]: { count: number; positions: number[] } } = {};
+      
+      words.forEach((word, index) => {
+        const cleanWord = word.replace(/[.,!?;:'"()]/g, '');
+        if (singleFillers.includes(cleanWord)) {
+          if (!fillerCounts[cleanWord]) {
+            fillerCounts[cleanWord] = { count: 0, positions: [] };
+          }
+          fillerCounts[cleanWord].count++;
+          fillerCounts[cleanWord].positions.push(index);
+          totalCount++;
+        }
+      });
+      
+      // Convert to array format
+      Object.entries(fillerCounts).forEach(([word, data]) => {
+        detectedFillers.push({
+          word,
+          count: data.count,
+          positions: data.positions
+        });
+      });
+      
+      // Calculate metrics
+      const timeInMinutes = duration / 60;
+      const frequencyPerMinute = timeInMinutes > 0 ? totalCount / timeInMinutes : 0;
+      const wordCount = words.length;
+      const fillerPercentage = wordCount > 0 ? (totalCount / wordCount) * 100 : 0;
+      
+      // Generate severity assessment
+      let severity = 'excellent';
+      if (frequencyPerMinute > 5) severity = 'high';
+      else if (frequencyPerMinute > 3) severity = 'moderate';
+      else if (frequencyPerMinute > 1) severity = 'low';
+      
+      // Generate coaching suggestions
+      const suggestions = [];
+      if (totalCount > 0) {
+        const topFiller = detectedFillers.reduce((prev, current) => 
+          (prev.count > current.count) ? prev : current
+        );
+        suggestions.push(`Focus on reducing "${topFiller.word}" - detected ${topFiller.count} times`);
+        
+        if (frequencyPerMinute > 3) {
+          suggestions.push('Practice pausing instead of using filler words');
+          suggestions.push('Take deeper breaths to give yourself thinking time');
+        }
+      }
+      
+      const analysis = {
+        totalFillers: totalCount,
+        frequencyPerMinute: Math.round(frequencyPerMinute * 10) / 10,
+        fillerPercentage: Math.round(fillerPercentage * 10) / 10,
+        severity,
+        detectedFillers: detectedFillers.sort((a, b) => b.count - a.count),
+        suggestions,
+        analysis: {
+          mostCommonFiller: detectedFillers.length > 0 ? detectedFillers[0].word : null,
+          improvement: frequencyPerMinute < 2 ? 'excellent' : 'needs_improvement',
+          confidence: totalCount > 5 ? 0.95 : 0.8
+        }
+      };
+      
+      console.log('📊 Filler analysis result:', analysis);
+      res.json(analysis);
+      
+    } catch (error) {
+      console.error('Error analyzing filler words:', error);
+      res.status(500).json({ error: 'Failed to analyze filler words' });
+    }
+  });
+
   // Get user practice sessions
   app.get("/api/practice-sessions", async (req: any, res) => {
     try {
