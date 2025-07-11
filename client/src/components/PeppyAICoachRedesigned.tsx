@@ -272,17 +272,18 @@ export default function PeppyAICoachRedesigned() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
       {/* Header Section */}
-      <div className="text-center py-12 px-6">
+      <div className="text-center py-16 px-6 mb-8">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
+          className="mb-8"
         >
           <PeppyParrot mood="happy" size="large" isAnimated={true} />
         </motion.div>
         
         <motion.h1
-          className="text-5xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-pink-600 bg-clip-text text-transparent mt-6 mb-4"
+          className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-pink-600 bg-clip-text text-transparent mb-6"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
@@ -291,7 +292,7 @@ export default function PeppyAICoachRedesigned() {
         </motion.h1>
         
         <motion.p
-          className="text-xl text-gray-600 mb-6"
+          className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
@@ -304,44 +305,44 @@ export default function PeppyAICoachRedesigned() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.7 }}
         >
-          <Badge className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 text-sm">
-            <Brain className="w-4 h-4 mr-2" />
+          <Badge className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 text-base font-medium">
+            <Brain className="w-5 h-5 mr-3" />
             Neural Network v3.0 • Multi-Modal Analysis • Transformer Models
           </Badge>
         </motion.div>
       </div>
 
       {/* Main Interface */}
-      <div className="max-w-7xl mx-auto px-6 pb-12">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="max-w-7xl mx-auto px-6 pb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Main Coaching Area */}
           <div className="lg:col-span-3">
             <Card className="bg-white/70 backdrop-blur-sm border-purple-200 shadow-xl">
-              <CardHeader className="bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-t-lg">
-                <CardTitle className="flex items-center gap-3">
+              <CardHeader className="bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-t-lg p-6">
+                <CardTitle className="flex items-center gap-4">
                   <PeppyParrot mood="encouraging" size="small" isAnimated={true} />
-                  <div>
-                    <h3 className="text-lg font-semibold">Your Personal Speech Coach</h3>
-                    <p className="text-purple-100 text-sm">Personalized coaching based on your unique patterns</p>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-semibold mb-1">Your Personal Speech Coach</h3>
+                    <p className="text-purple-100 text-base">Personalized coaching based on your unique patterns</p>
                   </div>
                   {currentGoal && (
-                    <Badge className="bg-white/20 text-white ml-auto">
+                    <Badge className="bg-white/20 text-white px-4 py-2">
                       {currentGoal.charAt(0).toUpperCase() + currentGoal.slice(1)}
                     </Badge>
                   )}
                 </CardTitle>
               </CardHeader>
               
-              <CardContent className="p-6">
+              <CardContent className="p-8">
                 {!currentGoal && (
-                  <div className="mb-6">
-                    <h4 className="text-lg font-semibold text-gray-800 mb-3">What would you like to work on today?</h4>
+                  <div className="mb-8">
+                    <h4 className="text-xl font-semibold text-gray-800 mb-4">What would you like to work on today?</h4>
                     <CoachingGoals onGoalSelect={handleGoalSelection} />
                   </div>
                 )}
                 
                 {/* Messages Area */}
-                <div className="h-96 overflow-y-auto mb-4 space-y-2">
+                <div className="h-[480px] overflow-y-auto mb-6 space-y-3 px-2">
                   {messages.map((message) => (
                     <ChatMessage
                       key={message.id}
@@ -352,7 +353,7 @@ export default function PeppyAICoachRedesigned() {
                   ))}
                   
                   {isTyping && (
-                    <div className="flex items-center gap-2 text-gray-500 text-sm">
+                    <div className="flex items-center gap-3 text-gray-500 text-sm py-4">
                       <PeppyParrot mood="thinking" size="small" />
                       <span>Peppy is analyzing your patterns...</span>
                       <motion.div
@@ -370,29 +371,29 @@ export default function PeppyAICoachRedesigned() {
                 </div>
                 
                 {/* Input Area */}
-                <div className="flex gap-3">
+                <div className="flex gap-4">
                   <div className="flex-1 relative">
                     <Input
                       value={inputMessage}
                       onChange={(e) => setInputMessage(e.target.value)}
                       placeholder="Share your speaking challenges or ask for personalized advice..."
-                      className="pr-12 bg-white/80 border-purple-200"
+                      className="pr-16 bg-white/80 border-purple-200 h-12 text-base"
                       onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                     />
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="absolute right-1 top-1/2 -translate-y-1/2 text-purple-600"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-purple-600 hover:bg-purple-50"
                       onClick={() => setIsRecording(!isRecording)}
                     >
-                      <Mic className={`w-4 h-4 ${isRecording ? 'text-red-500' : ''}`} />
+                      <Mic className={`w-5 h-5 ${isRecording ? 'text-red-500' : ''}`} />
                     </Button>
                   </div>
                   <Button
                     onClick={handleSendMessage}
-                    className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
+                    className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 h-12 px-6"
                   >
-                    <Send className="w-4 h-4" />
+                    <Send className="w-5 h-5" />
                   </Button>
                 </div>
               </CardContent>
@@ -403,36 +404,36 @@ export default function PeppyAICoachRedesigned() {
           <div className="space-y-6">
             {/* Your Progress Trends */}
             <Card className="bg-white/70 backdrop-blur-sm border-purple-200">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-purple-700">
-                  <Brain className="w-5 h-5" />
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-3 text-purple-700 text-lg">
+                  <Brain className="w-6 h-6" />
                   Your Insights
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-0">
                 <PersonalizedInsights userId={user?.id} />
               </CardContent>
             </Card>
 
             {/* Weekly Focus */}
             <Card className="bg-white/70 backdrop-blur-sm border-purple-200">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-purple-700">
-                  <Target className="w-5 h-5" />
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-3 text-purple-700 text-lg">
+                  <Target className="w-6 h-6" />
                   This Week's Focus
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                    <h4 className="font-semibold text-blue-800 mb-1">Reduce Filler Words</h4>
-                    <p className="text-sm text-blue-600">Target: &lt;3 "um"s per minute</p>
-                    <Progress value={75} className="h-2 mt-2" />
+              <CardContent className="pt-0">
+                <div className="space-y-4">
+                  <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <h4 className="font-semibold text-blue-800 mb-2">Reduce Filler Words</h4>
+                    <p className="text-sm text-blue-600 mb-3">Target: &lt;3 "um"s per minute</p>
+                    <Progress value={75} className="h-3" />
                   </div>
-                  <div className="p-3 bg-green-50 rounded-lg border border-green-200">
-                    <h4 className="font-semibold text-green-800 mb-1">Eye Contact</h4>
-                    <p className="text-sm text-green-600">Target: 70% audience engagement</p>
-                    <Progress value={85} className="h-2 mt-2" />
+                  <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                    <h4 className="font-semibold text-green-800 mb-2">Eye Contact</h4>
+                    <p className="text-sm text-green-600 mb-3">Target: 70% audience engagement</p>
+                    <Progress value={85} className="h-3" />
                   </div>
                 </div>
               </CardContent>
@@ -440,24 +441,24 @@ export default function PeppyAICoachRedesigned() {
 
             {/* Quick Coaching Actions */}
             <Card className="bg-white/70 backdrop-blur-sm border-purple-200">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-purple-700">
-                  <Sparkles className="w-5 h-5" />
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-3 text-purple-700 text-lg">
+                  <Sparkles className="w-6 h-6" />
                   Quick Actions
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <Button variant="outline" size="sm" className="w-full justify-start">
-                    <Play className="w-4 h-4 mr-2" />
+              <CardContent className="pt-0">
+                <div className="space-y-3">
+                  <Button variant="outline" size="default" className="w-full justify-start h-12 text-base">
+                    <Play className="w-5 h-5 mr-3" />
                     Practice Session
                   </Button>
-                  <Button variant="outline" size="sm" className="w-full justify-start">
-                    <Trophy className="w-4 h-4 mr-2" />
+                  <Button variant="outline" size="default" className="w-full justify-start h-12 text-base">
+                    <Trophy className="w-5 h-5 mr-3" />
                     View Progress
                   </Button>
-                  <Button variant="outline" size="sm" className="w-full justify-start">
-                    <Settings className="w-4 h-4 mr-2" />
+                  <Button variant="outline" size="default" className="w-full justify-start h-12 text-base">
+                    <Settings className="w-5 h-5 mr-3" />
                     Update Goals
                   </Button>
                 </div>
