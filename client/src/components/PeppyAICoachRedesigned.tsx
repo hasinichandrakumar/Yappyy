@@ -11,7 +11,8 @@ import {
   Award, MessageCircle, BarChart3, Zap, Star,
   ChevronRight, Play, Pause, Volume2, Mic, 
   Send, Timer, Eye, Trophy, Settings, Activity,
-  Layers, Cpu, Database, TrendingDown
+  Layers, Cpu, Database, TrendingDown, User,
+  ArrowRight, Bell, X
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { apiRequest } from '@/lib/queryClient';
@@ -431,6 +432,61 @@ const CoachingGoals = ({ onGoalSelect }: { onGoalSelect: (goal: string) => void 
   );
 };
 
+// First Time User Notification Component
+const FirstTimeUserNotification = ({ onDismiss, onPersonalize }: { onDismiss: () => void; onPersonalize: () => void }) => (
+  <motion.div
+    initial={{ opacity: 0, y: -50 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -50 }}
+    className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-md"
+  >
+    <Card className="bg-gradient-to-r from-purple-600 to-blue-600 text-white border-0 shadow-2xl">
+      <CardContent className="p-4">
+        <div className="flex items-start gap-3">
+          <div className="flex-shrink-0">
+            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+              <Bell className="w-5 h-5" />
+            </div>
+          </div>
+          <div className="flex-1">
+            <h3 className="font-bold text-lg mb-1">Welcome to Yappyy! 🎉</h3>
+            <p className="text-sm text-purple-100 mb-3 leading-relaxed">
+              For the most accurate deep learning results, personalize your profile with your speaking goals and preferences. This helps our neural network provide better coaching!
+            </p>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                onClick={onPersonalize}
+                className="bg-white text-purple-600 hover:bg-purple-50 font-semibold"
+              >
+                <User className="w-4 h-4 mr-1" />
+                Personalize Profile
+                <ArrowRight className="w-4 h-4 ml-1" />
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={onDismiss}
+                className="text-white hover:bg-white/20"
+              >
+                Later
+              </Button>
+            </div>
+          </div>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={onDismiss}
+            className="text-white hover:bg-white/20 p-1"
+          >
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  </motion.div>
+);
+
 export default function PeppyAICoachRedesigned() {
   const { user } = useAuth();
   const [messages, setMessages] = useState([
@@ -446,6 +502,47 @@ export default function PeppyAICoachRedesigned() {
   const [currentCoachingMode, setCurrentCoachingMode] = useState('conversation');
   const [isTyping, setIsTyping] = useState(false);
   const [currentGoal, setCurrentGoal] = useState<string | null>(null);
+  const [showFirstTimeNotification, setShowFirstTimeNotification] = useState(false);
+
+  // Query practice sessions to determine if this is a first-time user
+  const { data: sessions } = useQuery({
+    queryKey: ['/api/practice-sessions'],
+    enabled: !!user
+  });
+
+  // Check if first-time user (no practice sessions) and show notification
+  useEffect(() => {
+    if (user && sessions && Array.isArray(sessions) && sessions.length === 0) {
+      // Check if notification was dismissed before (using localStorage)
+      const notificationDismissed = localStorage.getItem(`firstTimeNotification_${user.id}`);
+      if (!notificationDismissed) {
+        setShowFirstTimeNotification(true);
+      }
+    }
+  }, [user, sessions]);
+
+  const handleDismissNotification = () => {
+    setShowFirstTimeNotification(false);
+    if (user) {
+      localStorage.setItem(`firstTimeNotification_${user.id}`, 'true');
+    }
+  };
+
+  const handlePersonalizeProfile = () => {
+    setShowFirstTimeNotification(false);
+    if (user) {
+      localStorage.setItem(`firstTimeNotification_${user.id}`, 'true');
+    }
+    // Navigate to profile settings or show profile modal
+    // For now, we'll just show a message in the chat
+    const profileMessage = {
+      id: Date.now(),
+      text: "Great choice! To personalize your profile, you can tell me about your speaking goals, experience level, and what areas you'd like to focus on. This helps my neural network provide more accurate coaching. What's your main speaking goal?",
+      isUser: false,
+      timestamp: new Date().toLocaleTimeString()
+    };
+    setMessages(prev => [...prev, profileMessage]);
+  };
 
 
 
@@ -552,6 +649,15 @@ export default function PeppyAICoachRedesigned() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+      {/* First Time User Notification */}
+      <AnimatePresence>
+        {showFirstTimeNotification && (
+          <FirstTimeUserNotification
+            onDismiss={handleDismissNotification}
+            onPersonalize={handlePersonalizeProfile}
+          />
+        )}
+      </AnimatePresence>
       {/* Header Section */}
       <div className="text-center py-16 px-6 mb-8">
         <motion.div
@@ -595,10 +701,10 @@ export default function PeppyAICoachRedesigned() {
 
       {/* Main Interface */}
       <div className="max-w-7xl mx-auto px-6 pb-16">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 lg:h-[700px]">
           {/* Main Coaching Area */}
-          <div className="lg:col-span-3">
-            <Card className="bg-white/70 backdrop-blur-sm border-purple-200 shadow-xl">
+          <div className="lg:col-span-3 flex">
+            <Card className="bg-white/70 backdrop-blur-sm border-purple-200 shadow-xl flex-1 flex flex-col">
               <CardHeader className="bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-t-lg p-6">
                 <CardTitle className="flex items-center gap-4">
                   <PeppyParrot mood="encouraging" size="small" isAnimated={true} />
@@ -614,7 +720,7 @@ export default function PeppyAICoachRedesigned() {
                 </CardTitle>
               </CardHeader>
               
-              <CardContent className="p-8">
+              <CardContent className="p-8 flex-1 flex flex-col">
                 {!currentGoal && (
                   <div className="mb-8">
                     <h4 className="text-xl font-semibold text-gray-800 mb-4">What would you like to work on today?</h4>
@@ -623,7 +729,7 @@ export default function PeppyAICoachRedesigned() {
                 )}
                 
                 {/* Messages Area */}
-                <div className="h-[480px] overflow-y-auto mb-6 space-y-3 px-2">
+                <div className="flex-1 overflow-y-auto mb-6 space-y-3 px-2 min-h-[400px]">
                   {messages.map((message) => (
                     <ChatMessage
                       key={message.id}
@@ -682,21 +788,19 @@ export default function PeppyAICoachRedesigned() {
           </div>
 
           {/* Sidebar with Personalized Insights */}
-          <div className="space-y-6">
+          <div className="flex">
             {/* Your Progress Trends */}
-            <Card className="bg-white/70 backdrop-blur-sm border-purple-200">
+            <Card className="bg-white/70 backdrop-blur-sm border-purple-200 flex-1 flex flex-col">
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center gap-3 text-purple-700 text-lg">
                   <Brain className="w-6 h-6" />
                   Your Insights
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-0">
+              <CardContent className="pt-0 flex-1 overflow-y-auto">
                 <DeepLearningAnalytics userId={user?.id} />
               </CardContent>
             </Card>
-
-
           </div>
         </div>
       </div>
