@@ -31,7 +31,7 @@ export default function HomePage() {
                   onClick={() => window.location.href = '/api/auth/google'}
                   className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white font-button shadow-lg hover:shadow-xl transition-all duration-300 px-6 py-2"
                 >
-                  Start Learning Here
+                  Sign In
                 </Button>
               )}
             </div>
