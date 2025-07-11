@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Mic, BarChart3, Brain, FileText, Trophy, Target } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Mic, BarChart3, Brain, FileText, Trophy, Target, User, LogOut, Settings } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import SimplifiedPracticePage from "@/components/SimplifiedPracticePage";
 import PeppyAICoach from "@/components/PeppyAICoach";
 import PersonalizedSpeechDNA from "@/components/PersonalizedSpeechDNA";
@@ -11,6 +15,15 @@ import yappyyLogoPath from '@assets/Untitled_design-11600-removebg-preview_17497
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("practice");
+  const { user } = useAuth();
+
+  const handleLogout = () => {
+    window.location.href = "/api/auth/logout";
+  };
+
+  const getInitials = (firstName?: string, lastName?: string) => {
+    return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase() || 'U';
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -24,6 +37,52 @@ export default function Dashboard() {
                 <h1 className="text-xl font-semibold text-gray-900">Public Speaking Coach</h1>
                 <p className="text-sm text-gray-500">AI-Powered Speech Training Platform</p>
               </div>
+            </div>
+            
+            {/* Profile Section */}
+            <div className="flex items-center space-x-4">
+              {user && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src={user.profileImageUrl} alt={user.firstName} />
+                        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-cyan-500 text-white">
+                          {getInitials(user.firstName, user.lastName)}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <div className="flex items-center justify-start gap-2 p-2">
+                      <div className="flex flex-col space-y-1 leading-none">
+                        {user.firstName && (
+                          <p className="font-medium">{user.firstName} {user.lastName}</p>
+                        )}
+                        {user.email && (
+                          <p className="w-[200px] truncate text-sm text-muted-foreground">
+                            {user.email}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="cursor-pointer">
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Profile</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="cursor-pointer">
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>Settings</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="cursor-pointer text-red-600" onClick={handleLogout}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Log out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </div>
           </div>
         </div>
