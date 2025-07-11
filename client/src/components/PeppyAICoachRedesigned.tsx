@@ -696,30 +696,6 @@ export default function PeppyAICoachRedesigned() {
               </CardContent>
             </Card>
 
-            {/* Weekly Focus */}
-            <Card className="bg-white/70 backdrop-blur-sm border-purple-200">
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-3 text-purple-700 text-lg">
-                  <Target className="w-6 h-6" />
-                  This Week's Focus
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="space-y-4">
-                  <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                    <h4 className="font-semibold text-blue-800 mb-2">Reduce Filler Words</h4>
-                    <p className="text-sm text-blue-600 mb-3">Target: &lt;3 "um"s per minute</p>
-                    <Progress value={75} className="h-3" />
-                  </div>
-                  <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                    <h4 className="font-semibold text-green-800 mb-2">Eye Contact</h4>
-                    <p className="text-sm text-green-600 mb-3">Target: 70% audience engagement</p>
-                    <Progress value={85} className="h-3" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
             {/* Quick Coaching Actions */}
             <Card className="bg-white/70 backdrop-blur-sm border-purple-200">
               <CardHeader className="pb-4">
