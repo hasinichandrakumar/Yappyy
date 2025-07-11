@@ -253,9 +253,25 @@ export default function EnhancedAnalysisTab() {
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span className="text-blue-700">Optimal Range: 140-160 WPM</span>
-                        <span className="font-medium text-blue-800">Excellent</span>
+                        <span className="font-medium text-blue-800">
+                          {(() => {
+                            const avgWPM = Math.round(filteredSessions.reduce((sum: number, s: any) => sum + (s.speakingPace || s.averageWPM || 0), 0) / sessionCount);
+                            if (avgWPM === 0) return 'No Data';
+                            if (avgWPM >= 140 && avgWPM <= 160) return 'Excellent';
+                            if (avgWPM >= 120 && avgWPM < 140) return 'Good';
+                            if (avgWPM >= 100 && avgWPM < 120) return 'Developing';
+                            return 'Needs Practice';
+                          })()}
+                        </span>
                       </div>
-                      <Progress value={85} className="h-2 bg-blue-200" />
+                      <Progress value={(() => {
+                        const avgWPM = Math.round(filteredSessions.reduce((sum: number, s: any) => sum + (s.speakingPace || s.averageWPM || 0), 0) / sessionCount);
+                        if (avgWPM === 0) return 0;
+                        if (avgWPM >= 140 && avgWPM <= 160) return 100;
+                        if (avgWPM >= 120 && avgWPM < 140) return 75;
+                        if (avgWPM >= 100 && avgWPM < 120) return 50;
+                        return 25;
+                      })()} className="h-2 bg-blue-200" />
                     </div>
                   </div>
                 </div>
@@ -276,7 +292,16 @@ export default function EnhancedAnalysisTab() {
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span className="text-emerald-700">Clear pronunciation</span>
-                        <span className="font-medium text-emerald-800">Strong</span>
+                        <span className="font-medium text-emerald-800">
+                          {(() => {
+                            const avgClarity = Math.round(filteredSessions.reduce((sum: number, s: any) => sum + (s.clarityScore || 0), 0) / sessionCount);
+                            if (avgClarity === 0) return 'No Data';
+                            if (avgClarity >= 80) return 'Strong';
+                            if (avgClarity >= 60) return 'Good';
+                            if (avgClarity >= 40) return 'Developing';
+                            return 'Needs Practice';
+                          })()}
+                        </span>
                       </div>
                       <Progress value={Math.round(filteredSessions.reduce((sum: number, s: any) => sum + (s.clarityScore || 0), 0) / sessionCount)} className="h-2 bg-emerald-200" />
                     </div>
@@ -299,7 +324,16 @@ export default function EnhancedAnalysisTab() {
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span className="text-purple-700">Volume variation</span>
-                        <span className="font-medium text-purple-800">Good</span>
+                        <span className="font-medium text-purple-800">
+                          {(() => {
+                            const avgVolume = Math.round(filteredSessions.reduce((sum: number, s: any) => sum + (s.volumeConsistency || 0), 0) / sessionCount);
+                            if (avgVolume === 0) return 'No Data';
+                            if (avgVolume >= 80) return 'Excellent';
+                            if (avgVolume >= 60) return 'Good';
+                            if (avgVolume >= 40) return 'Developing';
+                            return 'Needs Practice';
+                          })()}
+                        </span>
                       </div>
                       <Progress value={Math.round(filteredSessions.reduce((sum: number, s: any) => sum + (s.volumeConsistency || 0), 0) / sessionCount)} className="h-2 bg-purple-200" />
                     </div>
@@ -322,7 +356,16 @@ export default function EnhancedAnalysisTab() {
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
                         <span className="text-orange-700">Pitch variation</span>
-                        <span className="font-medium text-orange-800">Developing</span>
+                        <span className="font-medium text-orange-800">
+                          {(() => {
+                            const avgIntonation = Math.round(filteredSessions.reduce((sum: number, s: any) => sum + (s.intonationScore || 0), 0) / sessionCount);
+                            if (avgIntonation === 0) return 'No Data';
+                            if (avgIntonation >= 80) return 'Excellent';
+                            if (avgIntonation >= 60) return 'Good';
+                            if (avgIntonation >= 40) return 'Developing';
+                            return 'Needs Practice';
+                          })()}
+                        </span>
                       </div>
                       <Progress value={Math.round(filteredSessions.reduce((sum: number, s: any) => sum + (s.intonationScore || 0), 0) / sessionCount)} className="h-2 bg-orange-200" />
                     </div>

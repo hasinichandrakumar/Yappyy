@@ -259,35 +259,50 @@ export default function EnhancedPracticeHubFixed() {
             const words = transcript.trim().split(/\s+/).filter(word => word.length > 0);
             const fillerRatio = fillerWords.length / Math.max(words.length, 1);
             
-            // Calculate voice clarity: reduce score based on filler words
-            let clarity = 85; // Base clarity
+            // Calculate voice clarity: start from base of 70 and adjust based on performance
+            let clarity = 70; // Base clarity only when actively speaking
             clarity -= fillerRatio * 30; // Penalty for filler words
             clarity += currentWPM > 150 ? -10 : 0; // Penalty for speaking too fast
             clarity += currentWPM < 100 ? -5 : 0; // Penalty for speaking too slow
             
             setVoiceClarity(Math.round(Math.max(45, Math.min(100, clarity))));
           } else if (isListening) {
-            // Listening but no speech detected
-            setVoiceClarity(65);
+            // Listening but no speech detected - show waiting state
+            setVoiceClarity(0);
           }
 
           // Posture analysis based on session duration and activity
-          let postureBase = 82;
-          const fatigueFactor = Math.max(0, sessionDuration - 300) * 0.02; // Decrease after 5 minutes
-          const activityBonus = isListening ? 3 : 0;
-          const postureScore = postureBase - fatigueFactor + activityBonus;
-          setPostureScore(Math.round(Math.max(55, Math.min(95, postureScore))));
+          if (isListening && transcript.length > 0) {
+            let postureBase = 75; // Only show when actively speaking
+            const fatigueFactor = Math.max(0, sessionDuration - 300) * 0.02; // Decrease after 5 minutes
+            const activityBonus = isListening ? 3 : 0;
+            const postureScore = postureBase - fatigueFactor + activityBonus;
+            setPostureScore(Math.round(Math.max(55, Math.min(95, postureScore))));
+          } else {
+            // No active speech detected
+            setPostureScore(0);
+          }
 
           // Eye contact based on engagement metrics
-          let eyeContactBase = 75;
-          const engagementBonus = transcript.length > 100 ? 8 : transcript.length > 50 ? 4 : 0;
-          const consistencyBonus = sessionDuration > 60 ? 5 : 0;
-          const eyeContact = eyeContactBase + engagementBonus + consistencyBonus;
-          setEyeContactScore(Math.round(Math.max(50, Math.min(95, eyeContact))));
+          if (isListening && transcript.length > 0) {
+            let eyeContactBase = 70; // Only show when actively speaking
+            const engagementBonus = transcript.length > 100 ? 8 : transcript.length > 50 ? 4 : 0;
+            const consistencyBonus = sessionDuration > 60 ? 5 : 0;
+            const eyeContact = eyeContactBase + engagementBonus + consistencyBonus;
+            setEyeContactScore(Math.round(Math.max(50, Math.min(95, eyeContact))));
+          } else {
+            // No active speech detected
+            setEyeContactScore(0);
+          }
 
           // Overall confidence based on weighted performance metrics
-          const weightedScore = (eyeContactScore * 0.3) + (postureScore * 0.3) + (voiceClarity * 0.4);
-          setCurrentConfidenceScore(Math.round(Math.max(40, Math.min(100, weightedScore))));
+          if (eyeContactScore > 0 || postureScore > 0 || voiceClarity > 0) {
+            const weightedScore = (eyeContactScore * 0.3) + (postureScore * 0.3) + (voiceClarity * 0.4);
+            setCurrentConfidenceScore(Math.round(Math.max(40, Math.min(100, weightedScore))));
+          } else {
+            // No active analysis data
+            setCurrentConfidenceScore(0);
+          }
         }
       }, 1000);
     }

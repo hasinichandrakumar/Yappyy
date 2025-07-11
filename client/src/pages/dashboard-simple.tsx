@@ -69,24 +69,17 @@ export default function DashboardSimple() {
             </CardContent>
           </Card>
 
-          {/* Live Metrics Placeholder */}
+          {/* Live Metrics */}
           <Card className="border border-gray-200">
             <CardHeader>
               <CardTitle>Live Performance Feedback</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-green-600">85%</p>
-                  <p className="text-sm text-gray-600">Voice Clarity</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-blue-600">142 WPM</p>
-                  <p className="text-sm text-gray-600">Speaking Pace</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-purple-600">78%</p>
-                  <p className="text-sm text-gray-600">Eye Contact</p>
+                <div className="text-center py-8 text-gray-500">
+                  <BarChart3 className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                  <p className="text-lg font-medium mb-2">No Live Session Active</p>
+                  <p className="text-sm">Start a practice session to see real-time performance metrics</p>
                 </div>
               </div>
             </CardContent>

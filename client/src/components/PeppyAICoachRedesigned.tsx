@@ -106,41 +106,57 @@ const DeepLearningAnalytics = ({ userId }: { userId?: string }) => {
   
   // Calculate neural network-driven trends from actual session data
   const calculateNeuralTrend = (metric: string) => {
-    if (sessions.length < 2) return { value: 0, trend: 'stable', change: '0%', confidence: 0 };
+    if (sessions.length === 0) return { value: 0, trend: 'stable', change: '0%', confidence: 0 };
     
     const recent = sessions.slice(-3);
     const older = sessions.slice(-6, -3);
     
-    let recentAvg = 0, olderAvg = 0;
+    let recentAvg = 0, olderAvg = 0, hasData = false;
     
     switch (metric) {
       case 'Voice Modulation':
-        recentAvg = recent.reduce((sum, s) => sum + (s.voiceClarity || 0), 0) / recent.length;
-        olderAvg = older.length > 0 ? older.reduce((sum, s) => sum + (s.voiceClarity || 0), 0) / older.length : recentAvg;
+        const voiceData = recent.filter(s => s.voiceClarity > 0);
+        if (voiceData.length === 0) return { value: 0, trend: 'stable', change: '0%', confidence: 0 };
+        recentAvg = voiceData.reduce((sum, s) => sum + s.voiceClarity, 0) / voiceData.length;
+        const olderVoiceData = older.filter(s => s.voiceClarity > 0);
+        olderAvg = olderVoiceData.length > 0 ? olderVoiceData.reduce((sum, s) => sum + s.voiceClarity, 0) / olderVoiceData.length : recentAvg;
+        hasData = true;
         break;
       case 'Body Language':
-        recentAvg = recent.reduce((sum, s) => sum + (s.gestureScore || 0), 0) / recent.length;
-        olderAvg = older.length > 0 ? older.reduce((sum, s) => sum + (s.gestureScore || 0), 0) / older.length : recentAvg;
+        const gestureData = recent.filter(s => s.gestureScore > 0);
+        if (gestureData.length === 0) return { value: 0, trend: 'stable', change: '0%', confidence: 0 };
+        recentAvg = gestureData.reduce((sum, s) => sum + s.gestureScore, 0) / gestureData.length;
+        const olderGestureData = older.filter(s => s.gestureScore > 0);
+        olderAvg = olderGestureData.length > 0 ? olderGestureData.reduce((sum, s) => sum + s.gestureScore, 0) / olderGestureData.length : recentAvg;
+        hasData = true;
         break;
       case 'Content Structure':
-        recentAvg = recent.reduce((sum, s) => sum + (s.coherenceScore || 75), 0) / recent.length;
-        olderAvg = older.length > 0 ? older.reduce((sum, s) => sum + (s.coherenceScore || 75), 0) / older.length : recentAvg;
+        const contentData = recent.filter(s => s.coherenceScore > 0);
+        if (contentData.length === 0) return { value: 0, trend: 'stable', change: '0%', confidence: 0 };
+        recentAvg = contentData.reduce((sum, s) => sum + s.coherenceScore, 0) / contentData.length;
+        const olderContentData = older.filter(s => s.coherenceScore > 0);
+        olderAvg = olderContentData.length > 0 ? olderContentData.reduce((sum, s) => sum + s.coherenceScore, 0) / olderContentData.length : recentAvg;
+        hasData = true;
         break;
       case 'Purpose Alignment':
-        // Analyze purpose-specific performance
-        const purposeScore = recent.reduce((sum, s) => {
-          const wordCount = s.wordCount || 1;
-          const fillerRate = (s.fillerWords?.length || 0) / wordCount;
+        // Only calculate if we have meaningful data
+        const sessionsWithWords = recent.filter(s => s.wordCount > 0);
+        if (sessionsWithWords.length === 0) return { value: 0, trend: 'stable', change: '0%', confidence: 0 };
+        const purposeScore = sessionsWithWords.reduce((sum, s) => {
+          const fillerRate = (s.fillerWords?.length || 0) / s.wordCount;
           return sum + ((1 - fillerRate) * 100);
-        }, 0) / recent.length;
+        }, 0) / sessionsWithWords.length;
         recentAvg = purposeScore;
-        olderAvg = older.length > 0 ? older.reduce((sum, s) => {
-          const wordCount = s.wordCount || 1;
-          const fillerRate = (s.fillerWords?.length || 0) / wordCount;
+        const olderSessionsWithWords = older.filter(s => s.wordCount > 0);
+        olderAvg = olderSessionsWithWords.length > 0 ? olderSessionsWithWords.reduce((sum, s) => {
+          const fillerRate = (s.fillerWords?.length || 0) / s.wordCount;
           return sum + ((1 - fillerRate) * 100);
-        }, 0) / older.length : recentAvg;
+        }, 0) / olderSessionsWithWords.length : recentAvg;
+        hasData = true;
         break;
     }
+    
+    if (!hasData) return { value: 0, trend: 'stable', change: '0%', confidence: 0 };
     
     const change = ((recentAvg - olderAvg) / Math.max(olderAvg, 1)) * 100;
     const confidence = Math.min(95, 60 + (sessions.length * 5)); // Higher confidence with more data
@@ -153,13 +169,13 @@ const DeepLearningAnalytics = ({ userId }: { userId?: string }) => {
     };
   };
 
-  // Enhanced neural metrics using GraphQL data
+  // Enhanced neural metrics using GraphQL data - only show authentic metrics
   const neuralMetrics = neuralAnalysis ? [
     { 
       metric: 'Voice Modulation', 
       value: Math.round(neuralAnalysis.voiceModulation?.clarity || 0),
-      trend: 'up', // Determined by GraphQL trends
-      change: `+${((neuralAnalysis.voiceModulation?.modulation || 0) - 70).toFixed(1)}%`,
+      trend: neuralAnalysis.voiceModulation?.clarity > 0 ? 'stable' : 'stable',
+      change: '0%', // Only show change when we have historical data
       confidence: neuralAnalysis.voiceModulation?.confidence || 0,
       neural: 'Enhanced Prosody Analysis',
       description: 'Advanced pitch variation, prosody, and vocal clarity analysis'
@@ -167,8 +183,8 @@ const DeepLearningAnalytics = ({ userId }: { userId?: string }) => {
     { 
       metric: 'Body Language', 
       value: Math.round(neuralAnalysis.bodyLanguage?.gestureEffectiveness || 0),
-      trend: neuralAnalysis.bodyLanguage?.gestureEffectiveness > 75 ? 'up' : 'stable',
-      change: `+${((neuralAnalysis.bodyLanguage?.engagement || 0) - 70).toFixed(1)}%`,
+      trend: neuralAnalysis.bodyLanguage?.gestureEffectiveness > 0 ? 'stable' : 'stable',
+      change: '0%', // Only show change when we have historical data
       confidence: neuralAnalysis.bodyLanguage?.confidence || 0,
       neural: 'Vision Transformer CNN',
       description: 'Advanced gesture recognition and posture confidence analysis'
@@ -176,8 +192,8 @@ const DeepLearningAnalytics = ({ userId }: { userId?: string }) => {
     { 
       metric: 'Content Structure', 
       value: Math.round(neuralAnalysis.contentStructure?.coherenceScore || 0),
-      trend: neuralAnalysis.contentStructure?.structure > 80 ? 'up' : 'stable',
-      change: `+${((neuralAnalysis.contentStructure?.logicalFlow || 0) - 75).toFixed(1)}%`,
+      trend: neuralAnalysis.contentStructure?.coherenceScore > 0 ? 'stable' : 'stable',
+      change: '0%', // Only show change when we have historical data
       confidence: neuralAnalysis.contentStructure?.confidence || 0,
       neural: 'Advanced NLP Transformer',
       description: 'Enhanced content flow and audience impact assessment'
@@ -185,13 +201,13 @@ const DeepLearningAnalytics = ({ userId }: { userId?: string }) => {
     { 
       metric: 'Neural Confidence', 
       value: Math.round(neuralAnalysis.confidenceScore || 0),
-      trend: neuralAnalysis.confidenceScore > 80 ? 'up' : 'stable',
-      change: `+${((neuralAnalysis.confidenceScore || 0) - 70).toFixed(1)}%`,
+      trend: neuralAnalysis.confidenceScore > 0 ? 'stable' : 'stable',
+      change: '0%', // Only show change when we have historical data
       confidence: neuralAnalysis.confidenceScore || 0,
       neural: 'Bayesian Confidence Engine',
       description: 'Multi-modal confidence scoring with uncertainty bounds'
     }
-  ] : [
+  ].filter(metric => metric.value > 0) : [ // Only show metrics with actual data
     { 
       metric: 'Voice Modulation', 
       ...calculateNeuralTrend('Voice Modulation'), 
@@ -216,7 +232,7 @@ const DeepLearningAnalytics = ({ userId }: { userId?: string }) => {
       neural: 'Context Awareness AI',
       description: 'Goal achievement and audience engagement'
     }
-  ];
+  ].filter(metric => metric.value > 0); // Only show metrics with actual data
 
   // Enhanced insights using GraphQL neural analysis
   const insights = neuralAnalysis && userProgress ? [
@@ -280,45 +296,55 @@ const DeepLearningAnalytics = ({ userId }: { userId?: string }) => {
       </div>
 
       {/* Deep Learning Metrics */}
-      <div className="space-y-3">
-        {neuralMetrics.map((metric, index) => (
-          <motion.div
-            key={metric.metric}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-700">{metric.metric}</span>
-              <div className="flex items-center gap-2">
-                {metric.trend === 'up' ? (
-                  <TrendingUp className="w-4 h-4 text-green-500" />
-                ) : metric.trend === 'down' ? (
-                  <TrendingDown className="w-4 h-4 text-red-500" />
-                ) : (
-                  <Activity className="w-4 h-4 text-blue-500" />
-                )}
-                <span className={`text-xs font-semibold ${
-                  metric.trend === 'up' ? 'text-green-600' : 
-                  metric.trend === 'down' ? 'text-red-600' : 'text-blue-600'
-                }`}>
-                  {metric.change}
+      {neuralMetrics.length > 0 ? (
+        <div className="space-y-3">
+          {neuralMetrics.map((metric, index) => (
+            <motion.div
+              key={metric.metric}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-700">{metric.metric}</span>
+                <div className="flex items-center gap-2">
+                  {metric.trend === 'up' ? (
+                    <TrendingUp className="w-4 h-4 text-green-500" />
+                  ) : metric.trend === 'down' ? (
+                    <TrendingDown className="w-4 h-4 text-red-500" />
+                  ) : (
+                    <Activity className="w-4 h-4 text-blue-500" />
+                  )}
+                  {metric.change !== '0%' && (
+                    <span className={`text-xs font-semibold ${
+                      metric.trend === 'up' ? 'text-green-600' : 
+                      metric.trend === 'down' ? 'text-red-600' : 'text-blue-600'
+                    }`}>
+                      {metric.change}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <Progress value={metric.value} className="h-3 mb-2" />
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-gray-500">{metric.value}/100 • {metric.confidence}% confidence</span>
+                <span className="text-xs text-purple-600 flex items-center gap-1">
+                  <Brain className="w-3 h-3" />
+                  {metric.neural}
                 </span>
               </div>
-            </div>
-            <Progress value={metric.value} className="h-3 mb-2" />
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-500">{metric.value}/100 • {metric.confidence}% confidence</span>
-              <span className="text-xs text-purple-600 flex items-center gap-1">
-                <Brain className="w-3 h-3" />
-                {metric.neural}
-              </span>
-            </div>
-            <p className="text-xs text-gray-600 mt-1">{metric.description}</p>
-          </motion.div>
-        ))}
-      </div>
+              <p className="text-xs text-gray-600 mt-1">{metric.description}</p>
+            </motion.div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
+          <Brain className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+          <p className="text-lg font-medium mb-2">No Neural Data Available</p>
+          <p className="text-sm">Complete practice sessions to see deep learning analytics</p>
+        </div>
+      )}
 
       {/* AI Insights */}
       <div className="space-y-3">

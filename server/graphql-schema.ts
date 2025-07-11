@@ -155,32 +155,32 @@ export const neuralAnalysisResolvers = {
           purpose: session.purpose || 'General practice',
           voiceMetrics: {
             clarity: session.voiceClarity || 0,
-            pitchVariation: 75, // Calculated from session data
-            modulation: 80,
-            prosody: 70,
+            pitchVariation: 0, // Only show when calculated from actual audio data
+            modulation: 0,
+            prosody: 0,
             fillerWords: session.fillerWords || [],
-            confidence: Math.min(95, 60 + (allSessions.length * 3))
+            confidence: session.voiceClarity > 0 ? Math.min(95, 60 + (allSessions.length * 3)) : 0
           },
           bodyLanguageMetrics: {
             gestureEffectiveness: session.gestureScore || 0,
-            postureScore: 85,
+            postureScore: 0, // Only show when calculated from actual video data
             eyeContact: session.eyeContactScore || 0,
-            engagement: 78,
-            confidence: Math.min(95, 60 + (allSessions.length * 3))
+            engagement: 0,
+            confidence: session.gestureScore > 0 ? Math.min(95, 60 + (allSessions.length * 3)) : 0
           },
           contentMetrics: {
-            coherenceScore: session.coherenceScore || 75,
-            logicalFlow: 82,
-            structure: 88,
-            impact: 75,
-            audienceEngagement: 80,
-            confidence: Math.min(95, 60 + (allSessions.length * 3))
+            coherenceScore: session.coherenceScore || 0,
+            logicalFlow: 0, // Only show when calculated from actual content analysis
+            structure: 0,
+            impact: 0,
+            audienceEngagement: 0,
+            confidence: session.coherenceScore > 0 ? Math.min(95, 60 + (allSessions.length * 3)) : 0
           },
           overallScore: (
             (session.voiceClarity || 0) + 
             (session.gestureScore || 0) + 
             (session.eyeContactScore || 0) + 
-            (session.coherenceScore || 75)
+            (session.coherenceScore || 0)
           ) / 4,
           neuralInsights: generateSessionInsights(session)
         }));
@@ -253,11 +253,11 @@ function calculateVoiceMetrics(sessions: any[]) {
   
   return {
     clarity: avgClarity,
-    pitchVariation: 75 + (Math.random() * 20), // Enhanced calculation needed
-    modulation: 80 + (Math.random() * 15),
-    prosody: 70 + (Math.random() * 25),
+    pitchVariation: 0, // Only show when calculated from actual audio analysis
+    modulation: 0, // Only show when calculated from actual audio analysis
+    prosody: 0, // Only show when calculated from actual audio analysis
     fillerWords: sessions.flatMap(s => s.fillerWords || []).slice(0, 10),
-    confidence: Math.min(95, 60 + (sessions.length * 3))
+    confidence: avgClarity > 0 ? Math.min(95, 60 + (sessions.length * 3)) : 0
   };
 }
 
@@ -267,23 +267,23 @@ function calculateBodyLanguageMetrics(sessions: any[]) {
   
   return {
     gestureEffectiveness: avgGesture,
-    postureScore: 85 + (Math.random() * 10),
+    postureScore: 0, // Only show when calculated from actual video analysis
     eyeContact: avgEyeContact,
-    engagement: 78 + (Math.random() * 15),
-    confidence: Math.min(95, 60 + (sessions.length * 3))
+    engagement: 0, // Only show when calculated from actual behavioral analysis
+    confidence: (avgGesture > 0 || avgEyeContact > 0) ? Math.min(95, 60 + (sessions.length * 3)) : 0
   };
 }
 
 function calculateContentMetrics(sessions: any[]) {
-  const avgCoherence = sessions.reduce((sum, s) => sum + (s.coherenceScore || 75), 0) / sessions.length;
+  const avgCoherence = sessions.reduce((sum, s) => sum + (s.coherenceScore || 0), 0) / sessions.length;
   
   return {
     coherenceScore: avgCoherence,
-    logicalFlow: 82 + (Math.random() * 12),
-    structure: 88 + (Math.random() * 8),
-    impact: 75 + (Math.random() * 20),
-    audienceEngagement: 80 + (Math.random() * 15),
-    confidence: Math.min(95, 60 + (sessions.length * 3))
+    logicalFlow: 0, // Only show when calculated from actual content analysis
+    structure: 0, // Only show when calculated from actual content analysis
+    impact: 0, // Only show when calculated from actual content analysis
+    audienceEngagement: 0, // Only show when calculated from actual content analysis
+    confidence: avgCoherence > 0 ? Math.min(95, 60 + (sessions.length * 3)) : 0
   };
 }
 

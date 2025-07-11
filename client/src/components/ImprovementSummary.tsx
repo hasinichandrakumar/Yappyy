@@ -422,28 +422,30 @@ export default function ImprovementSummary() {
   const generateCompetencyMap = (metrics: any) => {
     return {
       'Voice Control': {
-        current: Math.max(metrics.voice.clarity, 60),
-        potential: 90,
+        current: metrics.voice.clarity || 0,
+        potential: metrics.voice.clarity > 0 ? Math.min(100, metrics.voice.clarity + 20) : 0,
         priority: metrics.voice.clarity < 70 ? 9 : 6
       },
       'Body Language': {
-        current: Math.max((metrics.bodyLanguage.posture + metrics.bodyLanguage.eyeContact) / 2, 55),
-        potential: 88,
+        current: metrics.bodyLanguage.posture > 0 || metrics.bodyLanguage.eyeContact > 0 ? 
+          (metrics.bodyLanguage.posture + metrics.bodyLanguage.eyeContact) / 2 : 0,
+        potential: (metrics.bodyLanguage.posture > 0 || metrics.bodyLanguage.eyeContact > 0) ? 
+          Math.min(100, ((metrics.bodyLanguage.posture + metrics.bodyLanguage.eyeContact) / 2) + 15) : 0,
         priority: 8
       },
       'Content Structure': {
-        current: Math.max(metrics.speech.wordCount > 50 ? 75 : 60, 60),
-        potential: 85,
+        current: metrics.speech.wordCount > 50 ? Math.min(100, metrics.speech.wordCount / 2) : 0,
+        potential: metrics.speech.wordCount > 50 ? Math.min(100, (metrics.speech.wordCount / 2) + 15) : 0,
         priority: 7
       },
       'Audience Engagement': {
-        current: Math.max(metrics.voice.confidence, 65),
-        potential: 92,
+        current: metrics.voice.confidence || 0,
+        potential: metrics.voice.confidence > 0 ? Math.min(100, metrics.voice.confidence + 20) : 0,
         priority: metrics.voice.confidence < 75 ? 8 : 5
       },
       'Emotional Intelligence': {
-        current: 70,
-        potential: 85,
+        current: 0, // Only show when calculated from actual emotional analysis
+        potential: 0,
         priority: 6
       }
     };
@@ -451,9 +453,10 @@ export default function ImprovementSummary() {
 
   const generateMotivationalProfile = (metrics: any) => {
     return {
-      communicationStyle: metrics.voice.confidence > 75 ? 'Direct and Assertive' : 'Thoughtful and Measured',
-      learningPreference: 'Visual and Practical',
-      challengeLevel: 'Progressive Growth',
+      communicationStyle: metrics.voice.confidence > 75 ? 'Direct and Assertive' : 
+                          metrics.voice.confidence > 0 ? 'Thoughtful and Measured' : 'Developing',
+      learningPreference: metrics.speech.wordCount > 50 ? 'Visual and Practical' : 'Exploratory',
+      challengeLevel: metrics.voice.confidence > 0 ? 'Progressive Growth' : 'Foundation Building',
       feedbackStyle: 'Constructive and Encouraging'
     };
   };
