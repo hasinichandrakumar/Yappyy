@@ -12,7 +12,7 @@ import PersonalizedSpeechDNA from "@/components/PersonalizedSpeechDNA";
 import Enhanced50PlusTemplates from "@/components/Enhanced50PlusTemplates";
 import ImprovedBadgeSystem from "@/components/ImprovedBadgeSystem";
 import EnhancedAnalysisTab from "@/components/EnhancedAnalysisTab";
-import ProfilePage from "@/components/ProfilePage";
+import SimpleProfileForm from "@/components/SimpleProfileForm";
 import yappyyLogoPath from '@assets/Untitled_design-11600-removebg-preview_1749744306540.png';
 
 export default function Dashboard() {
@@ -163,11 +163,8 @@ export default function Dashboard() {
 
       {/* Profile Modal */}
       <Dialog open={showProfile} onOpenChange={setShowProfile}>
-        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Profile & Settings</DialogTitle>
-          </DialogHeader>
-          <ProfilePage />
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
+          <SimpleProfileForm />
         </DialogContent>
       </Dialog>
     </div>
