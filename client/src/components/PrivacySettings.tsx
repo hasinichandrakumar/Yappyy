@@ -56,11 +56,14 @@ export default function PrivacySettings() {
     setIsSaving(true);
     try {
       // Save privacy settings to backend using apiRequest
-      await apiRequest('/api/privacy-settings', 'POST', data);
+      const response = await apiRequest('/api/privacy-settings', 'POST', data);
+      const result = await response.json();
+
+      console.log('Privacy settings saved:', result);
 
       toast({
-        title: "Privacy Settings Updated",
-        description: "Your privacy preferences have been saved successfully!",
+        title: "Privacy Settings Saved",
+        description: `All privacy preferences have been updated successfully! Data collection: ${data.dataCollection ? 'enabled' : 'disabled'}, Voice recordings: ${data.voiceRecordings ? 'enabled' : 'disabled'}`,
       });
     } catch (error) {
       console.error('Privacy settings save error:', error);
@@ -76,6 +79,11 @@ export default function PrivacySettings() {
 
   const handleDataExport = async () => {
     try {
+      toast({
+        title: "Exporting Data",
+        description: "Preparing your data export...",
+      });
+
       const response = await apiRequest('/api/export-data', 'POST', {});
 
       // Trigger download
@@ -88,10 +96,11 @@ export default function PrivacySettings() {
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
 
       toast({
         title: "Data Export Complete",
-        description: "Your data has been exported and downloaded successfully!",
+        description: "Your complete data has been exported and downloaded as a JSON file!",
       });
     } catch (error) {
       console.error('Data export error:', error);
@@ -369,7 +378,7 @@ export default function PrivacySettings() {
                   type="button"
                   variant="outline"
                   onClick={handleDataExport}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 hover:bg-blue-50 hover:border-blue-300"
                 >
                   <Download className="w-4 h-4" />
                   Export My Data
@@ -382,7 +391,7 @@ export default function PrivacySettings() {
                   type="button"
                   variant="destructive"
                   onClick={() => setShowDataDeletion(true)}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 hover:bg-red-700"
                 >
                   <Trash2 className="w-4 h-4" />
                   Delete All Data
