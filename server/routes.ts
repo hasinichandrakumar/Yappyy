@@ -381,13 +381,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get user practice sessions
+  // Get user practice sessions with resilient error handling
   app.get("/api/practice-sessions", async (req: any, res) => {
     try {
       const userId = req.user?.id || 'demo-user';
       const sessions = await storage.getUserPracticeSessions(userId);
       res.json(sessions);
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Error fetching practice sessions:", error.message);
+      // Handle database connection errors gracefully during recording
+      if (error.code === '57P01' || error.message.includes('terminating connection')) {
+        console.log("Database connection error during session fetch - returning empty array");
+        return res.json([]);
+      }
       res.status(500).json({ message: "Failed to fetch sessions" });
     }
   });

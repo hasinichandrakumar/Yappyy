@@ -40,7 +40,7 @@ import {
   type ChallengeParticipation,
   type InsertChallengeParticipation
 } from "@shared/schema";
-import { db } from "./db";
+import { db, resilientQuery } from "./db";
 import { eq, desc, and, gte, lte } from "drizzle-orm";
 
 // Database operation wrapper with retry logic
@@ -118,8 +118,15 @@ export interface IStorage {
 export class DatabaseStorage implements IStorage {
   // User operations
   async getUser(id: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
+    try {
+      return await resilientQuery(async () => {
+        const [user] = await db.select().from(users).where(eq(users.id, id));
+        return user;
+      });
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      return undefined;
+    }
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
@@ -152,11 +159,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserPracticeSessions(userId: string): Promise<PracticeSession[]> {
-    return await db
-      .select()
-      .from(practiceSessions)
-      .where(eq(practiceSessions.userId, userId))
-      .orderBy(desc(practiceSessions.createdAt));
+    try {
+      return await resilientQuery(async () => {
+        return await db
+          .select()
+          .from(practiceSessions)
+          .where(eq(practiceSessions.userId, userId))
+          .orderBy(desc(practiceSessions.createdAt));
+      });
+    } catch (error) {
+      console.error('Error fetching user practice sessions:', error);
+      return [];
+    }
   }
 
   async deletePracticeSession(id: number): Promise<void> {

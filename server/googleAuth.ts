@@ -164,7 +164,7 @@ export async function setupGoogleAuth(app: Express) {
     });
   }
 
-  // Auth check endpoint - returns current user or null
+  // Auth check endpoint - returns current user or null with resilient error handling
   app.get("/api/auth/user", async (req: any, res) => {
     try {
       console.log("Auth check - req.user:", req.user ? "exists" : "null");
@@ -177,8 +177,13 @@ export async function setupGoogleAuth(app: Express) {
       
       console.log("No authenticated user found, returning null");
       res.json(null);
-    } catch (error) {
-      console.error("Auth check error:", error);
+    } catch (error: any) {
+      console.error("Auth check error:", error.message);
+      // Handle database connection errors gracefully to prevent runtime crashes
+      if (error.code === '57P01' || error.message.includes('terminating connection')) {
+        console.log("Database connection error during auth check - returning null");
+        return res.json(null);
+      }
       res.json(null);
     }
   });
