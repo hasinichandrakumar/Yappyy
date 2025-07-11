@@ -424,6 +424,83 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Empowering Children Section */}
+      <section className="py-20 bg-gradient-to-br from-blue-50 via-cyan-50 to-sky-50 relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-20 left-10 w-16 h-16 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob"></div>
+          <div className="absolute top-40 right-20 w-20 h-20 bg-cyan-200 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob animation-delay-2000"></div>
+          <div className="absolute bottom-32 left-20 w-12 h-12 bg-sky-200 rounded-full mix-blend-multiply filter blur-xl opacity-40 animate-blob animation-delay-4000"></div>
+        </div>
+        
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative text-center">
+          <div className="mb-8">
+            <h2 className="text-4xl md:text-5xl font-bold text-slate-800 mb-8 leading-tight">
+              Every Child Has a Voice That 
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-cyan-600 to-sky-600"> Deserves to Be Heard</span>
+            </h2>
+          </div>
+          
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 md:p-12 shadow-xl border border-blue-200">
+              <div className="space-y-6 text-lg text-slate-700 leading-relaxed">
+                <p className="text-xl md:text-2xl font-medium text-slate-800">
+                  Our AI public speaking coach isn't just about giving speeches — it's about giving kids the courage to stand up, speak out, and share their ideas with the world.
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
+                  <div className="text-left">
+                    <p className="mb-4">
+                      When kids learn to speak with confidence, they feel seen and valued. They discover that their words can spark change in their schools, their communities, and beyond.
+                    </p>
+                    <p>
+                      They learn that they can inspire others, stand up for what's right, and make a real difference — no matter how small they start.
+                    </p>
+                  </div>
+                  
+                  <div className="text-left">
+                    <p className="mb-4">
+                      Most importantly, public speaking gives kids the wings to follow their dreams. It opens doors to new opportunities and helps them believe in themselves, even when no one else does.
+                    </p>
+                    <p>
+                      💙 Our AI coach is here to be that quiet cheerleader in their pocket — helping them practice, grow, and shine, one word at a time.
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="mt-10 p-6 bg-gradient-to-r from-blue-100 to-cyan-100 rounded-2xl">
+                  <p className="text-xl font-semibold text-slate-800 mb-2">
+                    Because every child deserves to feel heard.
+                  </p>
+                  <p className="text-xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-600">
+                    Every child deserves to know that their voice can change the world.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="mt-10">
+                {isAuthenticated ? (
+                  <Link href="/dashboard">
+                    <Button size="lg" className="bg-gradient-to-br from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 px-8 py-4">
+                      Help Your Child Find Their Voice
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                  </Link>
+                ) : (
+                  <Button
+                    size="lg"
+                    onClick={() => window.location.href = '/api/auth/google'}
+                    className="bg-gradient-to-br from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 px-8 py-4"
+                  >
+                    Start Building Confidence Today
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="bg-slate-800 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
