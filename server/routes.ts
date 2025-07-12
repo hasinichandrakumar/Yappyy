@@ -454,7 +454,7 @@ Provide detailed, actionable analysis focusing on specific improvements and cele
         }],
         progressSummary: "You're on the right track! Keep practicing regularly to see continued improvement.",
         sessionMetadata: {
-          sessionName: sessionData.sessionName,
+          sessionName: req.body.sessionData?.sessionName || 'Practice Session',
           duration: duration,
           timestamp: new Date().toISOString(),
           analysisVersion: '2.0-fallback'
