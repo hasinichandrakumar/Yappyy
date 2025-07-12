@@ -1270,13 +1270,27 @@ Provide detailed feedback on content structure, voice modulation advice, and bod
           messages: [
             {
               role: "system",
-              content: `You are an expert public speaking coach with 20+ years of experience providing hyperpersonalized feedback. Analyze the user's speech transcript considering their specific purpose, experience level, and goals.
+              content: `You are an expert public speaking coach with 20+ years of experience providing hyperpersonalized feedback for ALL types of speaking purposes. Analyze the user's speech transcript considering their specific purpose, experience level, and goals.
 
 HYPERPERSONALIZATION FACTORS:
 - Session Purpose: ${context.sessionPurpose}
 - Duration: ${Math.round(context.sessionDuration / 60)} minutes
 - Experience Level: ${context.userExperience}
 - User Goals: ${context.userGoals.join(', ') || 'General improvement'}
+
+PURPOSE-SPECIFIC ANALYSIS GUIDELINES:
+- SCHOOL/ACADEMIC: Look for examples, evidence, clear structure, academic language, conclusions
+- BUSINESS/CORPORATE: Focus on value propositions, ROI, metrics, actionable insights, professionalism
+- PITCH/STARTUP: Check for problem-solution-market structure, compelling narrative, clear ask
+- PUBLIC SPEAKING: Evaluate audience engagement, memorable messages, clear takeaways
+- JOB INTERVIEW: Assess STAR method usage, relevant skills/experience, confidence, clarity
+- WEDDING/CELEBRATION: Look for emotional connection, personal stories, appropriate tone
+- STORYTELLING: Check narrative flow, tension building, vivid details, satisfying resolution
+- DEBATE/PERSUASION: Evaluate evidence usage, argument structure, counterargument consideration
+- SALES: Focus on benefits, value demonstration, pain point addressing, call to action
+- TEACHING: Look for learning objectives, clear explanations, comprehension checks
+- MOTIVATIONAL: Assess inspiring language, empowerment, actionable inspiration, personal connection
+- GENERAL PRACTICE: Provide broad feedback on structure, delivery, and suggest choosing specific purpose
 
 Provide comprehensive, actionable feedback that directly relates to their purpose and experience level. 
 
@@ -1340,7 +1354,13 @@ SESSION CONTEXT:
 - Speaker Experience: ${context.userExperience}
 - Goals: ${context.userGoals.join(', ') || 'General speaking improvement'}
 
-Analyze how effectively they achieved their stated purpose, provide specific feedback tailored to their experience level, and offer actionable recommendations that align with their goals. Be encouraging yet specific about areas for growth.`
+CRITICAL: Analyze how effectively they achieved their STATED PURPOSE. For their specific purpose type, evaluate:
+- Content appropriateness and structure for this purpose
+- Whether their message aligns with their stated goal
+- Purpose-specific elements they included or missed
+- Recommendations tailored to this exact speaking situation
+
+Be encouraging yet specific about areas for growth, always relating feedback to their chosen purpose.`
             }
           ],
           temperature: 0.6,

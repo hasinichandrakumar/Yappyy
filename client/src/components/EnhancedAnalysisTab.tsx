@@ -1147,11 +1147,20 @@ function generateContentBasedFeedback(transcript: string, purpose: string) {
   const sentences = transcript.split(/[.!?]+/).filter(s => s.trim().length > 5);
   const avgWordsPerSentence = words.length / Math.max(sentences.length, 1);
   
-  // Purpose-specific analysis
+  // Enhanced purpose-specific analysis
   const purposeLower = purpose?.toLowerCase() || "";
-  const isSchoolPresentation = purposeLower.includes("school") || purposeLower.includes("presentation") || purposeLower.includes("academic");
-  const isBusinessPresentation = purposeLower.includes("business") || purposeLower.includes("work") || purposeLower.includes("meeting");
-  const isPitch = purposeLower.includes("pitch") || purposeLower.includes("proposal") || purposeLower.includes("investment");
+  const isSchoolPresentation = purposeLower.includes("school") || purposeLower.includes("academic") || purposeLower.includes("classroom") || purposeLower.includes("student");
+  const isBusinessPresentation = purposeLower.includes("business") || purposeLower.includes("work") || purposeLower.includes("meeting") || purposeLower.includes("corporate");
+  const isPitch = purposeLower.includes("pitch") || purposeLower.includes("proposal") || purposeLower.includes("investment") || purposeLower.includes("startup");
+  const isPublicSpeaking = purposeLower.includes("public speaking") || purposeLower.includes("speech") || purposeLower.includes("keynote") || purposeLower.includes("conference");
+  const isJobInterview = purposeLower.includes("interview") || purposeLower.includes("job") || purposeLower.includes("hiring") || purposeLower.includes("career");
+  const isWeddingSpeech = purposeLower.includes("wedding") || purposeLower.includes("toast") || purposeLower.includes("celebration") || purposeLower.includes("ceremony");
+  const isStorytelling = purposeLower.includes("story") || purposeLower.includes("narrative") || purposeLower.includes("tale") || purposeLower.includes("anecdote");
+  const isDebate = purposeLower.includes("debate") || purposeLower.includes("argument") || purposeLower.includes("discussion") || purposeLower.includes("persuasion");
+  const isSalesPresentation = purposeLower.includes("sales") || purposeLower.includes("product") || purposeLower.includes("demo") || purposeLower.includes("client");
+  const isTeaching = purposeLower.includes("teach") || purposeLower.includes("lesson") || purposeLower.includes("training") || purposeLower.includes("workshop");
+  const isMotivational = purposeLower.includes("motivational") || purposeLower.includes("inspire") || purposeLower.includes("encourage") || purposeLower.includes("uplift");
+  const isGeneralPractice = purposeLower.includes("general") || purposeLower.includes("practice") || purpose === "" || purpose === "General Practice";
   
   const strengths = [];
   const improvements = [];
@@ -1173,7 +1182,7 @@ function generateContentBasedFeedback(transcript: string, purpose: string) {
     improvements.push("Expand on ideas with more detailed explanations");
   }
   
-  // Purpose-specific feedback
+  // Comprehensive purpose-specific feedback
   if (isSchoolPresentation) {
     if (transcript.toLowerCase().includes("example") || transcript.toLowerCase().includes("for instance")) {
       strengths.push("Good use of examples to support academic points");
@@ -1200,20 +1209,155 @@ function generateContentBasedFeedback(transcript: string, purpose: string) {
     });
     
   } else if (isBusinessPresentation) {
+    if (transcript.toLowerCase().includes("roi") || transcript.toLowerCase().includes("revenue") || transcript.toLowerCase().includes("profit")) {
+      strengths.push("Good focus on business metrics and outcomes");
+    } else {
+      improvements.push("Include specific business metrics, ROI, or financial impact");
+    }
+    
     recommendations.push({
       category: "Business Content",
-      suggestion: "Focus on clear value propositions and actionable business insights",
+      suggestion: "Focus on clear value propositions, actionable insights, and measurable business outcomes",
       priority: "High"
     });
+    
   } else if (isPitch) {
+    const hasProblem = transcript.toLowerCase().includes("problem") || transcript.toLowerCase().includes("challenge");
+    const hasSolution = transcript.toLowerCase().includes("solution") || transcript.toLowerCase().includes("solve");
+    const hasMarket = transcript.toLowerCase().includes("market") || transcript.toLowerCase().includes("opportunity");
+    
+    if (hasProblem) strengths.push("Clear problem identification");
+    else improvements.push("Start with a compelling problem statement");
+    
+    if (hasSolution) strengths.push("Well-defined solution presentation");
+    else improvements.push("Clearly explain your solution and its benefits");
+    
     recommendations.push({
-      category: "Pitch Content",
-      suggestion: "Structure with problem, solution, market opportunity, and clear ask",
+      category: "Pitch Structure",
+      suggestion: "Follow problem-solution-market-ask format for maximum investor impact",
       priority: "High"
     });
+    
+  } else if (isPublicSpeaking) {
+    if (transcript.toLowerCase().includes("you") || transcript.toLowerCase().includes("your")) {
+      strengths.push("Good audience engagement through direct address");
+    } else {
+      improvements.push("Use more direct audience engagement (you, your, we, us)");
+    }
+    
+    recommendations.push({
+      category: "Public Speaking",
+      suggestion: "Focus on audience connection, clear main message, and memorable takeaways",
+      priority: "High"
+    });
+    
+  } else if (isJobInterview) {
+    if (transcript.toLowerCase().includes("experience") || transcript.toLowerCase().includes("skill")) {
+      strengths.push("Good focus on relevant experience and skills");
+    } else {
+      improvements.push("Highlight specific experiences and skills relevant to the role");
+    }
+    
+    recommendations.push({
+      category: "Interview Content",
+      suggestion: "Use STAR method (Situation, Task, Action, Result) to structure your responses",
+      priority: "High"
+    });
+    
+  } else if (isWeddingSpeech) {
+    if (transcript.toLowerCase().includes("love") || transcript.toLowerCase().includes("happy") || transcript.toLowerCase().includes("joy")) {
+      strengths.push("Beautiful emotional connection and celebration of love");
+    } else {
+      improvements.push("Include more emotional elements about love, happiness, and celebration");
+    }
+    
+    recommendations.push({
+      category: "Wedding Speech",
+      suggestion: "Share personal stories, express genuine emotions, and keep it heartfelt but concise",
+      priority: "Medium"
+    });
+    
+  } else if (isStorytelling) {
+    if (transcript.toLowerCase().includes("then") || transcript.toLowerCase().includes("next") || transcript.toLowerCase().includes("suddenly")) {
+      strengths.push("Good narrative flow with clear progression");
+    } else {
+      improvements.push("Use more transitional words to create smooth story flow");
+    }
+    
+    recommendations.push({
+      category: "Storytelling",
+      suggestion: "Build tension, include vivid details, and deliver a satisfying resolution",
+      priority: "High"
+    });
+    
+  } else if (isDebate) {
+    if (transcript.toLowerCase().includes("evidence") || transcript.toLowerCase().includes("research") || transcript.toLowerCase().includes("study")) {
+      strengths.push("Strong use of evidence to support arguments");
+    } else {
+      improvements.push("Include more concrete evidence, statistics, or research to support your points");
+    }
+    
+    recommendations.push({
+      category: "Debate Content",
+      suggestion: "Structure arguments clearly, anticipate counterarguments, and use credible evidence",
+      priority: "High"
+    });
+    
+  } else if (isSalesPresentation) {
+    if (transcript.toLowerCase().includes("benefit") || transcript.toLowerCase().includes("value") || transcript.toLowerCase().includes("advantage")) {
+      strengths.push("Good focus on customer benefits and value");
+    } else {
+      improvements.push("Emphasize specific customer benefits and value propositions");
+    }
+    
+    recommendations.push({
+      category: "Sales Content",
+      suggestion: "Focus on customer pain points, demonstrate value, and include clear call to action",
+      priority: "High"
+    });
+    
+  } else if (isTeaching) {
+    if (transcript.toLowerCase().includes("understand") || transcript.toLowerCase().includes("learn") || transcript.toLowerCase().includes("remember")) {
+      strengths.push("Good focus on student comprehension and learning");
+    } else {
+      improvements.push("Include more learning-focused language and comprehension checks");
+    }
+    
+    recommendations.push({
+      category: "Teaching Content",
+      suggestion: "Use clear explanations, provide examples, and check for understanding",
+      priority: "High"
+    });
+    
+  } else if (isMotivational) {
+    if (transcript.toLowerCase().includes("can") || transcript.toLowerCase().includes("will") || transcript.toLowerCase().includes("achieve")) {
+      strengths.push("Inspiring and empowering language that motivates action");
+    } else {
+      improvements.push("Use more empowering language to inspire and motivate your audience");
+    }
+    
+    recommendations.push({
+      category: "Motivational Content",
+      suggestion: "Share personal stories, use positive language, and provide actionable inspiration",
+      priority: "High"
+    });
+    
+  } else if (isGeneralPractice) {
+    recommendations.push({
+      category: "General Practice",
+      suggestion: "Focus on clear structure, engaging delivery, and audience connection",
+      priority: "Medium"
+    });
+    
+    recommendations.push({
+      category: "Content Development",
+      suggestion: "Choose a specific purpose (presentation, pitch, story) for more targeted feedback",
+      priority: "Low"
+    });
+    
   } else {
     recommendations.push({
-      category: "General Content",
+      category: "Content Structure",
       suggestion: "Organize content with clear beginning, middle, and end structure",
       priority: "Medium"
     });
