@@ -14,6 +14,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { SessionDataViewer } from '@/components/SessionDataViewer';
 import { useRoboflowVision } from '@/hooks/useRoboflowVision';
+import SessionAnalysisPage from './SessionAnalysisPage';
 
 interface SimplifiedMetrics {
   eyeContact: number;
@@ -53,6 +54,8 @@ export default function SimplifiedPracticePage() {
   // Core session state
   const [isRecording, setIsRecording] = useState(false);
   const [sessionName, setSessionName] = useState("");
+  const [showAnalysisPage, setShowAnalysisPage] = useState(false);
+  const [sessionAnalysisData, setSessionAnalysisData] = useState<any>(null);
   const [sessionPurpose, setSessionPurpose] = useState("");
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingPurpose, setIsEditingPurpose] = useState(false);
@@ -948,11 +951,66 @@ export default function SimplifiedPracticePage() {
           title: "Session Saved",
           description: `${sessionName} saved successfully`,
         });
+        
+        // Prepare session data for analysis page
+        setSessionAnalysisData(sessionData);
+        setShowAnalysisPage(true);
       }
     } catch (error) {
       console.error('Error saving session:', error);
+      toast({
+        title: "Save Failed",
+        description: "Could not save session data",
+        variant: "destructive"
+      });
     }
   }, [sessionName, sessionPurpose, sessionDuration, transcript, metrics, toast]);
+
+  // Show analysis page if session is complete
+  if (showAnalysisPage && sessionAnalysisData) {
+    return (
+      <SessionAnalysisPage
+        sessionData={sessionAnalysisData}
+        onClose={() => setShowAnalysisPage(false)}
+        onNewSession={() => {
+          setShowAnalysisPage(false);
+          setSessionAnalysisData(null);
+          // Reset all session data
+          setSessionName("");
+          setSessionPurpose("");
+          setTranscript("");
+          setInterimTranscript("");
+          setSessionDuration(0);
+          setMetrics({
+            eyeContact: 0,
+            confidence: 0,
+            engagement: 0,
+            wordsPerMinute: 0,
+            fillerWordCount: 0,
+            clarity: 0,
+            voice: {
+              clarity: 0,
+              pace: 0,
+              volume: 85,
+              intonation: 75,
+              fillerCount: 0,
+              pauseEffectiveness: 80,
+              pitchVariation: 75,
+              vocalFryDetection: false,
+              uptalkPatterns: 0
+            },
+            bodyLanguage: {
+              eyeContactScore: 0,
+              gestureEffectiveness: 0,
+              postureConfidence: 0,
+              facialExpressions: 0,
+              overallPresence: 0
+            }
+          });
+        }}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-4">

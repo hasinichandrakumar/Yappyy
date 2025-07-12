@@ -264,6 +264,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
 
+  // Generate AI insights for session analysis
+  app.post('/api/generate-session-insights', async (req, res) => {
+    try {
+      const { sessionData, fillerCount, duration, wpm } = req.body;
+      
+      console.log('🧠 Generating AI insights for session analysis...');
+      
+      // Generate personalized insights based on session performance
+      let insights = '';
+      
+      if (sessionData.overallPerformance >= 85) {
+        insights = `Outstanding performance! Your confidence and clarity were exceptional. To reach the next level, focus on varying your vocal pace and incorporating more strategic gestures to enhance audience engagement.`;
+      } else if (sessionData.overallPerformance >= 70) {
+        insights = `Solid performance with clear strengths in delivery. Consider working on ${sessionData.confidenceLevel < 70 ? 'building confidence through power poses before speaking' : 'maintaining consistent eye contact'} to boost your overall impact.`;
+      } else if (sessionData.overallPerformance >= 50) {
+        insights = `Good foundation with room for improvement. Focus on ${fillerCount > 5 ? 'reducing filler words through strategic pauses' : 'speaking with more energy and conviction'} to enhance your message delivery.`;
+      } else {
+        insights = `Keep practicing! Every speaker starts somewhere. Focus on one area at a time - start with ${wpm < 120 ? 'increasing your speaking pace slightly' : fillerCount > 10 ? 'reducing filler words' : 'building confidence through preparation'}.`;
+      }
+      
+      // Add specific recommendations based on metrics
+      if (wpm < 100) {
+        insights += ` Your speaking pace could benefit from slight acceleration to maintain audience attention.`;
+      } else if (wpm > 200) {
+        insights += ` Consider slowing down slightly to ensure your audience can follow your message clearly.`;
+      }
+      
+      if (fillerCount > 15) {
+        insights += ` Practice strategic pauses instead of using filler words - silence can be powerful.`;
+      }
+      
+      console.log('✅ AI insights generated successfully');
+      
+      res.json({
+        insights,
+        recommendations: [
+          'Practice in front of a mirror to improve confidence',
+          'Record yourself speaking to identify patterns',
+          'Use strategic pauses instead of filler words',
+          'Maintain consistent eye contact with your audience'
+        ],
+        nextGoals: [
+          'Achieve 90%+ confidence score',
+          'Reduce filler words to under 5 per session',
+          'Maintain 140-160 WPM speaking pace'
+        ]
+      });
+    } catch (error) {
+      console.error('❌ Error generating AI insights:', error);
+      res.status(500).json({ error: 'Failed to generate insights' });
+    }
+  });
+
   // Dedicated vocal filler detection endpoint for audio analysis
   app.post('/api/detect-vocal-fillers', async (req, res) => {
     try {
