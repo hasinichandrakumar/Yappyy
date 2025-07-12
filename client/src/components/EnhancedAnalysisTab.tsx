@@ -221,7 +221,7 @@ export default function EnhancedAnalysisTab() {
       <Card className="bg-white/70 backdrop-blur-sm border border-white/30 shadow-xl">
         <Tabs defaultValue="voice" className="w-full">
           <div className="border-b border-slate-200/50 px-6 pt-6">
-            <TabsList className="grid w-full grid-cols-5 bg-slate-100/50 p-1 rounded-xl">
+            <TabsList className="grid w-full grid-cols-4 bg-slate-100/50 p-1 rounded-xl">
               <TabsTrigger value="voice" className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#2563eb] data-[state=active]:to-[#22d3ee] data-[state=active]:text-white data-[state=active]:shadow-lg whitespace-nowrap">
                 <Mic className="h-4 w-4" />
                 <span className="hidden sm:inline">Voice</span>
@@ -233,10 +233,6 @@ export default function EnhancedAnalysisTab() {
               <TabsTrigger value="transcript" className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#2563eb] data-[state=active]:to-[#22d3ee] data-[state=active]:text-white data-[state=active]:shadow-lg whitespace-nowrap">
                 <FileText className="h-4 w-4" />
                 <span className="hidden sm:inline">Transcript</span>
-              </TabsTrigger>
-              <TabsTrigger value="trends" className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#2563eb] data-[state=active]:to-[#22d3ee] data-[state=active]:text-white data-[state=active]:shadow-lg whitespace-nowrap">
-                <TrendingUp className="h-4 w-4" />
-                <span className="hidden sm:inline">Trends</span>
               </TabsTrigger>
               <TabsTrigger value="export" className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#2563eb] data-[state=active]:to-[#22d3ee] data-[state=active]:text-white data-[state=active]:shadow-lg whitespace-nowrap">
                 <Download className="h-4 w-4" />
@@ -1044,223 +1040,6 @@ export default function EnhancedAnalysisTab() {
             )}
           </TabsContent>
 
-          {/* Trends Analysis */}
-          <TabsContent value="trends" className="space-y-6 p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="h-12 w-12 bg-gradient-to-br from-[#2563eb] to-[#22d3ee] rounded-full flex items-center justify-center">
-                <TrendingUp className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h3 className="text-2xl font-bold text-slate-900">Performance Trends</h3>
-                <p className="text-slate-600">Track your progress over time across all sessions</p>
-              </div>
-            </div>
-
-            {typedSessions.length > 0 ? (
-              <div className="space-y-6">
-                {/* Performance Trends Chart */}
-                <Card className="p-6">
-                  <h4 className="text-lg font-semibold mb-4">Overall Performance Over Time</h4>
-                  <div className="h-64 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 flex items-end space-x-2">
-                    {typedSessions.slice(-10).map((session, index) => {
-                      const height = ((session.overallScore || 75) / 100) * 200;
-                      return (
-                        <div key={session.id} className="flex-1 flex flex-col items-center">
-                          <div 
-                            className="bg-gradient-to-t from-blue-500 to-purple-500 rounded-t w-full min-h-4 transition-all hover:opacity-80"
-                            style={{ height: `${height}px` }}
-                            title={`Session ${index + 1}: ${session.overallScore || 75}%`}
-                          />
-                          <div className="text-xs text-slate-600 mt-2 text-center">
-                            {new Date(session.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <div className="mt-4 text-sm text-slate-600 text-center">
-                    Average Score: {Math.round(typedSessions.reduce((sum, s) => sum + (s.overallScore || 75), 0) / typedSessions.length)}%
-                  </div>
-                </Card>
-
-                {/* Skill-Based Trends */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  
-                  {/* Voice Quality Trend */}
-                  <Card className="p-4">
-                    <div className="flex items-center gap-2 mb-4">
-                      <Mic className="h-5 w-5 text-blue-600" />
-                      <h4 className="font-semibold">Voice Quality</h4>
-                    </div>
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Current Average</span>
-                        <span className="font-bold text-lg text-blue-600">
-                          {(() => {
-                            const total = typedSessions.reduce((sum, s) => sum + (s.voiceClarity || 80), 0);
-                            const average = typedSessions.length > 0 ? total / typedSessions.length : 80;
-                            return Math.round(isNaN(average) ? 80 : average);
-                          })()}%
-                        </span>
-                      </div>
-                      <Progress 
-                        value={(() => {
-                          const total = typedSessions.reduce((sum, s) => sum + (s.voiceClarity || 80), 0);
-                          const average = typedSessions.length > 0 ? total / typedSessions.length : 80;
-                          return Math.round(isNaN(average) ? 80 : average);
-                        })()} 
-                        className="h-2" 
-                      />
-                      <div className="text-xs text-slate-600">
-                        {typedSessions.length >= 2 && (
-                          <>
-                            {((typedSessions[typedSessions.length - 1]?.voiceClarity || 80) - (typedSessions[0]?.voiceClarity || 80)) > 0 ? '📈' : '📉'} 
-                            {Math.abs((typedSessions[typedSessions.length - 1]?.voiceClarity || 80) - (typedSessions[0]?.voiceClarity || 80)).toFixed(1)}% change from first session
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </Card>
-
-                  {/* Eye Contact Trend */}
-                  <Card className="p-4">
-                    <div className="flex items-center gap-2 mb-4">
-                      <Eye className="h-5 w-5 text-purple-600" />
-                      <h4 className="font-semibold">Eye Contact</h4>
-                    </div>
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Current Average</span>
-                        <span className="font-bold text-lg text-purple-600">
-                          {(() => {
-                            const total = typedSessions.reduce((sum, s) => sum + (s.eyeContactScore || 75), 0);
-                            const average = typedSessions.length > 0 ? total / typedSessions.length : 75;
-                            return Math.round(isNaN(average) ? 75 : average);
-                          })()}%
-                        </span>
-                      </div>
-                      <Progress 
-                        value={(() => {
-                          const total = typedSessions.reduce((sum, s) => sum + (s.eyeContactScore || 75), 0);
-                          const average = typedSessions.length > 0 ? total / typedSessions.length : 75;
-                          return Math.round(isNaN(average) ? 75 : average);
-                        })()} 
-                        className="h-2" 
-                      />
-                      <div className="text-xs text-slate-600">
-                        {typedSessions.length >= 2 && (
-                          <>
-                            {((typedSessions[typedSessions.length - 1]?.eyeContactScore || 75) - (typedSessions[0]?.eyeContactScore || 75)) > 0 ? '📈' : '📉'} 
-                            {Math.abs((typedSessions[typedSessions.length - 1]?.eyeContactScore || 75) - (typedSessions[0]?.eyeContactScore || 75)).toFixed(1)}% change from first session
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </Card>
-
-                  {/* Confidence Trend */}
-                  <Card className="p-4">
-                    <div className="flex items-center gap-2 mb-4">
-                      <Trophy className="h-5 w-5 text-green-600" />
-                      <h4 className="font-semibold">Confidence</h4>
-                    </div>
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Current Average</span>
-                        <span className="font-bold text-lg text-green-600">
-                          {(() => {
-                            const total = typedSessions.reduce((sum, s) => sum + (s.confidenceScore || 78), 0);
-                            const average = typedSessions.length > 0 ? total / typedSessions.length : 78;
-                            return Math.round(isNaN(average) ? 78 : average);
-                          })()}%
-                        </span>
-                      </div>
-                      <Progress 
-                        value={(() => {
-                          const total = typedSessions.reduce((sum, s) => sum + (s.confidenceScore || 78), 0);
-                          const average = typedSessions.length > 0 ? total / typedSessions.length : 78;
-                          return Math.round(isNaN(average) ? 78 : average);
-                        })()} 
-                        className="h-2" 
-                      />
-                      <div className="text-xs text-slate-600">
-                        {typedSessions.length >= 2 && (
-                          <>
-                            {((typedSessions[typedSessions.length - 1]?.confidenceScore || 78) - (typedSessions[0]?.confidenceScore || 78)) > 0 ? '📈' : '📉'} 
-                            {Math.abs((typedSessions[typedSessions.length - 1]?.confidenceScore || 78) - (typedSessions[0]?.confidenceScore || 78)).toFixed(1)}% change from first session
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </Card>
-                </div>
-
-                {/* Progress Insights */}
-                <Card className="p-6">
-                  <h4 className="text-lg font-semibold mb-4">Progress Insights</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    
-                    {/* Practice Stats */}
-                    <div className="space-y-4">
-                      <h5 className="font-medium text-slate-700">Practice Statistics</h5>
-                      <div className="space-y-3">
-                        <div className="flex justify-between">
-                          <span className="text-sm text-slate-600">Total Sessions</span>
-                          <span className="font-semibold">{typedSessions.length}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm text-slate-600">Total Practice Time</span>
-                          <span className="font-semibold">
-                            {Math.round(typedSessions.reduce((sum, s) => sum + (s.duration || 0), 0) / 60)} min
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm text-slate-600">Average Session Length</span>
-                          <span className="font-semibold">
-                            {(() => {
-                              const total = typedSessions.reduce((sum, s) => sum + (s.duration || 0), 0);
-                              const average = typedSessions.length > 0 ? total / typedSessions.length : 0;
-                              return Math.round(isNaN(average) ? 0 : average / 60);
-                            })()} min
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Recent Improvements */}
-                    <div className="space-y-4">
-                      <h5 className="font-medium text-slate-700">Recent Improvements</h5>
-                      <div className="space-y-2">
-                        {typedSessions.length >= 3 && (
-                          <>
-                            <div className="flex items-center gap-2 text-sm">
-                              <div className="w-2 h-2 bg-green-500 rounded-full" />
-                              <span>Completed {typedSessions.length} practice sessions</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm">
-                              <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                              <span>Consistent practice streak building</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm">
-                              <div className="w-2 h-2 bg-purple-500 rounded-full" />
-                              <span>Performance stability improving</span>
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <Info className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-slate-600 mb-2">No Session Data</h3>
-                <p className="text-slate-500">Complete practice sessions to view performance trends</p>
-              </div>
-            )}
-          </TabsContent>
-
           {/* PDF Export Tab */}
           <TabsContent value="export" className="space-y-6 p-6">
             <div className="flex items-center gap-3 mb-6">
@@ -1451,7 +1230,7 @@ function TranscriptAnalysisComponent({ session, onAnalysisComplete }: Transcript
                 {(aiFeedback.strengths || []).map((strength: string, index: number) => (
                   <li key={index} className="text-sm text-green-800 flex items-start gap-2">
                     <div className="w-1.5 h-1.5 bg-green-500 rounded-full mt-2 flex-shrink-0" />
-                    {strength}
+                    <span>{strength}</span>
                   </li>
                 ))}
               </ul>
@@ -1460,35 +1239,39 @@ function TranscriptAnalysisComponent({ session, onAnalysisComplete }: Transcript
             {/* Improvements */}
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <Lightbulb className="h-4 w-4 text-orange-600" />
-                <h6 className="font-semibold text-orange-900">Growth Opportunities</h6>
+                <Target className="h-4 w-4 text-orange-600" />
+                <h6 className="font-semibold text-orange-900">Areas for Improvement</h6>
               </div>
               <ul className="space-y-2">
                 {(aiFeedback.improvements || []).map((improvement: string, index: number) => (
                   <li key={index} className="text-sm text-orange-800 flex items-start gap-2">
                     <div className="w-1.5 h-1.5 bg-orange-500 rounded-full mt-2 flex-shrink-0" />
-                    {improvement}
+                    <span>{improvement}</span>
                   </li>
                 ))}
               </ul>
             </div>
           </div>
 
-          {/* Personalized Recommendations */}
-          {aiFeedback.recommendations && (
-            <div className="mt-6 p-4 bg-white rounded-lg border border-blue-200">
-              <div className="flex items-center gap-2 mb-3">
-                <Target className="h-4 w-4 text-purple-600" />
-                <h6 className="font-semibold text-purple-900">Personalized Action Plan</h6>
+          {/* Recommendations */}
+          {aiFeedback.recommendations && aiFeedback.recommendations.length > 0 && (
+            <div className="mt-6 space-y-3">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-purple-600" />
+                <h6 className="font-semibold text-purple-900">Personalized Recommendations</h6>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {aiFeedback.recommendations.map((rec: any, index: number) => (
-                  <div key={index} className="p-3 bg-purple-50 rounded-lg">
-                    <div className="text-sm font-medium text-purple-900 mb-1">{rec.category}</div>
-                    <div className="text-xs text-purple-700">{rec.suggestion}</div>
-                    <Badge variant="outline" className="mt-2 text-xs">
-                      {rec.priority} Priority
-                    </Badge>
+                  <div key={index} className="bg-white/60 rounded-lg p-4 border border-purple-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge variant="outline" className="text-xs">
+                        {rec.category}
+                      </Badge>
+                      <Badge variant={rec.priority === 'High' ? 'destructive' : rec.priority === 'Medium' ? 'default' : 'secondary'} className="text-xs">
+                        {rec.priority}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-purple-800">{rec.suggestion}</p>
                   </div>
                 ))}
               </div>
@@ -1497,92 +1280,68 @@ function TranscriptAnalysisComponent({ session, onAnalysisComplete }: Transcript
         </Card>
       )}
 
-      {/* Interactive Transcript */}
-      <Card className="p-6">
-        <h5 className="text-lg font-semibold mb-4">Session Transcript</h5>
-        <div className="max-h-80 overflow-y-auto space-y-3">
-          {transcriptSegments.length > 0 ? (
-            transcriptSegments.map((segment, index) => (
-              <div
-                key={segment.id}
-                className="p-3 bg-slate-50 rounded-lg border border-slate-200 hover:border-blue-300 cursor-pointer transition-all"
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <Badge variant="outline" className="text-xs">
-                    {segment.timestamp}
-                  </Badge>
-                  <div className="flex items-center gap-2">
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      segment.sentiment === 'positive' ? 'bg-green-100 text-green-700' :
-                      segment.sentiment === 'confident' ? 'bg-blue-100 text-blue-700' :
-                      'bg-gray-100 text-gray-700'
-                    }`}>
-                      {segment.sentiment}
-                    </span>
-                    <span className="text-xs text-slate-500">{Math.round(segment.confidence)}% confidence</span>
-                  </div>
-                </div>
-                <p className="text-sm text-slate-700">{segment.text}</p>
-              </div>
-            ))
-          ) : session?.transcript ? (
-            // Show raw transcript if segments aren't available
-            <div className="space-y-4">
-              <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
-                <div className="flex items-center justify-between mb-3">
-                  <Badge variant="outline" className="text-xs">
-                    Full Session Transcript
-                  </Badge>
-                  <div className="flex items-center gap-2">
-                    <Badge className="bg-blue-100 text-blue-800 text-xs">
-                      {session.duration ? `${Math.floor(session.duration / 60)}:${(session.duration % 60).toString().padStart(2, '0')}` : 'Duration N/A'}
-                    </Badge>
-                    <Badge className="bg-green-100 text-green-800 text-xs">
-                      {session.transcript.split(' ').length} words
-                    </Badge>
-                  </div>
-                </div>
-                <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
-                  {session.transcript}
-                </p>
-              </div>
-              
-              {/* Filler Words Analysis */}
-              {session.fillerWordCount > 0 && (
-                <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
-                  <div className="flex items-center gap-2 mb-2">
-                    <AlertTriangle className="h-4 w-4 text-orange-600" />
-                    <h6 className="font-semibold text-orange-900">Filler Words Detected</h6>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-orange-800">
-                      {session.fillerWordCount} filler words detected in this session
-                    </span>
-                    <Badge variant="outline" className="bg-orange-100 text-orange-800">
-                      {session.fillerWords ? session.fillerWords.length : session.fillerWordCount} total
-                    </Badge>
-                  </div>
-                  {session.fillerWords && Array.isArray(session.fillerWords) && (
-                    <div className="mt-3 flex flex-wrap gap-1">
-                      {session.fillerWords.map((word: string, index: number) => (
-                        <Badge key={index} variant="destructive" className="text-xs">
-                          {word}
-                        </Badge>
-                      ))}
+      {/* Transcript Display */}
+      {hasTranscript && (
+        <Card className="p-6">
+          <h5 className="text-lg font-semibold mb-4">Session Transcript</h5>
+          <div className="bg-slate-50 rounded-lg p-4 max-h-64 overflow-y-auto">
+            {transcriptSegments.length > 0 ? (
+              <div className="space-y-3">
+                {transcriptSegments.map((segment: any) => (
+                  <div key={segment.id} className="flex gap-3 hover:bg-white rounded-lg p-2 transition-colors">
+                    <div className="text-xs text-slate-500 font-mono w-12 flex-shrink-0">
+                      {segment.timestamp}
                     </div>
-                  )}
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="text-center py-6">
-              <FileText className="h-8 w-8 text-slate-400 mx-auto mb-2" />
-              <p className="text-slate-500 text-sm">No transcript available for this session</p>
-              <p className="text-slate-400 text-xs mt-1">Practice sessions will generate transcripts automatically</p>
-            </div>
-          )}
-        </div>
-      </Card>
+                    <div className="flex-1">
+                      <p className="text-sm text-slate-700">{segment.text}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge variant="outline" className="text-xs">
+                          {Math.round(segment.confidence)}% confidence
+                        </Badge>
+                        <Badge variant={segment.sentiment === 'positive' ? 'default' : segment.sentiment === 'confident' ? 'secondary' : 'outline'} className="text-xs">
+                          {segment.sentiment}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-slate-600 text-center py-4">
+                <p className="text-sm">{session.transcript}</p>
+              </div>
+            )}
+          </div>
+        </Card>
+      )}
+
+      {/* No Transcript Message */}
+      {!hasTranscript && (
+        <Card className="p-6 text-center">
+          <MessageSquare className="h-12 w-12 text-slate-400 mx-auto mb-3" />
+          <h5 className="text-lg font-semibold text-slate-600 mb-2">No Transcript Available</h5>
+          <p className="text-slate-500 text-sm">
+            This session doesn't have a transcript. Make sure to speak during your practice sessions to enable AI analysis.
+          </p>
+          <Button
+            onClick={analyzeTranscript}
+            disabled={isAnalyzing}
+            className="mt-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white"
+          >
+            {isAnalyzing ? (
+              <>
+                <Brain className="w-4 h-4 mr-2 animate-spin" />
+                Analyzing...
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-4 h-4 mr-2" />
+                Generate Analysis
+              </>
+            )}
+          </Button>
+        </Card>
+      )}
     </div>
   );
 }

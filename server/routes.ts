@@ -611,7 +611,13 @@ Provide detailed, actionable analysis focusing on specific improvements and cele
       const fillerCounts: { [key: string]: { count: number; positions: number[] } } = {};
       
       words.forEach((word, index) => {
-        const cleanWord = word.replace(/[.,!?;:'"()]/g, '');
+        // Clean word by removing punctuation and converting to lowercase
+        const cleanWord = word.toLowerCase().replace(/[.,!?;:'"()[\]]/g, '');
+        
+        // Debug logging for "uh" detection
+        if (cleanWord === 'uh' || cleanWord.includes('uh')) {
+          console.log(`🔍 Found "uh" variant: "${word}" -> cleaned: "${cleanWord}"`);
+        }
         
         if (singleFillers.includes(cleanWord)) {
           if (!fillerCounts[cleanWord]) {
@@ -620,6 +626,11 @@ Provide detailed, actionable analysis focusing on specific improvements and cele
           fillerCounts[cleanWord].count++;
           fillerCounts[cleanWord].positions.push(index);
           totalCount++;
+          
+          // Extra logging for "uh" detection
+          if (cleanWord === 'uh') {
+            console.log(`✅ "uh" detected and counted at position ${index}`);
+          }
         }
       });
       

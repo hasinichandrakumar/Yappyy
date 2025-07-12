@@ -32,15 +32,22 @@ export class PDFExportService {
   private margin: number = 20;
   private currentY: number = 20;
   private colors = {
-    primary: [37, 99, 235], // Blue
-    secondary: [34, 211, 238], // Cyan
-    success: [16, 185, 129], // Green
-    warning: [245, 158, 11], // Orange
-    purple: [139, 92, 246], // Purple
+    primary: [99, 102, 241], // Yappyy Indigo
+    secondary: [139, 92, 246], // Yappyy Purple  
+    accent: [59, 130, 246], // Yappyy Blue
+    success: [34, 197, 94], // Emerald
+    warning: [251, 146, 60], // Orange
+    danger: [239, 68, 68], // Red
     gray: [100, 116, 139], // Slate
     lightGray: [248, 250, 252], // Light background
-    darkGray: [30, 41, 59], // Dark text
-    white: [255, 255, 255]
+    darkGray: [15, 23, 42], // Slate 900
+    mutedGray: [71, 85, 105], // Slate 600
+    white: [255, 255, 255],
+    brand: {
+      gradient1: [99, 102, 241], // Indigo 500
+      gradient2: [139, 92, 246], // Violet 500
+      background: [248, 250, 252] // Slate 50
+    }
   };
 
   constructor() {
@@ -129,100 +136,157 @@ export class PDFExportService {
   }
 
   private addCoverPage(session: SessionData): void {
-    // Gradient background simulation
-    this.pdf.setFillColor(...this.colors.primary);
-    this.pdf.rect(0, 0, this.pageWidth, 80, 'F');
+    // Modern gradient background with brand colors
+    this.pdf.setFillColor(...this.colors.brand.gradient1);
+    this.pdf.rect(0, 0, this.pageWidth, 90, 'F');
     
-    // White overlay for gradient effect
-    this.pdf.setFillColor(255, 255, 255, 0.1);
-    this.pdf.rect(0, 60, this.pageWidth, 20, 'F');
+    // Gradient overlay effect with secondary color
+    this.pdf.setFillColor(...this.colors.brand.gradient2);
+    for (let i = 0; i < 20; i++) {
+      const alpha = 0.1 - (i * 0.005);
+      this.pdf.setFillColor(139, 92, 246, alpha);
+      this.pdf.rect(0, 70 + i, this.pageWidth, 1, 'F');
+    }
     
-    // Logo area
-    this.pdf.setFillColor(...this.colors.white);
+    // Modern logo styling
     this.pdf.setFont('helvetica', 'bold');
-    this.pdf.setFontSize(32);
+    this.pdf.setFontSize(42);
     this.pdf.setTextColor(...this.colors.white);
-    this.pdf.text('Yappyy', this.pageWidth / 2, 40, { align: 'center' });
+    this.pdf.text('Yappyy', this.pageWidth / 2, 35, { align: 'center' });
     
-    this.pdf.setFontSize(16);
+    // Elegant tagline with better typography
+    this.pdf.setFontSize(14);
     this.pdf.setFont('helvetica', 'normal');
-    this.pdf.text('AI-Powered Speaking Coach', this.pageWidth / 2, 50, { align: 'center' });
+    this.pdf.setTextColor(255, 255, 255, 0.9);
+    this.pdf.text('AI-Powered Speaking Excellence', this.pageWidth / 2, 50, { align: 'center' });
     
-    // Session title
+    // Decorative line
+    this.pdf.setDrawColor(255, 255, 255, 0.5);
+    this.pdf.setLineWidth(0.5);
+    this.pdf.line(this.pageWidth / 2 - 40, 60, this.pageWidth / 2 + 40, 60);
+    
+    // Professional session title with modern typography
     this.pdf.setTextColor(...this.colors.darkGray);
-    this.pdf.setFontSize(28);
+    this.pdf.setFontSize(32);
     this.pdf.setFont('helvetica', 'bold');
-    this.pdf.text('Session Analysis Report', this.pageWidth / 2, 120, { align: 'center' });
+    this.pdf.text('Session Analysis Report', this.pageWidth / 2, 110, { align: 'center' });
     
-    // Session details card
-    this.pdf.setFillColor(...this.colors.lightGray);
-    this.pdf.roundedRect(30, 140, 150, 60, 3, 3, 'F');
+    // Elegant subtitle
+    this.pdf.setFontSize(14);
+    this.pdf.setFont('helvetica', 'normal');
+    this.pdf.setTextColor(...this.colors.mutedGray);
+    this.pdf.text('Comprehensive Performance Analysis', this.pageWidth / 2, 125, { align: 'center' });
     
-    this.pdf.setFontSize(20);
+    // Modern session details card with shadow and border
+    this.pdf.setFillColor(0, 0, 0, 0.05);
+    this.pdf.roundedRect(32, 147, 146, 58, 8, 8, 'F');
+    
+    this.pdf.setFillColor(...this.colors.white);
+    this.pdf.setDrawColor(...this.colors.primary);
+    this.pdf.setLineWidth(1);
+    this.pdf.roundedRect(30, 145, 150, 60, 8, 8, 'FD');
+    
+    // Session name with brand color
+    this.pdf.setFontSize(18);
     this.pdf.setFont('helvetica', 'bold');
     this.pdf.setTextColor(...this.colors.primary);
-    this.pdf.text(session.sessionName, 105, 160, { align: 'center' });
+    this.pdf.text(session.sessionName, 105, 165, { align: 'center' });
     
-    this.pdf.setFontSize(12);
+    // Session metadata with improved spacing
+    this.pdf.setFontSize(11);
     this.pdf.setFont('helvetica', 'normal');
-    this.pdf.setTextColor(...this.colors.gray);
-    this.pdf.text(`Date: ${new Date(session.createdAt).toLocaleDateString()}`, 105, 175, { align: 'center' });
-    this.pdf.text(`Duration: ${Math.round(session.duration / 60)} minutes`, 105, 185, { align: 'center' });
+    this.pdf.setTextColor(...this.colors.mutedGray);
+    this.pdf.text(`${new Date(session.createdAt).toLocaleDateString()}`, 105, 180, { align: 'center' });
+    this.pdf.text(`${Math.round(session.duration / 60)} minutes`, 105, 192, { align: 'center' });
     
-    // Overall score circle
+    // Professional overall score circle with gradient effect
     const centerX = this.pageWidth / 2;
     const centerY = 240;
-    const radius = 25;
+    const radius = 30;
     
+    // Shadow effect
+    this.pdf.setFillColor(0, 0, 0, 0.1);
+    this.pdf.circle(centerX + 2, centerY + 2, radius, 'F');
+    
+    // Main circle with brand gradient
     this.pdf.setFillColor(...this.colors.primary);
     this.pdf.circle(centerX, centerY, radius, 'F');
     
-    this.pdf.setFontSize(24);
+    // Inner circle for depth
+    this.pdf.setFillColor(...this.colors.accent);
+    this.pdf.circle(centerX, centerY, radius - 3, 'F');
+    
+    // Score display with better typography
+    this.pdf.setFontSize(28);
     this.pdf.setFont('helvetica', 'bold');
     this.pdf.setTextColor(...this.colors.white);
-    this.pdf.text(`${Math.round(session.overallScore || 75)}%`, centerX, centerY + 3, { align: 'center' });
+    this.pdf.text(`${Math.round(session.overallScore || 75)}%`, centerX, centerY + 4, { align: 'center' });
     
+    // Professional label
+    this.pdf.setFontSize(14);
+    this.pdf.setFont('helvetica', 'bold');
+    this.pdf.setTextColor(...this.colors.darkGray);
+    this.pdf.text('Overall Performance', centerX, centerY + 45, { align: 'center' });
+    
+    // Performance category
+    const score = Math.round(session.overallScore || 75);
+    const category = score >= 85 ? 'Excellent' : score >= 70 ? 'Good' : score >= 55 ? 'Improving' : 'Needs Focus';
     this.pdf.setFontSize(12);
-    this.pdf.setTextColor(...this.colors.gray);
-    this.pdf.text('Overall Score', centerX, centerY + 40, { align: 'center' });
+    this.pdf.setFont('helvetica', 'normal');
+    this.pdf.setTextColor(...this.colors.mutedGray);
+    this.pdf.text(category, centerX, centerY + 58, { align: 'center' });
   }
 
   private addExecutiveSummary(session: SessionData): void {
     this.addSectionTitle('Executive Summary', true);
     
-    // Summary card
-    this.pdf.setFillColor(...this.colors.lightGray);
-    this.pdf.roundedRect(this.margin, this.currentY, this.pageWidth - (2 * this.margin), 40, 3, 3, 'F');
+    // Professional summary card with modern styling
+    this.pdf.setFillColor(0, 0, 0, 0.03);
+    this.pdf.roundedRect(this.margin + 2, this.currentY + 2, this.pageWidth - (2 * this.margin), 45, 8, 8, 'F');
     
-    const summaryText = `This session analysis provides comprehensive insights into your speaking performance. 
-    Based on advanced AI analysis, you achieved an overall score of ${Math.round(session.overallScore || 75)}% 
-    with strengths in voice clarity and areas for improvement in eye contact and confidence.`;
+    this.pdf.setFillColor(...this.colors.brand.background);
+    this.pdf.setDrawColor(...this.colors.primary);
+    this.pdf.setLineWidth(1);
+    this.pdf.roundedRect(this.margin, this.currentY, this.pageWidth - (2 * this.margin), 45, 8, 8, 'FD');
     
-    this.pdf.setFontSize(11);
+    // Executive summary content
+    const summaryText = `This comprehensive analysis leverages advanced AI technology to evaluate your speaking performance across multiple dimensions. Your overall score of ${Math.round(session.overallScore || 75)}% reflects measurable strengths in communication delivery and identifies specific opportunities for enhancement in eye contact engagement and confidence projection.`;
+    
+    this.pdf.setFontSize(12);
     this.pdf.setFont('helvetica', 'normal');
     this.pdf.setTextColor(...this.colors.darkGray);
     
-    const lines = this.pdf.splitTextToSize(summaryText, this.pageWidth - (2 * this.margin) - 10);
+    const lines = this.pdf.splitTextToSize(summaryText, this.pageWidth - (2 * this.margin) - 20);
     lines.forEach((line: string, index: number) => {
-      this.pdf.text(line, this.margin + 5, this.currentY + 10 + (index * 6));
+      this.pdf.text(line, this.margin + 15, this.currentY + 15 + (index * 6));
     });
     
     this.currentY += 50;
   }
 
   private addSectionTitle(title: string, withIcon: boolean = false): void {
-    this.checkPageBreak(25);
+    this.checkPageBreak(30);
     
-    // Section header with background
+    // Modern section header with gradient effect
     this.pdf.setFillColor(...this.colors.primary);
-    this.pdf.rect(this.margin, this.currentY - 5, this.pageWidth - (2 * this.margin), 15, 'F');
+    this.pdf.roundedRect(this.margin, this.currentY - 5, this.pageWidth - (2 * this.margin), 18, 4, 4, 'F');
     
-    this.pdf.setFontSize(16);
+    // Subtle gradient overlay
+    this.pdf.setFillColor(...this.colors.accent);
+    this.pdf.roundedRect(this.margin, this.currentY - 5, this.pageWidth - (2 * this.margin), 6, 4, 4, 'F');
+    
+    // Professional typography
+    this.pdf.setFontSize(18);
     this.pdf.setFont('helvetica', 'bold');
     this.pdf.setTextColor(...this.colors.white);
-    this.pdf.text(title, this.margin + 5, this.currentY + 5);
+    this.pdf.text(title, this.margin + 10, this.currentY + 7);
     
-    this.currentY += 20;
+    // Decorative accent line
+    this.pdf.setDrawColor(...this.colors.white);
+    this.pdf.setLineWidth(0.5);
+    this.pdf.line(this.margin + 10, this.currentY + 10, this.margin + 50, this.currentY + 10);
+    
+    this.currentY += 25;
   }
 
   private addText(text: string, fontSize: number = 12): void {
@@ -254,55 +318,59 @@ export class PDFExportService {
   }
 
   private addEnhancedPerformanceCard(label: string, value: number, color: number[], x: number, y: number, width: number, height: number): void {
-    // Card shadow
-    this.pdf.setFillColor(0, 0, 0, 0.1);
-    this.pdf.roundedRect(x + 1, y + 1, width, height, 3, 3, 'F');
+    // Professional shadow effect
+    this.pdf.setFillColor(0, 0, 0, 0.08);
+    this.pdf.roundedRect(x + 2, y + 2, width, height, 6, 6, 'F');
     
-    // Card background
+    // Clean white background
     this.pdf.setFillColor(...this.colors.white);
-    this.pdf.roundedRect(x, y, width, height, 3, 3, 'F');
+    this.pdf.roundedRect(x, y, width, height, 6, 6, 'F');
     
-    // Card border
+    // Modern border with brand color
     this.pdf.setDrawColor(...color);
-    this.pdf.setLineWidth(0.5);
-    this.pdf.roundedRect(x, y, width, height, 3, 3, 'S');
+    this.pdf.setLineWidth(1.5);
+    this.pdf.roundedRect(x, y, width, height, 6, 6, 'S');
     
-    // Color accent bar
+    // Top accent bar with gradient effect
     this.pdf.setFillColor(...color);
-    this.pdf.rect(x, y, width, 3, 'F');
+    this.pdf.roundedRect(x, y, width, 5, 6, 6, 'F');
+    this.pdf.setFillColor(...this.colors.white);
+    this.pdf.rect(x, y + 5, width, height - 5, 'F');
     
-    // Label
-    this.pdf.setFontSize(12);
+    // Label with improved typography
+    this.pdf.setFontSize(11);
     this.pdf.setFont('helvetica', 'bold');
     this.pdf.setTextColor(...this.colors.darkGray);
-    this.pdf.text(label, x + 10, y + 15);
+    this.pdf.text(label, x + 12, y + 18);
     
-    // Value with color
-    this.pdf.setFontSize(18);
+    // Large, prominent value display
+    this.pdf.setFontSize(24);
     this.pdf.setFont('helvetica', 'bold');
     this.pdf.setTextColor(...color);
-    this.pdf.text(`${Math.round(value)}%`, x + width - 25, y + 15);
+    this.pdf.text(`${Math.round(value)}%`, x + width - 30, y + 20);
     
-    // Progress bar
-    const barWidth = width - 20;
-    const barHeight = 4;
-    const barY = y + height - 12;
+    // Elegant progress indicator
+    const barWidth = width - 24;
+    const barHeight = 6;
+    const barY = y + height - 16;
     
-    // Background bar
-    this.pdf.setFillColor(229, 231, 235);
-    this.pdf.roundedRect(x + 10, barY, barWidth, barHeight, 2, 2, 'F');
+    // Modern progress track
+    this.pdf.setFillColor(241, 245, 249);
+    this.pdf.roundedRect(x + 12, barY, barWidth, barHeight, 3, 3, 'F');
     
-    // Progress bar with gradient effect
+    // Vibrant progress fill with rounded edges
     const progressWidth = (value / 100) * barWidth;
     this.pdf.setFillColor(...color);
-    this.pdf.roundedRect(x + 10, barY, progressWidth, barHeight, 2, 2, 'F');
+    this.pdf.roundedRect(x + 12, barY, progressWidth, barHeight, 3, 3, 'F');
     
-    // Performance indicator
-    const indicator = value >= 80 ? 'Excellent' : value >= 60 ? 'Good' : 'Needs Work';
+    // Performance badge
+    const indicator = value >= 85 ? 'Outstanding' : value >= 70 ? 'Excellent' : value >= 55 ? 'Good' : 'Improving';
+    const badgeColor = value >= 85 ? this.colors.success : value >= 70 ? this.colors.primary : value >= 55 ? this.colors.warning : this.colors.mutedGray;
+    
     this.pdf.setFontSize(8);
-    this.pdf.setFont('helvetica', 'normal');
-    this.pdf.setTextColor(...this.colors.gray);
-    this.pdf.text(indicator, x + 10, y + height - 5);
+    this.pdf.setFont('helvetica', 'bold');
+    this.pdf.setTextColor(...badgeColor);
+    this.pdf.text(indicator, x + 12, y + height - 6);
   }
 
   private addAnalysisDetails(analysis: any): void {
@@ -704,26 +772,44 @@ export class PDFExportService {
     for (let i = 1; i <= pageCount; i++) {
       this.pdf.setPage(i);
       
-      // Footer background
+      // Modern gradient footer background
       this.pdf.setFillColor(...this.colors.primary);
-      this.pdf.rect(0, this.pageHeight - 15, this.pageWidth, 15, 'F');
+      this.pdf.rect(0, this.pageHeight - 20, this.pageWidth, 20, 'F');
+      
+      // Subtle gradient overlay
+      this.pdf.setFillColor(...this.colors.secondary);
+      this.pdf.rect(0, this.pageHeight - 20, this.pageWidth, 8, 'F');
+      
+      // Professional branding
+      this.pdf.setFontSize(10);
+      this.pdf.setFont('helvetica', 'bold');
+      this.pdf.setTextColor(...this.colors.white);
+      this.pdf.text('Yappyy', this.margin, this.pageHeight - 12);
       
       this.pdf.setFontSize(8);
       this.pdf.setFont('helvetica', 'normal');
-      this.pdf.setTextColor(...this.colors.white);
+      this.pdf.text('AI-Powered Speaking Excellence', this.margin, this.pageHeight - 5);
       
-      // Footer text
+      // Generation timestamp
+      this.pdf.setFontSize(8);
+      this.pdf.setFont('helvetica', 'normal');
+      this.pdf.setTextColor(255, 255, 255, 0.8);
       this.pdf.text(
-        `Generated by Yappyy - AI-Powered Speaking Coach | ${new Date().toLocaleDateString()}`,
-        this.margin,
-        this.pageHeight - 8
+        `Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}`,
+        this.pageWidth / 2,
+        this.pageHeight - 5,
+        { align: 'center' }
       );
       
-      // Page number
+      // Professional page numbering
+      this.pdf.setFontSize(10);
+      this.pdf.setFont('helvetica', 'bold');
+      this.pdf.setTextColor(...this.colors.white);
       this.pdf.text(
-        `Page ${i} of ${pageCount}`,
-        this.pageWidth - this.margin - 20,
-        this.pageHeight - 8
+        `${i} / ${pageCount}`,
+        this.pageWidth - this.margin,
+        this.pageHeight - 8,
+        { align: 'right' }
       );
     }
   }
