@@ -218,23 +218,9 @@ export default function SimplifiedPracticePage() {
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = 'en-US';
-    recognition.maxAlternatives = 5; // Get more alternatives to catch fillers
+    recognition.maxAlternatives = 3;
     
-    // CRITICAL: Try to disable browser filtering of vocal fillers
-    try {
-      // Disable profanity filter and speech enhancement that might filter "um"/"uh"
-      (recognition as any).filterProfanity = false;
-      (recognition as any).enableSpeechEnhancement = false;
-      (recognition as any).enableBackgroundNoiseReduction = false;
-      
-      // Enable recognition of all speech including vocal fillers
-      (recognition as any).recognizeVocalFillers = true;
-      (recognition as any).includeInterimFillers = true;
-      
-      console.log('🎤 CRITICAL: Disabled speech filtering to capture vocal fillers');
-    } catch (e) {
-      console.log('🎤 Using browser default settings for speech recognition');
-    }
+    console.log('🎤 Speech recognition configured with standard browser settings');
     
     // CRITICAL: Aggressive configuration to capture vocal fillers like "um" and "uh"
     try {
@@ -279,35 +265,15 @@ export default function SimplifiedPracticePage() {
         let bestTranscript = result[0].transcript;
         let foundFillers = false;
         
-        // Examine all alternatives to find one with vocal fillers (AGGRESSIVE SEARCH)
+        // Check all alternatives for vocal fillers
         for (let j = 0; j < result.length; j++) {
-          const altTranscript = result[j].transcript.toLowerCase().trim();
-          
-          // Check for direct filler words first
+          const altTranscript = result[j].transcript.toLowerCase();
           if (altTranscript.includes('um') || altTranscript.includes('uh') || 
-              altTranscript.includes('ah') || altTranscript.includes('er') ||
-              altTranscript.includes('hmm') || altTranscript.includes('umm') || 
-              altTranscript.includes('uhh') || altTranscript.includes('ohh')) {
+              altTranscript.includes('ah') || altTranscript.includes('er')) {
             bestTranscript = result[j].transcript;
             foundFillers = true;
             console.log('🎯 Found vocal filler in alternative:', bestTranscript);
             break;
-          }
-          
-          // Check if entire transcript is just a short vocal sound (likely filtered filler)
-          const words = altTranscript.split(/\s+/).filter(w => w.length > 0);
-          if (words.length === 1) {
-            const word = words[0].replace(/[.,!?;:'"()]/g, '');
-            if (word.length <= 3 && /^[aeiouhmn]+$/.test(word)) {
-              console.log('🚨 SUSPECTED FILTERED FILLER detected:', word);
-              bestTranscript = word.length === 1 && word === 'a' ? 'uh' : 
-                              word.length === 1 && word === 'o' ? 'uh' :
-                              word.length <= 2 && /^[uh]+$/.test(word) ? 'uh' :
-                              word.length <= 3 && /^[um]+$/.test(word) ? 'um' : 
-                              bestTranscript;
-              foundFillers = true;
-              break;
-            }
           }
         }
         
@@ -322,38 +288,7 @@ export default function SimplifiedPracticePage() {
           rawResult: result
         });
         
-        // AGGRESSIVE EMERGENCY BYPASS: Look for any suspicious short sounds that could be fillers
-        if (!foundFillers && result.isFinal) {
-          const text = bestTranscript.trim().toLowerCase();
-          const words = text.split(/\s+/).filter(w => w.length > 0);
-          
-          // Check each word for potential vocal fillers
-          words.forEach(word => {
-            const cleanWord = word.replace(/[.,!?;:'"()]/g, '');
-            
-            // Match patterns that browsers might filter as "um" or "uh"
-            if (/^(u+m+|u+h+|o+h+|a+h+|e+r+|h+m+)$/i.test(cleanWord) && cleanWord.length <= 4) {
-              console.log('🚨 EMERGENCY PATTERN: Converting suspicious sound to filler:', cleanWord);
-              if (/^u+m+$/i.test(cleanWord)) {
-                bestTranscript = bestTranscript.replace(new RegExp(word, 'gi'), 'um');
-                foundFillers = true;
-              } else if (/^u+h+$/i.test(cleanWord)) {
-                bestTranscript = bestTranscript.replace(new RegExp(word, 'gi'), 'uh');
-                foundFillers = true;
-              } else if (/^[aoeh]+$/i.test(cleanWord) && cleanWord.length <= 2) {
-                bestTranscript = bestTranscript.replace(new RegExp(word, 'gi'), 'uh');
-                foundFillers = true;
-              }
-            }
-            
-            // Special case: single character vocal sounds
-            if (cleanWord.length === 1 && /^[aoeuh]$/i.test(cleanWord)) {
-              console.log('🚨 SINGLE CHAR VOCAL SOUND detected:', cleanWord);
-              bestTranscript = bestTranscript.replace(new RegExp(word, 'gi'), 'uh');
-              foundFillers = true;
-            }
-          });
-        }
+
         
         if (result.isFinal) {
           finalTranscript += bestTranscript + ' ';
@@ -1313,13 +1248,22 @@ export default function SimplifiedPracticePage() {
           </CardHeader>
         </Card>
 
-        {/* Tip */}
-        <Alert className="border-green-200 bg-green-50">
-          <Eye className="h-4 w-4" />
-          <AlertDescription>
-            <strong>Tip:</strong> Look directly at your camera lens to maintain eye contact. Aim for 60-80% eye contact during your speech.
-          </AlertDescription>
-        </Alert>
+        {/* Tips */}
+        <div className="space-y-3">
+          <Alert className="border-green-200 bg-green-50">
+            <Eye className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Tip:</strong> Look directly at your camera lens to maintain eye contact. Aim for 60-80% eye contact during your speech.
+            </AlertDescription>
+          </Alert>
+          
+          <Alert className="border-orange-200 bg-orange-50">
+            <Activity className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Note:</strong> Browser speech recognition automatically filters out "um" and "uh" sounds. The system detects other filler words like "like", "so", "you know" effectively.
+            </AlertDescription>
+          </Alert>
+        </div>
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -1346,12 +1290,10 @@ export default function SimplifiedPracticePage() {
                         <Activity className="w-3 h-3 mr-1" />
                         RECORDING {Math.floor(sessionDuration / 60)}:{(sessionDuration % 60).toString().padStart(2, '0')}
                       </Badge>
-                      {(analyzer || isListeningForFillers) && (
-                        <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
-                          <Activity className="w-3 h-3 mr-1" />
-                          VOCAL FILLER DETECTOR {isListeningForFillers ? '(AUDIO)' : '(FREQ)'}
-                        </Badge>
-                      )}
+                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                        <Activity className="w-3 h-3 mr-1" />
+                        SMART FILLER DETECTION
+                      </Badge>
                       {isRoboflowAnalyzing && (
                         <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
                           <Activity className="w-3 h-3 mr-1" />
@@ -1434,62 +1376,11 @@ export default function SimplifiedPracticePage() {
                   <span className="text-sm text-gray-600">Words Per Minute</span>
                   <span className="font-semibold">{metrics.wordsPerMinute}</span>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Filler Words</span>
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold">{metrics.fillerWordCount}</span>
-                    {isRecording && (
-                      <div className="flex gap-1">
-                        <button
-                          onClick={() => {
-                            console.log('🎯 MANUAL: User clicked UM button');
-                            setTranscript(prev => {
-                              const enhanced = prev + ' um ';
-                              transcriptRef.current = enhanced;
-                              return enhanced;
-                            });
-                            setVocalFillerBuffer(prev => [...prev, 'um']);
-                            setMetrics(prev => ({
-                              ...prev,
-                              fillerWordCount: prev.fillerWordCount + 1,
-                              voice: { ...prev.voice, fillerCount: prev.voice.fillerCount + 1 }
-                            }));
-                          }}
-                          className="px-1 py-0.5 text-xs bg-red-100 text-red-600 rounded hover:bg-red-200 border border-red-300"
-                          title="Click when you say 'um'"
-                        >
-                          +UM
-                        </button>
-                        <button
-                          onClick={() => {
-                            console.log('🎯 MANUAL: User clicked UH button');
-                            setTranscript(prev => {
-                              const enhanced = prev + ' uh ';
-                              transcriptRef.current = enhanced;
-                              return enhanced;
-                            });
-                            setVocalFillerBuffer(prev => [...prev, 'uh']);
-                            setMetrics(prev => ({
-                              ...prev,
-                              fillerWordCount: prev.fillerWordCount + 1,
-                              voice: { ...prev.voice, fillerCount: prev.voice.fillerCount + 1 }
-                            }));
-                          }}
-                          className="px-1 py-0.5 text-xs bg-red-100 text-red-600 rounded hover:bg-red-200 border border-red-300"
-                          title="Click when you say 'uh'"
-                        >
-                          +UH
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                  <span className="font-semibold">{metrics.fillerWordCount}</span>
                 </div>
-                {vocalFillerBuffer.length > 0 && (
-                  <div className="flex justify-between">
-                    <span className="text-sm text-orange-600">Vocal Fillers (um/uh)</span>
-                    <span className="font-semibold text-orange-700">{vocalFillerBuffer.length}</span>
-                  </div>
-                )}
+
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Total Words</span>
                   <span className="font-semibold">{transcript.split(' ').filter(w => w.length > 0).length}</span>
