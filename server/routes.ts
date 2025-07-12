@@ -357,9 +357,9 @@ Make the content more engaging, natural, and personalized while keeping the same
               content: `Analyze this speaking session and provide comprehensive insights:
 
 SESSION DETAILS:
-- Session Name: ${sessionData.sessionName || 'Practice Session'}
-- Purpose: ${sessionData.purpose || 'General Practice'}
-- Duration: ${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, '0')}
+- Session Name: ${sessionData?.sessionName || req.body.sessionData?.sessionName || 'Practice Session'}
+- Purpose: ${sessionData?.purpose || req.body.sessionData?.purpose || 'General Practice'}
+- Duration: ${Math.floor((req.body.duration || 120) / 60)}:${((req.body.duration || 120) % 60).toString().padStart(2, '0')}
 - Words Per Minute: ${wpm || 0}
 
 PERFORMANCE METRICS:
@@ -455,7 +455,7 @@ Provide detailed, actionable analysis focusing on specific improvements and cele
         progressSummary: "You're on the right track! Keep practicing regularly to see continued improvement.",
         sessionMetadata: {
           sessionName: req.body.sessionData?.sessionName || 'Practice Session',
-          duration: duration,
+          duration: req.body.duration || 120,
           timestamp: new Date().toISOString(),
           analysisVersion: '2.0-fallback'
         }
