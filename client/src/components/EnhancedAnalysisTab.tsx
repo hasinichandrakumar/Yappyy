@@ -37,7 +37,9 @@ import {
   Download,
   Lightbulb,
   Smile,
-  Star
+  Star,
+  Video,
+  RotateCcw
 } from 'lucide-react';
 
 export default function EnhancedAnalysisTab() {
@@ -1007,20 +1009,86 @@ export default function EnhancedAnalysisTab() {
 
             {sessionCount > 0 && selectedSession !== 'all' ? (
               <div className="space-y-6">
-                {/* Session Info */}
-                <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200/50">
-                  <div className="flex items-center gap-3">
-                    <Play className="h-5 w-5 text-blue-600" />
-                    <div>
-                      <h4 className="font-semibold text-blue-900">
-                        {filteredSessions[0]?.name || 'Practice Session'}
-                      </h4>
-                      <p className="text-sm text-blue-700">
-                        Duration: {Math.round((filteredSessions[0]?.duration || 120) / 60)}m {((filteredSessions[0]?.duration || 120) % 60)}s
-                      </p>
+                {/* Session Info with Video Playback */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200/50">
+                    <div className="flex items-center gap-3">
+                      <Play className="h-5 w-5 text-blue-600" />
+                      <div>
+                        <h4 className="font-semibold text-blue-900">
+                          {filteredSessions[0]?.name || 'Practice Session'}
+                        </h4>
+                        <p className="text-sm text-blue-700">
+                          Duration: {Math.round((filteredSessions[0]?.duration || 120) / 60)}m {((filteredSessions[0]?.duration || 120) % 60)}s
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {filteredSessions[0]?.videoRecording && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="border-blue-200 text-blue-700 hover:bg-blue-50"
+                          onClick={() => {
+                            const videoElement = document.getElementById('session-video-player') as HTMLVideoElement;
+                            if (videoElement) {
+                              videoElement.scrollIntoView({ behavior: 'smooth' });
+                              videoElement.play();
+                            }
+                          }}
+                        >
+                          <Video className="h-4 w-4 mr-2" />
+                          Watch Recording
+                        </Button>
+                      )}
+                      <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+                        Purpose: {filteredSessions[0]?.purpose || filteredSessions[0]?.sessionName || 'General Practice'}
+                      </Badge>
                     </div>
                   </div>
 
+                  {/* Video Player Section */}
+                  {filteredSessions[0]?.videoRecording && (
+                    <Card className="p-4 bg-white/80 backdrop-blur-sm border border-blue-200/50">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Video className="h-5 w-5 text-blue-600" />
+                        <h5 className="font-semibold text-blue-900">Session Recording</h5>
+                      </div>
+                      <div className="relative bg-black rounded-lg overflow-hidden">
+                        <video
+                          id="session-video-player"
+                          className="w-full max-h-96 object-contain"
+                          controls
+                          preload="metadata"
+                          poster="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTggNVYxOUwxOSAxMkw4IDVaIiBmaWxsPSIjNjM2NkYxIi8+Cjwvc3ZnPgo="
+                        >
+                          <source src={filteredSessions[0].videoRecording} type="video/webm" />
+                          <source src={filteredSessions[0].videoRecording} type="video/mp4" />
+                          Your browser does not support video playback.
+                        </video>
+                        <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
+                          Practice Session Recording
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between mt-3 text-sm text-blue-700">
+                        <span>Review your body language and delivery alongside the AI feedback</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            const video = document.getElementById('session-video-player') as HTMLVideoElement;
+                            if (video) {
+                              video.currentTime = 0;
+                              video.play();
+                            }
+                          }}
+                        >
+                          <RotateCcw className="h-4 w-4 mr-1" />
+                          Restart
+                        </Button>
+                      </div>
+                    </Card>
+                  )}
                 </div>
 
                 {/* AI-Powered Transcript Analysis */}
