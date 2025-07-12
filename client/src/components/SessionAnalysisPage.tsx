@@ -39,6 +39,33 @@ interface SessionData {
   fillerWordCount: number;
   wordsPerMinute: number;
   createdAt: string;
+  facialAnalysis?: {
+    emotionalExpression: {
+      confidence: number;
+      engagement: number;
+      enthusiasm: number;
+      nervousness: number;
+      authenticity: number;
+    };
+    microExpressions: {
+      eyebrowMovement: number;
+      eyeMovement: number;
+      mouthExpression: number;
+      facialSymmetry: number;
+    };
+    communicationSignals: {
+      eyeContactQuality: number;
+      gazeFocus: number;
+      blinkRate: number;
+      facialStability: number;
+    };
+    overallPresence: {
+      charisma: number;
+      trustworthiness: number;
+      professionalism: number;
+      approachability: number;
+    };
+  };
 }
 
 interface SessionAnalysisPageProps {
@@ -357,6 +384,193 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
                   </div>
                 </div>
               )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Facial Analysis */}
+        {sessionData.facialAnalysis && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Eye className="w-5 h-5" />
+                Facial Analysis & Emotional Intelligence
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                {/* Emotional Expression */}
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-gray-800">Emotional Expression</h4>
+                  
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Confidence</span>
+                      <span className={getScoreColor(sessionData.facialAnalysis.emotionalExpression.confidence)}>
+                        {sessionData.facialAnalysis.emotionalExpression.confidence}%
+                      </span>
+                    </div>
+                    <Progress value={sessionData.facialAnalysis.emotionalExpression.confidence} className="h-2" />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Engagement</span>
+                      <span className={getScoreColor(sessionData.facialAnalysis.emotionalExpression.engagement)}>
+                        {sessionData.facialAnalysis.emotionalExpression.engagement}%
+                      </span>
+                    </div>
+                    <Progress value={sessionData.facialAnalysis.emotionalExpression.engagement} className="h-2" />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Authenticity</span>
+                      <span className={getScoreColor(sessionData.facialAnalysis.emotionalExpression.authenticity)}>
+                        {sessionData.facialAnalysis.emotionalExpression.authenticity}%
+                      </span>
+                    </div>
+                    <Progress value={sessionData.facialAnalysis.emotionalExpression.authenticity} className="h-2" />
+                  </div>
+                </div>
+
+                {/* Communication Signals */}
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-gray-800">Communication Signals</h4>
+                  
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Eye Contact Quality</span>
+                      <span className={getScoreColor(sessionData.facialAnalysis.communicationSignals.eyeContactQuality)}>
+                        {sessionData.facialAnalysis.communicationSignals.eyeContactQuality}%
+                      </span>
+                    </div>
+                    <Progress value={sessionData.facialAnalysis.communicationSignals.eyeContactQuality} className="h-2" />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Gaze Focus</span>
+                      <span className={getScoreColor(sessionData.facialAnalysis.communicationSignals.gazeFocus)}>
+                        {sessionData.facialAnalysis.communicationSignals.gazeFocus}%
+                      </span>
+                    </div>
+                    <Progress value={sessionData.facialAnalysis.communicationSignals.gazeFocus} className="h-2" />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Facial Stability</span>
+                      <span className={getScoreColor(sessionData.facialAnalysis.communicationSignals.facialStability)}>
+                        {sessionData.facialAnalysis.communicationSignals.facialStability}%
+                      </span>
+                    </div>
+                    <Progress value={sessionData.facialAnalysis.communicationSignals.facialStability} className="h-2" />
+                  </div>
+                </div>
+
+                {/* Overall Presence */}
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-gray-800">Overall Presence</h4>
+                  
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Charisma</span>
+                      <span className={getScoreColor(sessionData.facialAnalysis.overallPresence.charisma)}>
+                        {sessionData.facialAnalysis.overallPresence.charisma}%
+                      </span>
+                    </div>
+                    <Progress value={sessionData.facialAnalysis.overallPresence.charisma} className="h-2" />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Trustworthiness</span>
+                      <span className={getScoreColor(sessionData.facialAnalysis.overallPresence.trustworthiness)}>
+                        {sessionData.facialAnalysis.overallPresence.trustworthiness}%
+                      </span>
+                    </div>
+                    <Progress value={sessionData.facialAnalysis.overallPresence.trustworthiness} className="h-2" />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Professionalism</span>
+                      <span className={getScoreColor(sessionData.facialAnalysis.overallPresence.professionalism)}>
+                        {sessionData.facialAnalysis.overallPresence.professionalism}%
+                      </span>
+                    </div>
+                    <Progress value={sessionData.facialAnalysis.overallPresence.professionalism} className="h-2" />
+                  </div>
+                </div>
+
+                {/* Micro-expressions */}
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-gray-800">Micro-Expressions</h4>
+                  
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Eye Movement</span>
+                      <span className={getScoreColor(sessionData.facialAnalysis.microExpressions.eyeMovement)}>
+                        {sessionData.facialAnalysis.microExpressions.eyeMovement}%
+                      </span>
+                    </div>
+                    <Progress value={sessionData.facialAnalysis.microExpressions.eyeMovement} className="h-2" />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Facial Symmetry</span>
+                      <span className={getScoreColor(sessionData.facialAnalysis.microExpressions.facialSymmetry)}>
+                        {sessionData.facialAnalysis.microExpressions.facialSymmetry}%
+                      </span>
+                    </div>
+                    <Progress value={sessionData.facialAnalysis.microExpressions.facialSymmetry} className="h-2" />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Expression Quality</span>
+                      <span className={getScoreColor(sessionData.facialAnalysis.microExpressions.mouthExpression)}>
+                        {sessionData.facialAnalysis.microExpressions.mouthExpression}%
+                      </span>
+                    </div>
+                    <Progress value={sessionData.facialAnalysis.microExpressions.mouthExpression} className="h-2" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Facial Analysis Summary */}
+              <div className="mt-6 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200">
+                <h4 className="font-semibold text-purple-800 mb-2">Facial Analysis Insights</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-purple-700">
+                  <div>
+                    <strong>Emotional Intelligence:</strong> 
+                    {sessionData.facialAnalysis.emotionalExpression.engagement > 75 ? 
+                      " Excellent emotional connection with high engagement levels." :
+                      " Good emotional expression, focus on increasing enthusiasm and authenticity."}
+                  </div>
+                  <div>
+                    <strong>Non-verbal Communication:</strong>
+                    {sessionData.facialAnalysis.communicationSignals.eyeContactQuality > 70 ?
+                      " Strong eye contact and focused gaze distribution." :
+                      " Improve eye contact consistency and gaze focus for better audience connection."}
+                  </div>
+                  <div>
+                    <strong>Professional Presence:</strong>
+                    {sessionData.facialAnalysis.overallPresence.professionalism > 80 ?
+                      " Exceptional professional demeanor and charismatic presence." :
+                      " Developing strong presence, continue building confidence and charisma."}
+                  </div>
+                  <div>
+                    <strong>Micro-Expression Control:</strong>
+                    {sessionData.facialAnalysis.microExpressions.facialSymmetry > 75 ?
+                      " Excellent facial control and expression symmetry." :
+                      " Focus on consistent facial expressions and natural movement patterns."}
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         )}

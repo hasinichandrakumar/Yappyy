@@ -14,6 +14,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { SessionDataViewer } from '@/components/SessionDataViewer';
 import { useRoboflowVision } from '@/hooks/useRoboflowVision';
+import { useFacialAnalysis } from '@/hooks/useFacialAnalysis';
 import SessionAnalysisPage from './SessionAnalysisPage';
 
 interface SimplifiedMetrics {
@@ -116,6 +117,16 @@ export default function SimplifiedPracticePage() {
     analyzeSingleFrame,
     cleanup: cleanupRoboflow
   } = useRoboflowVision();
+
+  // Facial analysis integration
+  const {
+    isActive: isFacialAnalysisActive,
+    currentAnalysis: facialAnalysis,
+    startFacialAnalysis,
+    stopFacialAnalysis,
+    getAverageFacialMetrics,
+    error: facialAnalysisError
+  } = useFacialAnalysis();
 
   // Refs
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -799,22 +810,25 @@ export default function SimplifiedPracticePage() {
           },
           bodyLanguage: {
             ...prev.bodyLanguage,
-            // Use Roboflow analysis if available, otherwise use progressive simulation
-            eyeContactScore: roboflowAnalysis?.facial?.eyeContact || Math.min(85, Math.max(0, 
-              Math.floor(progressFactor * (55 + Math.random() * 25))
-            )),
+            // Use facial analysis if available, otherwise use Roboflow or progressive simulation
+            eyeContactScore: facialAnalysis?.facialMetrics?.communicationSignals?.eyeContactQuality || 
+              roboflowAnalysis?.facial?.eyeContact || Math.min(85, Math.max(0, 
+                Math.floor(progressFactor * (55 + Math.random() * 25))
+              )),
             gestureEffectiveness: roboflowAnalysis?.gestures?.effectiveness || Math.min(90, Math.max(0, 
               Math.floor(progressFactor * (60 + Math.random() * 25))
             )),
             postureConfidence: roboflowAnalysis?.posture?.confidence || Math.min(85, Math.max(0, 
               Math.floor(progressFactor * (50 + Math.random() * 30))
             )),
-            facialExpressions: roboflowAnalysis?.facial?.engagement || Math.min(80, Math.max(0, 
-              Math.floor(progressFactor * (45 + Math.random() * 30))
-            )),
-            overallPresence: roboflowAnalysis?.overall?.presence || Math.min(85, Math.max(0, 
-              Math.floor(progressFactor * (55 + Math.random() * 25))
-            ))
+            facialExpressions: facialAnalysis?.facialMetrics?.emotionalExpression?.authenticity || 
+              roboflowAnalysis?.facial?.engagement || Math.min(80, Math.max(0, 
+                Math.floor(progressFactor * (45 + Math.random() * 30))
+              )),
+            overallPresence: facialAnalysis?.facialMetrics?.overallPresence?.charisma || 
+              roboflowAnalysis?.overall?.presence || Math.min(85, Math.max(0, 
+                Math.floor(progressFactor * (55 + Math.random() * 25))
+              ))
           }
         }));
       }, 3000);
@@ -825,6 +839,16 @@ export default function SimplifiedPracticePage() {
         console.log('🤖 Roboflow computer vision analysis started');
       } catch (error) {
         console.warn('⚠️ Roboflow analysis unavailable, using fallback');
+      }
+
+      // Start facial analysis
+      if (videoRef.current) {
+        try {
+          startFacialAnalysis(videoRef.current, 3000); // Analyze every 3 seconds
+          console.log('🎭 Facial analysis started');
+        } catch (error) {
+          console.warn('⚠️ Facial analysis unavailable, using fallback');
+        }
       }
 
       console.log('Recording started');
@@ -887,6 +911,14 @@ export default function SimplifiedPracticePage() {
       console.warn('⚠️ Error stopping Roboflow analysis');
     }
 
+    // Stop facial analysis
+    try {
+      stopFacialAnalysis();
+      console.log('🎭 Facial analysis stopped');
+    } catch (error) {
+      console.warn('⚠️ Error stopping facial analysis');
+    }
+
     setIsRecording(false);
 
     // Reset metrics to 0 after recording stops
@@ -937,6 +969,12 @@ export default function SimplifiedPracticePage() {
         confidenceLevel: metrics.confidence,
         fillerWordCount: metrics.fillerWordCount,
         wordsPerMinute: metrics.wordsPerMinute,
+        facialAnalysis: facialAnalysis?.facialMetrics ? {
+          emotionalExpression: facialAnalysis.facialMetrics.emotionalExpression,
+          microExpressions: facialAnalysis.facialMetrics.microExpressions,
+          communicationSignals: facialAnalysis.facialMetrics.communicationSignals,
+          overallPresence: facialAnalysis.facialMetrics.overallPresence
+        } : undefined,
         createdAt: new Date().toISOString()
       };
 
@@ -1134,6 +1172,18 @@ export default function SimplifiedPracticePage() {
                         <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
                           <Activity className="w-3 h-3 mr-1" />
                           VOCAL FILLER DETECTOR {isListeningForFillers ? '(AUDIO)' : '(FREQ)'}
+                        </Badge>
+                      )}
+                      {isRoboflowAnalyzing && (
+                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                          <Activity className="w-3 h-3 mr-1" />
+                          COMPUTER VISION ACTIVE
+                        </Badge>
+                      )}
+                      {isFacialAnalysisActive && (
+                        <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                          <Activity className="w-3 h-3 mr-1" />
+                          FACIAL ANALYSIS ACTIVE
                         </Badge>
                       )}
                     </div>

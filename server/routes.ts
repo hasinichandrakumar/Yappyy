@@ -2484,6 +2484,22 @@ Respond with detailed analysis in JSON format:
     }
   });
 
+  // =====================================================
+  // FACIAL ANALYSIS ENGINE ENDPOINTS
+  // =====================================================
+
+  // Import facial analysis functions
+  const { analyzeFacialExpression, getFacialAnalysisHistory, batchFacialAnalysis } = await import('./facial-analysis-engine');
+
+  // Real-time facial expression analysis
+  app.post('/api/facial-analysis/analyze', analyzeFacialExpression);
+
+  // Get facial analysis history and averages
+  app.get('/api/facial-analysis/history', getFacialAnalysisHistory);
+
+  // Batch facial analysis for multiple frames
+  app.post('/api/facial-analysis/batch', batchFacialAnalysis);
+
   // Comprehensive body language analysis endpoint
   app.post('/api/roboflow/body-language-analysis', async (req, res) => {
     try {
