@@ -1150,17 +1150,42 @@ export class PDFExportService {
 
 // Helper functions for generating reports
 export const generateSessionPDF = async (session: SessionData): Promise<void> => {
-  const pdfService = new PDFExportService();
-  await pdfService.generateSessionReport(session);
-  const filename = `yappyy-session-${session.id}-${new Date().toISOString().split('T')[0]}.pdf`;
-  await pdfService.downloadPDF(filename);
+  console.log('🔍 Starting PDF generation for session:', session.id);
+  try {
+    const pdfService = new PDFExportService();
+    console.log('✅ PDF service created');
+    
+    await pdfService.generateSessionReport(session);
+    console.log('✅ Session report generated');
+    
+    const filename = `yappyy-session-${session.id}-${new Date().toISOString().split('T')[0]}.pdf`;
+    console.log('📥 Downloading PDF:', filename);
+    
+    await pdfService.downloadPDF(filename);
+    console.log('✅ PDF download initiated');
+  } catch (error) {
+    console.error('❌ PDF generation failed:', error);
+    throw error;
+  }
 };
 
 export const generatePeriodPDF = async (options: ReportOptions): Promise<void> => {
-  const pdfService = new PDFExportService();
-  await pdfService.generatePeriodReport(options);
-  
-  const dateStr = new Date().toISOString().split('T')[0];
-  const filename = `yappyy-${options.type}-report-${dateStr}.pdf`;
-  await pdfService.downloadPDF(filename);
+  console.log('🔍 Starting period PDF generation:', options.type, 'with', options.sessions.length, 'sessions');
+  try {
+    const pdfService = new PDFExportService();
+    console.log('✅ PDF service created');
+    
+    await pdfService.generatePeriodReport(options);
+    console.log('✅ Period report generated');
+    
+    const dateStr = new Date().toISOString().split('T')[0];
+    const filename = `yappyy-${options.type}-report-${dateStr}.pdf`;
+    console.log('📥 Downloading PDF:', filename);
+    
+    await pdfService.downloadPDF(filename);
+    console.log('✅ PDF download initiated');
+  } catch (error) {
+    console.error('❌ PDF generation failed:', error);
+    throw error;
+  }
 };

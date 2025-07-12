@@ -27,20 +27,26 @@ export default function PDFExportControls({ sessions, selectedSession }: PDFExpo
   const { toast } = useToast();
 
   const handleSessionExport = async (session: SessionData) => {
-    if (!session) return;
+    console.log('🎯 Session export button clicked for session:', session?.id);
+    if (!session) {
+      console.error('❌ No session provided');
+      return;
+    }
     
     setIsGenerating(true);
     try {
+      console.log('🚀 Calling generateSessionPDF...');
       await generateSessionPDF(session);
+      console.log('✅ PDF generation completed successfully');
       toast({
         title: "PDF Generated",
         description: `Session analysis report has been downloaded.`,
       });
     } catch (error) {
-      console.error('PDF generation failed:', error);
+      console.error('❌ PDF generation failed in component:', error);
       toast({
         title: "Export Failed",
-        description: "Failed to generate PDF report. Please try again.",
+        description: `Failed to generate PDF report: ${error.message || error}`,
         variant: "destructive",
       });
     } finally {
@@ -49,7 +55,9 @@ export default function PDFExportControls({ sessions, selectedSession }: PDFExpo
   };
 
   const handlePeriodExport = async (type: 'weekly' | 'monthly' | 'yearly') => {
+    console.log('🎯 Period export button clicked for:', type);
     if (sessions.length === 0) {
+      console.error('❌ No sessions available');
       toast({
         title: "No Data Available",
         description: "Complete some practice sessions first.",
@@ -80,6 +88,8 @@ export default function PDFExportControls({ sessions, selectedSession }: PDFExpo
         return sessionDate >= startDate && sessionDate <= now;
       });
 
+      console.log('📊 Filtered sessions for', type, ':', filteredSessions.length, 'out of', sessions.length);
+
       const options: ReportOptions = {
         type,
         sessions: filteredSessions,
@@ -89,17 +99,19 @@ export default function PDFExportControls({ sessions, selectedSession }: PDFExpo
         }
       };
 
+      console.log('🚀 Calling generatePeriodPDF...');
       await generatePeriodPDF(options);
+      console.log('✅ PDF generation completed successfully');
       
       toast({
         title: "PDF Generated",
         description: `${type.charAt(0).toUpperCase() + type.slice(1)} analysis report has been downloaded.`,
       });
     } catch (error) {
-      console.error('PDF generation failed:', error);
+      console.error('❌ PDF generation failed in component:', error);
       toast({
         title: "Export Failed",
-        description: "Failed to generate PDF report. Please try again.",
+        description: `Failed to generate PDF report: ${error.message || error}`,
         variant: "destructive",
       });
     } finally {
