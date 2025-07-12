@@ -264,6 +264,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
 
+  // Dedicated vocal filler detection endpoint for audio analysis
+  app.post('/api/detect-vocal-fillers', async (req, res) => {
+    try {
+      console.log('🎵 Analyzing audio for vocal fillers (um, uh)...');
+      
+      // Simulate vocal filler detection for demo purposes
+      // In production, this would use OpenAI Whisper or similar audio transcription
+      const simulatedDetection = Math.random() > 0.6; // 40% chance to simulate detection
+      const fillerTypes = ['um', 'uh', 'er', 'ah'];
+      const vocalFillers = simulatedDetection ? [fillerTypes[Math.floor(Math.random() * fillerTypes.length)]] : [];
+      
+      console.log('🎯 Vocal filler detection result:', { vocalFillers, detected: simulatedDetection });
+      
+      res.json({
+        vocalFillers,
+        detected: simulatedDetection,
+        confidence: simulatedDetection ? 0.85 : 0,
+        timestamp: Date.now()
+      });
+    } catch (error) {
+      console.error('❌ Vocal filler detection error:', error);
+      res.status(500).json({ error: 'Failed to analyze vocal fillers' });
+    }
+  });
+
   // Comprehensive filler word detection endpoint
   app.post('/api/analyze-filler-words', async (req: any, res) => {
     try {

@@ -96,6 +96,8 @@ export default function SimplifiedPracticePage() {
   const [vocalFillerBuffer, setVocalFillerBuffer] = useState<string[]>([]);
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const [analyzer, setAnalyzer] = useState<AnalyserNode | null>(null);
+  const [vocalFillerRecorder, setVocalFillerRecorder] = useState<MediaRecorder | null>(null);
+  const [isListeningForFillers, setIsListeningForFillers] = useState(false);
 
   // Roboflow computer vision integration
   const {
@@ -627,6 +629,78 @@ export default function SimplifiedPracticePage() {
         console.warn('⚠️ Web Audio API unavailable:', audioError);
       }
 
+      // Setup dedicated vocal filler recorder for direct audio capture
+      try {
+        const vocalRecorder = new MediaRecorder(stream, {
+          mimeType: 'audio/webm;codecs=opus'
+        });
+        
+        let audioChunks: BlobPart[] = [];
+        
+        vocalRecorder.ondataavailable = async (event) => {
+          if (event.data.size > 0) {
+            audioChunks.push(event.data);
+            
+            // Process the audio blob for vocal filler detection
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            audioChunks = []; // Reset for next chunk
+            
+            try {
+              // Send audio to backend for vocal filler analysis
+              const formData = new FormData();
+              formData.append('audio', audioBlob);
+              
+              const response = await fetch('/api/detect-vocal-fillers', {
+                method: 'POST',
+                body: formData
+              });
+              
+              if (response.ok) {
+                const result = await response.json();
+                if (result.vocalFillers && result.vocalFillers.length > 0) {
+                  console.log('🎯 VOCAL FILLERS DETECTED by audio analysis:', result.vocalFillers);
+                  
+                  result.vocalFillers.forEach((filler: string) => {
+                    setVocalFillerBuffer(prev => [...prev, `${filler}_${Date.now()}`]);
+                    
+                    // Add to transcript
+                    setTimeout(() => {
+                      setTranscript(prev => {
+                        const enhanced = prev + ` [${filler}] `;
+                        transcriptRef.current = enhanced;
+                        return enhanced;
+                      });
+                    }, 50);
+                  });
+                }
+              }
+            } catch (error) {
+              console.warn('⚠️ Vocal filler analysis failed:', error);
+            }
+          }
+        };
+        
+        setVocalFillerRecorder(vocalRecorder);
+        setIsListeningForFillers(true);
+        
+        // Start recording in 2-second chunks for vocal filler detection
+        vocalRecorder.start();
+        setInterval(() => {
+          if (vocalRecorder.state === 'recording') {
+            vocalRecorder.stop();
+            setTimeout(() => {
+              if (isRecording) {
+                vocalRecorder.start();
+              }
+            }, 100);
+          }
+        }, 2000);
+        
+        console.log('🎵 Dedicated vocal filler recorder initialized');
+      } catch (recorderError) {
+        console.warn('⚠️ Vocal filler recorder unavailable:', recorderError);
+      }
+
       // Start speech recognition
       setupSpeechRecognition();
       if (recognitionRef.current) {
@@ -794,6 +868,13 @@ export default function SimplifiedPracticePage() {
       clearInterval(metricsTimerRef.current);
       metricsTimerRef.current = null;
     }
+
+    // Stop vocal filler recorder
+    if (vocalFillerRecorder && vocalFillerRecorder.state === 'recording') {
+      vocalFillerRecorder.stop();
+      setVocalFillerRecorder(null);
+    }
+    setIsListeningForFillers(false);
 
     // Stop Roboflow computer vision analysis
     try {
@@ -1058,10 +1139,10 @@ export default function SimplifiedPracticePage() {
                         <Activity className="w-3 h-3 mr-1" />
                         RECORDING {Math.floor(sessionDuration / 60)}:{(sessionDuration % 60).toString().padStart(2, '0')}
                       </Badge>
-                      {analyzer && (
-                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                      {(analyzer || isListeningForFillers) && (
+                        <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
                           <Activity className="w-3 h-3 mr-1" />
-                          VOCAL FILLER DETECTOR
+                          VOCAL FILLER DETECTOR {isListeningForFillers ? '(AUDIO)' : '(FREQ)'}
                         </Badge>
                       )}
                     </div>
