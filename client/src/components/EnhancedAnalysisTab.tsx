@@ -317,9 +317,16 @@ export default function EnhancedAnalysisTab() {
                       <div className="text-3xl font-bold text-emerald-800 mb-1">
                         {(() => {
                           const total = filteredSessions.reduce((sum: number, s: any) => {
-                            // Use multiple possible fields for voice clarity
-                            const clarity = s.clarityScore || s.voiceClarity || s.confidenceScore || 
-                                           (s.transcript && s.transcript.length > 50 ? 75 : 65);
+                            // Convert decimal values to percentages (0.39 -> 39%)
+                            let clarity = s.clarityScore || s.voiceClarity || s.confidenceScore || 0;
+                            // If value is between 0-1, convert to percentage
+                            if (clarity > 0 && clarity <= 1) {
+                              clarity = clarity * 100;
+                            }
+                            // If still 0, use transcript-based fallback
+                            if (clarity === 0 && s.transcript && s.transcript.length > 50) {
+                              clarity = 75;
+                            }
                             return sum + clarity;
                           }, 0);
                           return Math.round(total / sessionCount);
@@ -334,8 +341,13 @@ export default function EnhancedAnalysisTab() {
                           {(() => {
                             const avgClarity = (() => {
                               const total = filteredSessions.reduce((sum: number, s: any) => {
-                                const clarity = s.clarityScore || s.voiceClarity || s.confidenceScore || 
-                                               (s.transcript && s.transcript.length > 50 ? 75 : 65);
+                                let clarity = s.clarityScore || s.voiceClarity || s.confidenceScore || 0;
+                                if (clarity > 0 && clarity <= 1) {
+                                  clarity = clarity * 100;
+                                }
+                                if (clarity === 0 && s.transcript && s.transcript.length > 50) {
+                                  clarity = 75;
+                                }
                                 return sum + clarity;
                               }, 0);
                               return Math.round(total / sessionCount);
@@ -349,8 +361,13 @@ export default function EnhancedAnalysisTab() {
                       </div>
                       <Progress value={(() => {
                         const total = filteredSessions.reduce((sum: number, s: any) => {
-                          const clarity = s.clarityScore || s.voiceClarity || s.confidenceScore || 
-                                         (s.transcript && s.transcript.length > 50 ? 75 : 65);
+                          let clarity = s.clarityScore || s.voiceClarity || s.confidenceScore || 0;
+                          if (clarity > 0 && clarity <= 1) {
+                            clarity = clarity * 100;
+                          }
+                          if (clarity === 0 && s.transcript && s.transcript.length > 50) {
+                            clarity = 75;
+                          }
                           return sum + clarity;
                         }, 0);
                         return Math.round(total / sessionCount);
@@ -370,10 +387,16 @@ export default function EnhancedAnalysisTab() {
                       <div className="text-3xl font-bold text-purple-800 mb-1">
                         {(() => {
                           const total = filteredSessions.reduce((sum: number, s: any) => {
-                            // Calculate volume consistency from session data
-                            const volume = s.volumeConsistency || 
-                                          (s.confidenceScore ? s.confidenceScore - 5 : 0) || // Derive from confidence
-                                          (s.duration && s.duration > 60 ? 70 : 60); // Base on session length
+                            // Convert decimal values to percentages (0.8 -> 80%)
+                            let volume = s.volumeConsistency || s.confidenceScore || 0;
+                            // If value is between 0-1, convert to percentage
+                            if (volume > 0 && volume <= 1) {
+                              volume = volume * 100;
+                            }
+                            // If still 0, use session-based fallback
+                            if (volume === 0 && s.duration && s.duration > 60) {
+                              volume = 70;
+                            }
                             return sum + volume;
                           }, 0);
                           return Math.round(total / sessionCount);
@@ -388,9 +411,13 @@ export default function EnhancedAnalysisTab() {
                           {(() => {
                             const avgVolume = (() => {
                               const total = filteredSessions.reduce((sum: number, s: any) => {
-                                const volume = s.volumeConsistency || 
-                                              (s.confidenceScore ? s.confidenceScore - 5 : 0) || 
-                                              (s.duration && s.duration > 60 ? 70 : 60);
+                                let volume = s.volumeConsistency || s.confidenceScore || 0;
+                                if (volume > 0 && volume <= 1) {
+                                  volume = volume * 100;
+                                }
+                                if (volume === 0 && s.duration && s.duration > 60) {
+                                  volume = 70;
+                                }
                                 return sum + volume;
                               }, 0);
                               return Math.round(total / sessionCount);
@@ -404,9 +431,13 @@ export default function EnhancedAnalysisTab() {
                       </div>
                       <Progress value={(() => {
                         const total = filteredSessions.reduce((sum: number, s: any) => {
-                          const volume = s.volumeConsistency || 
-                                        (s.confidenceScore ? s.confidenceScore - 5 : 0) || 
-                                        (s.duration && s.duration > 60 ? 70 : 60);
+                          let volume = s.volumeConsistency || s.confidenceScore || 0;
+                          if (volume > 0 && volume <= 1) {
+                            volume = volume * 100;
+                          }
+                          if (volume === 0 && s.duration && s.duration > 60) {
+                            volume = 70;
+                          }
                           return sum + volume;
                         }, 0);
                         return Math.round(total / sessionCount);
@@ -426,11 +457,18 @@ export default function EnhancedAnalysisTab() {
                       <div className="text-3xl font-bold text-orange-800 mb-1">
                         {(() => {
                           const total = filteredSessions.reduce((sum: number, s: any) => {
-                            // Calculate intonation from multiple session metrics
-                            const intonation = s.intonationScore || 
-                                              (s.confidenceScore ? s.confidenceScore + 5 : 0) || // Derive from confidence + bonus
-                                              (s.averageWPM && s.averageWPM > 120 ? 68 : 58) || // Base on speaking pace
-                                              (s.transcript && s.transcript.length > 100 ? 65 : 55); // Base on content length
+                            // Convert decimal values to percentages (0.75 -> 75%)
+                            let intonation = s.intonationScore || s.confidenceScore || 0;
+                            // If value is between 0-1, convert to percentage
+                            if (intonation > 0 && intonation <= 1) {
+                              intonation = intonation * 100;
+                            }
+                            // If still 0, use session-based fallback
+                            if (intonation === 0 && s.averageWPM && s.averageWPM > 120) {
+                              intonation = 68;
+                            } else if (intonation === 0 && s.transcript && s.transcript.length > 100) {
+                              intonation = 65;
+                            }
                             return sum + intonation;
                           }, 0);
                           return Math.round(total / sessionCount);
@@ -445,10 +483,15 @@ export default function EnhancedAnalysisTab() {
                           {(() => {
                             const avgIntonation = (() => {
                               const total = filteredSessions.reduce((sum: number, s: any) => {
-                                const intonation = s.intonationScore || 
-                                                  (s.confidenceScore ? s.confidenceScore + 5 : 0) || 
-                                                  (s.averageWPM && s.averageWPM > 120 ? 68 : 58) || 
-                                                  (s.transcript && s.transcript.length > 100 ? 65 : 55);
+                                let intonation = s.intonationScore || s.confidenceScore || 0;
+                                if (intonation > 0 && intonation <= 1) {
+                                  intonation = intonation * 100;
+                                }
+                                if (intonation === 0 && s.averageWPM && s.averageWPM > 120) {
+                                  intonation = 68;
+                                } else if (intonation === 0 && s.transcript && s.transcript.length > 100) {
+                                  intonation = 65;
+                                }
                                 return sum + intonation;
                               }, 0);
                               return Math.round(total / sessionCount);
@@ -462,10 +505,15 @@ export default function EnhancedAnalysisTab() {
                       </div>
                       <Progress value={(() => {
                         const total = filteredSessions.reduce((sum: number, s: any) => {
-                          const intonation = s.intonationScore || 
-                                            (s.confidenceScore ? s.confidenceScore + 5 : 0) || 
-                                            (s.averageWPM && s.averageWPM > 120 ? 68 : 58) || 
-                                            (s.transcript && s.transcript.length > 100 ? 65 : 55);
+                          let intonation = s.intonationScore || s.confidenceScore || 0;
+                          if (intonation > 0 && intonation <= 1) {
+                            intonation = intonation * 100;
+                          }
+                          if (intonation === 0 && s.averageWPM && s.averageWPM > 120) {
+                            intonation = 68;
+                          } else if (intonation === 0 && s.transcript && s.transcript.length > 100) {
+                            intonation = 65;
+                          }
                           return sum + intonation;
                         }, 0);
                         return Math.round(total / sessionCount);
