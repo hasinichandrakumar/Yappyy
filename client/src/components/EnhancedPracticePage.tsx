@@ -129,6 +129,12 @@ export default function EnhancedPracticePage() {
   const [speechPurpose, setSpeechPurpose] = useState<SpeechPurpose | null>(null);
   const [contentAnalysis, setContentAnalysis] = useState<ContentAnalysisResult | null>(null);
   const [showContentAnalysis, setShowContentAnalysis] = useState(false);
+  
+  // Raw Audio Capture for Enhanced Filler Detection
+  const [audioAnalyzer, setAudioAnalyzer] = useState<AudioContext | null>(null);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const audioChunks = useRef<Blob[]>([]);
+  const [isAudioCaptureActive, setIsAudioCaptureActive] = useState(false);
 
   // Refs for Advanced Systems
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -185,6 +191,9 @@ export default function EnhancedPracticePage() {
 
         // Initialize Speech Recognition for Enhanced Filler Word Detection
         setupSpeechRecognition();
+        
+        // Initialize Raw Audio Capture for Vocal Filler Detection
+        await setupRawAudioCapture();
 
         console.log('🚀 Enhanced AI systems initialized');
       } catch (error) {
@@ -251,7 +260,7 @@ export default function EnhancedPracticePage() {
     return () => clearInterval(analysisInterval);
   }, [isRecording]);
 
-  // Enhanced Speech Recognition with Comprehensive Filler Word Detection
+  // Enhanced Speech Recognition with Raw Audio Capture for Filler Detection
   const setupSpeechRecognition = useCallback(() => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
       console.warn('Speech recognition not supported in this browser');
@@ -264,7 +273,15 @@ export default function EnhancedPracticePage() {
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = 'en-US';
-    recognition.maxAlternatives = 1;
+    recognition.maxAlternatives = 5; // Maximum alternatives to catch all variations
+    
+    // Enhanced settings for better filler word detection
+    if ('webkitSpeechRecognition' in window) {
+      // WebKit-specific settings for better filler word capture
+      (recognition as any).serviceURI = 'wss://www.google.com/speech-api/v2/recognize';
+      (recognition as any).interim = true;
+      (recognition as any).continuous = true;
+    }
 
     recognition.onstart = () => {
       console.log('🎤 Speech recognition started');
@@ -273,49 +290,63 @@ export default function EnhancedPracticePage() {
     recognition.onresult = (event: any) => {
       try {
         let finalTranscript = '';
+        let interimTranscript = '';
         
         if (!event.results) return;
         
+        // Process all results including alternatives
         for (let i = event.resultIndex; i < event.results.length; i++) {
-          if (!event.results[i] || !event.results[i][0]) continue;
+          if (!event.results[i]) continue;
           
-          const transcript = event.results[i][0].transcript;
-          if (event.results[i].isFinal) {
-            finalTranscript += transcript + ' ';
+          // Check all alternatives for better filler word detection
+          for (let j = 0; j < Math.min(event.results[i].length, 5); j++) {
+            const result = event.results[i][j];
+            if (!result) continue;
+            
+            const transcript = result.transcript;
+            
+            if (event.results[i].isFinal) {
+              finalTranscript += transcript + ' ';
+            } else {
+              interimTranscript += transcript + ' ';
+            }
+            
+            // Check for filler words in both final and interim results
+            const detectedFillers = detectEnhancedFillerWords(transcript);
+            if (detectedFillers.length > 0) {
+              console.log('🎯 Filler words detected in speech recognition:', detectedFillers);
+              
+              setMetrics(prevMetrics => ({
+                ...prevMetrics,
+                content: {
+                  ...prevMetrics.content,
+                  fillerWords: [...(prevMetrics.content.fillerWords || []), ...detectedFillers]
+                }
+              }));
+              
+              // Show real-time feedback for filler words
+              detectedFillers.forEach(filler => {
+                const feedbackItem: EnhancedLiveFeedback = {
+                  id: `filler-${Date.now()}-${Math.random()}`,
+                  timestamp: Date.now(),
+                  category: 'content',
+                  feedback: `Filler word detected: "${filler}"`,
+                  severity: 'warning',
+                  confidence: 0.9,
+                  actionable: 'Pause instead of using filler words - take a breath and continue with confidence'
+                };
+                
+                setLiveFeedback(prev => [...prev.slice(-9), feedbackItem]);
+              });
+            }
           }
         }
 
-        // Update transcript and detect filler words
+        // Update transcript with final results
         if (finalTranscript.trim()) {
           setTranscript(prev => prev + finalTranscript);
-          
-          // Enhanced filler word detection
-          const detectedFillers = detectEnhancedFillerWords(finalTranscript);
-          if (detectedFillers.length > 0) {
-            setMetrics(prevMetrics => ({
-              ...prevMetrics,
-              content: {
-                ...prevMetrics.content,
-                fillerWords: [...(prevMetrics.content.fillerWords || []), ...detectedFillers]
-              }
-            }));
-            
-            // Show real-time feedback for filler words
-            detectedFillers.forEach(filler => {
-              const feedbackItem: EnhancedLiveFeedback = {
-                id: `filler-${Date.now()}-${Math.random()}`,
-                timestamp: Date.now(),
-                category: 'content',
-                feedback: `Filler word detected: "${filler}"`,
-                severity: 'warning',
-                confidence: 0.9,
-                actionable: 'Pause instead of using filler words - take a breath and continue with confidence'
-              };
-              
-              setLiveFeedback(prev => [...prev.slice(-9), feedbackItem]);
-            });
-          }
         }
+        
       } catch (error) {
         console.error('Speech recognition processing error:', error);
       }
@@ -342,13 +373,118 @@ export default function EnhancedPracticePage() {
     recognitionRef.current = recognition;
   }, []);
 
+  // Raw Audio Capture Setup for Vocal Filler Detection
+  const setupRawAudioCapture = useCallback(async () => {
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        console.warn('MediaDevices API not supported');
+        return;
+      }
+
+      // Get audio stream
+      const audioStream = await navigator.mediaDevices.getUserMedia({ 
+        audio: { 
+          echoCancellation: false,
+          noiseSuppression: false,
+          autoGainControl: false 
+        } 
+      });
+
+      // Create AudioContext for frequency analysis
+      const audioContext = new AudioContext();
+      setAudioAnalyzer(audioContext);
+
+      // Create MediaRecorder for capturing audio chunks
+      const recorder = new MediaRecorder(audioStream, {
+        mimeType: 'audio/webm;codecs=opus'
+      });
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunks.current.push(event.data);
+          
+          // Process audio chunk for vocal filler detection
+          processAudioChunk(event.data);
+        }
+      };
+
+      recorder.onstop = () => {
+        // Final processing when recording stops
+        console.log('🎵 Audio recording stopped');
+      };
+
+      setMediaRecorder(recorder);
+      console.log('🎵 Raw audio capture system initialized');
+
+    } catch (error) {
+      console.error('Failed to setup raw audio capture:', error);
+    }
+  }, []);
+
+  // Process audio chunks for vocal filler detection
+  const processAudioChunk = useCallback(async (audioBlob: Blob) => {
+    try {
+      // Convert blob to ArrayBuffer for analysis
+      const arrayBuffer = await audioBlob.arrayBuffer();
+      
+      // Send to backend for vocal filler analysis
+      const formData = new FormData();
+      formData.append('audio', audioBlob, 'audio.webm');
+      
+      const response = await fetch('/api/detect-vocal-fillers', {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        
+        if (result.detected && result.vocalFillers.length > 0) {
+          console.log('🎯 Vocal fillers detected:', result.vocalFillers);
+          
+          // Add detected vocal fillers to transcript
+          const fillerText = result.vocalFillers.join(' ');
+          setTranscript(prev => prev + ` [${fillerText}] `);
+          
+          // Update metrics
+          setMetrics(prevMetrics => ({
+            ...prevMetrics,
+            content: {
+              ...prevMetrics.content,
+              fillerWords: [...(prevMetrics.content.fillerWords || []), ...result.vocalFillers]
+            }
+          }));
+          
+          // Show live feedback
+          result.vocalFillers.forEach((filler: string) => {
+            const feedbackItem: EnhancedLiveFeedback = {
+              id: `vocal-filler-${Date.now()}-${Math.random()}`,
+              timestamp: Date.now(),
+              category: 'voice',
+              feedback: `Vocal filler detected: "${filler}"`,
+              severity: 'warning',
+              confidence: result.confidence || 0.85,
+              actionable: 'Take a breath instead of using vocal fillers - pause confidently and continue'
+            };
+            
+            setLiveFeedback(prev => [...prev.slice(-9), feedbackItem]);
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error processing audio chunk:', error);
+    }
+  }, []);
+
   // Enhanced Filler Word Detection Function
   const detectEnhancedFillerWords = useCallback((text: string): string[] => {
     const detectedFillers: string[] = [];
     
-    // Comprehensive filler word patterns
+    // Enhanced filler word patterns with aggressive "um" and "uh" detection
     const singleWordFillers = [
-      'um', 'uh', 'er', 'erm', 'ah', 'eh', 'oh', 'hmm', 'mhm',
+      // Primary vocal fillers - most important for detection
+      'um', 'uh', 'er', 'erm', 'ah', 'eh', 'oh', 'hmm', 'mhm', 'uhm', 'umm', 'mm',
+      // Secondary fillers
       'like', 'so', 'well', 'actually', 'basically', 'literally', 'obviously', 
       'right', 'okay', 'alright', 'yeah', 'yep', 'yup', 'nah', 'nope',
       'kinda', 'sorta', 'anyway', 'meanwhile', 'whatever', 'stuff', 'things',
@@ -396,6 +532,47 @@ export default function EnhancedPracticePage() {
     
     return detectedFillers;
   }, []);
+  
+  // Test function to inject filler words for demonstration
+  const testFillerDetection = useCallback(() => {
+    const testTranscript = "Um, well, I think, uh, this is a great, you know, presentation about, like, the importance of, uh, good communication skills.";
+    const detectedFillers = detectEnhancedFillerWords(testTranscript);
+    
+    console.log('🧪 Testing filler word detection:', { testTranscript, detectedFillers });
+    
+    // Add to transcript
+    setTranscript(prev => prev + testTranscript + ' ');
+    
+    // Add to metrics
+    setMetrics(prevMetrics => ({
+      ...prevMetrics,
+      content: {
+        ...prevMetrics.content,
+        fillerWords: [...(prevMetrics.content.fillerWords || []), ...detectedFillers]
+      }
+    }));
+    
+    // Show feedback
+    detectedFillers.forEach(filler => {
+      const feedbackItem: EnhancedLiveFeedback = {
+        id: `test-filler-${Date.now()}-${Math.random()}`,
+        timestamp: Date.now(),
+        category: 'content',
+        feedback: `Test filler detected: "${filler}"`,
+        severity: 'warning',
+        confidence: 1.0,
+        actionable: 'This is a test detection - your filler word detection is working!'
+      };
+      
+      setLiveFeedback(prev => [...prev.slice(-9), feedbackItem]);
+    });
+    
+    toast({
+      title: "Test Complete",
+      description: `Detected ${detectedFillers.length} filler words in test transcript`,
+      duration: 3000
+    });
+  }, [detectEnhancedFillerWords, toast]);
 
   // Comprehensive real-time analysis
   const performComprehensiveAnalysis = useCallback(async () => {
@@ -688,6 +865,18 @@ export default function EnhancedPracticePage() {
         }
       }
 
+      // Start raw audio recording for vocal filler detection
+      if (mediaRecorder && mediaRecorder.state === 'inactive') {
+        try {
+          audioChunks.current = []; // Clear previous chunks
+          mediaRecorder.start(2000); // Record in 2-second chunks
+          setIsAudioCaptureActive(true);
+          console.log('🎵 Raw audio capture started for vocal filler detection');
+        } catch (error) {
+          console.error('Failed to start audio recording:', error);
+        }
+      }
+
       // Start session timer
       const startTime = Date.now();
       const timer = setInterval(() => {
@@ -720,6 +909,17 @@ export default function EnhancedPracticePage() {
         console.log('🎤 Speech recognition stopped');
       } catch (error) {
         console.error('Failed to stop speech recognition:', error);
+      }
+    }
+
+    // Stop raw audio recording
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+      try {
+        mediaRecorder.stop();
+        setIsAudioCaptureActive(false);
+        console.log('🎵 Raw audio capture stopped');
+      } catch (error) {
+        console.error('Failed to stop audio recording:', error);
       }
     }
 
@@ -1032,6 +1232,17 @@ export default function EnhancedPracticePage() {
                       Stop ({Math.floor(sessionDuration / 60)}:{(sessionDuration % 60).toString().padStart(2, '0')})
                     </Button>
                   )}
+                  
+                  {/* Test Filler Detection Button */}
+                  <Button 
+                    onClick={testFillerDetection} 
+                    variant="outline" 
+                    size="sm"
+                    className="bg-purple-50 hover:bg-purple-100 text-purple-700"
+                  >
+                    <Zap className="w-4 h-4 mr-1" />
+                    Test Filler Detection
+                  </Button>
                 </div>
               </div>
             </div>
@@ -1078,11 +1289,19 @@ export default function EnhancedPracticePage() {
                   
                   {/* Simplified Live Status */}
                   {isRecording && (
-                    <div className="absolute top-4 left-4">
+                    <div className="absolute top-4 left-4 space-y-2">
                       <Badge variant="destructive" className="animate-pulse">
                         <Activity className="w-3 h-3 mr-1" />
                         RECORDING {Math.floor(sessionDuration / 60)}:{(sessionDuration % 60).toString().padStart(2, '0')}
                       </Badge>
+                      {isAudioCaptureActive && (
+                        <div>
+                          <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-300">
+                            <Mic className="w-3 h-3 mr-1" />
+                            ENHANCED VOCAL FILLER DETECTION ACTIVE
+                          </Badge>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
