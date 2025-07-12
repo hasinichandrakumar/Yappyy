@@ -14,6 +14,8 @@ export interface SessionData {
   confidenceScore?: number;
   transcript?: string;
   analysis?: any;
+  fillerWords?: string[];
+  fillerWordCount?: number;
 }
 
 export interface ReportOptions {
@@ -76,6 +78,11 @@ export class PDFExportService {
       this.addSectionTitle('Detailed Analysis', true);
       this.addAnalysisDetails(session.analysis);
     }
+
+    // Filler Words Analysis (only add the method if it exists)
+    this.checkPageBreak(50);
+    this.addSectionTitle('Filler Words Analysis', true);
+    this.addFillerWordsSection(session);
 
     // Transcript (if available)
     if (session.transcript && session.transcript.trim()) {
@@ -204,6 +211,12 @@ export class PDFExportService {
     const centerY = 240;
     const radius = 30;
     
+    // Calculate overall score from available metrics
+    const voiceScore = (session.voiceClarity || 0.8) * 100;
+    const confidenceScore = (session.confidenceScore || 0.75) * 100;
+    const eyeContactScore = parseFloat(session.eyeContactScore || '75');
+    const overallScore = Math.round((voiceScore + confidenceScore + eyeContactScore) / 3);
+    
     // Shadow effect
     this.pdf.setFillColor(0, 0, 0, 0.1);
     this.pdf.circle(centerX + 2, centerY + 2, radius, 'F');
@@ -220,7 +233,7 @@ export class PDFExportService {
     this.pdf.setFontSize(28);
     this.pdf.setFont('helvetica', 'bold');
     this.pdf.setTextColor(...this.colors.white);
-    this.pdf.text(`${Math.round(session.overallScore || 75)}%`, centerX, centerY + 4, { align: 'center' });
+    this.pdf.text(`${overallScore}%`, centerX, centerY + 4, { align: 'center' });
     
     // Professional label
     this.pdf.setFontSize(14);
@@ -229,8 +242,7 @@ export class PDFExportService {
     this.pdf.text('Overall Performance', centerX, centerY + 45, { align: 'center' });
     
     // Performance category
-    const score = Math.round(session.overallScore || 75);
-    const category = score >= 85 ? 'Excellent' : score >= 70 ? 'Good' : score >= 55 ? 'Improving' : 'Needs Focus';
+    const category = overallScore >= 85 ? 'Excellent' : overallScore >= 70 ? 'Good' : overallScore >= 55 ? 'Improving' : 'Needs Focus';
     this.pdf.setFontSize(12);
     this.pdf.setFont('helvetica', 'normal');
     this.pdf.setTextColor(...this.colors.mutedGray);
@@ -250,7 +262,12 @@ export class PDFExportService {
     this.pdf.roundedRect(this.margin, this.currentY, this.pageWidth - (2 * this.margin), 45, 8, 8, 'FD');
     
     // Executive summary content
-    const summaryText = `This comprehensive analysis leverages advanced AI technology to evaluate your speaking performance across multiple dimensions. Your overall score of ${Math.round(session.overallScore || 75)}% reflects measurable strengths in communication delivery and identifies specific opportunities for enhancement in eye contact engagement and confidence projection.`;
+    const voiceScore = (session.voiceClarity || 0.8) * 100;
+    const confidenceScore = (session.confidenceScore || 0.75) * 100;
+    const eyeContactScore = parseFloat(session.eyeContactScore || '75');
+    const overallScore = Math.round((voiceScore + confidenceScore + eyeContactScore) / 3);
+    
+    const summaryText = `This comprehensive analysis leverages advanced AI technology to evaluate your speaking performance across multiple dimensions. Your overall score of ${overallScore}% reflects measurable strengths in communication delivery and identifies specific opportunities for enhancement in eye contact engagement and confidence projection.`;
     
     this.pdf.setFontSize(12);
     this.pdf.setFont('helvetica', 'normal');
@@ -297,11 +314,17 @@ export class PDFExportService {
   }
 
   private addPerformanceGrid(session: SessionData): void {
+    // Calculate accurate scores from database values
+    const voiceScore = (session.voiceClarity || 0.8) * 100;
+    const confidenceScore = (session.confidenceScore || 0.75) * 100;
+    const eyeContactScore = parseFloat(session.eyeContactScore || '75');
+    const overallScore = Math.round((voiceScore + confidenceScore + eyeContactScore) / 3);
+    
     const metrics = [
-      { label: 'Overall Score', value: session.overallScore || 75, color: this.colors.primary, icon: '★' },
-      { label: 'Voice Clarity', value: session.voiceClarity || 80, color: this.colors.success, icon: '🎤' },
-      { label: 'Eye Contact', value: session.eyeContactScore || 75, color: this.colors.purple, icon: '👁' },
-      { label: 'Confidence', value: session.confidenceScore || 78, color: this.colors.warning, icon: '💪' }
+      { label: 'Overall Score', value: overallScore, color: this.colors.primary, icon: '★' },
+      { label: 'Voice Clarity', value: voiceScore, color: this.colors.success, icon: '🎤' },
+      { label: 'Eye Contact', value: eyeContactScore, color: this.colors.secondary, icon: '👁' },
+      { label: 'Confidence', value: confidenceScore, color: this.colors.accent, icon: '💪' }
     ];
     
     const cardWidth = (this.pageWidth - (2 * this.margin) - 15) / 2;
@@ -371,6 +394,55 @@ export class PDFExportService {
     this.pdf.setFont('helvetica', 'bold');
     this.pdf.setTextColor(...badgeColor);
     this.pdf.text(indicator, x + 12, y + height - 6);
+  }
+
+  private addFillerWordsSection(session: SessionData): void {
+    // Create a simple filler words analysis section
+    const totalFillerWords = session.fillerWords || 0;
+    
+    // Professional filler words card
+    this.pdf.setFillColor(0, 0, 0, 0.03);
+    this.pdf.roundedRect(this.margin + 2, this.currentY + 2, this.pageWidth - (2 * this.margin), 60, 8, 8, 'F');
+    
+    this.pdf.setFillColor(...this.colors.brand.background);
+    this.pdf.setDrawColor(...this.colors.warning);
+    this.pdf.setLineWidth(1);
+    this.pdf.roundedRect(this.margin, this.currentY, this.pageWidth - (2 * this.margin), 60, 8, 8, 'FD');
+    
+    // Header section
+    this.pdf.setFontSize(16);
+    this.pdf.setFont('helvetica', 'bold');
+    this.pdf.setTextColor(...this.colors.warning);
+    this.pdf.text('Total Filler Words Detected', this.margin + 15, this.currentY + 20);
+    
+    // Total count display
+    this.pdf.setFontSize(28);
+    this.pdf.setFont('helvetica', 'bold');
+    this.pdf.setTextColor(...this.colors.warning);
+    this.pdf.text(`${totalFillerWords}`, this.pageWidth - this.margin - 30, this.currentY + 25);
+    
+    // Impact assessment
+    const impactLevel = totalFillerWords > 15 ? 'High Impact' : totalFillerWords > 8 ? 'Moderate Impact' : 'Low Impact';
+    const impactColor = totalFillerWords > 15 ? this.colors.danger : totalFillerWords > 8 ? this.colors.warning : this.colors.success;
+    
+    this.pdf.setFontSize(12);
+    this.pdf.setFont('helvetica', 'normal');
+    this.pdf.setTextColor(...impactColor);
+    this.pdf.text(impactLevel, this.pageWidth - this.margin - 50, this.currentY + 35);
+    
+    // Analysis text
+    const analysisText = totalFillerWords > 15 
+      ? 'Consider practicing more structured speech patterns to reduce dependency on filler words.'
+      : totalFillerWords > 8 
+      ? 'Good progress! Focus on conscious pausing instead of using filler words.'
+      : 'Excellent! Your speech shows minimal filler word usage.';
+    
+    this.pdf.setFontSize(11);
+    this.pdf.setFont('helvetica', 'normal');
+    this.pdf.setTextColor(...this.colors.mutedGray);
+    this.pdf.text(analysisText, this.margin + 15, this.currentY + 45);
+    
+    this.currentY += 70;
   }
 
   private addAnalysisDetails(analysis: any): void {
