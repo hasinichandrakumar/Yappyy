@@ -567,13 +567,62 @@ export default function SimplifiedPracticePage() {
         console.log('🎵 Web Audio API initialized for vocal filler detection');
         
         // Start audio pattern analysis
-        const analyzeInterval = setInterval(() => {
-          analyzeAudioForVocalFillers();
-        }, 100); // Check every 100ms for vocal patterns
+        let analyzeInterval: NodeJS.Timeout;
+        const startAnalysis = () => {
+          analyzeInterval = setInterval(() => {
+            if (audioAnalyzerRef.current) {
+              const bufferLength = audioAnalyzerRef.current.frequencyBinCount;
+              const dataArray = new Uint8Array(bufferLength);
+              audioAnalyzerRef.current.getByteFrequencyData(dataArray);
+              
+              // Analyze frequency patterns for vocal fillers (um/uh typically 100-300Hz)
+              let lowFreqEnergy = 0;
+              let midFreqEnergy = 0;
+              
+              // Calculate energy in frequency ranges
+              for (let i = 0; i < bufferLength; i++) {
+                const freq = (i * 22050) / bufferLength; // Convert to Hz
+                if (freq >= 80 && freq <= 300) {
+                  lowFreqEnergy += dataArray[i];
+                } else if (freq >= 300 && freq <= 1000) {
+                  midFreqEnergy += dataArray[i];
+                }
+              }
+              
+              // Detect vocal filler pattern (strong low freq, weak mid freq)
+              const ratio = lowFreqEnergy / (midFreqEnergy + 1);
+              const totalEnergy = lowFreqEnergy + midFreqEnergy;
+              
+              if (ratio > 2.5 && totalEnergy > 1000) {
+                console.log('🎯 AUDIO PATTERN: Possible vocal filler detected!', { ratio, totalEnergy });
+                
+                // Add to vocal filler buffer with timestamp
+                const timestamp = Date.now();
+                setVocalFillerBuffer(prev => {
+                  const recent = prev.filter(item => timestamp - parseInt(item.split('_')[1] || '0') < 2000);
+                  if (recent.length === 0) {
+                    const newFiller = `um_${timestamp}`;
+                    console.log('✅ VOCAL FILLER DETECTED via audio analysis:', newFiller);
+                    
+                    // Add to transcript immediately
+                    setTimeout(() => {
+                      setTranscript(prev => {
+                        const enhanced = prev + ` [um] `;
+                        transcriptRef.current = enhanced;
+                        return enhanced;
+                      });
+                    }, 50);
+                    
+                    return [...recent, newFiller];
+                  }
+                  return recent;
+                });
+              }
+            }
+          }, 100); // Check every 100ms for vocal patterns
+        };
         
-        // Clean up interval when recording stops
-        const cleanup = () => clearInterval(analyzeInterval);
-        return cleanup;
+        startAnalysis();
       } catch (audioError) {
         console.warn('⚠️ Web Audio API unavailable:', audioError);
       }
