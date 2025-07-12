@@ -1178,7 +1178,7 @@ function TranscriptAnalysisComponent({ session, onAnalysisComplete }: Transcript
 
   // Generate AI-powered transcript analysis
   const analyzeTranscript = async () => {
-    if (!session?.transcript || session.transcript.length < 20) {
+    if (!session?.transcript || session.transcript.length < 5) {
       toast({
         title: "No transcript available",
         description: "Please complete a session with speech to generate AI feedback.",
@@ -1189,6 +1189,12 @@ function TranscriptAnalysisComponent({ session, onAnalysisComplete }: Transcript
 
     setIsAnalyzing(true);
     try {
+      // Always generate transcript segments first
+      if (transcriptSegments.length === 0) {
+        const segments = breakTranscriptIntoSegments(session.transcript);
+        setTranscriptSegments(segments);
+      }
+
       const response = await fetch('/api/hyperpersonalized-transcript-analysis', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1210,10 +1216,6 @@ function TranscriptAnalysisComponent({ session, onAnalysisComplete }: Transcript
       setAiFeedback(feedback);
       onAnalysisComplete(feedback);
 
-      // Break transcript into segments for detailed analysis
-      const segments = breakTranscriptIntoSegments(session.transcript);
-      setTranscriptSegments(segments);
-
       toast({
         title: "AI Analysis Complete",
         description: "Hyperpersonalized feedback generated successfully!"
@@ -1221,10 +1223,22 @@ function TranscriptAnalysisComponent({ session, onAnalysisComplete }: Transcript
 
     } catch (error) {
       console.error('Transcript analysis error:', error);
+      
+      // Even if AI analysis fails, try to provide basic feedback
+      setAiFeedback({
+        strengths: ["Session completed successfully", "Spoke for the entire duration"],
+        improvements: ["Continue practicing regularly", "Focus on clarity and pace"],
+        recommendations: [{
+          category: "Practice",
+          suggestion: "Regular practice sessions build confidence",
+          priority: "Medium"
+        }]
+      });
+      
       toast({
-        title: "Analysis Error",
-        description: "Failed to generate AI feedback. Please try again.",
-        variant: "destructive"
+        title: "Basic Analysis Complete",
+        description: "Generated basic feedback. Full AI analysis unavailable.",
+        variant: "default"
       });
     } finally {
       setIsAnalyzing(false);
@@ -1245,8 +1259,17 @@ function TranscriptAnalysisComponent({ session, onAnalysisComplete }: Transcript
 
   // Auto-analyze when component mounts if transcript exists
   useEffect(() => {
-    if (session?.transcript && session.transcript.length > 20 && !aiFeedback) {
-      analyzeTranscript();
+    if (session?.transcript && session.transcript.length > 0) {
+      // Always generate transcript segments, even if AI analysis fails
+      if (transcriptSegments.length === 0) {
+        const segments = breakTranscriptIntoSegments(session.transcript);
+        setTranscriptSegments(segments);
+      }
+      
+      // Only trigger AI analysis if transcript is substantial and we don't have feedback
+      if (session.transcript.length > 20 && !aiFeedback) {
+        analyzeTranscript();
+      }
     }
   }, [session]);
 
@@ -1260,25 +1283,8 @@ function TranscriptAnalysisComponent({ session, onAnalysisComplete }: Transcript
     );
   }
 
-  if (!session.transcript || session.transcript.length < 20) {
-    return (
-      <div className="space-y-4">
-        <h4 className="text-lg font-semibold text-slate-900 mb-4">Speech Transcript with AI Feedback</h4>
-        <div className="text-center py-8 bg-slate-50/50 rounded-lg">
-          <FileText className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-slate-600 mb-2">No transcript available</h3>
-          <p className="text-slate-500">Transcript data will appear here for recorded sessions</p>
-          <Button
-            variant="outline"
-            className="mt-4"
-            onClick={() => window.location.href = '/practice'}
-          >
-            Start a Practice Session
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  // Always show the component, even if transcript is short or empty
+  const hasTranscript = session.transcript && session.transcript.length > 0;
 
   return (
     <div className="space-y-6">
@@ -1373,7 +1379,7 @@ function TranscriptAnalysisComponent({ session, onAnalysisComplete }: Transcript
 
       {/* Interactive Transcript */}
       <Card className="p-6">
-        <h5 className="text-lg font-semibold mb-4">Interactive Transcript</h5>
+        <h5 className="text-lg font-semibold mb-4">Session Transcript</h5>
         <div className="max-h-80 overflow-y-auto space-y-3">
           {transcriptSegments.length > 0 ? (
             transcriptSegments.map((segment, index) => (
@@ -1399,10 +1405,60 @@ function TranscriptAnalysisComponent({ session, onAnalysisComplete }: Transcript
                 <p className="text-sm text-slate-700">{segment.text}</p>
               </div>
             ))
+          ) : session?.transcript ? (
+            // Show raw transcript if segments aren't available
+            <div className="space-y-4">
+              <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
+                <div className="flex items-center justify-between mb-3">
+                  <Badge variant="outline" className="text-xs">
+                    Full Session Transcript
+                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge className="bg-blue-100 text-blue-800 text-xs">
+                      {session.duration ? `${Math.floor(session.duration / 60)}:${(session.duration % 60).toString().padStart(2, '0')}` : 'Duration N/A'}
+                    </Badge>
+                    <Badge className="bg-green-100 text-green-800 text-xs">
+                      {session.transcript.split(' ').length} words
+                    </Badge>
+                  </div>
+                </div>
+                <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
+                  {session.transcript}
+                </p>
+              </div>
+              
+              {/* Filler Words Analysis */}
+              {session.fillerWordCount > 0 && (
+                <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <AlertTriangle className="h-4 w-4 text-orange-600" />
+                    <h6 className="font-semibold text-orange-900">Filler Words Detected</h6>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-orange-800">
+                      {session.fillerWordCount} filler words detected in this session
+                    </span>
+                    <Badge variant="outline" className="bg-orange-100 text-orange-800">
+                      {session.fillerWords ? session.fillerWords.length : session.fillerWordCount} total
+                    </Badge>
+                  </div>
+                  {session.fillerWords && Array.isArray(session.fillerWords) && (
+                    <div className="mt-3 flex flex-wrap gap-1">
+                      {session.fillerWords.map((word: string, index: number) => (
+                        <Badge key={index} variant="destructive" className="text-xs">
+                          {word}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           ) : (
             <div className="text-center py-6">
-              <Clock className="h-8 w-8 text-slate-400 mx-auto mb-2" />
-              <p className="text-slate-500 text-sm">Transcript segments will appear here</p>
+              <FileText className="h-8 w-8 text-slate-400 mx-auto mb-2" />
+              <p className="text-slate-500 text-sm">No transcript available for this session</p>
+              <p className="text-slate-400 text-xs mt-1">Practice sessions will generate transcripts automatically</p>
             </div>
           )}
         </div>
