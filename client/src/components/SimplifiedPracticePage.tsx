@@ -951,32 +951,64 @@ export default function SimplifiedPracticePage() {
       });
     }, 1000); // Small delay to allow final session save
 
-    // Save session
+    // Save session with schema-compliant data structure
     try {
+      const averageWPM = sessionDuration > 0 ? Math.round((transcript.split(' ').filter(w => w.length > 0).length / sessionDuration) * 60) : 0;
+      const overallConfidence = Math.round((metrics.eyeContact + metrics.confidence + metrics.engagement) / 3);
+      
       const sessionData = {
         userId: 'demo-user',
-        sessionName,
-        purpose: sessionPurpose,
         duration: sessionDuration,
-        transcript,
-        overallPerformance: Math.round((metrics.eyeContact + metrics.confidence + metrics.engagement) / 3),
-        clarityScore: metrics.clarity,
-        volumeConsistency: 80,
-        intonationScore: 75,
-        paceConsistency: 85,
-        engagementLevel: metrics.engagement,
-        eyeContactScore: metrics.eyeContact,
-        confidenceLevel: metrics.confidence,
-        fillerWordCount: metrics.fillerWordCount,
-        wordsPerMinute: metrics.wordsPerMinute,
-        facialAnalysis: facialAnalysis?.facialMetrics ? {
-          emotionalExpression: facialAnalysis.facialMetrics.emotionalExpression,
-          microExpressions: facialAnalysis.facialMetrics.microExpressions,
-          communicationSignals: facialAnalysis.facialMetrics.communicationSignals,
-          overallPresence: facialAnalysis.facialMetrics.overallPresence
-        } : undefined,
-        createdAt: new Date().toISOString()
+        averageWPM: averageWPM,
+        confidenceScore: overallConfidence / 100, // Convert to 0-1 range for real type
+        voiceClarity: metrics.clarity / 100, // Convert to 0-1 range for real type
+        fillerWords: metrics.fillerWordCount,
+        pauseCount: Math.floor(sessionDuration / 30), // Estimate pauses
+        eyeContactScore: `${metrics.eyeContact}%`, // String format as required by schema
+        transcript: transcript || 'No transcript available',
+        coachingTips: [
+          `Confidence level: ${metrics.confidence}%`,
+          `Eye contact: ${metrics.eyeContact}%`, 
+          `Engagement: ${metrics.engagement}%`,
+          `Speaking pace: ${averageWPM} WPM`
+        ],
+        // Analysis tab compatible fields
+        clarityScore: metrics.clarity / 100,
+        volumeConsistency: 0.8, // Default value as real type
+        intonationScore: 0.75, // Default value as real type
+        postureScore: (metrics.bodyLanguage?.postureConfidence || 70) / 100,
+        fillerWordsUh: Math.floor(metrics.fillerWordCount * 0.4), // Estimate "uh" fillers
+        fillerWordsLike: Math.floor(metrics.fillerWordCount * 0.3), // Estimate "like" fillers
+        fillerWordsSo: Math.floor(metrics.fillerWordCount * 0.3), // Estimate "so" fillers
+        name: sessionName || `Session ${Date.now()}`,
+        purpose: sessionPurpose || 'General practice session',
+        // Enhanced AI analysis fields
+        aiAnalysis: {
+          overallPerformance: overallConfidence,
+          sessionName: sessionName,
+          purpose: sessionPurpose,
+          facialAnalysis: facialAnalysis?.facialMetrics || null
+        },
+        speechPatterns: {
+          averageWPM: averageWPM,
+          fillerCount: metrics.fillerWordCount,
+          clarity: metrics.clarity
+        },
+        bodyLanguageMetrics: {
+          eyeContact: metrics.eyeContact,
+          confidence: metrics.confidence,
+          posture: metrics.bodyLanguage?.postureConfidence || 70,
+          gestures: metrics.bodyLanguage?.gestureEffectiveness || 75
+        },
+        persuasivenessScore: overallConfidence / 100,
+        emotionalIntelligence: {
+          engagement: metrics.engagement,
+          confidence: metrics.confidence,
+          authenticity: facialAnalysis?.facialMetrics?.emotionalExpression?.authenticity || 75
+        }
       };
+
+      console.log('💾 Saving session with schema-compliant data:', sessionData);
 
       const response = await fetch('/api/practice-sessions', {
         method: 'POST',
@@ -985,13 +1017,38 @@ export default function SimplifiedPracticePage() {
       });
 
       if (response.ok) {
+        const savedSession = await response.json();
+        console.log('✅ Session saved successfully:', savedSession);
+        
         toast({
           title: "✅ Session Saved Successfully",
           description: `${sessionName} saved with full transcript and analytics - view anytime in Analysis tab`,
         });
         
-        // Prepare session data for analysis page
-        setSessionAnalysisData(sessionData);
+        // Prepare enriched session data for analysis page
+        const analysisData = {
+          ...sessionData,
+          sessionName: sessionData.name,
+          purpose: sessionData.purpose,
+          overallPerformance: Math.round(sessionData.confidenceScore * 100),
+          clarityScore: Math.round(sessionData.clarityScore * 100),
+          volumeConsistency: Math.round(sessionData.volumeConsistency * 100),
+          intonationScore: Math.round(sessionData.intonationScore * 100),
+          paceConsistency: 85,
+          engagementLevel: metrics.engagement,
+          eyeContactScore: metrics.eyeContact,
+          confidenceLevel: metrics.confidence,
+          fillerWordCount: sessionData.fillerWords,
+          wordsPerMinute: sessionData.averageWPM,
+          facialAnalysis: facialAnalysis?.facialMetrics ? {
+            emotionalExpression: facialAnalysis.facialMetrics.emotionalExpression,
+            microExpressions: facialAnalysis.facialMetrics.microExpressions,
+            communicationSignals: facialAnalysis.facialMetrics.communicationSignals,
+            overallPresence: facialAnalysis.facialMetrics.overallPresence
+          } : undefined
+        };
+        
+        setSessionAnalysisData(analysisData);
         setShowAnalysisPage(true);
       }
     } catch (error) {
