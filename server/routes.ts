@@ -518,8 +518,8 @@ Provide detailed, actionable analysis focusing on specific improvements and cele
       
       // Comprehensive filler word patterns - 60+ common speech fillers
       const singleFillers = [
-        // Classic vocal fillers
-        'um', 'uh', 'uhm', 'umm', 'er', 'err', 'ah', 'eh', 'mm', 'hmm', 'hm',
+        // Classic vocal fillers - PRIORITY DETECTION
+        'um', 'uh', 'uhm', 'umm', 'uhhh', 'ummm', 'er', 'err', 'ah', 'eh', 'mm', 'hmm', 'hm',
         
         // Discourse markers
         'like', 'so', 'well', 'okay', 'ok', 'right', 'yeah', 'yes', 'yep', 'sure',
@@ -614,23 +614,43 @@ Provide detailed, actionable analysis focusing on specific improvements and cele
         // Clean word by removing punctuation and converting to lowercase
         const cleanWord = word.toLowerCase().replace(/[.,!?;:'"()[\]]/g, '');
         
-        // Debug logging for "uh" detection
-        if (cleanWord === 'uh' || cleanWord.includes('uh')) {
-          console.log(`🔍 Found "uh" variant: "${word}" -> cleaned: "${cleanWord}"`);
+        // Enhanced debug logging for "um" and "uh" detection
+        if (cleanWord === 'uh' || cleanWord === 'um' || cleanWord.includes('uh') || cleanWord.includes('um')) {
+          console.log(`🔍 Found UM/UH variant: "${word}" -> cleaned: "${cleanWord}" -> inList: ${singleFillers.includes(cleanWord)}`);
         }
         
-        if (singleFillers.includes(cleanWord)) {
+        // Special handling for common vocal fillers with variations
+        const isVocalFiller = singleFillers.includes(cleanWord) || 
+          /^u+h+$/i.test(cleanWord) ||  // Match "uh", "uhh", "uhhh" etc
+          /^u+m+$/i.test(cleanWord) ||  // Match "um", "umm", "ummm" etc
+          /^u+h+m+$/i.test(cleanWord);  // Match "uhm", "uhhm" etc
+        
+        if (isVocalFiller) {
+          // Normalize vocal filler variants to base forms
+          let normalizedWord = cleanWord;
+          if (/^u+h+$/i.test(cleanWord)) normalizedWord = 'uh';
+          else if (/^u+m+$/i.test(cleanWord)) normalizedWord = 'um';
+          else if (/^u+h+m+$/i.test(cleanWord)) normalizedWord = 'uhm';
+          
+          if (!fillerCounts[normalizedWord]) {
+            fillerCounts[normalizedWord] = { count: 0, positions: [] };
+          }
+          fillerCounts[normalizedWord].count++;
+          fillerCounts[normalizedWord].positions.push(index);
+          totalCount++;
+          
+          // Extra logging for "uh" and "um" detection
+          if (normalizedWord === 'uh' || normalizedWord === 'um') {
+            console.log(`✅ "${normalizedWord}" detected and counted at position ${index} (original: "${word}")`);
+          }
+        } else if (singleFillers.includes(cleanWord)) {
+          // Handle other filler words normally
           if (!fillerCounts[cleanWord]) {
             fillerCounts[cleanWord] = { count: 0, positions: [] };
           }
           fillerCounts[cleanWord].count++;
           fillerCounts[cleanWord].positions.push(index);
           totalCount++;
-          
-          // Extra logging for "uh" detection
-          if (cleanWord === 'uh') {
-            console.log(`✅ "uh" detected and counted at position ${index}`);
-          }
         }
       });
       
