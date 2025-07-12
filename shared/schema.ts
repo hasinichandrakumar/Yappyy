@@ -114,6 +114,22 @@ export const coachingFeedback = pgTable("coaching_feedback", {
   timestamp: timestamp("timestamp").defaultNow().notNull(),
 });
 
+// Custom templates table for user-created templates
+export const customTemplates = pgTable("custom_templates", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  title: varchar("title").notNull(),
+  category: varchar("category").notNull(),
+  description: text("description"),
+  content: text("content").notNull(),
+  difficulty: varchar("difficulty").default("Beginner"),
+  duration: varchar("duration").default("5-10 minutes"),
+  tags: text("tags").array().default([]),
+  isPublic: boolean("is_public").default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // User progress tracking for advanced AI features
 export const userProgress = pgTable("user_progress", {
   id: serial("id").primaryKey(),
@@ -175,6 +191,12 @@ export const insertUserAchievementSchema = createInsertSchema(userAchievements).
 });
 
 export const insertUserStreakSchema = createInsertSchema(userStreaks).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertCustomTemplateSchema = createInsertSchema(customTemplates).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -328,3 +350,6 @@ export type InsertChallengeParticipation = z.infer<typeof insertChallengePartici
 export type ChallengeParticipation = typeof challengeParticipations.$inferSelect;
 export type InsertSpeechPersona = z.infer<typeof insertSpeechPersonaSchema>;
 export type SpeechPersona = typeof speechPersona.$inferSelect;
+
+export type InsertCustomTemplate = z.infer<typeof insertCustomTemplateSchema>;
+export type CustomTemplate = typeof customTemplates.$inferSelect;

@@ -13,6 +13,7 @@ import {
   socialInteractions,
   challenges,
   challengeParticipations,
+  customTemplates,
   type User, 
   type UpsertUser,
   type PracticeSession,
@@ -38,7 +39,9 @@ import {
   type Challenge,
   type InsertChallenge,
   type ChallengeParticipation,
-  type InsertChallengeParticipation
+  type InsertChallengeParticipation,
+  type CustomTemplate,
+  type InsertCustomTemplate
 } from "@shared/schema";
 import { db, resilientQuery } from "./db";
 import { eq, desc, and, gte, lte } from "drizzle-orm";
@@ -535,6 +538,55 @@ export class DatabaseStorage implements IStorage {
 
       return persona;
     });
+  }
+
+  // Custom templates operations
+  async createCustomTemplate(templateData: InsertCustomTemplate): Promise<CustomTemplate> {
+    const [template] = await db
+      .insert(customTemplates)
+      .values(templateData)
+      .returning();
+    return template;
+  }
+
+  async getUserCustomTemplates(userId: string): Promise<CustomTemplate[]> {
+    return await db
+      .select()
+      .from(customTemplates)
+      .where(eq(customTemplates.userId, userId))
+      .orderBy(desc(customTemplates.createdAt));
+  }
+
+  async getCustomTemplate(id: number): Promise<CustomTemplate | null> {
+    const templates = await db
+      .select()
+      .from(customTemplates)
+      .where(eq(customTemplates.id, id))
+      .limit(1);
+    return templates[0] || null;
+  }
+
+  async updateCustomTemplate(id: number, updates: Partial<InsertCustomTemplate>): Promise<CustomTemplate> {
+    const [template] = await db
+      .update(customTemplates)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(customTemplates.id, id))
+      .returning();
+    return template;
+  }
+
+  async deleteCustomTemplate(id: number): Promise<void> {
+    await db
+      .delete(customTemplates)
+      .where(eq(customTemplates.id, id));
+  }
+
+  async getPublicCustomTemplates(): Promise<CustomTemplate[]> {
+    return await db
+      .select()
+      .from(customTemplates)
+      .where(eq(customTemplates.isPublic, true))
+      .orderBy(desc(customTemplates.createdAt));
   }
 }
 

@@ -688,6 +688,53 @@ export default function EnhancedTemplateMarketplace() {
     return matchesCategory && matchesSearch;
   });
 
+  // Save custom template mutation
+  const saveCustomTemplateMutation = useMutation({
+    mutationFn: async (templateData: any) => {
+      const response = await apiRequest('/api/custom-templates', {
+        method: 'POST',
+        body: JSON.stringify(templateData)
+      });
+      return response;
+    },
+    onSuccess: () => {
+      // Reset form and show success
+      setCustomTemplate({
+        title: '',
+        category: 'business',
+        description: '',
+        content: ''
+      });
+      setShowCreateTemplate(false);
+      // Optionally show success notification
+      alert('Template saved successfully! You can now find it in your personal collection.');
+    },
+    onError: (error) => {
+      console.error('Failed to save template:', error);
+      alert('Failed to save template. Please try again.');
+    }
+  });
+
+  // AI help mutation for template improvement
+  const aiHelpMutation = useMutation({
+    mutationFn: async (templateData: any) => {
+      const response = await apiRequest('/api/improve-template', {
+        method: 'POST',
+        body: JSON.stringify(templateData)
+      });
+      return response;
+    },
+    onSuccess: (data) => {
+      if (data.improvedContent) {
+        setCustomTemplate(prev => ({ ...prev, content: data.improvedContent }));
+      }
+    },
+    onError: (error) => {
+      console.error('Failed to get AI help:', error);
+      alert('AI assistance is temporarily unavailable. Please try again later.');
+    }
+  });
+
   // AI-powered template personalization
   const personalizeTemplateMutation = useMutation({
     mutationFn: async (personalizationData: any) => {
@@ -737,6 +784,39 @@ export default function EnhancedTemplateMarketplace() {
         userPreferences: 'Make it more engaging and personal'
       });
     }
+  };
+
+  const handleSaveCustomTemplate = () => {
+    if (!customTemplate.title || !customTemplate.content) {
+      alert('Please fill in both the title and content fields.');
+      return;
+    }
+
+    const templateData = {
+      ...customTemplate,
+      id: `custom-${Date.now()}`,
+      difficulty: 'Beginner' as const,
+      duration: '5-10 minutes',
+      tags: [customTemplate.category, 'custom'],
+      popularity: 0,
+      icon: templateCategories.find(cat => cat.id === customTemplate.category)?.icon || FileText
+    };
+
+    saveCustomTemplateMutation.mutate(templateData);
+  };
+
+  const handleAIHelp = () => {
+    if (!customTemplate.content) {
+      alert('Please write some content first so AI can help improve it.');
+      return;
+    }
+
+    aiHelpMutation.mutate({
+      title: customTemplate.title,
+      category: customTemplate.category,
+      description: customTemplate.description,
+      content: customTemplate.content
+    });
   };
 
   const handleDownloadPDF = () => {
@@ -1081,21 +1161,23 @@ Tips:
               
               <div className="flex gap-3">
                 <Button 
+                  onClick={handleSaveCustomTemplate}
                   className="flex-1 text-base font-medium"
                   size="lg"
-                  disabled={!customTemplate.title || !customTemplate.content}
+                  disabled={!customTemplate.title || !customTemplate.content || saveCustomTemplateMutation.isPending}
                 >
                   <Save className="h-5 w-5 mr-2" />
-                  Save My Template
+                  {saveCustomTemplateMutation.isPending ? 'Saving...' : 'Save My Template'}
                 </Button>
                 <Button 
+                  onClick={handleAIHelp}
                   variant="outline"
                   size="lg"
                   className="text-base font-medium"
-                  disabled={!customTemplate.content}
+                  disabled={!customTemplate.content || aiHelpMutation.isPending}
                 >
                   <Sparkles className="h-5 w-5 mr-2" />
-                  AI Help
+                  {aiHelpMutation.isPending ? 'Getting Help...' : 'AI Help'}
                 </Button>
               </div>
               

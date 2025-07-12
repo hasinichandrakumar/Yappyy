@@ -81,11 +81,6 @@ export class PDFExportService {
       this.addAnalysisDetails(session.analysis);
     }
 
-    // Filler Words Analysis (only add the method if it exists)
-    this.checkPageBreak(50);
-    this.addSectionTitle('Filler Words Analysis', true);
-    this.addFillerWordsSection(session);
-
     // Transcript (if available)
     if (session.transcript && session.transcript.trim()) {
       this.checkPageBreak(60);
@@ -991,7 +986,7 @@ export class PDFExportService {
   }
 
   private addRecommendations(sessions: SessionData[]): void {
-    const recommendations = this.generateRecommendations(sessions);
+    const recommendations = this.generatePeriodRecommendations(sessions);
     
     recommendations.forEach((rec, index) => {
       this.checkPageBreak(8);
@@ -999,7 +994,7 @@ export class PDFExportService {
     });
   }
 
-  private generateRecommendations(sessions: SessionData[]): string[] {
+  private generatePeriodRecommendations(sessions: SessionData[]): string[] {
     if (sessions.length === 0) return ['Complete more practice sessions for personalized recommendations'];
 
     const recommendations: string[] = [];

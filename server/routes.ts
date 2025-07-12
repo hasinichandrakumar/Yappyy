@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { RealTimeSessionManager } from "./redis-realtime";
-import { insertPracticeSessionSchema, insertCoachingFeedbackSchema } from "@shared/schema";
+import { insertPracticeSessionSchema, insertCoachingFeedbackSchema, insertCustomTemplateSchema } from "@shared/schema";
 import { setupGoogleAuth, requireAuth } from "./googleAuth";
 import { setupDemoAuth, demoAuth } from "./demo-auth";
 import { generateClubCoaching } from "./ai-coaching";
@@ -1846,6 +1846,98 @@ Provide specific, actionable coaching tips to improve this presentation. Focus o
       res.json(result);
     } catch (error: any) {
       res.status(500).json({ message: "Failed to analyze speech", error: error.message });
+    }
+  });
+
+  // Custom Templates API endpoints
+  app.post('/api/custom-templates', demoAuth, async (req: any, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
+      const templateData = insertCustomTemplateSchema.parse({
+        ...req.body,
+        userId
+      });
+
+      const template = await storage.createCustomTemplate(templateData);
+      res.json(template);
+    } catch (error: any) {
+      console.error('Failed to create custom template:', error);
+      res.status(500).json({ error: 'Failed to create template' });
+    }
+  });
+
+  app.get('/api/custom-templates', demoAuth, async (req: any, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ error: 'User not authenticated' });
+      }
+
+      const templates = await storage.getUserCustomTemplates(userId);
+      res.json(templates);
+    } catch (error: any) {
+      console.error('Failed to get custom templates:', error);
+      res.status(500).json({ error: 'Failed to get templates' });
+    }
+  });
+
+  app.post('/api/improve-template', demoAuth, async (req: any, res) => {
+    try {
+      const { title, category, description, content } = req.body;
+
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are an expert speech writing coach. Help improve the user\'s speech template by making it more engaging, structured, and impactful. Keep the core message but enhance clarity, flow, and persuasiveness.'
+            },
+            {
+              role: 'user',
+              content: `Please improve this speech template:
+
+Title: ${title}
+Category: ${category}
+Description: ${description}
+
+Current Content:
+${content}
+
+Make it more engaging and professional while keeping the same structure and purpose. Focus on:
+1. Stronger opening hooks
+2. Better transitions
+3. More compelling language
+4. Clear calls to action
+5. Professional tone
+
+Return only the improved content, maintaining the same format with [brackets] for customizable sections.`
+            }
+          ],
+          temperature: 0.7
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`OpenAI API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const improvedContent = data.choices[0].message.content;
+
+      res.json({ improvedContent });
+    } catch (error: any) {
+      console.error('Failed to improve template:', error);
+      res.status(500).json({ error: 'AI assistance temporarily unavailable' });
     }
   });
 
