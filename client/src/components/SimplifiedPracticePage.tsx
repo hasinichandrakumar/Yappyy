@@ -191,6 +191,24 @@ export default function SimplifiedPracticePage() {
     return highlightedText;
   };
 
+  // Save session name function
+  const saveSessionName = () => {
+    setIsEditingName(false);
+    toast({
+      title: "Session Name Updated",
+      description: `Session renamed to "${sessionName}"`,
+    });
+  };
+
+  // Save session purpose function
+  const saveSessionPurpose = () => {
+    setIsEditingPurpose(false);
+    toast({
+      title: "Session Purpose Updated",
+      description: "AI will use this to provide targeted feedback",
+    });
+  };
+
   // Initialize session name
   useEffect(() => {
     const initializeSessionName = async () => {
@@ -1174,7 +1192,8 @@ export default function SimplifiedPracticePage() {
                       placeholder="Enter session name"
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
-                          setIsEditingName(false);
+                          e.preventDefault();
+                          saveSessionName();
                         }
                         if (e.key === 'Escape') {
                           setIsEditingName(false);
@@ -1182,7 +1201,7 @@ export default function SimplifiedPracticePage() {
                       }}
                       autoFocus
                     />
-                    <Button size="sm" onClick={() => setIsEditingName(false)}>
+                    <Button size="sm" onClick={saveSessionName}>
                       <Save className="w-4 h-4" />
                     </Button>
                   </div>
@@ -1205,7 +1224,7 @@ export default function SimplifiedPracticePage() {
                       placeholder="What's your goal for this session?"
                       className="min-h-[60px]"
                     />
-                    <Button size="sm" onClick={() => setIsEditingPurpose(false)}>
+                    <Button size="sm" onClick={saveSessionPurpose}>
                       <Save className="w-4 h-4" />
                     </Button>
                   </div>
