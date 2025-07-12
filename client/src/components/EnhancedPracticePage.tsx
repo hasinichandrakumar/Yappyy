@@ -28,6 +28,7 @@ import { enhancedEyeTracking } from '@/lib/enhanced-eye-tracking';
 import { contentAnalysisEngine, ContentAnalysisResult, SpeechPurpose } from '@/lib/content-analysis-engine-fixed';
 import { useDeepLearningCoach } from '@/hooks/useDeepLearningCoach';
 import { SessionDataViewer } from '@/components/SessionDataViewer';
+import { createVocalFillerDetector, VocalFillerResult } from '@/lib/vocal-filler-detector';
 
 interface EnhancedLiveFeedback {
   id: string;
@@ -135,6 +136,10 @@ export default function EnhancedPracticePage() {
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const audioChunks = useRef<Blob[]>([]);
   const [isAudioCaptureActive, setIsAudioCaptureActive] = useState(false);
+  
+  // Advanced Vocal Filler Detection using Web Audio API
+  const [vocalFillerDetector, setVocalFillerDetector] = useState<ReturnType<typeof createVocalFillerDetector> | null>(null);
+  const [isVocalFillerActive, setIsVocalFillerActive] = useState(false);
 
   // Refs for Advanced Systems
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -192,6 +197,10 @@ export default function EnhancedPracticePage() {
         // Initialize Speech Recognition for Enhanced Filler Word Detection
         setupSpeechRecognition();
         
+        // Initialize Advanced Vocal Filler Detector
+        const detector = createVocalFillerDetector();
+        setVocalFillerDetector(detector);
+        
         // Initialize Raw Audio Capture for Vocal Filler Detection
         await setupRawAudioCapture();
 
@@ -227,6 +236,7 @@ export default function EnhancedPracticePage() {
       // Cleanup systems
       tensorFlowSystem.current?.dispose();
       webGazerTracking.current?.cleanup();
+      vocalFillerDetector?.destroy();
     };
   }, []);
 
@@ -876,6 +886,46 @@ export default function EnhancedPracticePage() {
           console.error('Failed to start audio recording:', error);
         }
       }
+      
+      // Start advanced vocal filler detection using Web Audio API
+      if (vocalFillerDetector) {
+        try {
+          const initialized = await vocalFillerDetector.initialize();
+          if (initialized) {
+            vocalFillerDetector.start((result: VocalFillerResult) => {
+              if (result.detected && result.fillerType) {
+                console.log('🎯 Web Audio API detected vocal filler:', result);
+                
+                // Add to metrics
+                setMetrics(prevMetrics => ({
+                  ...prevMetrics,
+                  content: {
+                    ...prevMetrics.content,
+                    fillerWords: [...(prevMetrics.content.fillerWords || []), result.fillerType!]
+                  }
+                }));
+                
+                // Show real-time feedback
+                const feedbackItem: EnhancedLiveFeedback = {
+                  id: `vocal-filler-${Date.now()}-${Math.random()}`,
+                  timestamp: Date.now(),
+                  category: 'content',
+                  feedback: `Vocal filler detected: "${result.fillerType}"`,
+                  severity: 'warning',
+                  confidence: result.confidence,
+                  actionable: 'Pause and breathe instead of using filler sounds'
+                };
+                
+                setLiveFeedback(prev => [...prev.slice(-9), feedbackItem]);
+              }
+            });
+            setIsVocalFillerActive(true);
+            console.log('🎤 Advanced vocal filler detection started');
+          }
+        } catch (error) {
+          console.error('Failed to start vocal filler detection:', error);
+        }
+      }
 
       // Start session timer
       const startTime = Date.now();
@@ -920,6 +970,17 @@ export default function EnhancedPracticePage() {
         console.log('🎵 Raw audio capture stopped');
       } catch (error) {
         console.error('Failed to stop audio recording:', error);
+      }
+    }
+    
+    // Stop advanced vocal filler detection
+    if (vocalFillerDetector && isVocalFillerActive) {
+      try {
+        vocalFillerDetector.stop();
+        setIsVocalFillerActive(false);
+        console.log('🎤 Advanced vocal filler detection stopped');
+      } catch (error) {
+        console.error('Failed to stop vocal filler detection:', error);
       }
     }
 
@@ -1294,11 +1355,12 @@ export default function EnhancedPracticePage() {
                         <Activity className="w-3 h-3 mr-1" />
                         RECORDING {Math.floor(sessionDuration / 60)}:{(sessionDuration % 60).toString().padStart(2, '0')}
                       </Badge>
-                      {isAudioCaptureActive && (
+                      {(isAudioCaptureActive || isVocalFillerActive) && (
                         <div>
                           <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-300">
                             <Mic className="w-3 h-3 mr-1" />
-                            ENHANCED VOCAL FILLER DETECTION ACTIVE
+                            VOCAL FILLER DETECTOR (AUDIO) 
+                            {isVocalFillerActive && " + WEB AUDIO API"}
                           </Badge>
                         </div>
                       )}
