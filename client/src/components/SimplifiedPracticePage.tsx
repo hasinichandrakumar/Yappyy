@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { SessionDataViewer } from '@/components/SessionDataViewer';
+import { useRoboflowVision } from '@/hooks/useRoboflowVision';
 
 interface SimplifiedMetrics {
   eyeContact: number;
@@ -90,6 +91,21 @@ export default function SimplifiedPracticePage() {
 
   // Live feedback
   const [liveFeedback, setLiveFeedback] = useState<LiveFeedback[]>([]);
+
+  // Roboflow computer vision integration
+  const {
+    isAnalyzing: isRoboflowAnalyzing,
+    analysis: roboflowAnalysis,
+    frameCount: roboflowFrameCount,
+    processingTime: roboflowProcessingTime,
+    error: roboflowError,
+    videoRef: roboflowVideoRef,
+    canvasRef: roboflowCanvasRef,
+    startRealTimeAnalysis,
+    stopRealTimeAnalysis,
+    analyzeSingleFrame,
+    cleanup: cleanupRoboflow
+  } = useRoboflowVision();
 
   // Refs
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -513,24 +529,33 @@ export default function SimplifiedPracticePage() {
           },
           bodyLanguage: {
             ...prev.bodyLanguage,
-            eyeContactScore: Math.min(85, Math.max(0, 
+            // Use Roboflow analysis if available, otherwise use progressive simulation
+            eyeContactScore: roboflowAnalysis?.facial?.eyeContact || Math.min(85, Math.max(0, 
               Math.floor(progressFactor * (55 + Math.random() * 25))
             )),
-            gestureEffectiveness: Math.min(90, Math.max(0, 
+            gestureEffectiveness: roboflowAnalysis?.gestures?.effectiveness || Math.min(90, Math.max(0, 
               Math.floor(progressFactor * (60 + Math.random() * 25))
             )),
-            postureConfidence: Math.min(85, Math.max(0, 
+            postureConfidence: roboflowAnalysis?.posture?.confidence || Math.min(85, Math.max(0, 
               Math.floor(progressFactor * (50 + Math.random() * 30))
             )),
-            facialExpressions: Math.min(80, Math.max(0, 
+            facialExpressions: roboflowAnalysis?.facial?.engagement || Math.min(80, Math.max(0, 
               Math.floor(progressFactor * (45 + Math.random() * 30))
             )),
-            overallPresence: Math.min(85, Math.max(0, 
+            overallPresence: roboflowAnalysis?.overall?.presence || Math.min(85, Math.max(0, 
               Math.floor(progressFactor * (55 + Math.random() * 25))
             ))
           }
         }));
       }, 3000);
+
+      // Start Roboflow real-time computer vision analysis
+      try {
+        await startRealTimeAnalysis(3000); // Analyze every 3 seconds
+        console.log('🤖 Roboflow computer vision analysis started');
+      } catch (error) {
+        console.warn('⚠️ Roboflow analysis unavailable, using fallback');
+      }
 
       console.log('Recording started');
     } catch (error) {
@@ -562,6 +587,14 @@ export default function SimplifiedPracticePage() {
     if (metricsTimerRef.current) {
       clearInterval(metricsTimerRef.current);
       metricsTimerRef.current = null;
+    }
+
+    // Stop Roboflow computer vision analysis
+    try {
+      stopRealTimeAnalysis();
+      console.log('🤖 Roboflow computer vision analysis stopped');
+    } catch (error) {
+      console.warn('⚠️ Error stopping Roboflow analysis');
     }
 
     setIsRecording(false);

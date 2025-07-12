@@ -37,6 +37,7 @@ import { enhancedVoiceSynthesis } from "./enhanced-voice-synthesis";
 import { webrtcIntegration } from "./webrtc-integration";
 import { advancedComputerVision } from "./advanced-computer-vision";
 import { enhancedNeuralPipeline } from "./enhanced-neural-pipeline";
+import { roboflowVision, analyzeVideoFrame, trainCustomVisionModel } from './roboflow-computer-vision';
 import { graphqlHTTP } from 'express-graphql';
 import neuralGraphQL from './graphql-schema';
 
@@ -2311,6 +2312,133 @@ Respond with detailed analysis in JSON format:
       res.status(500).json({ 
         success: false, 
         message: 'Failed to delete user data' 
+      });
+    }
+  });
+
+  // =====================================================
+  // ROBOFLOW COMPUTER VISION API ENDPOINTS
+  // =====================================================
+
+  // Enhanced video frame analysis with Roboflow
+  app.post('/api/roboflow/analyze-frame', async (req, res) => {
+    await analyzeVideoFrame(req, res);
+  });
+
+  // Train custom Roboflow model for specialized analysis
+  app.post('/api/roboflow/train-model', requireAuth, async (req, res) => {
+    await trainCustomVisionModel(req, res);
+  });
+
+  // Get Roboflow engine performance metrics
+  app.get('/api/roboflow/performance', async (req, res) => {
+    try {
+      const metrics = roboflowVision.getPerformanceMetrics();
+      res.json({
+        success: true,
+        metrics,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('❌ Error fetching Roboflow performance:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'Failed to fetch performance metrics' 
+      });
+    }
+  });
+
+  // Comprehensive body language analysis endpoint
+  app.post('/api/roboflow/body-language-analysis', async (req, res) => {
+    try {
+      const { videoFrames, sessionContext } = req.body;
+      
+      if (!videoFrames || videoFrames.length === 0) {
+        return res.status(400).json({ 
+          error: 'Video frames required for analysis' 
+        });
+      }
+
+      const frameAnalyses = [];
+      const startTime = Date.now();
+
+      // Analyze each frame with Roboflow
+      for (const frame of videoFrames.slice(0, 10)) { // Limit to 10 frames for performance
+        const analysis = await roboflowVision.analyzeFrame(frame);
+        frameAnalyses.push(analysis);
+      }
+
+      // Aggregate analysis results
+      const aggregatedMetrics = {
+        posture: {
+          confidence: Math.round(frameAnalyses.reduce((sum, a) => sum + a.posture.confidence, 0) / frameAnalyses.length),
+          alignment: Math.round(frameAnalyses.reduce((sum, a) => sum + a.posture.alignment, 0) / frameAnalyses.length),
+          openness: Math.round(frameAnalyses.reduce((sum, a) => sum + a.posture.openness, 0) / frameAnalyses.length)
+        },
+        gestures: {
+          handMovements: Math.round(frameAnalyses.reduce((sum, a) => sum + a.gestures.handMovements, 0) / frameAnalyses.length),
+          effectiveness: Math.round(frameAnalyses.reduce((sum, a) => sum + a.gestures.effectiveness, 0) / frameAnalyses.length),
+          timing: Math.round(frameAnalyses.reduce((sum, a) => sum + a.gestures.timing, 0) / frameAnalyses.length)
+        },
+        facial: {
+          engagement: Math.round(frameAnalyses.reduce((sum, a) => sum + a.facial.engagement, 0) / frameAnalyses.length),
+          authenticity: Math.round(frameAnalyses.reduce((sum, a) => sum + a.facial.authenticity, 0) / frameAnalyses.length),
+          eyeContact: Math.round(frameAnalyses.reduce((sum, a) => sum + a.facial.eyeContact, 0) / frameAnalyses.length)
+        },
+        overall: {
+          presence: Math.round(frameAnalyses.reduce((sum, a) => sum + a.overall.presence, 0) / frameAnalyses.length),
+          confidence: Math.round(frameAnalyses.reduce((sum, a) => sum + a.overall.confidence, 0) / frameAnalyses.length),
+          professionalism: Math.round(frameAnalyses.reduce((sum, a) => sum + a.overall.professionalism, 0) / frameAnalyses.length)
+        }
+      };
+
+      const processingTime = Date.now() - startTime;
+      
+      console.log(`🤖 Roboflow batch analysis completed: ${frameAnalyses.length} frames in ${processingTime}ms`);
+
+      res.json({
+        success: true,
+        analysis: aggregatedMetrics,
+        frameCount: frameAnalyses.length,
+        processingTime,
+        engine: 'roboflow-enhanced',
+        timestamp: new Date().toISOString()
+      });
+
+    } catch (error) {
+      console.error('❌ Roboflow body language analysis error:', error);
+      res.status(500).json({ 
+        success: false,
+        error: 'Body language analysis failed',
+        message: error.message 
+      });
+    }
+  });
+
+  // Real-time computer vision stream endpoint
+  app.post('/api/roboflow/stream-analysis', async (req, res) => {
+    try {
+      const { frameData, streamId } = req.body;
+      
+      if (!frameData) {
+        return res.status(400).json({ error: 'Frame data required' });
+      }
+
+      const analysis = await roboflowVision.analyzeFrame(frameData);
+      
+      res.json({
+        success: true,
+        streamId,
+        analysis,
+        timestamp: new Date().toISOString(),
+        engine: 'roboflow-realtime'
+      });
+
+    } catch (error) {
+      console.error('❌ Roboflow stream analysis error:', error);
+      res.status(500).json({ 
+        success: false,
+        error: 'Stream analysis failed' 
       });
     }
   });
