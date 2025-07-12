@@ -622,15 +622,25 @@ export default function Enhanced50PlusTemplates() {
       if (response.ok) {
         const result = await response.json();
         setEditedContent(result.personalizedContent);
+        
+        // Show improvements if available
+        const improvementText = result.improvements && result.improvements.length > 0 
+          ? `Improvements: ${result.improvements.join(', ')}` 
+          : "AI has enhanced your template with personalized content";
+        
         toast({
-          title: "Template Personalized",
-          description: "AI has enhanced your template with personalized content",
+          title: "Template Personalized ✨",
+          description: improvementText,
         });
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to personalize template');
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error('AI Personalization error:', error);
       toast({
-        title: "AI Error",
-        description: "Failed to personalize template",
+        title: "AI Personalization Failed",
+        description: error.message || "Unable to personalize template. Please try again.",
         variant: "destructive"
       });
     } finally {

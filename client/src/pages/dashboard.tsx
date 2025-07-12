@@ -15,6 +15,7 @@ import EnhancedAnalysisTab from "@/components/EnhancedAnalysisTab";
 import SimpleProfileForm from "@/components/SimpleProfileForm";
 import AppSettings from "@/components/AppSettings";
 import PrivacySettings from "@/components/PrivacySettings";
+import FunctionalProgressTracker from "@/components/FunctionalProgressTracker";
 import yappyyLogoPath from '@assets/Untitled_design-11600-removebg-preview_1749744306540.png';
 
 export default function Dashboard() {
@@ -168,10 +169,7 @@ export default function Dashboard() {
           </TabsContent>
 
           <TabsContent value="achievements" className="space-y-6">
-            <div className="grid gap-6">
-              <ImprovedBadgeSystem />
-              <PersonalizedSpeechDNA />
-            </div>
+            <FunctionalProgressTracker />
           </TabsContent>
 
         </Tabs>

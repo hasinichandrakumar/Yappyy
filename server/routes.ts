@@ -58,10 +58,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { template, userRequest } = req.body;
       
+      if (!template || !template.content) {
+        return res.status(400).json({ error: 'Template with content is required' });
+      }
+
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${process.env.OPENAI_API_KEY || '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'}`,
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -69,11 +73,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
           messages: [
             {
               role: 'system',
-              content: 'You are an expert speech writing coach. Personalize and enhance speech templates while maintaining their core structure and effectiveness.'
+              content: `You are an expert speech writing coach. Your job is to personalize and enhance speech templates while maintaining their core structure and effectiveness. 
+
+Always respond with valid JSON in this exact format:
+{
+  "personalizedContent": "the enhanced and personalized template content",
+  "improvements": ["list of key improvements made"],
+  "deliveryTips": ["specific tips for delivering this personalized version"]
+}`
             },
             {
               role: 'user',
-              content: `Please personalize this speech template based on the user request: "${userRequest}"\n\nTemplate: ${template.title}\nCategory: ${template.category}\nContent:\n${template.content}\n\nMake it more engaging, personalized, and effective while keeping the same structure.`
+              content: `Please personalize this speech template based on the request: "${userRequest || 'Make this more engaging and personalized'}"
+
+Template Title: ${template.title}
+Category: ${template.category}
+Original Content:
+${template.content}
+
+Make the content more engaging, natural, and personalized while keeping the same structure and purpose. Add specific examples, improve transitions, and make the language more conversational and compelling.`
             }
           ],
           response_format: { type: "json_object" },
@@ -81,16 +99,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        const content = JSON.parse(result.choices[0].message.content);
-        res.json({ personalizedContent: content.personalizedContent || template.content });
-      } else {
-        res.status(500).json({ error: 'Failed to personalize template' });
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('OpenAI API error:', response.status, errorText);
+        return res.status(500).json({ error: 'OpenAI API request failed' });
       }
-    } catch (error) {
+
+      const data = await response.json();
+      const result = JSON.parse(data.choices[0].message.content);
+      
+      res.json({
+        personalizedContent: result.personalizedContent || template.content,
+        improvements: result.improvements || [],
+        deliveryTips: result.deliveryTips || []
+      });
+    } catch (error: any) {
       console.error('Template personalization error:', error);
-      res.status(500).json({ error: 'Failed to personalize template' });
+      res.status(500).json({ 
+        error: 'Failed to personalize template',
+        details: error.message 
+      });
     }
   });
 
