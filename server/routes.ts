@@ -274,17 +274,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       console.log('🎯 Analyzing filler words in transcript:', transcript.substring(0, 100) + '...');
-      console.log('📝 Full transcript received:', JSON.stringify(transcript));
       
-      // Enhanced filler word patterns
+      // Enhanced filler word patterns - comprehensive list
       const singleFillers = [
         'um', 'uh', 'uhm', 'umm', 'er', 'err', 'ah', 'eh', 'mm', 'hmm',
         'like', 'so', 'well', 'okay', 'ok', 'right', 'actually', 'basically',
         'literally', 'obviously', 'essentially', 'definitely', 'absolutely',
         'totally', 'really', 'very', 'quite', 'just', 'maybe', 'perhaps', 'anyway'
       ];
-      
-      console.log('🔍 Looking for these single fillers:', singleFillers.slice(0, 10));
       
       const multiWordFillers = [
         'you know', 'i mean', 'kind of', 'sort of', 'i guess', 'you see',
@@ -296,10 +293,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const words = text.split(/\s+/);
       let detectedFillers: { word: string; count: number; positions: number[] }[] = [];
       let totalCount = 0;
-      
-      console.log('📊 Processing text:', JSON.stringify(text));
-      console.log('📝 Words array:', words.slice(0, 20));
-      console.log('🔢 Total words:', words.length);
       
       // Analyze multi-word fillers
       multiWordFillers.forEach(phrase => {
@@ -322,13 +315,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       words.forEach((word, index) => {
         const cleanWord = word.replace(/[.,!?;:'"()]/g, '');
         
-        // Debug every word check
-        if (index < 10) {
-          console.log(`🔍 Checking word ${index}: "${word}" -> "${cleanWord}" -> includes: ${singleFillers.includes(cleanWord)}`);
-        }
-        
         if (singleFillers.includes(cleanWord)) {
-          console.log(`✅ Found filler word: "${cleanWord}" at position ${index}`);
           if (!fillerCounts[cleanWord]) {
             fillerCounts[cleanWord] = { count: 0, positions: [] };
           }

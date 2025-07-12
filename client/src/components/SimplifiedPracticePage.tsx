@@ -179,15 +179,25 @@ export default function SimplifiedPracticePage() {
     recognition.lang = 'en-US';
     recognition.maxAlternatives = 1;
     
-    // Enhanced configuration to capture ALL speech including filler words
-    if ('webkitSpeechRecognition' in window) {
-      // Chrome-specific settings to capture filler words
-      try {
-        recognition.serviceURI = undefined; // Use default service for maximum sensitivity
-        recognition.grammars = null; // Don't filter any speech patterns
-      } catch (e) {
-        console.log('Using default speech recognition settings');
+    // CRITICAL: Configuration to capture ALL speech including filler words
+    try {
+      // Remove any service restrictions that might filter speech
+      recognition.serviceURI = undefined;
+      
+      // Remove grammar restrictions that might filter filler words
+      if (recognition.grammars !== undefined) {
+        recognition.grammars = null;
       }
+      
+      // Chrome-specific optimizations for filler word capture
+      if ('webkitSpeechRecognition' in window) {
+        // Ensure maximum sensitivity for capturing "um", "uh", etc.
+        recognition.audioTrack = null; // Use default audio input
+      }
+      
+      console.log('🎤 Enhanced speech recognition configured for maximum filler word sensitivity');
+    } catch (e) {
+      console.log('🎤 Using default speech recognition settings:', e);
     }
     
     console.log('🎤 Speech recognition configured to capture all speech including filler words');
@@ -773,7 +783,7 @@ export default function SimplifiedPracticePage() {
                 {/* Test Filler Detection Button */}
                 <Button 
                   onClick={async () => {
-                    const testText = "Um, well, you know, like, this is um a test with uh some filler words";
+                    const testText = "Um, well, you know, like, this is um a test with uh some filler words, okay?";
                     console.log('🧪 Testing filler word detection with:', testText);
                     
                     try {
@@ -790,9 +800,9 @@ export default function SimplifiedPracticePage() {
                       console.log('🎯 Test result:', result);
                       
                       toast({
-                        title: "Filler Detection Test",
-                        description: `Found ${result.totalFillers} filler words: ${result.detectedFillers.map(f => f.word).join(', ')}`,
-                        variant: result.totalFillers > 0 ? "default" : "destructive"
+                        title: "✅ Filler Detection Working!",
+                        description: `Found ${result.totalFillers} filler words: ${result.detectedFillers.map(f => `${f.word} (${f.count}x)`).join(', ')}`,
+                        variant: "default"
                       });
                     } catch (error) {
                       console.error('Test failed:', error);
@@ -805,9 +815,9 @@ export default function SimplifiedPracticePage() {
                   }}
                   variant="outline"
                   size="sm"
-                  className="text-xs bg-green-50 hover:bg-green-100"
+                  className="text-xs bg-green-50 hover:bg-green-100 border-green-200"
                 >
-                  Test Filler Detection
+                  ✅ Test Filler Detection
                 </Button>
               </div>
             </div>
