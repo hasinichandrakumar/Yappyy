@@ -77,7 +77,7 @@ interface SessionAnalysisPageProps {
 export default function SessionAnalysisPage({ sessionData, onClose, onNewSession }: SessionAnalysisPageProps) {
   const [fillerAnalysis, setFillerAnalysis] = useState<any>(null);
   const [isGeneratingInsights, setIsGeneratingInsights] = useState(true);
-  const [aiInsights, setAIInsights] = useState<string>('');
+  const [aiInsights, setAIInsights] = useState<any>(null);
 
   useEffect(() => {
     analyzeSession();
@@ -100,7 +100,7 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
         setFillerAnalysis(fillerData);
       }
 
-      // Generate AI insights
+      // Generate comprehensive AI insights
       await generateAIInsights();
     } catch (error) {
       console.error('Error analyzing session:', error);
@@ -124,11 +124,14 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
 
       if (response.ok) {
         const data = await response.json();
-        setAIInsights(data.insights);
+        setAIInsights(data);
       }
     } catch (error) {
       console.error('Error generating AI insights:', error);
-      setAIInsights('Unable to generate insights at this time.');
+      setAIInsights({
+        overallAssessment: 'Unable to generate comprehensive insights at this time.',
+        progressSummary: 'Session completed successfully. Continue practicing for improvement.'
+      });
     }
   };
 
@@ -297,48 +300,242 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
             </CardContent>
           </Card>
 
-          {/* AI Insights */}
+          {/* Comprehensive AI Analysis */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Lightbulb className="w-5 h-5" />
-                AI Insights & Recommendations
+                AI-Powered Comprehensive Analysis
               </CardTitle>
             </CardHeader>
             <CardContent>
               {isGeneratingInsights ? (
                 <div className="text-center py-8">
                   <div className="animate-spin w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-                  <p className="text-gray-600">Analyzing your performance...</p>
+                  <p className="text-gray-600">Generating comprehensive AI insights...</p>
                 </div>
-              ) : (
-                <div className="space-y-4">
-                  {getPerformanceInsights().map((insight, index) => (
-                    <div 
-                      key={index}
-                      className={`p-3 rounded-lg border-l-4 ${
-                        insight.type === 'success' 
-                          ? 'bg-green-50 border-green-400 text-green-800' 
-                          : insight.type === 'warning'
-                          ? 'bg-yellow-50 border-yellow-400 text-yellow-800'
-                          : 'bg-blue-50 border-blue-400 text-blue-800'
-                      }`}
-                    >
-                      <div className="flex items-start gap-2">
-                        {insight.type === 'success' && <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />}
-                        {insight.type === 'warning' && <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />}
-                        {insight.type === 'info' && <Info className="w-4 h-4 mt-0.5 flex-shrink-0" />}
-                        <p className="text-sm">{insight.message}</p>
+              ) : aiInsights ? (
+                <div className="space-y-6">
+                  
+                  {/* Overall Assessment */}
+                  <div className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200">
+                    <h4 className="font-semibold text-blue-800 mb-2 flex items-center gap-2">
+                      <BarChart3 className="w-4 h-4" />
+                      Overall Assessment
+                    </h4>
+                    <p className="text-blue-700">{aiInsights.overallAssessment}</p>
+                  </div>
+
+                  {/* Analysis Breakdown */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    
+                    {/* Voice Analysis */}
+                    {aiInsights.voiceAnalysis && (
+                      <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="font-semibold text-green-800 flex items-center gap-2">
+                            <Mic className="w-4 h-4" />
+                            Voice Quality
+                          </h4>
+                          <span className={`text-lg font-bold ${getScoreColor(aiInsights.voiceAnalysis.score)}`}>
+                            {aiInsights.voiceAnalysis.score}%
+                          </span>
+                        </div>
+                        
+                        <div className="space-y-3 text-sm">
+                          <div>
+                            <strong className="text-green-800">Strengths:</strong>
+                            <ul className="mt-1 space-y-1">
+                              {aiInsights.voiceAnalysis.strengths?.map((strength: string, index: number) => (
+                                <li key={index} className="flex items-start gap-1">
+                                  <CheckCircle className="w-3 h-3 text-green-600 mt-0.5 flex-shrink-0" />
+                                  <span className="text-green-700">{strength}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                          
+                          <div>
+                            <strong className="text-green-800">Areas for Growth:</strong>
+                            <ul className="mt-1 space-y-1">
+                              {aiInsights.voiceAnalysis.improvements?.map((improvement: string, index: number) => (
+                                <li key={index} className="flex items-start gap-1">
+                                  <TrendingUp className="w-3 h-3 text-green-600 mt-0.5 flex-shrink-0" />
+                                  <span className="text-green-700">{improvement}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Content Analysis */}
+                    {aiInsights.contentAnalysis && (
+                      <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="font-semibold text-purple-800 flex items-center gap-2">
+                            <MessageSquare className="w-4 h-4" />
+                            Content Quality
+                          </h4>
+                          <span className={`text-lg font-bold ${getScoreColor(aiInsights.contentAnalysis.score)}`}>
+                            {aiInsights.contentAnalysis.score}%
+                          </span>
+                        </div>
+                        
+                        <div className="space-y-3 text-sm">
+                          <div>
+                            <strong className="text-purple-800">Strengths:</strong>
+                            <ul className="mt-1 space-y-1">
+                              {aiInsights.contentAnalysis.strengths?.map((strength: string, index: number) => (
+                                <li key={index} className="flex items-start gap-1">
+                                  <CheckCircle className="w-3 h-3 text-purple-600 mt-0.5 flex-shrink-0" />
+                                  <span className="text-purple-700">{strength}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                          
+                          <div>
+                            <strong className="text-purple-800">Areas for Growth:</strong>
+                            <ul className="mt-1 space-y-1">
+                              {aiInsights.contentAnalysis.improvements?.map((improvement: string, index: number) => (
+                                <li key={index} className="flex items-start gap-1">
+                                  <TrendingUp className="w-3 h-3 text-purple-600 mt-0.5 flex-shrink-0" />
+                                  <span className="text-purple-700">{improvement}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Delivery Analysis */}
+                    {aiInsights.deliveryAnalysis && (
+                      <div className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="font-semibold text-orange-800 flex items-center gap-2">
+                            <Eye className="w-4 h-4" />
+                            Delivery & Presence
+                          </h4>
+                          <span className={`text-lg font-bold ${getScoreColor(aiInsights.deliveryAnalysis.score)}`}>
+                            {aiInsights.deliveryAnalysis.score}%
+                          </span>
+                        </div>
+                        
+                        <div className="space-y-3 text-sm">
+                          <div>
+                            <strong className="text-orange-800">Strengths:</strong>
+                            <ul className="mt-1 space-y-1">
+                              {aiInsights.deliveryAnalysis.strengths?.map((strength: string, index: number) => (
+                                <li key={index} className="flex items-start gap-1">
+                                  <CheckCircle className="w-3 h-3 text-orange-600 mt-0.5 flex-shrink-0" />
+                                  <span className="text-orange-700">{strength}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                          
+                          <div>
+                            <strong className="text-orange-800">Areas for Growth:</strong>
+                            <ul className="mt-1 space-y-1">
+                              {aiInsights.deliveryAnalysis.improvements?.map((improvement: string, index: number) => (
+                                <li key={index} className="flex items-start gap-1">
+                                  <TrendingUp className="w-3 h-3 text-orange-600 mt-0.5 flex-shrink-0" />
+                                  <span className="text-orange-700">{improvement}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Key Insights */}
+                  {aiInsights.keyInsights && aiInsights.keyInsights.length > 0 && (
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-gray-800 flex items-center gap-2">
+                        <Info className="w-4 h-4" />
+                        Key Insights
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {aiInsights.keyInsights.map((insight: any, index: number) => (
+                          <div key={index} className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                            <h5 className="font-medium text-slate-800 mb-1">{insight.title}</h5>
+                            <p className="text-sm text-slate-600 mb-2">{insight.description}</p>
+                            {insight.actionItems && insight.actionItems.length > 0 && (
+                              <div className="space-y-1">
+                                <strong className="text-xs text-slate-700">Action Items:</strong>
+                                <ul className="text-xs text-slate-600 space-y-0.5">
+                                  {insight.actionItems.map((action: string, actionIndex: number) => (
+                                    <li key={actionIndex} className="flex items-start gap-1">
+                                      <span className="text-slate-400">•</span>
+                                      {action}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  ))}
-                  
-                  {aiInsights && (
-                    <div className="mt-4 p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200">
-                      <h4 className="font-semibold text-purple-800 mb-2">Personalized Coaching</h4>
-                      <p className="text-sm text-purple-700">{aiInsights}</p>
+                  )}
+
+                  {/* Recommendations */}
+                  {aiInsights.recommendations && aiInsights.recommendations.length > 0 && (
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-gray-800 flex items-center gap-2">
+                        <Target className="w-4 h-4" />
+                        Personalized Recommendations
+                      </h4>
+                      <div className="space-y-2">
+                        {aiInsights.recommendations.map((rec: any, index: number) => (
+                          <div 
+                            key={index} 
+                            className={`p-3 rounded-lg border-l-4 ${
+                              rec.priority === 'high' 
+                                ? 'bg-red-50 border-red-400 text-red-800'
+                                : rec.priority === 'medium'
+                                ? 'bg-yellow-50 border-yellow-400 text-yellow-800'
+                                : 'bg-blue-50 border-blue-400 text-blue-800'
+                            }`}
+                          >
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <h5 className="font-medium mb-1">{rec.title}</h5>
+                                <p className="text-sm opacity-90">{rec.description}</p>
+                              </div>
+                              <Badge 
+                                variant={rec.priority === 'high' ? 'destructive' : rec.priority === 'medium' ? 'default' : 'secondary'}
+                                className="ml-2 flex-shrink-0"
+                              >
+                                {rec.priority}
+                              </Badge>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
+
+                  {/* Progress Summary */}
+                  {aiInsights.progressSummary && (
+                    <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+                      <h4 className="font-semibold text-green-800 mb-2 flex items-center gap-2">
+                        <Star className="w-4 h-4" />
+                        Your Journey Forward
+                      </h4>
+                      <p className="text-green-700">{aiInsights.progressSummary}</p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <Lightbulb className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>AI insights could not be generated at this time.</p>
                 </div>
               )}
             </CardContent>
