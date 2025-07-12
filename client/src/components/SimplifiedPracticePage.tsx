@@ -295,14 +295,15 @@ export default function SimplifiedPracticePage() {
       setInterimTranscript(interimText);
       interimTranscriptRef.current = interimText;
       
-      // Enhanced vocal filler detection in interim results
+      // Enhanced vocal filler detection in interim results with regex patterns
       if (interimText.trim()) {
         const interimLower = interimText.toLowerCase().trim();
-        const vocalFillerPatterns = ['um', 'uh', 'uhm', 'umm', 'er', 'err', 'ah', 'eh'];
+        const vocalFillerPatterns = ['um', 'uh', 'uhm', 'umm', 'uhhh', 'ummm', 'er', 'err', 'ah', 'eh'];
         
+        // Check exact match first
         for (const pattern of vocalFillerPatterns) {
           if (interimLower === pattern || interimLower.startsWith(pattern + ' ') || interimLower.endsWith(' ' + pattern)) {
-            console.log('🎯 VOCAL FILLER detected in interim:', pattern);
+            console.log('🎯 EXACT VOCAL FILLER detected in interim:', pattern);
             setVocalFillerBuffer(prev => [...prev, pattern]);
             
             // Add to transcript immediately to ensure it's captured
@@ -317,6 +318,32 @@ export default function SimplifiedPracticePage() {
             break;
           }
         }
+        
+        // Enhanced regex detection for variations like "uhhh", "ummm"
+        const words = interimLower.split(/\s+/).filter(word => word.length > 0);
+        words.forEach((word) => {
+          const cleanWord = word.replace(/[.,!?;:'"()[\]]/g, '');
+          
+          // Regex patterns for vocal filler variations (same as backend)
+          if (/^u+h+$/i.test(cleanWord) || /^u+m+$/i.test(cleanWord) || /^u+h+m+$/i.test(cleanWord)) {
+            let normalizedWord = cleanWord;
+            if (/^u+h+$/i.test(cleanWord)) normalizedWord = 'uh';
+            else if (/^u+m+$/i.test(cleanWord)) normalizedWord = 'um';
+            else if (/^u+h+m+$/i.test(cleanWord)) normalizedWord = 'uhm';
+            
+            console.log('🎯 REGEX VOCAL FILLER detected in interim:', normalizedWord, 'from', cleanWord);
+            setVocalFillerBuffer(prev => [...prev, normalizedWord]);
+            
+            setTimeout(() => {
+              setTranscript(prev => {
+                const enhanced = prev + ` ${normalizedWord} `;
+                transcriptRef.current = enhanced;
+                console.log('✅ Added regex vocal filler to transcript:', normalizedWord);
+                return enhanced;
+              });
+            }, 100);
+          }
+        });
       }
 
       if (finalTranscript.trim()) {
@@ -358,11 +385,24 @@ export default function SimplifiedPracticePage() {
           }
         });
         
-        // Check for single-word fillers with exact word boundaries
+        // Enhanced single-word filler detection with regex patterns
         words.forEach(word => {
           const cleanWord = word.replace(/[.,!?;:'"()]/g, '');
+          
+          // Check exact matches first
           if (singleFillerWords.includes(cleanWord)) {
             detectedFillers.push(cleanWord);
+          }
+          
+          // Enhanced regex detection for vocal filler variations (same as backend)
+          else if (/^u+h+$/i.test(cleanWord) || /^u+m+$/i.test(cleanWord) || /^u+h+m+$/i.test(cleanWord)) {
+            let normalizedWord = cleanWord;
+            if (/^u+h+$/i.test(cleanWord)) normalizedWord = 'uh';
+            else if (/^u+m+$/i.test(cleanWord)) normalizedWord = 'um';
+            else if (/^u+h+m+$/i.test(cleanWord)) normalizedWord = 'uhm';
+            
+            detectedFillers.push(normalizedWord);
+            console.log('🎯 REGEX FILLER detected in final transcript:', normalizedWord, 'from', cleanWord);
           }
         });
         
