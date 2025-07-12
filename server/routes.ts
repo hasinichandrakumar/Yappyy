@@ -419,13 +419,13 @@ Provide detailed, actionable analysis focusing on specific improvements and cele
     } catch (error: any) {
       console.error('❌ Error generating AI insights:', error);
       
-      // Fallback response if OpenAI fails
+      // Fallback response if OpenAI fails (using request data)
       const fallbackInsights = {
-        overallAssessment: `Good practice session with ${sessionData.overallPerformance || 75}% overall performance. Continue working on consistency and confidence.`,
+        overallAssessment: `Good practice session with ${req.body.sessionData?.overallPerformance || 75}% overall performance. Continue working on consistency and confidence.`,
         voiceAnalysis: {
-          score: sessionData.clarityScore || 75,
+          score: req.body.sessionData?.clarityScore || 75,
           strengths: ["Clear articulation"],
-          improvements: fillerCount > 5 ? ["Reduce filler words"] : ["Maintain current pace"],
+          improvements: (req.body.fillerCount || 0) > 5 ? ["Reduce filler words"] : ["Maintain current pace"],
           insights: "Your voice quality shows good potential. Focus on consistent volume and pacing."
         },
         contentAnalysis: {
@@ -435,7 +435,7 @@ Provide detailed, actionable analysis focusing on specific improvements and cele
           insights: "Content structure is developing well. Focus on adding more specific examples."
         },
         deliveryAnalysis: {
-          score: sessionData.confidenceLevel || 70,
+          score: req.body.sessionData?.confidenceLevel || 70,
           strengths: ["Good posture"],
           improvements: ["Increase eye contact"],
           insights: "Delivery shows confidence. Work on engaging more directly with your audience."
