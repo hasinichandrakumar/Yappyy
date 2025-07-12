@@ -94,6 +94,8 @@ export default function SimplifiedPracticePage() {
   
   // Vocal filler detection state
   const [vocalFillerBuffer, setVocalFillerBuffer] = useState<string[]>([]);
+  const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
+  const [analyzer, setAnalyzer] = useState<AnalyserNode | null>(null);
 
   // Roboflow computer vision integration
   const {
@@ -119,6 +121,7 @@ export default function SimplifiedPracticePage() {
   const metricsTimerRef = useRef<NodeJS.Timeout | null>(null);
   const transcriptRef = useRef<string>('');
   const interimTranscriptRef = useRef<string>('');
+  const audioAnalyzerRef = useRef<AnalyserNode | null>(null);
   const { toast } = useToast();
 
   // Comprehensive filler word highlighting with 60+ patterns
@@ -531,7 +534,13 @@ export default function SimplifiedPracticePage() {
   const startRecording = useCallback(async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
+        audio: {
+          echoCancellation: false,  // CRITICAL: Disable to preserve vocal fillers
+          noiseSuppression: false,  // CRITICAL: Disable to preserve vocal fillers  
+          autoGainControl: false,   // CRITICAL: Disable to preserve vocal fillers
+          sampleRate: 44100,       // High quality for pattern analysis
+          channelCount: 1          // Mono for better vocal analysis
+        },
         video: { width: 640, height: 480 }
       });
 
@@ -539,6 +548,34 @@ export default function SimplifiedPracticePage() {
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
+      }
+
+      // Setup Web Audio API for direct vocal filler detection
+      try {
+        const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const source = audioCtx.createMediaStreamSource(stream);
+        const analyserNode = audioCtx.createAnalyser();
+        
+        analyserNode.fftSize = 2048;
+        analyserNode.smoothingTimeConstant = 0.3;
+        source.connect(analyserNode);
+        
+        setAudioContext(audioCtx);
+        setAnalyzer(analyserNode);
+        audioAnalyzerRef.current = analyserNode;
+        
+        console.log('🎵 Web Audio API initialized for vocal filler detection');
+        
+        // Start audio pattern analysis
+        const analyzeInterval = setInterval(() => {
+          analyzeAudioForVocalFillers();
+        }, 100); // Check every 100ms for vocal patterns
+        
+        // Clean up interval when recording stops
+        const cleanup = () => clearInterval(analyzeInterval);
+        return cleanup;
+      } catch (audioError) {
+        console.warn('⚠️ Web Audio API unavailable:', audioError);
       }
 
       // Start speech recognition
@@ -684,6 +721,19 @@ export default function SimplifiedPracticePage() {
 
     if (recognitionRef.current) {
       recognitionRef.current.stop();
+    }
+
+    // Clean up Web Audio API
+    if (audioContext) {
+      try {
+        await audioContext.close();
+        setAudioContext(null);
+        setAnalyzer(null);
+        audioAnalyzerRef.current = null;
+        console.log('🎵 Web Audio API cleaned up');
+      } catch (error) {
+        console.warn('⚠️ Error cleaning up audio context:', error);
+      }
     }
 
     // Clean up timers
@@ -853,6 +903,35 @@ export default function SimplifiedPracticePage() {
                   {showLiveTranscript ? 'Hide' : 'Show'} Transcript
                 </Button>
                 
+                {/* Test Vocal Filler Detection */}
+                <Button 
+                  onClick={() => {
+                    // Simulate vocal filler detection for testing
+                    console.log('🧪 Simulating vocal filler detection...');
+                    setVocalFillerBuffer(prev => [...prev, `test_um_${Date.now()}`, `test_uh_${Date.now() + 100}`]);
+                    
+                    // Add to transcript
+                    setTimeout(() => {
+                      setTranscript(prev => {
+                        const enhanced = prev + ' [SIMULATED: um] [SIMULATED: uh] ';
+                        transcriptRef.current = enhanced;
+                        return enhanced;
+                      });
+                    }, 100);
+                    
+                    toast({
+                      title: "🎵 Vocal Filler Test",
+                      description: "Simulated 'um' and 'uh' detection. Now try speaking them during recording!",
+                      variant: "default"
+                    });
+                  }}
+                  variant="outline"
+                  size="sm"
+                  className="text-xs bg-orange-50 hover:bg-orange-100 border-orange-200"
+                >
+                  🎵 Test Vocal Fillers
+                </Button>
+
                 {/* Test Filler Detection Button */}
                 <Button 
                   onClick={async () => {
@@ -925,11 +1004,17 @@ export default function SimplifiedPracticePage() {
                   />
                   
                   {isRecording && (
-                    <div className="absolute top-4 left-4">
+                    <div className="absolute top-4 left-4 space-y-2">
                       <Badge variant="destructive" className="animate-pulse">
                         <Activity className="w-3 h-3 mr-1" />
                         RECORDING {Math.floor(sessionDuration / 60)}:{(sessionDuration % 60).toString().padStart(2, '0')}
                       </Badge>
+                      {analyzer && (
+                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                          <Activity className="w-3 h-3 mr-1" />
+                          VOCAL FILLER DETECTOR
+                        </Badge>
+                      )}
                     </div>
                   )}
                 </div>
