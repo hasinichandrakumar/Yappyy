@@ -275,18 +275,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('🎯 Analyzing filler words in transcript:', transcript.substring(0, 100) + '...');
       
-      // Enhanced filler word patterns - comprehensive list
+      // Comprehensive filler word patterns - 60+ common speech fillers
       const singleFillers = [
-        'um', 'uh', 'uhm', 'umm', 'er', 'err', 'ah', 'eh', 'mm', 'hmm',
-        'like', 'so', 'well', 'okay', 'ok', 'right', 'actually', 'basically',
-        'literally', 'obviously', 'essentially', 'definitely', 'absolutely',
-        'totally', 'really', 'very', 'quite', 'just', 'maybe', 'perhaps', 'anyway'
+        // Classic vocal fillers
+        'um', 'uh', 'uhm', 'umm', 'er', 'err', 'ah', 'eh', 'mm', 'hmm', 'hm',
+        
+        // Discourse markers
+        'like', 'so', 'well', 'okay', 'ok', 'right', 'yeah', 'yes', 'yep', 'sure',
+        
+        // Intensifiers used as fillers
+        'actually', 'basically', 'literally', 'obviously', 'essentially', 'definitely',
+        'absolutely', 'totally', 'really', 'very', 'quite', 'pretty', 'super',
+        
+        // Hedging words
+        'just', 'maybe', 'perhaps', 'probably', 'possibly', 'kinda', 'sorta',
+        
+        // Transition fillers
+        'anyway', 'anyhow', 'meanwhile', 'however', 'furthermore', 'moreover',
+        
+        // Thinking fillers
+        'wait', 'hold on', 'hmm',
+        
+        // Agreement fillers
+        'exactly', 'precisely', 'indeed', 'certainly', 'surely', 'clearly',
+        
+        // Time fillers
+        'now', 'then', 'next', 'first', 'second', 'finally', 'lastly',
+        
+        // Emphasis fillers
+        'honestly', 'frankly', 'seriously', 'truly', 'genuinely', 'certainly',
+        
+        // Casual speech fillers
+        'dude', 'man', 'guys', 'folks', 'people', 'thing', 'stuff', 'things'
       ];
       
       const multiWordFillers = [
+        // Classic multi-word fillers
         'you know', 'i mean', 'kind of', 'sort of', 'i guess', 'you see',
         'and stuff', 'or something', 'or whatever', 'and things', 'and all that',
-        'how do i put this', 'what i mean is', 'let me think', 'let me see'
+        
+        // Thinking phrases
+        'how do i put this', 'what i mean is', 'let me think', 'let me see',
+        'how can i say', 'what im trying to say', 'if you will', 'so to speak',
+        'give me a second', 'hold on a minute', 'wait a minute',
+        
+        // Hesitation phrases
+        'i dont know', 'im not sure', 'i think maybe', 'i suppose', 'i believe',
+        'it seems like', 'it appears that', 'i would say', 'in my opinion',
+        
+        // Clarification fillers
+        'what i mean', 'in other words', 'that is to say', 'or rather',
+        'to put it simply', 'in a sense', 'in a way', 'more or less',
+        
+        // Continuation fillers
+        'and so on', 'and so forth', 'et cetera', 'and whatnot', 'and such',
+        'and everything', 'and all', 'or anything', 'or nothing',
+        
+        // Approximation fillers
+        'more or less', 'give or take', 'around about', 'something like that',
+        'or thereabouts', 'in the ballpark', 'roughly speaking',
+        
+        // Emphasis phrases
+        'to be honest', 'to tell you the truth', 'as a matter of fact',
+        'the thing is', 'the point is', 'what im saying is', 'bottom line',
+        
+        // Filler combinations
+        'you know what', 'you know what i mean', 'if you know what i mean',
+        'know what i mean', 'do you know what', 'you get what im saying',
+        'like you know', 'so anyway', 'but like', 'and like', 'or like',
+        'i mean like', 'so like', 'well like', 'but anyway', 'so basically'
       ];
       
       const text = transcript.toLowerCase().trim();

@@ -118,14 +118,33 @@ export default function SimplifiedPracticePage() {
   const interimTranscriptRef = useRef<string>('');
   const { toast } = useToast();
 
-  // Function to highlight filler words in transcript
+  // Comprehensive filler word highlighting with 60+ patterns
   const highlightFillerWords = (text: string) => {
     const fillerWords = [
-      'um', 'uh', 'uhm', 'umm', 'er', 'err', 'ah', 'eh', 'mm', 'hmm',
-      'like', 'so', 'well', 'okay', 'ok', 'right', 'actually', 'basically',
-      'literally', 'obviously', 'essentially', 'definitely', 'absolutely',
-      'totally', 'really', 'very', 'quite', 'just', 'maybe', 'perhaps', 'anyway',
-      'you know', 'i mean', 'kind of', 'sort of', 'i guess', 'you see'
+      // Classic vocal fillers
+      'um', 'uh', 'uhm', 'umm', 'er', 'err', 'ah', 'eh', 'mm', 'hmm', 'hm',
+      
+      // Discourse markers
+      'like', 'so', 'well', 'okay', 'ok', 'right', 'yeah', 'yes', 'yep', 'sure',
+      
+      // Intensifiers used as fillers
+      'actually', 'basically', 'literally', 'obviously', 'essentially', 'definitely',
+      'absolutely', 'totally', 'really', 'very', 'quite', 'pretty', 'super',
+      
+      // Hedging words
+      'just', 'maybe', 'perhaps', 'probably', 'possibly', 'kinda', 'sorta',
+      
+      // Transition & emphasis fillers
+      'anyway', 'anyhow', 'exactly', 'precisely', 'indeed', 'certainly', 'surely',
+      'clearly', 'honestly', 'frankly', 'seriously', 'truly', 'genuinely',
+      
+      // Time & casual fillers
+      'now', 'then', 'next', 'first', 'second', 'finally', 'lastly',
+      'dude', 'man', 'guys', 'folks', 'people', 'thing', 'stuff', 'things',
+      
+      // Multi-word patterns
+      'you know', 'i mean', 'kind of', 'sort of', 'i guess', 'you see',
+      'you know what', 'i dont know', 'what i mean', 'the thing is'
     ];
 
     let highlightedText = text;
@@ -783,8 +802,8 @@ export default function SimplifiedPracticePage() {
                 {/* Test Filler Detection Button */}
                 <Button 
                   onClick={async () => {
-                    const testText = "Um, well, you know, like, this is um a test with uh some filler words, okay?";
-                    console.log('🧪 Testing filler word detection with:', testText);
+                    const testText = "Um, well, you know, like, this is basically um a test with uh some filler words, you know what I mean? I guess, sort of, anyway, it's pretty obvious that, honestly, we should totally check if this actually works, right?";
+                    console.log('🧪 Testing comprehensive filler word detection with:', testText);
                     
                     try {
                       const response = await fetch('/api/analyze-filler-words', {
@@ -800,8 +819,8 @@ export default function SimplifiedPracticePage() {
                       console.log('🎯 Test result:', result);
                       
                       toast({
-                        title: "✅ Filler Detection Working!",
-                        description: `Found ${result.totalFillers} filler words: ${result.detectedFillers.map(f => `${f.word} (${f.count}x)`).join(', ')}`,
+                        title: "✅ Enhanced Filler Detection!",
+                        description: `Found ${result.totalFillers} filler words: ${result.detectedFillers.slice(0, 5).map(f => `${f.word} (${f.count}x)`).join(', ')}${result.detectedFillers.length > 5 ? '...' : ''}`,
                         variant: "default"
                       });
                     } catch (error) {
