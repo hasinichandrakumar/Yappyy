@@ -1379,6 +1379,128 @@ function generateContentBasedFeedback(transcript: string, purpose: string) {
   };
 }
 
+// Filler Word Analysis Display Component
+function FillerWordAnalysisDisplay({ transcript }: { transcript: string }) {
+  const [fillerAnalysis, setFillerAnalysis] = useState<any>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  const analyzeFillers = async () => {
+    if (!transcript || transcript.length < 10) return;
+    
+    setIsAnalyzing(true);
+    try {
+      const response = await fetch('/api/analyze-filler-words', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          transcript, 
+          duration: Math.max(60, transcript.split(' ').length * 0.5) // Estimate duration
+        })
+      });
+      
+      if (response.ok) {
+        const analysis = await response.json();
+        setFillerAnalysis(analysis);
+      }
+    } catch (error) {
+      console.error('Filler analysis error:', error);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  useEffect(() => {
+    analyzeFillers();
+  }, [transcript]);
+
+  if (!fillerAnalysis && !isAnalyzing) return null;
+
+  const topFillers = fillerAnalysis?.detectedFillers?.slice(0, 4) || [];
+  const totalFillers = fillerAnalysis?.totalFillers || 0;
+  const fillerPercentage = fillerAnalysis?.fillerPercentage || 0;
+  const severity = fillerAnalysis?.severity || 'unknown';
+
+  const getSeverityColor = (severity: string) => {
+    switch (severity) {
+      case 'excellent': return 'text-green-600 bg-green-50 border-green-200';
+      case 'good': return 'text-blue-600 bg-blue-50 border-blue-200';
+      case 'moderate': return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+      case 'needs_improvement': return 'text-orange-600 bg-orange-50 border-orange-200';
+      case 'critical': return 'text-red-600 bg-red-50 border-red-200';
+      default: return 'text-gray-600 bg-gray-50 border-gray-200';
+    }
+  };
+
+  return (
+    <Card className={`p-4 border-2 ${getSeverityColor(severity)}`}>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <MessageSquare className="h-5 w-5" />
+          <h5 className="text-lg font-semibold">Filler Word Analysis</h5>
+          {isAnalyzing && <Loader2 className="h-4 w-4 animate-spin ml-2" />}
+        </div>
+        <Badge className={getSeverityColor(severity)}>
+          {severity.replace('_', ' ').toUpperCase()}
+        </Badge>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+        <div className="text-center p-3 bg-white/50 rounded-lg">
+          <div className="text-2xl font-bold">{totalFillers}</div>
+          <div className="text-sm opacity-75">Total Fillers</div>
+        </div>
+        <div className="text-center p-3 bg-white/50 rounded-lg">
+          <div className="text-2xl font-bold">{fillerPercentage.toFixed(1)}%</div>
+          <div className="text-sm opacity-75">Filler Rate</div>
+        </div>
+        <div className="text-center p-3 bg-white/50 rounded-lg col-span-2 md:col-span-1">
+          <div className="text-2xl font-bold">{fillerAnalysis?.frequencyPerMinute?.toFixed(1) || '0'}</div>
+          <div className="text-sm opacity-75">Per Minute</div>
+        </div>
+      </div>
+
+      {topFillers.length > 0 && (
+        <div>
+          <h6 className="font-semibold mb-3 flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4" />
+            Top {Math.min(4, topFillers.length)} Most Common Fillers:
+          </h6>
+          <div className="grid grid-cols-2 gap-2">
+            {topFillers.map((filler: any, index: number) => (
+              <div 
+                key={index}
+                className="flex items-center justify-between p-2 bg-white/60 rounded-lg border"
+              >
+                <span className="font-medium text-sm">"{filler.word}"</span>
+                <Badge variant="outline" className="text-xs">
+                  {filler.count}x
+                </Badge>
+              </div>
+            ))}
+          </div>
+          
+          {fillerAnalysis?.suggestions?.length > 0 && (
+            <div className="mt-3 p-3 bg-white/40 rounded-lg">
+              <h6 className="font-medium text-sm mb-2 flex items-center gap-1">
+                <Lightbulb className="h-3 w-3" />
+                Quick Tips:
+              </h6>
+              <ul className="text-xs space-y-1">
+                {fillerAnalysis.suggestions.slice(0, 2).map((suggestion: string, index: number) => (
+                  <li key={index} className="flex items-start gap-1">
+                    <span className="text-xs">•</span>
+                    <span>{suggestion}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+    </Card>
+  );
+}
+
 // Hyperpersonalized AI Transcript Analysis Component
 interface TranscriptAnalysisComponentProps {
   session: any;
@@ -1516,6 +1638,11 @@ function TranscriptAnalysisComponent({ session, onAnalysisComplete }: Transcript
           )}
         </Button>
       </div>
+
+      {/* Filler Word Analysis Section */}
+      {hasTranscript && (
+        <FillerWordAnalysisDisplay transcript={session.transcript} />
+      )}
 
       {/* AI Feedback Summary */}
       {aiFeedback && (
