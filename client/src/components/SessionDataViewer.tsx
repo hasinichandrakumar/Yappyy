@@ -338,9 +338,9 @@ export function SessionDataViewer({
                     
                     <div className="flex justify-between text-sm">
                       <span>Posture</span>
-                      <span>{Math.round(metrics.bodyLanguage.postureScore)}%</span>
+                      <span>{Math.round(metrics.bodyLanguage.postureConfidence)}%</span>
                     </div>
-                    <Progress value={metrics.bodyLanguage.postureScore} className="h-2" />
+                    <Progress value={metrics.bodyLanguage.postureConfidence} className="h-2" />
                   </div>
                 </div>
               </div>
@@ -349,7 +349,7 @@ export function SessionDataViewer({
             <Card className="p-4">
               <h3 className="font-semibold mb-3">Emotional Analysis</h3>
               <div className="grid grid-cols-3 gap-4">
-                {Object.entries(metrics.emotion).map(([emotion, value]) => (
+                {metrics.emotion && Object.entries(metrics.emotion).map(([emotion, value]) => (
                   <div key={emotion}>
                     <div className="flex justify-between text-sm mb-1">
                       <span className="capitalize">{emotion}</span>
@@ -358,6 +358,11 @@ export function SessionDataViewer({
                     <Progress value={value as number} className="h-2" />
                   </div>
                 ))}
+                {!metrics.emotion && (
+                  <div className="col-span-3 text-center text-gray-500 py-4">
+                    No emotional analysis data available
+                  </div>
+                )}
               </div>
             </Card>
           </div>
