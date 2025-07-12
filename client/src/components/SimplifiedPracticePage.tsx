@@ -140,11 +140,14 @@ export default function SimplifiedPracticePage() {
   const audioAnalyzerRef = useRef<AnalyserNode | null>(null);
   const { toast } = useToast();
 
-  // Comprehensive filler word highlighting with 60+ patterns
+  // Comprehensive filler word highlighting with 60+ patterns + custom fillers
   const highlightFillerWords = (text: string) => {
     const fillerWords = [
       // Classic vocal fillers
       'um', 'uh', 'uhm', 'umm', 'er', 'err', 'ah', 'eh', 'mm', 'hmm', 'hm',
+      
+      // Custom vocal fillers - USER REQUESTED
+      'blah', 'bleh', 'meh', 'huh', 'erm', 'urm',
       
       // Discourse markers
       'like', 'so', 'well', 'okay', 'ok', 'right', 'yeah', 'yes', 'yep', 'sure',
@@ -166,7 +169,7 @@ export default function SimplifiedPracticePage() {
       
       // Multi-word patterns
       'you know', 'i mean', 'kind of', 'sort of', 'i guess', 'you see',
-      'you know what', 'i dont know', 'what i mean', 'the thing is'
+      'you know what', 'i dont know', 'what i mean', 'the thing is', 'blah blah blah'
     ];
 
     let highlightedText = text;
@@ -1168,6 +1171,16 @@ export default function SimplifiedPracticePage() {
                       value={sessionName}
                       onChange={(e) => setSessionName(e.target.value)}
                       className="text-2xl font-bold"
+                      placeholder="Enter session name"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          setIsEditingName(false);
+                        }
+                        if (e.key === 'Escape') {
+                          setIsEditingName(false);
+                        }
+                      }}
+                      autoFocus
                     />
                     <Button size="sm" onClick={() => setIsEditingName(false)}>
                       <Save className="w-4 h-4" />
@@ -1175,7 +1188,7 @@ export default function SimplifiedPracticePage() {
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
-                    <h1 className="text-3xl font-bold text-blue-600">
+                    <h1 className="text-3xl font-bold text-blue-600 cursor-pointer hover:text-blue-700" onClick={() => setIsEditingName(true)}>
                       {sessionName}
                     </h1>
                     <Button variant="ghost" size="sm" onClick={() => setIsEditingName(true)}>

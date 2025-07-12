@@ -354,11 +354,12 @@ Make the content more engaging, natural, and personalized while keeping the same
             },
             {
               role: "user",
-              content: `Analyze this speaking session and provide comprehensive insights:
+              content: `Analyze this speaking session with FOCUS ON THE SESSION PURPOSE and provide comprehensive purpose-tailored insights:
+
+SESSION PURPOSE: "${sessionData?.sessionPurpose || sessionData?.purpose || 'General speaking practice'}"
 
 SESSION DETAILS:
 - Session Name: ${sessionData?.sessionName || req.body.sessionData?.sessionName || 'Practice Session'}
-- Purpose: ${sessionData?.purpose || req.body.sessionData?.purpose || 'General Practice'}
 - Duration: ${Math.floor((req.body.duration || 120) / 60)}:${((req.body.duration || 120) % 60).toString().padStart(2, '0')}
 - Words Per Minute: ${wpm || 0}
 
@@ -372,7 +373,7 @@ PERFORMANCE METRICS:
 - Pace Consistency: ${sessionData.paceConsistency || 0}%
 - Filler Word Count: ${fillerCount || sessionData.fillerWordCount || 0}
 
-TRANSCRIPT ANALYSIS:
+TRANSCRIPT TO ANALYZE FOR PURPOSE ALIGNMENT:
 "${sessionData.transcript || 'No transcript available'}"
 
 ${sessionData.facialAnalysis ? `
@@ -386,7 +387,7 @@ FACIAL ANALYSIS DATA:
 - Professionalism: ${sessionData.facialAnalysis.overallPresence?.professionalism || 0}%
 ` : ''}
 
-Provide detailed, actionable analysis focusing on specific improvements and celebrating strengths. Be encouraging but honest about areas for growth.`
+CRITICAL: Evaluate how well this speech achieved its stated PURPOSE. Analyze the content, structure, and delivery specifically in relation to their goal. Provide purpose-specific recommendations and assess whether the content was appropriate for this objective.`
             }
           ],
           temperature: 0.4,
@@ -586,10 +587,13 @@ Provide detailed, actionable analysis focusing on specific improvements and cele
       
       console.log('🎯 Analyzing filler words in transcript:', transcript.substring(0, 100) + '...');
       
-      // Comprehensive filler word patterns - 60+ common speech fillers
+      // Comprehensive filler word patterns - 60+ common speech fillers + custom words
       const singleFillers = [
         // Classic vocal fillers - PRIORITY DETECTION
         'um', 'uh', 'uhm', 'umm', 'uhhh', 'ummm', 'er', 'err', 'ah', 'eh', 'mm', 'hmm', 'hm',
+        
+        // Custom vocal fillers - USER REQUESTED
+        'blah', 'bleh', 'meh', 'huh', 'erm', 'urm',
         
         // Discourse markers
         'like', 'so', 'well', 'okay', 'ok', 'right', 'yeah', 'yes', 'yep', 'sure',
@@ -641,6 +645,7 @@ Provide detailed, actionable analysis focusing on specific improvements and cele
         // Continuation fillers
         'and so on', 'and so forth', 'et cetera', 'and whatnot', 'and such',
         'and everything', 'and all', 'or anything', 'or nothing',
+        'blah blah blah', 'blah blah', 'and blah',
         
         // Approximation fillers
         'more or less', 'give or take', 'around about', 'something like that',
