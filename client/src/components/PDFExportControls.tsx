@@ -278,6 +278,30 @@ export default function PDFExportControls({ sessions, selectedSession }: PDFExpo
           </div>
         </div>
 
+        {/* Debug Test Button */}
+        <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+          <Button
+            onClick={async () => {
+              console.log('🧪 Testing PDF library...');
+              try {
+                const { jsPDF } = await import('jspdf');
+                console.log('✅ jsPDF imported successfully');
+                const pdf = new jsPDF();
+                pdf.text('Test PDF', 10, 10);
+                pdf.save('test.pdf');
+                console.log('✅ Test PDF generated successfully');
+              } catch (error) {
+                console.error('❌ PDF test failed:', error);
+              }
+            }}
+            variant="outline"
+            size="sm"
+            className="mb-3"
+          >
+            🧪 Test PDF Library
+          </Button>
+        </div>
+
         {/* Report Information */}
         <div className="p-3 bg-blue-50 rounded-lg">
           <h5 className="font-medium text-blue-900 mb-2">What's included in PDF reports:</h5>
