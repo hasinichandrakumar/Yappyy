@@ -135,6 +135,45 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
     }
   };
 
+  const handleExportToPDF = async () => {
+    try {
+      console.log('🎯 Exporting session to PDF...');
+      
+      // Import the PDF export service
+      const { PDFExportService } = await import('@/lib/pdf-export');
+      const pdfService = new PDFExportService();
+      
+      // Convert sessionData to the expected format
+      const sessionForPDF = {
+        id: Date.now(),
+        userId: 'user',
+        sessionName: sessionData.sessionName || 'Practice Session',
+        duration: sessionData.duration || 0,
+        createdAt: new Date().toISOString(),
+        overallScore: sessionData.overallPerformance || 0,
+        voiceClarity: sessionData.clarityScore || 0,
+        eyeContactScore: sessionData.eyeContactScore || 0,
+        confidenceScore: sessionData.confidenceLevel || 0,
+        transcript: sessionData.transcript || '',
+        fillerWords: fillerAnalysis?.detectedFillers?.map((f: any) => f.word) || [],
+        fillerWordCount: sessionData.fillerWordCount || 0,
+        analysis: {
+          insights: aiInsights || {},
+          facialAnalysis: sessionData.facialAnalysis,
+          fillerAnalysis: fillerAnalysis
+        }
+      };
+      
+      await pdfService.generateSessionReport(sessionForPDF);
+      await pdfService.downloadPDF(`${sessionData.sessionName || 'Session'}_Analysis_Report.pdf`);
+      
+      console.log('✅ PDF export completed successfully');
+    } catch (error) {
+      console.error('❌ PDF export failed:', error);
+      alert('PDF export failed. Please try again.');
+    }
+  };
+
   const getScoreColor = (score: number) => {
     if (score >= 80) return 'text-green-600';
     if (score >= 60) return 'text-yellow-600';
@@ -776,9 +815,13 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
         <Card>
           <CardContent className="p-6">
             <div className="flex flex-wrap gap-4 justify-center">
-              <Button variant="outline" className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2"
+                onClick={() => handleExportToPDF()}
+              >
                 <Download className="w-4 h-4" />
-                Export Report
+                Export to PDF
               </Button>
               <Button variant="outline" className="flex items-center gap-2">
                 <Share2 className="w-4 h-4" />
