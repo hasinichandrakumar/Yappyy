@@ -91,6 +91,9 @@ export default function SimplifiedPracticePage() {
 
   // Live feedback
   const [liveFeedback, setLiveFeedback] = useState<LiveFeedback[]>([]);
+  
+  // Vocal filler detection state
+  const [vocalFillerBuffer, setVocalFillerBuffer] = useState<string[]>([]);
 
   // Roboflow computer vision integration
   const {
@@ -196,9 +199,9 @@ export default function SimplifiedPracticePage() {
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = 'en-US';
-    recognition.maxAlternatives = 1;
+    recognition.maxAlternatives = 3; // Get multiple alternatives to catch fillers
     
-    // CRITICAL: Configuration to capture ALL speech including filler words
+    // CRITICAL: Aggressive configuration to capture vocal fillers like "um" and "uh"
     try {
       // Remove any service restrictions that might filter speech
       recognition.serviceURI = undefined;
@@ -208,13 +211,22 @@ export default function SimplifiedPracticePage() {
         recognition.grammars = null;
       }
       
-      // Chrome-specific optimizations for filler word capture
+      // Chrome-specific optimizations for maximum filler word capture
       if ('webkitSpeechRecognition' in window) {
-        // Ensure maximum sensitivity for capturing "um", "uh", etc.
-        recognition.audioTrack = null; // Use default audio input
+        // Use maximum sensitivity settings
+        recognition.audioTrack = null;
+        
+        // Try to disable speech filtering if possible
+        try {
+          (recognition as any).enableInterimFillers = true;
+          (recognition as any).enableVocalFillers = true;
+          (recognition as any).filterProfanity = false;
+        } catch (filterError) {
+          console.log('🎤 Advanced filler settings not available, using fallback');
+        }
       }
       
-      console.log('🎤 Enhanced speech recognition configured for maximum filler word sensitivity');
+      console.log('🎤 AGGRESSIVE speech recognition configured for vocal filler capture (um, uh, etc.)');
     } catch (e) {
       console.log('🎤 Using default speech recognition settings:', e);
     }
@@ -226,32 +238,74 @@ export default function SimplifiedPracticePage() {
       let interimText = '';
       
       for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript;
+        const result = event.results[i];
         
-        // Log all speech recognition results for debugging
+        // Check ALL alternatives for filler words, not just the first one
+        let bestTranscript = result[0].transcript;
+        let foundFillers = false;
+        
+        // Examine all alternatives to find one with vocal fillers
+        for (let j = 0; j < result.length; j++) {
+          const altTranscript = result[j].transcript.toLowerCase();
+          if (altTranscript.includes('um') || altTranscript.includes('uh') || 
+              altTranscript.includes('ah') || altTranscript.includes('er')) {
+            bestTranscript = result[j].transcript;
+            foundFillers = true;
+            console.log('🎯 Found vocal filler in alternative:', bestTranscript);
+            break;
+          }
+        }
+        
+        // Log speech recognition results with filler detection info
         console.log('🎤 Speech result:', {
-          text: transcript,
-          isFinal: event.results[i].isFinal,
-          confidence: event.results[i][0].confidence
+          text: bestTranscript,
+          isFinal: result.isFinal,
+          confidence: result[0].confidence,
+          foundFillers: foundFillers,
+          alternatives: result.length
         });
         
-        if (event.results[i].isFinal) {
-          finalTranscript += transcript + ' ';
+        if (result.isFinal) {
+          finalTranscript += bestTranscript + ' ';
         } else {
-          interimText += transcript;
+          interimText += bestTranscript;
         }
       }
 
-      // Update interim transcript for live display
+      // Update interim transcript for live display AND check for vocal fillers
       setInterimTranscript(interimText);
-      interimTranscriptRef.current = interimText; // Update ref for real-time access
+      interimTranscriptRef.current = interimText;
+      
+      // Enhanced vocal filler detection in interim results
+      if (interimText.trim()) {
+        const interimLower = interimText.toLowerCase().trim();
+        const vocalFillerPatterns = ['um', 'uh', 'uhm', 'umm', 'er', 'err', 'ah', 'eh'];
+        
+        for (const pattern of vocalFillerPatterns) {
+          if (interimLower === pattern || interimLower.startsWith(pattern + ' ') || interimLower.endsWith(' ' + pattern)) {
+            console.log('🎯 VOCAL FILLER detected in interim:', pattern);
+            setVocalFillerBuffer(prev => [...prev, pattern]);
+            
+            // Add to transcript immediately to ensure it's captured
+            setTimeout(() => {
+              setTranscript(prev => {
+                const enhanced = prev + ` ${pattern} `;
+                transcriptRef.current = enhanced;
+                console.log('✅ Added vocal filler to transcript:', pattern);
+                return enhanced;
+              });
+            }, 100);
+            break;
+          }
+        }
+      }
 
       if (finalTranscript.trim()) {
         console.log('📝 Final transcript received:', finalTranscript.trim());
         
         setTranscript(prev => {
           const newTranscript = prev + finalTranscript;
-          transcriptRef.current = newTranscript; // Update ref for real-time access
+          transcriptRef.current = newTranscript;
           console.log('📋 Complete session transcript:', newTranscript.substring(0, 100) + '...');
           return newTranscript;
         });
@@ -950,6 +1004,12 @@ export default function SimplifiedPracticePage() {
                   <span className="text-sm text-gray-600">Filler Words</span>
                   <span className="font-semibold">{metrics.fillerWordCount}</span>
                 </div>
+                {vocalFillerBuffer.length > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-sm text-orange-600">Vocal Fillers (um/uh)</span>
+                    <span className="font-semibold text-orange-700">{vocalFillerBuffer.length}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Total Words</span>
                   <span className="font-semibold">{transcript.split(' ').filter(w => w.length > 0).length}</span>
