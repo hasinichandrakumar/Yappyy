@@ -105,14 +105,18 @@ export function useSpeechRecognition(): SpeechRecognitionResult {
     };
   }, []);
 
-  // Comprehensive filler word detection
+  // Enhanced filler word detection with improved "um"/"uh" patterns
   const detectFillerWords = (text: string): string[] => {
+    // Enhanced filler patterns with priority on "um" and "uh" detection
     const singleWordFillers = [
-      'um', 'uh', 'er', 'erm', 'ah', 'eh', 'oh', 'hmm', 'mhm',
+      // PRIORITY: Classic vocal fillers - most important to detect
+      'um', 'uh', 'uhm', 'umm', 'uhhh', 'ummm', 'er', 'erm', 'err', 'ah', 'eh', 'oh', 'hmm', 'mhm', 'mm', 'hm',
+      // Discourse markers
       'like', 'so', 'well', 'actually', 'basically', 'literally', 'obviously', 
       'right', 'okay', 'alright', 'yeah', 'yep', 'yup', 'nah', 'nope',
+      // Hedging and filler words
       'kinda', 'sorta', 'anyway', 'meanwhile', 'whatever', 'stuff', 'things',
-      'totally', 'really', 'super', 'pretty', 'quite', 'very'
+      'totally', 'really', 'super', 'pretty', 'quite', 'very', 'just'
     ];
     
     const phraseFillers = [
@@ -122,11 +126,38 @@ export function useSpeechRecognition(): SpeechRecognitionResult {
       'to be honest', 'if you will', 'as it were', 'per se'
     ];
     
-    const cleanText = text.toLowerCase().replace(/[.,!?;:]/g, '');
+    const cleanText = text.toLowerCase().replace(/[.,!?;:'"()[\]]/g, '');
     const words = cleanText.split(/\s+/).filter(word => word.length > 0);
     const detectedFillers: string[] = [];
     
-    // Check for phrase fillers first
+    // Enhanced detection with regex patterns for vocal fillers
+    words.forEach((word, index) => {
+      // Clean word by removing remaining punctuation
+      const cleanWord = word.replace(/[.,!?;:'"()[\]]/g, '');
+      
+      // Special handling for vocal filler variations with regex
+      const isVocalFiller = singleWordFillers.includes(cleanWord) || 
+        /^u+h+$/i.test(cleanWord) ||  // Match "uh", "uhh", "uhhh" etc
+        /^u+m+$/i.test(cleanWord) ||  // Match "um", "umm", "ummm" etc
+        /^u+h+m+$/i.test(cleanWord);  // Match "uhm", "uhhm" etc
+      
+      if (isVocalFiller) {
+        // Normalize vocal filler variants to base forms for consistency
+        let normalizedWord = cleanWord;
+        if (/^u+h+$/i.test(cleanWord)) normalizedWord = 'uh';
+        else if (/^u+m+$/i.test(cleanWord)) normalizedWord = 'um';
+        else if (/^u+h+m+$/i.test(cleanWord)) normalizedWord = 'uhm';
+        
+        detectedFillers.push(normalizedWord);
+        
+        // Debug logging for critical fillers
+        if (normalizedWord === 'uh' || normalizedWord === 'um') {
+          console.log(`🎯 Live detection: "${normalizedWord}" found in speech (original: "${word}")`);
+        }
+      }
+    });
+    
+    // Check for phrase fillers
     for (let i = 0; i < words.length - 1; i++) {
       const twoWords = `${words[i]} ${words[i + 1]}`;
       const threeWords = i < words.length - 2 ? `${words[i]} ${words[i + 1]} ${words[i + 2]}` : '';
@@ -137,16 +168,6 @@ export function useSpeechRecognition(): SpeechRecognitionResult {
       } else if (threeWords && phraseFillers.includes(threeWords)) {
         detectedFillers.push(threeWords);
         i += 2; // Skip next two words
-      } else if (singleWordFillers.includes(words[i])) {
-        detectedFillers.push(words[i]);
-      }
-    }
-    
-    // Check last word if not already processed
-    if (words.length > 0) {
-      const lastWord = words[words.length - 1];
-      if (singleWordFillers.includes(lastWord)) {
-        detectedFillers.push(lastWord);
       }
     }
     
