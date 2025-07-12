@@ -1033,74 +1033,7 @@ export default function SimplifiedPracticePage() {
                   {showLiveTranscript ? 'Hide' : 'Show'} Transcript
                 </Button>
                 
-                {/* Test Vocal Filler Detection */}
-                <Button 
-                  onClick={() => {
-                    // Simulate vocal filler detection for testing
-                    console.log('🧪 Simulating vocal filler detection...');
-                    setVocalFillerBuffer(prev => [...prev, `test_um_${Date.now()}`, `test_uh_${Date.now() + 100}`]);
-                    
-                    // Add to transcript
-                    setTimeout(() => {
-                      setTranscript(prev => {
-                        const enhanced = prev + ' [SIMULATED: um] [SIMULATED: uh] ';
-                        transcriptRef.current = enhanced;
-                        return enhanced;
-                      });
-                    }, 100);
-                    
-                    toast({
-                      title: "🎵 Vocal Filler Test",
-                      description: "Simulated 'um' and 'uh' detection. Now try speaking them during recording!",
-                      variant: "default"
-                    });
-                  }}
-                  variant="outline"
-                  size="sm"
-                  className="text-xs bg-orange-50 hover:bg-orange-100 border-orange-200"
-                >
-                  🎵 Test Vocal Fillers
-                </Button>
 
-                {/* Test Filler Detection Button */}
-                <Button 
-                  onClick={async () => {
-                    const testText = "Um, well, you know, like, this is basically um a test with uh some filler words, you know what I mean? I guess, sort of, anyway, it's pretty obvious that, honestly, we should totally check if this actually works, right?";
-                    console.log('🧪 Testing comprehensive filler word detection with:', testText);
-                    
-                    try {
-                      const response = await fetch('/api/analyze-filler-words', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                          transcript: testText,
-                          duration: 10
-                        })
-                      });
-                      
-                      const result = await response.json();
-                      console.log('🎯 Test result:', result);
-                      
-                      toast({
-                        title: "✅ Enhanced Filler Detection!",
-                        description: `Found ${result.totalFillers} filler words: ${result.detectedFillers.slice(0, 5).map(f => `${f.word} (${f.count}x)`).join(', ')}${result.detectedFillers.length > 5 ? '...' : ''}`,
-                        variant: "default"
-                      });
-                    } catch (error) {
-                      console.error('Test failed:', error);
-                      toast({
-                        title: "Test Failed",
-                        description: "Could not test filler detection",
-                        variant: "destructive"
-                      });
-                    }
-                  }}
-                  variant="outline"
-                  size="sm"
-                  className="text-xs bg-green-50 hover:bg-green-100 border-green-200"
-                >
-                  ✅ Test Filler Detection
-                </Button>
               </div>
             </div>
           </CardHeader>
@@ -1238,30 +1171,7 @@ export default function SimplifiedPracticePage() {
               </CardContent>
             </Card>
 
-            {/* Live Feedback */}
-            {liveFeedback.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Live Tips</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {liveFeedback.slice(-3).map((feedback) => (
-                      <div 
-                        key={feedback.id}
-                        className={`p-2 rounded text-sm ${
-                          feedback.type === 'warning' ? 'bg-yellow-50 text-yellow-800' :
-                          feedback.type === 'success' ? 'bg-green-50 text-green-800' :
-                          'bg-blue-50 text-blue-800'
-                        }`}
-                      >
-                        {feedback.message}
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+
           </div>
         </div>
 
