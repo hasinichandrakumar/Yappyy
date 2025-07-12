@@ -177,13 +177,20 @@ export default function SimplifiedPracticePage() {
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = 'en-US';
-    recognition.maxAlternatives = 3;
+    recognition.maxAlternatives = 1;
     
-    // Important: Configure to include filler words in transcription
+    // Enhanced configuration to capture ALL speech including filler words
     if ('webkitSpeechRecognition' in window) {
       // Chrome-specific settings to capture filler words
-      recognition.serviceURI = undefined; // Use default to ensure filler words are captured
+      try {
+        recognition.serviceURI = undefined; // Use default service for maximum sensitivity
+        recognition.grammars = null; // Don't filter any speech patterns
+      } catch (e) {
+        console.log('Using default speech recognition settings');
+      }
     }
+    
+    console.log('🎤 Speech recognition configured to capture all speech including filler words');
 
     recognition.onresult = async (event: any) => {
       let finalTranscript = '';
@@ -191,6 +198,14 @@ export default function SimplifiedPracticePage() {
       
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const transcript = event.results[i][0].transcript;
+        
+        // Log all speech recognition results for debugging
+        console.log('🎤 Speech result:', {
+          text: transcript,
+          isFinal: event.results[i].isFinal,
+          confidence: event.results[i][0].confidence
+        });
+        
         if (event.results[i].isFinal) {
           finalTranscript += transcript + ' ';
         } else {
@@ -203,9 +218,12 @@ export default function SimplifiedPracticePage() {
       interimTranscriptRef.current = interimText; // Update ref for real-time access
 
       if (finalTranscript.trim()) {
+        console.log('📝 Final transcript received:', finalTranscript.trim());
+        
         setTranscript(prev => {
           const newTranscript = prev + finalTranscript;
           transcriptRef.current = newTranscript; // Update ref for real-time access
+          console.log('📋 Complete session transcript:', newTranscript.substring(0, 100) + '...');
           return newTranscript;
         });
         setInterimTranscript(''); // Clear interim when we get final
@@ -248,6 +266,12 @@ export default function SimplifiedPracticePage() {
         
         // Enhanced backend filler word analysis for the complete transcript
         const fullTranscript = transcript + ' ' + finalTranscript;
+        console.log('🔍 Sending for filler analysis:', { 
+          transcript: fullTranscript.substring(0, 100) + '...', 
+          length: fullTranscript.length,
+          duration: sessionDuration 
+        });
+        
         if (fullTranscript.trim().length > 10) {
           try {
             const response = await fetch('/api/analyze-filler-words', {
@@ -744,6 +768,46 @@ export default function SimplifiedPracticePage() {
                 >
                   <FileText className="w-4 h-4" />
                   {showLiveTranscript ? 'Hide' : 'Show'} Transcript
+                </Button>
+                
+                {/* Test Filler Detection Button */}
+                <Button 
+                  onClick={async () => {
+                    const testText = "Um, well, you know, like, this is um a test with uh some filler words";
+                    console.log('🧪 Testing filler word detection with:', testText);
+                    
+                    try {
+                      const response = await fetch('/api/analyze-filler-words', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          transcript: testText,
+                          duration: 10
+                        })
+                      });
+                      
+                      const result = await response.json();
+                      console.log('🎯 Test result:', result);
+                      
+                      toast({
+                        title: "Filler Detection Test",
+                        description: `Found ${result.totalFillers} filler words: ${result.detectedFillers.map(f => f.word).join(', ')}`,
+                        variant: result.totalFillers > 0 ? "default" : "destructive"
+                      });
+                    } catch (error) {
+                      console.error('Test failed:', error);
+                      toast({
+                        title: "Test Failed",
+                        description: "Could not test filler detection",
+                        variant: "destructive"
+                      });
+                    }
+                  }}
+                  variant="outline"
+                  size="sm"
+                  className="text-xs bg-green-50 hover:bg-green-100"
+                >
+                  Test Filler Detection
                 </Button>
               </div>
             </div>
