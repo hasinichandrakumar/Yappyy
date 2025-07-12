@@ -59,19 +59,21 @@ export class PDFExportService {
   async generateSessionReport(session: SessionData): Promise<void> {
     this.resetDocument();
     
-    // Cover Page
-    this.addCoverPage(session);
-    this.pdf.addPage();
-    this.currentY = 20;
-
-    // Executive Summary
-    this.addExecutiveSummary(session);
-    this.currentY += 15;
-
-    // Performance Dashboard
-    this.addSectionTitle('Performance Dashboard', true);
-    this.addPerformanceGrid(session);
-    this.currentY += 20;
+    // Single page professional analysis
+    this.addModernHeader(session);
+    this.currentY = 45;
+    
+    // Key metrics in grid layout
+    this.addMetricsGrid(session);
+    this.currentY += 50;
+    
+    // Performance insights
+    this.addPerformanceInsights(session);
+    this.currentY += 35;
+    
+    // Filler words analysis
+    this.addFillerWordsSection(session);
+    this.currentY += 30;
 
     // Detailed Analysis
     if (session.analysis) {
@@ -140,6 +142,159 @@ export class PDFExportService {
   private resetDocument(): void {
     this.pdf = new jsPDF('p', 'mm', 'a4');
     this.currentY = 20;
+  }
+
+  private addModernHeader(session: SessionData): void {
+    // Gradient background header
+    this.pdf.setFillColor(99, 102, 241);
+    this.pdf.rect(0, 0, this.pageWidth, 35, 'F');
+    
+    // Yappyy logo/brand
+    this.pdf.setFontSize(28);
+    this.pdf.setFont('helvetica', 'bold');
+    this.pdf.setTextColor(255, 255, 255);
+    this.pdf.text('Yappyy', 20, 22);
+    
+    // Session analysis subtitle
+    this.pdf.setFontSize(14);
+    this.pdf.setFont('helvetica', 'normal');
+    this.pdf.text('AI-Powered Speech Analysis Report', 20, 30);
+    
+    // Session name and date on the right
+    this.pdf.setFontSize(12);
+    this.pdf.setFont('helvetica', 'bold');
+    const sessionText = session.sessionName || 'Practice Session';
+    const dateText = new Date().toLocaleDateString();
+    this.pdf.text(sessionText, this.pageWidth - 20, 18, { align: 'right' });
+    this.pdf.text(dateText, this.pageWidth - 20, 26, { align: 'right' });
+  }
+
+  private addMetricsGrid(session: SessionData): void {
+    // Calculate proper percentage values (scores are 0-1, convert to 0-100)
+    const overallScore = Math.round((session.overallScore || 0) * 100);
+    const voiceClarity = Math.round((session.voiceClarity || 0) * 100);
+    const eyeContactScore = Math.round(parseFloat(session.eyeContactScore?.toString() || '0'));
+    const confidenceScore = Math.round((session.confidenceScore || 0) * 100);
+    
+    const metrics = [
+      { label: 'Overall Performance', value: overallScore, icon: '🎯', color: this.colors.primary },
+      { label: 'Voice Clarity', value: voiceClarity, icon: '🎤', color: this.colors.success },
+      { label: 'Eye Contact', value: eyeContactScore, icon: '👁️', color: this.colors.secondary },
+      { label: 'Confidence Level', value: confidenceScore, icon: '💪', color: this.colors.accent }
+    ];
+    
+    const cardWidth = (this.pageWidth - 40) / 2;
+    const cardHeight = 35;
+    
+    metrics.forEach((metric, index) => {
+      const x = 20 + (index % 2) * (cardWidth + 10);
+      const y = this.currentY + Math.floor(index / 2) * (cardHeight + 8);
+      
+      this.addMetricCard(metric.label, metric.value, metric.color, x, y, cardWidth, cardHeight);
+    });
+  }
+
+  private addMetricCard(label: string, value: number, color: number[], x: number, y: number, width: number, height: number): void {
+    // Card shadow
+    this.pdf.setFillColor(0, 0, 0, 0.1);
+    this.pdf.roundedRect(x + 1, y + 1, width, height, 4, 4, 'F');
+    
+    // Card background
+    this.pdf.setFillColor(255, 255, 255);
+    this.pdf.setDrawColor(...color);
+    this.pdf.setLineWidth(1);
+    this.pdf.roundedRect(x, y, width, height, 4, 4, 'FD');
+    
+    // Colored top bar
+    this.pdf.setFillColor(...color);
+    this.pdf.roundedRect(x, y, width, 4, 4, 4, 'F');
+    this.pdf.rect(x, y + 4, width, height - 4, 'F');
+    this.pdf.setFillColor(255, 255, 255);
+    this.pdf.rect(x, y + 4, width, height - 4, 'F');
+    
+    // Label
+    this.pdf.setFontSize(11);
+    this.pdf.setFont('helvetica', 'bold');
+    this.pdf.setTextColor(60, 60, 60);
+    this.pdf.text(label, x + 8, y + 16);
+    
+    // Value
+    this.pdf.setFontSize(24);
+    this.pdf.setFont('helvetica', 'bold');
+    this.pdf.setTextColor(...color);
+    this.pdf.text(`${value}%`, x + width - 8, y + 25, { align: 'right' });
+    
+    // Performance badge
+    const badge = value >= 80 ? 'Excellent' : value >= 60 ? 'Good' : value >= 40 ? 'Fair' : 'Needs Work';
+    this.pdf.setFontSize(9);
+    this.pdf.setFont('helvetica', 'normal');
+    this.pdf.setTextColor(100, 100, 100);
+    this.pdf.text(badge, x + 8, y + height - 6);
+  }
+
+  private addPerformanceInsights(session: SessionData): void {
+    // Section title
+    this.pdf.setFontSize(16);
+    this.pdf.setFont('helvetica', 'bold');
+    this.pdf.setTextColor(99, 102, 241);
+    this.pdf.text('Performance Insights', 20, this.currentY);
+    
+    this.currentY += 10;
+    
+    // Create insights grid
+    const leftColumn = 20;
+    const rightColumn = this.pageWidth / 2 + 5;
+    const columnWidth = (this.pageWidth / 2) - 25;
+    
+    // Session details
+    this.pdf.setFontSize(10);
+    this.pdf.setFont('helvetica', 'bold');
+    this.pdf.setTextColor(80, 80, 80);
+    this.pdf.text('SESSION DETAILS', leftColumn, this.currentY);
+    this.currentY += 5;
+    
+    this.pdf.setFont('helvetica', 'normal');
+    this.pdf.setTextColor(0, 0, 0);
+    const duration = Math.floor((session.duration || 0) / 60);
+    const minutes = (session.duration || 0) % 60;
+    this.pdf.text(`Duration: ${duration}:${minutes.toString().padStart(2, '0')}`, leftColumn, this.currentY);
+    this.currentY += 4;
+    this.pdf.text(`Words Per Minute: ${session.analysis?.averageWPM || 'N/A'}`, leftColumn, this.currentY);
+    this.currentY += 4;
+    this.pdf.text(`Filler Words: ${session.fillerWordCount || 0}`, leftColumn, this.currentY);
+    
+    // Key strengths (right column)
+    this.currentY -= 13;
+    this.pdf.setFont('helvetica', 'bold');
+    this.pdf.setTextColor(80, 80, 80);
+    this.pdf.text('KEY STRENGTHS', rightColumn, this.currentY);
+    this.currentY += 5;
+    
+    this.pdf.setFont('helvetica', 'normal');
+    this.pdf.setTextColor(0, 0, 0);
+    
+    const strengths = this.getTopStrengths(session);
+    strengths.forEach(strength => {
+      this.pdf.text(`• ${strength}`, rightColumn, this.currentY);
+      this.currentY += 4;
+    });
+  }
+
+  private getTopStrengths(session: SessionData): string[] {
+    const strengths = [];
+    
+    const overallScore = (session.overallScore || 0) * 100;
+    const voiceClarity = (session.voiceClarity || 0) * 100;
+    const confidenceScore = (session.confidenceScore || 0) * 100;
+    const eyeContactScore = parseFloat(session.eyeContactScore?.toString() || '0');
+    
+    if (voiceClarity >= 70) strengths.push('Excellent voice clarity');
+    if (confidenceScore >= 70) strengths.push('Strong confidence level');
+    if (eyeContactScore >= 70) strengths.push('Good eye contact');
+    if ((session.fillerWordCount || 0) <= 3) strengths.push('Minimal filler words');
+    if (overallScore >= 70) strengths.push('Solid overall performance');
+    
+    return strengths.slice(0, 3);
   }
 
   private addCoverPage(session: SessionData): void {
@@ -397,52 +552,142 @@ export class PDFExportService {
   }
 
   private addFillerWordsSection(session: SessionData): void {
-    // Create a simple filler words analysis section
-    const totalFillerWords = session.fillerWords || 0;
-    
-    // Professional filler words card
-    this.pdf.setFillColor(0, 0, 0, 0.03);
-    this.pdf.roundedRect(this.margin + 2, this.currentY + 2, this.pageWidth - (2 * this.margin), 60, 8, 8, 'F');
-    
-    this.pdf.setFillColor(...this.colors.brand.background);
-    this.pdf.setDrawColor(...this.colors.warning);
-    this.pdf.setLineWidth(1);
-    this.pdf.roundedRect(this.margin, this.currentY, this.pageWidth - (2 * this.margin), 60, 8, 8, 'FD');
-    
-    // Header section
+    // Section title
     this.pdf.setFontSize(16);
     this.pdf.setFont('helvetica', 'bold');
-    this.pdf.setTextColor(...this.colors.warning);
-    this.pdf.text('Total Filler Words Detected', this.margin + 15, this.currentY + 20);
+    this.pdf.setTextColor(99, 102, 241);
+    this.pdf.text('Speech Analysis Summary', 20, this.currentY);
     
-    // Total count display
-    this.pdf.setFontSize(28);
+    this.currentY += 12;
+    
+    // Filler words summary with improved design
+    const fillerCount = session.fillerWordCount || 0;
+    const fillerData = session.analysis?.fillerAnalysis;
+    
+    // Filler words box
+    this.pdf.setFillColor(248, 250, 252);
+    this.pdf.setDrawColor(203, 213, 225);
+    this.pdf.setLineWidth(1);
+    this.pdf.roundedRect(20, this.currentY, this.pageWidth - 40, 25, 4, 4, 'FD');
+    
+    // Filler count
+    this.pdf.setFontSize(14);
     this.pdf.setFont('helvetica', 'bold');
-    this.pdf.setTextColor(...this.colors.warning);
-    this.pdf.text(`${totalFillerWords}`, this.pageWidth - this.margin - 30, this.currentY + 25);
+    this.pdf.setTextColor(220, 38, 127);
+    this.pdf.text('Filler Words Detected:', 25, this.currentY + 10);
     
-    // Impact assessment
-    const impactLevel = totalFillerWords > 15 ? 'High Impact' : totalFillerWords > 8 ? 'Moderate Impact' : 'Low Impact';
-    const impactColor = totalFillerWords > 15 ? this.colors.danger : totalFillerWords > 8 ? this.colors.warning : this.colors.success;
+    this.pdf.setFontSize(20);
+    this.pdf.text(`${fillerCount}`, this.pageWidth - 45, this.currentY + 12);
     
-    this.pdf.setFontSize(12);
+    // Severity assessment
+    const severity = fillerData?.severity || (fillerCount > 10 ? 'high' : fillerCount > 5 ? 'moderate' : 'excellent');
+    const severityText = severity === 'excellent' ? 'Excellent Control' : 
+                        severity === 'moderate' ? 'Room for Improvement' : 'Needs Attention';
+    
+    this.pdf.setFontSize(10);
     this.pdf.setFont('helvetica', 'normal');
-    this.pdf.setTextColor(...impactColor);
-    this.pdf.text(impactLevel, this.pageWidth - this.margin - 50, this.currentY + 35);
+    this.pdf.setTextColor(100, 100, 100);
+    this.pdf.text(severityText, 25, this.currentY + 18);
     
-    // Analysis text
-    const analysisText = totalFillerWords > 15 
-      ? 'Consider practicing more structured speech patterns to reduce dependency on filler words.'
-      : totalFillerWords > 8 
-      ? 'Good progress! Focus on conscious pausing instead of using filler words.'
-      : 'Excellent! Your speech shows minimal filler word usage.';
+    // Top filler words if available
+    if (fillerData?.detectedFillers?.length > 0) {
+      const topFillers = fillerData.detectedFillers.slice(0, 3).map(f => f.word).join(', ');
+      this.pdf.text(`Most common: ${topFillers}`, this.pageWidth - 100, this.currentY + 18);
+    }
     
+    this.currentY += 30;
+    
+    // Bottom recommendations section
+    this.addRecommendationsSection(session);
+  }
+
+  private addRecommendationsSection(session: SessionData): void {
+    // Recommendations title
+    this.pdf.setFontSize(16);
+    this.pdf.setFont('helvetica', 'bold');
+    this.pdf.setTextColor(99, 102, 241);
+    this.pdf.text('Key Recommendations', 20, this.currentY);
+    
+    this.currentY += 10;
+    
+    // Generate smart recommendations
+    const recommendations = this.generateRecommendations(session);
+    
+    // Recommendations in a clean list format
     this.pdf.setFontSize(11);
     this.pdf.setFont('helvetica', 'normal');
-    this.pdf.setTextColor(...this.colors.mutedGray);
-    this.pdf.text(analysisText, this.margin + 15, this.currentY + 45);
+    this.pdf.setTextColor(0, 0, 0);
     
-    this.currentY += 70;
+    recommendations.forEach((rec, index) => {
+      // Bullet point
+      this.pdf.setFillColor(99, 102, 241);
+      this.pdf.circle(25, this.currentY - 2, 1, 'F');
+      
+      // Recommendation text
+      this.pdf.text(rec, 30, this.currentY);
+      this.currentY += 6;
+    });
+    
+    // Add footer
+    this.addModernFooter();
+  }
+
+  private generateRecommendations(session: SessionData): string[] {
+    const recommendations = [];
+    
+    const overallScore = (session.overallScore || 0) * 100;
+    const voiceClarity = (session.voiceClarity || 0) * 100;
+    const confidenceScore = (session.confidenceScore || 0) * 100;
+    const eyeContactScore = parseFloat(session.eyeContactScore?.toString() || '0');
+    const fillerCount = session.fillerWordCount || 0;
+    
+    // Personalized recommendations based on performance
+    if (fillerCount > 5) {
+      recommendations.push('Practice pausing instead of using filler words - detected high frequency');
+    }
+    
+    if (voiceClarity < 70) {
+      recommendations.push('Focus on articulation and speaking clearly');
+    }
+    
+    if (eyeContactScore < 70) {
+      recommendations.push('Improve eye contact by looking directly at your audience');
+    }
+    
+    if (confidenceScore < 70) {
+      recommendations.push('Build confidence through regular practice and preparation');
+    }
+    
+    if (overallScore >= 70) {
+      recommendations.push('Continue your excellent progress with consistent practice');
+    }
+    
+    // Ensure at least 3 recommendations
+    if (recommendations.length < 3) {
+      recommendations.push('Record yourself practicing to identify improvement areas');
+      recommendations.push('Focus on varying your pace and tone for better engagement');
+    }
+    
+    return recommendations.slice(0, 4);
+  }
+
+  private addModernFooter(): void {
+    // Position footer at bottom
+    this.currentY = this.pageHeight - 25;
+    
+    // Footer line
+    this.pdf.setDrawColor(99, 102, 241);
+    this.pdf.setLineWidth(2);
+    this.pdf.line(20, this.currentY, this.pageWidth - 20, this.currentY);
+    
+    this.currentY += 8;
+    
+    // Footer text
+    this.pdf.setFontSize(10);
+    this.pdf.setFont('helvetica', 'normal');
+    this.pdf.setTextColor(100, 100, 100);
+    this.pdf.text('Generated by Yappyy AI Speech Coach', 20, this.currentY);
+    this.pdf.text(`${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}`, this.pageWidth - 20, this.currentY, { align: 'right' });
   }
 
   private addAnalysisDetails(analysis: any): void {
