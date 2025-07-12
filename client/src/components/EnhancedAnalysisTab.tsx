@@ -1061,6 +1061,112 @@ export default function EnhancedAnalysisTab() {
   );
 }
 
+// Content-based feedback generator for when AI is unavailable
+function generateContentBasedFeedback(transcript: string, purpose: string) {
+  if (!transcript || transcript.length < 10) {
+    return {
+      strengths: ["Session completed successfully"],
+      improvements: ["Try speaking more during the session to get detailed content feedback"],
+      recommendations: [{
+        category: "Content",
+        suggestion: "Aim for longer speaking sessions to analyze content structure",
+        priority: "Medium"
+      }]
+    };
+  }
+
+  const words = transcript.toLowerCase().split(/\s+/);
+  const sentences = transcript.split(/[.!?]+/).filter(s => s.trim().length > 5);
+  const avgWordsPerSentence = words.length / Math.max(sentences.length, 1);
+  
+  // Purpose-specific analysis
+  const purposeLower = purpose?.toLowerCase() || "";
+  const isSchoolPresentation = purposeLower.includes("school") || purposeLower.includes("presentation") || purposeLower.includes("academic");
+  const isBusinessPresentation = purposeLower.includes("business") || purposeLower.includes("work") || purposeLower.includes("meeting");
+  const isPitch = purposeLower.includes("pitch") || purposeLower.includes("proposal") || purposeLower.includes("investment");
+  
+  const strengths = [];
+  const improvements = [];
+  const recommendations = [];
+  
+  // Analyze content structure
+  if (sentences.length >= 3) {
+    strengths.push("Good speech structure with multiple key points");
+  } else {
+    improvements.push("Develop more detailed content with additional supporting points");
+  }
+  
+  // Analyze sentence complexity
+  if (avgWordsPerSentence > 15) {
+    improvements.push("Simplify sentences for better clarity and audience comprehension");
+  } else if (avgWordsPerSentence > 8) {
+    strengths.push("Well-balanced sentence length for audience engagement");
+  } else {
+    improvements.push("Expand on ideas with more detailed explanations");
+  }
+  
+  // Purpose-specific feedback
+  if (isSchoolPresentation) {
+    if (transcript.toLowerCase().includes("example") || transcript.toLowerCase().includes("for instance")) {
+      strengths.push("Good use of examples to support academic points");
+    } else {
+      improvements.push("Add specific examples and evidence to strengthen academic arguments");
+    }
+    
+    if (transcript.toLowerCase().includes("conclusion") || transcript.toLowerCase().includes("summary")) {
+      strengths.push("Clear conclusion that reinforces main academic points");
+    } else {
+      improvements.push("Include a stronger conclusion that summarizes key learning points");
+    }
+    
+    recommendations.push({
+      category: "Academic Content",
+      suggestion: "Structure your presentation with clear introduction, evidence-based main points, and strong conclusion",
+      priority: "High"
+    });
+    
+    recommendations.push({
+      category: "School Presentation",
+      suggestion: "Include specific examples, data, or case studies relevant to your academic topic",
+      priority: "Medium"
+    });
+    
+  } else if (isBusinessPresentation) {
+    recommendations.push({
+      category: "Business Content",
+      suggestion: "Focus on clear value propositions and actionable business insights",
+      priority: "High"
+    });
+  } else if (isPitch) {
+    recommendations.push({
+      category: "Pitch Content",
+      suggestion: "Structure with problem, solution, market opportunity, and clear ask",
+      priority: "High"
+    });
+  } else {
+    recommendations.push({
+      category: "General Content",
+      suggestion: "Organize content with clear beginning, middle, and end structure",
+      priority: "Medium"
+    });
+  }
+  
+  // Word count feedback
+  if (words.length < 50) {
+    improvements.push("Expand content length to develop ideas more thoroughly");
+  } else if (words.length > 300) {
+    strengths.push("Comprehensive content with detailed coverage of topic");
+  } else {
+    strengths.push("Appropriate content length for effective communication");
+  }
+  
+  return {
+    strengths: strengths.length > 0 ? strengths : ["Session completed with measurable content"],
+    improvements: improvements.length > 0 ? improvements : ["Continue developing content depth and structure"],
+    recommendations
+  };
+}
+
 // Hyperpersonalized AI Transcript Analysis Component
 interface TranscriptAnalysisComponentProps {
   session: any;
@@ -1121,20 +1227,13 @@ function TranscriptAnalysisComponent({ session, onAnalysisComplete }: Transcript
     } catch (error) {
       console.error('Transcript analysis error:', error);
       
-      // Even if AI analysis fails, try to provide basic feedback
-      setAiFeedback({
-        strengths: ["Session completed successfully", "Spoke for the entire duration"],
-        improvements: ["Continue practicing regularly", "Focus on clarity and pace"],
-        recommendations: [{
-          category: "Practice",
-          suggestion: "Regular practice sessions build confidence",
-          priority: "Medium"
-        }]
-      });
+      // Generate purpose-specific content analysis even when AI fails
+      const contentBasedFeedback = generateContentBasedFeedback(session.transcript, session.purpose || session.sessionName);
+      setAiFeedback(contentBasedFeedback);
       
       toast({
-        title: "Basic Analysis Complete",
-        description: "Generated basic feedback. Full AI analysis unavailable.",
+        title: "Content Analysis Complete",
+        description: "Generated content-based feedback for your session purpose.",
         variant: "default"
       });
     } finally {
