@@ -1048,16 +1048,7 @@ export default function SimplifiedPracticePage() {
           </Card>
         )}
 
-        {/* Session Data Viewer */}
-        {transcript && (
-          <SessionDataViewer 
-            transcript={transcript}
-            sessionDuration={sessionDuration}
-            metrics={metrics}
-            contentAnalysis={null}
-            isRecording={isRecording}
-          />
-        )}
+
       </div>
     </div>
   );
