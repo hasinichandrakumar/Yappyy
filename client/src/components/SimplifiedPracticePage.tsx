@@ -986,8 +986,8 @@ export default function SimplifiedPracticePage() {
 
       if (response.ok) {
         toast({
-          title: "Session Saved",
-          description: `${sessionName} saved successfully`,
+          title: "✅ Session Saved Successfully",
+          description: `${sessionName} saved with full transcript and analytics - view anytime in Analysis tab`,
         });
         
         // Prepare session data for analysis page
@@ -1113,10 +1113,20 @@ export default function SimplifiedPracticePage() {
                     Start Practice
                   </Button>
                 ) : (
-                  <Button onClick={stopRecording} variant="outline">
-                    <Square className="w-5 h-5 mr-2" />
-                    Stop ({Math.floor(sessionDuration / 60)}:{(sessionDuration % 60).toString().padStart(2, '0')})
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      onClick={stopRecording} 
+                      variant="destructive"
+                      className="bg-red-600 hover:bg-red-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 px-6"
+                      size="lg"
+                    >
+                      <Square className="w-5 h-5 mr-2" />
+                      End Session ({Math.floor(sessionDuration / 60)}:{(sessionDuration % 60).toString().padStart(2, '0')})
+                    </Button>
+                    <div className="text-sm text-gray-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
+                      💾 Auto-saves to Analysis tab
+                    </div>
+                  </div>
                 )}
                 
                 {/* Live Transcript Toggle */}

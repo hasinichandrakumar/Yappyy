@@ -126,6 +126,34 @@ export default function EnhancedAnalysisTab() {
     );
   }
 
+  // If no sessions exist, show empty state
+  if (sessionCount === 0) {
+    return (
+      <div className="space-y-6">
+        <Card className="p-8 text-center bg-white/70 backdrop-blur-sm border border-white/30 shadow-xl">
+          <div className="flex flex-col items-center space-y-4">
+            <div className="h-16 w-16 bg-gradient-to-br from-[#2563eb] to-[#22d3ee] rounded-full flex items-center justify-center">
+              <BarChart3 className="h-8 w-8 text-white" />
+            </div>
+            <h2 className="text-2xl font-bold text-slate-900">No Practice Sessions Yet</h2>
+            <p className="text-slate-600 max-w-md">
+              Complete your first practice session to see detailed analytics, transcripts, and AI-powered insights here.
+            </p>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-md">
+              <div className="flex items-center gap-2 text-blue-700 font-medium">
+                <Info className="w-4 h-4" />
+                How to get started
+              </div>
+              <p className="text-blue-600 text-sm mt-1">
+                Go to Practice tab → Click "Start Practice" → End session → Return here to view your analytics
+              </p>
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Session Selector */}
@@ -133,7 +161,7 @@ export default function EnhancedAnalysisTab() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-2xl font-bold text-slate-900">Speaking Analysis</h2>
-            <p className="text-slate-600">Detailed insights into your speaking performance</p>
+            <p className="text-slate-600">Detailed insights into your speaking performance ({sessionCount} session{sessionCount !== 1 ? 's' : ''})</p>
           </div>
           <div className="flex items-center gap-3">
             <Select value={selectedSession} onValueChange={setSelectedSession}>
