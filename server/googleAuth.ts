@@ -28,7 +28,7 @@ export function getSession() {
     saveUninitialized: true,
     cookie: {
       httpOnly: false, // Allow client-side access for debugging
-      secure: false, // Set to false for Replit development environment
+      secure: true, // Use secure cookies for production HTTPS deployment
       maxAge: sessionTtl,
       sameSite: 'lax'
     },
@@ -67,9 +67,7 @@ export async function setupGoogleAuth(app: Express) {
         {
           clientID: process.env.GOOGLE_CLIENT_ID!,
           clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-          callbackURL: process.env.NODE_ENV === 'production' 
-            ? `https://${process.env.REPLIT_DEV_DOMAIN}/api/auth/google/callback`
-            : `https://${process.env.REPLIT_DEV_DOMAIN}/api/auth/google/callback`,
+          callbackURL: `https://${process.env.REPLIT_DEV_DOMAIN}/api/auth/google/callback`,
         },
         async (accessToken, refreshToken, profile, done) => {
           try {
@@ -111,6 +109,27 @@ export async function setupGoogleAuth(app: Express) {
         domain: process.env.REPLIT_DEV_DOMAIN,
         callbackUrl: `https://${process.env.REPLIT_DEV_DOMAIN}/api/auth/google/callback`,
         nodeEnv: process.env.NODE_ENV
+      });
+    });
+
+    // Helper endpoint for Google Cloud Console setup
+    app.get("/api/auth/google-setup", (req, res) => {
+      const domain = process.env.REPLIT_DEV_DOMAIN;
+      res.json({
+        message: "Add these URLs to your Google Cloud Console OAuth settings",
+        instructions: {
+          step1: "Go to https://console.cloud.google.com/",
+          step2: "Navigate to APIs & Services → Credentials",
+          step3: "Edit your OAuth 2.0 Client ID",
+          step4: "Add the URLs below to the appropriate sections"
+        },
+        authorizedJavaScriptOrigins: [
+          `https://${domain}`
+        ],
+        authorizedRedirectURIs: [
+          `https://${domain}/api/auth/google/callback`
+        ],
+        currentDomain: domain
       });
     });
 
