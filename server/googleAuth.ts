@@ -116,20 +116,31 @@ export async function setupGoogleAuth(app: Express) {
     app.get("/api/auth/google-setup", (req, res) => {
       const domain = process.env.REPLIT_DEV_DOMAIN;
       res.json({
-        message: "Add these URLs to your Google Cloud Console OAuth settings",
+        message: "🚨 GOOGLE OAUTH SETUP REQUIRED - redirect_uri_mismatch Error",
+        error: "Error 400: redirect_uri_mismatch",
+        solution: "Add these exact URLs to your Google Cloud Console OAuth settings",
         instructions: {
           step1: "Go to https://console.cloud.google.com/",
           step2: "Navigate to APIs & Services → Credentials",
-          step3: "Edit your OAuth 2.0 Client ID",
-          step4: "Add the URLs below to the appropriate sections"
+          step3: "Find and edit your OAuth 2.0 Client ID",
+          step4: "In 'Authorized redirect URIs' section, click ADD URI",
+          step5: "Add the exact URL below (copy-paste to avoid typos)",
+          step6: "Save the changes and wait 5-10 minutes for Google to propagate"
         },
+        CRITICAL_REDIRECT_URI_TO_ADD: `https://${domain}/api/auth/google/callback`,
         authorizedJavaScriptOrigins: [
           `https://${domain}`
         ],
-        authorizedRedirectURIs: [
-          `https://${domain}/api/auth/google/callback`
-        ],
-        currentDomain: domain
+        currentDomain: domain,
+        troubleshooting: {
+          commonIssues: [
+            "Typos in the redirect URI",
+            "Missing https:// prefix", 
+            "Extra trailing slashes",
+            "Not waiting for Google's propagation (5-10 minutes)"
+          ],
+          verification: "After adding, test the Google sign-in again"
+        }
       });
     });
 
