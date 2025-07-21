@@ -11,8 +11,7 @@ import {
   Award, MessageCircle, BarChart3, Zap, Star,
   ChevronRight, Play, Pause, Volume2, Mic, 
   Send, Timer, Eye, Trophy, Settings, Activity,
-  Layers, Cpu, Database, TrendingDown, User,
-  ArrowRight, Bell, X
+  Layers, Cpu, Database, TrendingDown
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { apiRequest } from '@/lib/queryClient';
@@ -432,60 +431,7 @@ const CoachingGoals = ({ onGoalSelect }: { onGoalSelect: (goal: string) => void 
   );
 };
 
-// First Time User Notification Component
-const FirstTimeUserNotification = ({ onDismiss, onPersonalize }: { onDismiss: () => void; onPersonalize: () => void }) => (
-  <motion.div
-    initial={{ opacity: 0, y: -50 }}
-    animate={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0, y: -50 }}
-    className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-md"
-  >
-    <Card className="bg-gradient-to-r from-purple-600 to-blue-600 text-white border-0 shadow-2xl">
-      <CardContent className="p-4">
-        <div className="flex items-start gap-3">
-          <div className="flex-shrink-0">
-            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-              <Bell className="w-5 h-5" />
-            </div>
-          </div>
-          <div className="flex-1">
-            <h3 className="font-bold text-lg mb-1">Welcome to Yappyy! 🎉</h3>
-            <p className="text-sm text-purple-100 mb-3 leading-relaxed">
-              For the most accurate deep learning results, personalize your profile with your speaking goals and preferences. This helps our neural network provide better coaching!
-            </p>
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                onClick={onPersonalize}
-                className="bg-white text-purple-600 hover:bg-purple-50 font-semibold"
-              >
-                <User className="w-4 h-4 mr-1" />
-                Personalize Profile
-                <ArrowRight className="w-4 h-4 ml-1" />
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={onDismiss}
-                className="text-white hover:bg-white/20"
-              >
-                Later
-              </Button>
-            </div>
-          </div>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={onDismiss}
-            className="text-white hover:bg-white/20 p-1"
-          >
-            <X className="w-4 h-4" />
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  </motion.div>
-);
+
 
 export default function AICoachRedesigned() {
   const { user } = useAuth();
@@ -502,47 +448,12 @@ export default function AICoachRedesigned() {
   const [currentCoachingMode, setCurrentCoachingMode] = useState('conversation');
   const [isTyping, setIsTyping] = useState(false);
   const [currentGoal, setCurrentGoal] = useState<string | null>(null);
-  const [showFirstTimeNotification, setShowFirstTimeNotification] = useState(false);
 
-  // Query practice sessions to determine if this is a first-time user
+  // Query practice sessions for neural analysis
   const { data: sessions } = useQuery({
     queryKey: ['/api/practice-sessions'],
     enabled: !!user
   });
-
-  // Check if first-time user (no practice sessions) and show notification
-  useEffect(() => {
-    if (user && sessions && Array.isArray(sessions) && sessions.length === 0) {
-      // Check if notification was dismissed before (using localStorage)
-      const notificationDismissed = localStorage.getItem(`firstTimeNotification_${(user as any)?.id || 'demo'}`);
-      if (!notificationDismissed) {
-        setShowFirstTimeNotification(true);
-      }
-    }
-  }, [user, sessions]);
-
-  const handleDismissNotification = () => {
-    setShowFirstTimeNotification(false);
-    if (user) {
-      localStorage.setItem(`firstTimeNotification_${(user as any)?.id || 'demo'}`, 'true');
-    }
-  };
-
-  const handlePersonalizeProfile = () => {
-    setShowFirstTimeNotification(false);
-    if (user) {
-      localStorage.setItem(`firstTimeNotification_${(user as any)?.id || 'demo'}`, 'true');
-    }
-    // Navigate to profile settings or show profile modal
-    // For now, we'll just show a message in the chat
-    const profileMessage = {
-      id: Date.now(),
-      text: "Great choice! To personalize your profile, you can tell me about your speaking goals, experience level, and what areas you'd like to focus on. This helps my neural network provide more accurate coaching. What's your main speaking goal?",
-      isUser: false,
-      timestamp: new Date().toLocaleTimeString()
-    };
-    setMessages(prev => [...prev, profileMessage]);
-  };
 
 
 
@@ -675,15 +586,6 @@ export default function AICoachRedesigned() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
-      {/* First Time User Notification */}
-      <AnimatePresence>
-        {showFirstTimeNotification && (
-          <FirstTimeUserNotification
-            onDismiss={handleDismissNotification}
-            onPersonalize={handlePersonalizeProfile}
-          />
-        )}
-      </AnimatePresence>
       {/* Header Section */}
       <div className="text-center py-16 px-6 mb-8">
         <motion.div
