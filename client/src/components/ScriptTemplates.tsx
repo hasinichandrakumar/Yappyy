@@ -19,7 +19,11 @@ import {
   Sparkles,
   TrendingUp,
   Bot,
-  Zap
+  Zap,
+  Rocket,
+  UserCheck,
+  AlertTriangle,
+  BookOpen
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -40,6 +44,11 @@ interface ScriptTemplate {
     placeholder: string;
     key: string;
   }[];
+  tags?: string[];
+  popularity?: number;
+  contentAdvice?: string;
+  voiceAdvice?: string;
+  bodyLanguageAdvice?: string;
 }
 
 const scriptTemplates: ScriptTemplate[] = [
@@ -598,6 +607,652 @@ Thank you.`,
       { label: "Audience Challenge", placeholder: "choose one tiny habit for the next 30 days", key: "AUDIENCE_CHALLENGE" },
       { label: "Collective Action", placeholder: "commit to small, daily improvements", key: "COLLECTIVE_ACTION" },
       { label: "World Change", placeholder: "create a healthier, happier society", key: "WORLD_CHANGE" }
+    ]
+  },
+  
+  // NEW COMPREHENSIVE TEMPLATES - Significantly expanding the template library
+  {
+    id: "product-launch",
+    title: "Product Launch Presentation",
+    description: "Compelling product launch for new features or products",
+    category: "Business",
+    duration: "10-15 min",
+    difficulty: "intermediate",
+    icon: <Rocket className="w-5 h-5" />,
+    color: "bg-purple-500",
+    tags: ["launch", "product", "announcement", "marketing"],
+    popularity: 88,
+    contentAdvice: "Focus on customer benefits rather than features. Include a clear problem-solution narrative and social proof.",
+    voiceAdvice: "Use energetic and confident delivery with strategic pauses for emphasis on key benefits.",
+    bodyLanguageAdvice: "Use gestures to demonstrate product usage and maintain eye contact to build trust.",
+    template: `Good [TIME_OF_DAY], [AUDIENCE_TYPE]!
+
+Today marks a milestone for [COMPANY_NAME] and, more importantly, for you.
+
+[PROBLEM_INTRODUCTION] has been a challenge for [TARGET_AUDIENCE] for too long.
+
+I'm excited to introduce [PRODUCT_NAME] - [PRODUCT_TAGLINE].
+
+Here's how it works:
+• [KEY_FEATURE_1]
+• [KEY_FEATURE_2] 
+• [KEY_FEATURE_3]
+
+But features don't matter if they don't solve real problems. Let me show you what this means for you:
+
+[BENEFIT_1] means [SPECIFIC_OUTCOME_1].
+[BENEFIT_2] results in [SPECIFIC_OUTCOME_2].
+[BENEFIT_3] delivers [SPECIFIC_OUTCOME_3].
+
+We've already seen incredible results: [SUCCESS_METRIC_1], [SUCCESS_METRIC_2], and [SUCCESS_METRIC_3].
+
+[CUSTOMER_TESTIMONIAL]
+
+Starting [AVAILABILITY_DATE], [PRODUCT_NAME] will be available [WHERE_TO_GET].
+
+For the first [LIMITED_TIME], we're offering [SPECIAL_OFFER].
+
+This isn't just a product launch - it's the beginning of [VISION_STATEMENT].
+
+Thank you. I'm excited to answer your questions and show you [PRODUCT_NAME] in action.`,
+    prompts: [
+      { label: "Time of Day", placeholder: "morning/afternoon/evening", key: "TIME_OF_DAY" },
+      { label: "Audience Type", placeholder: "team/customers/investors", key: "AUDIENCE_TYPE" },
+      { label: "Company Name", placeholder: "TechCorp", key: "COMPANY_NAME" },
+      { label: "Problem Introduction", placeholder: "Managing complex data workflows", key: "PROBLEM_INTRODUCTION" },
+      { label: "Target Audience", placeholder: "data scientists and analysts", key: "TARGET_AUDIENCE" },
+      { label: "Product Name", placeholder: "DataFlow Pro", key: "PRODUCT_NAME" },
+      { label: "Product Tagline", placeholder: "the first AI-powered data orchestration platform", key: "PRODUCT_TAGLINE" },
+      { label: "Key Feature 1", placeholder: "One-click data pipeline creation", key: "KEY_FEATURE_1" },
+      { label: "Key Feature 2", placeholder: "Real-time error detection and auto-healing", key: "KEY_FEATURE_2" },
+      { label: "Key Feature 3", placeholder: "Collaborative workspace with version control", key: "KEY_FEATURE_3" },
+      { label: "Benefit 1", placeholder: "Reducing setup time by 90%", key: "BENEFIT_1" },
+      { label: "Specific Outcome 1", placeholder: "you can focus on insights instead of infrastructure", key: "SPECIFIC_OUTCOME_1" },
+      { label: "Benefit 2", placeholder: "Eliminating data pipeline failures", key: "BENEFIT_2" },
+      { label: "Specific Outcome 2", placeholder: "99.9% uptime for your critical workflows", key: "SPECIFIC_OUTCOME_2" },
+      { label: "Benefit 3", placeholder: "Team collaboration at scale", key: "BENEFIT_3" },
+      { label: "Specific Outcome 3", placeholder: "seamless handoffs between data teams", key: "SPECIFIC_OUTCOME_3" },
+      { label: "Success Metric 1", placeholder: "500+ beta users", key: "SUCCESS_METRIC_1" },
+      { label: "Success Metric 2", placeholder: "85% reduction in pipeline errors", key: "SUCCESS_METRIC_2" },
+      { label: "Success Metric 3", placeholder: "4.9/5 user satisfaction", key: "SUCCESS_METRIC_3" },
+      { label: "Customer Testimonial", placeholder: "Sarah from DataTech says: 'This transformed our entire workflow'", key: "CUSTOMER_TESTIMONIAL" },
+      { label: "Availability Date", placeholder: "next Monday", key: "AVAILABILITY_DATE" },
+      { label: "Where to Get", placeholder: "at dataflowpro.com", key: "WHERE_TO_GET" },
+      { label: "Limited Time", placeholder: "30 days", key: "LIMITED_TIME" },
+      { label: "Special Offer", placeholder: "50% off the first year", key: "SPECIAL_OFFER" },
+      { label: "Vision Statement", placeholder: "making data science accessible to everyone", key: "VISION_STATEMENT" }
+    ]
+  },
+  
+  {
+    id: "job-interview",
+    title: "Job Interview Presentation",
+    description: "Professional interview presentation for your dream role",
+    category: "Professional",
+    duration: "5-10 min",
+    difficulty: "intermediate",
+    icon: <UserCheck className="w-5 h-5" />,
+    color: "bg-green-500",
+    tags: ["interview", "career", "professional", "hiring"],
+    popularity: 95,
+    contentAdvice: "Tell a compelling story about your career journey with specific achievements and quantifiable results.",
+    voiceAdvice: "Project confidence without arrogance. Use clear, measured delivery with enthusiasm for the role.",
+    bodyLanguageAdvice: "Maintain professional posture and genuine eye contact. Use gestures sparingly but purposefully.",
+    template: `Good [TIME_OF_DAY], [INTERVIEWER_NAMES]. Thank you for this opportunity.
+
+I'm [YOUR_NAME], and I'm excited to discuss how my experience aligns with [COMPANY_NAME]'s vision for [POSITION_TITLE].
+
+My journey began [CAREER_START_STORY]. This taught me [EARLY_LESSON], which became the foundation of my approach to [RELEVANT_SKILL].
+
+In my role as [CURRENT_PREVIOUS_POSITION] at [CURRENT_PREVIOUS_COMPANY], I [MAJOR_ACHIEVEMENT_1]. This resulted in [QUANTIFIABLE_RESULT_1].
+
+One challenge that defined my growth was [SPECIFIC_CHALLENGE]. Here's how I approached it:
+• [APPROACH_STEP_1]
+• [APPROACH_STEP_2]
+• [APPROACH_STEP_3]
+
+The outcome was [CHALLENGE_OUTCOME], which taught me [LESSON_LEARNED].
+
+I've also led initiatives in [LEADERSHIP_EXAMPLE]. By [SPECIFIC_ACTION], we achieved [TEAM_RESULT].
+
+What excites me about [COMPANY_NAME] is [COMPANY_SPECIFIC_INTEREST]. I see an opportunity to contribute by [YOUR_CONTRIBUTION_VISION].
+
+My experience with [RELEVANT_EXPERTISE] and my passion for [PASSION_AREA] position me to [VALUE_PROPOSITION].
+
+In the next 90 days, I would focus on [90_DAY_PLAN]. Within a year, I envision [1_YEAR_VISION].
+
+I'd love to hear more about [QUESTION_FOR_THEM] and discuss how we can [MUTUAL_SUCCESS].
+
+Thank you.`,
+    prompts: [
+      { label: "Time of Day", placeholder: "morning/afternoon", key: "TIME_OF_DAY" },
+      { label: "Interviewer Names", placeholder: "Sarah and Michael", key: "INTERVIEWER_NAMES" },
+      { label: "Your Name", placeholder: "Alex Johnson", key: "YOUR_NAME" },
+      { label: "Company Name", placeholder: "TechCorp", key: "COMPANY_NAME" },
+      { label: "Position Title", placeholder: "Senior Product Manager", key: "POSITION_TITLE" },
+      { label: "Career Start Story", placeholder: "when I built my first app in college", key: "CAREER_START_STORY" },
+      { label: "Early Lesson", placeholder: "user feedback is worth more than perfect code", key: "EARLY_LESSON" },
+      { label: "Relevant Skill", placeholder: "product development", key: "RELEVANT_SKILL" },
+      { label: "Current/Previous Position", placeholder: "Product Manager", key: "CURRENT_PREVIOUS_POSITION" },
+      { label: "Current/Previous Company", placeholder: "StartupTech", key: "CURRENT_PREVIOUS_COMPANY" },
+      { label: "Major Achievement 1", placeholder: "led the redesign of our core platform", key: "MAJOR_ACHIEVEMENT_1" },
+      { label: "Quantifiable Result 1", placeholder: "30% increase in user engagement and $2M additional revenue", key: "QUANTIFIABLE_RESULT_1" },
+      { label: "Specific Challenge", placeholder: "launching a product in a completely new market", key: "SPECIFIC_CHALLENGE" },
+      { label: "Approach Step 1", placeholder: "Conducted 50+ customer interviews", key: "APPROACH_STEP_1" },
+      { label: "Approach Step 2", placeholder: "Built MVPs with rapid iteration cycles", key: "APPROACH_STEP_2" },
+      { label: "Approach Step 3", placeholder: "Collaborated closely with design and engineering", key: "APPROACH_STEP_3" },
+      { label: "Challenge Outcome", placeholder: "successful product launch with 15K users in 3 months", key: "CHALLENGE_OUTCOME" },
+      { label: "Lesson Learned", placeholder: "the importance of market validation before feature development", key: "LESSON_LEARNED" },
+      { label: "Leadership Example", placeholder: "cross-functional team coordination", key: "LEADERSHIP_EXAMPLE" },
+      { label: "Specific Action", placeholder: "implementing weekly sync meetings and shared KPIs", key: "SPECIFIC_ACTION" },
+      { label: "Team Result", placeholder: "reduced project delivery time by 40%", key: "TEAM_RESULT" },
+      { label: "Company Specific Interest", placeholder: "your commitment to sustainable technology solutions", key: "COMPANY_SPECIFIC_INTEREST" },
+      { label: "Your Contribution Vision", placeholder: "bringing user-centered design to enterprise products", key: "YOUR_CONTRIBUTION_VISION" },
+      { label: "Relevant Expertise", placeholder: "B2B SaaS product management", key: "RELEVANT_EXPERTISE" },
+      { label: "Passion Area", placeholder: "creating intuitive user experiences", key: "PASSION_AREA" },
+      { label: "Value Proposition", placeholder: "drive product adoption and customer satisfaction", key: "VALUE_PROPOSITION" },
+      { label: "90 Day Plan", placeholder: "understanding customer needs and product roadmap priorities", key: "90_DAY_PLAN" },
+      { label: "1 Year Vision", placeholder: "launching 2 major features that increase customer retention by 25%", key: "1_YEAR_VISION" },
+      { label: "Question for Them", placeholder: "the team's biggest product challenges", key: "QUESTION_FOR_THEM" },
+      { label: "Mutual Success", placeholder: "accelerate TechCorp's growth in the enterprise market", key: "MUTUAL_SUCCESS" }
+    ]
+  },
+
+  {
+    id: "crisis-communication",
+    title: "Crisis Communication",
+    description: "Professional crisis response and damage control",
+    category: "Professional",
+    duration: "3-7 min",
+    difficulty: "advanced",
+    icon: <AlertTriangle className="w-5 h-5" />,
+    color: "bg-red-500",
+    tags: ["crisis", "communication", "pr", "emergency"],
+    popularity: 72,
+    contentAdvice: "Lead with accountability and transparency. Focus on solutions and next steps rather than dwelling on problems.",
+    voiceAdvice: "Use calm, measured tone that conveys seriousness and control. Avoid defensive language.",
+    bodyLanguageAdvice: "Maintain composed posture and direct eye contact. Keep gestures minimal and purposeful.",
+    template: `[AUDIENCE_TYPE], thank you for your time.
+
+I want to address [CRISIS_SITUATION] directly and transparently.
+
+First, let me be clear: [ACCOUNTABILITY_STATEMENT].
+
+Here's what happened: [FACTUAL_SUMMARY].
+
+We take full responsibility for [RESPONSIBILITY_SCOPE] and sincerely apologize to [AFFECTED_PARTIES].
+
+Our immediate response has been:
+• [IMMEDIATE_ACTION_1]
+• [IMMEDIATE_ACTION_2] 
+• [IMMEDIATE_ACTION_3]
+
+To prevent this from happening again, we are implementing:
+• [PREVENTION_MEASURE_1]
+• [PREVENTION_MEASURE_2]
+• [PREVENTION_MEASURE_3]
+
+For those affected: [SPECIFIC_REMEDY_OFFER].
+
+Moving forward, we commit to [FUTURE_COMMITMENT].
+
+We will provide updates [UPDATE_FREQUENCY] at [COMMUNICATION_CHANNEL].
+
+I understand this situation has [IMPACT_ACKNOWLEDGMENT]. We are committed to [REBUILDING_TRUST_STATEMENT].
+
+I'm here to answer your questions and will continue to be available as we work through this together.
+
+Thank you.`,
+    prompts: [
+      { label: "Audience Type", placeholder: "customers/stakeholders/media", key: "AUDIENCE_TYPE" },
+      { label: "Crisis Situation", placeholder: "the data security incident from Tuesday", key: "CRISIS_SITUATION" },
+      { label: "Accountability Statement", placeholder: "this should not have happened and we take full responsibility", key: "ACCOUNTABILITY_STATEMENT" },
+      { label: "Factual Summary", placeholder: "unauthorized access was detected in our customer database at 2 PM", key: "FACTUAL_SUMMARY" },
+      { label: "Responsibility Scope", placeholder: "the security vulnerability and delayed response", key: "RESPONSIBILITY_SCOPE" },
+      { label: "Affected Parties", placeholder: "our customers and their trust in us", key: "AFFECTED_PARTIES" },
+      { label: "Immediate Action 1", placeholder: "Secured the breach within 4 hours", key: "IMMEDIATE_ACTION_1" },
+      { label: "Immediate Action 2", placeholder: "Notified all affected customers", key: "IMMEDIATE_ACTION_2" },
+      { label: "Immediate Action 3", placeholder: "Engaged external security experts", key: "IMMEDIATE_ACTION_3" },
+      { label: "Prevention Measure 1", placeholder: "Enhanced encryption protocols", key: "PREVENTION_MEASURE_1" },
+      { label: "Prevention Measure 2", placeholder: "24/7 security monitoring", key: "PREVENTION_MEASURE_2" },
+      { label: "Prevention Measure 3", placeholder: "Monthly security audits", key: "PREVENTION_MEASURE_3" },
+      { label: "Specific Remedy Offer", placeholder: "free credit monitoring and identity protection for one year", key: "SPECIFIC_REMEDY_OFFER" },
+      { label: "Future Commitment", placeholder: "transparency and security as our top priorities", key: "FUTURE_COMMITMENT" },
+      { label: "Update Frequency", placeholder: "weekly", key: "UPDATE_FREQUENCY" },
+      { label: "Communication Channel", placeholder: "our website and email", key: "COMMUNICATION_CHANNEL" },
+      { label: "Impact Acknowledgment", placeholder: "caused stress and concern about your personal information", key: "IMPACT_ACKNOWLEDGMENT" },
+      { label: "Rebuilding Trust Statement", placeholder: "earning back your trust through our actions, not just words", key: "REBUILDING_TRUST_STATEMENT" }
+    ]
+  },
+
+  {
+    id: "training-workshop",
+    title: "Training Workshop Introduction",
+    description: "Engaging workshop opening for skill development sessions",
+    category: "Professional",
+    duration: "5-8 min",
+    difficulty: "intermediate",
+    icon: <BookOpen className="w-5 h-5" />,
+    color: "bg-blue-600",
+    tags: ["training", "workshop", "education", "development"],
+    popularity: 81,
+    contentAdvice: "Set clear learning objectives and create psychological safety for participation. Use interactive elements.",
+    voiceAdvice: "Use engaging, enthusiastic tone with varied pace to maintain energy and attention.",
+    bodyLanguageAdvice: "Move around the space naturally and use gestures to encourage participation.",
+    template: `Welcome everyone to [WORKSHOP_TITLE]!
+
+I'm [YOUR_NAME], [YOUR_CREDENTIALS], and I'm excited to spend the next [DURATION] with you.
+
+Let's start with a quick question: [OPENING_QUESTION]
+
+Great responses! This tells me you're exactly where you need to be.
+
+Here's what we're going to accomplish today:
+• [LEARNING_OBJECTIVE_1]
+• [LEARNING_OBJECTIVE_2] 
+• [LEARNING_OBJECTIVE_3]
+
+By the end of our time together, you'll be able to [MAIN_OUTCOME].
+
+I believe in learning by doing. So we'll use:
+- [ACTIVITY_TYPE_1] to [PURPOSE_1]
+- [ACTIVITY_TYPE_2] to [PURPOSE_2]
+- [ACTIVITY_TYPE_3] to [PURPOSE_3]
+
+A few ground rules for our time together:
+• [GROUND_RULE_1]
+• [GROUND_RULE_2]
+• [GROUND_RULE_3]
+
+[PERSONAL_STORY_INTRO]: [RELEVANT_EXPERIENCE]. This taught me [KEY_LESSON], which is exactly what we'll explore today.
+
+The research shows [SUPPORTING_STATISTIC]. But here's what's really exciting: [PRACTICAL_INSIGHT].
+
+Let's dive in with our first activity: [FIRST_ACTIVITY].
+
+Remember, the goal isn't perfection—it's progress and practice.
+
+Ready? Let's begin!`,
+    prompts: [
+      { label: "Workshop Title", placeholder: "Effective Communication Skills", key: "WORKSHOP_TITLE" },
+      { label: "Your Name", placeholder: "Sarah Thompson", key: "YOUR_NAME" },
+      { label: "Your Credentials", placeholder: "certified communication coach with 10 years experience", key: "YOUR_CREDENTIALS" },
+      { label: "Duration", placeholder: "3 hours", key: "DURATION" },
+      { label: "Opening Question", placeholder: "How many of you have ever felt misunderstood in an important conversation?", key: "OPENING_QUESTION" },
+      { label: "Learning Objective 1", placeholder: "Master active listening techniques", key: "LEARNING_OBJECTIVE_1" },
+      { label: "Learning Objective 2", placeholder: "Practice clear and assertive communication", key: "LEARNING_OBJECTIVE_2" },
+      { label: "Learning Objective 3", placeholder: "Handle difficult conversations with confidence", key: "LEARNING_OBJECTIVE_3" },
+      { label: "Main Outcome", placeholder: "communicate with clarity and confidence in any situation", key: "MAIN_OUTCOME" },
+      { label: "Activity Type 1", placeholder: "Role-playing exercises", key: "ACTIVITY_TYPE_1" },
+      { label: "Purpose 1", placeholder: "practice real-world scenarios", key: "PURPOSE_1" },
+      { label: "Activity Type 2", placeholder: "Partner discussions", key: "ACTIVITY_TYPE_2" },
+      { label: "Purpose 2", placeholder: "build active listening skills", key: "PURPOSE_2" },
+      { label: "Activity Type 3", placeholder: "Reflection journaling", key: "ACTIVITY_TYPE_3" },
+      { label: "Purpose 3", placeholder: "internalize key concepts", key: "PURPOSE_3" },
+      { label: "Ground Rule 1", placeholder: "What's shared here, stays here", key: "GROUND_RULE_1" },
+      { label: "Ground Rule 2", placeholder: "All questions and perspectives are welcome", key: "GROUND_RULE_2" },
+      { label: "Ground Rule 3", placeholder: "Practice with kindness toward yourself and others", key: "GROUND_RULE_3" },
+      { label: "Personal Story Intro", placeholder: "Five years ago, I lost a major client due to a communication breakdown", key: "PERSONAL_STORY_INTRO" },
+      { label: "Relevant Experience", placeholder: "I realized I was talking at them, not with them", key: "RELEVANT_EXPERIENCE" },
+      { label: "Key Lesson", placeholder: "true communication is about connection, not just information", key: "KEY_LESSON" },
+      { label: "Supporting Statistic", placeholder: "93% of communication effectiveness comes from tone and body language", key: "SUPPORTING_STATISTIC" },
+      { label: "Practical Insight", placeholder: "small changes in how we listen can transform relationships", key: "PRACTICAL_INSIGHT" },
+      { label: "First Activity", placeholder: "a listening exercise with a partner", key: "FIRST_ACTIVITY" }
+    ]
+  },
+
+  {
+    id: "sales-presentation",
+    title: "Sales Presentation",
+    description: "Persuasive sales pitch for products or services",
+    category: "Business",
+    duration: "10-20 min",
+    difficulty: "intermediate",
+    icon: <TrendingUp className="w-5 h-5" />,
+    color: "bg-orange-500",
+    tags: ["sales", "persuasion", "revenue", "client"],
+    popularity: 90,
+    contentAdvice: "Focus on customer pain points and demonstrate clear ROI. Use social proof and create urgency.",
+    voiceAdvice: "Build rapport with conversational tone, then increase energy when presenting solutions.",
+    bodyLanguageAdvice: "Use open gestures and lean in during key points. Mirror client's communication style.",
+    template: `[GREETING], [CLIENT_NAME].
+
+Thank you for taking the time to meet with me today. I know time is your most valuable asset.
+
+[RAPPORT_BUILDING_STATEMENT].
+
+I've been thinking about our previous conversation where you mentioned [CLIENT_PAIN_POINT]. I believe I can help you solve that.
+
+Let me ask you: What would it mean to your business if you could [DESIRED_OUTCOME]?
+
+That's exactly what [PRODUCT_SERVICE_NAME] does for companies like yours.
+
+Here's the situation many [CLIENT_INDUSTRY] companies face:
+• [INDUSTRY_CHALLENGE_1]
+• [INDUSTRY_CHALLENGE_2]
+• [INDUSTRY_CHALLENGE_3]
+
+Sound familiar?
+
+[PRODUCT_SERVICE_NAME] is specifically designed to address these challenges. Here's how:
+
+[FEATURE_1] means [BENEFIT_1]. For example, [SPECIFIC_EXAMPLE_1].
+
+[FEATURE_2] results in [BENEFIT_2]. One client saw [SUCCESS_STORY_1].
+
+[FEATURE_3] delivers [BENEFIT_3]. This typically leads to [QUANTIFIABLE_OUTCOME].
+
+Let me show you exactly how this would work for [CLIENT_COMPANY]:
+
+Based on your current [CURRENT_SITUATION], implementing our solution would:
+• [SPECIFIC_BENEFIT_1]: [PROJECTED_RESULT_1]
+• [SPECIFIC_BENEFIT_2]: [PROJECTED_RESULT_2]
+• [SPECIFIC_BENEFIT_3]: [PROJECTED_RESULT_3]
+
+The total ROI for [CLIENT_COMPANY] would be approximately [ROI_PROJECTION] within [TIMEFRAME].
+
+Other companies in [CLIENT_INDUSTRY] are already seeing these results:
+- [SOCIAL_PROOF_1]
+- [SOCIAL_PROOF_2]
+- [SOCIAL_PROOF_3]
+
+I recommend we move forward with [RECOMMENDED_PACKAGE] for [INVESTMENT_AMOUNT].
+
+However, [URGENCY_ELEMENT].
+
+What questions do you have about moving forward?`,
+    prompts: [
+      { label: "Greeting", placeholder: "Good morning/afternoon", key: "GREETING" },
+      { label: "Client Name", placeholder: "Michael", key: "CLIENT_NAME" },
+      { label: "Rapport Building Statement", placeholder: "I noticed your recent expansion into the European market - congratulations", key: "RAPPORT_BUILDING_STATEMENT" },
+      { label: "Client Pain Point", placeholder: "difficulty tracking customer satisfaction across all touchpoints", key: "CLIENT_PAIN_POINT" },
+      { label: "Desired Outcome", placeholder: "predict customer churn before it happens", key: "DESIRED_OUTCOME" },
+      { label: "Product/Service Name", placeholder: "CustomerInsight Pro", key: "PRODUCT_SERVICE_NAME" },
+      { label: "Client Industry", placeholder: "SaaS", key: "CLIENT_INDUSTRY" },
+      { label: "Industry Challenge 1", placeholder: "Customer data scattered across multiple platforms", key: "INDUSTRY_CHALLENGE_1" },
+      { label: "Industry Challenge 2", placeholder: "Reactive rather than proactive customer success", key: "INDUSTRY_CHALLENGE_2" },
+      { label: "Industry Challenge 3", placeholder: "High churn rates in competitive markets", key: "INDUSTRY_CHALLENGE_3" },
+      { label: "Feature 1", placeholder: "Unified customer dashboard", key: "FEATURE_1" },
+      { label: "Benefit 1", placeholder: "complete customer visibility in one place", key: "BENEFIT_1" },
+      { label: "Specific Example 1", placeholder: "see every interaction from first contact to renewal", key: "SPECIFIC_EXAMPLE_1" },
+      { label: "Feature 2", placeholder: "Predictive churn analytics", key: "FEATURE_2" },
+      { label: "Benefit 2", placeholder: "identify at-risk customers 90 days before they churn", key: "BENEFIT_2" },
+      { label: "Success Story 1", placeholder: "TechStart reduced churn by 35% in 6 months", key: "SUCCESS_STORY_1" },
+      { label: "Feature 3", placeholder: "Automated intervention workflows", key: "FEATURE_3" },
+      { label: "Benefit 3", placeholder: "proactive customer success without manual effort", key: "BENEFIT_3" },
+      { label: "Quantifiable Outcome", placeholder: "15-25% reduction in churn rates", key: "QUANTIFIABLE_OUTCOME" },
+      { label: "Client Company", placeholder: "TechCorp", key: "CLIENT_COMPANY" },
+      { label: "Current Situation", placeholder: "2,500 customers and 18% annual churn", key: "CURRENT_SITUATION" },
+      { label: "Specific Benefit 1", placeholder: "Reduced churn from 18% to 12%", key: "SPECIFIC_BENEFIT_1" },
+      { label: "Projected Result 1", placeholder: "$450K additional annual revenue", key: "PROJECTED_RESULT_1" },
+      { label: "Specific Benefit 2", placeholder: "25% improvement in customer satisfaction", key: "SPECIFIC_BENEFIT_2" },
+      { label: "Projected Result 2", placeholder: "increased referrals and expansion revenue", key: "PROJECTED_RESULT_2" },
+      { label: "Specific Benefit 3", placeholder: "50% reduction in manual customer success work", key: "SPECIFIC_BENEFIT_3" },
+      { label: "Projected Result 3", placeholder: "reallocate 2 FTEs to growth initiatives", key: "PROJECTED_RESULT_3" },
+      { label: "ROI Projection", placeholder: "280%", key: "ROI_PROJECTION" },
+      { label: "Timeframe", placeholder: "12 months", key: "TIMEFRAME" },
+      { label: "Social Proof 1", placeholder: "CloudTech: 40% churn reduction in 8 months", key: "SOCIAL_PROOF_1" },
+      { label: "Social Proof 2", placeholder: "DataFlow: $2M additional revenue in year one", key: "SOCIAL_PROOF_2" },
+      { label: "Social Proof 3", placeholder: "StartupLabs: Customer satisfaction increased from 7.2 to 9.1", key: "SOCIAL_PROOF_3" },
+      { label: "Recommended Package", placeholder: "the Professional plan", key: "RECOMMENDED_PACKAGE" },
+      { label: "Investment Amount", placeholder: "$2,500 per month", key: "INVESTMENT_AMOUNT" },
+      { label: "Urgency Element", placeholder: "I can offer a 20% discount if we finalize this by Friday", key: "URGENCY_ELEMENT" }
+    ]
+  },
+
+  // Additional Professional Templates
+  {
+    id: "team-meeting",
+    title: "Team Meeting Leadership",
+    description: "Lead productive team meetings with clear outcomes",
+    category: "Professional",
+    duration: "15-30 min",
+    difficulty: "intermediate",
+    icon: <Users className="w-5 h-5" />,
+    color: "bg-indigo-500",
+    tags: ["meeting", "leadership", "team", "productivity"],
+    popularity: 87,
+    contentAdvice: "Set clear agenda and outcomes. Encourage participation and maintain focus on actionable items.",
+    voiceAdvice: "Use confident, inclusive tone that encourages input from all team members.",
+    bodyLanguageAdvice: "Make eye contact with all participants and use gestures to facilitate discussion.",
+    template: `Good [TIME_OF_DAY], everyone. Thank you for joining today's [MEETING_TYPE].
+
+Before we dive in, let's review our agenda:
+• [AGENDA_ITEM_1] - [TIME_1]
+• [AGENDA_ITEM_2] - [TIME_2] 
+• [AGENDA_ITEM_3] - [TIME_3]
+• Next steps and action items - [TIME_4]
+
+Our goal today is to [MEETING_OBJECTIVE] so we can [DESIRED_OUTCOME].
+
+Let's start with [FIRST_TOPIC]. [CONTEXT_FOR_TOPIC].
+
+[FACILITATING_QUESTION]: What are your thoughts on [SPECIFIC_QUESTION]?
+
+[Pause for discussion]
+
+Great points. Let me summarize what I'm hearing: [SUMMARY_TECHNIQUE].
+
+Moving to [SECOND_TOPIC]: [TOPIC_CONTEXT].
+
+[DECISION_POINT]: We need to decide on [DECISION_NEEDED]. Let's hear options from the group.
+
+Based on our discussion, here are our action items:
+• [ACTION_ITEM_1] - Owner: [OWNER_1] - Due: [DUE_DATE_1]
+• [ACTION_ITEM_2] - Owner: [OWNER_2] - Due: [DUE_DATE_2]
+• [ACTION_ITEM_3] - Owner: [OWNER_3] - Due: [DUE_DATE_3]
+
+Next meeting: [NEXT_MEETING_DATE] to review progress on [FOLLOW_UP_TOPIC].
+
+Questions before we wrap up?
+
+Thank you everyone. Let's make it happen!`,
+    prompts: [
+      { label: "Time of Day", placeholder: "morning/afternoon", key: "TIME_OF_DAY" },
+      { label: "Meeting Type", placeholder: "weekly team sync", key: "MEETING_TYPE" },
+      { label: "Agenda Item 1", placeholder: "Project Alpha update", key: "AGENDA_ITEM_1" },
+      { label: "Time 1", placeholder: "10 min", key: "TIME_1" },
+      { label: "Agenda Item 2", placeholder: "Resource allocation discussion", key: "AGENDA_ITEM_2" },
+      { label: "Time 2", placeholder: "15 min", key: "TIME_2" },
+      { label: "Agenda Item 3", placeholder: "Q3 planning priorities", key: "AGENDA_ITEM_3" },
+      { label: "Time 3", placeholder: "20 min", key: "TIME_3" },
+      { label: "Time 4", placeholder: "5 min", key: "TIME_4" },
+      { label: "Meeting Objective", placeholder: "align on Q3 priorities and resolve resource conflicts", key: "MEETING_OBJECTIVE" },
+      { label: "Desired Outcome", placeholder: "move forward with clear ownership and timelines", key: "DESIRED_OUTCOME" },
+      { label: "First Topic", placeholder: "Project Alpha timeline", key: "FIRST_TOPIC" },
+      { label: "Context for Topic", placeholder: "We're currently 2 weeks behind the original schedule", key: "CONTEXT_FOR_TOPIC" },
+      { label: "Facilitating Question", placeholder: "Before we problem-solve", key: "FACILITATING_QUESTION" },
+      { label: "Specific Question", placeholder: "the biggest blocker to getting back on track", key: "SPECIFIC_QUESTION" },
+      { label: "Summary Technique", placeholder: "the main challenges are timeline pressure and resource constraints", key: "SUMMARY_TECHNIQUE" },
+      { label: "Second Topic", placeholder: "resource reallocation", key: "SECOND_TOPIC" },
+      { label: "Topic Context", placeholder: "Based on Project Alpha's needs", key: "TOPIC_CONTEXT" },
+      { label: "Decision Point", placeholder: "Now for the decision we need to make", key: "DECISION_POINT" },
+      { label: "Decision Needed", placeholder: "whether to bring in temporary contractors", key: "DECISION_NEEDED" },
+      { label: "Action Item 1", placeholder: "Research contractor options and costs", key: "ACTION_ITEM_1" },
+      { label: "Owner 1", placeholder: "Sarah", key: "OWNER_1" },
+      { label: "Due Date 1", placeholder: "Friday", key: "DUE_DATE_1" },
+      { label: "Action Item 2", placeholder: "Revise Project Alpha timeline", key: "ACTION_ITEM_2" },
+      { label: "Owner 2", placeholder: "Mike", key: "OWNER_2" },
+      { label: "Due Date 2", placeholder: "Tuesday", key: "DUE_DATE_2" },
+      { label: "Action Item 3", placeholder: "Communication plan to stakeholders", key: "ACTION_ITEM_3" },
+      { label: "Owner 3", placeholder: "Jenny", key: "OWNER_3" },
+      { label: "Due Date 3", placeholder: "Thursday", key: "DUE_DATE_3" },
+      { label: "Next Meeting Date", placeholder: "next Friday", key: "NEXT_MEETING_DATE" },
+      { label: "Follow Up Topic", placeholder: "Project Alpha progress", key: "FOLLOW_UP_TOPIC" }
+    ]
+  },
+
+  {
+    id: "investor-update",
+    title: "Investor Update",
+    description: "Professional quarterly update for investors",
+    category: "Business",
+    duration: "20-30 min",
+    difficulty: "advanced",
+    icon: <TrendingUp className="w-5 h-5" />,
+    color: "bg-emerald-500",
+    tags: ["investor", "finance", "quarterly", "business"],
+    popularity: 79,
+    contentAdvice: "Lead with key metrics and achievements. Be transparent about challenges and show clear action plans.",
+    voiceAdvice: "Use confident, data-driven delivery with appropriate pauses for emphasis on key metrics.",
+    bodyLanguageAdvice: "Maintain professional posture and use gestures to emphasize growth trends and achievements.",
+    template: `Good [TIME_OF_DAY], everyone. Thank you for joining our [QUARTER] investor update.
+
+I'm excited to share our progress and discuss what's ahead for [COMPANY_NAME].
+
+## Key Highlights This Quarter
+
+We achieved [MAJOR_MILESTONE] and hit [KEY_METRIC_1] - a [PERCENTAGE_GROWTH]% increase from last quarter.
+
+Our revenue was [REVENUE_FIGURE], which puts us [REVENUE_COMPARISON] our projections.
+
+## Financial Performance
+
+• Revenue: [REVENUE_DETAIL]
+• Growth Rate: [GROWTH_RATE_DETAIL] 
+• Cash Position: [CASH_POSITION]
+• Burn Rate: [BURN_RATE] - giving us [RUNWAY] of runway
+
+## Product & Market Progress
+
+This quarter, we [PRODUCT_ACHIEVEMENT]. Our customers are responding well: [CUSTOMER_FEEDBACK].
+
+Market traction highlights:
+• [TRACTION_METRIC_1]
+• [TRACTION_METRIC_2]
+• [TRACTION_METRIC_3]
+
+## Challenges & Learnings
+
+I want to be transparent about [CHALLENGE_FACED]. We addressed this by [SOLUTION_IMPLEMENTED], which resulted in [OUTCOME].
+
+## Looking Ahead
+
+Next quarter, we're focused on [Q_NEXT_PRIORITY_1], [Q_NEXT_PRIORITY_2], and [Q_NEXT_PRIORITY_3].
+
+Our key goals are:
+• [GOAL_1]: [TARGET_1]
+• [GOAL_2]: [TARGET_2]
+• [GOAL_3]: [TARGET_3]
+
+## Funding & Use of Capital
+
+We've deployed [CAPITAL_DEPLOYED] primarily toward [USE_CASE_1] and [USE_CASE_2].
+
+Looking ahead, we anticipate [FUTURE_FUNDING_NEEDS] for [FUNDING_PURPOSE].
+
+## Questions & Discussion
+
+I'm here to answer any questions about our performance, strategy, or outlook.
+
+Thank you for your continued support and partnership.`,
+    prompts: [
+      { label: "Time of Day", placeholder: "morning/afternoon", key: "TIME_OF_DAY" },
+      { label: "Quarter", placeholder: "Q3 2025", key: "QUARTER" },
+      { label: "Company Name", placeholder: "TechCorp", key: "COMPANY_NAME" },
+      { label: "Major Milestone", placeholder: "our 10,000th customer milestone", key: "MAJOR_MILESTONE" },
+      { label: "Key Metric 1", placeholder: "$2.5M in monthly recurring revenue", key: "KEY_METRIC_1" },
+      { label: "Percentage Growth", placeholder: "45", key: "PERCENTAGE_GROWTH" },
+      { label: "Revenue Figure", placeholder: "$7.2M", key: "REVENUE_FIGURE" },
+      { label: "Revenue Comparison", placeholder: "15% above", key: "REVENUE_COMPARISON" },
+      { label: "Revenue Detail", placeholder: "$7.2M (up 45% QoQ)", key: "REVENUE_DETAIL" },
+      { label: "Growth Rate Detail", placeholder: "45% QoQ, 180% YoY", key: "GROWTH_RATE_DETAIL" },
+      { label: "Cash Position", placeholder: "$12M in the bank", key: "CASH_POSITION" },
+      { label: "Burn Rate", placeholder: "$800K monthly", key: "BURN_RATE" },
+      { label: "Runway", placeholder: "15 months", key: "RUNWAY" },
+      { label: "Product Achievement", placeholder: "launched our AI analytics dashboard", key: "PRODUCT_ACHIEVEMENT" },
+      { label: "Customer Feedback", placeholder: "85% report increased productivity within 30 days", key: "CUSTOMER_FEEDBACK" },
+      { label: "Traction Metric 1", placeholder: "Net Revenue Retention: 125%", key: "TRACTION_METRIC_1" },
+      { label: "Traction Metric 2", placeholder: "Customer Acquisition Cost: down 25%", key: "TRACTION_METRIC_2" },
+      { label: "Traction Metric 3", placeholder: "Average Contract Value: up 35%", key: "TRACTION_METRIC_3" },
+      { label: "Challenge Faced", placeholder: "increased churn in our SMB segment", key: "CHALLENGE_FACED" },
+      { label: "Solution Implemented", placeholder: "launching a dedicated success program", key: "SOLUTION_IMPLEMENTED" },
+      { label: "Outcome", placeholder: "reducing SMB churn by 40% in 8 weeks", key: "OUTCOME" },
+      { label: "Q Next Priority 1", placeholder: "expanding into enterprise market", key: "Q_NEXT_PRIORITY_1" },
+      { label: "Q Next Priority 2", placeholder: "launching mobile app", key: "Q_NEXT_PRIORITY_2" },
+      { label: "Q Next Priority 3", placeholder: "international expansion", key: "Q_NEXT_PRIORITY_3" },
+      { label: "Goal 1", placeholder: "Enterprise pipeline", key: "GOAL_1" },
+      { label: "Target 1", placeholder: "$5M in qualified opportunities", key: "TARGET_1" },
+      { label: "Goal 2", placeholder: "Mobile app adoption", key: "GOAL_2" },
+      { label: "Target 2", placeholder: "50% of users on mobile within 60 days", key: "TARGET_2" },
+      { label: "Goal 3", placeholder: "EU market entry", key: "GOAL_3" },
+      { label: "Target 3", placeholder: "First 100 European customers", key: "TARGET_3" },
+      { label: "Capital Deployed", placeholder: "$1.8M this quarter", key: "CAPITAL_DEPLOYED" },
+      { label: "Use Case 1", placeholder: "engineering team expansion", key: "USE_CASE_1" },
+      { label: "Use Case 2", placeholder: "enterprise sales hiring", key: "USE_CASE_2" },
+      { label: "Future Funding Needs", placeholder: "Series B funding in Q1 2026", key: "FUTURE_FUNDING_NEEDS" },
+      { label: "Funding Purpose", placeholder: "accelerating international expansion", key: "FUNDING_PURPOSE" }
+    ]
+  },
+
+  {
+    id: "graduation-speech",
+    title: "Graduation Speech",
+    description: "Inspirational commencement address for graduates",
+    category: "Personal",
+    duration: "10-15 min",
+    difficulty: "intermediate",
+    icon: <Award className="w-5 h-5" />,
+    color: "bg-yellow-500",
+    tags: ["graduation", "inspiration", "achievement", "future"],
+    popularity: 83,
+    contentAdvice: "Balance celebration of achievement with inspiration for the future. Include personal stories and universal truths.",
+    voiceAdvice: "Use inspiring, uplifting tone with strategic pauses for emphasis and applause moments.",
+    bodyLanguageAdvice: "Stand tall with confident posture. Use gestures to connect with the entire audience.",
+    template: `Dean [DEAN_NAME], faculty, proud families, and most importantly, graduating class of [YEAR]!
+
+Today, we celebrate not just your academic achievement, but your journey of growth, discovery, and transformation.
+
+[YEARS_AGO] years ago, you walked through these doors as [DESCRIPTION_OF_ARRIVAL]. Today, you leave as [DESCRIPTION_OF_DEPARTURE].
+
+I want to share a story about [PERSONAL_STORY_INTRO]. [STORY_DETAILS]. This taught me [LESSON_FROM_STORY], and I believe it applies to your journey ahead.
+
+Your education here has given you more than knowledge—it's given you [EDUCATIONAL_VALUE_1], [EDUCATIONAL_VALUE_2], and [EDUCATIONAL_VALUE_3].
+
+But education doesn't end here. In fact, [CONTINUING_EDUCATION_POINT].
+
+As you enter [NEXT_PHASE], you'll face [CHALLENGE_THEY_WILL_FACE]. Remember: [ADVICE_FOR_CHALLENGE].
+
+The world needs what you have to offer. Your generation faces [GLOBAL_CHALLENGE], and you have the tools to [HOW_THEY_CAN_HELP].
+
+I leave you with three pieces of advice:
+
+First: [ADVICE_1]. [ELABORATION_1].
+
+Second: [ADVICE_2]. [ELABORATION_2].
+
+Third: [ADVICE_3]. [ELABORATION_3].
+
+Class of [YEAR], you are ready. You are prepared. You are needed.
+
+Go forth and [CALL_TO_ACTION].
+
+Congratulations, graduates!`,
+    prompts: [
+      { label: "Dean Name", placeholder: "Dr. Johnson", key: "DEAN_NAME" },
+      { label: "Year", placeholder: "2025", key: "YEAR" },
+      { label: "Years Ago", placeholder: "Four", key: "YEARS_AGO" },
+      { label: "Description of Arrival", placeholder: "eager but uncertain freshmen", key: "DESCRIPTION_OF_ARRIVAL" },
+      { label: "Description of Departure", placeholder: "confident leaders ready to change the world", key: "DESCRIPTION_OF_DEPARTURE" },
+      { label: "Personal Story Intro", placeholder: "my first major failure", key: "PERSONAL_STORY_INTRO" },
+      { label: "Story Details", placeholder: "I pitched a business idea that got completely rejected. I was devastated", key: "STORY_DETAILS" },
+      { label: "Lesson from Story", placeholder: "failure isn't the opposite of success—it's the stepping stone to it", key: "LESSON_FROM_STORY" },
+      { label: "Educational Value 1", placeholder: "critical thinking skills", key: "EDUCATIONAL_VALUE_1" },
+      { label: "Educational Value 2", placeholder: "resilience in face of challenges", key: "EDUCATIONAL_VALUE_2" },
+      { label: "Educational Value 3", placeholder: "the ability to collaborate and lead", key: "EDUCATIONAL_VALUE_3" },
+      { label: "Continuing Education Point", placeholder: "the most successful people never stop learning", key: "CONTINUING_EDUCATION_POINT" },
+      { label: "Next Phase", placeholder: "your careers and graduate studies", key: "NEXT_PHASE" },
+      { label: "Challenge They Will Face", placeholder: "setbacks and moments of doubt", key: "CHALLENGE_THEY_WILL_FACE" },
+      { label: "Advice for Challenge", placeholder: "your education has taught you to persist, adapt, and grow", key: "ADVICE_FOR_CHALLENGE" },
+      { label: "Global Challenge", placeholder: "climate change, inequality, and technological disruption", key: "GLOBAL_CHALLENGE" },
+      { label: "How They Can Help", placeholder: "create solutions that previous generations couldn't imagine", key: "HOW_THEY_CAN_HELP" },
+      { label: "Advice 1", placeholder: "Never stop being curious", key: "ADVICE_1" },
+      { label: "Elaboration 1", placeholder: "The moment you think you know everything is the moment you stop growing", key: "ELABORATION_1" },
+      { label: "Advice 2", placeholder: "Build bridges, not walls", key: "ADVICE_2" },
+      { label: "Elaboration 2", placeholder: "Our greatest challenges require collaboration across differences", key: "ELABORATION_2" },
+      { label: "Advice 3", placeholder: "Define success for yourself", key: "ADVICE_3" },
+      { label: "Elaboration 3", placeholder: "Don't let others' expectations overshadow your own values and dreams", key: "ELABORATION_3" },
+      { label: "Call to Action", placeholder: "make your mark on the world", key: "CALL_TO_ACTION" }
     ]
   }
 ];
