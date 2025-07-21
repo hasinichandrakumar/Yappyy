@@ -93,10 +93,10 @@ export default function Dashboard() {
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => window.location.href = '/api/auth/logout'}
-                title="Logout"
+                onClick={() => window.location.href = '/'}
+                title="Return to Home"
               >
-                Logout
+                Home
               </Button>
             </div>
           </div>

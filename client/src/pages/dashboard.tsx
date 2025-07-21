@@ -4,7 +4,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Mic, BarChart3, Brain, FileText, Trophy, Target, User, LogOut, Settings, Shield } from "lucide-react";
+import { Mic, BarChart3, Brain, FileText, Trophy, Target, User, Home, Settings, Shield } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import SimplifiedPracticePage from "@/components/SimplifiedPracticePage";
 import AICoachRedesigned from "@/components/AICoachRedesigned";
@@ -25,8 +25,8 @@ export default function Dashboard() {
   const [showPrivacy, setShowPrivacy] = useState(false);
   const { user } = useAuth();
 
-  const handleLogout = () => {
-    window.location.href = "/api/auth/logout";
+  const handleHomeRedirect = () => {
+    window.location.href = "/";
   };
 
   const handleProfileClick = () => {
@@ -100,9 +100,9 @@ export default function Dashboard() {
                       <span>Privacy</span>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="cursor-pointer text-red-600" onClick={handleLogout}>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Log out</span>
+                    <DropdownMenuItem className="cursor-pointer" onClick={() => window.location.href = '/'}>
+                      <Home className="mr-2 h-4 w-4" />
+                      <span>Home</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

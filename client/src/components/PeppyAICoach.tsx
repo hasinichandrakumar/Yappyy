@@ -10,7 +10,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { 
   Brain, TrendingUp, Target, Sparkles, Heart, 
   Award, MessageCircle, BarChart3, Zap, Star,
-  ChevronRight, Play, Pause, Volume2, Mic, LogIn, LogOut, User
+  ChevronRight, Play, Pause, Volume2, Mic, LogIn, Home, User
 } from 'lucide-react';
 import { SiGoogle } from 'react-icons/si';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -437,11 +437,11 @@ export default function PeppyAICoach() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => window.location.href = '/api/auth/logout'}
+                  onClick={() => window.location.href = '/'}
                   className="flex items-center gap-2 border-gray-300 hover:bg-gray-50"
                 >
-                  <LogOut className="w-4 h-4" />
-                  Sign Out
+                  <Home className="w-4 h-4" />
+                  Home
                 </Button>
                 {user.id === 'demo-user-123' && (
                   <Button

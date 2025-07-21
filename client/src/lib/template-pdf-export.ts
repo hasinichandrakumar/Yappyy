@@ -1,4 +1,4 @@
-// Template PDF Export System with Modern Styling
+// Professional Template PDF Export System with Yappyy Branding
 import { jsPDF } from 'jspdf';
 
 export interface TemplateData {
@@ -21,326 +21,258 @@ export class TemplatePDFExportService {
   private margin: number = 20;
   private currentY: number = 20;
   private colors = {
-    primary: [99, 102, 241], // Yappyy Indigo
-    secondary: [139, 92, 246], // Yappyy Purple  
-    accent: [59, 130, 246], // Yappyy Blue
-    success: [34, 197, 94], // Emerald
-    warning: [251, 146, 60], // Orange
-    text: [15, 23, 42], // Slate 900
-    mutedText: [71, 85, 105], // Slate 600
-    lightGray: [248, 250, 252], // Light background
-    white: [255, 255, 255],
+    // Yappyy Brand Colors
+    yappyyPurple: [139, 92, 246] as [number, number, number], // Main Yappyy Purple
+    yappyyBlue: [59, 130, 246] as [number, number, number], // Yappyy Blue accent
+    yappyyIndigo: [99, 102, 241] as [number, number, number], // Yappyy Indigo
+    
+    // Status Colors
+    success: [34, 197, 94] as [number, number, number], // Emerald for success
+    warning: [251, 146, 60] as [number, number, number], // Orange for warning
+    info: [14, 165, 233] as [number, number, number], // Sky blue for info
+    
+    // Text Colors
+    text: [15, 23, 42] as [number, number, number], // Slate 900 - main text
+    mutedText: [71, 85, 105] as [number, number, number], // Slate 600 - secondary text
+    lightText: [148, 163, 184] as [number, number, number], // Slate 400 - light text
+    
+    // Background Colors
+    white: [255, 255, 255] as [number, number, number],
+    lightGray: [248, 250, 252] as [number, number, number], // Slate 50
+    cardBg: [241, 245, 249] as [number, number, number], // Slate 100
   };
 
   constructor() {
     this.pdf = new jsPDF('p', 'mm', 'a4');
-    this.setupModernStyling();
+    this.setupProfessionalStyling();
   }
 
-  private setupModernStyling(): void {
-    // Use consistent font styling that matches the website
+  private setupProfessionalStyling(): void {
+    // Use professional font styling that matches Yappyy brand
     this.pdf.setFont('helvetica', 'normal');
-    this.pdf.setFontSize(11);
-    this.pdf.setTextColor(15, 23, 42); // Slate 900 - matches website text
+    this.pdf.setFontSize(10);
+    this.pdf.setTextColor(...this.colors.text); // Professional dark text
   }
 
-  async generateTemplateReport(template: TemplateData): Promise<void> {
-    this.resetDocument();
+  public async generateTemplateReport(templateData: TemplateData): Promise<void> {
+    console.log('🎨 Generating professional Yappyy PDF for template:', templateData.title);
     
-    // Modern header
-    this.addModernHeader(template);
-    this.currentY = 50;
-    
-    // Template overview section
-    this.addTemplateOverview(template);
-    this.currentY += 25;
-    
-    // Template content section
-    this.addTemplateContent(template);
-    this.currentY += 20;
-    
-    // Coaching advice sections
-    this.addCoachingAdvice(template);
-    
-    // Footer
-    this.addModernFooter();
+    try {
+      this.currentY = this.margin;
+      
+      // Professional Yappyy header with purple branding
+      this.addProfessionalHeader(templateData.title);
+      
+      // Template overview with aligned cards
+      this.addAlignedTemplateOverview(templateData);
+      
+      // Content sections with proper spacing
+      this.addProfessionalContentSection(templateData);
+      
+      // Coaching advice with visual hierarchy
+      this.addVisualCoachingAdvice(templateData);
+      
+      // Professional footer with Yappyy branding
+      this.addYappyyFooter();
+      
+      console.log('✅ Professional PDF generation completed successfully');
+    } catch (error) {
+      console.error('❌ PDF generation failed:', error);
+      throw error;
+    }
   }
 
-  private resetDocument(): void {
-    this.pdf = new jsPDF('p', 'mm', 'a4');
-    this.currentY = 20;
-    this.pageHeight = this.pdf.internal.pageSize.height;
-    this.pageWidth = this.pdf.internal.pageSize.width;
-    this.setupModernStyling();
-  }
-
-  private addModernHeader(template: TemplateData): void {
-    // Modern gradient header matching website design
-    this.pdf.setFillColor(99, 102, 241); // Primary indigo
-    this.pdf.rect(0, 0, this.pageWidth, 40, 'F');
+  private addProfessionalHeader(title: string): void {
+    const headerHeight = 50;
     
-    // Add subtle gradient effect
-    this.pdf.setFillColor(139, 92, 246, 0.3); // Violet overlay
-    this.pdf.rect(0, 0, this.pageWidth, 40, 'F');
+    // Purple gradient header background
+    this.pdf.setFillColor(...this.colors.yappyyPurple);
+    this.pdf.rect(0, 0, this.pageWidth, headerHeight, 'F');
     
-    // Yappyy brand with modern styling
-    this.pdf.setFontSize(32);
+    // Yappyy logo/brand text
+    this.pdf.setFontSize(28);
     this.pdf.setFont('helvetica', 'bold');
-    this.pdf.setTextColor(255, 255, 255);
-    this.pdf.text('Yappyy', 20, 25);
+    this.pdf.setTextColor(...this.colors.white);
+    this.pdf.text('Yappyy', this.margin, 25);
     
-    // Subtitle with better spacing
-    this.pdf.setFontSize(12);
+    // Subtitle
+    this.pdf.setFontSize(14);
     this.pdf.setFont('helvetica', 'normal');
-    this.pdf.setTextColor(241, 245, 249); // Light text
-    this.pdf.text('Speech Template Guide', 20, 32);
+    this.pdf.text('Speech Template Guide', this.margin, 35);
     
-    // Template title on the right with better alignment
-    this.pdf.setFontSize(11);
+    // Template title on the right
+    this.pdf.setFontSize(16);
     this.pdf.setFont('helvetica', 'bold');
-    this.pdf.setTextColor(255, 255, 255);
-    const maxWidth = 80; // Maximum width for text
-    const lines = this.pdf.splitTextToSize(template.title, maxWidth);
+    const titleWidth = this.pdf.getTextWidth(title);
+    this.pdf.text(title, this.pageWidth - this.margin - titleWidth, 30);
     
-    // Position based on number of lines
-    const startY = lines.length > 1 ? 18 : 22;
-    lines.forEach((line: string, index: number) => {
-      this.pdf.text(line, this.pageWidth - 20, startY + (index * 6), { align: 'right' });
-    });
+    this.currentY = headerHeight + 20;
   }
 
-  private addTemplateOverview(template: TemplateData): void {
+  private addAlignedTemplateOverview(templateData: TemplateData): void {
     // Section title
     this.pdf.setFontSize(18);
     this.pdf.setFont('helvetica', 'bold');
-    this.pdf.setTextColor(...this.colors.primary);
-    this.pdf.text('Template Overview', 20, this.currentY);
-    
+    this.pdf.setTextColor(...this.colors.yappyyPurple);
+    this.pdf.text('Template Overview', this.margin, this.currentY);
     this.currentY += 15;
     
-    // Create overview cards in a grid
-    const cardWidth = (this.pageWidth - 50) / 2;
+    // Card dimensions and positioning
+    const cardWidth = (this.pageWidth - this.margin * 2 - 10) / 2; // Two columns with gap
     const cardHeight = 25;
+    const gap = 10;
     
-    // Left column - Basic info
-    this.addInfoCard('Category', template.category, 20, this.currentY, cardWidth, cardHeight, this.colors.accent);
-    this.addInfoCard('Duration', template.duration, 20, this.currentY + 30, cardWidth, cardHeight, this.colors.success);
+    // Row 1: Category and Difficulty
+    this.addInfoCard('Category', templateData.category, this.margin, this.currentY, cardWidth, cardHeight, this.colors.yappyyBlue);
+    this.addInfoCard('Difficulty', templateData.difficulty, this.margin + cardWidth + gap, this.currentY, cardWidth, cardHeight, this.colors.warning);
+    this.currentY += cardHeight + 10;
     
-    // Right column - Additional info
-    this.addInfoCard('Difficulty', template.difficulty, 20 + cardWidth + 10, this.currentY, cardWidth, cardHeight, this.colors.warning);
+    // Row 2: Duration and Description
+    this.addInfoCard('Duration', templateData.duration, this.margin, this.currentY, cardWidth, cardHeight, this.colors.success);
+    this.addInfoCard('Description', templateData.description || 'Professional speech template', this.margin + cardWidth + gap, this.currentY, cardWidth, cardHeight, this.colors.yappyyPurple);
+    this.currentY += cardHeight + 15;
     
-    // Description if available
-    if (template.description) {
-      this.addInfoCard('Description', template.description, 20 + cardWidth + 10, this.currentY + 30, cardWidth, cardHeight, this.colors.secondary);
-    }
-    
-    // Tags if available
-    if (template.tags && template.tags.length > 0) {
-      this.currentY += 70;
+    // Tags section
+    if (templateData.tags && templateData.tags.length > 0) {
       this.pdf.setFontSize(12);
       this.pdf.setFont('helvetica', 'bold');
-      this.pdf.setTextColor(...this.colors.mutedText);
-      this.pdf.text('Tags:', 20, this.currentY);
+      this.pdf.setTextColor(...this.colors.text);
+      this.pdf.text('Tags:', this.margin, this.currentY);
       
       this.pdf.setFont('helvetica', 'normal');
-      this.pdf.setTextColor(...this.colors.text);
-      this.pdf.text(template.tags.join(' • '), 45, this.currentY);
-    } else {
-      this.currentY += 45;
+      this.pdf.setTextColor(...this.colors.mutedText);
+      const tagsText = templateData.tags.join(' • ');
+      this.pdf.text(tagsText, this.margin + 25, this.currentY);
+      this.currentY += 20;
     }
   }
 
-  private addInfoCard(label: string, value: string, x: number, y: number, width: number, height: number, color: number[]): void {
-    // Card shadow
-    this.pdf.setFillColor(0, 0, 0, 0.1);
-    this.pdf.roundedRect(x + 1, y + 1, width, height, 3, 3, 'F');
-    
+  private addInfoCard(label: string, value: string, x: number, y: number, width: number, height: number, color: [number, number, number]): void {
     // Card background
-    this.pdf.setFillColor(...this.colors.white);
-    this.pdf.setDrawColor(...color);
-    this.pdf.setLineWidth(1);
-    this.pdf.roundedRect(x, y, width, height, 3, 3, 'FD');
+    this.pdf.setFillColor(...this.colors.cardBg);
+    this.pdf.rect(x, y, width, height, 'F');
     
-    // Colored top bar
+    // Colored left border
     this.pdf.setFillColor(...color);
-    this.pdf.roundedRect(x, y, width, 4, 3, 3, 'F');
-    this.pdf.rect(x, y + 4, width, height - 4, 'F');
-    this.pdf.setFillColor(...this.colors.white);
-    this.pdf.rect(x, y + 4, width, height - 4, 'F');
+    this.pdf.rect(x, y, 3, height, 'F');
     
-    // Label
+    // Card content
     this.pdf.setFontSize(10);
-    this.pdf.setFont('helvetica', 'bold');
+    this.pdf.setFont('helvetica', 'normal');
     this.pdf.setTextColor(...this.colors.mutedText);
-    this.pdf.text(label, x + 8, y + 12);
+    this.pdf.text(label, x + 8, y + 8);
     
-    // Value
     this.pdf.setFontSize(12);
     this.pdf.setFont('helvetica', 'bold');
     this.pdf.setTextColor(...color);
-    
-    // Handle long text by splitting if necessary
-    const maxWidth = width - 16;
-    const lines = this.pdf.splitTextToSize(value, maxWidth);
-    if (lines.length > 1) {
-      this.pdf.setFontSize(10);
-    }
-    this.pdf.text(lines[0], x + 8, y + 20);
+    this.pdf.text(value, x + 8, y + 18);
   }
 
-  private addTemplateContent(template: TemplateData): void {
-    this.checkPageBreak(40);
-    
-    // Section title
-    this.pdf.setFontSize(18);
+  private addProfessionalContentSection(templateData: TemplateData): void {
+    // Content section header
+    this.pdf.setFontSize(16);
     this.pdf.setFont('helvetica', 'bold');
-    this.pdf.setTextColor(...this.colors.primary);
-    this.pdf.text('Template Script', 20, this.currentY);
-    
-    this.currentY += 15;
-    
-    // Content background
-    const contentHeight = Math.max(60, this.getTextHeight(template.content, this.pageWidth - 50));
-    this.pdf.setFillColor(...this.colors.lightGray);
-    this.pdf.setDrawColor(203, 213, 225);
-    this.pdf.setLineWidth(1);
-    this.pdf.roundedRect(20, this.currentY, this.pageWidth - 40, contentHeight, 4, 4, 'FD');
-    
-    // Content text
-    this.pdf.setFontSize(11);
-    this.pdf.setFont('helvetica', 'normal');
-    this.pdf.setTextColor(...this.colors.text);
-    
-    const lines = this.pdf.splitTextToSize(template.content, this.pageWidth - 50);
-    let textY = this.currentY + 8;
-    
-    lines.forEach((line: string) => {
-      if (textY > this.pageHeight - 40) {
-        this.pdf.addPage();
-        textY = 20;
-      }
-      this.pdf.text(line, 25, textY);
-      textY += 5;
-    });
-    
-    this.currentY += contentHeight + 5;
-  }
-
-  private addCoachingAdvice(template: TemplateData): void {
-    this.checkPageBreak(80);
-    
-    // Section title
-    this.pdf.setFontSize(18);
-    this.pdf.setFont('helvetica', 'bold');
-    this.pdf.setTextColor(...this.colors.primary);
-    this.pdf.text('Professional Coaching Advice', 20, this.currentY);
-    
-    this.currentY += 15;
-    
-    // Content advice
-    this.addAdviceSection('Content Structure', template.contentAdvice, this.colors.accent);
-    this.currentY += 5;
-    
-    // Voice advice
-    this.addAdviceSection('Voice Modulation', template.voiceAdvice, this.colors.success);
-    this.currentY += 5;
-    
-    // Body language advice
-    this.addAdviceSection('Body Language', template.bodyLanguageAdvice, this.colors.warning);
-  }
-
-  private addAdviceSection(title: string, advice: string, color: number[]): void {
-    this.checkPageBreak(25);
-    
-    // Section header with icon
-    this.pdf.setFillColor(...color);
-    this.pdf.roundedRect(20, this.currentY, this.pageWidth - 40, 8, 2, 2, 'F');
-    
-    this.pdf.setFontSize(12);
-    this.pdf.setFont('helvetica', 'bold');
-    this.pdf.setTextColor(...this.colors.white);
-    this.pdf.text(title, 25, this.currentY + 6);
-    
+    this.pdf.setTextColor(...this.colors.yappyyPurple);
+    this.pdf.text('Template Content', this.margin, this.currentY);
     this.currentY += 12;
     
-    // Advice content
-    const adviceHeight = Math.max(15, this.getTextHeight(advice, this.pageWidth - 50));
-    this.pdf.setFillColor(255, 255, 255);
-    this.pdf.setDrawColor(...color);
-    this.pdf.setLineWidth(1);
-    this.pdf.roundedRect(20, this.currentY, this.pageWidth - 40, adviceHeight, 2, 2, 'FD');
+    // Content box
+    const contentStartY = this.currentY;
+    const contentWidth = this.pageWidth - this.margin * 2;
     
+    // Background for content
+    this.pdf.setFillColor(...this.colors.lightGray);
+    this.pdf.rect(this.margin, this.currentY, contentWidth, 60, 'F');
+    
+    // Content text
     this.pdf.setFontSize(10);
     this.pdf.setFont('helvetica', 'normal');
     this.pdf.setTextColor(...this.colors.text);
     
-    const lines = this.pdf.splitTextToSize(advice, this.pageWidth - 50);
-    let textY = this.currentY + 6;
+    const contentLines = this.pdf.splitTextToSize(templateData.content, contentWidth - 10);
+    this.pdf.text(contentLines, this.margin + 5, this.currentY + 8);
     
-    lines.forEach((line: string) => {
-      this.pdf.text(line, 25, textY);
-      textY += 4;
-    });
-    
-    this.currentY += adviceHeight + 8;
+    this.currentY += 70;
   }
 
-  private getTextHeight(text: string, maxWidth: number): number {
-    const lines = this.pdf.splitTextToSize(text, maxWidth);
-    return lines.length * 4 + 8; // 4mm per line + padding
-  }
-
-  private checkPageBreak(requiredSpace: number): void {
-    if (this.currentY + requiredSpace > this.pageHeight - 40) {
-      this.pdf.addPage();
-      this.currentY = 20;
-    }
-  }
-
-  private addModernFooter(): void {
-    // Position footer at bottom
-    this.currentY = this.pageHeight - 30;
+  private addVisualCoachingAdvice(templateData: TemplateData): void {
+    // Coaching advice header
+    this.pdf.setFontSize(16);
+    this.pdf.setFont('helvetica', 'bold');
+    this.pdf.setTextColor(...this.colors.yappyyPurple);
+    this.pdf.text('Coaching Advice', this.margin, this.currentY);
+    this.currentY += 15;
     
-    // Modern footer background
+    const adviceWidth = this.pageWidth - this.margin * 2;
+    const adviceHeight = 30;
+    
+    // Content Advice
+    this.addAdviceSection('Content Strategy', templateData.contentAdvice, this.colors.info, adviceWidth, adviceHeight);
+    
+    // Voice Advice
+    this.addAdviceSection('Voice Coaching', templateData.voiceAdvice, this.colors.success, adviceWidth, adviceHeight);
+    
+    // Body Language Advice
+    this.addAdviceSection('Body Language', templateData.bodyLanguageAdvice, this.colors.warning, adviceWidth, adviceHeight);
+  }
+
+  private addAdviceSection(title: string, advice: string, color: [number, number, number], width: number, height: number): void {
+    // Advice card background
+    this.pdf.setFillColor(...this.colors.white);
+    this.pdf.rect(this.margin, this.currentY, width, height, 'F');
+    
+    // Colored top border
+    this.pdf.setFillColor(...color);
+    this.pdf.rect(this.margin, this.currentY, width, 2, 'F');
+    
+    // Section title
+    this.pdf.setFontSize(12);
+    this.pdf.setFont('helvetica', 'bold');
+    this.pdf.setTextColor(...color);
+    this.pdf.text(title, this.margin + 5, this.currentY + 12);
+    
+    // Advice text
+    this.pdf.setFontSize(10);
+    this.pdf.setFont('helvetica', 'normal');
+    this.pdf.setTextColor(...this.colors.text);
+    
+    const adviceLines = this.pdf.splitTextToSize(advice, width - 10);
+    this.pdf.text(adviceLines, this.margin + 5, this.currentY + 22);
+    
+    this.currentY += height + 8;
+  }
+
+  private addYappyyFooter(): void {
+    const footerY = this.pageHeight - 30;
+    
+    // Footer background
     this.pdf.setFillColor(...this.colors.lightGray);
-    this.pdf.rect(0, this.currentY - 5, this.pageWidth, 25, 'F');
+    this.pdf.rect(0, footerY, this.pageWidth, 30, 'F');
     
-    // Accent line
-    this.pdf.setFillColor(...this.colors.primary);
-    this.pdf.rect(0, this.currentY - 5, this.pageWidth, 2, 'F');
+    // Yappyy branding
+    this.pdf.setFontSize(12);
+    this.pdf.setFont('helvetica', 'bold');
+    this.pdf.setTextColor(...this.colors.yappyyPurple);
+    this.pdf.text('Powered by Yappyy', this.margin, footerY + 15);
     
-    this.currentY += 5;
-    
-    // Footer content with better typography
-    this.pdf.setFontSize(9);
+    // Date and website
+    const currentDate = new Date().toLocaleDateString();
+    this.pdf.setFontSize(10);
     this.pdf.setFont('helvetica', 'normal');
     this.pdf.setTextColor(...this.colors.mutedText);
-    this.pdf.text('Generated by Yappyy AI Speech Coach Platform', 20, this.currentY);
-    
-    // Timestamp with better formatting
-    const now = new Date();
-    const timestamp = `${now.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric', 
-      year: 'numeric' 
-    })} • ${now.toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    })}`;
-    
-    this.pdf.text(timestamp, this.pageWidth - 20, this.currentY, { align: 'right' });
+    this.pdf.text(`Generated: ${currentDate}`, this.margin, footerY + 25);
     
     // Website URL
-    this.pdf.setFontSize(8);
-    this.pdf.setTextColor(100, 116, 139); // More muted
-    this.pdf.text('www.yappyy.ai', this.pageWidth - 20, this.currentY + 6, { align: 'right' });
+    const websiteText = 'yappyy.com - AI-Powered Speech Coaching';
+    const websiteWidth = this.pdf.getTextWidth(websiteText);
+    this.pdf.text(websiteText, this.pageWidth - this.margin - websiteWidth, footerY + 25);
   }
 
-  async downloadPDF(filename: string): Promise<void> {
+  public async downloadPDF(filename: string): Promise<void> {
     this.pdf.save(filename);
   }
 
-  getPDFBlob(): Blob {
+  public getPDFBlob(): Blob {
     return this.pdf.output('blob');
   }
 }

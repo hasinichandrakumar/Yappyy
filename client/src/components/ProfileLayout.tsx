@@ -68,9 +68,9 @@ export default function ProfileLayout({ children }: ProfileLayoutProps) {
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => window.location.href = '/api/auth/logout'}
+                onClick={() => window.location.href = '/'}
               >
-                Logout
+                Home
               </Button>
             </div>
           </div>
