@@ -150,7 +150,7 @@ export async function sendMagicLinkEmail(email: string, token: string): Promise<
 
       const msg = {
         to: email,
-        from: 'test@example.com', // SendGrid test sender
+        from: 'your-verified-email@domain.com', // Replace with your verified SendGrid sender
         subject: 'Sign in to Yappyy - Your Magic Link',
         html: `
           <div style="font-family: 'Poppins', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
