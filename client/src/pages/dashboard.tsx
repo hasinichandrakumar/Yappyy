@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Mic, BarChart3, Brain, FileText, Trophy, Target, User, LogOut, Settings, Shield } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import SimplifiedPracticePage from "@/components/SimplifiedPracticePage";
-import PeppyAICoachRedesigned from "@/components/PeppyAICoachRedesigned";
+import AICoachRedesigned from "@/components/AICoachRedesigned";
 import PersonalizedSpeechDNA from "@/components/PersonalizedSpeechDNA";
 import Enhanced50PlusTemplates from "@/components/Enhanced50PlusTemplates";
 import ImprovedBadgeSystem from "@/components/ImprovedBadgeSystem";
@@ -161,7 +161,7 @@ export default function Dashboard() {
           </TabsContent>
 
           <TabsContent value="ai-coach" className="space-y-6">
-            <PeppyAICoachRedesigned />
+            <AICoachRedesigned />
           </TabsContent>
 
           <TabsContent value="templates" className="space-y-6">

@@ -19,8 +19,8 @@ import { apiRequest } from '@/lib/queryClient';
 import { useQuery } from '@tanstack/react-query';
 import { useNeuralAnalysis, useUserProgress } from '@/hooks/useGraphQLQuery';
 
-// Enhanced Peppy Parrot Component with Multiple Moods
-const PeppyParrot = ({ 
+// Enhanced AI Coach Avatar Component with Multiple Moods
+const AICoachAvatar = ({ 
   mood = 'happy', 
   size = 'large',
   isAnimated = true 
@@ -65,7 +65,7 @@ const PeppyParrot = ({
         }}
       />
       
-      {/* Peppy Canvas */}
+      {/* AI Coach Canvas */}
       <canvas
         ref={canvasRef}
         className={`${sizeClasses[size]} relative z-10 drop-shadow-lg`}
@@ -487,12 +487,12 @@ const FirstTimeUserNotification = ({ onDismiss, onPersonalize }: { onDismiss: ()
   </motion.div>
 );
 
-export default function PeppyAICoachRedesigned() {
+export default function AICoachRedesigned() {
   const { user } = useAuth();
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Hi! I'm Peppy, your deep learning AI speech coach! 🧠 I continuously learn from your practice sessions to provide hyperpersonalized feedback on voice modulation, body language, and content structure based on your specific purpose and goals. What would you like to work on today?",
+      text: "Hello! I'm your advanced AI speech coach powered by deep learning. I continuously learn from your practice sessions to provide personalized feedback on voice modulation, body language, and content structure based on your specific purpose and goals. What would you like to work on today?",
       isUser: false,
       timestamp: new Date().toLocaleTimeString()
     }
@@ -586,7 +586,7 @@ export default function PeppyAICoachRedesigned() {
       const sessions = await practiceResponse.json();
       
       // Send message with practice data context for deep learning analysis
-      const response = await apiRequest('/api/peppy-conversation', {
+      const response = await apiRequest('/api/ai-coach-conversation', {
         method: 'POST',
         body: JSON.stringify({
           message: inputMessage,
@@ -741,8 +741,8 @@ export default function PeppyAICoachRedesigned() {
                   
                   {isTyping && (
                     <div className="flex items-center gap-3 text-gray-500 text-sm py-4">
-                      <PeppyParrot mood="thinking" size="small" />
-                      <span>Peppy is analyzing your patterns...</span>
+                      <AICoachAvatar mood="thinking" size="small" />
+                      <span>AI Coach is analyzing your patterns...</span>
                       <motion.div
                         className="flex gap-1"
                         initial={{ opacity: 0.5 }}

@@ -543,7 +543,7 @@ CRITICAL: Evaluate how well this speech achieved its stated PURPOSE. Analyze the
       
       // Enhanced vocal filler detection with improved probability
       // This simulates more realistic detection patterns
-      const audioPresent = req.body || req.files;
+      const audioPresent = req.body;
       const hasAudioData = audioPresent && Object.keys(audioPresent).length > 0;
       
       // Increased detection probability when audio data is present
@@ -1436,11 +1436,11 @@ Respond with JSON: {"additionalInsights": ["insight1", "insight2", "insight3"], 
     }
   });
   
-  // Enhanced Peppy Deep Learning AI Coach API with Session Integration
-  app.post("/api/peppy-deep-learning-analysis", demoAuth, peppyDeepLearningAnalysis);
+  // Enhanced AI Coach Deep Learning Analysis API with Session Integration
+  app.post("/api/ai-coach-deep-learning-analysis", demoAuth, peppyDeepLearningAnalysis);
   
-  // Enhanced Peppy Conversation endpoint with Neural Analysis
-  app.post('/api/peppy-conversation', demoAuth, async (req: any, res) => {
+  // Enhanced AI Coach Conversation endpoint with Neural Analysis
+  app.post('/api/ai-coach-conversation', demoAuth, async (req: any, res) => {
     try {
       const { message, currentGoal, sessionData, analysisContext } = req.body;
       const userId = req.user?.id || req.user?.claims?.sub || 'demo-user';
@@ -1484,7 +1484,7 @@ Respond with JSON: {"additionalInsights": ["insight1", "insight2", "insight3"], 
           messages: [
             {
               role: 'system',
-              content: `You are Peppy, a deep learning AI speech coach that continuously learns from user practice sessions. 
+              content: `You are an advanced AI speech coach powered by deep learning that continuously learns from user practice sessions. 
 
 NEURAL NETWORK CONTEXT:
 - Total Sessions Analyzed: ${conversationContext.neuralAnalysis.sessionsAnalyzed}
@@ -1524,7 +1524,7 @@ RESPONSE FORMAT: Provide conversational coaching followed by specific neural ana
         throw new Error('OpenAI API request failed');
       }
     } catch (error) {
-      console.error('Enhanced Peppy conversation error:', error);
+      console.error('Enhanced AI coach conversation error:', error);
       res.status(500).json({ error: 'Failed to process neural conversation' });
     }
   });
@@ -2384,7 +2384,7 @@ Respond with detailed analysis in JSON format:
   
   // Performance monitoring endpoint
   app.get("/api/performance-metrics", (req, res) => {
-    const metrics = processingEngine.getOverallPerformance();
+    const metrics = processingEngine.getPerformanceMetrics();
     res.json({ success: true, metrics });
   });
 
@@ -2839,7 +2839,7 @@ Respond with detailed analysis in JSON format:
 
   // Enhanced video frame analysis with Roboflow
   app.post('/api/roboflow/analyze-frame', async (req, res) => {
-    await analyzeVideoFrame(req, res);
+    await roboflowAnalyzeFrame(req, res);
   });
 
   // Train custom Roboflow model for specialized analysis
@@ -2943,7 +2943,7 @@ Respond with detailed analysis in JSON format:
       res.status(500).json({ 
         success: false,
         error: 'Body language analysis failed',
-        message: error.message 
+        message: error instanceof Error ? error.message : 'Unknown error' 
       });
     }
   });
