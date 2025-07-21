@@ -20,7 +20,7 @@ import {
   updateUserSpeakingProfile 
 } from "./world-class-ai-coach";
 import { analyzeContent } from "./ai-content-analysis";
-import { analyzeVideoFrame, analyzePosture, analyzeEyeContact } from "./openai-realtime-vision";
+import { analyzePosture, analyzeEyeContact } from "./openai-realtime-vision";
 import { transcribeWithAnalytics } from "./deepgram-speech";
 import { processMultiModalAnalysis } from "./advanced-ai-orchestrator";
 import { analyzeVoiceQuality, analyzeFillerWords, generateVoiceCoaching } from "./advanced-voice-engine";
@@ -37,7 +37,7 @@ import { enhancedVoiceSynthesis } from "./enhanced-voice-synthesis";
 import { webrtcIntegration } from "./webrtc-integration";
 import { advancedComputerVision } from "./advanced-computer-vision";
 import { enhancedNeuralPipeline } from "./enhanced-neural-pipeline";
-import { roboflowVision, analyzeVideoFrame, trainCustomVisionModel } from './roboflow-computer-vision';
+import { roboflowVision, analyzeVideoFrame as roboflowAnalyzeFrame, trainCustomVisionModel } from './roboflow-computer-vision';
 import { graphqlHTTP } from 'express-graphql';
 import neuralGraphQL from './graphql-schema';
 
@@ -45,7 +45,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const server = createServer(app);
   
   // Initialize Enhanced Real-Time Processing Engine
-  const processingEngine = new RealTimeProcessingEngine(server);
+  const processingEngine = new RealTimeProcessingEngine();
   
   // Setup Google Authentication first (primary auth system)
   await setupGoogleAuth(app);
@@ -685,7 +685,7 @@ CRITICAL: Evaluate how well this speech achieved its stated PURPOSE. Analyze the
       // Analyze single-word fillers
       const fillerCounts: { [key: string]: { count: number; positions: number[] } } = {};
       
-      words.forEach((word, index) => {
+      words.forEach((word: string, index: number) => {
         // Clean word by removing punctuation and converting to lowercase
         const cleanWord = word.toLowerCase().replace(/[.,!?;:'"()[\]]/g, '');
         
@@ -1594,8 +1594,8 @@ RESPONSE FORMAT: Provide conversational coaching followed by specific neural ana
       
       const context = {
         voiceModulation: sessions.length > 0 ? sessions.reduce((sum, s) => sum + (s.voiceClarity || 0), 0) / sessions.length : 0,
-        bodyLanguage: sessions.length > 0 ? sessions.reduce((sum, s) => sum + (s.gestureScore || 0), 0) / sessions.length : 0,
-        contentStructure: sessions.length > 0 ? sessions.reduce((sum, s) => sum + (s.coherenceScore || 75), 0) / sessions.length : 75,
+        bodyLanguage: sessions.length > 0 ? sessions.reduce((sum, s) => sum + (s.postureScore || 0), 0) / sessions.length : 0,
+        contentStructure: sessions.length > 0 ? sessions.reduce((sum, s) => sum + (s.confidenceScore || 0), 0) / sessions.length : 0,
         totalSessions: sessions.length,
         recentPerformance: sessions.slice(-6)
       };
@@ -1975,7 +1975,7 @@ Return only the improved content, maintaining the same format with [brackets] fo
   app.post('/api/openai/session-insights', demoAuth, generateSessionInsights);
 
   // OpenAI Realtime Vision Analysis
-  app.post("/api/vision/analyze-frame", demoAuth, analyzeVideoFrame);
+  app.post("/api/vision/analyze-frame", demoAuth, roboflowAnalyzeFrame);
   app.post("/api/vision/analyze-posture", demoAuth, analyzePosture);
   app.post("/api/vision/analyze-eye-contact", demoAuth, analyzeEyeContact);
 

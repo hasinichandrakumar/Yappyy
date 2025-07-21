@@ -124,42 +124,8 @@ export default function NewPracticeDashboard() {
   };
 
   const startLiveAnalysis = () => {
-    // Simulate live speech analysis
-    const analysisInterval = setInterval(() => {
-      if (!isRecording) {
-        clearInterval(analysisInterval);
-        return;
-      }
-
-      // Update live metrics with more accurate simulation
-      setLiveMetrics(prev => ({
-        ...prev,
-        volume: Math.random() * 100,
-        clarity: 70 + Math.random() * 30,
-        pace: 140 + Math.random() * 40, // WPM
-        wordsSpoken: prev.wordsSpoken + Math.floor(Math.random() * 3),
-        fillerWords: prev.fillerWords + (Math.random() < 0.1 ? 1 : 0)
-      }));
-
-      // Generate live feedback
-      if (Math.random() < 0.3) {
-        const feedbackTypes = [
-          { type: 'voice', feedback: 'Good pace - keep it steady', severity: 'success' },
-          { type: 'content', feedback: 'Strong opening statement', severity: 'success' },
-          { type: 'body_language', feedback: 'Maintain eye contact with camera', severity: 'warning' },
-          { type: 'voice_modulation', feedback: 'Vary your tone for emphasis', severity: 'info' }
-        ];
-        
-        const randomFeedback = feedbackTypes[Math.floor(Math.random() * feedbackTypes.length)];
-        setLiveFeedback(prev => [...prev, {
-          id: Date.now().toString(),
-          timestamp: prev.length > 0 ? prev[prev.length - 1].timestamp + Math.random() * 30 : 0,
-          type: randomFeedback.type as any,
-          feedback: randomFeedback.feedback,
-          severity: randomFeedback.severity as any
-        }]);
-      }
-    }, 2000);
+    // Remove simulated analysis - only use real AI feedback when available
+    console.log('Live analysis started - waiting for real AI feedback');
   };
 
   const generatePostSessionAnalysis = async () => {

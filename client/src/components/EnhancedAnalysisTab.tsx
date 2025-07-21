@@ -321,10 +321,7 @@ export default function EnhancedAnalysisTab() {
                             if (clarity > 0 && clarity <= 1) {
                               clarity = clarity * 100;
                             }
-                            // If still 0, use transcript-based fallback
-                            if (clarity === 0 && s.transcript && s.transcript.length > 50) {
-                              clarity = 75;
-                            }
+                            // Only use real data - no fallback values
                             return sum + clarity;
                           }, 0);
                           return Math.round(total / sessionCount);
@@ -343,9 +340,7 @@ export default function EnhancedAnalysisTab() {
                                 if (clarity > 0 && clarity <= 1) {
                                   clarity = clarity * 100;
                                 }
-                                if (clarity === 0 && s.transcript && s.transcript.length > 50) {
-                                  clarity = 75;
-                                }
+                                // Only use real data - no fallback values
                                 return sum + clarity;
                               }, 0);
                               return Math.round(total / sessionCount);
@@ -433,9 +428,7 @@ export default function EnhancedAnalysisTab() {
                           if (volume > 0 && volume <= 1) {
                             volume = volume * 100;
                           }
-                          if (volume === 0 && s.duration && s.duration > 60) {
-                            volume = 70;
-                          }
+                          // No fallback - only use real data
                           return sum + volume;
                         }, 0);
                         return Math.round(total / sessionCount);
@@ -461,12 +454,7 @@ export default function EnhancedAnalysisTab() {
                             if (intonation > 0 && intonation <= 1) {
                               intonation = intonation * 100;
                             }
-                            // If still 0, use session-based fallback
-                            if (intonation === 0 && s.averageWPM && s.averageWPM > 120) {
-                              intonation = 68;
-                            } else if (intonation === 0 && s.transcript && s.transcript.length > 100) {
-                              intonation = 65;
-                            }
+                            // No fallback - only use real data
                             return sum + intonation;
                           }, 0);
                           return Math.round(total / sessionCount);
@@ -485,11 +473,7 @@ export default function EnhancedAnalysisTab() {
                                 if (intonation > 0 && intonation <= 1) {
                                   intonation = intonation * 100;
                                 }
-                                if (intonation === 0 && s.averageWPM && s.averageWPM > 120) {
-                                  intonation = 68;
-                                } else if (intonation === 0 && s.transcript && s.transcript.length > 100) {
-                                  intonation = 65;
-                                }
+                                // No fallback - only use real data
                                 return sum + intonation;
                               }, 0);
                               return Math.round(total / sessionCount);
@@ -507,11 +491,7 @@ export default function EnhancedAnalysisTab() {
                           if (intonation > 0 && intonation <= 1) {
                             intonation = intonation * 100;
                           }
-                          if (intonation === 0 && s.averageWPM && s.averageWPM > 120) {
-                            intonation = 68;
-                          } else if (intonation === 0 && s.transcript && s.transcript.length > 100) {
-                            intonation = 65;
-                          }
+                          // No fallback - only use real data
                           return sum + intonation;
                         }, 0);
                         return Math.round(total / sessionCount);
@@ -707,9 +687,16 @@ export default function EnhancedAnalysisTab() {
                     </div>
                     <div className="text-sm text-blue-600 mb-3">Engagement Level</div>
                     <Progress value={(() => {
-                      const total = filteredSessions.reduce((sum: number, s: any) => sum + (s.eyeContactScore || 75), 0);
-                      const average = sessionCount > 0 ? total / sessionCount : 75;
-                      return Math.round(isNaN(average) ? 75 : average);
+                      const total = filteredSessions.reduce((sum: number, s: any) => {
+                        let score = s.eyeContactScore || 0;
+                        // Convert string to number if needed
+                        if (typeof score === 'string') score = parseFloat(score);
+                        // Convert decimal to percentage if needed
+                        if (score > 0 && score <= 1) score = score * 100;
+                        return sum + score;
+                      }, 0);
+                      const average = sessionCount > 0 ? total / sessionCount : 0;
+                      return Math.round(isNaN(average) ? 0 : average);
                     })()} className="h-2 bg-blue-200" />
                     <div className="text-xs text-blue-700 mt-2">Good eye contact maintained</div>
                   </div>
@@ -724,16 +711,16 @@ export default function EnhancedAnalysisTab() {
                   <div className="text-center">
                     <div className="text-4xl font-bold text-emerald-800 mb-2">
                       {(() => {
-                        const total = filteredSessions.reduce((sum: number, s: any) => sum + (s.postureScore || 80), 0);
-                        const average = sessionCount > 0 ? total / sessionCount : 80;
-                        return Math.round(isNaN(average) ? 80 : average);
+                        const total = filteredSessions.reduce((sum: number, s: any) => sum + (s.postureScore || 0), 0);
+                        const average = sessionCount > 0 ? total / sessionCount : 0;
+                        return Math.round(isNaN(average) ? 0 : average);
                       })()}%
                     </div>
                     <div className="text-sm text-emerald-600 mb-3">Confidence Score</div>
                     <Progress value={(() => {
-                      const total = filteredSessions.reduce((sum: number, s: any) => sum + (s.postureScore || 80), 0);
-                      const average = sessionCount > 0 ? total / sessionCount : 80;
-                      return Math.round(isNaN(average) ? 80 : average);
+                      const total = filteredSessions.reduce((sum: number, s: any) => sum + (s.postureScore || 0), 0);
+                      const average = sessionCount > 0 ? total / sessionCount : 0;
+                      return Math.round(isNaN(average) ? 0 : average);
                     })()} className="h-2 bg-emerald-200" />
                     <div className="text-xs text-emerald-700 mt-2">Strong, confident stance</div>
                   </div>
@@ -748,16 +735,16 @@ export default function EnhancedAnalysisTab() {
                   <div className="text-center">
                     <div className="text-4xl font-bold text-purple-800 mb-2">
                       {(() => {
-                        const total = filteredSessions.reduce((sum: number, s: any) => sum + (s.gestureScore || 78), 0);
-                        const average = sessionCount > 0 ? total / sessionCount : 78;
-                        return Math.round(isNaN(average) ? 78 : average);
+                        const total = filteredSessions.reduce((sum: number, s: any) => sum + (s.gestureScore || 0), 0);
+                        const average = sessionCount > 0 ? total / sessionCount : 0;
+                        return Math.round(isNaN(average) ? 0 : average);
                       })()}%
                     </div>
                     <div className="text-sm text-purple-600 mb-3">Natural Movement</div>
                     <Progress value={(() => {
-                      const total = filteredSessions.reduce((sum: number, s: any) => sum + (s.gestureScore || 78), 0);
-                      const average = sessionCount > 0 ? total / sessionCount : 78;
-                      return Math.round(isNaN(average) ? 78 : average);
+                      const total = filteredSessions.reduce((sum: number, s: any) => sum + (s.gestureScore || 0), 0);
+                      const average = sessionCount > 0 ? total / sessionCount : 0;
+                      return Math.round(isNaN(average) ? 0 : average);
                     })()} className="h-2 bg-purple-200" />
                     <div className="text-xs text-purple-700 mt-2">Good use of hand gestures</div>
                   </div>
@@ -776,10 +763,10 @@ export default function EnhancedAnalysisTab() {
                           if (s.facialAnalysis?.emotionalExpression?.confidence) {
                             return sum + s.facialAnalysis.emotionalExpression.confidence;
                           }
-                          return sum + 82; // Default facial expression score
+                          return sum + 0; // Only use real facial analysis data
                         }, 0);
-                        const average = sessionCount > 0 ? total / sessionCount : 82;
-                        return Math.round(isNaN(average) ? 82 : average);
+                        const average = sessionCount > 0 ? total / sessionCount : 0;
+                        return Math.round(isNaN(average) ? 0 : average);
                       })()}%
                     </div>
                     <div className="text-sm text-pink-600 mb-3">Emotional Expression</div>
@@ -788,10 +775,10 @@ export default function EnhancedAnalysisTab() {
                         if (s.facialAnalysis?.emotionalExpression?.confidence) {
                           return sum + s.facialAnalysis.emotionalExpression.confidence;
                         }
-                        return sum + 82;
+                        return sum + 0;
                       }, 0);
-                      const average = sessionCount > 0 ? total / sessionCount : 82;
-                      return Math.round(isNaN(average) ? 82 : average);
+                      const average = sessionCount > 0 ? total / sessionCount : 0;
+                      return Math.round(isNaN(average) ? 0 : average);
                     })()} className="h-2 bg-pink-200" />
                     <div className="text-xs text-pink-700 mt-2">Authentic emotional display</div>
                   </div>
@@ -810,10 +797,10 @@ export default function EnhancedAnalysisTab() {
                           if (s.facialAnalysis?.microExpressions?.facialSymmetry) {
                             return sum + s.facialAnalysis.microExpressions.facialSymmetry;
                           }
-                          return sum + 79; // Default micro-expression score
+                          return sum + 0; // Only use real facial analysis data
                         }, 0);
-                        const average = sessionCount > 0 ? total / sessionCount : 79;
-                        return Math.round(isNaN(average) ? 79 : average);
+                        const average = sessionCount > 0 ? total / sessionCount : 0;
+                        return Math.round(isNaN(average) ? 0 : average);
                       })()}%
                     </div>
                     <div className="text-sm text-orange-600 mb-3">Facial Symmetry</div>
@@ -822,10 +809,10 @@ export default function EnhancedAnalysisTab() {
                         if (s.facialAnalysis?.microExpressions?.facialSymmetry) {
                           return sum + s.facialAnalysis.microExpressions.facialSymmetry;
                         }
-                        return sum + 79;
+                        return sum + 0;
                       }, 0);
-                      const average = sessionCount > 0 ? total / sessionCount : 79;
-                      return Math.round(isNaN(average) ? 79 : average);
+                      const average = sessionCount > 0 ? total / sessionCount : 0;
+                      return Math.round(isNaN(average) ? 0 : average);
                     })()} className="h-2 bg-orange-200" />
                     <div className="text-xs text-orange-700 mt-2">Natural expression control</div>
                   </div>
@@ -844,10 +831,10 @@ export default function EnhancedAnalysisTab() {
                           if (s.facialAnalysis?.overallPresence?.charisma) {
                             return sum + s.facialAnalysis.overallPresence.charisma;
                           }
-                          return sum + 84; // Default presence score
+                          return sum + 0; // Only use real presence analysis data
                         }, 0);
-                        const average = sessionCount > 0 ? total / sessionCount : 84;
-                        return Math.round(isNaN(average) ? 84 : average);
+                        const average = sessionCount > 0 ? total / sessionCount : 0;
+                        return Math.round(isNaN(average) ? 0 : average);
                       })()}%
                     </div>
                     <div className="text-sm text-indigo-600 mb-3">Professional Charisma</div>
@@ -856,10 +843,10 @@ export default function EnhancedAnalysisTab() {
                         if (s.facialAnalysis?.overallPresence?.charisma) {
                           return sum + s.facialAnalysis.overallPresence.charisma;
                         }
-                        return sum + 84;
+                        return sum + 0;
                       }, 0);
-                      const average = sessionCount > 0 ? total / sessionCount : 84;
-                      return Math.round(isNaN(average) ? 84 : average);
+                      const average = sessionCount > 0 ? total / sessionCount : 0;
+                      return Math.round(isNaN(average) ? 0 : average);
                     })()} className="h-2 bg-indigo-200" />
                     <div className="text-xs text-indigo-700 mt-2">Strong audience connection</div>
                   </div>
@@ -886,19 +873,19 @@ export default function EnhancedAnalysisTab() {
                             <div className="flex justify-between text-sm">
                               <span>Confidence</span>
                               <span className="font-medium">
-                                {sessionWithFacialData.facialAnalysis?.emotionalExpression?.confidence || 85}%
+                                {sessionWithFacialData.facialAnalysis?.emotionalExpression?.confidence || 0}%
                               </span>
                             </div>
                             <div className="flex justify-between text-sm">
                               <span>Engagement</span>
                               <span className="font-medium">
-                                {sessionWithFacialData.facialAnalysis?.emotionalExpression?.engagement || 82}%
+                                {sessionWithFacialData.facialAnalysis?.emotionalExpression?.engagement || 0}%
                               </span>
                             </div>
                             <div className="flex justify-between text-sm">
                               <span>Authenticity</span>
                               <span className="font-medium">
-                                {sessionWithFacialData.facialAnalysis?.emotionalExpression?.authenticity || 87}%
+                                {sessionWithFacialData.facialAnalysis?.emotionalExpression?.authenticity || 0}%
                               </span>
                             </div>
                           </div>
@@ -911,19 +898,19 @@ export default function EnhancedAnalysisTab() {
                             <div className="flex justify-between text-sm">
                               <span>Eye Contact Quality</span>
                               <span className="font-medium">
-                                {sessionWithFacialData.facialAnalysis?.communicationSignals?.eyeContactQuality || 83}%
+                                {sessionWithFacialData.facialAnalysis?.communicationSignals?.eyeContactQuality || 0}%
                               </span>
                             </div>
                             <div className="flex justify-between text-sm">
                               <span>Gaze Focus</span>
                               <span className="font-medium">
-                                {sessionWithFacialData.facialAnalysis?.communicationSignals?.gazeFocus || 80}%
+                                {sessionWithFacialData.facialAnalysis?.communicationSignals?.gazeFocus || 0}%
                               </span>
                             </div>
                             <div className="flex justify-between text-sm">
                               <span>Facial Stability</span>
                               <span className="font-medium">
-                                {sessionWithFacialData.facialAnalysis?.communicationSignals?.facialStability || 84}%
+                                {sessionWithFacialData.facialAnalysis?.communicationSignals?.facialStability || 0}%
                               </span>
                             </div>
                           </div>
@@ -936,19 +923,19 @@ export default function EnhancedAnalysisTab() {
                             <div className="flex justify-between text-sm">
                               <span>Eye Movement</span>
                               <span className="font-medium">
-                                {sessionWithFacialData.facialAnalysis?.microExpressions?.eyeMovement || 78}%
+                                {sessionWithFacialData.facialAnalysis?.microExpressions?.eyeMovement || 0}%
                               </span>
                             </div>
                             <div className="flex justify-between text-sm">
                               <span>Facial Symmetry</span>
                               <span className="font-medium">
-                                {sessionWithFacialData.facialAnalysis?.microExpressions?.facialSymmetry || 81}%
+                                {sessionWithFacialData.facialAnalysis?.microExpressions?.facialSymmetry || 0}%
                               </span>
                             </div>
                             <div className="flex justify-between text-sm">
                               <span>Expression Quality</span>
                               <span className="font-medium">
-                                {sessionWithFacialData.facialAnalysis?.microExpressions?.mouthExpression || 86}%
+                                {sessionWithFacialData.facialAnalysis?.microExpressions?.mouthExpression || 0}%
                               </span>
                             </div>
                           </div>
@@ -961,19 +948,19 @@ export default function EnhancedAnalysisTab() {
                             <div className="flex justify-between text-sm">
                               <span>Charisma</span>
                               <span className="font-medium">
-                                {sessionWithFacialData.facialAnalysis?.overallPresence?.charisma || 84}%
+                                {sessionWithFacialData.facialAnalysis?.overallPresence?.charisma || 0}%
                               </span>
                             </div>
                             <div className="flex justify-between text-sm">
                               <span>Trustworthiness</span>
                               <span className="font-medium">
-                                {sessionWithFacialData.facialAnalysis?.overallPresence?.trustworthiness || 88}%
+                                {sessionWithFacialData.facialAnalysis?.overallPresence?.trustworthiness || 0}%
                               </span>
                             </div>
                             <div className="flex justify-between text-sm">
                               <span>Professionalism</span>
                               <span className="font-medium">
-                                {sessionWithFacialData.facialAnalysis?.overallPresence?.professionalism || 90}%
+                                {sessionWithFacialData.facialAnalysis?.overallPresence?.professionalism || 0}%
                               </span>
                             </div>
                           </div>

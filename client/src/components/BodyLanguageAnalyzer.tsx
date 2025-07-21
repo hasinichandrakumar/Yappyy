@@ -59,66 +59,39 @@ interface Session {
 export default function BodyLanguageAnalyzer() {
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [isAnalyzingSession, setIsAnalyzingSession] = useState(false);
-  const [metrics, setMetrics] = useState<BodyLanguageMetrics>({
-    eyeContactDuration: 65,
-    eyeContactFrequency: 72,
-    gazeDirection: "Forward-focused",
-    blinkRate: 18,
-    facialExpression: "Confident",
-    headMovement: 68,
-    shoulderPosition: "Slightly tense",
-    armGestures: 45,
-    handPosition: "Clasped in front",
-    stanceStability: 82,
-    weightShifting: 35,
-    footPosition: "Shoulder-width apart",
-    overallPresence: 74,
-    energyLevel: "Moderate",
-    proximityToAudience: "Appropriate",
-    confidenceSignals: 78,
-    gestureVariety: 85,
-    facialEngagement: 82,
-    postureAlignment: 76,
-    movementPurpose: 88
-  });
-
-  const [postureBreakdown, setPostureBreakdown] = useState<PostureBreakdown>({
-    spinalCurvature: 78,
-    shoulderAlignment: 85,
-    hipAlignment: 80,
-    headTilt: 72,
-    chestOpenness: 68
-  });
+  const [metrics, setMetrics] = useState<BodyLanguageMetrics | null>(null);
+  const [postureBreakdown, setPostureBreakdown] = useState<PostureBreakdown | null>(null);
 
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [currentFrame, setCurrentFrame] = useState<string | null>(null);
 
-  // Simulate real-time body language analysis
+  // Load body language data from selected session only when session is available
   useEffect(() => {
-    const interval = setInterval(() => {
-      setMetrics(prev => ({
-        ...prev,
-        eyeContactDuration: Math.max(40, Math.min(95, prev.eyeContactDuration + (Math.random() - 0.5) * 10)),
-        eyeContactFrequency: Math.max(40, Math.min(95, prev.eyeContactFrequency + (Math.random() - 0.5) * 8)),
-        blinkRate: Math.max(12, Math.min(25, prev.blinkRate + (Math.random() - 0.5) * 2)),
-        headMovement: Math.max(30, Math.min(90, prev.headMovement + (Math.random() - 0.5) * 12)),
-        armGestures: Math.max(20, Math.min(90, prev.armGestures + (Math.random() - 0.5) * 15)),
-        stanceStability: Math.max(60, Math.min(95, prev.stanceStability + (Math.random() - 0.5) * 6)),
-        weightShifting: Math.max(20, Math.min(80, prev.weightShifting + (Math.random() - 0.5) * 10)),
-        overallPresence: Math.max(50, Math.min(95, prev.overallPresence + (Math.random() - 0.5) * 8))
-      }));
+    if (selectedSession) {
+      loadSessionBodyLanguageData();
+    }
+  }, [selectedSession]);
 
-      setPostureBreakdown(prev => ({
-        spinalCurvature: Math.max(60, Math.min(95, prev.spinalCurvature + (Math.random() - 0.5) * 6)),
-        shoulderAlignment: Math.max(60, Math.min(95, prev.shoulderAlignment + (Math.random() - 0.5) * 5)),
-        hipAlignment: Math.max(60, Math.min(95, prev.hipAlignment + (Math.random() - 0.5) * 4)),
-        headTilt: Math.max(60, Math.min(95, prev.headTilt + (Math.random() - 0.5) * 7)),
-        chestOpenness: Math.max(50, Math.min(95, prev.chestOpenness + (Math.random() - 0.5) * 8))
-      }));
-    }, 4000);
-
-    return () => clearInterval(interval);
-  }, []);
+  const loadSessionBodyLanguageData = async () => {
+    if (!selectedSession) return;
+    
+    setIsAnalyzingSession(true);
+    try {
+      // Fetch actual session data - only display if real data exists
+      const response = await apiRequest(`/api/sessions/${selectedSession.id}/body-language`);
+      if (response && response.bodyLanguageData) {
+        setMetrics(response.bodyLanguageData.metrics);
+        setPostureBreakdown(response.bodyLanguageData.postureBreakdown);
+      }
+    } catch (error) {
+      console.error('Failed to load body language data:', error);
+      // Do not show any data if loading fails
+      setMetrics(null);
+      setPostureBreakdown(null);
+    } finally {
+      setIsAnalyzingSession(false);
+    }
+  };
 
   const analyzeCurrentPosture = async () => {
     setIsAnalyzing(true);
@@ -219,29 +192,48 @@ export default function BodyLanguageAnalyzer() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center">
-              <div className={`text-2xl font-bold ${getScoreColor(metrics.overallPresence)}`}>
-                {Math.round(metrics.overallPresence)}%
-              </div>
-              <div className="text-sm text-gray-600">Overall Presence</div>
+          {!selectedSession ? (
+            <div className="text-center py-8">
+              <Users className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+              <p className="text-gray-600">Select a practice session above to view body language analysis</p>
             </div>
-            <div className="text-center">
-              <div className="text-lg font-semibold text-cyan-600">
-                {metrics.energyLevel}
-              </div>
-              <div className="text-sm text-gray-600">Energy Level</div>
+          ) : isAnalyzingSession ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading body language data...</p>
             </div>
-            <div className="text-center">
-              <div className="text-lg font-semibold text-cyan-600">
-                {metrics.proximityToAudience}
-              </div>
-              <div className="text-sm text-gray-600">Audience Distance</div>
+          ) : !metrics ? (
+            <div className="text-center py-8">
+              <AlertCircle className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+              <p className="text-gray-600">No body language data available for this session</p>
+              <p className="text-sm text-gray-500 mt-2">Body language analysis requires computer vision during recording</p>
             </div>
-          </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="text-center">
+                <div className={`text-2xl font-bold ${getScoreColor(metrics.overallPresence)}`}>
+                  {Math.round(metrics.overallPresence)}%
+                </div>
+                <div className="text-sm text-gray-600">Overall Presence</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-semibold text-cyan-600">
+                  {metrics.energyLevel}
+                </div>
+                <div className="text-sm text-gray-600">Energy Level</div>
+              </div>
+              <div className="text-center">
+                <div className="text-lg font-semibold text-cyan-600">
+                  {metrics.proximityToAudience}
+                </div>
+                <div className="text-sm text-gray-600">Audience Distance</div>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
+      {metrics && (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Eye Contact & Facial Analysis */}
         <Card className="bg-surface rounded-xl shadow-sm border border-gray-200">
@@ -392,7 +384,7 @@ export default function BodyLanguageAnalyzer() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {Object.entries(postureBreakdown).map(([key, value]) => {
+            {postureBreakdown ? Object.entries(postureBreakdown).map(([key, value]) => {
               const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
               return (
                 <div key={key} className="space-y-2">
@@ -415,8 +407,13 @@ export default function BodyLanguageAnalyzer() {
                   )}
                 </div>
               );
-            })}
+            }) : (
+              <div className="text-center py-4">
+                <p className="text-gray-600">No posture data available</p>
+              </div>
+            )}
 
+            {postureBreakdown && (
             <div className="mt-4 p-3 bg-blue-50 rounded-lg">
               <div className="flex items-center space-x-2">
                 <TrendingUp className="w-4 h-4 text-blue-600" />
@@ -426,9 +423,12 @@ export default function BodyLanguageAnalyzer() {
                 Imagine a string pulling you up from the crown of your head. This helps align your entire spine naturally.
               </p>
             </div>
+            )}
           </CardContent>
         </Card>
       </div>
+      </div>
+      )}
     </div>
   );
 }
