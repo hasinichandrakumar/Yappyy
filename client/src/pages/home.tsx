@@ -95,7 +95,7 @@ export default function HomePage() {
                     padding: 0,
                     margin: 0
                   }}
-                  src="https://www.canva.com/design/DAGt0NLsNxI/V0IlLnjC67dT6N1qhI9hJw/watch?embed=access_restricted" 
+                  src="https://www.canva.com/design/DAGt0v149NM/JGXYXZdwDCnyhrYrwPJ78A/watch?embed" 
                   allowFullScreen 
                   allow="fullscreen"
                   title="Yappyy UI Demo"
@@ -103,12 +103,12 @@ export default function HomePage() {
               </div>
               <div className="text-center mt-4">
                 <a 
-                  href="https://www.canva.com/design/DAGt0NLsNxI/V0IlLnjC67dT6N1qhI9hJw/watch?utm_content=DAGt0NLsNxI&utm_campaign=designshare&utm_medium=embeds&utm_source=link" 
+                  href="https://www.canva.com/design/DAGt0v149NM/JGXYXZdwDCnyhrYrwPJ78A/watch?utm_content=DAGt0v149NM&utm_campaign=designshare&utm_medium=embeds&utm_source=link" 
                   target="_blank" 
                   rel="noopener"
                   className="text-blue-600 hover:text-blue-800 font-medium text-sm"
                 >
-                  Yappyy UI
+                  Yappyy UI Demo
                 </a>
                 <span className="text-gray-500 text-sm"> by Hasini Chandrakumar</span>
               </div>
