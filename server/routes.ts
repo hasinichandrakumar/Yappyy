@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { RealTimeSessionManager } from "./redis-realtime";
 import { insertPracticeSessionSchema, insertCoachingFeedbackSchema, insertCustomTemplateSchema } from "@shared/schema";
-import { setupGoogleAuth, requireAuth } from "./googleAuth";
+import { setupMagicLinkAuth, requireAuth } from "./auth-magic-link-routes";
 import { setupDemoAuth, demoAuth } from "./demo-auth";
 import { generateClubCoaching } from "./ai-coaching";
 import { 
@@ -49,8 +49,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize Enhanced Real-Time Processing Engine
   const processingEngine = new RealTimeProcessingEngine();
   
-  // Setup Google Authentication first (primary auth system)
-  await setupGoogleAuth(app);
+  // Setup Magic Link Authentication (primary auth system)
+  await setupMagicLinkAuth(app);
   
   // Setup Demo Authentication (fallback for development)
   setupDemoAuth(app);

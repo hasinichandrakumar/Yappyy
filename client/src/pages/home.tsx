@@ -2,8 +2,8 @@ import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Mic, Video, Trophy, Target, BarChart3, Users, ArrowRight, CheckCircle, Brain, Zap, Cpu, Eye } from 'lucide-react';
-import { SiGoogle } from 'react-icons/si';
 import { useAuth } from '@/hooks/useAuth';
+import MagicLinkLogin from '@/components/MagicLinkLogin';
 import yappyyLogoPath from '@assets/Untitled_design-11600-removebg-preview_1749744306540.png';
 
 export default function HomePage() {
@@ -27,12 +27,11 @@ export default function HomePage() {
                   </Button>
                 </Link>
               ) : (
-                <Button
-                  onClick={() => window.location.href = '/api/auth/google'}
-                  className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white font-button shadow-lg hover:shadow-xl transition-all duration-300 px-6 py-2"
-                >
-                  Sign In
-                </Button>
+                <Link href="/login">
+                  <Button className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white font-button shadow-lg hover:shadow-xl transition-all duration-300 px-6 py-2">
+                    Sign In
+                  </Button>
+                </Link>
               )}
             </div>
           </div>
@@ -68,18 +67,15 @@ export default function HomePage() {
                   </Button>
                 </Link>
               ) : (
-                <div className="flex flex-col gap-4 items-center">
+                <Link href="/login">
                   <Button
                     size="lg"
-                    onClick={() => window.location.href = '/api/auth/google'}
                     className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white font-button shadow-lg hover:shadow-xl transition-all duration-300 px-8 py-4 text-lg"
                   >
-                    Start Learning Here
+                    Start Learning Now
+                    <Mic className="ml-2 h-5 w-5" />
                   </Button>
-                  <p className="text-sm text-gray-500 text-center">
-                    Free to use • Save your progress • Personalized coaching
-                  </p>
-                </div>
+                </Link>
               )}
             </div>
           </div>

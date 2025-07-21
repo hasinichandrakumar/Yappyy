@@ -9,7 +9,7 @@ import Home from "@/pages/home";
 import Dashboard from "@/pages/dashboard";
 import UserProfile from "@/components/UserProfile";
 import LogoExport from "@/pages/logo-export";
-import LoginPage from "@/components/LoginPage";
+import LoginPage from "@/pages/login";
 import NotFound from "@/pages/not-found";
 import ClubsHub from "@/components/ClubsHub";
 

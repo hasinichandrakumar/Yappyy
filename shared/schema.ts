@@ -2,7 +2,7 @@ import { pgTable, text, serial, integer, boolean, timestamp, real, varchar, json
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// Session storage table for Google Auth
+// Session storage table
 export const sessions = pgTable(
   "sessions",
   {
@@ -13,7 +13,17 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
-// User storage table for Google Auth
+// Magic link authentication table
+export const magicLinks = pgTable("magic_links", {
+  id: serial("id").primaryKey(),
+  email: varchar("email").notNull(),
+  token: varchar("token").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  usedAt: timestamp("used_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// User storage table
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().notNull(),
   email: varchar("email").unique(),
