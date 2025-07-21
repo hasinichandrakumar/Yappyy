@@ -9,13 +9,22 @@ import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   Mic, Square, Edit3, Save, Eye, 
-  Activity, TrendingUp, FileText, Users
+  Activity, TrendingUp, FileText, Users,
+  Video, Play, Pause, RotateCcw, Download,
+  Library, Camera
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { SessionDataViewer } from '@/components/SessionDataViewer';
 import { useRoboflowVision } from '@/hooks/useRoboflowVision';
 import { useFacialAnalysis } from '@/hooks/useFacialAnalysis';
 import SessionAnalysisPage from './SessionAnalysisPage';
+import VideoPlaybackViewer from './VideoPlaybackViewer';
+import RecordingLibrary from './RecordingLibrary';
+import { 
+  videoRecordingManager, 
+  sessionRecordingStorage, 
+  VideoRecordingData 
+} from '@/lib/video-recording';
 
 interface SimplifiedMetrics {
   eyeContact: number;
@@ -64,6 +73,12 @@ export default function SimplifiedPracticePage() {
   const [transcript, setTranscript] = useState<string>('');
   const [interimTranscript, setInterimTranscript] = useState<string>('');
   const [showLiveTranscript, setShowLiveTranscript] = useState(true);
+
+  // Video recording state
+  const [currentRecording, setCurrentRecording] = useState<VideoRecordingData | null>(null);
+  const [showVideoPlayback, setShowVideoPlayback] = useState(false);
+  const [showRecordingLibrary, setShowRecordingLibrary] = useState(false);
+  const [videoRecordingEnabled, setVideoRecordingEnabled] = useState(true);
 
   // Simplified metrics - start at 0 until recording begins
   const [metrics, setMetrics] = useState<SimplifiedMetrics>({
@@ -139,6 +154,9 @@ export default function SimplifiedPracticePage() {
   const interimTranscriptRef = useRef<string>('');
   const audioAnalyzerRef = useRef<AnalyserNode | null>(null);
   const { toast } = useToast();
+
+  // Video recording refs
+  const recordingVideoRef = useRef<HTMLVideoElement>(null);
 
   // Comprehensive filler word highlighting with 60+ patterns + custom fillers
   const highlightFillerWords = (text: string) => {
@@ -613,9 +631,38 @@ export default function SimplifiedPracticePage() {
     }
   }, [metrics.wordsPerMinute, isRecording, sessionDuration]);
 
+  // Initialize video recording
+  const initializeVideoRecording = async (): Promise<boolean> => {
+    if (!videoRecordingEnabled || !recordingVideoRef.current) return false;
+    
+    try {
+      const initialized = await videoRecordingManager.initializeRecording(recordingVideoRef.current);
+      if (initialized) {
+        console.log('✅ Video recording system initialized');
+        toast({
+          title: "Video Recording Ready",
+          description: "High-quality video recording is active",
+          duration: 2000
+        });
+      }
+      return initialized;
+    } catch (error) {
+      console.error('❌ Failed to initialize video recording:', error);
+      toast({
+        title: "Video Recording Unavailable",
+        description: "Session will record audio only",
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
+
   // Start recording
   const startRecording = useCallback(async () => {
     try {
+      // Initialize video recording first
+      const videoInitialized = await initializeVideoRecording();
+      
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: false,  // CRITICAL: Disable to preserve vocal fillers
@@ -624,8 +671,21 @@ export default function SimplifiedPracticePage() {
           sampleRate: 44100,       // High quality for pattern analysis
           channelCount: 1          // Mono for better vocal analysis
         },
-        video: { width: 640, height: 480 }
+        video: { 
+          width: { ideal: 1280, min: 640 }, 
+          height: { ideal: 720, min: 480 },
+          frameRate: { ideal: 30, min: 24 },
+          facingMode: 'user'
+        }
       });
+      
+      // Start video recording if initialized
+      if (videoInitialized) {
+        const recordingStarted = videoRecordingManager.startRecording();
+        if (recordingStarted) {
+          console.log('🎬 Video recording started');
+        }
+      }
 
       streamRef.current = stream;
       if (videoRef.current) {
@@ -931,6 +991,17 @@ export default function SimplifiedPracticePage() {
 
   // Stop recording
   const stopRecording = useCallback(async () => {
+    // Stop video recording and save to storage
+    let recordingData: VideoRecordingData | null = null;
+    try {
+      recordingData = await videoRecordingManager.stopRecording();
+      if (recordingData) {
+        console.log('🎬 Video recording stopped and processed');
+      }
+    } catch (error) {
+      console.warn('⚠️ Error stopping video recording:', error);
+    }
+
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
@@ -1115,6 +1186,26 @@ export default function SimplifiedPracticePage() {
           } : undefined
         };
         
+        // Save video recording with session data
+        if (recordingData) {
+          const recordingId = sessionRecordingStorage.saveRecording(
+            recordingData,
+            transcript,
+            sessionData,
+            facialAnalysis?.facialMetrics
+          );
+          
+          // Set the current recording for playback
+          setCurrentRecording(recordingData);
+          
+          console.log('🎬 Video recording saved with session data:', recordingId);
+          toast({
+            title: "Video Recording Saved",
+            description: "Session video available for playback",
+            duration: 3000
+          });
+        }
+
         setSessionAnalysisData(analysisData);
         setShowAnalysisPage(true);
       }
@@ -1127,6 +1218,26 @@ export default function SimplifiedPracticePage() {
       });
     }
   }, [sessionName, sessionPurpose, sessionDuration, transcript, metrics, toast]);
+
+  // Show video playback if requested
+  if (showVideoPlayback && currentRecording) {
+    return (
+      <VideoPlaybackViewer
+        recordingData={currentRecording}
+        onClose={() => {
+          setShowVideoPlayback(false);
+          setCurrentRecording(null);
+        }}
+      />
+    );
+  }
+
+  // Show recording library if requested  
+  if (showRecordingLibrary) {
+    return (
+      <RecordingLibrary />
+    );
+  }
 
   // Show analysis page if session is complete
   if (showAnalysisPage && sessionAnalysisData) {
@@ -1264,16 +1375,47 @@ export default function SimplifiedPracticePage() {
                   </div>
                 )}
                 
-                {/* Live Transcript Toggle */}
-                <Button
-                  variant="outline"
-                  onClick={() => setShowLiveTranscript(!showLiveTranscript)}
-                  className="flex items-center gap-2"
-                >
-                  <FileText className="w-4 h-4" />
-                  {showLiveTranscript ? 'Hide' : 'Show'} Transcript
-                </Button>
-                
+                {/* Video Recording Controls */}
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setVideoRecordingEnabled(!videoRecordingEnabled)}
+                    className={`flex items-center gap-2 ${videoRecordingEnabled ? 'bg-purple-50 border-purple-200' : ''}`}
+                  >
+                    <Video className="w-4 h-4" />
+                    {videoRecordingEnabled ? 'Video ON' : 'Video OFF'}
+                  </Button>
+                  
+                  {currentRecording && (
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowVideoPlayback(true)}
+                      className="flex items-center gap-2"
+                    >
+                      <Play className="w-4 h-4" />
+                      Watch Recording
+                    </Button>
+                  )}
+                  
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowRecordingLibrary(true)}
+                    className="flex items-center gap-2"
+                  >
+                    <Library className="w-4 h-4" />
+                    Library
+                  </Button>
+                  
+                  {/* Live Transcript Toggle */}
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowLiveTranscript(!showLiveTranscript)}
+                    className="flex items-center gap-2"
+                  >
+                    <FileText className="w-4 h-4" />
+                    {showLiveTranscript ? 'Hide' : 'Show'} Transcript
+                  </Button>
+                </div>
 
               </div>
             </div>
@@ -1311,6 +1453,15 @@ export default function SimplifiedPracticePage() {
                     muted
                     playsInline
                   />
+                  
+                  {/* Hidden video element for recording */}
+                  <video
+                    ref={recordingVideoRef}
+                    className="hidden"
+                    muted
+                    playsInline
+                  />
+                  
                   <canvas
                     ref={canvasRef}
                     className="absolute inset-0 w-full h-full pointer-events-none opacity-50"

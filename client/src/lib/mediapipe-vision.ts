@@ -29,6 +29,21 @@ export interface EmotionAnalysis {
   micro_expressions: MicroExpression[];
 }
 
+interface FullBodyPostureAnalysis {
+  spineAlignment: number;
+  shoulderLevel: number;
+  hipAlignment: number;
+  stanceWidth: number;
+  weightDistribution: number;
+  headPosition: number;
+  overallStability: number;
+  confidence: number;
+  openness: number;
+  authority: number;
+  engagement: number;
+  overallScore: number;
+}
+
 export interface MicroExpression {
   type: 'smile' | 'frown' | 'surprise' | 'concern' | 'focus';
   intensity: number;
@@ -135,13 +150,19 @@ export class MediaPipeVisionSystem {
 
     this.ctx.restore();
 
+    // Enhanced full-body analysis if pose landmarks are available
+    const fullBodyPosture = results.poseLandmarks ? 
+      this.analyzeFullBodyPosture(results.poseLandmarks) : 
+      this.getDefaultPostureAnalysis();
+
     return {
       faceLandmarks: results.faceLandmarks || [],
       poseLandmarks: results.poseLandmarks || [],
       handLandmarks: [results.leftHandLandmarks, results.rightHandLandmarks].filter(Boolean),
       emotions,
       gestureConfidence,
-      eyeContactPrecision
+      eyeContactPrecision,
+      fullBodyPosture
     };
   }
 
@@ -196,6 +217,54 @@ export class MediaPipeVisionSystem {
     const gestureSymmetry = this.calculateGestureSymmetry(leftWrist, rightWrist);
 
     return Math.min(100, armMovement * 40 + shoulderStability * 35 + gestureSymmetry * 25);
+  }
+
+  // Full-body posture analysis with comprehensive metrics
+  private analyzeFullBodyPosture(poseLandmarks: any[]): FullBodyPostureAnalysis {
+    if (!poseLandmarks || poseLandmarks.length === 0) {
+      return this.getDefaultPostureAnalysis();
+    }
+
+    // Key body landmarks for full analysis
+    const nose = poseLandmarks[0];
+    const leftShoulder = poseLandmarks[11];
+    const rightShoulder = poseLandmarks[12];
+    const leftElbow = poseLandmarks[13];
+    const rightElbow = poseLandmarks[14];
+    const leftHip = poseLandmarks[23];
+    const rightHip = poseLandmarks[24];
+    const leftKnee = poseLandmarks[25];
+    const rightKnee = poseLandmarks[26];
+    const leftAnkle = poseLandmarks[27];
+    const rightAnkle = poseLandmarks[28];
+
+    // Calculate comprehensive posture metrics
+    const spineAlignment = this.calculateSpineAlignment(nose, leftShoulder, rightShoulder, leftHip, rightHip);
+    const shoulderLevel = this.calculateShoulderLevel(leftShoulder, rightShoulder);
+    const hipAlignment = this.calculateHipAlignment(leftHip, rightHip);
+    const stanceWidth = this.calculateStanceWidth(leftAnkle, rightAnkle);
+    const weightDistribution = this.calculateWeightDistribution(leftKnee, rightKnee, leftAnkle, rightAnkle);
+    const headPosition = this.calculateHeadPosition(nose, leftShoulder, rightShoulder);
+    const overallStability = this.calculateOverallStability(poseLandmarks);
+    const confidence = this.calculatePostureConfidence(spineAlignment, shoulderLevel, hipAlignment);
+    const openness = this.calculatePostureOpenness(leftShoulder, rightShoulder, leftElbow, rightElbow);
+    const authority = this.calculatePostureAuthority(spineAlignment, shoulderLevel, headPosition);
+    const engagement = this.calculatePostureEngagement(poseLandmarks);
+
+    return {
+      spineAlignment: Math.round(spineAlignment * 100),
+      shoulderLevel: Math.round(shoulderLevel * 100),
+      hipAlignment: Math.round(hipAlignment * 100),
+      stanceWidth: Math.round(stanceWidth * 100),
+      weightDistribution: Math.round(weightDistribution * 100),
+      headPosition: Math.round(headPosition * 100),
+      overallStability: Math.round(overallStability * 100),
+      confidence: Math.round(confidence * 100),
+      openness: Math.round(openness * 100),
+      authority: Math.round(authority * 100),
+      engagement: Math.round(engagement * 100),
+      overallScore: Math.round((spineAlignment + shoulderLevel + hipAlignment + confidence + openness) * 20)
+    };
   }
 
   private analyzeEyeContactPrecision(faceLandmarks: any[]): number {
@@ -369,6 +438,155 @@ export class MediaPipeVisionSystem {
       angle = 360.0 - angle;
     }
     return angle;
+  }
+
+  // Comprehensive posture calculation methods
+  private calculateSpineAlignment(nose: any, leftShoulder: any, rightShoulder: any, leftHip: any, rightHip: any): number {
+    if (!nose || !leftShoulder || !rightShoulder || !leftHip || !rightHip) return 0.7;
+
+    const shoulderCenter = { x: (leftShoulder.x + rightShoulder.x) / 2, y: (leftShoulder.y + rightShoulder.y) / 2 };
+    const hipCenter = { x: (leftHip.x + rightHip.x) / 2, y: (leftHip.y + rightHip.y) / 2 };
+    
+    // Calculate spine angle - should be vertical (0 degrees from vertical)
+    const spineAngle = Math.abs(Math.atan2(shoulderCenter.x - hipCenter.x, shoulderCenter.y - hipCenter.y) * 180 / Math.PI);
+    const alignment = Math.max(0, 1 - spineAngle / 30); // Perfect alignment at 0°, poor at 30°+
+    
+    return Math.min(1, Math.max(0.3, alignment));
+  }
+
+  private calculateShoulderLevel(leftShoulder: any, rightShoulder: any): number {
+    if (!leftShoulder || !rightShoulder) return 0.7;
+    
+    const heightDifference = Math.abs(leftShoulder.y - rightShoulder.y);
+    const shoulderWidth = Math.abs(leftShoulder.x - rightShoulder.x);
+    const levelness = 1 - (heightDifference / shoulderWidth);
+    
+    return Math.min(1, Math.max(0.4, levelness));
+  }
+
+  private calculateHipAlignment(leftHip: any, rightHip: any): number {
+    if (!leftHip || !rightHip) return 0.7;
+    
+    const heightDifference = Math.abs(leftHip.y - rightHip.y);
+    const hipWidth = Math.abs(leftHip.x - rightHip.x);
+    const alignment = 1 - (heightDifference / hipWidth);
+    
+    return Math.min(1, Math.max(0.4, alignment));
+  }
+
+  private calculateStanceWidth(leftAnkle: any, rightAnkle: any): number {
+    if (!leftAnkle || !rightAnkle) return 0.7;
+    
+    const stanceWidth = Math.abs(leftAnkle.x - rightAnkle.x);
+    // Optimal stance is shoulder-width apart (approximately 0.15-0.25 normalized units)
+    const optimal = stanceWidth > 0.1 && stanceWidth < 0.3 ? 1.0 : 
+                   stanceWidth > 0.05 && stanceWidth < 0.4 ? 0.8 : 0.6;
+    
+    return optimal;
+  }
+
+  private calculateWeightDistribution(leftKnee: any, rightKnee: any, leftAnkle: any, rightAnkle: any): number {
+    if (!leftKnee || !rightKnee || !leftAnkle || !rightAnkle) return 0.7;
+    
+    // Analyze weight distribution based on knee-ankle alignment
+    const leftLegAlignment = Math.abs(leftKnee.x - leftAnkle.x);
+    const rightLegAlignment = Math.abs(rightKnee.x - rightAnkle.x);
+    const avgAlignment = (leftLegAlignment + rightLegAlignment) / 2;
+    
+    // Good weight distribution has minimal knee-ankle misalignment
+    const distribution = Math.max(0.4, 1 - avgAlignment * 10);
+    
+    return Math.min(1, distribution);
+  }
+
+  private calculateHeadPosition(nose: any, leftShoulder: any, rightShoulder: any): number {
+    if (!nose || !leftShoulder || !rightShoulder) return 0.7;
+    
+    const shoulderCenter = { x: (leftShoulder.x + rightShoulder.x) / 2, y: (leftShoulder.y + rightShoulder.y) / 2 };
+    const headOffset = Math.abs(nose.x - shoulderCenter.x);
+    
+    // Head should be centered over shoulders
+    const centeredness = Math.max(0.3, 1 - headOffset * 5);
+    
+    return Math.min(1, centeredness);
+  }
+
+  private calculateOverallStability(poseLandmarks: any[]): number {
+    if (!poseLandmarks || poseLandmarks.length < 25) return 0.7;
+    
+    // Analyze overall body stability based on landmark consistency
+    const keyPoints = [11, 12, 23, 24, 25, 26, 27, 28]; // Shoulders, hips, knees, ankles
+    let stability = 0.8; // Base stability
+    
+    // Check for excessive movement or inconsistent positioning
+    for (const pointIndex of keyPoints) {
+      const point = poseLandmarks[pointIndex];
+      if (point && point.visibility < 0.5) {
+        stability -= 0.05; // Reduce stability for poorly detected points
+      }
+    }
+    
+    return Math.min(1, Math.max(0.4, stability));
+  }
+
+  private calculatePostureConfidence(spineAlignment: number, shoulderLevel: number, hipAlignment: number): number {
+    // Overall confidence based on key structural elements
+    return (spineAlignment * 0.4 + shoulderLevel * 0.3 + hipAlignment * 0.3);
+  }
+
+  private calculatePostureOpenness(leftShoulder: any, rightShoulder: any, leftElbow: any, rightElbow: any): number {
+    if (!leftShoulder || !rightShoulder) return 0.7;
+    
+    const shoulderWidth = Math.abs(leftShoulder.x - rightShoulder.x);
+    let openness = shoulderWidth > 0.15 ? 0.9 : 0.6; // Wide shoulders indicate openness
+    
+    // Factor in arm positioning if available
+    if (leftElbow && rightElbow) {
+      const armSpread = Math.abs(leftElbow.x - rightElbow.x);
+      if (armSpread > shoulderWidth) {
+        openness = Math.min(1, openness + 0.1); // Bonus for open arm positioning
+      }
+    }
+    
+    return openness;
+  }
+
+  private calculatePostureAuthority(spineAlignment: number, shoulderLevel: number, headPosition: number): number {
+    // Authority comes from strong vertical alignment and centered head position
+    return (spineAlignment * 0.5 + shoulderLevel * 0.3 + headPosition * 0.2);
+  }
+
+  private calculatePostureEngagement(poseLandmarks: any[]): number {
+    if (!poseLandmarks || poseLandmarks.length < 15) return 0.7;
+    
+    const nose = poseLandmarks[0];
+    const leftShoulder = poseLandmarks[11];
+    const rightShoulder = poseLandmarks[12];
+    
+    if (!nose || !leftShoulder || !rightShoulder) return 0.7;
+    
+    // Engagement is measured by forward lean and active positioning
+    const shoulderCenter = { x: (leftShoulder.x + rightShoulder.x) / 2, y: (leftShoulder.y + rightShoulder.y) / 2 };
+    const forwardLean = nose.y < shoulderCenter.y ? 0.1 : 0; // Slight bonus for forward engagement
+    
+    return Math.min(1, 0.75 + forwardLean);
+  }
+
+  private getDefaultPostureAnalysis(): FullBodyPostureAnalysis {
+    return {
+      spineAlignment: 70,
+      shoulderLevel: 70,
+      hipAlignment: 70,
+      stanceWidth: 70,
+      weightDistribution: 70,
+      headPosition: 70,
+      overallStability: 70,
+      confidence: 70,
+      openness: 70,
+      authority: 70,
+      engagement: 70,
+      overallScore: 70
+    };
   }
 
   private getDefaultEmotions(): EmotionAnalysis {
