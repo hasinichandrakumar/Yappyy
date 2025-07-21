@@ -137,28 +137,76 @@ class MagicLinkAuthService implements MagicLinkService {
 // Export singleton instance
 export const magicLinkService = new MagicLinkAuthService();
 
-// Email sending utility (mock for development, replace with real service in production)
+// Email sending function with SendGrid integration
 export async function sendMagicLinkEmail(email: string, token: string): Promise<boolean> {
+  const baseUrl = process.env.BASE_URL || 'http://localhost:5000';
+  const magicLink = `${baseUrl}/auth/verify?token=${token}`;
+  
   try {
-    const magicLinkUrl = `${process.env.BASE_URL || 'http://localhost:5000'}/auth/verify?token=${token}`;
-    
-    // In development, just log the magic link
-    if (process.env.NODE_ENV === 'development') {
-      console.log('\n🔗 MAGIC LINK (Development Mode):');
+    // Check if SendGrid is configured
+    if (process.env.SENDGRID_API_KEY) {
+      const sgMail = require('@sendgrid/mail');
+      sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+      const msg = {
+        to: email,
+        from: 'noreply@yappyy.com', // Replace with your verified SendGrid sender
+        subject: 'Sign in to Yappyy - Your Magic Link',
+        html: `
+          <div style="font-family: 'Poppins', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="text-align: center; margin-bottom: 30px;">
+              <h1 style="color: #2563eb; font-size: 32px; margin: 0; background: linear-gradient(135deg, #2563eb 0%, #22d3ee 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                Yappyy
+              </h1>
+              <p style="color: #6b7280; font-size: 16px; margin: 5px 0 0 0;">AI-Powered Speech Training Platform</p>
+            </div>
+            
+            <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+              <h2 style="color: #1f2937; font-size: 24px; margin: 0 0 20px 0;">Welcome Back!</h2>
+              
+              <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 0 0 25px 0;">
+                Click the button below to sign in to your Yappyy account and continue your speaking improvement journey.
+              </p>
+              
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${magicLink}" style="background: linear-gradient(135deg, #2563eb 0%, #22d3ee 100%); color: white; text-decoration: none; padding: 15px 30px; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block;">
+                  Sign In to Yappyy
+                </a>
+              </div>
+              
+              <p style="color: #6b7280; font-size: 14px; margin: 20px 0 0 0;">
+                This link will expire in 15 minutes for security. If you didn't request this, you can safely ignore this email.
+              </p>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+              <p style="color: #9ca3af; font-size: 12px;">
+                © 2025 Yappyy. All rights reserved.
+              </p>
+            </div>
+          </div>
+        `,
+        text: `Welcome to Yappyy!\n\nClick this link to sign in: ${magicLink}\n\nThis link expires in 15 minutes.\n\nIf you didn't request this, you can safely ignore this email.`
+      };
+
+      await sgMail.send(msg);
+      console.log(`✅ Magic link email sent successfully to ${email}`);
+      return true;
+    } else {
+      // Development mode - log to console
+      console.log('🔗 MAGIC LINK (Development Mode):');
       console.log(`📧 Email: ${email}`);
-      console.log(`🔗 Magic Link: ${magicLinkUrl}`);
-      console.log('⏰ Expires in 15 minutes\n');
+      console.log(`🔗 Magic Link: ${magicLink}`);
+      console.log('⏰ Expires in 15 minutes');
+      console.log('💡 Configure SENDGRID_API_KEY to send actual emails');
       return true;
     }
-
-    // In production, you would integrate with a real email service here
-    // For example: SendGrid, AWS SES, Mailgun, etc.
-    console.log(`📧 Magic link email would be sent to ${email} in production`);
-    console.log(`🔗 Magic link URL: ${magicLinkUrl}`);
-    
-    return true;
   } catch (error) {
-    console.error('❌ Error sending magic link email:', error);
+    console.error('❌ Failed to send magic link email:', error);
+    // Still log to console as fallback
+    console.log('🔗 MAGIC LINK (Fallback - Email Failed):');
+    console.log(`📧 Email: ${email}`);
+    console.log(`🔗 Magic Link: ${magicLink}`);
     return false;
   }
 }
