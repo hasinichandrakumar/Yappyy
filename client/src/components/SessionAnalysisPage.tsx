@@ -27,6 +27,7 @@ import {
 interface SessionData {
   sessionName: string;
   purpose: string;
+  practiceCategory?: string; // Add practice category for purpose-based analysis
   duration: number;
   transcript: string;
   overallPerformance: number;
@@ -140,6 +141,35 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
 
   const generateAIInsights = async () => {
     try {
+      // Use purpose-based analysis if practice category is available
+      if (sessionData.practiceCategory && sessionData.practiceCategory !== 'general') {
+        console.log('🎯 Using purpose-based analysis for category:', sessionData.practiceCategory);
+        
+        const purposeResponse = await fetch('/api/purpose-based-analysis', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            transcript: sessionData.transcript,
+            practiceCategory: sessionData.practiceCategory,
+            sessionData: {
+              duration: sessionData.duration,
+              wordsPerMinute: sessionData.wordsPerMinute,
+              fillerWordCount: sessionData.fillerWordCount,
+              confidenceLevel: sessionData.confidenceLevel,
+              eyeContactScore: sessionData.eyeContactScore,
+              engagementLevel: sessionData.engagementLevel
+            }
+          })
+        });
+
+        if (purposeResponse.ok) {
+          const purposeData = await purposeResponse.json();
+          setAIInsights(purposeData);
+          return;
+        }
+      }
+
+      // Fallback to general session insights
       const response = await fetch('/api/generate-session-insights', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -147,7 +177,8 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
           sessionData,
           fillerCount: fillerAnalysis?.totalFillers ?? sessionData.fillerWordCount,
           duration: sessionData.duration,
-          wpm: sessionData.wordsPerMinute
+          wpm: sessionData.wordsPerMinute,
+          practiceCategory: sessionData.practiceCategory
         })
       });
 

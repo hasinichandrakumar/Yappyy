@@ -14,6 +14,7 @@ import {
   personalizeTemplate,
   generateSessionInsights
 } from "./openai-coaching";
+import { generatePurposeBasedAnalysis, generateEnhancedSessionInsights } from "./purpose-based-ai-analysis";
 import { 
   generateWorldClassCoaching, 
   generateLiveEmpathicFeedback, 
@@ -3036,6 +3037,76 @@ Respond with detailed analysis in JSON format:
       });
     }
   });
+
+  // =====================================================
+  // PURPOSE-BASED AI ANALYSIS ENDPOINTS
+  // =====================================================
+
+  // Purpose-based AI analysis endpoint
+  app.post('/api/purpose-based-analysis', demoAuth, async (req: any, res) => {
+    try {
+      const { transcript, practiceCategory, sessionData } = req.body;
+      
+      if (!transcript || !practiceCategory) {
+        return res.status(400).json({ 
+          error: 'Transcript and practice category are required' 
+        });
+      }
+      
+      const analysis = await generatePurposeBasedAnalysis(
+        transcript, 
+        practiceCategory, 
+        sessionData
+      );
+      
+      res.json(analysis);
+    } catch (error) {
+      console.error('Purpose-based analysis error:', error);
+      res.status(500).json({ 
+        error: 'Failed to generate purpose-based analysis',
+        overallAssessment: `Analysis for ${req.body.practiceCategory || 'general'} practice completed.`,
+        purposeSpecificFeedback: 'Continue practicing to improve your communication skills.'
+      });
+    }
+  });
+
+  // Enhanced session insights with purpose context
+  app.post('/api/generate-session-insights', demoAuth, async (req: any, res) => {
+    try {
+      const { sessionData, fillerCount, duration, wpm, practiceCategory } = req.body;
+      
+      // Use purpose-based analysis if practice category is provided
+      if (practiceCategory && practiceCategory !== 'general') {
+        const insights = await generateEnhancedSessionInsights({
+          sessionData,
+          fillerCount: fillerCount || sessionData?.fillerWordCount || 0,
+          duration: duration || sessionData?.duration || 0,
+          wpm: wpm || sessionData?.wordsPerMinute || 0
+        }, fillerCount || 0, practiceCategory);
+        
+        return res.json(insights);
+      }
+      
+      // Fallback to general insights
+      const insights = await generateSessionInsights({
+        sessionData,
+        fillerCount: fillerCount || sessionData?.fillerWordCount || 0,
+        duration: duration || sessionData?.duration || 0,
+        wpm: wpm || sessionData?.wordsPerMinute || 0
+      });
+      
+      res.json(insights);
+    } catch (error) {
+      console.error('Session insights generation error:', error);
+      res.status(500).json({ 
+        error: 'Failed to generate insights',
+        overallAssessment: 'Session completed successfully. Continue practicing for improvement.',
+        progressSummary: 'Keep practicing to develop your speaking skills.'
+      });
+    }
+  });
+
+  console.log('🎯 Purpose-Based AI Analysis System activated');
 
   const httpServer = createServer(app);
   return httpServer;
