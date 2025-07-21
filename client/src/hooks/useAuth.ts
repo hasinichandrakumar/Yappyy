@@ -1,29 +1,22 @@
-import { useQuery } from "@tanstack/react-query";
+// Open access - no authentication required
+interface User {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+}
 
 export function useAuth() {
-  const { data: user, isLoading, error } = useQuery({
-    queryKey: ["/api/auth/user"],
-    retry: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-  });
-
-  // If there's an error (like database connection issues), treat as unauthenticated
-  // but not loading so the homepage can show
-  if (error) {
-    return {
-      user: null,
-      isLoading: false,
-      isAuthenticated: false,
-      error
-    };
-  }
-
+  // Always return authenticated for open dashboard access
   return {
-    user,
-    isLoading,
-    isAuthenticated: !!user,
-    error
+    user: { 
+      id: 'guest', 
+      email: 'guest@yappyy.com', 
+      firstName: 'Guest', 
+      lastName: 'User' 
+    } as User,
+    isLoading: false,
+    isAuthenticated: true,
+    error: null
   };
 }

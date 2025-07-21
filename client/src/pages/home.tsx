@@ -58,25 +58,59 @@ export default function HomePage() {
             <p className="text-xl md:text-2xl font-body text-slate-600 mb-8 max-w-3xl mx-auto">
               AI-powered speech coaching that transforms your communication skills through real-time feedback and personalized training
             </p>
-            <div className="flex justify-center">
-              {isAuthenticated ? (
-                <Link href="/dashboard">
-                  <Button size="lg" className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white font-button shadow-lg hover:shadow-xl transition-all duration-300 px-8 py-4">
-                    Start Practicing Now
-                    <Mic className="ml-2 h-5 w-5" />
-                  </Button>
-                </Link>
-              ) : (
-                <Link href="/login">
-                  <Button
-                    size="lg"
-                    className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white font-button shadow-lg hover:shadow-xl transition-all duration-300 px-8 py-4 text-lg"
-                  >
-                    Start Learning Now
-                    <Mic className="ml-2 h-5 w-5" />
-                  </Button>
-                </Link>
-              )}
+            <div className="flex justify-center mb-12">
+              <Link href="/dashboard">
+                <Button size="lg" className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white font-button shadow-lg hover:shadow-xl transition-all duration-300 px-8 py-4">
+                  Start Practicing Now
+                  <Mic className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
+            </div>
+
+            {/* Canva Video Embed */}
+            <div className="max-w-4xl mx-auto">
+              <div style={{
+                position: 'relative',
+                width: '100%',
+                height: 0,
+                paddingTop: '56.2225%',
+                paddingBottom: 0,
+                boxShadow: '0 2px 8px 0 rgba(63,69,81,0.16)',
+                marginTop: '1.6em',
+                marginBottom: '0.9em',
+                overflow: 'hidden',
+                borderRadius: '8px',
+                willChange: 'transform'
+              }}>
+                <iframe 
+                  loading="lazy" 
+                  style={{
+                    position: 'absolute',
+                    width: '100%',
+                    height: '100%',
+                    top: 0,
+                    left: 0,
+                    border: 'none',
+                    padding: 0,
+                    margin: 0
+                  }}
+                  src="https://www.canva.com/design/DAGt0NLsNxI/V0IlLnjC67dT6N1qhI9hJw/watch?embed=access_restricted" 
+                  allowFullScreen 
+                  allow="fullscreen"
+                  title="Yappyy UI Demo"
+                />
+              </div>
+              <div className="text-center mt-4">
+                <a 
+                  href="https://www.canva.com/design/DAGt0NLsNxI/V0IlLnjC67dT6N1qhI9hJw/watch?utm_content=DAGt0NLsNxI&utm_campaign=designshare&utm_medium=embeds&utm_source=link" 
+                  target="_blank" 
+                  rel="noopener"
+                  className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                >
+                  Yappyy UI
+                </a>
+                <span className="text-gray-500 text-sm"> by Hasini Chandrakumar</span>
+              </div>
             </div>
           </div>
         </div>
