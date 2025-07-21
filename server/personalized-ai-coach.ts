@@ -362,29 +362,79 @@ class PersonalizedAICoach {
       // Learn from this interaction
       await this.updateProfileFromInteraction(userId, message, aiResponse, profile);
       
+      const strengths = await this.identifyStrengths(recentSessions);
+      const challenges = await this.identifyUserChallenges(await storage.getUser(userId), recentSessions);
+      
       return {
+        success: true,
         coaching: aiResponse,
-        personalizedInsights: {
+        insights: [
+          `Neural network analysis based on ${profile.performanceMetrics.sessionCount} sessions`,
+          strengths.length > 0 ? `Your strongest areas: ${strengths.slice(0,2).map(s => s.area).join(', ')}` : 'Building comprehensive strength profile',
+          `Learning velocity: ${(profile.learningPatterns.improvementVelocity * 100).toFixed(0)}% improvement rate`
+        ],
+        recommendations: [
+          'Continue leveraging your natural speaking patterns',
+          challenges.length > 0 ? `Focus improvement efforts on ${challenges[0].area}` : 'Maintain consistent practice schedule',
+          'Build on session-to-session progress patterns'
+        ],
+        confidence: Math.round(this.calculateNeuralConfidence(profile) * 100),
+        adaptiveStrategy: this.determineAdaptiveStrategy(profile),
+        personalizedProfile: {
           coachingStyle: profile.communicationPreferences.coachingTone,
           focusAreas: profile.learningPatterns.focusAreas,
-          adaptiveStrategy: this.determineAdaptiveStrategy(profile),
           neuralConfidence: this.calculateNeuralConfidence(profile),
           sessionCount: profile.performanceMetrics.sessionCount,
-          strengthAreas: profile.performanceMetrics.strengthAreas.map(s => s.area),
+          strengthAreas: strengths.map(s => s.area),
           nextMilestone: this.getNextMilestone(profile)
-        }
+        },
+        selfLearning: true,
+        fallback: false
       };
     } catch (error) {
       console.error('Error generating personalized coaching:', error);
+      
+      // Check if it's an API quota error
+      if (error.status === 429 || error.code === 'insufficient_quota') {
+        console.log('🧠 OpenAI quota exceeded, using enhanced fallback with personalized data');
+      }
+      
+      // Enhanced fallback with personalized elements
+      const sessions = await storage.getUserPracticeSessions(userId);
+      const user = await storage.getUser(userId);
+      const strengths = await this.identifyStrengths(sessions);
+      const challenges = await this.identifyUserChallenges(user, sessions);
+      const focusAreas = await this.getFocusAreas(user, sessions);
+      
       return {
-        coaching: "I'm here to help with your speaking practice. Let me know what specific area you'd like to work on today.",
-        personalizedInsights: {
-          coachingStyle: 'supportive',
-          focusAreas: ['confidence_building'],
-          adaptiveStrategy: 'baseline_establishment',
-          neuralConfidence: 0.6,
-          sessionCount: 0
-        }
+        success: true,
+        coaching: `I'm your personalized AI coach! ${profile.performanceMetrics.sessionCount > 0 ? `Based on your ${profile.performanceMetrics.sessionCount} practice sessions, ` : ''}I'm here to help you ${focusAreas.length > 0 ? `improve your ${focusAreas[0]}` : 'develop your speaking skills'}. What would you like to work on today?`,
+        insights: [
+          `Your coaching approach is set to ${this.determineAdaptiveStrategy(profile)}`,
+          strengths.length > 0 ? `Your strength areas include ${strengths.map(s => s.area).join(', ')}` : 'I\'m learning about your speaking patterns to provide better insights',
+          challenges.length > 0 ? `Focus areas for improvement: ${challenges.slice(0,2).map(c => c.area).join(', ')}` : 'Complete more practice sessions for detailed improvement suggestions'
+        ],
+        recommendations: [
+          focusAreas.length > 0 ? `Focus on improving your ${focusAreas[0]} skills` : 'Start with a practice session to establish your baseline',
+          profile.communicationPreferences.coachingTone === 'supportive' ? 'Practice in a comfortable environment to build confidence' : 'Challenge yourself with advanced speaking scenarios',
+          'Use the practice page to work on specific speaking goals'
+        ],
+        nextSteps: [
+          'Try starting a practice session to work on your current goals',
+          'Ask me specific questions about speaking techniques',
+          'Share what speaking situation you\'d like to improve'
+        ],
+        confidence: Math.min(95, 60 + (profile.performanceMetrics.sessionCount * 5)),
+        adaptiveStrategy: this.determineAdaptiveStrategy(profile),
+        personalizedProfile: {
+          strengths: strengths.slice(0, 3),
+          challenges: challenges.slice(0, 3),
+          focusAreas: focusAreas,
+          nextMilestone: this.getNextMilestone(profile),
+          neuralConfidence: this.calculateNeuralConfidence(profile)
+        },
+        selfLearning: true,
+        fallback: true
       };
     }
   }

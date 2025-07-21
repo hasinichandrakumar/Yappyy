@@ -585,30 +585,50 @@ export default function AICoachRedesigned() {
       const practiceResponse = await fetch('/api/practice-sessions');
       const sessions = await practiceResponse.json();
       
-      // Send message with practice data context for deep learning analysis
-      const response = await apiRequest('/api/ai-coach-conversation', {
+      // Send message to personalized self-learning AI coach
+      const response = await apiRequest('/api/personalized-coaching', {
         method: 'POST',
         body: JSON.stringify({
           message: inputMessage,
-          currentGoal,
-          sessionData: Array.isArray(sessions) ? sessions.slice(-5) : [], // Last 5 sessions for context
-          analysisContext: {
-            voiceModulation: sessions.length > 0 ? sessions.reduce((sum: number, s: any) => sum + (s.voiceClarity || 0), 0) / sessions.length : 0,
-            bodyLanguage: sessions.length > 0 ? sessions.reduce((sum: number, s: any) => sum + (s.gestureScore || 0), 0) / sessions.length : 0,
-            contentStructure: sessions.length > 0 ? sessions.reduce((sum: number, s: any) => sum + (s.coherenceScore || 75), 0) / sessions.length : 75,
-            totalSessions: sessions.length,
-            recentPerformance: sessions.slice(-3)
-          }
+          sessionContext: {
+            currentGoal: currentGoal || 'general_improvement',
+            recentPerformance: {
+              confidence: sessions.length > 0 ? sessions.reduce((sum: number, s: any) => sum + (s.confidenceScore || 0.7), 0) / sessions.length * 100 : 70,
+              clarity: sessions.length > 0 ? sessions.reduce((sum: number, s: any) => sum + (s.clarityScore || 0.7), 0) / sessions.length * 100 : 70,
+              engagement: sessions.length > 0 ? sessions.reduce((sum: number, s: any) => sum + (s.contentQuality || 0.7), 0) / sessions.length * 100 : 70
+            },
+            sessionCount: sessions.length,
+            recentSessions: Array.isArray(sessions) ? sessions.slice(-3) : []
+          },
+          userFeedback: null // Will be used for explicit feedback in future
         })
       });
 
-      if (response.coaching && response.analysis) {
+      if (response.success && response.coaching) {
+        let aiResponseText = response.coaching;
+        
+        // Add personalized insights if available
+        if (response.insights && response.insights.length > 0) {
+          aiResponseText += `\n\n🧠 **Personalized Insights**:\n${response.insights.slice(0, 2).join('\n')}`;
+        }
+        
+        // Add recommendations if available
+        if (response.recommendations && response.recommendations.length > 0) {
+          aiResponseText += `\n\n💡 **Recommendations**:\n${response.recommendations.slice(0, 2).join('\n')}`;
+        }
+        
+        // Add confidence and neural info
+        if (response.confidence) {
+          aiResponseText += `\n\n📊 **AI Confidence**: ${Math.round(response.confidence)}% | **Strategy**: ${response.adaptiveStrategy || 'Personalized'}`;
+        }
+        
         const aiResponse = {
           id: Date.now() + 1,
-          text: `${response.coaching}\n\n🧠 **Neural Analysis**: ${response.analysis.insights}\n\n📊 **Based on ${response.analysis.sessionsAnalyzed} sessions**: ${response.analysis.recommendations}`,
+          text: aiResponseText,
           isUser: false,
           timestamp: new Date().toLocaleTimeString()
         };
+        
         setMessages(prev => [...prev, aiResponse]);
         setIsTyping(false);
         return;
