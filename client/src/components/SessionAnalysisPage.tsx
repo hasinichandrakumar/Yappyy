@@ -145,7 +145,7 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           sessionData,
-          fillerCount: sessionData.fillerWordCount,
+          fillerCount: fillerAnalysis?.totalFillers ?? sessionData.fillerWordCount,
           duration: sessionData.duration,
           wpm: sessionData.wordsPerMinute
         })
@@ -185,7 +185,7 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
         confidenceScore: normalizedData.confidenceLevel || 0,
         transcript: normalizedData.transcript || '',
         fillerWords: fillerAnalysis?.detectedFillers?.map((f: any) => f.word) || [],
-        fillerWordCount: normalizedData.fillerWordCount || 0,
+        fillerWordCount: fillerAnalysis?.totalFillers ?? (normalizedData.fillerWordCount || 0),
         analysis: {
           insights: aiInsights || {},
           facialAnalysis: normalizedData.facialAnalysis,
@@ -306,7 +306,9 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
           <Card>
             <CardContent className="p-4 text-center">
               <MessageSquare className="w-8 h-8 mx-auto mb-2 text-red-600" />
-              <div className="text-2xl font-bold text-red-600">{normalizedData.fillerWordCount}</div>
+              <div className="text-2xl font-bold text-red-600">
+                {fillerAnalysis?.totalFillers ?? normalizedData.fillerWordCount}
+              </div>
               <div className="text-sm text-gray-600">Filler Words</div>
             </CardContent>
           </Card>
