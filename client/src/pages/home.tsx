@@ -98,7 +98,7 @@ export default function HomePage() {
                   src="https://www.canva.com/design/DAGt0v149NM/JGXYXZdwDCnyhrYrwPJ78A/watch?embed" 
                   allowFullScreen 
                   allow="fullscreen"
-                  title="Yappyy UI Demo"
+                  title="Yappyy Landing Page Demo"
                 />
               </div>
               <div className="text-center mt-4">
@@ -108,7 +108,7 @@ export default function HomePage() {
                   rel="noopener"
                   className="text-blue-600 hover:text-blue-800 font-medium text-sm"
                 >
-                  Yappyy UI Demo
+                  Yappyy Landing Page
                 </a>
                 <span className="text-gray-500 text-sm"> by Hasini Chandrakumar</span>
               </div>
