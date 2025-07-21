@@ -49,7 +49,9 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-5xl md:text-7xl font-display text-transparent bg-clip-text bg-gradient-to-br from-[#2563eb] to-[#22d3ee] mb-6">
-              Future Talks Here
+              Talk Smart.
+              <br />
+              Talk Yappy.
             </h1>
             <p className="text-xl md:text-2xl font-body text-slate-600 mb-8 max-w-3xl mx-auto">
               AI-powered speech coaching that transforms your communication skills through real-time feedback and personalized training
