@@ -14,6 +14,8 @@ import {
   challenges,
   challengeParticipations,
   customTemplates,
+  aiCoachProfiles,
+  userLearningInsights,
   type User, 
   type UpsertUser,
   type PracticeSession,
@@ -41,7 +43,11 @@ import {
   type ChallengeParticipation,
   type InsertChallengeParticipation,
   type CustomTemplate,
-  type InsertCustomTemplate
+  type InsertCustomTemplate,
+  type AiCoachProfile,
+  type InsertAiCoachProfile,
+  type UserLearningInsight,
+  type InsertUserLearningInsight
 } from "@shared/schema";
 import { db, resilientQuery } from "./db";
 import { eq, desc, and, gte, lte } from "drizzle-orm";
@@ -116,6 +122,16 @@ export interface IStorage {
   // Speech persona operations
   getSpeechPersona(userId: string): Promise<any>;
   generateSpeechPersona(userId: string, sessions: any[]): Promise<any>;
+  
+  // AI Coach Profile operations for personalization
+  getAiCoachProfile(userId: string): Promise<AiCoachProfile | undefined>;
+  createAiCoachProfile(profile: InsertAiCoachProfile): Promise<AiCoachProfile>;
+  updateAiCoachProfile(userId: string, updates: Partial<InsertAiCoachProfile>): Promise<AiCoachProfile>;
+  
+  // User Learning Insights operations
+  getUserLearningInsights(userId: string): Promise<UserLearningInsight[]>;
+  createUserLearningInsight(insight: InsertUserLearningInsight): Promise<UserLearningInsight>;
+  getSessionLearningInsights(sessionId: number): Promise<UserLearningInsight[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -587,6 +603,65 @@ export class DatabaseStorage implements IStorage {
       .from(customTemplates)
       .where(eq(customTemplates.isPublic, true))
       .orderBy(desc(customTemplates.createdAt));
+  }
+
+  // AI Coach Profile operations for personalized coaching
+  async getAiCoachProfile(userId: string): Promise<AiCoachProfile | undefined> {
+    try {
+      const [profile] = await db
+        .select()
+        .from(aiCoachProfiles)
+        .where(eq(aiCoachProfiles.userId, userId));
+      return profile;
+    } catch (error) {
+      console.error('Error fetching AI coach profile:', error);
+      return undefined;
+    }
+  }
+
+  async createAiCoachProfile(profile: InsertAiCoachProfile): Promise<AiCoachProfile> {
+    const [createdProfile] = await db
+      .insert(aiCoachProfiles)
+      .values(profile)
+      .returning();
+    return createdProfile;
+  }
+
+  async updateAiCoachProfile(userId: string, updates: Partial<InsertAiCoachProfile>): Promise<AiCoachProfile> {
+    const [updatedProfile] = await db
+      .update(aiCoachProfiles)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(aiCoachProfiles.userId, userId))
+      .returning();
+    return updatedProfile;
+  }
+
+  // User Learning Insights operations
+  async getUserLearningInsights(userId: string): Promise<UserLearningInsight[]> {
+    return await db
+      .select()
+      .from(userLearningInsights)
+      .where(eq(userLearningInsights.userId, userId))
+      .orderBy(desc(userLearningInsights.createdAt));
+  }
+
+  async createUserLearningInsight(insight: InsertUserLearningInsight): Promise<UserLearningInsight> {
+    const [createdInsight] = await db
+      .insert(userLearningInsights)
+      .values(insight)
+      .returning();
+    return createdInsight;
+  }
+
+  async getSessionLearningInsights(sessionId: number): Promise<UserLearningInsight[]> {
+    return await db
+      .select()
+      .from(userLearningInsights)
+      .where(eq(userLearningInsights.sessionId, sessionId))
+      .orderBy(desc(userLearningInsights.createdAt));
   }
 }
 

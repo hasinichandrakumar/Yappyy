@@ -31,6 +31,7 @@ import { processContentAnalysis } from "./content-analysis-api";
 import { getAdaptiveCoaching, getUserLearningProgress, getAdvancedPublicSpeakingCoaching } from "./deep-learning-coach";
 import { peppyDeepLearningAnalysis, peppyConversation } from "./peppy-deep-learning-coach";
 import { advancedNeuralAnalysis } from "./peppy-deep-learning-engine";
+import { getPersonalizedCoaching, getUserNeuralProfile } from "./personalized-ai-coach";
 import { aiFineTuning } from "./ai-fine-tuning";
 import { multiModalFusion } from "./multi-modal-fusion";
 import { enhancedVoiceSynthesis } from "./enhanced-voice-synthesis";
@@ -1530,6 +1531,10 @@ RESPONSE FORMAT: Provide conversational coaching followed by specific neural ana
   });
   
   app.post("/api/advanced-neural-analysis", demoAuth, advancedNeuralAnalysis);
+  
+  // Personalized AI Coach endpoints for individual user learning
+  app.post('/api/personalized-coaching', demoAuth, getPersonalizedCoaching);
+  app.get('/api/user-neural-profile', demoAuth, getUserNeuralProfile);
   
   // GraphQL endpoint for flexible neural data queries
   app.use('/api/graphql', demoAuth, graphqlHTTP({
