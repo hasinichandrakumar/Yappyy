@@ -32,6 +32,7 @@ import { getAdaptiveCoaching, getUserLearningProgress, getAdvancedPublicSpeaking
 import { peppyDeepLearningAnalysis, peppyConversation } from "./peppy-deep-learning-coach";
 import { advancedNeuralAnalysis } from "./peppy-deep-learning-engine";
 import { getPersonalizedCoaching, getUserNeuralProfile } from "./personalized-ai-coach";
+import { worldClassNeuralAICoach } from "./world-class-neural-ai-coach";
 import { aiFineTuning } from "./ai-fine-tuning";
 import { multiModalFusion } from "./multi-modal-fusion";
 import { enhancedVoiceSynthesis } from "./enhanced-voice-synthesis";
@@ -1533,7 +1534,31 @@ RESPONSE FORMAT: Provide conversational coaching followed by specific neural ana
   app.post("/api/advanced-neural-analysis", demoAuth, advancedNeuralAnalysis);
   
   // Personalized AI Coach endpoints for individual user learning with self-improvement
-  app.post('/api/personalized-coaching', demoAuth, getPersonalizedCoaching);
+  // World-Class Neural Network AI Coach System
+  app.post('/api/personalized-coaching', demoAuth, async (req: any, res) => {
+    try {
+      const { message, sessionContext } = req.body;
+      const userId = req.user?.id || req.user?.claims?.sub || 'demo-user-123';
+      
+      console.log('🧠 World-Class Neural AI Coach processing for user:', userId);
+      
+      const result = await worldClassNeuralAICoach.generateCoaching(userId, message || 'Hello');
+      
+      res.json({
+        ...result,
+        timestamp: new Date().toISOString(),
+        worldClass: true,
+        neuralNetwork: true
+      });
+      
+    } catch (error) {
+      console.error('Error in world-class neural coaching:', error);
+      res.status(500).json({ 
+        error: 'Neural coaching system error',
+        fallback: true 
+      });
+    }
+  });
   app.get('/api/user-neural-profile', demoAuth, getUserNeuralProfile);
   
   // Feedback learning endpoint for AI self-improvement

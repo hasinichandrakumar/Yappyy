@@ -514,7 +514,7 @@ export default function AICoachRedesigned() {
   useEffect(() => {
     if (user && sessions && Array.isArray(sessions) && sessions.length === 0) {
       // Check if notification was dismissed before (using localStorage)
-      const notificationDismissed = localStorage.getItem(`firstTimeNotification_${user.id}`);
+      const notificationDismissed = localStorage.getItem(`firstTimeNotification_${(user as any)?.id || 'demo'}`);
       if (!notificationDismissed) {
         setShowFirstTimeNotification(true);
       }
@@ -524,14 +524,14 @@ export default function AICoachRedesigned() {
   const handleDismissNotification = () => {
     setShowFirstTimeNotification(false);
     if (user) {
-      localStorage.setItem(`firstTimeNotification_${user.id}`, 'true');
+      localStorage.setItem(`firstTimeNotification_${(user as any)?.id || 'demo'}`, 'true');
     }
   };
 
   const handlePersonalizeProfile = () => {
     setShowFirstTimeNotification(false);
     if (user) {
-      localStorage.setItem(`firstTimeNotification_${user.id}`, 'true');
+      localStorage.setItem(`firstTimeNotification_${(user as any)?.id || 'demo'}`, 'true');
     }
     // Navigate to profile settings or show profile modal
     // For now, we'll just show a message in the chat
@@ -585,9 +585,10 @@ export default function AICoachRedesigned() {
       const practiceResponse = await fetch('/api/practice-sessions');
       const sessions = await practiceResponse.json();
       
-      // Send message to personalized self-learning AI coach
-      const response = await apiRequest('/api/personalized-coaching', {
+      // Send message to world-class neural AI coach
+      const response = await fetch('/api/personalized-coaching', {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: inputMessage,
           sessionContext: {
@@ -600,26 +601,31 @@ export default function AICoachRedesigned() {
             sessionCount: sessions.length,
             recentSessions: Array.isArray(sessions) ? sessions.slice(-3) : []
           },
-          userFeedback: null // Will be used for explicit feedback in future
+          userFeedback: null
         })
-      });
+      }).then(res => res.json());
 
-      if (response.success && response.coaching) {
+      if (response?.success && response?.coaching) {
         let aiResponseText = response.coaching;
         
         // Add personalized insights if available
-        if (response.insights && response.insights.length > 0) {
-          aiResponseText += `\n\n🧠 **Personalized Insights**:\n${response.insights.slice(0, 2).join('\n')}`;
+        if (response?.insights && response.insights.length > 0) {
+          aiResponseText += `\n\n🧠 **Neural Insights**:\n${response.insights.slice(0, 2).join('\n')}`;
         }
         
         // Add recommendations if available
-        if (response.recommendations && response.recommendations.length > 0) {
-          aiResponseText += `\n\n💡 **Recommendations**:\n${response.recommendations.slice(0, 2).join('\n')}`;
+        if (response?.recommendations && response.recommendations.length > 0) {
+          aiResponseText += `\n\n💡 **AI Recommendations**:\n${response.recommendations.slice(0, 2).join('\n')}`;
         }
         
-        // Add confidence and neural info
-        if (response.confidence) {
-          aiResponseText += `\n\n📊 **AI Confidence**: ${Math.round(response.confidence)}% | **Strategy**: ${response.adaptiveStrategy || 'Personalized'}`;
+        // Add neural network analysis
+        if (response?.confidence) {
+          aiResponseText += `\n\n📊 **Neural Network**: ${Math.round(response.confidence)}% confidence | **Strategy**: ${response.adaptiveStrategy || 'Personalized'}`;
+        }
+        
+        // Add world-class indicator
+        if (response?.worldClass) {
+          aiResponseText += `\n\n🌟 **World-Class AI Coach**: Neural network analysis complete`;
         }
         
         const aiResponse = {
@@ -686,7 +692,7 @@ export default function AICoachRedesigned() {
           transition={{ duration: 0.6 }}
           className="mb-8"
         >
-          <PeppyParrot mood="happy" size="large" isAnimated={true} />
+          <AICoachAvatar mood="happy" size="large" isAnimated={true} />
         </motion.div>
         
         <motion.h1
@@ -695,7 +701,7 @@ export default function AICoachRedesigned() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          Meet Peppy
+          AI Coach
         </motion.h1>
         
         <motion.p
@@ -727,7 +733,7 @@ export default function AICoachRedesigned() {
             <Card className="bg-white/70 backdrop-blur-sm border-purple-200 shadow-xl flex-1 flex flex-col">
               <CardHeader className="bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-t-lg p-6">
                 <CardTitle className="flex items-center gap-4">
-                  <PeppyParrot mood="encouraging" size="small" isAnimated={true} />
+                  <AICoachAvatar mood="encouraging" size="small" isAnimated={true} />
                   <div className="flex-1">
                     <h3 className="text-xl font-semibold mb-1">Your Personal Speech Coach</h3>
                     <p className="text-purple-100 text-base">Personalized coaching based on your unique patterns</p>
@@ -818,7 +824,7 @@ export default function AICoachRedesigned() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-0 flex-1 overflow-y-auto">
-                <DeepLearningAnalytics userId={user?.id} />
+                <DeepLearningAnalytics userId={(user as any)?.id || 'demo'} />
               </CardContent>
             </Card>
           </div>

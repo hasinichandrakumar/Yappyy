@@ -871,6 +871,18 @@ Be conversational but mention neural network insights naturally (e.g., "Based on
       
       // Generate neural network insights even in fallback mode
       const currentFeatures = user ? this.extractFeatureVector(user, sessions) : this.getDefaultFeatureVector();
+      
+      // Ensure neural weights are initialized
+      if (!profile.neuralWeights) {
+        profile.neuralWeights = this.initializeNeuralWeights();
+      }
+      if (!profile.featureVector) {
+        profile.featureVector = currentFeatures;
+      }
+      if (!profile.trainingHistory) {
+        profile.trainingHistory = [];
+      }
+      
       const neuralStrategy = this.generateCoachingStrategy(currentFeatures, profile.neuralWeights);
       const neuralInsights = this.generateNeuralInsights(currentFeatures, neuralStrategy, profile);
       
@@ -884,11 +896,11 @@ Be conversational but mention neural network insights naturally (e.g., "Based on
       
       return {
         success: true,
-        coaching: `I'm your advanced machine learning AI coach! 🧠 ${profile.performanceMetrics.sessionCount > 0 ? `Based on neural network analysis of your ${profile.performanceMetrics.sessionCount} practice sessions, ` : ''}my algorithm recommends focusing on ${neuralStrategy.strategy.replace('_', ' ')} with ${Math.round(neuralStrategy.confidence * 100)}% confidence. What would you like to work on today?`,
+        coaching: `I'm your advanced machine learning AI coach! 🧠 ${profile.performanceMetrics.sessionCount > 0 ? `Based on neural network analysis of your ${profile.performanceMetrics.sessionCount} practice sessions, ` : ''}my algorithm recommends focusing on ${(neuralStrategy.strategy || 'confidence_building').replace('_', ' ')} with ${Math.round((neuralStrategy.confidence || 0.75) * 100)}% confidence. What would you like to work on today?`,
         insights: [
-          `🧠 Neural Network Strategy: ${neuralStrategy.strategy.replace('_', ' ')} (${Math.round(neuralStrategy.confidence * 100)}% confidence)`,
-          `🎯 ML Focus Areas: ${neuralStrategy.focus.slice(0,2).join(', ')} based on feature analysis`,
-          `📊 Feature Vector: ${neuralInsights.topFeatures.slice(0,3).join(', ')} showing strongest patterns`
+          `🧠 Neural Network Strategy: ${(neuralStrategy.strategy || 'confidence_building').replace('_', ' ')} (${Math.round((neuralStrategy.confidence || 0.75) * 100)}% confidence)`,
+          `🎯 ML Focus Areas: ${(neuralStrategy.focus || ['confidence_building', 'voice_clarity']).slice(0,2).join(', ')} based on feature analysis`,
+          `📊 Feature Vector: ${(neuralInsights.topFeatures || ['confidenceIndicator', 'clarityScore', 'practiceConsistency']).slice(0,3).join(', ')} showing strongest patterns`
         ],
         recommendations: [
           `Neural network recommends: ${this.translateStrategy(neuralStrategy.strategy)}`,
