@@ -586,38 +586,6 @@ export default function AICoachRedesigned() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
-      {/* Header Section */}
-      <div className="text-center py-16 px-6 mb-8">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="mb-8"
-        >
-          <AICoachAvatar mood="happy" size="large" isAnimated={true} />
-        </motion.div>
-        
-        <motion.h1
-          className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-pink-600 bg-clip-text text-transparent mb-6"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          AI Coach
-        </motion.h1>
-        
-        <motion.p
-          className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-        >
-          Your Revolutionary Deep Learning AI Speech Coach
-        </motion.p>
-        
-
-      </div>
-
       {/* Main Interface */}
       <div className="max-w-7xl mx-auto px-6 pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 lg:h-[700px]">
