@@ -93,10 +93,13 @@ export default function Dashboard() {
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => window.location.href = '/'}
-                title="Return to Home"
+                onClick={() => {
+                  window.sessionStorage.setItem('loggedOut', 'true');
+                  window.location.href = '/';
+                }}
+                title="Logout"
               >
-                Home
+                Logout
               </Button>
             </div>
           </div>

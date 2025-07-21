@@ -25,9 +25,7 @@ export default function Dashboard() {
   const [showPrivacy, setShowPrivacy] = useState(false);
   const { user } = useAuth();
 
-  const handleHomeRedirect = () => {
-    window.location.href = "/";
-  };
+  const { logout } = useAuth();
 
   const handleProfileClick = () => {
     setShowProfile(true);
@@ -100,9 +98,9 @@ export default function Dashboard() {
                       <span>Privacy</span>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="cursor-pointer" onClick={() => window.location.href = '/'}>
+                    <DropdownMenuItem className="cursor-pointer text-red-600" onClick={logout}>
                       <Home className="mr-2 h-4 w-4" />
-                      <span>Home</span>
+                      <span>Logout</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

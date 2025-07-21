@@ -19,20 +19,16 @@ export default function HomePage() {
               <img src={yappyyLogoPath} alt="Yappyy" className="h-8" />
             </div>
             <div className="flex items-center space-x-4">
-              {isAuthenticated ? (
-                <Link href="/dashboard">
-                  <Button className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white font-button shadow-lg hover:shadow-xl transition-all duration-300">
-                    Dashboard
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
-              ) : (
-                <Link href="/login">
-                  <Button className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white font-button shadow-lg hover:shadow-xl transition-all duration-300 px-6 py-2">
-                    Sign In
-                  </Button>
-                </Link>
-              )}
+              <Button 
+                className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white font-button shadow-lg hover:shadow-xl transition-all duration-300"
+                onClick={() => {
+                  window.sessionStorage.removeItem('loggedOut');
+                  window.location.href = '/dashboard';
+                }}
+              >
+                Dashboard
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
             </div>
           </div>
         </div>
@@ -59,12 +55,17 @@ export default function HomePage() {
               AI-powered speech coaching that transforms your communication skills through real-time feedback and personalized training
             </p>
             <div className="flex justify-center mb-12">
-              <Link href="/dashboard">
-                <Button size="lg" className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white font-button shadow-lg hover:shadow-xl transition-all duration-300 px-8 py-4">
-                  Start Practicing Now
-                  <Mic className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
+              <Button 
+                size="lg" 
+                className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white font-button shadow-lg hover:shadow-xl transition-all duration-300 px-8 py-4"
+                onClick={() => {
+                  window.sessionStorage.removeItem('loggedOut');
+                  window.location.href = '/dashboard';
+                }}
+              >
+                Start Practicing Now
+                <Mic className="ml-2 h-5 w-5" />
+              </Button>
             </div>
 
             {/* Canva Video Embed */}

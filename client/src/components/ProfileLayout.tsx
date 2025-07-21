@@ -68,9 +68,12 @@ export default function ProfileLayout({ children }: ProfileLayoutProps) {
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => window.location.href = '/'}
+                onClick={() => {
+                  window.sessionStorage.setItem('loggedOut', 'true');
+                  window.location.href = '/';
+                }}
               >
-                Home
+                Logout
               </Button>
             </div>
           </div>

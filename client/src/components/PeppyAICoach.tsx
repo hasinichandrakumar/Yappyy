@@ -437,11 +437,14 @@ export default function PeppyAICoach() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => window.location.href = '/'}
+                  onClick={() => {
+                    window.sessionStorage.setItem('loggedOut', 'true');
+                    window.location.href = '/';
+                  }}
                   className="flex items-center gap-2 border-gray-300 hover:bg-gray-50"
                 >
                   <Home className="w-4 h-4" />
-                  Home
+                  Logout
                 </Button>
                 {user.id === 'demo-user-123' && (
                   <Button
