@@ -48,7 +48,7 @@ export async function resilientQuery(callback: () => Promise<any>) {
       await new Promise(resolve => setTimeout(resolve, 1000));
       try {
         return await callback();
-      } catch (retryError) {
+      } catch (retryError: any) {
         console.error('Retry failed:', retryError.message);
         throw retryError;
       }

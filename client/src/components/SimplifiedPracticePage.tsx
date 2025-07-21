@@ -585,51 +585,136 @@ export default function SimplifiedPracticePage() {
     recognitionRef.current = recognition;
   }, [sessionDuration, transcript]);
 
-  // WPM-based feedback system
+  // Enhanced comprehensive live insights system
   useEffect(() => {
-    if (isRecording && metrics.wordsPerMinute > 0) {
-      const wpm = metrics.wordsPerMinute;
-      
-      if (wpm >= 120 && wpm <= 180) {
-        setLiveFeedback(prev => {
-          // Avoid duplicate messages
-          const lastMessage = prev[prev.length - 1];
-          if (lastMessage && lastMessage.message.includes(`${wpm} WPM`)) return prev;
-          
-          return [...prev.slice(-4), {
+    if (!isRecording) return;
+
+    const generateLiveInsights = () => {
+      const currentWPM = metrics.wordsPerMinute;
+      const fillerCount = metrics.fillerWordCount;
+      const confidence = metrics.confidence;
+      const eyeContact = metrics.eyeContact;
+      const engagement = metrics.engagement;
+      const sessionMinutes = sessionDuration / 60000;
+      const lastMessage = liveFeedback[liveFeedback.length - 1];
+
+      // Voice and Speech Analytics
+      if (currentWPM > 0) {
+        if (currentWPM >= 120 && currentWPM <= 180 && (!lastMessage || !lastMessage.message.includes('Perfect pace'))) {
+          setLiveFeedback(prev => [...prev.slice(-5), {
             id: Date.now().toString(),
-            message: `Great speaking pace at ${wpm} WPM!`,
+            message: `Perfect pace at ${currentWPM} WPM! Maintain this rhythm`,
             type: 'success',
             timestamp: Date.now()
-          }];
-        });
-      } else if (wpm > 200) {
-        setLiveFeedback(prev => {
-          const lastMessage = prev[prev.length - 1];
-          if (lastMessage && lastMessage.message.includes('too fast')) return prev;
-          
-          return [...prev.slice(-4), {
+          }]);
+        } else if (currentWPM > 200 && (!lastMessage || !lastMessage.message.includes('too fast'))) {
+          setLiveFeedback(prev => [...prev.slice(-5), {
             id: Date.now().toString(),
-            message: `Speaking too fast at ${wpm} WPM - try slowing down`,
+            message: `Slow down! ${currentWPM} WPM is too fast for clarity`,
             type: 'warning',
             timestamp: Date.now()
-          }];
-        });
-      } else if (wpm < 100 && wpm > 0 && sessionDuration > 10) {
-        setLiveFeedback(prev => {
-          const lastMessage = prev[prev.length - 1];
-          if (lastMessage && lastMessage.message.includes('slowly')) return prev;
-          
-          return [...prev.slice(-4), {
+          }]);
+        } else if (currentWPM < 100 && currentWPM > 0 && sessionMinutes > 0.5 && (!lastMessage || !lastMessage.message.includes('increase pace'))) {
+          setLiveFeedback(prev => [...prev.slice(-5), {
             id: Date.now().toString(),
-            message: `Speaking slowly at ${wpm} WPM - consider increasing pace`,
+            message: `Increase energy - ${currentWPM} WPM may lose audience attention`,
             type: 'info',
             timestamp: Date.now()
-          }];
-        });
+          }]);
+        }
       }
-    }
-  }, [metrics.wordsPerMinute, isRecording, sessionDuration]);
+
+      // Filler Word Analysis
+      if (sessionMinutes > 1) {
+        const fillersPerMinute = fillerCount / sessionMinutes;
+        if (fillersPerMinute > 3 && (!lastMessage || !lastMessage.message.includes('filler'))) {
+          setLiveFeedback(prev => [...prev.slice(-5), {
+            id: Date.now().toString(),
+            message: `${Math.round(fillersPerMinute)} fillers/min detected - pause instead of "um"`,
+            type: 'warning',
+            timestamp: Date.now()
+          }]);
+        } else if (fillersPerMinute <= 1 && fillerCount > 0 && (!lastMessage || !lastMessage.message.includes('clean speech'))) {
+          setLiveFeedback(prev => [...prev.slice(-5), {
+            id: Date.now().toString(),
+            message: 'Excellent! Clean speech with minimal filler words',
+            type: 'success',
+            timestamp: Date.now()
+          }]);
+        }
+      }
+
+      // Body Language Insights
+      if (eyeContact > 70 && (!lastMessage || !lastMessage.message.includes('eye contact'))) {
+        setLiveFeedback(prev => [...prev.slice(-5), {
+          id: Date.now().toString(),
+          message: 'Great eye contact! You\'re connecting with your audience',
+          type: 'success',
+          timestamp: Date.now()
+        }]);
+      } else if (eyeContact < 50 && eyeContact > 0 && (!lastMessage || !lastMessage.message.includes('Look at camera'))) {
+        setLiveFeedback(prev => [...prev.slice(-5), {
+          id: Date.now().toString(),
+          message: 'Look at camera more - aim for 60-70% direct eye contact',
+          type: 'info',
+          timestamp: Date.now()
+        }]);
+      }
+
+      // Confidence and Energy Feedback
+      if (confidence > 80 && (!lastMessage || !lastMessage.message.includes('confident'))) {
+        setLiveFeedback(prev => [...prev.slice(-5), {
+          id: Date.now().toString(),
+          message: 'Excellent confidence! Your posture shows authority',
+          type: 'success',
+          timestamp: Date.now()
+        }]);
+      } else if (confidence < 60 && confidence > 0 && (!lastMessage || !lastMessage.message.includes('Stand tall'))) {
+        setLiveFeedback(prev => [...prev.slice(-5), {
+          id: Date.now().toString(),
+          message: 'Stand tall and use open gestures to boost confidence',
+          type: 'info',
+          timestamp: Date.now()
+        }]);
+      }
+
+      // Professional Speaking Tips (rotating)
+      const professionalTips = [
+        { message: 'Use hand gestures naturally to emphasize key points', type: 'info' as const },
+        { message: 'Vary your vocal pitch to avoid monotone delivery', type: 'info' as const },
+        { message: 'Use strategic pauses for emphasis and clarity', type: 'info' as const },
+        { message: 'Project your voice from your diaphragm', type: 'info' as const },
+        { message: 'Smile when appropriate to increase warmth', type: 'info' as const },
+        { message: 'Keep shoulders relaxed and spine straight', type: 'info' as const },
+        { message: 'Use inclusive "you" language to engage audience', type: 'info' as const },
+        { message: 'Structure your message: intro, main points, conclusion', type: 'info' as const },
+        { message: 'Use concrete examples to illustrate concepts', type: 'info' as const },
+        { message: 'Practice smooth transitions between ideas', type: 'info' as const }
+      ];
+
+      // Add professional tip every 30-45 seconds
+      if (sessionMinutes > 0.5 && Math.floor(sessionMinutes * 2) !== Math.floor((sessionMinutes - 0.1) * 2)) {
+        const tip = professionalTips[Math.floor(Math.random() * professionalTips.length)];
+        if (!lastMessage || lastMessage.message !== tip.message) {
+          setLiveFeedback(prev => [...prev.slice(-5), {
+            id: Date.now().toString(),
+            message: tip.message,
+            type: tip.type,
+            timestamp: Date.now()
+          }]);
+        }
+      }
+    };
+
+    // Initial insight after 5 seconds, then every 10-15 seconds
+    const initialTimeout = setTimeout(generateLiveInsights, 5000);
+    const interval = setInterval(generateLiveInsights, 12000 + Math.random() * 6000);
+    
+    return () => {
+      clearTimeout(initialTimeout);
+      clearInterval(interval);
+    };
+  }, [isRecording, metrics, sessionDuration, liveFeedback]);
 
   // Initialize video recording
   const initializeVideoRecording = async (): Promise<boolean> => {
