@@ -615,16 +615,7 @@ export default function AICoachRedesigned() {
           Your Revolutionary Deep Learning AI Speech Coach
         </motion.p>
         
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.7 }}
-        >
-          <Badge className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 text-base font-medium">
-            <Brain className="w-5 h-5 mr-3" />
-            Deep Learning Neural Network • Practice Session Analysis • Multi-Modal AI
-          </Badge>
-        </motion.div>
+
       </div>
 
       {/* Main Interface */}
