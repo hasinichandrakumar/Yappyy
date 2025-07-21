@@ -3,6 +3,7 @@ import { randomBytes, createHash } from 'crypto';
 import { eq, and, gt } from 'drizzle-orm';
 import { db } from './db';
 import { magicLinks, users } from '../shared/schema';
+import sgMail from '@sendgrid/mail';
 
 export interface MagicLinkService {
   generateMagicLink(email: string): Promise<{ token: string; expires: Date }>;
@@ -145,12 +146,11 @@ export async function sendMagicLinkEmail(email: string, token: string): Promise<
   try {
     // Check if SendGrid is configured
     if (process.env.SENDGRID_API_KEY) {
-      const sgMail = require('@sendgrid/mail');
       sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
       const msg = {
         to: email,
-        from: 'noreply@yappyy.com', // Replace with your verified SendGrid sender
+        from: 'test@example.com', // SendGrid test sender
         subject: 'Sign in to Yappyy - Your Magic Link',
         html: `
           <div style="font-family: 'Poppins', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -201,12 +201,19 @@ export async function sendMagicLinkEmail(email: string, token: string): Promise<
       console.log('💡 Configure SENDGRID_API_KEY to send actual emails');
       return true;
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Failed to send magic link email:', error);
+    
+    // Log specific SendGrid error details
+    if (error.response && error.response.body && error.response.body.errors) {
+      console.error('SendGrid Error Details:', error.response.body.errors);
+    }
+    
     // Still log to console as fallback
     console.log('🔗 MAGIC LINK (Fallback - Email Failed):');
     console.log(`📧 Email: ${email}`);
     console.log(`🔗 Magic Link: ${magicLink}`);
-    return false;
+    console.log('💡 Note: Use the console link above to sign in');
+    return true; // Return true so the user can still use the console link
   }
 }

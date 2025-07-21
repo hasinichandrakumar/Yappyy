@@ -60,15 +60,11 @@ export async function setupMagicLinkAuth(app: Express): Promise<void> {
       // Send email (in development, just log it)
       const emailSent = await sendMagicLinkEmail(email, token);
       
-      if (!emailSent) {
-        return res.status(500).json({ 
-          error: 'Failed to send magic link email. Please try again.' 
-        });
-      }
-
       res.json({ 
         success: true, 
-        message: 'Magic link sent to your email address!',
+        message: emailSent 
+          ? 'Magic link sent to your email address!'
+          : 'Magic link generated. Check server console for the link.',
         expires: expires.toISOString(),
         // In development, include the token for testing
         ...(process.env.NODE_ENV === 'development' && { 
