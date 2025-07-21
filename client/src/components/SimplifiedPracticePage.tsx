@@ -500,7 +500,7 @@ export default function SimplifiedPracticePage() {
                 }
               }));
               
-              const uniqueFillers = [...new Set(detectedFillers)];
+              const uniqueFillers = Array.from(new Set(detectedFillers));
               const feedbackMessage = uniqueFillers.length === 1 
                 ? `Reduce filler word: "${uniqueFillers[0]}"` 
                 : `Reduce filler words: ${uniqueFillers.slice(0, 2).join(', ')}`;

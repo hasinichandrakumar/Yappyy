@@ -680,9 +680,14 @@ export default function EnhancedAnalysisTab() {
                   <div className="text-center">
                     <div className="text-4xl font-bold text-blue-800 mb-2">
                       {(() => {
-                        const total = filteredSessions.reduce((sum: number, s: any) => sum + (s.eyeContactScore || 75), 0);
-                        const average = sessionCount > 0 ? total / sessionCount : 75;
-                        return Math.round(isNaN(average) ? 75 : average);
+                        const total = filteredSessions.reduce((sum: number, s: any) => {
+                          let score = s.eyeContactScore || 0;
+                          if (typeof score === 'string') score = parseFloat(score);
+                          if (score > 0 && score <= 1) score = score * 100;
+                          return sum + score;
+                        }, 0);
+                        const average = sessionCount > 0 ? total / sessionCount : 0;
+                        return Math.round(isNaN(average) ? 0 : average);
                       })()}%
                     </div>
                     <div className="text-sm text-blue-600 mb-3">Engagement Level</div>
@@ -698,7 +703,22 @@ export default function EnhancedAnalysisTab() {
                       const average = sessionCount > 0 ? total / sessionCount : 0;
                       return Math.round(isNaN(average) ? 0 : average);
                     })()} className="h-2 bg-blue-200" />
-                    <div className="text-xs text-blue-700 mt-2">Good eye contact maintained</div>
+                    <div className="text-xs text-blue-700 mt-2">
+                      {(() => {
+                        const total = filteredSessions.reduce((sum: number, s: any) => {
+                          let score = s.eyeContactScore || 0;
+                          if (typeof score === 'string') score = parseFloat(score);
+                          if (score > 0 && score <= 1) score = score * 100;
+                          return sum + score;
+                        }, 0);
+                        const average = sessionCount > 0 ? total / sessionCount : 0;
+                        if (average === 0) return "No eye contact data available";
+                        if (average >= 80) return "Excellent eye contact maintained";
+                        if (average >= 60) return "Good eye contact maintained";
+                        if (average >= 40) return "Eye contact needs improvement";
+                        return "Focus on making more eye contact";
+                      })()}
+                    </div>
                   </div>
                 </div>
 
@@ -722,7 +742,17 @@ export default function EnhancedAnalysisTab() {
                       const average = sessionCount > 0 ? total / sessionCount : 0;
                       return Math.round(isNaN(average) ? 0 : average);
                     })()} className="h-2 bg-emerald-200" />
-                    <div className="text-xs text-emerald-700 mt-2">Strong, confident stance</div>
+                    <div className="text-xs text-emerald-700 mt-2">
+                      {(() => {
+                        const total = filteredSessions.reduce((sum: number, s: any) => sum + (s.postureScore || 0), 0);
+                        const average = sessionCount > 0 ? total / sessionCount : 0;
+                        if (average === 0) return "No posture data available";
+                        if (average >= 80) return "Strong, confident stance";
+                        if (average >= 60) return "Good posture maintained";
+                        if (average >= 40) return "Posture needs improvement";
+                        return "Focus on standing/sitting straighter";
+                      })()}
+                    </div>
                   </div>
                 </div>
 
@@ -746,7 +776,17 @@ export default function EnhancedAnalysisTab() {
                       const average = sessionCount > 0 ? total / sessionCount : 0;
                       return Math.round(isNaN(average) ? 0 : average);
                     })()} className="h-2 bg-purple-200" />
-                    <div className="text-xs text-purple-700 mt-2">Good use of hand gestures</div>
+                    <div className="text-xs text-purple-700 mt-2">
+                      {(() => {
+                        const total = filteredSessions.reduce((sum: number, s: any) => sum + (s.gestureScore || 0), 0);
+                        const average = sessionCount > 0 ? total / sessionCount : 0;
+                        if (average === 0) return "No gesture data available";
+                        if (average >= 80) return "Excellent use of hand gestures";
+                        if (average >= 60) return "Good use of hand gestures";
+                        if (average >= 40) return "Gestures need improvement";
+                        return "Try using more natural hand movements";
+                      })()}
+                    </div>
                   </div>
                 </div>
 

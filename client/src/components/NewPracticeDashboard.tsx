@@ -308,40 +308,20 @@ export default function NewPracticeDashboard() {
                 <CardTitle className="text-lg">Live Metrics</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>Volume Level</span>
-                    <span>{Math.round(liveMetrics.volume)}%</span>
-                  </div>
-                  <Progress value={liveMetrics.volume} className="h-2" />
+                {/* Only show real metrics when available - no simulated data */}
+                <div className="text-center py-4 text-gray-500">
+                  <p className="text-sm">Real-time metrics will appear during recording</p>
                 </div>
                 
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>Voice Clarity</span>
-                    <span>{Math.round(liveMetrics.clarity)}%</span>
+                {/* Show only timer during recording - no simulated metrics */}
+                {isRecording && (
+                  <div className="text-center">
+                    <div className="text-2xl font-mono font-bold text-blue-600">
+                      {Math.floor(liveMetrics.duration / 60)}:{(liveMetrics.duration % 60).toString().padStart(2, '0')}
+                    </div>
+                    <p className="text-sm text-gray-500">Session Duration</p>
                   </div>
-                  <Progress value={liveMetrics.clarity} className="h-2" />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="text-gray-600">Pace</span>
-                    <p className="font-medium">{Math.round(liveMetrics.pace)} WPM</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">Duration</span>
-                    <p className="font-medium">{Math.floor(liveMetrics.duration / 60)}:{(liveMetrics.duration % 60).toString().padStart(2, '0')}</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">Words</span>
-                    <p className="font-medium">{liveMetrics.wordsSpoken}</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">Filler Words</span>
-                    <p className="font-medium text-orange-600">{liveMetrics.fillerWords}</p>
-                  </div>
-                </div>
+                )}
               </CardContent>
             </Card>
 

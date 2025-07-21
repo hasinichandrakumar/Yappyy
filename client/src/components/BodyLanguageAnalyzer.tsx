@@ -78,10 +78,11 @@ export default function BodyLanguageAnalyzer() {
     setIsAnalyzingSession(true);
     try {
       // Fetch actual session data - only display if real data exists
-      const response = await apiRequest(`/api/sessions/${selectedSession.id}/body-language`);
-      if (response && response.bodyLanguageData) {
-        setMetrics(response.bodyLanguageData.metrics);
-        setPostureBreakdown(response.bodyLanguageData.postureBreakdown);
+      const response = await fetch(`/api/sessions/${selectedSession.id}/body-language`);
+      const data = await response.json();
+      if (data && data.bodyLanguageData) {
+        setMetrics(data.bodyLanguageData.metrics);
+        setPostureBreakdown(data.bodyLanguageData.postureBreakdown);
       }
     } catch (error) {
       console.error('Failed to load body language data:', error);
@@ -114,12 +115,15 @@ export default function BodyLanguageAnalyzer() {
       // Simulate AI analysis delay
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Update metrics with analysis results
-      setMetrics(prev => ({
-        ...prev,
-        overallPresence: Math.min(95, prev.overallPresence + 5),
-        armGestures: Math.min(90, prev.armGestures + 10)
-      }));
+      // Update metrics with analysis results - only if previous data exists
+      setMetrics(prev => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          overallPresence: Math.min(95, prev.overallPresence + 5),
+          armGestures: Math.min(90, prev.armGestures + 10)
+        };
+      });
     } catch (error) {
       console.error('Failed to analyze posture:', error);
     } finally {
@@ -426,7 +430,6 @@ export default function BodyLanguageAnalyzer() {
             )}
           </CardContent>
         </Card>
-      </div>
       </div>
       )}
     </div>
