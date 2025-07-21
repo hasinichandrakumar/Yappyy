@@ -428,43 +428,581 @@ COACHING INSTRUCTIONS:
 Always provide personalized, data-driven coaching that builds on their unique patterns and progress.`;
   }
 
-  // Update profile based on user interaction
+  // Enhanced self-learning from user feedback interactions
   private async updateProfileFromInteraction(userId: string, userMessage: string, aiResponse: string, profile: PersonalizedNeuralProfile): Promise<void> {
-    // Analyze interaction for learning
-    const isEngagementHigh = userMessage.length > 50; // Longer messages suggest engagement
-    const isQuestionAsking = userMessage.includes('?');
-    const isGoalSetting = userMessage.toLowerCase().includes('goal') || userMessage.toLowerCase().includes('improve');
+    // Deep analysis of user interaction patterns for continuous learning
+    const interaction = await this.analyzeUserInteraction(userId, userMessage, aiResponse, profile);
     
-    // Update learning patterns
-    if (isEngagementHigh) {
-      profile.learningPatterns.practiceConsistency = Math.min(1, profile.learningPatterns.practiceConsistency + 0.05);
+    // Update neural profile based on interaction analysis
+    await this.adaptProfileFromFeedback(userId, interaction, profile);
+    
+    // Generate learning insights for continuous improvement
+    await this.createSelfLearningInsights(userId, interaction);
+    
+    // Update coaching strategy based on effectiveness
+    await this.optimizeCoachingStrategy(userId, interaction, profile);
+  }
+
+  // Comprehensive user interaction analysis for self-learning
+  private async analyzeUserInteraction(userId: string, userMessage: string, aiResponse: string, profile: PersonalizedNeuralProfile): Promise<any> {
+    const engagement = {
+      messageLength: userMessage.length,
+      questionCount: (userMessage.match(/\?/g) || []).length,
+      emotionalWords: this.detectEmotionalLanguage(userMessage),
+      responseRelevance: await this.assessResponseRelevance(userMessage, aiResponse),
+      followUpLikelihood: this.predictFollowUpEngagement(userMessage),
+      learningIntent: this.detectLearningIntent(userMessage),
+      feedbackQuality: this.assessFeedbackQuality(userMessage, profile)
+    };
+
+    const patterns = {
+      communicationStyle: this.identifyCommunicationStyle(userMessage),
+      learningPreference: this.inferLearningPreference(userMessage, profile),
+      motivationLevel: this.assessMotivationLevel(userMessage),
+      challengeAreas: this.extractChallengeAreas(userMessage),
+      successIndicators: this.detectSuccessIndicators(userMessage),
+      improvementFocus: this.identifyImprovementFocus(userMessage)
+    };
+
+    const effectiveness = {
+      coachingResonance: this.measureCoachingResonance(userMessage, profile),
+      personalityAlignment: this.assessPersonalityAlignment(userMessage, profile),
+      adaptationNeeded: this.identifyAdaptationNeeds(userMessage, profile),
+      strategyOptimization: this.suggestStrategyOptimization(userMessage, profile)
+    };
+
+    return { engagement, patterns, effectiveness, timestamp: new Date() };
+  }
+
+  // Adapt profile based on user feedback patterns
+  private async adaptProfileFromFeedback(userId: string, interaction: any, profile: PersonalizedNeuralProfile): Promise<void> {
+    // Update personality vector based on interaction patterns
+    if (interaction.engagement.emotionalWords.length > 2) {
+      profile.personalityVector.emotionalResonance = Math.min(1, profile.personalityVector.emotionalResonance + 0.05);
     }
-    
-    // Increment training iterations
+
+    if (interaction.patterns.communicationStyle === 'analytical') {
+      profile.personalityVector.analyticalThinking = Math.min(1, profile.personalityVector.analyticalThinking + 0.03);
+    }
+
+    // Update learning patterns based on engagement quality
+    if (interaction.engagement.followUpLikelihood > 0.7) {
+      profile.learningPatterns.practiceConsistency = Math.min(1, profile.learningPatterns.practiceConsistency + 0.04);
+    }
+
+    // Adjust communication preferences based on resonance
+    if (interaction.effectiveness.coachingResonance < 0.6) {
+      // Switch coaching tone if current approach isn't resonating
+      const tones = ['supportive', 'motivational', 'professional', 'friendly'];
+      const currentIndex = tones.indexOf(profile.communicationPreferences.coachingTone);
+      profile.communicationPreferences.coachingTone = tones[(currentIndex + 1) % tones.length] as any;
+    }
+
+    // Update focus areas based on user-expressed challenges
+    if (interaction.patterns.challengeAreas.length > 0) {
+      profile.learningPatterns.focusAreas = [
+        ...new Set([...interaction.patterns.challengeAreas.slice(0, 2), ...profile.learningPatterns.focusAreas])
+      ].slice(0, 3);
+    }
+
+    // Increment training iterations and update confidence
     profile.performanceMetrics.sessionCount += 1;
-    
-    // Save updated profile
+    profile.performanceMetrics.overallConfidence = this.calculateUpdatedConfidence(profile, interaction);
+
+    // Save the updated profile
     await this.saveUserProfile(userId, profile);
-    
-    // Create learning insight
-    if (isGoalSetting) {
-      const insight: InsertUserLearningInsight = {
+  }
+
+  // Create self-learning insights from interactions
+  private async createSelfLearningInsights(userId: string, interaction: any): Promise<void> {
+    const insights: InsertUserLearningInsight[] = [];
+
+    // Learning pattern insights
+    if (interaction.patterns.learningPreference !== 'unknown') {
+      insights.push({
         userId,
         insightType: 'pattern',
-        category: 'goal_setting',
-        insight: `User actively setting goals and seeking improvement guidance`,
-        confidence: 0.8,
+        category: 'learning_preference',
+        insight: `User demonstrates ${interaction.patterns.learningPreference} learning preference based on interaction style`,
+        confidence: 0.75,
         priority: 'medium',
         actionable: true,
-        metadata: { interactionType: 'goal_setting', messageLength: userMessage.length }
-      };
-      
+        metadata: { 
+          learningStyle: interaction.patterns.learningPreference,
+          interactionQuality: interaction.engagement.responseRelevance 
+        }
+      });
+    }
+
+    // Engagement insights
+    if (interaction.engagement.followUpLikelihood > 0.8) {
+      insights.push({
+        userId,
+        insightType: 'strength',
+        category: 'engagement',
+        insight: `High engagement pattern detected - user responds well to current coaching approach`,
+        confidence: 0.85,
+        priority: 'low',
+        actionable: false,
+        metadata: { 
+          engagementScore: interaction.engagement.followUpLikelihood,
+          messageLength: interaction.engagement.messageLength 
+        }
+      });
+    }
+
+    // Adaptation insights
+    if (interaction.effectiveness.adaptationNeeded.length > 0) {
+      insights.push({
+        userId,
+        insightType: 'improvement',
+        category: 'coaching_strategy',
+        insight: `Coaching adaptation needed: ${interaction.effectiveness.adaptationNeeded.join(', ')}`,
+        confidence: 0.7,
+        priority: 'high',
+        actionable: true,
+        metadata: { 
+          adaptations: interaction.effectiveness.adaptationNeeded,
+          currentStrategy: interaction.effectiveness.strategyOptimization 
+        }
+      });
+    }
+
+    // Save all insights
+    for (const insight of insights) {
       try {
         await storage.createUserLearningInsight(insight);
       } catch (error) {
-        console.error('Error creating learning insight:', error);
+        console.error('Error creating self-learning insight:', error);
       }
     }
+  }
+
+  // Optimize coaching strategy based on interaction effectiveness
+  private async optimizeCoachingStrategy(userId: string, interaction: any, profile: PersonalizedNeuralProfile): Promise<void> {
+    const currentStrategy = this.determineAdaptiveStrategy(profile);
+    const optimizedStrategy = this.calculateOptimizedStrategy(interaction, currentStrategy);
+
+    if (optimizedStrategy !== currentStrategy) {
+      // Update the coaching strategy
+      await storage.updateAiCoachProfile(userId, {
+        adaptiveStrategy: optimizedStrategy,
+        neuralConfidence: this.calculateNeuralConfidence(profile),
+        trainingIterations: profile.performanceMetrics.sessionCount + 1
+      });
+
+      // Log strategy optimization
+      await storage.createUserLearningInsight({
+        userId,
+        insightType: 'recommendation',
+        category: 'strategy_optimization',
+        insight: `Coaching strategy optimized from ${currentStrategy} to ${optimizedStrategy} based on interaction effectiveness`,
+        confidence: 0.8,
+        priority: 'medium',
+        actionable: true,
+        metadata: { 
+          previousStrategy: currentStrategy,
+          newStrategy: optimizedStrategy,
+          optimizationReason: interaction.effectiveness.strategyOptimization 
+        }
+      });
+    }
+  }
+
+  // Helper methods for interaction analysis
+  private detectEmotionalLanguage(message: string): string[] {
+    const emotionalWords = [
+      'excited', 'nervous', 'confident', 'worried', 'frustrated', 'motivated', 
+      'discouraged', 'inspired', 'overwhelmed', 'proud', 'anxious', 'hopeful'
+    ];
+    return emotionalWords.filter(word => message.toLowerCase().includes(word));
+  }
+
+  private async assessResponseRelevance(userMessage: string, aiResponse: string): Promise<number> {
+    // Simplified relevance assessment - in production could use NLP models
+    const userKeywords = userMessage.toLowerCase().split(' ').filter(word => word.length > 3);
+    const responseKeywords = aiResponse.toLowerCase().split(' ').filter(word => word.length > 3);
+    const overlap = userKeywords.filter(word => responseKeywords.includes(word)).length;
+    return Math.min(1, overlap / Math.max(userKeywords.length, 1));
+  }
+
+  private predictFollowUpEngagement(message: string): number {
+    let score = 0.5;
+    if (message.includes('?')) score += 0.2;
+    if (message.length > 50) score += 0.15;
+    if (message.toLowerCase().includes('help') || message.toLowerCase().includes('improve')) score += 0.15;
+    return Math.min(1, score);
+  }
+
+  private detectLearningIntent(message: string): string {
+    const intents = {
+      'goal_setting': ['goal', 'objective', 'target', 'aim'],
+      'skill_improvement': ['improve', 'better', 'enhance', 'develop'],
+      'problem_solving': ['problem', 'issue', 'challenge', 'difficulty'],
+      'feedback_seeking': ['feedback', 'opinion', 'thoughts', 'advice']
+    };
+
+    for (const [intent, keywords] of Object.entries(intents)) {
+      if (keywords.some(keyword => message.toLowerCase().includes(keyword))) {
+        return intent;
+      }
+    }
+    return 'general_inquiry';
+  }
+
+  private assessFeedbackQuality(message: string, profile: PersonalizedNeuralProfile): number {
+    let quality = 0.5;
+    
+    // Length indicates thoughtfulness
+    if (message.length > 100) quality += 0.2;
+    
+    // Specific questions show engagement
+    if (message.includes('how') || message.includes('what') || message.includes('why')) quality += 0.15;
+    
+    // References to personal experience show relevance
+    if (message.toLowerCase().includes('i') || message.toLowerCase().includes('my')) quality += 0.15;
+    
+    return Math.min(1, quality);
+  }
+
+  private identifyCommunicationStyle(message: string): string {
+    if (message.includes('data') || message.includes('metrics') || message.includes('analysis')) return 'analytical';
+    if (message.length < 30) return 'direct';
+    if (message.includes('feel') || message.includes('think') || message.includes('believe')) return 'collaborative';
+    return 'balanced';
+  }
+
+  private inferLearningPreference(message: string, profile: PersonalizedNeuralProfile): string {
+    if (message.includes('show') || message.includes('example') || message.includes('demonstrate')) return 'visual';
+    if (message.includes('explain') || message.includes('tell') || message.includes('describe')) return 'auditory';
+    if (message.includes('practice') || message.includes('try') || message.includes('do')) return 'kinesthetic';
+    return profile.learningPatterns.preferredFeedbackStyle || 'unknown';
+  }
+
+  private assessMotivationLevel(message: string): number {
+    let motivation = 0.5;
+    const positiveWords = ['excited', 'ready', 'motivated', 'eager', 'committed'];
+    const negativeWords = ['tired', 'frustrated', 'overwhelmed', 'discouraged'];
+    
+    positiveWords.forEach(word => {
+      if (message.toLowerCase().includes(word)) motivation += 0.15;
+    });
+    
+    negativeWords.forEach(word => {
+      if (message.toLowerCase().includes(word)) motivation -= 0.1;
+    });
+    
+    return Math.max(0, Math.min(1, motivation));
+  }
+
+  private extractChallengeAreas(message: string): string[] {
+    const challengeKeywords = {
+      'confidence': ['nervous', 'scared', 'anxious', 'confidence'],
+      'voice_clarity': ['mumble', 'unclear', 'voice', 'speaking'],
+      'eye_contact': ['eye contact', 'looking at', 'gaze'],
+      'body_language': ['gestures', 'posture', 'movement', 'body']
+    };
+
+    const challenges = [];
+    for (const [area, keywords] of Object.entries(challengeKeywords)) {
+      if (keywords.some(keyword => message.toLowerCase().includes(keyword))) {
+        challenges.push(area);
+      }
+    }
+    return challenges;
+  }
+
+  private detectSuccessIndicators(message: string): string[] {
+    const successKeywords = ['improved', 'better', 'progress', 'success', 'achievement', 'confident'];
+    return successKeywords.filter(keyword => message.toLowerCase().includes(keyword));
+  }
+
+  private identifyImprovementFocus(message: string): string {
+    const focusAreas = {
+      'presentation_skills': ['presentation', 'slides', 'audience'],
+      'conversation_skills': ['conversation', 'discussion', 'meeting'],
+      'public_speaking': ['public', 'speech', 'stage', 'podium'],
+      'interview_skills': ['interview', 'job', 'career']
+    };
+
+    for (const [focus, keywords] of Object.entries(focusAreas)) {
+      if (keywords.some(keyword => message.toLowerCase().includes(keyword))) {
+        return focus;
+      }
+    }
+    return 'general_communication';
+  }
+
+  private measureCoachingResonance(message: string, profile: PersonalizedNeuralProfile): number {
+    // Measure how well the current coaching approach resonates with user
+    let resonance = 0.5;
+    
+    // Check alignment with communication preferences
+    const preferredTone = profile.communicationPreferences.coachingTone;
+    if (preferredTone === 'supportive' && message.includes('thank') || message.includes('helpful')) {
+      resonance += 0.3;
+    }
+    
+    // Check if user is asking for different type of feedback
+    if (message.includes('more detail') && profile.communicationPreferences.detailLevel === 'summary') {
+      resonance -= 0.2;
+    }
+    
+    return Math.max(0, Math.min(1, resonance));
+  }
+
+  private assessPersonalityAlignment(message: string, profile: PersonalizedNeuralProfile): number {
+    let alignment = 0.5;
+    
+    // Check if interaction style matches personality vector
+    if (profile.personalityVector.analyticalThinking > 0.7 && message.includes('data')) {
+      alignment += 0.2;
+    }
+    
+    if (profile.personalityVector.emotionalResonance > 0.7 && this.detectEmotionalLanguage(message).length > 0) {
+      alignment += 0.2;
+    }
+    
+    return Math.max(0, Math.min(1, alignment));
+  }
+
+  private identifyAdaptationNeeds(message: string, profile: PersonalizedNeuralProfile): string[] {
+    const needs = [];
+    
+    if (message.includes('too complex') || message.includes('simpler')) {
+      needs.push('simplify_language');
+    }
+    
+    if (message.includes('more examples') || message.includes('show me')) {
+      needs.push('increase_examples');
+    }
+    
+    if (message.includes('not relevant') || message.includes('different')) {
+      needs.push('adjust_focus');
+    }
+    
+    return needs;
+  }
+
+  private suggestStrategyOptimization(message: string, profile: PersonalizedNeuralProfile): string {
+    if (message.includes('motivate') || message.includes('encourage')) return 'increase_motivation';
+    if (message.includes('specific') || message.includes('concrete')) return 'increase_specificity';
+    if (message.includes('gentle') || message.includes('supportive')) return 'increase_support';
+    return 'maintain_current';
+  }
+
+  private calculateUpdatedConfidence(profile: PersonalizedNeuralProfile, interaction: any): number {
+    let confidence = profile.performanceMetrics.overallConfidence;
+    
+    // Increase confidence based on positive interactions
+    if (interaction.engagement.followUpLikelihood > 0.7) {
+      confidence = Math.min(1, confidence + 0.02);
+    }
+    
+    // Adjust based on learning indicators
+    if (interaction.patterns.learningIntent === 'skill_improvement') {
+      confidence = Math.min(1, confidence + 0.01);
+    }
+    
+    return confidence;
+  }
+
+  private calculateOptimizedStrategy(interaction: any, currentStrategy: string): string {
+    // Optimize strategy based on interaction effectiveness
+    if (interaction.effectiveness.coachingResonance < 0.5) {
+      const strategies = ['confidence_building', 'accelerated_growth', 'focused_improvement', 'data_driven', 'balanced_development'];
+      const currentIndex = strategies.indexOf(currentStrategy);
+      return strategies[(currentIndex + 1) % strategies.length];
+    }
+    
+    return currentStrategy;
+  }
+
+  // Process explicit user feedback for continuous learning
+  async processFeedbackLearning(userId: string, feedback: any): Promise<void> {
+    try {
+      const profile = await this.getOrCreateUserProfile(userId);
+      
+      // Analyze feedback sentiment and content
+      const feedbackAnalysis = await this.analyzeFeedback(feedback);
+      
+      // Update profile based on feedback
+      await this.applyFeedbackLearning(userId, feedbackAnalysis, profile);
+      
+      // Create feedback-based insights
+      await this.createFeedbackInsights(userId, feedbackAnalysis);
+      
+      console.log(`🧠 Processed feedback learning for user ${userId}:`, feedbackAnalysis.summary);
+      
+    } catch (error) {
+      console.error('Error processing feedback learning:', error);
+    }
+  }
+
+  // Analyze user feedback for learning patterns
+  private async analyzeFeedback(feedback: any): Promise<any> {
+    const analysis = {
+      sentiment: this.analyzeFeedbackSentiment(feedback.message || ''),
+      satisfaction: feedback.rating || this.inferSatisfaction(feedback.message || ''),
+      specificIssues: this.extractFeedbackIssues(feedback.message || ''),
+      suggestionType: this.categorizeFeedbackType(feedback.message || ''),
+      actionableItems: this.extractActionableItems(feedback.message || ''),
+      urgency: this.assessFeedbackUrgency(feedback),
+      summary: this.generateFeedbackSummary(feedback)
+    };
+
+    return analysis;
+  }
+
+  // Apply feedback learning to user profile
+  private async applyFeedbackLearning(userId: string, feedbackAnalysis: any, profile: PersonalizedNeuralProfile): Promise<void> {
+    // Adjust coaching approach based on satisfaction
+    if (feedbackAnalysis.satisfaction < 3) {
+      // Low satisfaction - major coaching adjustment needed
+      const tones = ['supportive', 'motivational', 'professional', 'friendly'];
+      const currentIndex = tones.indexOf(profile.communicationPreferences.coachingTone);
+      profile.communicationPreferences.coachingTone = tones[(currentIndex + 2) % tones.length] as any;
+      
+      // Adjust detail level
+      if (feedbackAnalysis.specificIssues.includes('too_complex')) {
+        profile.communicationPreferences.detailLevel = 'summary';
+      } else if (feedbackAnalysis.specificIssues.includes('not_specific')) {
+        profile.communicationPreferences.detailLevel = 'high';
+      }
+    }
+
+    // Update focus areas based on feedback
+    if (feedbackAnalysis.actionableItems.length > 0) {
+      profile.learningPatterns.focusAreas = [
+        ...new Set([...feedbackAnalysis.actionableItems.slice(0, 2), ...profile.learningPatterns.focusAreas])
+      ].slice(0, 3);
+    }
+
+    // Adjust personality vector based on feedback sentiment
+    if (feedbackAnalysis.sentiment === 'positive') {
+      profile.personalityVector.emotionalResonance = Math.min(1, profile.personalityVector.emotionalResonance + 0.1);
+    } else if (feedbackAnalysis.sentiment === 'negative') {
+      profile.personalityVector.adaptability = Math.min(1, profile.personalityVector.adaptability + 0.15);
+    }
+
+    // Save updated profile
+    await this.saveUserProfile(userId, profile);
+  }
+
+  // Create insights from feedback analysis
+  private async createFeedbackInsights(userId: string, feedbackAnalysis: any): Promise<void> {
+    const insights: InsertUserLearningInsight[] = [];
+
+    // Satisfaction insight
+    insights.push({
+      userId,
+      insightType: feedbackAnalysis.satisfaction >= 4 ? 'strength' : 'improvement',
+      category: 'user_satisfaction',
+      insight: `User feedback indicates ${feedbackAnalysis.satisfaction >= 4 ? 'high' : 'low'} satisfaction with current coaching approach`,
+      confidence: 0.9,
+      priority: feedbackAnalysis.satisfaction < 3 ? 'high' : 'medium',
+      actionable: feedbackAnalysis.satisfaction < 4,
+      metadata: {
+        satisfaction: feedbackAnalysis.satisfaction,
+        sentiment: feedbackAnalysis.sentiment,
+        issues: feedbackAnalysis.specificIssues
+      }
+    });
+
+    // Specific improvement insights
+    if (feedbackAnalysis.actionableItems.length > 0) {
+      insights.push({
+        userId,
+        insightType: 'recommendation',
+        category: 'coaching_improvement',
+        insight: `User requested specific improvements: ${feedbackAnalysis.actionableItems.join(', ')}`,
+        confidence: 0.85,
+        priority: 'high',
+        actionable: true,
+        metadata: {
+          requestedImprovements: feedbackAnalysis.actionableItems,
+          feedbackType: feedbackAnalysis.suggestionType,
+          urgency: feedbackAnalysis.urgency
+        }
+      });
+    }
+
+    // Save insights
+    for (const insight of insights) {
+      try {
+        await storage.createUserLearningInsight(insight);
+      } catch (error) {
+        console.error('Error creating feedback insight:', error);
+      }
+    }
+  }
+
+  // Helper methods for feedback analysis
+  private analyzeFeedbackSentiment(message: string): string {
+    const positiveWords = ['great', 'excellent', 'helpful', 'useful', 'good', 'love', 'perfect', 'amazing'];
+    const negativeWords = ['bad', 'terrible', 'useless', 'confusing', 'wrong', 'hate', 'awful', 'poor'];
+    
+    const positiveCount = positiveWords.filter(word => message.toLowerCase().includes(word)).length;
+    const negativeCount = negativeWords.filter(word => message.toLowerCase().includes(word)).length;
+    
+    if (positiveCount > negativeCount) return 'positive';
+    if (negativeCount > positiveCount) return 'negative';
+    return 'neutral';
+  }
+
+  private inferSatisfaction(message: string): number {
+    const veryPositive = ['excellent', 'perfect', 'amazing', 'outstanding'];
+    const positive = ['good', 'helpful', 'useful', 'nice'];
+    const negative = ['bad', 'poor', 'confusing', 'unclear'];
+    const veryNegative = ['terrible', 'awful', 'useless', 'hate'];
+    
+    if (veryPositive.some(word => message.toLowerCase().includes(word))) return 5;
+    if (positive.some(word => message.toLowerCase().includes(word))) return 4;
+    if (negative.some(word => message.toLowerCase().includes(word))) return 2;
+    if (veryNegative.some(word => message.toLowerCase().includes(word))) return 1;
+    return 3;
+  }
+
+  private extractFeedbackIssues(message: string): string[] {
+    const issues = [];
+    if (message.includes('too complex') || message.includes('complicated')) issues.push('too_complex');
+    if (message.includes('not specific') || message.includes('vague')) issues.push('not_specific');
+    if (message.includes('too short') || message.includes('brief')) issues.push('too_brief');
+    if (message.includes('irrelevant') || message.includes('not helpful')) issues.push('irrelevant');
+    if (message.includes('tone') || message.includes('attitude')) issues.push('tone_mismatch');
+    return issues;
+  }
+
+  private categorizeFeedbackType(message: string): string {
+    if (message.includes('suggestion') || message.includes('recommend')) return 'suggestion';
+    if (message.includes('problem') || message.includes('issue')) return 'problem_report';
+    if (message.includes('like') || message.includes('love')) return 'positive_feedback';
+    if (message.includes('dislike') || message.includes('hate')) return 'negative_feedback';
+    return 'general_comment';
+  }
+
+  private extractActionableItems(message: string): string[] {
+    const items = [];
+    if (message.includes('more examples')) items.push('increase_examples');
+    if (message.includes('simpler') || message.includes('easier')) items.push('simplify_language');
+    if (message.includes('more detail')) items.push('increase_detail');
+    if (message.includes('different tone')) items.push('adjust_tone');
+    if (message.includes('focus on')) {
+      const match = message.match(/focus on (\w+)/i);
+      if (match) items.push(`focus_${match[1].toLowerCase()}`);
+    }
+    return items;
+  }
+
+  private assessFeedbackUrgency(feedback: any): string {
+    if (feedback.rating && feedback.rating <= 2) return 'high';
+    if (feedback.message && feedback.message.includes('urgent')) return 'high';
+    if (feedback.message && (feedback.message.includes('please') || feedback.message.includes('need'))) return 'medium';
+    return 'low';
+  }
+
+  private generateFeedbackSummary(feedback: any): string {
+    return `User provided ${feedback.rating ? `${feedback.rating}-star` : 'qualitative'} feedback: ${(feedback.message || '').substring(0, 100)}${feedback.message && feedback.message.length > 100 ? '...' : ''}`;
   }
 
   // Get next personalized milestone
@@ -478,6 +1016,7 @@ Always provide personalized, data-driven coaching that builds on their unique pa
     
     return 'Master advanced speaking techniques for your industry';
   }
+
 }
 
 // Export singleton instance
@@ -486,16 +1025,23 @@ export const personalizedAICoach = new PersonalizedAICoach();
 // API endpoints
 export async function getPersonalizedCoaching(req: Request, res: Response) {
   try {
-    const { message, sessionContext } = req.body;
+    const { message, sessionContext, userFeedback } = req.body;
     const userId = (req as any).user?.id || (req as any).user?.claims?.sub || 'demo-user';
     
-    console.log('🧠 Generating personalized coaching for user:', userId);
+    console.log('🧠 Generating self-learning personalized coaching for user:', userId);
+    
+    // Process any user feedback to improve AI coaching
+    if (userFeedback) {
+      await personalizedAICoach.processFeedbackLearning(userId, userFeedback);
+    }
     
     const result = await personalizedAICoach.generatePersonalizedCoaching(userId, message, sessionContext);
     
     res.json({
       success: true,
       ...result,
+      selfLearning: true,
+      feedbackProcessed: !!userFeedback,
       timestamp: new Date().toISOString()
     });
     

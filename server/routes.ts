@@ -1532,9 +1532,40 @@ RESPONSE FORMAT: Provide conversational coaching followed by specific neural ana
   
   app.post("/api/advanced-neural-analysis", demoAuth, advancedNeuralAnalysis);
   
-  // Personalized AI Coach endpoints for individual user learning
+  // Personalized AI Coach endpoints for individual user learning with self-improvement
   app.post('/api/personalized-coaching', demoAuth, getPersonalizedCoaching);
   app.get('/api/user-neural-profile', demoAuth, getUserNeuralProfile);
+  
+  // Feedback learning endpoint for AI self-improvement
+  app.post('/api/ai-feedback-learning', demoAuth, async (req: Request, res: Response) => {
+    try {
+      const { feedback, context } = req.body;
+      const userId = (req as any).user?.id || (req as any).user?.claims?.sub || 'demo-user';
+      
+      console.log('🧠 Processing AI feedback learning for user:', userId);
+      
+      await (await import('./personalized-ai-coach')).personalizedAICoach.processFeedbackLearning(userId, {
+        message: feedback,
+        rating: context?.rating,
+        category: context?.category || 'general',
+        timestamp: new Date().toISOString()
+      });
+      
+      res.json({
+        success: true,
+        message: 'Feedback processed for AI learning',
+        selfLearning: true,
+        timestamp: new Date().toISOString()
+      });
+      
+    } catch (error) {
+      console.error('Error processing AI feedback learning:', error);
+      res.status(500).json({ 
+        error: 'Failed to process feedback learning',
+        fallback: true 
+      });
+    }
+  });
   
   // GraphQL endpoint for flexible neural data queries
   app.use('/api/graphql', demoAuth, graphqlHTTP({
