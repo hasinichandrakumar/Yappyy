@@ -67,7 +67,7 @@ export async function setupGoogleAuth(app: Express) {
         {
           clientID: process.env.GOOGLE_CLIENT_ID!,
           clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-          callbackURL: `https://${process.env.REPLIT_DEV_DOMAIN}/api/auth/google/callback`,
+          callbackURL: `https://0c7fe059-a7da-4a46-a7cc-18655fec2a24-00-1znejaw22ebqj.picard.replit.dev/api/auth/google/callback`,
         },
         async (accessToken, refreshToken, profile, done) => {
           try {
@@ -151,7 +151,7 @@ export async function setupGoogleAuth(app: Express) {
       "/api/auth/google/callback",
       (req, res, next) => {
         console.log("OAuth callback received", req.query);
-        passport.authenticate("google", (err, user, info) => {
+        passport.authenticate("google", (err: any, user: any, info: any) => {
           if (err) {
             console.error("OAuth authentication error:", err);
             console.error("Error details:", JSON.stringify(err, null, 2));
