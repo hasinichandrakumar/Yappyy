@@ -4,12 +4,12 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 
-import { useAuth } from "@/hooks/useAuth.ts";
+import { useAuth } from "@/hooks/useAuth";
+import Landing from "@/components/Landing";
 import Home from "@/pages/home";
 import Dashboard from "@/pages/dashboard";
 import UserProfile from "@/components/UserProfile";
 import LogoExport from "@/pages/logo-export";
-import LoginPage from "@/pages/login";
 import NotFound from "@/pages/not-found";
 import ClubsHub from "@/components/ClubsHub";
 
@@ -38,9 +38,8 @@ function Router() {
   if (!isAuthenticated) {
     return (
       <Switch>
-  
-        <Route path="/" component={Home} />
-        <Route component={Home} />
+        <Route path="/" component={Landing} />
+        <Route component={Landing} />
       </Switch>
     );
   }
