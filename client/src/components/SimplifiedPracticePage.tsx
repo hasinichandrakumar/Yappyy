@@ -62,7 +62,7 @@ interface LiveFeedback {
   timestamp: number;
 }
 
-// Practice purposes based on template categories
+// Practice purposes - inclusive for all ages and contexts
 const practicePurposes = [
   { 
     id: 'general', 
@@ -72,53 +72,60 @@ const practicePurposes = [
     focusAreas: ['Clarity', 'Confidence', 'Pace']
   },
   { 
-    id: 'business', 
-    label: 'Work & Business', 
-    icon: Briefcase,
-    description: 'Professional presentations and meetings',
-    focusAreas: ['Authority', 'Structure', 'Persuasion']
+    id: 'storytelling', 
+    label: 'Storytelling & Creative Expression', 
+    icon: Heart,
+    description: 'Share stories, ideas, and creative thoughts',
+    focusAreas: ['Emotion', 'Creativity', 'Connection']
   },
   { 
     id: 'academic', 
-    label: 'School & Education', 
+    label: 'School & Class Presentations', 
     icon: GraduationCap,
-    description: 'Academic presentations and lectures',
+    description: 'School presentations, reports, and class projects',
     focusAreas: ['Clarity', 'Examples', 'Engagement']
   },
   { 
-    id: 'interview', 
-    label: 'Job Interviews', 
+    id: 'confidence', 
+    label: 'Building Confidence', 
+    icon: Target,
+    description: 'Overcome shyness and speak with confidence',
+    focusAreas: ['Self-assurance', 'Voice strength', 'Courage']
+  },
+  { 
+    id: 'conversation', 
+    label: 'Everyday Conversations', 
     icon: Users,
-    description: 'Interview and career preparation',
-    focusAreas: ['Confidence', 'Examples', 'Structure']
+    description: 'Improve daily communication and social skills',
+    focusAreas: ['Natural flow', 'Listening', 'Connection']
   },
   { 
     id: 'presentation', 
-    label: 'Public Speaking', 
+    label: 'Public Speaking & Presentations', 
     icon: Presentation,
-    description: 'Conferences and public presentations',
-    focusAreas: ['Engagement', 'Structure', 'Authority']
+    description: 'Formal presentations and public speaking',
+    focusAreas: ['Engagement', 'Structure', 'Clarity']
   },
   { 
     id: 'leadership', 
-    label: 'Leadership & TED Talks', 
-    icon: Target,
-    description: 'Inspirational and leadership speaking',
-    focusAreas: ['Vision', 'Inspiration', 'Authority']
+    label: 'Leadership & Inspiration', 
+    icon: TrendingUp,
+    description: 'Inspire others and lead with your voice',
+    focusAreas: ['Vision', 'Inspiration', 'Influence']
   },
   { 
     id: 'personal', 
-    label: 'Wedding & Events', 
+    label: 'Special Occasions & Events', 
     icon: Heart,
-    description: 'Weddings, celebrations, and personal events',
-    focusAreas: ['Emotion', 'Storytelling', 'Connection']
+    description: 'Celebrations, ceremonies, and special moments',
+    focusAreas: ['Emotion', 'Personal touch', 'Celebration']
   },
   { 
-    id: 'sales', 
-    label: 'Sales & Pitching', 
-    icon: TrendingUp,
-    description: 'Sales presentations and pitches',
-    focusAreas: ['Persuasion', 'Energy', 'Benefits']
+    id: 'business', 
+    label: 'Professional & Career', 
+    icon: Briefcase,
+    description: 'Professional presentations and career development',
+    focusAreas: ['Authority', 'Structure', 'Persuasion']
   }
 ];
 

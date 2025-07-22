@@ -79,6 +79,36 @@ const purposeAnalysisTemplates = {
       bodyLanguage: 'Engaging gestures, direct eye contact, enthusiastic presence'
     }
   },
+  storytelling: {
+    focusAreas: ['emotion', 'creativity', 'connection', 'narrative_flow'],
+    idealWPM: [110, 140],
+    keyElements: ['engaging narratives', 'emotional expression', 'creative language', 'personal connection'],
+    feedbackCriteria: {
+      content: 'Compelling stories, emotional depth, creative expression, relatable themes',
+      delivery: 'Expressive tone, dramatic pauses, varied pace, emotional modulation',
+      bodyLanguage: 'Expressive gestures, engaging eye contact, animated expressions'
+    }
+  },
+  confidence: {
+    focusAreas: ['self_assurance', 'voice_strength', 'courage', 'overcoming_shyness'],
+    idealWPM: [120, 150],
+    keyElements: ['bold statements', 'clear voice projection', 'assertive language', 'personal empowerment'],
+    feedbackCriteria: {
+      content: 'Confident language, personal empowerment themes, assertive messaging',
+      delivery: 'Strong voice projection, steady pace, clear articulation, confident tone',
+      bodyLanguage: 'Upright posture, direct eye contact, steady stance, open gestures'
+    }
+  },
+  conversation: {
+    focusAreas: ['natural_flow', 'listening', 'connection', 'social_comfort'],
+    idealWPM: [130, 160],
+    keyElements: ['natural dialogue', 'responsive communication', 'social awareness', 'authentic connection'],
+    feedbackCriteria: {
+      content: 'Conversational tone, relatable language, authentic expression, social awareness',
+      delivery: 'Natural rhythm, responsive pace, warm tone, comfortable delivery',
+      bodyLanguage: 'Relaxed posture, natural gestures, approachable demeanor, attentive presence'
+    }
+  },
   general: {
     focusAreas: ['clarity', 'confidence', 'pace', 'overall_improvement'],
     idealWPM: [120, 160],

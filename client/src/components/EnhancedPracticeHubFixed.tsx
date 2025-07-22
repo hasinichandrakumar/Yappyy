@@ -544,16 +544,74 @@ export default function EnhancedPracticeHubFixed() {
       };
     }
 
-    if (lowercasePurpose.includes('conversation') || lowercasePurpose.includes('social')) {
+    if (lowercasePurpose.includes('storytelling') || lowercasePurpose.includes('story') || lowercasePurpose.includes('creative')) {
+      return {
+        summary: `Your storytelling practice shows ${metrics.overallScore >= 70 ? 'captivating' : 'developing'} creative expression.`,
+        strengths: [
+          metrics.wpm >= 110 && metrics.wpm <= 140 ? "Perfect storytelling pace for emotional connection" : null,
+          metrics.fillerCount <= 4 ? "Smooth narrative flow" : null,
+          "Building creative communication skills",
+          "Developing emotional expression abilities"
+        ].filter(Boolean),
+        areas: [
+          metrics.wpm < 110 ? "Add more energy to bring your story to life" : null,
+          metrics.wpm > 160 ? "Slow down to let emotions and details shine" : null,
+          metrics.fillerCount > 6 ? "Practice smoother story transitions" : null,
+          "Work on using different voices for characters",
+          "Practice dramatic pauses for effect"
+        ].filter(Boolean)
+      };
+    }
+
+    if (lowercasePurpose.includes('confidence') || lowercasePurpose.includes('shy') || lowercasePurpose.includes('courage')) {
+      return {
+        summary: `Your confidence-building practice shows ${metrics.overallScore >= 70 ? 'growing' : 'developing'} self-assurance.`,
+        strengths: [
+          metrics.wpm >= 120 && metrics.wpm <= 150 ? "Speaking with good energy and confidence" : null,
+          metrics.fillerCount <= 3 ? "Clear, confident communication" : null,
+          "Taking brave steps to practice speaking",
+          "Building inner confidence through practice"
+        ].filter(Boolean),
+        areas: [
+          metrics.wpm < 120 ? "Speak louder and with more energy - your voice matters!" : null,
+          metrics.wpm > 170 ? "Take your time - confident speakers don't rush" : null,
+          metrics.fillerCount > 5 ? "Practice replacing 'um' with confident pauses" : null,
+          "Stand tall and speak from your heart",
+          "Remember: every practice session builds your confidence"
+        ].filter(Boolean)
+      };
+    }
+
+    if (lowercasePurpose.includes('conversation') || lowercasePurpose.includes('social') || lowercasePurpose.includes('everyday')) {
       return {
         summary: `Your conversational practice shows ${metrics.overallScore >= 70 ? 'natural' : 'improving'} communication flow.`,
         strengths: [
           metrics.fillerCount <= 5 ? "Natural speaking rhythm" : null,
-          "Working on everyday communication skills"
+          "Working on everyday communication skills",
+          "Building social confidence"
         ].filter(Boolean),
         areas: [
           metrics.fillerCount > 8 ? "Practice smoother speech transitions" : null,
-          "Develop active listening responses"
+          "Develop active listening responses",
+          "Practice asking engaging questions"
+        ].filter(Boolean)
+      };
+    }
+
+    if (lowercasePurpose.includes('academic') || lowercasePurpose.includes('school') || lowercasePurpose.includes('class')) {
+      return {
+        summary: `Your school presentation practice shows ${metrics.overallScore >= 75 ? 'excellent' : 'good'} academic communication skills.`,
+        strengths: [
+          metrics.wpm >= 120 && metrics.wpm <= 140 ? "Great pace for classroom presentations" : null,
+          metrics.fillerCount <= 3 ? "Clear, academic delivery" : null,
+          "Building important school presentation skills"
+        ].filter(Boolean),
+        areas: [
+          metrics.wpm < 120 ? "Speak with more confidence in class" : null,
+          metrics.wpm > 160 ? "Slow down so classmates can follow along" : null,
+          metrics.fillerCount > 4 ? "Practice clearer explanations" : null,
+          "Work on engaging your classmates",
+          "Practice explaining complex ideas simply"
         ].filter(Boolean)
       };
     }
