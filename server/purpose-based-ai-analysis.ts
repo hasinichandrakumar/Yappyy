@@ -80,33 +80,33 @@ const purposeAnalysisTemplates = {
     }
   },
   storytelling: {
-    focusAreas: ['emotion', 'creativity', 'connection', 'narrative_flow'],
+    focusAreas: ['creativity', 'imagination', 'emotional_connection', 'sharing_experiences'],
     idealWPM: [110, 140],
-    keyElements: ['engaging narratives', 'emotional expression', 'creative language', 'personal connection'],
+    keyElements: ['imaginative ideas', 'personal experiences', 'creative expression', 'sharing your world'],
     feedbackCriteria: {
-      content: 'Compelling stories, emotional depth, creative expression, relatable themes',
-      delivery: 'Expressive tone, dramatic pauses, varied pace, emotional modulation',
-      bodyLanguage: 'Expressive gestures, engaging eye contact, animated expressions'
+      content: 'Creative ideas, personal experiences, imaginative stories, expressing thoughts and feelings',
+      delivery: 'Expressive and animated, bringing stories to life, sharing with enthusiasm',
+      bodyLanguage: 'Animated gestures, expressive face, comfortable sharing, engaging presence'
     }
   },
   confidence: {
-    focusAreas: ['self_assurance', 'voice_strength', 'courage', 'overcoming_shyness'],
+    focusAreas: ['self_expression', 'inner_strength', 'courage_to_speak', 'finding_voice'],
     idealWPM: [120, 150],
-    keyElements: ['bold statements', 'clear voice projection', 'assertive language', 'personal empowerment'],
+    keyElements: ['authentic self-expression', 'brave communication', 'personal truth', 'unique voice discovery'],
     feedbackCriteria: {
-      content: 'Confident language, personal empowerment themes, assertive messaging',
-      delivery: 'Strong voice projection, steady pace, clear articulation, confident tone',
-      bodyLanguage: 'Upright posture, direct eye contact, steady stance, open gestures'
+      content: 'Authentic expression, personal stories, courage to share thoughts and feelings',
+      delivery: 'Speaking from the heart, honest tone, genuine expression, brave communication',
+      bodyLanguage: 'Standing tall with pride, natural gestures, authentic presence, comfortable self-expression'
     }
   },
   conversation: {
-    focusAreas: ['natural_flow', 'listening', 'connection', 'social_comfort'],
+    focusAreas: ['making_friends', 'social_comfort', 'being_yourself', 'connecting_naturally'],
     idealWPM: [130, 160],
-    keyElements: ['natural dialogue', 'responsive communication', 'social awareness', 'authentic connection'],
+    keyElements: ['natural communication', 'friendly conversation', 'being authentic', 'connecting with others'],
     feedbackCriteria: {
-      content: 'Conversational tone, relatable language, authentic expression, social awareness',
-      delivery: 'Natural rhythm, responsive pace, warm tone, comfortable delivery',
-      bodyLanguage: 'Relaxed posture, natural gestures, approachable demeanor, attentive presence'
+      content: 'Friendly tone, being yourself, sharing thoughts naturally, connecting with others',
+      delivery: 'Comfortable pace, warm and friendly tone, natural expression, relaxed communication',
+      bodyLanguage: 'Relaxed and friendly posture, natural gestures, welcoming presence, being yourself'
     }
   },
   general: {

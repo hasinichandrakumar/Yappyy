@@ -62,70 +62,70 @@ interface LiveFeedback {
   timestamp: number;
 }
 
-// Practice purposes - inclusive for all ages and contexts
+// Practice purposes - helping everyone find their voice and express themselves
 const practicePurposes = [
   { 
-    id: 'general', 
-    label: 'General Speaking', 
-    icon: Settings,
-    description: 'Overall communication improvement',
-    focusAreas: ['Clarity', 'Confidence', 'Pace']
+    id: 'confidence', 
+    label: 'Finding Your Voice & Building Confidence', 
+    icon: Heart,
+    description: 'Overcome shyness, build courage, and discover your unique voice',
+    focusAreas: ['Self-expression', 'Inner strength', 'Courage to speak']
   },
   { 
     id: 'storytelling', 
-    label: 'Storytelling & Creative Expression', 
-    icon: Heart,
-    description: 'Share stories, ideas, and creative thoughts',
-    focusAreas: ['Emotion', 'Creativity', 'Connection']
-  },
-  { 
-    id: 'academic', 
-    label: 'School & Class Presentations', 
-    icon: GraduationCap,
-    description: 'School presentations, reports, and class projects',
-    focusAreas: ['Clarity', 'Examples', 'Engagement']
-  },
-  { 
-    id: 'confidence', 
-    label: 'Building Confidence', 
-    icon: Target,
-    description: 'Overcome shyness and speak with confidence',
-    focusAreas: ['Self-assurance', 'Voice strength', 'Courage']
+    label: 'Creative Expression & Storytelling', 
+    icon: Presentation,
+    description: 'Share your imagination, stories, and creative ideas with the world',
+    focusAreas: ['Creativity', 'Imagination', 'Emotional connection']
   },
   { 
     id: 'conversation', 
-    label: 'Everyday Conversations', 
+    label: 'Connecting with Others', 
     icon: Users,
-    description: 'Improve daily communication and social skills',
-    focusAreas: ['Natural flow', 'Listening', 'Connection']
+    description: 'Build friendships and communicate naturally in everyday situations',
+    focusAreas: ['Making friends', 'Social comfort', 'Being yourself']
+  },
+  { 
+    id: 'academic', 
+    label: 'Sharing Ideas & Knowledge', 
+    icon: GraduationCap,
+    description: 'Present your thoughts, projects, and learning with confidence',
+    focusAreas: ['Sharing knowledge', 'Teaching others', 'Academic confidence']
+  },
+  { 
+    id: 'leadership', 
+    label: 'Inspiring & Leading Others', 
+    icon: TrendingUp,
+    description: 'Use your voice to make positive change and inspire others',
+    focusAreas: ['Making a difference', 'Inspiring change', 'Leading by example']
+  },
+  { 
+    id: 'personal', 
+    label: 'Special Moments & Celebrations', 
+    icon: Target,
+    description: 'Express yourself during important moments and celebrations',
+    focusAreas: ['Personal expression', 'Celebrating life', 'Meaningful moments']
   },
   { 
     id: 'presentation', 
     label: 'Public Speaking & Presentations', 
-    icon: Presentation,
-    description: 'Formal presentations and public speaking',
-    focusAreas: ['Engagement', 'Structure', 'Clarity']
-  },
-  { 
-    id: 'leadership', 
-    label: 'Leadership & Inspiration', 
-    icon: TrendingUp,
-    description: 'Inspire others and lead with your voice',
-    focusAreas: ['Vision', 'Inspiration', 'Influence']
-  },
-  { 
-    id: 'personal', 
-    label: 'Special Occasions & Events', 
-    icon: Heart,
-    description: 'Celebrations, ceremonies, and special moments',
-    focusAreas: ['Emotion', 'Personal touch', 'Celebration']
+    icon: Settings,
+    description: 'Speak confidently to groups and share your message',
+    focusAreas: ['Public confidence', 'Clear communication', 'Audience connection']
   },
   { 
     id: 'business', 
-    label: 'Professional & Career', 
+    label: 'Professional Communication', 
     icon: Briefcase,
-    description: 'Professional presentations and career development',
-    focusAreas: ['Authority', 'Structure', 'Persuasion']
+    description: 'Develop professional speaking skills for career success',
+    focusAreas: ['Professional presence', 'Career development', 'Workplace communication']
+  },
+  { 
+    id: 'general', 
+    label: 'Overall Communication Growth', 
+    icon: GraduationCap,
+    description: 'Improve all aspects of speaking and self-expression',
+    focusAreas: ['General improvement', 'Well-rounded skills', 'Personal growth']
   }
 ];
 

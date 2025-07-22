@@ -544,56 +544,60 @@ export default function EnhancedPracticeHubFixed() {
       };
     }
 
-    if (lowercasePurpose.includes('storytelling') || lowercasePurpose.includes('story') || lowercasePurpose.includes('creative')) {
+    if (lowercasePurpose.includes('storytelling') || lowercasePurpose.includes('story') || lowercasePurpose.includes('creative') || lowercasePurpose.includes('imagination')) {
       return {
-        summary: `Your storytelling practice shows ${metrics.overallScore >= 70 ? 'captivating' : 'developing'} creative expression.`,
+        summary: `Your creative expression is ${metrics.overallScore >= 70 ? 'beautifully imaginative' : 'blossoming wonderfully'}!`,
         strengths: [
-          metrics.wpm >= 110 && metrics.wpm <= 140 ? "Perfect storytelling pace for emotional connection" : null,
-          metrics.fillerCount <= 4 ? "Smooth narrative flow" : null,
-          "Building creative communication skills",
-          "Developing emotional expression abilities"
+          metrics.wpm >= 110 && metrics.wpm <= 140 ? "You're sharing your imagination at the perfect pace" : null,
+          metrics.fillerCount <= 4 ? "Your creative ideas are flowing naturally" : null,
+          "You're brave enough to share your imagination with the world",
+          "Your creative voice is unique and special",
+          "You're building the courage to express your thoughts and feelings"
         ].filter(Boolean),
         areas: [
-          metrics.wpm < 110 ? "Add more energy to bring your story to life" : null,
-          metrics.wpm > 160 ? "Slow down to let emotions and details shine" : null,
-          metrics.fillerCount > 6 ? "Practice smoother story transitions" : null,
-          "Work on using different voices for characters",
-          "Practice dramatic pauses for effect"
+          metrics.wpm < 110 ? "Let your excitement and passion shine through even more!" : null,
+          metrics.wpm > 160 ? "Take time to let your amazing ideas fully express themselves" : null,
+          metrics.fillerCount > 6 ? "Practice letting your creative thoughts flow smoothly" : null,
+          "Explore different ways to express your feelings and ideas",
+          "Remember that your imagination and creativity are gifts to share"
         ].filter(Boolean)
       };
     }
 
-    if (lowercasePurpose.includes('confidence') || lowercasePurpose.includes('shy') || lowercasePurpose.includes('courage')) {
+    if (lowercasePurpose.includes('confidence') || lowercasePurpose.includes('voice') || lowercasePurpose.includes('finding') || lowercasePurpose.includes('shy') || lowercasePurpose.includes('courage')) {
       return {
-        summary: `Your confidence-building practice shows ${metrics.overallScore >= 70 ? 'growing' : 'developing'} self-assurance.`,
+        summary: `You're ${metrics.overallScore >= 70 ? 'beautifully' : 'bravely'} discovering your unique voice and building confidence!`,
         strengths: [
-          metrics.wpm >= 120 && metrics.wpm <= 150 ? "Speaking with good energy and confidence" : null,
-          metrics.fillerCount <= 3 ? "Clear, confident communication" : null,
-          "Taking brave steps to practice speaking",
-          "Building inner confidence through practice"
+          metrics.wpm >= 120 && metrics.wpm <= 150 ? "You're speaking with wonderful energy and authenticity" : null,
+          metrics.fillerCount <= 3 ? "Your natural voice is coming through clearly" : null,
+          "You're being brave by practicing and expressing yourself",
+          "You're discovering what makes your voice special and unique",
+          "Every time you practice, you're finding more of your authentic self"
         ].filter(Boolean),
         areas: [
-          metrics.wpm < 120 ? "Speak louder and with more energy - your voice matters!" : null,
-          metrics.wpm > 170 ? "Take your time - confident speakers don't rush" : null,
-          metrics.fillerCount > 5 ? "Practice replacing 'um' with confident pauses" : null,
-          "Stand tall and speak from your heart",
-          "Remember: every practice session builds your confidence"
+          metrics.wpm < 120 ? "Let your voice shine brighter - the world needs to hear you!" : null,
+          metrics.wpm > 170 ? "Take your time to let your thoughts and feelings fully express" : null,
+          metrics.fillerCount > 5 ? "Practice letting your natural voice flow freely" : null,
+          "Remember that your thoughts and feelings matter",
+          "Keep exploring what makes your voice uniquely yours"
         ].filter(Boolean)
       };
     }
 
-    if (lowercasePurpose.includes('conversation') || lowercasePurpose.includes('social') || lowercasePurpose.includes('everyday')) {
+    if (lowercasePurpose.includes('conversation') || lowercasePurpose.includes('social') || lowercasePurpose.includes('connecting') || lowercasePurpose.includes('friends') || lowercasePurpose.includes('everyday')) {
       return {
-        summary: `Your conversational practice shows ${metrics.overallScore >= 70 ? 'natural' : 'improving'} communication flow.`,
+        summary: `You're ${metrics.overallScore >= 70 ? 'wonderfully natural' : 'beautifully growing'} at connecting with others!`,
         strengths: [
-          metrics.fillerCount <= 5 ? "Natural speaking rhythm" : null,
-          "Working on everyday communication skills",
-          "Building social confidence"
+          metrics.fillerCount <= 5 ? "You're speaking naturally and being yourself" : null,
+          "You're practicing how to connect and make friends",
+          "You're building the confidence to be social and friendly",
+          "You're learning to share yourself with others naturally"
         ].filter(Boolean),
         areas: [
-          metrics.fillerCount > 8 ? "Practice smoother speech transitions" : null,
-          "Develop active listening responses",
-          "Practice asking engaging questions"
+          metrics.fillerCount > 8 ? "Practice letting your thoughts flow more naturally" : null,
+          "Keep practicing being yourself around others",
+          "Remember that people want to connect with the real you",
+          "Practice sharing your thoughts and feelings openly"
         ].filter(Boolean)
       };
     }
