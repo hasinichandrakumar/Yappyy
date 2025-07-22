@@ -4,7 +4,8 @@ import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 
 // Replit Auth configuration
-const REPLIT_USER_ID = process.env.REPLIT_USER_ID || '';
+const REPLIT_USER_ID = process.env.REPLIT_USERID || process.env.REPL_OWNER_ID || '';
+const REPLIT_USER_NAME = process.env.REPLIT_USER || process.env.REPL_OWNER || '';
 const REPLIT_APP_NAME = process.env.REPL_SLUG || 'yappyy';
 
 interface ReplitUser {
@@ -38,6 +39,9 @@ export function getSession() {
 }
 
 export async function setupAuth(app: Express) {
+  console.log('🔧 Replit Auth Setup - User ID:', REPLIT_USER_ID);
+  console.log('🔧 Replit Auth Setup - Username:', REPLIT_USER_NAME);
+  
   app.set("trust proxy", 1);
   app.use(getSession());
 
@@ -97,17 +101,20 @@ export async function setupAuth(app: Express) {
   });
 
   // Auto-login middleware for seamless experience
-  app.use((req: any, res, next) => {
+  app.use(async (req: any, res, next) => {
     if (!req.session.user) {
       const replitUser = getReplitUser(req);
       if (replitUser) {
-        // Auto-create session for Replit users
-        storage.upsertUser({
-          id: replitUser.id,
-          email: replitUser.email || `${replitUser.username}@replit.com`,
-          firstName: replitUser.name?.split(' ')[0] || replitUser.username,
-          lastName: replitUser.name?.split(' ').slice(1).join(' ') || ''
-        }).then(user => {
+        try {
+          // Auto-create session for Replit users
+          const user = await storage.upsertUser({
+            id: replitUser.id,
+            email: replitUser.email || `${replitUser.username}@replit.com`,
+            firstName: replitUser.name?.split(' ')[0] || replitUser.username,
+            lastName: replitUser.name?.split(' ').slice(1).join(' ') || '',
+            profileImageUrl: replitUser.avatar || 'https://via.placeholder.com/150'
+          });
+          
           req.session.user = {
             replit: replitUser,
             claims: {
@@ -118,14 +125,14 @@ export async function setupAuth(app: Express) {
               profile_image_url: user.profileImageUrl
             }
           };
-          next();
-        }).catch(() => next());
-      } else {
-        next();
+          
+          console.log('🔄 Auto-login successful for Replit user:', replitUser.username);
+        } catch (error) {
+          console.error('Auto-login error:', error);
+        }
       }
-    } else {
-      next();
     }
+    next();
   });
 }
 
@@ -137,10 +144,10 @@ function getReplitUser(req: any): ReplitUser | null {
       // In Replit environment, user data is available
       return {
         id: REPLIT_USER_ID,
-        username: process.env.REPLIT_USER_NAME || REPLIT_USER_ID,
-        name: process.env.REPLIT_USER_DISPLAY_NAME,
+        username: REPLIT_USER_NAME || REPLIT_USER_ID,
+        name: process.env.REPLIT_USER_DISPLAY_NAME || REPLIT_USER_NAME,
         avatar: process.env.REPLIT_USER_AVATAR,
-        email: process.env.REPLIT_USER_EMAIL
+        email: process.env.REPLIT_USER_EMAIL || `${REPLIT_USER_NAME}@replit.com`
       };
     }
 

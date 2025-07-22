@@ -46,6 +46,23 @@ import neuralGraphQL from './graphql-schema';
 
 // Helper function to extract user ID from request with Replit Auth support
 function getUserId(req: any): string {
+  // Check session-based user first (Replit Auth and Magic Link users)
+  if (req.session?.user?.replit?.id) {
+    console.log('🔍 Using Replit session user ID:', req.session.user.replit.id);
+    return req.session.user.replit.id;
+  }
+  if (req.session?.user?.claims?.sub) {
+    console.log('🔍 Using claims sub ID:', req.session.user.claims.sub);
+    return req.session.user.claims.sub;
+  }
+  // Fallback to legacy user properties
+  console.log('🔍 Falling back to demo user - session structure:', {
+    hasSession: !!req.session,
+    hasUser: !!req.session?.user,
+    hasReplit: !!req.session?.user?.replit,
+    replitId: req.session?.user?.replit?.id,
+    claimsSub: req.session?.user?.claims?.sub
+  });
   return req.user?.replit?.id || req.user?.claims?.sub || req.user?.id || 'demo-user';
 }
 
@@ -67,16 +84,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User info endpoint for debugging and profile display
   app.get('/api/user/info', (req: any, res) => {
     const userId = getUserId(req);
+    const sessionUser = req.session?.user;
     const userInfo = {
       id: userId,
-      isAuthenticated: !!req.session?.user,
-      authType: req.user?.replit ? 'replit' : req.user?.claims ? 'session' : 'demo',
-      username: req.user?.replit?.username || 'demo-user',
-      name: req.user?.replit?.name || req.user?.claims?.first_name || 'Demo User',
-      email: req.user?.replit?.email || req.user?.claims?.email || 'demo@example.com'
+      isAuthenticated: !!sessionUser,
+      authType: sessionUser?.replit ? 'replit' : sessionUser?.claims ? 'session' : 'demo',
+      username: sessionUser?.replit?.username || sessionUser?.claims?.first_name || 'demo-user',
+      name: sessionUser?.replit?.name || sessionUser?.claims?.first_name || 'Demo User',
+      email: sessionUser?.replit?.email || sessionUser?.claims?.email || 'demo@example.com'
     };
     
     console.log('🔍 User Info Request:', userInfo);
+    console.log('🔍 Session Details:', { hasSession: !!req.session, hasUser: !!req.session?.user, replitUser: !!sessionUser?.replit });
     res.json(userInfo);
   });
 
