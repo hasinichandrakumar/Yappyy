@@ -24,22 +24,14 @@ export default function Landing() {
             🚀 Share your ideas and make a difference
           </p>
         </div>
-        <div className="space-y-4">
-          <Button 
-            onClick={() => window.location.href = '/api/login'}
-            className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg rounded-lg w-full max-w-sm"
-          >
-            Sign In with Replit
-          </Button>
-          <Button 
-            onClick={() => window.location.href = '/api/auth/google'}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg rounded-lg w-full max-w-sm"
-          >
-            Sign In with Google
-          </Button>
-        </div>
+        <Button 
+          onClick={() => window.location.href = '/api/auth/google'}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg rounded-lg"
+        >
+          Sign In with Google
+        </Button>
         <p className="mt-4 text-gray-500">
-          Choose your preferred sign-in method to start your voice discovery journey
+          Sign in with your Google account to start your voice discovery journey
         </p>
       </div>
     </div>

@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { RealTimeSessionManager } from "./redis-realtime";
 import { insertPracticeSessionSchema, insertCoachingFeedbackSchema, insertCustomTemplateSchema } from "@shared/schema";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+// Removed Replit Auth - using Google OAuth only
 import { setupGoogleAuth } from "./googleAuth";
 import { unifiedAuth, getUserId } from "./unifiedAuth";
 import { generateClubCoaching } from "./ai-coaching";
@@ -51,13 +51,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize Enhanced Real-Time Processing Engine
   const processingEngine = new RealTimeProcessingEngine();
   
-  // Setup Replit Authentication (primary auth system)
-  await setupAuth(app);
-  
-  // Setup Google Authentication (secondary auth option)
+  // Setup Google Authentication (primary auth system)
   await setupGoogleAuth(app);
 
-  // Auth routes - unified for both Replit Auth and Google OAuth
+  // Auth routes - Google OAuth only
   app.get('/api/auth/user', unifiedAuth, async (req: any, res) => {
     try {
       const userId = getUserId(req);
@@ -73,11 +70,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Google OAuth routes
-  app.get('/api/auth/google', (req, res, next) => {
-    const passport = require('passport');
-    passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
-  });
+  // Google OAuth initiation route (handled in googleAuth.ts)
 
   // Handle the custom domain OAuth callback
   app.get('/oauth2callback', (req, res, next) => {
