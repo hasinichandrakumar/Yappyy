@@ -3,7 +3,9 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { RealTimeSessionManager } from "./redis-realtime";
 import { insertPracticeSessionSchema, insertCoachingFeedbackSchema, insertCustomTemplateSchema } from "@shared/schema";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, unifiedAuth } from "./replitAuth";
+import { setupGoogleAuth } from "./googleAuth";
+import { unifiedAuth, getUserId } from "./unifiedAuth";
 import { generateClubCoaching } from "./ai-coaching";
 import { 
   generateComprehensiveAnalysis, 
@@ -51,11 +53,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Setup Replit Authentication (primary auth system)
   await setupAuth(app);
+  
+  // Setup Google Authentication (secondary auth option)
+  await setupGoogleAuth(app);
 
-  // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  // Auth routes - unified for both Replit Auth and Google OAuth
+  app.get('/api/auth/user', unifiedAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "No user ID found" });
+      }
+      
       const user = await storage.getUser(userId);
       res.json(user);
     } catch (error) {
@@ -64,8 +73,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Google OAuth routes
+  app.get('/api/auth/google', (req, res, next) => {
+    const passport = require('passport');
+    passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
+  });
+
+  app.get('/api/auth/google/callback', (req, res, next) => {
+    const passport = require('passport');
+    passport.authenticate('google', { 
+      successRedirect: '/',
+      failureRedirect: '/api/login'
+    })(req, res, next);
+  });
+
+  // Logout route (works for both auth systems)
+  app.get('/api/auth/logout', (req, res) => {
+    req.logout(() => {
+      res.redirect('/');
+    });
+  });
+
   // Template personalization route
-  app.post('/api/openai/personalize-template', isAuthenticated, async (req: any, res) => {
+  app.post('/api/openai/personalize-template', unifiedAuth, async (req: any, res) => {
     try {
       const { template, userRequest } = req.body;
       
@@ -134,7 +164,7 @@ Make the content more engaging, natural, and personalized while keeping the same
   });
 
   // Deep Learning Profile endpoint
-  app.post('/api/deep-learning-profile', isAuthenticated, async (req: any, res) => {
+  app.post('/api/deep-learning-profile', unifiedAuth, async (req: any, res) => {
     try {
       const userId = req.user?.id || req.user?.claims?.sub;
       const profileData = req.body;
@@ -161,7 +191,7 @@ Make the content more engaging, natural, and personalized while keeping the same
   });
 
   // Get Neural Coach Profile endpoint
-  app.get('/api/neural-coach-profile', isAuthenticated, async (req: any, res) => {
+  app.get('/api/neural-coach-profile', unifiedAuth, async (req: any, res) => {
     try {
       const userId = req.user?.id || req.user?.claims?.sub;
       
@@ -192,7 +222,7 @@ Make the content more engaging, natural, and personalized while keeping the same
   });
 
   // Update user profile
-  app.patch('/api/user/profile', isAuthenticated, async (req: any, res) => {
+  app.patch('/api/user/profile', unifiedAuth, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const updates = req.body;
@@ -205,7 +235,7 @@ Make the content more engaging, natural, and personalized while keeping the same
   });
 
   // Get user preferences
-  app.get('/api/user/preferences', isAuthenticated, async (req: any, res) => {
+  app.get('/api/user/preferences', unifiedAuth, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const preferences = await storage.getUserPreferences(userId);
@@ -217,7 +247,7 @@ Make the content more engaging, natural, and personalized while keeping the same
   });
 
   // Update user preference
-  app.put('/api/user/preferences', isAuthenticated, async (req: any, res) => {
+  app.put('/api/user/preferences', unifiedAuth, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const { category, setting, value } = req.body;
@@ -235,7 +265,7 @@ Make the content more engaging, natural, and personalized while keeping the same
   });
 
   // Get user achievements
-  app.get('/api/user/achievements', isAuthenticated, async (req: any, res) => {
+  app.get('/api/user/achievements', unifiedAuth, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const achievements = await storage.getUserAchievements(userId);
@@ -247,7 +277,7 @@ Make the content more engaging, natural, and personalized while keeping the same
   });
 
   // Get user streaks
-  app.get('/api/user/streaks', isAuthenticated, async (req: any, res) => {
+  app.get('/api/user/streaks', unifiedAuth, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const streaks = await storage.getUserStreaks(userId);
@@ -259,7 +289,7 @@ Make the content more engaging, natural, and personalized while keeping the same
   });
 
   // Mark onboarding as complete
-  app.post('/api/user/complete-onboarding', isAuthenticated, async (req: any, res) => {
+  app.post('/api/user/complete-onboarding', unifiedAuth, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const updatedUser = await storage.updateUserProfile(userId, {
@@ -274,7 +304,7 @@ Make the content more engaging, natural, and personalized while keeping the same
   });
 
   // Get user's daily goals
-  app.get('/api/user/daily-goals', isAuthenticated, async (req: any, res) => {
+  app.get('/api/user/daily-goals', unifiedAuth, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const goals = await storage.generateDailyGoalsForUser(userId);
@@ -286,7 +316,7 @@ Make the content more engaging, natural, and personalized while keeping the same
   });
 
   // Update daily goal progress
-  app.post('/api/user/daily-goals/:goalId/complete', isAuthenticated, async (req: any, res) => {
+  app.post('/api/user/daily-goals/:goalId/complete', unifiedAuth, async (req: any, res) => {
     try {
       const { goalId } = req.params;
       const updatedGoal = await storage.updateDailyGoal(parseInt(goalId), {
@@ -998,7 +1028,7 @@ CRITICAL: Evaluate how well this speech achieved its stated PURPOSE. Analyze the
   });
 
   // Speech persona endpoints
-  app.get("/api/speech-persona", isAuthenticated, async (req: any, res) => {
+  app.get("/api/speech-persona", unifiedAuth, async (req: any, res) => {
     try {
       const userId = req.user?.replit?.id || req.user?.id || 'demo-user';
       const persona = await storage.getSpeechPersona(userId);
@@ -1009,7 +1039,7 @@ CRITICAL: Evaluate how well this speech achieved its stated PURPOSE. Analyze the
     }
   });
 
-  app.post("/api/speech-persona/generate", isAuthenticated, async (req: any, res) => {
+  app.post("/api/speech-persona/generate", unifiedAuth, async (req: any, res) => {
     try {
       const userId = req.user?.replit?.id || req.user?.id || 'demo-user';
       const sessions = await storage.getUserPracticeSessions(userId);
@@ -1022,7 +1052,7 @@ CRITICAL: Evaluate how well this speech achieved its stated PURPOSE. Analyze the
   });
 
   // Comprehensive AI coaching analysis
-  app.post("/api/ai-coaching-comprehensive", isAuthenticated, async (req: any, res) => {
+  app.post("/api/ai-coaching-comprehensive", unifiedAuth, async (req: any, res) => {
     try {
       const { session, purpose, userProgress, previousSessions } = req.body;
 
@@ -1108,7 +1138,7 @@ Be specific, actionable, and encouraging while maintaining professional coaching
   });
 
   // Template personalization endpoint
-  app.post("/api/personalize-template", isAuthenticated, async (req: any, res) => {
+  app.post("/api/personalize-template", unifiedAuth, async (req: any, res) => {
     try {
       const { template, userPreferences } = req.body;
 
@@ -1168,7 +1198,7 @@ Make the template more engaging and personal while keeping the structure intact.
   });
 
   // Template feedback endpoint
-  app.post("/api/template-feedback", isAuthenticated, async (req: any, res) => {
+  app.post("/api/template-feedback", unifiedAuth, async (req: any, res) => {
     try {
       const { template, content } = req.body;
 
@@ -1241,16 +1271,16 @@ Provide detailed feedback on content structure, voice modulation advice, and bod
   });
 
   // Speech transcription with analytics endpoint
-  app.post("/api/deepgram-transcribe", isAuthenticated, transcribeWithAnalytics);
+  app.post("/api/deepgram-transcribe", unifiedAuth, transcribeWithAnalytics);
 
   // AI Content Analysis endpoint
-  app.post("/api/ai-content-analysis", isAuthenticated, analyzeContent);
+  app.post("/api/ai-content-analysis", unifiedAuth, analyzeContent);
 
   // Enhanced Content Analysis endpoint
-  app.post("/api/content-analysis", isAuthenticated, processContentAnalysis);
+  app.post("/api/content-analysis", unifiedAuth, processContentAnalysis);
   
   // Hyperpersonalized AI Transcript Analysis endpoint
-  app.post("/api/hyperpersonalized-transcript-analysis", isAuthenticated, async (req: any, res) => {
+  app.post("/api/hyperpersonalized-transcript-analysis", unifiedAuth, async (req: any, res) => {
     try {
       const { transcript, purpose, duration, sessionType, userProfile } = req.body;
 
@@ -1448,10 +1478,10 @@ Respond with JSON: {"additionalInsights": ["insight1", "insight2", "insight3"], 
   });
   
   // Enhanced AI Coach Deep Learning Analysis API with Session Integration
-  app.post("/api/ai-coach-deep-learning-analysis", isAuthenticated, peppyDeepLearningAnalysis);
+  app.post("/api/ai-coach-deep-learning-analysis", unifiedAuth, peppyDeepLearningAnalysis);
   
   // Enhanced AI Coach Conversation endpoint with Neural Analysis
-  app.post('/api/ai-coach-conversation', isAuthenticated, async (req: any, res) => {
+  app.post('/api/ai-coach-conversation', unifiedAuth, async (req: any, res) => {
     try {
       const { message, currentGoal, sessionData, analysisContext } = req.body;
       const userId = req.user?.id || req.user?.claims?.sub || 'demo-user';
@@ -1540,11 +1570,11 @@ RESPONSE FORMAT: Provide conversational coaching followed by specific neural ana
     }
   });
   
-  app.post("/api/advanced-neural-analysis", isAuthenticated, advancedNeuralAnalysis);
+  app.post("/api/advanced-neural-analysis", unifiedAuth, advancedNeuralAnalysis);
   
   // Personalized AI Coach endpoints for individual user learning with self-improvement
   // World-Class Neural Network AI Coach System
-  app.post('/api/personalized-coaching', isAuthenticated, async (req: any, res) => {
+  app.post('/api/personalized-coaching', unifiedAuth, async (req: any, res) => {
     try {
       const { message, sessionContext } = req.body;
       const userId = req.user?.id || req.user?.claims?.sub || 'demo-user-123';
@@ -1568,10 +1598,10 @@ RESPONSE FORMAT: Provide conversational coaching followed by specific neural ana
       });
     }
   });
-  app.get('/api/user-neural-profile', isAuthenticated, getUserNeuralProfile);
+  app.get('/api/user-neural-profile', unifiedAuth, getUserNeuralProfile);
   
   // Feedback learning endpoint for AI self-improvement
-  app.post('/api/ai-feedback-learning', isAuthenticated, async (req: Request, res: Response) => {
+  app.post('/api/ai-feedback-learning', unifiedAuth, async (req: Request, res: Response) => {
     try {
       const { feedback, context } = req.body;
       const userId = (req as any).user?.id || (req as any).user?.claims?.sub || 'demo-user';
@@ -1602,14 +1632,14 @@ RESPONSE FORMAT: Provide conversational coaching followed by specific neural ana
   });
   
   // GraphQL endpoint for flexible neural data queries
-  app.use('/api/graphql', isAuthenticated, graphqlHTTP({
+  app.use('/api/graphql', unifiedAuth, graphqlHTTP({
     schema: neuralGraphQL.schema,
     rootValue: neuralGraphQL.resolvers,
     graphiql: true, // Enable GraphQL playground in development
   }));
   
   // Enhanced Neural Pipeline endpoints
-  app.post('/api/neural-pipeline/stream', isAuthenticated, async (req: any, res) => {
+  app.post('/api/neural-pipeline/stream', unifiedAuth, async (req: any, res) => {
     try {
       const userId = req.user?.id || req.user?.claims?.sub || 'demo-user';
       const { sessionId, realTimeData } = req.body;
@@ -1640,7 +1670,7 @@ RESPONSE FORMAT: Provide conversational coaching followed by specific neural ana
   });
   
   // Performance metrics endpoint
-  app.get('/api/neural-pipeline/metrics', isAuthenticated, async (req: any, res) => {
+  app.get('/api/neural-pipeline/metrics', unifiedAuth, async (req: any, res) => {
     try {
       const metrics = enhancedNeuralPipeline.getPerformanceMetrics();
       res.json({
@@ -1655,7 +1685,7 @@ RESPONSE FORMAT: Provide conversational coaching followed by specific neural ana
   });
   
   // Neural Analysis endpoint for practice session integration
-  app.get('/api/neural-analysis/:userId', isAuthenticated, async (req: any, res) => {
+  app.get('/api/neural-analysis/:userId', unifiedAuth, async (req: any, res) => {
     try {
       const userId = req.params.userId || req.user?.id || req.user?.claims?.sub;
       const sessions = await storage.getUserPracticeSessions(userId);
@@ -1688,7 +1718,7 @@ RESPONSE FORMAT: Provide conversational coaching followed by specific neural ana
   });
   
   // User progress endpoint for Peppy
-  app.get("/api/user-progress", isAuthenticated, async (req: any, res) => {
+  app.get("/api/user-progress", unifiedAuth, async (req: any, res) => {
     try {
       const userId = req.user?.id || 'demo-user';
       const sessions = await storage.getUserPracticeSessions(userId);
@@ -1714,7 +1744,7 @@ RESPONSE FORMAT: Provide conversational coaching followed by specific neural ana
   });
 
   // User achievements endpoint
-  app.get("/api/user-achievements", isAuthenticated, async (req: any, res) => {
+  app.get("/api/user-achievements", unifiedAuth, async (req: any, res) => {
     try {
       const userId = req.user?.replit?.id || req.user?.id || 'demo-user';
       const achievements = await storage.getUserAchievements(userId);
@@ -1726,7 +1756,7 @@ RESPONSE FORMAT: Provide conversational coaching followed by specific neural ana
   });
 
   // Update achievement progress
-  app.post("/api/achievements/update", isAuthenticated, async (req: any, res) => {
+  app.post("/api/achievements/update", unifiedAuth, async (req: any, res) => {
     try {
       const userId = req.user?.replit?.id || req.user?.id || 'demo-user';
       const { achievementId, progress, metadata } = req.body;
@@ -1802,7 +1832,7 @@ RESPONSE FORMAT: Provide conversational coaching followed by specific neural ana
   });
 
   // Speech coaching chat endpoint (OpenAI only)
-  app.post("/api/speech-coaching-chat", isAuthenticated, async (req: any, res) => {
+  app.post("/api/speech-coaching-chat", unifiedAuth, async (req: any, res) => {
     try {
       const { message, transcript, purpose, chatHistory } = req.body;
 
@@ -1945,7 +1975,7 @@ Provide specific, actionable coaching tips to improve this presentation. Focus o
   });
 
   // Custom Templates API endpoints
-  app.post('/api/custom-templates', isAuthenticated, async (req: any, res) => {
+  app.post('/api/custom-templates', unifiedAuth, async (req: any, res) => {
     try {
       const userId = req.user?.id;
       if (!userId) {
@@ -1965,7 +1995,7 @@ Provide specific, actionable coaching tips to improve this presentation. Focus o
     }
   });
 
-  app.get('/api/custom-templates', isAuthenticated, async (req: any, res) => {
+  app.get('/api/custom-templates', unifiedAuth, async (req: any, res) => {
     try {
       const userId = req.user?.id;
       if (!userId) {
@@ -1980,7 +2010,7 @@ Provide specific, actionable coaching tips to improve this presentation. Focus o
     }
   });
 
-  app.post('/api/improve-template', isAuthenticated, async (req: any, res) => {
+  app.post('/api/improve-template', unifiedAuth, async (req: any, res) => {
     try {
       const { title, category, description, content } = req.body;
 
@@ -2042,12 +2072,12 @@ Return only the improved content, maintaining the same format with [brackets] fo
   app.post('/api/openai/coaching-insights', generateCoachingInsights);
   app.post('/api/openai/live-feedback', generateLiveFeedback);
   app.post('/api/openai/personalize-template', personalizeTemplate);
-  app.post('/api/openai/session-insights', isAuthenticated, generateSessionInsights);
+  app.post('/api/openai/session-insights', unifiedAuth, generateSessionInsights);
 
   // OpenAI Realtime Vision Analysis
-  app.post("/api/vision/analyze-frame", isAuthenticated, roboflowAnalyzeFrame);
-  app.post("/api/vision/analyze-posture", isAuthenticated, analyzePosture);
-  app.post("/api/vision/analyze-eye-contact", isAuthenticated, analyzeEyeContact);
+  app.post("/api/vision/analyze-frame", unifiedAuth, roboflowAnalyzeFrame);
+  app.post("/api/vision/analyze-posture", unifiedAuth, analyzePosture);
+  app.post("/api/vision/analyze-eye-contact", unifiedAuth, analyzeEyeContact);
 
   // Analyze posture from image (simplified text-based analysis)
   app.post("/api/analyze-posture", async (req, res) => {
@@ -2440,12 +2470,12 @@ Respond with detailed analysis in JSON format:
   });
 
   // AI Club Coaching endpoint
-  app.post("/api/club-coaching", isAuthenticated, generateClubCoaching);
+  app.post("/api/club-coaching", unifiedAuth, generateClubCoaching);
 
   // World-class AI coaching system
-  app.post('/api/world-class-coaching', isAuthenticated, generateWorldClassCoaching);
-  app.post('/api/live-empathic-feedback', isAuthenticated, generateLiveEmpathicFeedback);
-  app.post('/api/update-speaking-profile', isAuthenticated, updateUserSpeakingProfile);
+  app.post('/api/world-class-coaching', unifiedAuth, generateWorldClassCoaching);
+  app.post('/api/live-empathic-feedback', unifiedAuth, generateLiveEmpathicFeedback);
+  app.post('/api/update-speaking-profile', unifiedAuth, updateUserSpeakingProfile);
 
   // Advanced Multi-Modal AI Routes - Enhanced Backend Architecture
   app.post("/api/multi-modal-analysis", processMultiModalAnalysis);
@@ -2459,23 +2489,23 @@ Respond with detailed analysis in JSON format:
   });
 
   // Deep Learning Coach endpoints
-  app.post("/api/deep-learning-coach", isAuthenticated, getAdaptiveCoaching);
-  app.post("/api/advanced-public-speaking-coach", isAuthenticated, getAdvancedPublicSpeakingCoaching);
-  app.get("/api/user-learning-progress/:userId", isAuthenticated, getUserLearningProgress);
+  app.post("/api/deep-learning-coach", unifiedAuth, getAdaptiveCoaching);
+  app.post("/api/advanced-public-speaking-coach", unifiedAuth, getAdvancedPublicSpeakingCoaching);
+  app.get("/api/user-learning-progress/:userId", unifiedAuth, getUserLearningProgress);
 
   // ======= ULTRA-ADVANCED AI ENDPOINTS =======
   
   // Ultra-Advanced Multi-Modal Analysis
-  app.post("/api/ultra-advanced-analysis", isAuthenticated, processUltraAdvancedAnalysis);
+  app.post("/api/ultra-advanced-analysis", unifiedAuth, processUltraAdvancedAnalysis);
   
   // Real-Time Processing Engine
-  app.post("/api/real-time-frame", isAuthenticated, processRealTimeFrame);
+  app.post("/api/real-time-frame", unifiedAuth, processRealTimeFrame);
   
   // Advanced Voice Analysis (Enhanced versions)
-  app.post("/api/voice-coaching-enhanced", isAuthenticated, generateVoiceCoaching);
+  app.post("/api/voice-coaching-enhanced", unifiedAuth, generateVoiceCoaching);
 
   // Ultra-fast live metrics endpoint (optimized for speed)
-  app.post('/api/live-metrics-fast', isAuthenticated, async (req, res) => {
+  app.post('/api/live-metrics-fast', unifiedAuth, async (req, res) => {
     try {
       const { sessionId, volume, pitch, transcript } = req.body;
       
@@ -2520,7 +2550,7 @@ Respond with detailed analysis in JSON format:
   // ========================================
 
   // AI Fine-Tuning Endpoints
-  app.post('/api/ai-fine-tuning/speech', isAuthenticated, async (req, res) => {
+  app.post('/api/ai-fine-tuning/speech', unifiedAuth, async (req, res) => {
     try {
       const { trainingData } = req.body;
       const jobId = await aiFineTuning.fineTuneSpeechModel(trainingData);
@@ -2531,7 +2561,7 @@ Respond with detailed analysis in JSON format:
     }
   });
 
-  app.post('/api/ai-fine-tuning/emotion', isAuthenticated, async (req, res) => {
+  app.post('/api/ai-fine-tuning/emotion', unifiedAuth, async (req, res) => {
     try {
       const { trainingData } = req.body;
       const modelId = await aiFineTuning.fineTuneEmotionModel(trainingData);
@@ -2542,7 +2572,7 @@ Respond with detailed analysis in JSON format:
     }
   });
 
-  app.post('/api/ai-fine-tuning/gesture', isAuthenticated, async (req, res) => {
+  app.post('/api/ai-fine-tuning/gesture', unifiedAuth, async (req, res) => {
     try {
       const { trainingData } = req.body;
       const modelId = await aiFineTuning.fineTuneGestureModel(trainingData);
@@ -2553,7 +2583,7 @@ Respond with detailed analysis in JSON format:
     }
   });
 
-  app.get('/api/ai-fine-tuning/bias-detection/:modelId', isAuthenticated, async (req, res) => {
+  app.get('/api/ai-fine-tuning/bias-detection/:modelId', unifiedAuth, async (req, res) => {
     try {
       const { modelId } = req.params;
       const { testData } = req.body;
@@ -2566,7 +2596,7 @@ Respond with detailed analysis in JSON format:
   });
 
   // Multi-Modal Fusion Endpoints
-  app.post('/api/multi-modal-fusion/analyze', isAuthenticated, async (req, res) => {
+  app.post('/api/multi-modal-fusion/analyze', unifiedAuth, async (req, res) => {
     try {
       const { voice, video, content, context } = req.body;
       const fusedAnalysis = await multiModalFusion.fuseMultiModalAnalysis({
@@ -2580,7 +2610,7 @@ Respond with detailed analysis in JSON format:
   });
 
   // Enhanced Voice Synthesis Endpoints
-  app.post('/api/enhanced-voice-synthesis/modulation', isAuthenticated, async (req, res) => {
+  app.post('/api/enhanced-voice-synthesis/modulation', unifiedAuth, async (req, res) => {
     try {
       const { audioBuffer, targetConfig } = req.body;
       const result = await enhancedVoiceSynthesis.generateVoiceModulationDemo(
@@ -2593,7 +2623,7 @@ Respond with detailed analysis in JSON format:
     }
   });
 
-  app.post('/api/enhanced-voice-synthesis/filler-detection', isAuthenticated, async (req, res) => {
+  app.post('/api/enhanced-voice-synthesis/filler-detection', unifiedAuth, async (req, res) => {
     try {
       const { transcript, audioBuffer, duration } = req.body;
       const fillerAnalysis = await enhancedVoiceSynthesis.detectAdvancedFillerWords(
@@ -2606,7 +2636,7 @@ Respond with detailed analysis in JSON format:
     }
   });
 
-  app.post('/api/enhanced-voice-synthesis/prosody', isAuthenticated, async (req, res) => {
+  app.post('/api/enhanced-voice-synthesis/prosody', unifiedAuth, async (req, res) => {
     try {
       const { audioBuffer } = req.body;
       const prosodyFeatures = await enhancedVoiceSynthesis.analyzeProsodyFeatures(audioBuffer);
@@ -2617,7 +2647,7 @@ Respond with detailed analysis in JSON format:
     }
   });
 
-  app.post('/api/enhanced-voice-synthesis/pitch-shifting', isAuthenticated, async (req, res) => {
+  app.post('/api/enhanced-voice-synthesis/pitch-shifting', unifiedAuth, async (req, res) => {
     try {
       const { audioBuffer, targetPitchRatio } = req.body;
       const shiftedAudio = await enhancedVoiceSynthesis.generatePitchShiftingDemo(
@@ -2631,7 +2661,7 @@ Respond with detailed analysis in JSON format:
   });
 
   // Advanced Computer Vision Endpoints
-  app.post('/api/advanced-computer-vision/analyze-frame', isAuthenticated, async (req, res) => {
+  app.post('/api/advanced-computer-vision/analyze-frame', unifiedAuth, async (req, res) => {
     try {
       const { frameData, timestamp, frameNumber } = req.body;
       const videoFrame = {
@@ -2647,7 +2677,7 @@ Respond with detailed analysis in JSON format:
     }
   });
 
-  app.get('/api/advanced-computer-vision/metrics', isAuthenticated, async (req, res) => {
+  app.get('/api/advanced-computer-vision/metrics', unifiedAuth, async (req, res) => {
     try {
       const metrics = advancedComputerVision.getModelMetrics();
       res.json(metrics);
@@ -2657,7 +2687,7 @@ Respond with detailed analysis in JSON format:
     }
   });
 
-  app.post('/api/advanced-computer-vision/clear-cache', isAuthenticated, async (req, res) => {
+  app.post('/api/advanced-computer-vision/clear-cache', unifiedAuth, async (req, res) => {
     try {
       advancedComputerVision.clearCache();
       res.json({ success: true, message: 'CV cache cleared' });
@@ -2668,7 +2698,7 @@ Respond with detailed analysis in JSON format:
   });
 
   // WebRTC Integration Endpoints
-  app.get('/api/webrtc/performance-metrics', isAuthenticated, async (req, res) => {
+  app.get('/api/webrtc/performance-metrics', unifiedAuth, async (req, res) => {
     try {
       const metrics = webrtcIntegration.getPerformanceMetrics();
       res.json(metrics);
@@ -2678,7 +2708,7 @@ Respond with detailed analysis in JSON format:
     }
   });
 
-  app.get('/api/webrtc/connections', isAuthenticated, async (req, res) => {
+  app.get('/api/webrtc/connections', unifiedAuth, async (req, res) => {
     try {
       const activeConnections = webrtcIntegration.getActiveConnectionsCount();
       res.json({ activeConnections });
@@ -2688,7 +2718,7 @@ Respond with detailed analysis in JSON format:
     }
   });
 
-  app.post('/api/webrtc/broadcast', isAuthenticated, async (req, res) => {
+  app.post('/api/webrtc/broadcast', unifiedAuth, async (req, res) => {
     try {
       const { channel, data } = req.body;
       const sentCount = webrtcIntegration.broadcast(channel, data);
@@ -2700,7 +2730,7 @@ Respond with detailed analysis in JSON format:
   });
 
   // World-Class Performance Monitoring
-  app.get('/api/world-class-metrics', isAuthenticated, async (req, res) => {
+  app.get('/api/world-class-metrics', unifiedAuth, async (req, res) => {
     try {
       const metrics = {
         ai_fine_tuning: {
@@ -2760,7 +2790,7 @@ Respond with detailed analysis in JSON format:
   console.log('🌟 WORLD-CLASS AI ARCHITECTURE FULLY DEPLOYED');
 
   // Settings and Privacy endpoints
-  app.post('/api/user-settings', isAuthenticated, async (req: any, res) => {
+  app.post('/api/user-settings', unifiedAuth, async (req: any, res) => {
     try {
       const userId = req.user?.id || req.user?.claims?.sub;
       const settingsData = req.body;
@@ -2781,7 +2811,7 @@ Respond with detailed analysis in JSON format:
     }
   });
 
-  app.post('/api/privacy-settings', isAuthenticated, async (req: any, res) => {
+  app.post('/api/privacy-settings', unifiedAuth, async (req: any, res) => {
     try {
       const userId = req.user?.id || req.user?.claims?.sub;
       const privacyData = req.body;
@@ -2813,7 +2843,7 @@ Respond with detailed analysis in JSON format:
     }
   });
 
-  app.post('/api/export-data', isAuthenticated, async (req: any, res) => {
+  app.post('/api/export-data', unifiedAuth, async (req: any, res) => {
     try {
       const userId = req.user?.id || req.user?.claims?.sub;
       
@@ -2876,7 +2906,7 @@ Respond with detailed analysis in JSON format:
     }
   });
 
-  app.delete('/api/delete-user-data', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/delete-user-data', unifiedAuth, async (req: any, res) => {
     try {
       const userId = req.user?.id || req.user?.claims?.sub;
       
@@ -2913,7 +2943,7 @@ Respond with detailed analysis in JSON format:
   });
 
   // Train custom Roboflow model for specialized analysis
-  app.post('/api/roboflow/train-model', isAuthenticated, async (req, res) => {
+  app.post('/api/roboflow/train-model', unifiedAuth, async (req, res) => {
     await trainCustomVisionModel(req, res);
   });
 
@@ -3051,7 +3081,7 @@ Respond with detailed analysis in JSON format:
   // =====================================================
 
   // Purpose-based AI analysis endpoint
-  app.post('/api/purpose-based-analysis', isAuthenticated, async (req: any, res) => {
+  app.post('/api/purpose-based-analysis', unifiedAuth, async (req: any, res) => {
     try {
       const { transcript, practiceCategory, sessionData } = req.body;
       
@@ -3079,7 +3109,7 @@ Respond with detailed analysis in JSON format:
   });
 
   // Enhanced session insights with purpose context
-  app.post('/api/generate-session-insights', isAuthenticated, async (req: any, res) => {
+  app.post('/api/generate-session-insights', unifiedAuth, async (req: any, res) => {
     try {
       const { sessionData, fillerCount, duration, wpm, practiceCategory } = req.body;
       
