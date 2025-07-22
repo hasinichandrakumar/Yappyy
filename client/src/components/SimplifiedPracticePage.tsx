@@ -7,13 +7,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Mic, Square, Edit3, Save, Eye, 
   Activity, TrendingUp, FileText, Users,
   Video, Play, Pause, RotateCcw, Download,
-  Library, Camera, Briefcase, GraduationCap, 
-  Heart, Target, Presentation, Settings
+  Library, Camera
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { SessionDataViewer } from '@/components/SessionDataViewer';
@@ -62,81 +60,13 @@ interface LiveFeedback {
   timestamp: number;
 }
 
-// Practice purposes - helping everyone find their voice and express themselves
-const practicePurposes = [
-  { 
-    id: 'confidence', 
-    label: 'Finding Your Voice & Building Confidence', 
-    icon: Heart,
-    description: 'Overcome shyness, build courage, and discover your unique voice',
-    focusAreas: ['Self-expression', 'Inner strength', 'Courage to speak']
-  },
-  { 
-    id: 'storytelling', 
-    label: 'Creative Expression & Storytelling', 
-    icon: Presentation,
-    description: 'Share your imagination, stories, and creative ideas with the world',
-    focusAreas: ['Creativity', 'Imagination', 'Emotional connection']
-  },
-  { 
-    id: 'conversation', 
-    label: 'Connecting with Others', 
-    icon: Users,
-    description: 'Build friendships and communicate naturally in everyday situations',
-    focusAreas: ['Making friends', 'Social comfort', 'Being yourself']
-  },
-  { 
-    id: 'academic', 
-    label: 'Sharing Ideas & Knowledge', 
-    icon: GraduationCap,
-    description: 'Present your thoughts, projects, and learning with confidence',
-    focusAreas: ['Sharing knowledge', 'Teaching others', 'Academic confidence']
-  },
-  { 
-    id: 'leadership', 
-    label: 'Inspiring & Leading Others', 
-    icon: TrendingUp,
-    description: 'Use your voice to make positive change and inspire others',
-    focusAreas: ['Making a difference', 'Inspiring change', 'Leading by example']
-  },
-  { 
-    id: 'personal', 
-    label: 'Special Moments & Celebrations', 
-    icon: Target,
-    description: 'Express yourself during important moments and celebrations',
-    focusAreas: ['Personal expression', 'Celebrating life', 'Meaningful moments']
-  },
-  { 
-    id: 'presentation', 
-    label: 'Public Speaking & Presentations', 
-    icon: Settings,
-    description: 'Speak confidently to groups and share your message',
-    focusAreas: ['Public confidence', 'Clear communication', 'Audience connection']
-  },
-  { 
-    id: 'business', 
-    label: 'Professional Communication', 
-    icon: Briefcase,
-    description: 'Develop professional speaking skills for career success',
-    focusAreas: ['Professional presence', 'Career development', 'Workplace communication']
-  },
-  { 
-    id: 'general', 
-    label: 'Overall Communication Growth', 
-    icon: GraduationCap,
-    description: 'Improve all aspects of speaking and self-expression',
-    focusAreas: ['General improvement', 'Well-rounded skills', 'Personal growth']
-  }
-];
-
 export default function SimplifiedPracticePage() {
   // Core session state
   const [isRecording, setIsRecording] = useState(false);
   const [sessionName, setSessionName] = useState("");
   const [showAnalysisPage, setShowAnalysisPage] = useState(false);
   const [sessionAnalysisData, setSessionAnalysisData] = useState<any>(null);
-  const [sessionPurpose, setSessionPurpose] = useState("general");
-  const [practiceCategory, setPracticeCategory] = useState("general");
+  const [sessionPurpose, setSessionPurpose] = useState("");
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingPurpose, setIsEditingPurpose] = useState(false);
   const [sessionDuration, setSessionDuration] = useState(0);
@@ -1275,7 +1205,6 @@ export default function SimplifiedPracticePage() {
         fillerWordsSo: Math.floor(metrics.fillerWordCount * 0.3), // Estimate "so" fillers
         name: sessionName || `Session ${Date.now()}`,
         purpose: sessionPurpose || 'General practice session',
-        practiceCategory: practiceCategory,
         // Enhanced AI analysis fields
         aiAnalysis: {
           overallPerformance: overallConfidence,
@@ -1483,77 +1412,28 @@ export default function SimplifiedPracticePage() {
                   </div>
                 )}
                 
-                {/* Practice Purpose Dropdown */}
-                <div className="mt-4">
-                  <label className="text-sm font-medium text-gray-700 mb-2 block">Practice Purpose</label>
-                  <Select value={practiceCategory} onValueChange={(value) => {
-                    setPracticeCategory(value);
-                    const purpose = practicePurposes.find(p => p.id === value);
-                    setSessionPurpose(purpose?.description || value);
-                    toast({
-                      title: "Practice Purpose Updated",
-                      description: `AI will provide ${purpose?.label.toLowerCase()} feedback`,
-                    });
-                  }}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select practice purpose" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {practicePurposes.map((purpose) => {
-                        const IconComponent = purpose.icon;
-                        return (
-                          <SelectItem key={purpose.id} value={purpose.id}>
-                            <div className="flex items-center gap-2">
-                              <IconComponent className="w-4 h-4" />
-                              <span>{purpose.label}</span>
-                            </div>
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
-                  
-                  {/* Purpose Description and Focus Areas */}
-                  {practiceCategory && practiceCategory !== 'general' && (
-                    <div className="mt-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                      <div className="text-sm text-blue-800 mb-1">
-                        <strong>Focus Areas:</strong> {practicePurposes.find(p => p.id === practiceCategory)?.focusAreas.join(', ')}
-                      </div>
-                      <div className="text-xs text-blue-600">
-                        AI analysis will be tailored for {practicePurposes.find(p => p.id === practiceCategory)?.label.toLowerCase()} contexts
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Custom Purpose Input (Optional) */}
-                  {isEditingPurpose && (
-                    <div className="mt-2">
-                      <Textarea
-                        value={sessionPurpose}
-                        onChange={(e) => setSessionPurpose(e.target.value)}
-                        placeholder="Add specific details about your practice session..."
-                        className="min-h-[60px] text-sm"
-                      />
-                      <div className="flex gap-2 mt-2">
-                        <Button size="sm" onClick={saveSessionPurpose}>
-                          <Save className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" onClick={() => setIsEditingPurpose(false)}>
-                          Cancel
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                  
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => setIsEditingPurpose(true)}
-                    className="mt-2 text-xs text-gray-500"
-                  >
-                    Add specific details...
-                  </Button>
-                </div>
+                {isEditingPurpose ? (
+                  <div className="flex items-center gap-2 mt-2">
+                    <Textarea
+                      value={sessionPurpose}
+                      onChange={(e) => setSessionPurpose(e.target.value)}
+                      placeholder="What's your goal for this session?"
+                      className="min-h-[60px]"
+                    />
+                    <Button size="sm" onClick={saveSessionPurpose}>
+                      <Save className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 mt-2">
+                    <p className="text-lg text-gray-600">
+                      {sessionPurpose || "Click to set your session goal"}
+                    </p>
+                    <Button variant="ghost" size="sm" onClick={() => setIsEditingPurpose(true)}>
+                      <Edit3 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
               </div>
 
               {/* Recording Controls */}

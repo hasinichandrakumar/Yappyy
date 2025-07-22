@@ -67,7 +67,7 @@ export async function setupGoogleAuth(app: Express) {
         {
           clientID: process.env.GOOGLE_CLIENT_ID!,
           clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-          callbackURL: `https://yappyy.com/oauth2callback`,
+          callbackURL: `https://${process.env.REPLIT_DEV_DOMAIN}/api/auth/google/callback`,
         },
         async (accessToken, refreshToken, profile, done) => {
           try {
@@ -147,7 +147,33 @@ export async function setupGoogleAuth(app: Express) {
     // Google OAuth routes
     app.get("/api/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 
-    // Note: OAuth callback is handled in routes.ts as /oauth2callback to match yappyy.com/oauth2callback
+    app.get(
+      "/api/auth/google/callback",
+      (req, res, next) => {
+        console.log("OAuth callback received", req.query);
+        passport.authenticate("google", (err, user, info) => {
+          if (err) {
+            console.error("OAuth authentication error:", err);
+            console.error("Error details:", JSON.stringify(err, null, 2));
+            return res.redirect("/?error=auth_error&details=" + encodeURIComponent(err.message || "Unknown error"));
+          }
+          if (!user) {
+            console.error("OAuth authentication failed:", info);
+            console.error("Info details:", JSON.stringify(info, null, 2));
+            return res.redirect("/?error=auth_failed&details=" + encodeURIComponent(info?.message || "Authentication failed"));
+          }
+          req.logIn(user, (err) => {
+            if (err) {
+              console.error("Login error:", err);
+              console.error("Login error details:", JSON.stringify(err, null, 2));
+              return res.redirect("/?error=login_error&details=" + encodeURIComponent(err.message || "Login failed"));
+            }
+            console.log("User successfully authenticated:", user.id);
+            return res.redirect("/dashboard");
+          });
+        })(req, res, next);
+      }
+    );
 
     // Logout route
     app.get("/api/auth/logout", (req, res) => {

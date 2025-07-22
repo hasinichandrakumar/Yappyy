@@ -126,32 +126,6 @@ export const detectSessionPurpose = (purpose: string): PurposeContext => {
     };
   }
 
-  // Confidence Building
-  if (purposeLower.includes('confidence') || purposeLower.includes('shy') ||
-      purposeLower.includes('nervous') || purposeLower.includes('courage') ||
-      purposeLower.includes('overcome') || purposeLower.includes('self-esteem')) {
-    return {
-      category: 'confidence',
-      subcategory: 'confidence_building',
-      idealWPM: [120, 150],
-      keyPhrases: ['I can', 'I believe', 'strong', 'confident', 'capable', 'determined'],
-      feedbackFocus: ['self_assurance', 'voice_strength', 'courage', 'empowerment']
-    };
-  }
-
-  // Everyday Conversations
-  if (purposeLower.includes('conversation') || purposeLower.includes('chat') ||
-      purposeLower.includes('talk') || purposeLower.includes('social') ||
-      purposeLower.includes('friends') || purposeLower.includes('daily')) {
-    return {
-      category: 'conversation',
-      subcategory: 'social_communication',
-      idealWPM: [130, 160],
-      keyPhrases: ['like', 'really', 'you know', 'actually', 'basically', 'honestly'],
-      feedbackFocus: ['natural_flow', 'listening', 'connection', 'social_comfort']
-    };
-  }
-
   // Default: General speaking
   return {
     category: 'general',
@@ -219,7 +193,7 @@ export const generateContextualFeedback = (
     };
   }
 
-  if (wpm > maxWPM) {
+  if (wmp > maxWPM) {
     const slowDownMessages: Record<string, string> = {
       sales: 'Slow down slightly - give prospects time to absorb your value proposition',
       interview: 'Reduce pace for interviews - measured speech shows control and confidence',
