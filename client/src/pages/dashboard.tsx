@@ -24,8 +24,10 @@ export default function Dashboard() {
   const [showSettings, setShowSettings] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
   const { user } = useAuth();
-
-  const { logout } = useAuth();
+  
+  const handleLogout = () => {
+    window.location.href = '/api/auth/logout';
+  };
 
   const handleProfileClick = () => {
     setShowProfile(true);
@@ -64,9 +66,9 @@ export default function Dashboard() {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                       <Avatar className="h-10 w-10">
-                        <AvatarImage src={user.profileImageUrl} alt={user.firstName} />
+                        <AvatarImage src={(user as any).profileImageUrl} alt={(user as any).firstName} />
                         <AvatarFallback className="bg-gradient-to-br from-blue-500 to-cyan-500 text-white">
-                          {getInitials(user.firstName, user.lastName)}
+                          {getInitials((user as any).firstName, (user as any).lastName)}
                         </AvatarFallback>
                       </Avatar>
                     </Button>
@@ -74,12 +76,12 @@ export default function Dashboard() {
                   <DropdownMenuContent className="w-56" align="end" forceMount>
                     <div className="flex items-center justify-start gap-2 p-2">
                       <div className="flex flex-col space-y-1 leading-none">
-                        {user.firstName && (
-                          <p className="font-medium">{user.firstName} {user.lastName}</p>
+                        {(user as any).firstName && (
+                          <p className="font-medium">{(user as any).firstName} {(user as any).lastName}</p>
                         )}
-                        {user.email && (
+                        {(user as any).email && (
                           <p className="w-[200px] truncate text-sm text-muted-foreground">
-                            {user.email}
+                            {(user as any).email}
                           </p>
                         )}
                       </div>
@@ -98,7 +100,7 @@ export default function Dashboard() {
                       <span>Privacy</span>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="cursor-pointer text-red-600" onClick={logout}>
+                    <DropdownMenuItem className="cursor-pointer text-red-600" onClick={handleLogout}>
                       <Home className="mr-2 h-4 w-4" />
                       <span>Logout</span>
                     </DropdownMenuItem>
