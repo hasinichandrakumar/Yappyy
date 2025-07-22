@@ -5,6 +5,7 @@ import { RealTimeSessionManager } from "./redis-realtime";
 import { insertPracticeSessionSchema, insertCoachingFeedbackSchema, insertCustomTemplateSchema } from "@shared/schema";
 import { setupMagicLinkAuth, requireAuth } from "./auth-magic-link-routes";
 import { setupDemoAuth, demoAuth } from "./demo-auth";
+import { setupAuth, isAuthenticated } from "./replitAuth";
 import { generateClubCoaching } from "./ai-coaching";
 import { 
   generateComprehensiveAnalysis, 
@@ -43,17 +44,41 @@ import { roboflowVision, analyzeVideoFrame as roboflowAnalyzeFrame, trainCustomV
 import { graphqlHTTP } from 'express-graphql';
 import neuralGraphQL from './graphql-schema';
 
+// Helper function to extract user ID from request with Replit Auth support
+function getUserId(req: any): string {
+  return req.user?.replit?.id || req.user?.claims?.sub || req.user?.id || 'demo-user';
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   const server = createServer(app);
   
   // Initialize Enhanced Real-Time Processing Engine
   const processingEngine = new RealTimeProcessingEngine();
   
-  // Setup Magic Link Authentication (primary auth system)
+  // Setup Replit Authentication (primary auth system)
+  await setupAuth(app);
+  
+  // Setup Magic Link Authentication (secondary)
   await setupMagicLinkAuth(app);
   
   // Setup Demo Authentication (fallback for development)
   setupDemoAuth(app);
+
+  // User info endpoint for debugging and profile display
+  app.get('/api/user/info', (req: any, res) => {
+    const userId = getUserId(req);
+    const userInfo = {
+      id: userId,
+      isAuthenticated: !!req.session?.user,
+      authType: req.user?.replit ? 'replit' : req.user?.claims ? 'session' : 'demo',
+      username: req.user?.replit?.username || 'demo-user',
+      name: req.user?.replit?.name || req.user?.claims?.first_name || 'Demo User',
+      email: req.user?.replit?.email || req.user?.claims?.email || 'demo@example.com'
+    };
+    
+    console.log('🔍 User Info Request:', userInfo);
+    res.json(userInfo);
+  });
 
   // Template personalization route
   app.post('/api/openai/personalize-template', demoAuth, async (req: any, res) => {
@@ -792,7 +817,7 @@ CRITICAL: Evaluate how well this speech achieved its stated PURPOSE. Analyze the
   // Get user practice sessions with resilient error handling
   app.get("/api/practice-sessions", async (req: any, res) => {
     try {
-      const userId = req.user?.id || 'demo-user';
+      const userId = getUserId(req);
       const sessions = await storage.getUserPracticeSessions(userId);
       res.json(sessions);
     } catch (error: any) {
@@ -957,7 +982,7 @@ CRITICAL: Evaluate how well this speech achieved its stated PURPOSE. Analyze the
     try {
       const validatedData = insertPracticeSessionSchema.parse({
         ...req.body,
-        userId: req.user?.id || 'demo-user'
+        userId: getUserId(req)
       });
       const session = await storage.createPracticeSession(validatedData);
       res.status(201).json(session);
