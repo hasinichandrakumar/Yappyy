@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { RealTimeSessionManager } from "./redis-realtime";
 import { insertPracticeSessionSchema, insertCoachingFeedbackSchema, insertCustomTemplateSchema } from "@shared/schema";
-import { setupAuth, unifiedAuth } from "./replitAuth";
+import { setupAuth, isAuthenticated } from "./replitAuth";
 import { setupGoogleAuth } from "./googleAuth";
 import { unifiedAuth, getUserId } from "./unifiedAuth";
 import { generateClubCoaching } from "./ai-coaching";
@@ -79,11 +79,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
   });
 
-  app.get('/api/auth/google/callback', (req, res, next) => {
+  // Handle the custom domain OAuth callback
+  app.get('/oauth2callback', (req, res, next) => {
+    console.log("OAuth callback received at /oauth2callback", req.query);
     const passport = require('passport');
-    passport.authenticate('google', { 
-      successRedirect: '/',
-      failureRedirect: '/api/login'
+    passport.authenticate('google', (err: any, user: any, info: any) => {
+      if (err) {
+        console.error("OAuth authentication error:", err);
+        return res.redirect("/?error=auth_error&details=" + encodeURIComponent(err.message || "Unknown error"));
+      }
+      if (!user) {
+        console.error("OAuth authentication failed:", info);
+        return res.redirect("/?error=auth_failed&details=" + encodeURIComponent(info?.message || "Authentication failed"));
+      }
+      req.logIn(user, (loginErr: any) => {
+        if (loginErr) {
+          console.error("Login error:", loginErr);
+          return res.redirect("/?error=login_error&details=" + encodeURIComponent(loginErr.message || "Login failed"));
+        }
+        console.log("User successfully authenticated via Google OAuth:", user.id);
+        return res.redirect("/");
+      });
     })(req, res, next);
   });
 
