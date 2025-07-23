@@ -1,15 +1,24 @@
-// Open access - no authentication required, but add logout capability
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 interface User {
   id: string;
   email: string;
-  firstName: string;
-  lastName: string;
+  name: string;
+  username: string;
+  authType: string;
+  isAuthenticated: boolean;
+  profileImageUrl?: string;
 }
 
 export function useAuth() {
   const [isLoggedOut, setIsLoggedOut] = useState(false);
+  
+  // Fetch real user data from API
+  const { data: userData, isLoading, error } = useQuery({
+    queryKey: ['/api/user/info'],
+    enabled: typeof window !== 'undefined' && !isLoggedOut && window.sessionStorage.getItem('loggedOut') !== 'true'
+  });
   
   // Check if user explicitly logged out
   const loggedOut = typeof window !== 'undefined' && 
@@ -19,7 +28,10 @@ export function useAuth() {
     if (typeof window !== 'undefined') {
       window.sessionStorage.setItem('loggedOut', 'true');
       setIsLoggedOut(true);
-      window.location.href = '/';
+      // Call logout endpoint
+      fetch('/api/auth/logout', { method: 'GET' }).then(() => {
+        window.location.href = '/';
+      });
     }
   };
 
@@ -30,17 +42,15 @@ export function useAuth() {
     }
   };
 
+  const user = loggedOut ? null : userData as User;
+  const isAuthenticated = !loggedOut && (userData as any)?.isAuthenticated === true;
+
   return {
-    user: loggedOut ? null : { 
-      id: 'guest', 
-      email: 'guest@yappyy.com', 
-      firstName: 'Guest', 
-      lastName: 'User' 
-    } as User,
-    isLoading: false,
-    isAuthenticated: !loggedOut,
+    user,
+    isLoading,
+    isAuthenticated,
     logout,
     login,
-    error: null
+    error
   };
 }

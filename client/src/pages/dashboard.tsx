@@ -39,8 +39,14 @@ export default function Dashboard() {
     setShowPrivacy(true);
   };
 
-  const getInitials = (firstName?: string, lastName?: string) => {
-    return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase() || 'U';
+  const getInitials = (name?: string, username?: string) => {
+    if (name) {
+      const names = name.split(' ');
+      return names.length > 1 
+        ? `${names[0][0]}${names[names.length-1][0]}`.toUpperCase()
+        : name.substring(0, 2).toUpperCase();
+    }
+    return username?.substring(0, 2).toUpperCase() || 'U';
   };
 
   return (
@@ -64,9 +70,9 @@ export default function Dashboard() {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                       <Avatar className="h-10 w-10">
-                        <AvatarImage src={user.profileImageUrl} alt={user.firstName} />
+                        <AvatarImage src={user.profileImageUrl} alt={user.name} />
                         <AvatarFallback className="bg-gradient-to-br from-blue-500 to-cyan-500 text-white">
-                          {getInitials(user.firstName, user.lastName)}
+                          {getInitials(user.name, user.username)}
                         </AvatarFallback>
                       </Avatar>
                     </Button>
@@ -74,8 +80,8 @@ export default function Dashboard() {
                   <DropdownMenuContent className="w-56" align="end" forceMount>
                     <div className="flex items-center justify-start gap-2 p-2">
                       <div className="flex flex-col space-y-1 leading-none">
-                        {user.firstName && (
-                          <p className="font-medium">{user.firstName} {user.lastName}</p>
+                        {user.name && (
+                          <p className="font-medium">{user.name}</p>
                         )}
                         {user.email && (
                           <p className="w-[200px] truncate text-sm text-muted-foreground">
