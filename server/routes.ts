@@ -1609,32 +1609,24 @@ RESPONSE FORMAT: Provide conversational coaching followed by specific neural ana
   app.get('/api/user-neural-profile',  getUserNeuralProfile);
   
   // Feedback learning endpoint for AI self-improvement
-  app.post('/api/ai-feedback-learning',  async (req: Request, res: Response) => {
+  app.post('/api/ai-feedback-learning', async (req: any, res) => {
     try {
       const { feedback, context } = req.body;
       const userId = (req as any).user?.id || (req as any).user?.claims?.sub || 'demo-user';
       
       console.log('🧠 Processing AI feedback learning for user:', userId);
       
-      await (await import('./personalized-ai-coach')).personalizedAICoach.processFeedbackLearning(userId, {
-        message: feedback,
-        rating: context?.rating,
-        category: context?.category || 'general',
-        timestamp: new Date().toISOString()
-      });
+      await (await import('./personalized-ai-coach')).personalizedAICoach.processFeedbackLearning(userId, feedback);
       
       res.json({
         success: true,
-        message: 'Feedback processed for AI learning',
-        selfLearning: true,
-        timestamp: new Date().toISOString()
+        message: 'Feedback processed for AI learning'
       });
       
     } catch (error) {
       console.error('Error processing AI feedback learning:', error);
       res.status(500).json({ 
-        error: 'Failed to process feedback learning',
-        fallback: true 
+        error: 'Failed to process feedback learning'
       });
     }
   });
@@ -2492,7 +2484,7 @@ Respond with detailed analysis in JSON format:
   
   // Performance monitoring endpoint
   app.get("/api/performance-metrics", (req, res) => {
-    const metrics = processingEngine.getPerformanceMetrics();
+    const metrics = processingEngine.getPerformanceStats();
     res.json({ success: true, metrics });
   });
 
