@@ -58,12 +58,12 @@ export async function setupGoogleAuth(app: Express) {
     done(null, user);
   });
 
-  // Google OAuth Strategy - Dynamic callback URL
+  // Google OAuth Strategy - Custom domain callback
   if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
     passport.use(new GoogleStrategy({
       clientID: GOOGLE_CLIENT_ID,
       clientSecret: GOOGLE_CLIENT_SECRET,
-      callbackURL: '/api/auth/google/callback' // Relative URL to work with any domain
+      callbackURL: 'https://yappyy.com/oauth2callback'
     }, async (accessToken, refreshToken, profile, done) => {
       try {
         // Create or update user with Google data
@@ -91,6 +91,16 @@ export async function setupGoogleAuth(app: Express) {
     passport.authenticate('google', { scope: ['profile', 'email'] })
   );
 
+  // Handle the custom OAuth callback route
+  app.get('/oauth2callback',
+    passport.authenticate('google', { failureRedirect: '/' }),
+    (req, res) => {
+      // Successful authentication, redirect to dashboard
+      res.redirect('/dashboard');
+    }
+  );
+
+  // Also handle the original route for compatibility
   app.get('/api/auth/google/callback',
     passport.authenticate('google', { failureRedirect: '/' }),
     (req, res) => {
