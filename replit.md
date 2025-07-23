@@ -441,11 +441,14 @@ The application now provides complete video recording and playback functionality
 - **Cross-Platform Access**: Works on any domain, not limited to Replit environment
 
 ### Google OAuth Configuration (January 23, 2025)
-- **Client ID**: 865530799156-v77qutagl1q2q7i7gi1ul5bvabrfa0il.apps.googleusercontent.com ✅ Current
+- **Client ID**: 372720245891-dtpkbj63rl2hju5vo2uorldivgurg6fh.apps.googleusercontent.com ✅ Configured
 - **Client Secret**: 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 ✅ Configured
-- **Redirect URI Strategy**: Using relative URLs to work with existing authorized domains
-- **Current Authorized Domains**: Check Google Cloud Console for existing redirect URIs
-- **Note**: Using existing OAuth client configuration since client ID cannot be modified
+- **Authorized Redirect URIs** (from Google Cloud Console):
+  - `https://cc330bf2-421a-4f10-8909-4007129dbdf4-00-13fzcyutraxb1.picard.replit.dev/api/auth/google/callback`
+  - `http://localhost:5000/api/auth/google/callback`
+  - `https://yappyy.com/oauth2callback` ✅ Custom domain
+- **Current Callback**: Using https://yappyy.com/oauth2callback
+- **Status**: Fully configured and ready for testing
 
 ### Previous Open Access Dashboard System - REPLACED ✅ (July 21, 2025)
 - **Replaced with Replit Auth**: Enhanced from open access to proper Replit user authentication
