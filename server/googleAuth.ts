@@ -8,7 +8,16 @@ import { storage } from "./storage";
 // Google OAuth configuration
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-const BASE_URL = process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : 'http://localhost:5000';
+// Get the current domain from the request or environment
+const getCurrentDomain = (req?: any) => {
+  if (req?.get('host')) {
+    return req.protocol + '://' + req.get('host');
+  }
+  if (process.env.REPLIT_DEV_DOMAIN) {
+    return `https://${process.env.REPLIT_DEV_DOMAIN}`;
+  }
+  return 'http://localhost:5000';
+};
 
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
@@ -49,12 +58,12 @@ export async function setupGoogleAuth(app: Express) {
     done(null, user);
   });
 
-  // Google OAuth Strategy
+  // Google OAuth Strategy - Dynamic callback URL
   if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
     passport.use(new GoogleStrategy({
       clientID: GOOGLE_CLIENT_ID,
       clientSecret: GOOGLE_CLIENT_SECRET,
-      callbackURL: `${BASE_URL}/api/auth/google/callback`
+      callbackURL: '/api/auth/google/callback' // Relative URL to work with any domain
     }, async (accessToken, refreshToken, profile, done) => {
       try {
         // Create or update user with Google data

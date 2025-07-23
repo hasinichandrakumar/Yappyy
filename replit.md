@@ -442,8 +442,10 @@ The application now provides complete video recording and playback functionality
 
 ### Google OAuth Configuration (January 23, 2025)
 - **Client ID**: 372720245891-dtpkbj63rl2hju5vo2uorldivgurg6fh.apps.googleusercontent.com ✅ Configured
-- **Required Redirect URIs**: Add these to Google Cloud Console:
-  - `https://your-domain.replit.app/api/auth/google/callback`
+- **Client Secret**: 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 ✅ Configured
+- **Current Domain**: https://0ba7bf69-6419-4ff8-b5ed-a9c40427be3e-00-o6rvz7sva6wa.picard.replit.dev
+- **Required Redirect URIs**: Add these exact URLs to Google Cloud Console:
+  - `https://0ba7bf69-6419-4ff8-b5ed-a9c40427be3e-00-o6rvz7sva6wa.picard.replit.dev/api/auth/google/callback`
   - `http://localhost:5000/api/auth/google/callback` (for development)
 - **Setup Location**: Google Cloud Console → APIs & Services → Credentials → OAuth 2.0 Client ID
 
