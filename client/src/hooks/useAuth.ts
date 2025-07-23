@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 interface User {
@@ -14,7 +14,7 @@ interface User {
 export function useAuth() {
   const [isLoggedOut, setIsLoggedOut] = useState(false);
   
-  // Fetch real user data from API
+  // Fetch real user data from API - only for Google OAuth authenticated users
   const { data: userData, isLoading, error } = useQuery({
     queryKey: ['/api/user/info'],
     enabled: typeof window !== 'undefined' && !isLoggedOut && window.sessionStorage.getItem('loggedOut') !== 'true'
@@ -28,7 +28,7 @@ export function useAuth() {
     if (typeof window !== 'undefined') {
       window.sessionStorage.setItem('loggedOut', 'true');
       setIsLoggedOut(true);
-      // Call logout endpoint
+      // Call Google OAuth logout endpoint
       fetch('/api/auth/logout', { method: 'GET' }).then(() => {
         window.location.href = '/';
       });
@@ -36,14 +36,15 @@ export function useAuth() {
   };
 
   const login = () => {
+    // Redirect to Google OAuth login
     if (typeof window !== 'undefined') {
       window.sessionStorage.removeItem('loggedOut');
-      setIsLoggedOut(false);
+      window.location.href = '/api/auth/google';
     }
   };
 
   const user = loggedOut ? null : userData as User;
-  const isAuthenticated = !loggedOut && (userData as any)?.isAuthenticated === true;
+  const isAuthenticated = !loggedOut && (userData as any)?.isAuthenticated === true && (userData as any)?.authType === 'google';
 
   return {
     user,
