@@ -67,9 +67,7 @@ export async function setupGoogleAuth(app: Express) {
         {
           clientID: process.env.GOOGLE_CLIENT_ID!,
           clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-          callbackURL: process.env.NODE_ENV === 'production' 
-            ? `https://${process.env.REPLIT_DEV_DOMAIN}/api/auth/google/callback`
-            : `https://${process.env.REPLIT_DEV_DOMAIN}/api/auth/google/callback`,
+          callbackURL: `https://${process.env.REPLIT_DEV_DOMAIN}/api/auth/google/callback`,
         },
         async (accessToken, refreshToken, profile, done) => {
           try {
@@ -103,6 +101,15 @@ export async function setupGoogleAuth(app: Express) {
 
 
     // Debug endpoint to check OAuth configuration
+    app.get('/api/auth/debug-config', (req, res) => {
+      res.json({
+        domain: process.env.REPLIT_DEV_DOMAIN,
+        callbackURL: `https://${process.env.REPLIT_DEV_DOMAIN}/api/auth/google/callback`,
+        hasCredentials: hasGoogleCredentials,
+        requestHost: req.get('host'),
+        requestURL: req.url
+      });
+    });
     app.get("/api/auth/debug", (req, res) => {
       res.json({
         hasClientId: !!process.env.GOOGLE_CLIENT_ID,
