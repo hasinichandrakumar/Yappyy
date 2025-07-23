@@ -6,6 +6,7 @@ import { insertPracticeSessionSchema, insertCoachingFeedbackSchema, insertCustom
 import { setupMagicLinkAuth, requireAuth } from "./auth-magic-link-routes";
 import { setupDemoAuth, demoAuth } from "./demo-auth";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupGoogleAuth } from "./googleAuth";
 import { generateClubCoaching } from "./ai-coaching";
 import { 
   generateComprehensiveAnalysis, 
@@ -44,26 +45,21 @@ import { roboflowVision, analyzeVideoFrame as roboflowAnalyzeFrame, trainCustomV
 import { graphqlHTTP } from 'express-graphql';
 import neuralGraphQL from './graphql-schema';
 
-// Helper function to extract user ID from request with Replit Auth support
+// Helper function to extract user ID from request with multi-auth support
 function getUserId(req: any): string {
   // Check session-based user first (Replit Auth and Magic Link users)
   if (req.session?.user?.replit?.id) {
-    console.log('🔍 Using Replit session user ID:', req.session.user.replit.id);
     return req.session.user.replit.id;
   }
   if (req.session?.user?.claims?.sub) {
-    console.log('🔍 Using claims sub ID:', req.session.user.claims.sub);
     return req.session.user.claims.sub;
   }
+  // Check Google OAuth user (passport-based)
+  if (req.user?.id) {
+    return req.user.id;
+  }
   // Fallback to legacy user properties
-  console.log('🔍 Falling back to demo user - session structure:', {
-    hasSession: !!req.session,
-    hasUser: !!req.session?.user,
-    hasReplit: !!req.session?.user?.replit,
-    replitId: req.session?.user?.replit?.id,
-    claimsSub: req.session?.user?.claims?.sub
-  });
-  return req.user?.replit?.id || req.user?.claims?.sub || req.user?.id || 'demo-user';
+  return req.user?.replit?.id || req.user?.claims?.sub || 'demo-user';
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -75,7 +71,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup Replit Authentication (primary auth system)
   await setupAuth(app);
   
-  // Setup Magic Link Authentication (secondary)
+  // Setup Google OAuth Authentication (secondary auth system)
+  await setupGoogleAuth(app);
+  
+  // Setup Magic Link Authentication (tertiary)
   await setupMagicLinkAuth(app);
   
   // Setup Demo Authentication (fallback for development)
@@ -85,17 +84,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/user/info', (req: any, res) => {
     const userId = getUserId(req);
     const sessionUser = req.session?.user;
+    const passportUser = req.user; // Google OAuth user from passport
+    
+    let authType = 'demo';
+    let username = 'demo-user';
+    let name = 'Demo User';
+    let email = 'demo@example.com';
+    let isAuthenticated = false;
+    
+    if (sessionUser?.replit) {
+      authType = 'replit';
+      username = sessionUser.replit.username;
+      name = sessionUser.replit.name || sessionUser.replit.username;
+      email = sessionUser.replit.email || `${sessionUser.replit.username}@replit.com`;
+      isAuthenticated = true;
+    } else if (passportUser) {
+      authType = 'google';
+      username = passportUser.firstName || passportUser.email?.split('@')[0] || 'google-user';
+      name = `${passportUser.firstName || ''} ${passportUser.lastName || ''}`.trim() || 'Google User';
+      email = passportUser.email || 'google-user@gmail.com';
+      isAuthenticated = true;
+    } else if (sessionUser?.claims) {
+      authType = 'session';
+      username = sessionUser.claims.first_name || 'session-user';
+      name = sessionUser.claims.first_name || 'Session User';
+      email = sessionUser.claims.email || 'session@example.com';
+      isAuthenticated = true;
+    }
+
     const userInfo = {
       id: userId,
-      isAuthenticated: !!sessionUser,
-      authType: sessionUser?.replit ? 'replit' : sessionUser?.claims ? 'session' : 'demo',
-      username: sessionUser?.replit?.username || sessionUser?.claims?.first_name || 'demo-user',
-      name: sessionUser?.replit?.name || sessionUser?.claims?.first_name || 'Demo User',
-      email: sessionUser?.replit?.email || sessionUser?.claims?.email || 'demo@example.com'
+      isAuthenticated,
+      authType,
+      username,
+      name,
+      email
     };
     
     console.log('🔍 User Info Request:', userInfo);
-    console.log('🔍 Session Details:', { hasSession: !!req.session, hasUser: !!req.session?.user, replitUser: !!sessionUser?.replit });
+    console.log('🔍 Auth Details:', { 
+      hasSession: !!req.session, 
+      hasSessionUser: !!sessionUser, 
+      hasPassportUser: !!passportUser,
+      replitUser: !!sessionUser?.replit,
+      googleUser: !!passportUser?.email
+    });
     res.json(userInfo);
   });
 
