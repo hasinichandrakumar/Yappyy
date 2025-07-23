@@ -28,7 +28,7 @@ export function getSession() {
     saveUninitialized: true,
     cookie: {
       httpOnly: false, // Allow client-side access for debugging
-      secure: true, // Use secure cookies for production HTTPS deployment
+      secure: process.env.NODE_ENV === 'production', // Use secure cookies only in production
       maxAge: sessionTtl,
       sameSite: 'lax'
     },
@@ -151,7 +151,7 @@ export async function setupGoogleAuth(app: Express) {
       "/api/auth/google/callback",
       (req, res, next) => {
         console.log("OAuth callback received", req.query);
-        passport.authenticate("google", (err, user, info) => {
+        passport.authenticate("google", (err: any, user: any, info: any) => {
           if (err) {
             console.error("OAuth authentication error:", err);
             console.error("Error details:", JSON.stringify(err, null, 2));
