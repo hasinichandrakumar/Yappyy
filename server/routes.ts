@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { RealTimeSessionManager } from "./redis-realtime";
 import { insertPracticeSessionSchema, insertCoachingFeedbackSchema, insertCustomTemplateSchema } from "@shared/schema";
-import { setupGoogleAuth } from "./googleAuth";
+import { setupAuth } from "./replitAuth";
 import { generateClubCoaching } from "./ai-coaching";
 import { 
   generateComprehensiveAnalysis, 
@@ -42,10 +42,10 @@ import { roboflowVision, analyzeVideoFrame as roboflowAnalyzeFrame, trainCustomV
 import { graphqlHTTP } from 'express-graphql';
 import neuralGraphQL from './graphql-schema';
 
-// Helper function to extract user ID from Google OAuth request
+// Helper function to extract user ID from Replit Auth request
 function getUserId(req: any): string {
-  // Google OAuth user (passport-based)
-  return req.user?.id || 'guest';
+  // Replit Auth user (session-based)
+  return req.session?.user?.claims?.sub || 'guest';
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -54,26 +54,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize Enhanced Real-Time Processing Engine
   const processingEngine = new RealTimeProcessingEngine();
   
-  // Setup Google OAuth Authentication (primary and only auth system)
-  await setupGoogleAuth(app);
+  // Setup Replit Authentication (primary and only auth system)
+  await setupAuth(app);
 
   // User info endpoint for debugging and profile display
   app.get('/api/user/info', (req: any, res) => {
     const userId = getUserId(req);
-    const passportUser = req.user; // Google OAuth user from passport
+    const sessionUser = req.session?.user; // Replit Auth user from session
     
-    if (passportUser) {
+    if (sessionUser?.claims) {
       const userInfo = {
         id: userId,
         isAuthenticated: true,
-        authType: 'google',
-        username: passportUser.firstName || passportUser.email?.split('@')[0] || 'google-user',
-        name: `${passportUser.firstName || ''} ${passportUser.lastName || ''}`.trim() || 'Google User',
-        email: passportUser.email || 'google-user@gmail.com',
-        profileImageUrl: passportUser.profileImageUrl
+        authType: 'replit',
+        username: sessionUser.replit?.username || sessionUser.claims.first_name || 'replit-user',
+        name: `${sessionUser.claims.first_name || ''} ${sessionUser.claims.last_name || ''}`.trim() || 'Replit User',
+        email: sessionUser.claims.email || 'replit-user@replit.com',
+        profileImageUrl: sessionUser.claims.profile_image_url
       };
       
-      console.log('🔍 Google User Info:', userInfo);
+      console.log('🔍 Replit User Info:', userInfo);
       res.json(userInfo);
     } else {
       const guestInfo = {
