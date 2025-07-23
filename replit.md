@@ -438,6 +438,12 @@ The application now provides complete video recording and playback functionality
 - **Simplified User Flow**: Streamlined authentication without multiple options or fallbacks
 - **Debug Endpoints**: `/api/user/info` for authentication verification and user data
 
+### Google OAuth Configuration Requirements (January 23, 2025)
+- **Current Domain**: `0c7fe059-a7da-4a46-a7cc-18655fec2a24-00-1znejaw22ebqj.picard.replit.dev`
+- **Required Redirect URI**: Must be added to Google Cloud Console for OAuth to work
+- **Setup Location**: Google Cloud Console → APIs & Services → Credentials → OAuth 2.0 Client ID
+- **Issue**: redirect_uri_mismatch error occurs if not properly configured
+
 ### Previous Open Access Dashboard System - REPLACED ✅ (July 21, 2025)
 - **Replaced with Replit Auth**: Enhanced from open access to proper Replit user authentication
 - **Maintained Accessibility**: Demo mode still available for non-Replit users
