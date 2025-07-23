@@ -441,7 +441,7 @@ The application now provides complete video recording and playback functionality
 - **Cross-Platform Access**: Works on any domain, not limited to Replit environment
 
 ### Google OAuth Configuration (January 23, 2025)
-- **Client ID**: 372720245891-dtpkbj63rl2hju5vo2uorldivgurg6fh.apps.googleusercontent.com ✅ Configured
+- **Client ID**: 372720245891-dtpkbj63rl2hju5vo2uorldivgurg6fh.apps.googleusercontent.com ✅ Updated
 - **Client Secret**: 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 ✅ Configured
 - **Custom Redirect URI**: https://yappyy.com/oauth2callback ✅ Professional domain callback
 - **Required Redirect URI**: Add this exact URL to Google Cloud Console:
