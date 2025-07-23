@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { RealTimeSessionManager } from "./redis-realtime";
 import { insertPracticeSessionSchema, insertCoachingFeedbackSchema, insertCustomTemplateSchema } from "@shared/schema";
-import { setupAuth } from "./replitAuth";
+import { setupGoogleAuth, isAuthenticated } from "./googleAuth";
 import { generateClubCoaching } from "./ai-coaching";
 import { 
   generateComprehensiveAnalysis, 
@@ -42,10 +42,10 @@ import { roboflowVision, analyzeVideoFrame as roboflowAnalyzeFrame, trainCustomV
 import { graphqlHTTP } from 'express-graphql';
 import neuralGraphQL from './graphql-schema';
 
-// Helper function to extract user ID from Replit Auth request
+// Helper function to extract user ID from Google OAuth request
 function getUserId(req: any): string {
-  // Replit Auth user (session-based)
-  return req.session?.user?.claims?.sub || 'guest';
+  // Google OAuth user (passport-based)
+  return req.user?.id || 'guest';
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -54,26 +54,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize Enhanced Real-Time Processing Engine
   const processingEngine = new RealTimeProcessingEngine();
   
-  // Setup Replit Authentication (primary and only auth system)
-  await setupAuth(app);
+  // Setup Google OAuth Authentication (primary and only auth system)
+  await setupGoogleAuth(app);
 
   // User info endpoint for debugging and profile display
   app.get('/api/user/info', (req: any, res) => {
     const userId = getUserId(req);
-    const sessionUser = req.session?.user; // Replit Auth user from session
+    const passportUser = req.user; // Google OAuth user from passport
     
-    if (sessionUser?.claims) {
+    if (passportUser) {
       const userInfo = {
         id: userId,
         isAuthenticated: true,
-        authType: 'replit',
-        username: sessionUser.replit?.username || sessionUser.claims.first_name || 'replit-user',
-        name: `${sessionUser.claims.first_name || ''} ${sessionUser.claims.last_name || ''}`.trim() || 'Replit User',
-        email: sessionUser.claims.email || 'replit-user@replit.com',
-        profileImageUrl: sessionUser.claims.profile_image_url
+        authType: 'google',
+        username: passportUser.firstName || passportUser.email?.split('@')[0] || 'google-user',
+        name: `${passportUser.firstName || ''} ${passportUser.lastName || ''}`.trim() || 'Google User',
+        email: passportUser.email || 'google-user@gmail.com',
+        profileImageUrl: passportUser.profileImageUrl
       };
       
-      console.log('🔍 Replit User Info:', userInfo);
+      console.log('🔍 Google User Info:', userInfo);
       res.json(userInfo);
     } else {
       const guestInfo = {
@@ -87,6 +87,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('🔍 Guest User Info:', guestInfo);
       res.json(guestInfo);
+    }
+  });
+
+  // Auth routes for React Query
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
     }
   });
 
