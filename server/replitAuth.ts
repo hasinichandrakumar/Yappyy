@@ -126,7 +126,11 @@ export async function setupAuth(app: Express) {
             }
           };
           
-          console.log('🔄 Auto-login successful for Replit user:', replitUser.username);
+          // Reduced logging to prevent spam
+          if (!req.session.loginLogged) {
+            console.log('🔄 Auto-login successful for Replit user:', replitUser.username);
+            req.session.loginLogged = true;
+          }
         } catch (error) {
           console.error('Auto-login error:', error);
         }
