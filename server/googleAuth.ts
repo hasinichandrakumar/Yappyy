@@ -93,22 +93,20 @@ export async function setupGoogleAuth(app: Express) {
     passport.authenticate('google', { scope: ['profile', 'email'] })
   );
 
-  // Handle the custom OAuth callback route (for yappyy.com domain)
+  // Handle the OAuth callback route - redirect to yappyy.com/dashboard
   app.get('/oauth2callback',
-    passport.authenticate('google', { failureRedirect: 'https://yappyy.com/' }),
-    (req, res) => {
-      // Successful authentication, redirect to yappyy.com dashboard
-      res.redirect('https://yappyy.com/dashboard');
-    }
+    passport.authenticate('google', { 
+      failureRedirect: 'https://yappyy.com/',
+      successRedirect: 'https://yappyy.com/dashboard'
+    })
   );
 
   // Also handle the original route for compatibility
   app.get('/api/auth/google/callback',
-    passport.authenticate('google', { failureRedirect: 'https://yappyy.com/' }),
-    (req, res) => {
-      // Successful authentication, redirect to yappyy.com dashboard
-      res.redirect('https://yappyy.com/dashboard');
-    }
+    passport.authenticate('google', { 
+      failureRedirect: 'https://yappyy.com/',
+      successRedirect: 'https://yappyy.com/dashboard'
+    })
   );
 
   // Login route (redirects to Google OAuth)
