@@ -110,7 +110,8 @@ export async function setupGoogleAuth(app: Express) {
     // Handle OAuth errors from Google
     if (req.query.error) {
       console.error('❌ OAuth error from Google:', req.query.error);
-      return res.redirect('/?error=oauth_failed');
+      console.error('❌ OAuth error description:', req.query.error_description);
+      return res.redirect(`/?error=oauth_failed&details=${encodeURIComponent(req.query.error_description || req.query.error)}`);
     }
     
     // Process OAuth callback
