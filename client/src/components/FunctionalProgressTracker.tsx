@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Calendar, TrendingUp, TrendingDown, Minus, Award, Target, BarChart3, Clock, Mic, Brain, Eye, Heart, Zap, CheckCircle } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Calendar, TrendingUp, TrendingDown, Minus, Award, Target, BarChart3, Clock, Mic, Brain, Eye, Heart, Zap, CheckCircle, Trophy, Star, Sparkles, PlayCircle, ArrowRight, Flame } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
@@ -59,12 +59,53 @@ interface ProgressMetrics {
   }[];
 }
 
+interface DailyGoal {
+  id: string;
+  type: 'practice' | 'improvement' | 'challenge' | 'streak';
+  title: string;
+  description: string;
+  target: number;
+  current: number;
+  unit: string;
+  yapX: number;
+  difficulty: 'easy' | 'medium' | 'hard';
+  category: 'voice' | 'body' | 'content' | 'confidence';
+  timeEstimate: string;
+  motivationalMessage: string;
+  icon: React.ReactNode;
+  color: string;
+  completed: boolean;
+}
+
 export default function FunctionalProgressTracker() {
   const [timeRange, setTimeRange] = useState('all');
   const [selectedMetric, setSelectedMetric] = useState('overall');
+  const queryClient = useQueryClient();
 
   const { data: sessions = [], isLoading: sessionsLoading } = useQuery<PracticeSession[]>({
     queryKey: ['/api/practice-sessions'],
+  });
+
+  // Fetch daily goals from API
+  const { data: dailyGoals = [] } = useQuery({
+    queryKey: ['/api/user/daily-goals'],
+  });
+
+  // Complete goal mutation
+  const completeGoalMutation = useMutation({
+    mutationFn: async (goalId: number) => {
+      const response = await fetch(`/api/user/daily-goals/${goalId}/complete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ targetValue: 100 })
+      });
+      if (!response.ok) throw new Error('Failed to complete goal');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/user/daily-goals'] });
+    }
   });
 
   // Calculate comprehensive progress metrics from real session data
@@ -343,12 +384,92 @@ export default function FunctionalProgressTracker() {
         </Card>
       </div>
 
-      <Tabs defaultValue="trends" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+      <Tabs defaultValue="goals" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="goals">Daily Goals</TabsTrigger>
           <TabsTrigger value="trends">Skill Trends</TabsTrigger>
           <TabsTrigger value="milestones">Milestones</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="goals" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="w-5 h-5" />
+                Today's Goals
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {dailyGoals.length === 0 ? (
+                <div className="text-center py-8">
+                  <Target className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No goals for today</h3>
+                  <p className="text-gray-600">Complete a practice session to generate personalized daily goals</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {dailyGoals.map((goal, index) => (
+                    <div key={index} className={`p-4 rounded-lg border-2 transition-all duration-200 ${goal.completed ? 'bg-green-50 border-green-200' : 'bg-white border-gray-200 hover:border-blue-300'}`}>
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-full ${goal.color} text-white`}>
+                            {goal.icon || <Target className="w-4 h-4" />}
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-gray-900">{goal.title}</h4>
+                            <p className="text-sm text-gray-600">{goal.description}</p>
+                          </div>
+                        </div>
+                        <Badge variant={goal.difficulty === 'hard' ? 'destructive' : goal.difficulty === 'medium' ? 'default' : 'secondary'}>
+                          {goal.difficulty}
+                        </Badge>
+                      </div>
+                      
+                      <div className="mb-3">
+                        <div className="flex justify-between text-sm text-gray-600 mb-1">
+                          <span>Progress</span>
+                          <span>{goal.current} / {goal.target} {goal.unit}</span>
+                        </div>
+                        <Progress value={(goal.current / goal.target) * 100} className="h-2" />
+                      </div>
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                          <Clock className="w-4 h-4" />
+                          <span>{goal.timeEstimate}</span>
+                          <span className="text-purple-600 font-medium">+{goal.yapX} YapX</span>
+                        </div>
+                        {!goal.completed ? (
+                          <Button 
+                            size="sm" 
+                            onClick={() => completeGoalMutation.mutate(goal.id)}
+                            disabled={completeGoalMutation.isPending}
+                            className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600"
+                          >
+                            {completeGoalMutation.isPending ? 'Completing...' : 'Complete'}
+                          </Button>
+                        ) : (
+                          <div className="flex items-center gap-2 text-green-600">
+                            <CheckCircle className="w-4 h-4" />
+                            <span className="text-sm font-medium">Completed!</span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {goal.motivationalMessage && (
+                        <div className="mt-3 p-2 bg-blue-50 rounded text-sm text-blue-800">
+                          <Sparkles className="w-4 h-4 inline mr-1" />
+                          {goal.motivationalMessage}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         <TabsContent value="trends" className="space-y-6">
           <Card>
