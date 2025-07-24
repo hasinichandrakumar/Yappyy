@@ -99,7 +99,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       hasUser: !!passportUser,
       userId: userId,
       isAuthenticated: req.isAuthenticated(),
-      email: passportUser?.email
+      email: passportUser?.email,
+      sessionData: req.session,
+      passport: req.session?.passport
     });
     
     if (passportUser && req.isAuthenticated()) {

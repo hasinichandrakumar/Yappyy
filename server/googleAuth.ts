@@ -133,6 +133,8 @@ export async function setupGoogleAuth(app: Express) {
         
         console.log('✅ OAuth callback successful for user:', user.email);
         console.log('✅ Session ID:', req.sessionID);
+        console.log('✅ User object:', user);
+        console.log('✅ Session after login:', req.session);
         console.log('✅ Redirecting to dashboard...');
         
         // Simply redirect to dashboard - session is already established
