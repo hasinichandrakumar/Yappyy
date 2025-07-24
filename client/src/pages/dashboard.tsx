@@ -36,17 +36,16 @@ export default function Dashboard() {
   useEffect(() => {
     if (user) {
       if (user.isAuthenticated) {
-        // For authenticated users - check if they've seen welcome before
-        const hasSeenWelcome = localStorage.getItem(`welcomeShown_${user.id}`);
+        // For authenticated users - determine by actual session data
+        const hasRecordedSessions = (user as any).totalSessions > 0;
         const todayKey = `dailyWelcomeShown_${user.id}_${new Date().toDateString()}`;
         const hasSeenTodayWelcome = localStorage.getItem(todayKey);
         
-        if (!hasSeenWelcome) {
-          // First time authenticated user
+        if (!hasRecordedSessions) {
+          // New authenticated user with no recorded sessions - show first-time welcome
           setShowWelcome(true);
-          localStorage.setItem(`welcomeShown_${user.id}`, 'true');
         } else if (!hasSeenTodayWelcome) {
-          // Returning authenticated user - show daily welcome with goals
+          // Returning authenticated user with sessions - show daily welcome with goals
           setShowReturningWelcome(true);
           localStorage.setItem(todayKey, 'true');
         }

@@ -397,10 +397,12 @@ The AI coach is now a true machine learning system with individual neural networ
 ## Latest Major Enhancement (July 24, 2025)
 
 ### Welcome Back Experience with Daily Goals - COMPLETED ✅ (July 24, 2025)
-- **Returning User Detection**: Enhanced dashboard logic to detect returning authenticated users and show personalized welcome back experience
+- **True New User Detection**: Enhanced `/api/auth/user` endpoint to determine new vs returning users based on actual practice session history
+- **Fresh Start for New Users**: New authenticated users with zero recorded sessions start completely fresh with session 1 and no existing data
+- **Returning User Experience**: Users with existing practice sessions see personalized welcome back dialog with daily goals and progress stats
 - **Daily Goals Integration**: ReturningUserWelcome component displays up to 2 daily goals with progress tracking and completion status
 - **Smart Welcome Logic**: Uses localStorage to track welcome message display per user and per day to avoid spam
-- **Goals Tab Addition**: Added dedicated "Goals" tab to main dashboard navigation for easy access to daily goals
+- **Goals Tab Addition**: Added dedicated "Goals" tab to main dashboard navigation for easy access to daily goals (6 tabs total)
 - **Progress Visualization**: Visual progress bars, completion badges, and motivational messages for goal engagement
 - **User Stats Display**: Shows practice streaks, total sessions, and improvement metrics in welcome dialog
 - **Professional Dialog**: Modal interface with user stats, goal progress, and motivation to start practicing

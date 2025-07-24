@@ -148,10 +148,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = getUserId(req);
       const user = await storage.getUser(userId);
       
-      // Return user data with authentication info
+      // Check if user has any practice sessions to determine if they're truly new
+      const userSessions = await storage.getUserPracticeSessions(userId);
+      const hasRecordedSessions = userSessions && userSessions.length > 0;
+      
+      // A user is "new" if they have never recorded any practice sessions
+      const isNewUser = !hasRecordedSessions;
+      
+      // Return user data with authentication info and proper new user status
       res.json({
         ...user,
-        isAuthenticated: true
+        isAuthenticated: true,
+        isNewUser: isNewUser,
+        totalSessions: userSessions ? userSessions.length : 0
       });
     } catch (error) {
       console.error("Error fetching user:", error);
