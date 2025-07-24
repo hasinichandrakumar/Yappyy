@@ -48,7 +48,7 @@ export function getSession() {
 }
 
 export async function setupGoogleAuth(app: Express) {
-  console.log('🔧 Google OAuth Setup - Client ID:', GOOGLE_CLIENT_ID ? 'Present' : 'Missing');
+  console.log('🔧 Google OAuth Setup - Client ID:', GOOGLE_CLIENT_ID ? `${GOOGLE_CLIENT_ID.substring(0, 30)}...` : 'Missing');
   
   app.set("trust proxy", 1);
   app.use(getSession());
@@ -71,6 +71,11 @@ export async function setupGoogleAuth(app: Express) {
       ? `https://${process.env.REPLIT_DEV_DOMAIN}/oauth2callback`
       : "https://yappyy.com/oauth2callback";
       
+    console.log('🔧 Google OAuth Strategy Configuration:');
+    console.log('  - Client ID:', GOOGLE_CLIENT_ID?.substring(0, 20) + '...');
+    console.log('  - Callback URL:', callbackURL);
+    console.log('  - Scopes: profile, email');
+    
     passport.use(new GoogleStrategy({
       clientID: GOOGLE_CLIENT_ID,
       clientSecret: GOOGLE_CLIENT_SECRET,
@@ -99,13 +104,17 @@ export async function setupGoogleAuth(app: Express) {
   }
 
   // Google OAuth routes
-  app.get('/api/auth/google', 
-    passport.authenticate('google', { scope: ['profile', 'email'] })
-  );
+  app.get('/api/auth/google', (req, res, next) => {
+    console.log('🚀 Starting Google OAuth flow...');
+    passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
+  });
 
   // Handle the OAuth callback route - redirect to dashboard
   app.get('/oauth2callback', (req, res, next) => {
-    console.log('🔄 OAuth callback received with query:', req.query);
+    console.log('🔄 OAuth callback received');
+    console.log('  - Query params:', req.query);
+    console.log('  - Has authorization code:', !!req.query.code);
+    console.log('  - Has error:', !!req.query.error);
     
     // Handle OAuth errors from Google
     if (req.query.error) {
