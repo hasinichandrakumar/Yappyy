@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LogIn, User, Shield, Mic } from "lucide-react";
 import yappyyMicIcon from "@assets/image_1749675190198.png";
-import yappyyLogo from "@assets/Y-2-removebg-preview_1753383888231.png";
+import yappyyLogo from "@assets/Y-2-removebg-preview_1753384287580.png";
 
 export default function LoginPage() {
   const handleLogin = () => {
@@ -19,9 +19,9 @@ export default function LoginPage() {
             </div>
           </div>
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent mb-2">
-              Yappyy
-            </h1>
+            <button onClick={() => window.location.href = '/'} className="hover:opacity-80 transition-opacity mb-2">
+              <img src={yappyyLogo} alt="Yappyy" className="h-12" />
+            </button>
             <CardTitle className="text-xl font-bold gradient-text font-display">
               Welcome
             </CardTitle>

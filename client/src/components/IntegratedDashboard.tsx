@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Bell, User, BarChart3, Eye, Brain, Star, TrendingUp, FileText, Trophy, Volume2, HelpCircle } from "lucide-react";
-import yappyyLogo from "@assets/Y-2-removebg-preview_1753383888231.png";
+import yappyyLogo from "@assets/Y-2-removebg-preview_1753384287580.png";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import NewPracticeDashboard from "@/components/NewPracticeDashboard";
 import ComprehensiveAICoach from "@/components/ComprehensiveAICoach";
@@ -22,9 +22,9 @@ export default function IntegratedDashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
-                Yappyy
-              </h1>
+              <button onClick={() => window.location.href = '/'} className="hover:opacity-80 transition-opacity">
+                <img src={yappyyLogo} alt="Yappyy" className="h-8" />
+              </button>
             </div>
             <div className="flex items-center space-x-4">
               <button className="text-blue-500 hover:text-blue-600 transition-colors">

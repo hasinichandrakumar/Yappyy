@@ -19,7 +19,7 @@ import PrivacySettings from "@/components/PrivacySettings";
 import FunctionalProgressTracker from "@/components/FunctionalProgressTracker";
 import WelcomeMessage from "@/components/WelcomeMessage";
 import ReturningUserWelcome from "@/components/ReturningUserWelcome";
-import yappyyLogoPath from '@assets/Y-2-removebg-preview_1753383888231.png';
+import yappyyLogoPath from '@assets/Y-2-removebg-preview_1753384287580.png';
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("practice");
@@ -87,9 +87,9 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
-                Yappyy
-              </h1>
+              <button onClick={() => window.location.href = '/'} className="hover:opacity-80 transition-opacity">
+                <img src={yappyyLogoPath} alt="Yappyy" className="h-8" />
+              </button>
             </div>
             
             {/* Profile Section */}

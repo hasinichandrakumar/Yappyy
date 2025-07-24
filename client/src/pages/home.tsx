@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Mic, Video, Trophy, Target, BarChart3, Users, ArrowRight, CheckCircle, Brain, Zap, Cpu, Eye, User as UserIcon, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import yappyyLogoPath from '@assets/Y-2-removebg-preview_1753383888231.png';
+import yappyyLogoPath from '@assets/Y-2-removebg-preview_1753384287580.png';
 
 export default function HomePage() {
   const { isAuthenticated, isLoading, user, logout } = useAuth();
@@ -103,9 +103,9 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
-                Yappyy
-              </h1>
+              <button onClick={() => window.location.href = '/'} className="hover:opacity-80 transition-opacity">
+                <img src={yappyyLogoPath} alt="Yappyy" className="h-8" />
+              </button>
             </div>
             <div className="flex items-center space-x-4">
               {!isAuthenticated ? (

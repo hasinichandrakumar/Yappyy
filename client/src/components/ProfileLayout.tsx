@@ -10,7 +10,7 @@ import {
   ArrowLeft,
   Home
 } from "lucide-react";
-import yappyyLogo from "@assets/Y-2-removebg-preview_1753383888231.png";
+import yappyyLogo from "@assets/Y-2-removebg-preview_1753384287580.png";
 
 interface ProfileLayoutProps {
   children: React.ReactNode;
@@ -44,9 +44,9 @@ export default function ProfileLayout({ children }: ProfileLayoutProps) {
                 </Button>
               </Link>
               <div className="flex items-center space-x-3">
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
-                  Yappyy
-                </h1>
+                <button onClick={() => window.location.href = '/'} className="hover:opacity-80 transition-opacity">
+                  <img src={yappyyLogo} alt="Yappyy" className="h-8" />
+                </button>
               </div>
             </div>
             
