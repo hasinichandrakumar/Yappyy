@@ -448,12 +448,12 @@ export default function SpeechDNA() {
       uniqueSignature: generateUniqueSignature(),
       communicationDNA,
       advancedMetrics: {
-        authenticity: Math.max(actualConfidence || 70, 70) + Math.random() * 10,
-        charisma: Math.max(actualConfidence || 65, 65) + Math.random() * 15,
-        clarity: Math.max(actualClarity || 70, 70) + Math.random() * 10,
-        impact: Math.max((actualConfidence + actualClarity) / 2 || 70, 70) + Math.random() * 10,
-        adaptability: Math.max((genome.cognitive + genome.emotional) / 2, 70),
-        memorability: Math.max(actualPace > 150 ? 80 : 70, 70) + Math.random() * 10
+        authenticity: actualConfidence || 0, // ELIMINATED: Only show actual confidence data
+        charisma: actualConfidence || 0, // ELIMINATED: Only show actual confidence data
+        clarity: actualClarity || 0, // ELIMINATED: Only show actual clarity data
+        impact: ((actualConfidence || 0) + (actualClarity || 0)) / 2, // ELIMINATED: Only show calculated from real data
+        adaptability: (genome.cognitive + genome.emotional) / 2,
+        memorability: actualPace > 150 ? 80 : (actualPace > 0 ? 70 : 0) // ELIMINATED: Only show when real pace data available
       },
       growthPotential: generateGrowthPotential(),
 

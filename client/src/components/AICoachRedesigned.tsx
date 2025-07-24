@@ -572,11 +572,14 @@ export default function AICoachRedesigned() {
         `🎯 **Voice Modulation Neural Net**: Pitch analysis reveals you naturally lower your voice when confident about topics. **Learning Model**: Leverage this by preparing "confidence anchors" - specific points where you demonstrate expert-level knowledge to trigger optimal vocal patterns.`
       ];
       
-      const randomResponse = neuralResponses[Math.floor(Math.random() * neuralResponses.length)];
+      // ELIMINATED: Random response selection - use persistent data-driven response instead
+      const dataBasedResponse = persistentData && persistentData.totalSessions > 0 
+        ? `🧠 **Persistent Analytics**: Based on your ${persistentData.totalSessions} sessions of coaching data, I can provide truly personalized feedback. Your neural profile shows continuous learning patterns that improve with each session.`
+        : neuralResponses[0]; // Use first response as fallback
       
       const aiResponse = {
         id: Date.now() + 1,
-        text: randomResponse,
+        text: dataBasedResponse,
         isUser: false,
         timestamp: new Date().toLocaleTimeString()
       };

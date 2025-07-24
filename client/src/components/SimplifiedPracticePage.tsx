@@ -81,7 +81,7 @@ export default function SimplifiedPracticePage() {
   const [showRecordingLibrary, setShowRecordingLibrary] = useState(false);
   const [videoRecordingEnabled, setVideoRecordingEnabled] = useState(true);
 
-  // Simplified metrics - start at 0 until recording begins
+  // AUTHENTIC METRICS ONLY - All start at 0 until real analysis data is available
   const [metrics, setMetrics] = useState<SimplifiedMetrics>({
     eyeContact: 0,
     confidence: 0,
@@ -92,11 +92,11 @@ export default function SimplifiedPracticePage() {
     voice: {
       clarity: 0,
       pace: 0,
-      volume: 85,
-      intonation: 75,
+      volume: 0, // Only show when real audio analysis available
+      intonation: 0, // Only show when real audio analysis available
       fillerCount: 0,
-      pauseEffectiveness: 80,
-      pitchVariation: 75,
+      pauseEffectiveness: 0, // Only show when real pause analysis available
+      pitchVariation: 0, // Only show when real pitch analysis available
       vocalFryDetection: false,
       uptalkPatterns: 0
     },
@@ -552,43 +552,8 @@ export default function SimplifiedPracticePage() {
 
         // Enhanced live feedback will be generated separately in a useEffect
 
-        // Generate body language insights
-        if (sessionDuration > 10 && sessionDuration % 15 === 0) {
-          const bodyLanguageTips = [
-            "Keep your shoulders relaxed and avoid hunching",
-            "Use natural hand gestures to emphasize points",
-            "Maintain good posture - stand or sit up straight",
-            "Smile naturally to appear more engaging",
-            "Use the 'triangle technique' - look at different points"
-          ];
-          
-          const randomTip = bodyLanguageTips[Math.floor(Math.random() * bodyLanguageTips.length)];
-          setLiveFeedback(prev => [...prev.slice(-4), {
-            id: Date.now().toString(),
-            message: `Body Language Tip: ${randomTip}`,
-            type: 'info',
-            timestamp: Date.now()
-          }]);
-        }
-
-        // Voice quality insights
-        if (finalTranscript.length > 50 && sessionDuration % 20 === 0) {
-          const voiceTips = [
-            "Vary your pitch to avoid monotone delivery",
-            "Use pauses for emphasis instead of filler words",
-            "Project your voice from your diaphragm",
-            "Speak with conviction and confidence",
-            "Practice breathing exercises for better control"
-          ];
-          
-          const randomVoiceTip = voiceTips[Math.floor(Math.random() * voiceTips.length)];
-          setLiveFeedback(prev => [...prev.slice(-4), {
-            id: Date.now().toString(),
-            message: `Voice Tip: ${randomVoiceTip}`,
-            type: 'info',
-            timestamp: Date.now()
-          }]);
-        }
+        // REMOVED: Random tip generation - replaced with real data-driven feedback only
+        // Tips will only be shown when actual body language or voice analysis data is available
       }
     };
 
@@ -706,23 +671,12 @@ export default function SimplifiedPracticePage() {
         { message: 'Practice smooth transitions between ideas', type: 'info' as const }
       ];
 
-      // Add professional tip every 30-45 seconds
-      if (sessionMinutes > 0.5 && Math.floor(sessionMinutes * 2) !== Math.floor((sessionMinutes - 0.1) * 2)) {
-        const tip = professionalTips[Math.floor(Math.random() * professionalTips.length)];
-        if (!lastMessage || lastMessage.message !== tip.message) {
-          setLiveFeedback(prev => [...prev.slice(-5), {
-            id: Date.now().toString(),
-            message: tip.message,
-            type: tip.type,
-            timestamp: Date.now()
-          }]);
-        }
-      }
+      // ELIMINATED: Random tip selection - Tips will only be shown based on actual analysis data
     };
 
-    // Initial insight after 5 seconds, then every 10-15 seconds
+    // Initial insight after 5 seconds, then every 15 seconds (fixed interval)
     const initialTimeout = setTimeout(generateLiveInsights, 5000);
-    const interval = setInterval(generateLiveInsights, 12000 + Math.random() * 6000);
+    const interval = setInterval(generateLiveInsights, 15000); // Fixed interval, no randomness
     
     return () => {
       clearTimeout(initialTimeout);

@@ -1588,8 +1588,8 @@ function TranscriptAnalysisComponent({ session, onAnalysisComplete }: Transcript
       id: index,
       text: sentence.trim(),
       timestamp: `${Math.floor(index * 15 / 60)}:${(index * 15 % 60).toString().padStart(2, '0')}`,
-      confidence: 75 + Math.random() * 20, // Simulated confidence score
-      sentiment: ['positive', 'neutral', 'confident'][Math.floor(Math.random() * 3)]
+      confidence: 0, // ELIMINATED: Only show when real confidence analysis available
+      sentiment: 'neutral' // ELIMINATED: Only show when real sentiment analysis available
     }));
   };
 

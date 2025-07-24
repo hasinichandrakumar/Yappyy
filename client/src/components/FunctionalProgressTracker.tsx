@@ -189,25 +189,25 @@ export default function FunctionalProgressTracker() {
         skill: 'Voice Clarity',
         current: Math.round(filteredSessions.reduce((sum, s) => sum + s.clarityScore, 0) / totalSessions),
         trend: 'up' as const,
-        change: Math.round(Math.random() * 20 + 5) // Simplified for now
+        change: 0 // ELIMINATED: Only show when real trend analysis available
       },
       {
         skill: 'Confidence',
         current: Math.round(filteredSessions.reduce((sum, s) => sum + s.confidenceLevel, 0) / totalSessions),
         trend: 'up' as const,
-        change: Math.round(Math.random() * 15 + 3)
+        change: 0 // ELIMINATED: Only show when real trend analysis available
       },
       {
         skill: 'Engagement',
         current: Math.round(filteredSessions.reduce((sum, s) => sum + s.engagementLevel, 0) / totalSessions),
         trend: 'stable' as const,
-        change: Math.round(Math.random() * 8 - 4)
+        change: 0 // ELIMINATED: Only show when real trend analysis available
       },
       {
         skill: 'Eye Contact',
         current: Math.round(filteredSessions.reduce((sum, s) => sum + s.eyeContactScore, 0) / totalSessions),
         trend: 'up' as const,
-        change: Math.round(Math.random() * 12 + 2)
+        change: 0 // ELIMINATED: Only show when real trend analysis available
       }
     ];
 
