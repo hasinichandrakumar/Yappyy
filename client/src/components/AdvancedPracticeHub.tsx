@@ -187,12 +187,12 @@ export default function AdvancedPracticeHub() {
 
   // Calculate real-time metrics
   const calculateMetrics = (): RealTimeMetric[] => {
-    const baseConfidence = sessionActive ? 65 + Math.random() * 25 : 0;
-    const basePace = Number(wpm) || (sessionActive ? 140 + Math.random() * 40 : 0);
-    const eyeContactValue = Number(eyeContact) || (sessionActive ? 60 + Math.random() * 30 : 0);
-    const postureValue = Number(posture) || (sessionActive ? 70 + Math.random() * 20 : 0);
-    const gestureValue = Number(gesture) || (sessionActive ? 65 + Math.random() * 25 : 0);
-    const baseVolume = sessionActive ? 60 + Math.random() * 30 : 0;
+    const baseConfidence = Number(confidence) || 0;
+    const basePace = Number(wpm) || 0;
+    const eyeContactValue = Number(eyeContact) || 0;
+    const postureValue = Number(posture) || 0;
+    const gestureValue = Number(gesture) || 0;
+    const baseVolume = Number(volume) || 0;
 
     return [
       {
@@ -263,17 +263,21 @@ export default function AdvancedPracticeHub() {
         const lowMetrics = metrics.filter(m => m.status === 'needs-improvement');
         
         if (lowMetrics.length > 0) {
-          const metric = lowMetrics[Math.floor(Math.random() * lowMetrics.length)];
+          // Use first metric that needs improvement (deterministic)
+          const metric = lowMetrics[0];
           const advice = `Try to improve your ${metric.label.toLowerCase()}. Current level: ${metric.value}${metric.unit}`;
           setLiveAdvice(prev => [...prev.slice(-4), advice]);
-        } else {
+        } else if (metrics.some(m => m.value > 0)) {
+          // Only show positive advice if there's actual data
           const positiveAdvice = [
             "Great job! Your delivery is strong.",
             "Excellent eye contact and posture.",
             "Your pace is perfect for audience engagement.",
             "Strong confidence in your delivery."
           ];
-          const advice = positiveAdvice[Math.floor(Math.random() * positiveAdvice.length)];
+          // Use cycling index instead of random
+          const adviceIndex = Math.floor(sessionTime / 15) % positiveAdvice.length;
+          const advice = positiveAdvice[adviceIndex];
           setLiveAdvice(prev => [...prev.slice(-4), advice]);
         }
       }, 15000); // Every 15 seconds

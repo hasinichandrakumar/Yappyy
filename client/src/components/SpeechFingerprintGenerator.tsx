@@ -53,9 +53,9 @@ export default function SpeechFingerprintGenerator({ sessionCount }: SpeechFinge
       "Good timing"
     ];
     
-    const dominantTraits = traitOptions
-      .sort(() => Math.random() - 0.5)
-      .slice(0, Math.min(4, Math.max(2, Math.floor(sessionCount / 3))));
+    // Use deterministic selection based on session count
+    const traitCount = Math.min(4, Math.max(2, Math.floor(sessionCount / 3)));
+    const dominantTraits = traitOptions.slice(0, traitCount);
     
     const patterns = [
       "Analytical Communicator",
@@ -66,7 +66,8 @@ export default function SpeechFingerprintGenerator({ sessionCount }: SpeechFinge
       "Engaging Conversationalist"
     ];
     
-    const speakingPattern = patterns[Math.floor(Math.random() * patterns.length)];
+    // Use session count to deterministically select pattern
+    const speakingPattern = patterns[sessionCount % patterns.length];
     
     setFingerprint({
       uniquenessScore,

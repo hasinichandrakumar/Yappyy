@@ -80,29 +80,29 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
   const [isGeneratingInsights, setIsGeneratingInsights] = useState(true);
   const [aiInsights, setAIInsights] = useState<any>(null);
 
-  // Normalize all data to ensure proper percentage display - fix broken percentage displays
+  // AUTHENTIC DATA ONLY - NO FAKE METRICS
   const normalizedData = {
     ...sessionData,
-    // Convert decimal values to percentages if needed, ensure proper numeric types
-    overallPerformance: Math.round(typeof sessionData.overallPerformance === 'number' ? 
-      (sessionData.overallPerformance > 1 ? sessionData.overallPerformance : sessionData.overallPerformance * 100) : 75),
-    clarityScore: Math.round(typeof sessionData.clarityScore === 'number' ? 
-      (sessionData.clarityScore > 1 ? sessionData.clarityScore : sessionData.clarityScore * 100) : 80),
-    volumeConsistency: Math.round(typeof sessionData.volumeConsistency === 'number' ? 
-      (sessionData.volumeConsistency > 1 ? sessionData.volumeConsistency : sessionData.volumeConsistency * 100) : 75),
-    intonationScore: Math.round(typeof sessionData.intonationScore === 'number' ? 
-      (sessionData.intonationScore > 1 ? sessionData.intonationScore : sessionData.intonationScore * 100) : 70),
-    paceConsistency: Math.round(typeof sessionData.paceConsistency === 'number' ? 
-      (sessionData.paceConsistency > 1 ? sessionData.paceConsistency : sessionData.paceConsistency * 100) : 85),
-    engagementLevel: Math.round(typeof sessionData.engagementLevel === 'number' ? 
-      (sessionData.engagementLevel > 1 ? sessionData.engagementLevel : sessionData.engagementLevel * 100) : 78),
-    eyeContactScore: Math.round(typeof sessionData.eyeContactScore === 'string' ? 
-      parseFloat(sessionData.eyeContactScore) : 
+    // Convert decimal values to percentages if needed, NO FALLBACK VALUES
+    overallPerformance: typeof sessionData.overallPerformance === 'number' ? 
+      Math.round(sessionData.overallPerformance > 1 ? sessionData.overallPerformance : sessionData.overallPerformance * 100) : 0,
+    clarityScore: typeof sessionData.clarityScore === 'number' ? 
+      Math.round(sessionData.clarityScore > 1 ? sessionData.clarityScore : sessionData.clarityScore * 100) : 0,
+    volumeConsistency: typeof sessionData.volumeConsistency === 'number' ? 
+      Math.round(sessionData.volumeConsistency > 1 ? sessionData.volumeConsistency : sessionData.volumeConsistency * 100) : 0,
+    intonationScore: typeof sessionData.intonationScore === 'number' ? 
+      Math.round(sessionData.intonationScore > 1 ? sessionData.intonationScore : sessionData.intonationScore * 100) : 0,
+    paceConsistency: typeof sessionData.paceConsistency === 'number' ? 
+      Math.round(sessionData.paceConsistency > 1 ? sessionData.paceConsistency : sessionData.paceConsistency * 100) : 0,
+    engagementLevel: typeof sessionData.engagementLevel === 'number' ? 
+      Math.round(sessionData.engagementLevel > 1 ? sessionData.engagementLevel : sessionData.engagementLevel * 100) : 0,
+    eyeContactScore: typeof sessionData.eyeContactScore === 'string' ? 
+      Math.round(parseFloat(sessionData.eyeContactScore)) : 
       (typeof sessionData.eyeContactScore === 'number' ? 
-        (sessionData.eyeContactScore > 1 ? sessionData.eyeContactScore : sessionData.eyeContactScore * 100) : 82)),
-    confidenceLevel: Math.round(typeof sessionData.confidenceLevel === 'number' ? 
-      (sessionData.confidenceLevel > 1 ? sessionData.confidenceLevel : sessionData.confidenceLevel * 100) : 76),
-    wordsPerMinute: Math.round(sessionData.wordsPerMinute || 145),
+        Math.round(sessionData.eyeContactScore > 1 ? sessionData.eyeContactScore : sessionData.eyeContactScore * 100) : 0),
+    confidenceLevel: typeof sessionData.confidenceLevel === 'number' ? 
+      Math.round(sessionData.confidenceLevel > 1 ? sessionData.confidenceLevel : sessionData.confidenceLevel * 100) : 0,
+    wordsPerMinute: sessionData.wordsPerMinute || 0,
     fillerWordCount: sessionData.fillerWordCount || 0
   };
 

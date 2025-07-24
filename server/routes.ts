@@ -637,22 +637,22 @@ CRITICAL: Evaluate how well this speech achieved its stated PURPOSE. Analyze the
           const fallbackAnalysis = {
             overallAssessment: "Session completed successfully with solid fundamental performance. Your practice data shows consistent improvement patterns.",
             voiceAnalysis: {
-              score: Math.max(60, sessionData.clarityScore || 75),
-              strengths: ["Clear articulation", "Consistent volume"],
-              improvements: ["Pace variation", "Vocal emphasis"],
-              insights: "Voice quality demonstrates solid foundation with opportunities for enhanced dynamic expression."
+              score: sessionData.clarityScore || 0,
+              strengths: sessionData.clarityScore > 0 ? ["Clear articulation", "Consistent volume"] : [],
+              improvements: sessionData.clarityScore > 0 ? ["Pace variation", "Vocal emphasis"] : ["Complete practice session for voice analysis"],
+              insights: sessionData.clarityScore > 0 ? "Voice quality demonstrates solid foundation with opportunities for enhanced dynamic expression." : "Complete practice session to receive voice analysis."
             },
             contentAnalysis: {
-              score: Math.max(65, sessionData.engagementLevel || 70),
-              strengths: ["Structured delivery", "Coherent messaging"],
-              improvements: ["Supporting examples", "Audience engagement"],
-              insights: "Content shows good organization with potential for more compelling storytelling elements."
+              score: sessionData.engagementLevel || 0,
+              strengths: sessionData.engagementLevel > 0 ? ["Structured delivery", "Coherent messaging"] : [],
+              improvements: sessionData.engagementLevel > 0 ? ["Supporting examples", "Audience engagement"] : ["Complete practice session for content analysis"],
+              insights: sessionData.engagementLevel > 0 ? "Content shows good organization with potential for more compelling storytelling elements." : "Complete practice session to receive content analysis."
             },
             deliveryAnalysis: {
-              score: Math.max(60, sessionData.confidenceLevel || 65),
-              strengths: ["Confident posture", "Steady pacing"],
-              improvements: ["Eye contact consistency", "Gesture coordination"],
-              insights: "Delivery demonstrates confidence with room for more dynamic presentation techniques."
+              score: sessionData.confidenceLevel || 0,
+              strengths: sessionData.confidenceLevel > 0 ? ["Confident posture", "Steady pacing"] : [],
+              improvements: sessionData.confidenceLevel > 0 ? ["Eye contact consistency", "Gesture coordination"] : ["Complete practice session for delivery analysis"],
+              insights: sessionData.confidenceLevel > 0 ? "Delivery demonstrates confidence with room for more dynamic presentation techniques." : "Complete practice session to receive delivery analysis."
             },
             keyInsights: [
               {
@@ -694,14 +694,14 @@ CRITICAL: Evaluate how well this speech achieved its stated PURPOSE. Analyze the
       } catch (parseError) {
         console.warn('⚠️ JSON parsing failed, providing structured fallback...');
         analysis = {
-          overallAssessment: "Session analysis completed with positive performance indicators showing areas for continued development.",
+          overallAssessment: "Session analysis completed. Continue practicing to receive comprehensive AI insights.",
           voiceAnalysis: {
-            score: sessionData.clarityScore || 70,
-            strengths: ["Voice clarity", "Volume control"],
-            improvements: ["Pace variation", "Vocal emphasis"],
-            insights: "Voice performance shows consistent quality with opportunities for dynamic expression enhancement."
+            score: sessionData.clarityScore || 0,
+            strengths: sessionData.clarityScore > 0 ? ["Voice clarity", "Volume control"] : [],
+            improvements: sessionData.clarityScore > 0 ? ["Pace variation", "Vocal emphasis"] : ["Complete practice session for voice analysis"],
+            insights: sessionData.clarityScore > 0 ? "Voice performance shows consistent quality with opportunities for dynamic expression enhancement." : "Complete practice session to receive voice analysis."
           },
-          progressSummary: "Continue practicing to build on these solid speaking fundamentals."
+          progressSummary: "Continue practicing to build on these speaking fundamentals."
         };
       }
       
@@ -722,26 +722,28 @@ CRITICAL: Evaluate how well this speech achieved its stated PURPOSE. Analyze the
     } catch (error: any) {
       console.error('❌ Error generating AI insights:', error);
       
-      // Fallback response if OpenAI fails (using request data)
+      // Fallback response if OpenAI fails (AUTHENTIC DATA ONLY)
       const fallbackInsights = {
-        overallAssessment: `Good practice session with ${req.body.sessionData?.overallPerformance || 75}% overall performance. Continue working on consistency and confidence.`,
+        overallAssessment: req.body.sessionData?.overallPerformance ? 
+          `Practice session completed with ${req.body.sessionData.overallPerformance}% overall performance. Continue working on consistency and confidence.` :
+          "Practice session completed. Continue practicing to receive comprehensive AI analysis.",
         voiceAnalysis: {
-          score: req.body.sessionData?.clarityScore || 75,
-          strengths: ["Clear articulation"],
-          improvements: (req.body.fillerCount || 0) > 5 ? ["Reduce filler words"] : ["Maintain current pace"],
-          insights: "Your voice quality shows good potential. Focus on consistent volume and pacing."
+          score: req.body.sessionData?.clarityScore || 0,
+          strengths: req.body.sessionData?.clarityScore > 0 ? ["Clear articulation"] : [],
+          improvements: (req.body.fillerCount || 0) > 5 ? ["Reduce filler words"] : req.body.sessionData?.clarityScore > 0 ? ["Maintain current pace"] : ["Complete practice session for voice analysis"],
+          insights: req.body.sessionData?.clarityScore > 0 ? "Your voice quality shows good potential. Focus on consistent volume and pacing." : "Complete practice session to receive voice analysis."
         },
         contentAnalysis: {
-          score: 75,
-          strengths: ["Structured content"],
-          improvements: ["Add more engaging examples"],
-          insights: "Content structure is developing well. Focus on adding more specific examples."
+          score: req.body.sessionData?.engagementLevel || 0,
+          strengths: req.body.sessionData?.engagementLevel > 0 ? ["Structured content"] : [],
+          improvements: req.body.sessionData?.engagementLevel > 0 ? ["Add more engaging examples"] : ["Complete practice session for content analysis"],
+          insights: req.body.sessionData?.engagementLevel > 0 ? "Content structure is developing well. Focus on adding more specific examples." : "Complete practice session to receive content analysis."
         },
         deliveryAnalysis: {
-          score: req.body.sessionData?.confidenceLevel || 70,
-          strengths: ["Good posture"],
-          improvements: ["Increase eye contact"],
-          insights: "Delivery shows confidence. Work on engaging more directly with your audience."
+          score: req.body.sessionData?.confidenceLevel || 0,
+          strengths: req.body.sessionData?.confidenceLevel > 0 ? ["Good posture"] : [],
+          improvements: req.body.sessionData?.confidenceLevel > 0 ? ["Increase eye contact"] : ["Complete practice session for delivery analysis"],
+          insights: req.body.sessionData?.confidenceLevel > 0 ? "Delivery shows confidence. Work on engaging more directly with your audience." : "Complete practice session to receive delivery analysis."
         },
         keyInsights: [{
           category: "improvement",
