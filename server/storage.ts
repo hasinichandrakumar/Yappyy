@@ -230,8 +230,10 @@ export class DatabaseStorage implements IStorage {
           .onConflictDoNothing()
       );
 
-      // Create initial daily goals for new user
-      await this.generateDailyGoalsForUser(userId);
+      // Create initial daily goals for new user (async to not block user creation)
+      this.generateDailyGoalsForUser(userId).catch(error => {
+        console.error('Error creating initial daily goals:', error);
+      });
 
       console.log('✅ New user data initialized for:', userId);
     } catch (error) {
@@ -500,61 +502,92 @@ export class DatabaseStorage implements IStorage {
   }
 
   async generateDailyGoalsForUser(userId: string): Promise<DailyGoal[]> {
-    // Check if user already has goals for today
-    const existingGoals = await this.getUserDailyGoals(userId);
+    console.log('🎯 Generating daily goals for user:', userId);
+    
+    // Quick check for existing goals today
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    const existingGoals = await resilientQuery(async () => {
+      return await db
+        .select()
+        .from(dailyGoals)
+        .where(
+          and(
+            eq(dailyGoals.userId, userId),
+            gte(dailyGoals.createdAt, today),
+            lte(dailyGoals.createdAt, tomorrow)
+          )
+        );
+    });
+
     if (existingGoals.length > 0) {
+      console.log('✅ Found existing goals for today:', existingGoals.length);
       return existingGoals;
     }
 
-    // Generate new goals based on user's progress and preferences
+    // Fast goal generation - create goals immediately
     const goalTemplates = [
       {
-        goalType: 'practice',
-        title: 'Voice Clarity Challenge',
-        description: 'Practice speaking with crystal clear articulation',
-        targetValue: 3,
-        unit: 'minutes',
-        points: 25,
-        difficulty: 'easy',
-        category: 'voice'
+        goalType: 'practice_sessions',
+        description: 'Complete practice sessions to improve your speaking skills',
+        targetValue: 2,
+        currentProgress: 0,
+        isCompleted: false
       },
       {
-        goalType: 'improvement',
-        title: 'Eye Contact Mastery',
-        description: 'Maintain steady eye contact throughout your speech',
-        targetValue: 85,
-        unit: '% eye contact',
-        points: 30,
-        difficulty: 'medium',
-        category: 'body'
+        goalType: 'speaking_minutes', 
+        description: 'Practice speaking for focused improvement time',
+        targetValue: 5,
+        currentProgress: 0,
+        isCompleted: false
       },
       {
-        goalType: 'challenge',
-        title: 'Confident Posture Power',
-        description: 'Stand tall and command attention with your presence',
-        targetValue: 90,
-        unit: '% good posture',
-        points: 35,
-        difficulty: 'medium',
-        category: 'body'
+        goalType: 'confidence_improvement',
+        description: 'Work on building confidence through vocal exercises',
+        targetValue: 80,
+        currentProgress: 0,
+        isCompleted: false
+      },
+      {
+        goalType: 'filler_reduction',
+        description: 'Practice speaking with fewer filler words like "um" and "uh"',
+        targetValue: 5,
+        currentProgress: 0,
+        isCompleted: false
       }
     ];
 
-    // Select 2 random goals for the day
-    const selectedTemplates = goalTemplates
+    // Randomly select 2 goals for the day
+    const selectedGoals = goalTemplates
       .sort(() => Math.random() - 0.5)
       .slice(0, 2);
 
     const newGoals: DailyGoal[] = [];
-    for (const template of selectedTemplates) {
-      const goal = await this.createDailyGoal({
-        userId,
-        ...template,
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // Expires in 24 hours
+    
+    // Create goals in parallel for speed
+    const goalPromises = selectedGoals.map(async (goalData) => {
+      return await resilientQuery(async () => {
+        const [goal] = await db
+          .insert(dailyGoals)
+          .values({
+            userId,
+            ...goalData,
+            date: today.toISOString().split('T')[0],
+            createdAt: new Date(),
+            updatedAt: new Date()
+          })
+          .returning();
+        return goal;
       });
-      newGoals.push(goal);
-    }
+    });
 
+    const goals = await Promise.all(goalPromises);
+    newGoals.push(...goals);
+
+    console.log('✅ Created', newGoals.length, 'new daily goals for user:', userId);
     return newGoals;
   }
 

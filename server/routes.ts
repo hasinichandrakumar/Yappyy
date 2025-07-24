@@ -160,11 +160,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Daily goals endpoint
+  // Daily goals endpoint - auto-generate if none exist
   app.get('/api/daily-goals', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const goals = await storage.getUserDailyGoals(userId);
+      
+      // Try to get existing goals first
+      let goals = await storage.getUserDailyGoals(userId);
+      
+      // If no goals exist, generate them immediately
+      if (goals.length === 0) {
+        console.log('🚀 No daily goals found, generating new ones for user:', userId);
+        goals = await storage.generateDailyGoalsForUser(userId);
+      }
+      
       res.json(goals);
     } catch (error) {
       console.error("Error fetching daily goals:", error);
