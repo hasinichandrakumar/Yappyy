@@ -193,18 +193,18 @@ export default function HomePage() {
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="text-center">
-            <h1 className="text-6xl md:text-8xl font-display text-white mb-6 font-bold">
+            <h1 className="text-7xl md:text-9xl lg:text-[12rem] font-display text-white mb-16 font-bold leading-tight">
               Talk Smart.
               <br />
               Talk Yappyy.
             </h1>
-            <p className="text-xl md:text-2xl font-body text-white/90 mb-8 max-w-3xl mx-auto">
+            <p className="text-2xl md:text-3xl lg:text-4xl font-body text-white/90 mb-16 max-w-5xl mx-auto leading-relaxed">
               AI-powered speech coaching that transforms your communication skills through real-time feedback and personalized training
             </p>
-            <div className="flex justify-center mb-12">
+            <div className="flex justify-center mb-20">
               <Button 
                 size="lg" 
-                className="bg-white hover:bg-gray-50 font-button shadow-lg hover:shadow-xl transition-all duration-300 px-8 py-4 border-0"
+                className="bg-white hover:bg-gray-50 font-button shadow-lg hover:shadow-xl transition-all duration-300 px-12 py-6 text-xl border-0"
                 onClick={() => {
                   if (isAuthenticated) {
                     window.location.href = '/dashboard';
@@ -216,7 +216,7 @@ export default function HomePage() {
                 <span className="bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 bg-clip-text text-transparent font-bold animate-gradient-x">
                   Start Practicing Now
                 </span>
-                <Mic className="ml-2 h-5 w-5 text-blue-600" />
+                <Mic className="ml-3 h-6 w-6 text-blue-600" />
               </Button>
             </div>
 
