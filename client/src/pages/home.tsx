@@ -70,7 +70,7 @@ export default function HomePage() {
                       </div>
                     </div>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => window.location.href = '/dashboard'}>
+                    <DropdownMenuItem onClick={() => window.location.href = 'https://yappyy.com/dashboard'}>
                       <UserIcon className="mr-2 h-4 w-4" />
                       Dashboard
                     </DropdownMenuItem>
@@ -87,7 +87,7 @@ export default function HomePage() {
                 className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white font-button shadow-lg hover:shadow-xl transition-all duration-300"
                 onClick={() => {
                   if (isAuthenticated) {
-                    window.location.href = '/dashboard';
+                    window.location.href = 'https://yappyy.com/dashboard';
                   } else {
                     window.location.href = '/api/login';
                   }

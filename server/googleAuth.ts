@@ -94,19 +94,19 @@ export async function setupGoogleAuth(app: Express) {
 
   // Handle the custom OAuth callback route (for yappyy.com domain)
   app.get('/oauth2callback',
-    passport.authenticate('google', { failureRedirect: '/' }),
+    passport.authenticate('google', { failureRedirect: 'https://yappyy.com/' }),
     (req, res) => {
-      // Successful authentication, redirect to dashboard
-      res.redirect('/dashboard');
+      // Successful authentication, redirect to yappyy.com dashboard
+      res.redirect('https://yappyy.com/dashboard');
     }
   );
 
   // Also handle the original route for compatibility
   app.get('/api/auth/google/callback',
-    passport.authenticate('google', { failureRedirect: '/' }),
+    passport.authenticate('google', { failureRedirect: 'https://yappyy.com/' }),
     (req, res) => {
-      // Successful authentication, redirect to dashboard
-      res.redirect('/dashboard');
+      // Successful authentication, redirect to yappyy.com dashboard
+      res.redirect('https://yappyy.com/dashboard');
     }
   );
 
@@ -122,7 +122,7 @@ export async function setupGoogleAuth(app: Express) {
         console.error('Logout error:', err);
       }
       req.session.destroy(() => {
-        res.redirect('/');
+        res.redirect('https://yappyy.com/');
       });
     });
   });

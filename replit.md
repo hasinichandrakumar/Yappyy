@@ -442,9 +442,11 @@ The application now provides complete video recording and playback functionality
 ### Google OAuth Configuration (January 23, 2025)
 - **Client ID**: 372720245891-dtpkbj63rl2hju5vo2uorldivgurg6fh.apps.googleusercontent.com ✅ Configured
 - **Client Secret**: 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 ✅ Configured
-- **Current Domain**: https://0c7fe059-a7da-4a46-a7cc-18655fec2a24-00-1znejaw22ebqj.picard.replit.dev
-- **Redirect URI**: `https://0c7fe059-a7da-4a46-a7cc-18655fec2a24-00-1znejaw22ebqj.picard.replit.dev/api/auth/google/callback` ✅ Added to Google Cloud Console
-- **Status**: Fully configured and ready for testing
+- **Production Domain**: https://yappyy.com ✅ Primary domain for user experience
+- **Development Domain**: https://0c7fe059-a7da-4a46-a7cc-18655fec2a24-00-1znejaw22ebqj.picard.replit.dev
+- **Dashboard Redirects**: All authentication flows redirect to https://yappyy.com/dashboard
+- **Redirect URIs**: Both yappyy.com/oauth2callback and Replit dev domain configured in Google Cloud Console
+- **Status**: Fully configured with yappyy.com as primary domain
 
 ### Previous Open Access Dashboard System - REPLACED ✅ (July 21, 2025)
 - **Replaced with Replit Auth**: Enhanced from open access to proper Replit user authentication
