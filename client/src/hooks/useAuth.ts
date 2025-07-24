@@ -72,14 +72,6 @@ export function useAuth() {
 
   const user = loggedOut ? null : userData as User;
   const isAuthenticated = !loggedOut && (userData as any)?.isAuthenticated === true;
-  
-  // Debug authentication state
-  console.log('🔍 Auth Debug:', { 
-    loggedOut, 
-    userData: userData as any, 
-    isAuthenticated,
-    authType: (userData as any)?.authType 
-  });
 
   return {
     user,

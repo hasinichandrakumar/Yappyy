@@ -94,15 +94,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const userId = getUserId(req);
     const passportUser = req.user; // Google OAuth user from passport
     
-    console.log('🔍 Session debug:', {
-      sessionId: req.sessionID,
-      hasUser: !!passportUser,
-      userId: userId,
-      isAuthenticated: req.isAuthenticated(),
-      email: passportUser?.email,
-      sessionData: req.session,
-      passport: req.session?.passport
-    });
+    // Session debug (disabled in production)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔍 Session debug:', {
+        sessionId: req.sessionID,
+        hasUser: !!passportUser,
+        userId: userId,
+        isAuthenticated: req.isAuthenticated(),
+        email: passportUser?.email
+      });
+    }
     
     if (passportUser && req.isAuthenticated()) {
       const userInfo = {
