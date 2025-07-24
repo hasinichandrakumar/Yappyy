@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Bell, User, BarChart3, Eye, Brain, Star, TrendingUp, FileText, Trophy, Volume2, HelpCircle } from "lucide-react";
-import yappyyLogo from "@assets/Untitled_design-11600-removebg-preview_1749744306540.png";
+import yappyyLogo from "@assets/Y-removebg-preview_1753380214189.png";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import NewPracticeDashboard from "@/components/NewPracticeDashboard";
 import ComprehensiveAICoach from "@/components/ComprehensiveAICoach";
