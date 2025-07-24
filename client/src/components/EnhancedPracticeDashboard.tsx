@@ -65,53 +65,9 @@ export default function EnhancedPracticeDashboard() {
     transcript: []
   });
 
-  // Helper function to generate transcript words
-  const generateTranscriptWord = (timestamp: number): TranscriptWord => {
-    const words = ["Hello", "everyone", "today", "I", "want", "to", "discuss", "like", "um", "actually"];
-    const word = words[Math.floor(Math.random() * words.length)];
-    const rand = Math.random();
-    
-    let type: "normal" | "filler" | "keyword" | "repeated" = "normal";
-    if (rand > 0.8) type = "filler";
-    else if (rand > 0.9) type = "keyword";
-    
-    let emotion: "happy" | "neutral" | "concerned" | "excited" | undefined = undefined;
-    if (Math.random() > 0.8) {
-      const emotions: ("happy" | "neutral" | "concerned")[] = ["happy", "neutral", "concerned"];
-      emotion = emotions[Math.floor(Math.random() * emotions.length)];
-    }
+  // REMOVED: No more fake transcript generation - only use real speech recognition data
 
-    return {
-      word,
-      timestamp,
-      confidence: Math.random(),
-      type,
-      emotion
-    };
-  };
-
-  // Simulate real-time session data updates
-  useEffect(() => {
-    if (!sessionData.isRecording || sessionData.isPaused) return;
-
-    const interval = setInterval(() => {
-      setSessionData(prev => {
-        const newWords: TranscriptWord[] = Math.random() > 0.7 ? [generateTranscriptWord(prev.duration)] : [];
-        
-        return {
-          ...prev,
-          duration: prev.duration + 1,
-          audioLevel: Math.max(20, Math.min(80, prev.audioLevel + (Math.random() - 0.5) * 10)),
-          speechRate: Math.max(80, Math.min(200, prev.speechRate + (Math.random() - 0.5) * 5)),
-          confidenceScore: Math.max(40, Math.min(100, prev.confidenceScore + (Math.random() - 0.5) * 3)),
-          fillerWordCount: prev.fillerWordCount + (Math.random() > 0.9 ? 1 : 0),
-          transcript: [...prev.transcript, ...newWords]
-        };
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [sessionData.isRecording, sessionData.isPaused]);
+  // REMOVED: No fake data simulation - only real metrics from actual speech and computer vision analysis
 
   const handleGoalSelect = (goal: PracticeGoal) => {
     setSessionData(prev => ({ ...prev, goal }));

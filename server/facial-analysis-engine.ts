@@ -76,6 +76,11 @@ export interface FacialAnalysisResult {
     processingTime: number;
     dataQuality: number;
     featureAccuracy: number;
+    clientEnhanced?: boolean;
+    clientConfidence?: number;
+    hybridProcessing?: boolean;
+    faceApiVersion?: string;
+    realLandmarks?: number;
   };
 }
 
@@ -192,27 +197,41 @@ export class FacialAnalysisEngine {
         throw new Error('Invalid or empty image data');
       }
       
-      // Extract real features from the base64 image data
+      // Extract real features from the base64 image data - ONLY use real CV data
       const realFeatures = await this.processRealImageData(imageData);
       
+      if (!realFeatures || !realFeatures.hasRealData) {
+        console.warn('❌ NO REAL COMPUTER VISION DATA - Returning zero metrics');
+        // Return ZERO values when no real CV data is available
+        return {
+          landmarkPoints: [],
+          eyeRegionMetrics: this.getZeroEyeMetrics(),
+          mouthRegionMetrics: this.getZeroMouthMetrics(),
+          facialGeometry: this.getZeroGeometry(),
+          skinToneAnalysis: this.getZeroSkinAnalysis(),
+          headPoseEstimation: this.getZeroHeadPose()
+        };
+      }
+      
+      console.log('✅ USING AUTHENTIC COMPUTER VISION DATA ONLY');
       return {
         landmarkPoints: realFeatures.landmarks || [],
-        eyeRegionMetrics: realFeatures.eyeMetrics || this.getDefaultEyeMetrics(),
-        mouthRegionMetrics: realFeatures.mouthMetrics || this.getDefaultMouthMetrics(),
-        facialGeometry: realFeatures.geometry || this.getDefaultGeometry(),
-        skinToneAnalysis: realFeatures.skinAnalysis || this.getDefaultSkinAnalysis(),
-        headPoseEstimation: realFeatures.headPose || this.getDefaultHeadPose()
+        eyeRegionMetrics: realFeatures.eyeMetrics,
+        mouthRegionMetrics: realFeatures.mouthMetrics,
+        facialGeometry: realFeatures.geometry,
+        skinToneAnalysis: realFeatures.skinAnalysis,
+        headPoseEstimation: realFeatures.headPose
       };
     } catch (error) {
-      console.warn('⚠️ Real facial analysis failed, using minimal data:', error);
-      // Return zero/default values instead of fake random data
+      console.warn('❌ Real facial analysis completely failed:', error);
+      // Return ZERO values when no computer vision analysis possible
       return {
         landmarkPoints: [],
-        eyeRegionMetrics: this.getDefaultEyeMetrics(),
-        mouthRegionMetrics: this.getDefaultMouthMetrics(),
-        facialGeometry: this.getDefaultGeometry(),
-        skinToneAnalysis: this.getDefaultSkinAnalysis(),
-        headPoseEstimation: this.getDefaultHeadPose()
+        eyeRegionMetrics: this.getZeroEyeMetrics(),
+        mouthRegionMetrics: this.getZeroMouthMetrics(),
+        facialGeometry: this.getZeroGeometry(),
+        skinToneAnalysis: this.getZeroSkinAnalysis(),
+        headPoseEstimation: this.getZeroHeadPose()
       };
     }
   }
@@ -223,18 +242,20 @@ export class FacialAnalysisEngine {
       // Import real computer vision engine
       const { realComputerVisionEngine } = await import('./real-computer-vision-engine');
       
-      console.log('🧠 Using TensorFlow.js for real facial analysis...');
+      console.log('🧠 Processing image with TensorFlow.js computer vision...');
       
       // Perform real computer vision analysis
       const realFaceDetection = await realComputerVisionEngine.analyzeRealFacialImage(imageData);
       
-      if (!realFaceDetection) {
-        throw new Error('Computer vision analysis failed');
+      if (!realFaceDetection || realFaceDetection.confidence < 0.3) {
+        console.warn('⚠️ Low quality CV detection - requiring minimum standards');
+        // Return ZERO values instead of fallback when CV fails
+        return null;
       }
 
-      console.log(`🎭 Real CV Analysis Complete - Confidence: ${(realFaceDetection.confidence * 100).toFixed(1)}%`);
+      console.log(`✅ HIGH-QUALITY CV Analysis: Confidence ${(realFaceDetection.confidence * 100).toFixed(1)}%`);
       
-      // Convert real computer vision results to our format
+      // Convert ONLY high-confidence computer vision results
       return {
         hasRealData: true,
         cvConfidence: realFaceDetection.confidence,
@@ -244,6 +265,7 @@ export class FacialAnalysisEngine {
           age: realFaceDetection.age,
           gender: realFaceDetection.gender
         },
+        landmarks: realFaceDetection.landmarks,
         eyeMetrics: this.extractEyeMetricsFromCV(realFaceDetection),
         mouthMetrics: this.extractMouthMetricsFromCV(realFaceDetection),
         geometry: this.extractGeometryFromCV(realFaceDetection),
@@ -253,8 +275,8 @@ export class FacialAnalysisEngine {
       
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      console.warn('⚠️ TensorFlow.js analysis failed, using fallback:', errorMessage);
-      throw new Error(`Real computer vision processing failed: ${errorMessage}`);
+      console.warn('⚠️ TensorFlow.js processing failed:', errorMessage);
+      return null; // Return null instead of throwing error
     }
   }
 
@@ -567,6 +589,81 @@ export class FacialAnalysisEngine {
       movementVariance: 0.15 // Low movement variance (stable)
     };
   }
+
+  // ZERO VALUE METHODS - Return zeros when no real computer vision data available
+  private getZeroEyeMetrics(): {
+    openness: number;
+    focus: number;
+    brightness: number;
+    browActivity: number;
+    saccadeFrequency: number;
+    gazeDirection: number;
+    blinkRate: number;
+  } {
+    return {
+      openness: 0,
+      focus: 0,
+      brightness: 0,
+      browActivity: 0,
+      saccadeFrequency: 0,
+      gazeDirection: 0,
+      blinkRate: 0
+    };
+  }
+
+  private getZeroMouthMetrics(): {
+    cornerLift: number;
+    tension: number;
+    expressiveness: number;
+    articulation: number;
+    forcedSmile: number;
+  } {
+    return {
+      cornerLift: 0,
+      tension: 0,
+      expressiveness: 0,
+      articulation: 0,
+      forcedSmile: 0
+    };
+  }
+
+  private getZeroGeometry(): {
+    symmetryScore: number;
+    proportions: number;
+    angleDeviation: number;
+  } {
+    return {
+      symmetryScore: 0,
+      proportions: 0,
+      angleDeviation: 0
+    };
+  }
+
+  private getZeroSkinAnalysis(): {
+    evenness: number;
+    healthiness: number;
+    brightness: number;
+  } {
+    return {
+      evenness: 0,
+      healthiness: 0,
+      brightness: 0
+    };
+  }
+
+  private getZeroHeadPose(): {
+    pitch: number;
+    yaw: number;
+    roll: number;
+    movementVariance: number;
+  } {
+    return {
+      pitch: 0,
+      yaw: 0,
+      roll: 0,
+      movementVariance: 0
+    };
+  }
   
   private generateFacialInsights(metrics: FacialMetrics): string[] {
     const insights: string[] = [];
@@ -658,39 +755,39 @@ export class FacialAnalysisEngine {
       timestamp: Date.now(),
       facialMetrics: {
         emotionalExpression: {
-          confidence: 65,
-          engagement: 70,
-          enthusiasm: 60,
-          nervousness: 20,
-          authenticity: 75
+          confidence: 0,
+          engagement: 0,
+          enthusiasm: 0,
+          nervousness: 0,
+          authenticity: 0
         },
         microExpressions: {
-          eyebrowMovement: 50,
-          eyeMovement: 65,
-          mouthExpression: 60,
-          facialSymmetry: 80
+          eyebrowMovement: 0,
+          eyeMovement: 0,
+          mouthExpression: 0,
+          facialSymmetry: 0
         },
         communicationSignals: {
-          eyeContactQuality: 60,
-          gazeFocus: 55,
-          blinkRate: 70,
-          facialStability: 65
+          eyeContactQuality: 0,
+          gazeFocus: 0,
+          blinkRate: 0,
+          facialStability: 0
         },
         overallPresence: {
-          charisma: 60,
-          trustworthiness: 70,
-          professionalism: 65,
-          approachability: 60
+          charisma: 0,
+          trustworthiness: 0,
+          professionalism: 0,
+          approachability: 0
         }
       },
-      insights: ["Facial analysis unavailable - using baseline metrics"],
-      recommendations: ["Ensure good lighting for optimal facial analysis"],
-      confidence: 60,
+      insights: ["❌ No computer vision data available - all metrics show zero"],
+      recommendations: ["Check camera access and lighting for facial analysis"],
+      confidence: 0,
       mlAnalysis: {
-        modelVersion: 'FacialML-fallback-v1.0.0',
+        modelVersion: 'FacialML-zero-v1.0.0',
         processingTime: 0,
         dataQuality: 0,
-        featureAccuracy: 60
+        featureAccuracy: 0
       }
     };
   }
