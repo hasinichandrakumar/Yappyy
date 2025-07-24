@@ -89,19 +89,19 @@ export default function DetailedAnalysis() {
   useEffect(() => {
     const interval = setInterval(() => {
       setPostureMetrics(prev => ({
-        spineAlignment: Math.max(60, Math.min(100, prev.spineAlignment + (Math.random() - 0.5) * 10)),
-        shoulderLevel: Math.max(60, Math.min(100, prev.shoulderLevel + (Math.random() - 0.5) * 8)),
-        headPosition: Math.max(60, Math.min(100, prev.headPosition + (Math.random() - 0.5) * 6)),
-        weightDistribution: Math.max(60, Math.min(100, prev.weightDistribution + (Math.random() - 0.5) * 5)),
-        overallPosture: Math.max(60, Math.min(100, prev.overallPosture + (Math.random() - 0.5) * 4))
+        spineAlignment: 0, // Only show when real posture analysis data available
+        shoulderLevel: 0, // Only show when real posture analysis data available
+        headPosition: 0, // Only show when real posture analysis data available
+        weightDistribution: 0, // Only show when real posture analysis data available
+        overallPosture: 0 // Only show when real posture analysis data available
       }));
 
       setGestureMetrics(prev => ({
-        handMovement: Math.max(40, Math.min(100, prev.handMovement + (Math.random() - 0.5) * 12)),
-        gestureVariety: Math.max(40, Math.min(100, prev.gestureVariety + (Math.random() - 0.5) * 10)),
-        gestureRelevance: Math.max(40, Math.min(100, prev.gestureRelevance + (Math.random() - 0.5) * 8)),
-        armPosition: Math.max(40, Math.min(100, prev.armPosition + (Math.random() - 0.5) * 6)),
-        gestureFrequency: Math.max(40, Math.min(100, prev.gestureFrequency + (Math.random() - 0.5) * 15))
+        handMovement: 0, // Only show when real gesture analysis data available
+        gestureVariety: 0, // Only show when real gesture analysis data available
+        gestureRelevance: 0, // Only show when real gesture analysis data available
+        armPosition: 0, // Only show when real gesture analysis data available
+        gestureFrequency: 0 // Only show when real gesture analysis data available
       }));
     }, 3000);
 

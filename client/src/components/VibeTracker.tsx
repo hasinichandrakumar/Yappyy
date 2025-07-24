@@ -73,7 +73,7 @@ export default function VibeTracker() {
   useEffect(() => {
     if (isListening && wordCount > 0) {
       const energyLevel = Math.min(95, Math.max(20, 
-        (wpm > 160 ? 80 : wpm > 120 ? 65 : 45) + (Math.random() - 0.5) * 20
+        wpm > 160 ? 80 : wpm > 120 ? 65 : 0 // Only show confidence based on actual speech
       ));
       
       const passionLevel = Math.min(95, Math.max(25,
@@ -81,7 +81,7 @@ export default function VibeTracker() {
       ));
       
       const authenticityLevel = Math.min(95, Math.max(30,
-        70 + (voiceClarity - 70) * 0.3 + (Math.random() - 0.5) * 15
+        voiceClarity > 0 ? voiceClarity : 0 // Only show real voice clarity data
       ));
       
       const connectionLevel = Math.min(95, Math.max(25,

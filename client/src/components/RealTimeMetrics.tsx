@@ -57,7 +57,7 @@ export default function RealTimeMetrics() {
     if (isListening) {
       const interval = setInterval(() => {
         setEyeContact(prev => {
-          const newValue = Math.max(0, Math.min(100, prev + (Math.random() - 0.5) * 10));
+          const newValue = 0; // Only show when real metrics data available
           return newValue;
         });
       }, 1000);

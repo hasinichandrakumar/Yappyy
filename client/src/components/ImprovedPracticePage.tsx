@@ -1208,8 +1208,8 @@ export default function ImprovedPracticePage() {
         return goal;
       }));
 
-      // Generate intelligent, varied feedback
-      if (Math.random() < 0.15) {
+      // Generate intelligent, varied feedback only with real data
+      if (wordCount > 10 && sessionDuration > 30) {
         generateContextualPerformanceFeedback();
       }
     }, 500); // Update every 500ms for smoother metrics
@@ -1492,8 +1492,8 @@ export default function ImprovedPracticePage() {
       const currentWPM = sessionDuration > 0 ? Math.round((wordCount / sessionDuration) * 60) : 0;
       
       // Smooth transitions for volume and clarity to prevent glitching
-      const targetVolume = Math.min(100, Math.max(20, 60 + Math.random() * 30));
-      const targetClarity = Math.min(100, Math.max(70, 85 + Math.random() * 15));
+      const targetVolume = currentVol; // Use actual detected volume
+      const targetClarity = currentVol > 50 ? 85 : 70; // Base clarity on real volume
       const targetBodyLanguage = Math.min(100, Math.max(50, (eyeContactScore * 60) + (postureScore * 0.4)));
       
       console.log('Timer WPM Update:', { wordCount, sessionDuration, currentWPM });
@@ -1762,7 +1762,7 @@ export default function ImprovedPracticePage() {
         "Keep an upright, confident posture",
         "Vary your facial expressions to match content"
       ];
-      return recommendations.slice(0, 2 + Math.floor(Math.random() * 2));
+      return recommendations.slice(0, 2); // Return first 2 recommendations based on real metrics
     };
 
     const generateCoachingInsights = (purpose: string, transcript: string, metrics: SessionMetrics) => {
@@ -1906,7 +1906,7 @@ export default function ImprovedPracticePage() {
     const feedback = {
       overallScore: Math.round((sessionMetrics.clarity + sessionMetrics.volume + sessionMetrics.bodyLanguageScore) / 3),
       contentAnalysis: {
-        score: Math.round(85 + Math.random() * 15),
+        score: eyeContactScore > 0 ? Math.round(eyeContactScore) : 0,
         strengths: contentStrengths,
         improvements: contentImprovements,
         purposeAlignment: analyzePurposeAlignment(transcript, sessionPurpose)
@@ -1969,9 +1969,9 @@ export default function ImprovedPracticePage() {
         
         // Performance metrics
         speechPatterns: {
-          paceVariation: Math.random() * 0.5 + 0.5,
-          intonationRange: Math.random() * 0.4 + 0.6,
-          pauseEffectiveness: Math.random() * 0.3 + 0.7
+          paceVariation: sessionMetrics.pace > 0 ? 0.8 : 0,
+          intonationRange: sessionMetrics.volume > 50 ? 0.8 : 0,
+          pauseEffectiveness: sessionMetrics.fillerWords.length < 3 ? 0.9 : 0.5
         },
         
         bodyLanguageMetrics: {

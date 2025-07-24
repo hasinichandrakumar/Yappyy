@@ -171,13 +171,13 @@ export class TensorFlowVisionSystem {
   private getSimulatedResults(): TensorFlowEmotionResults {
     // Simulate realistic facial expression results for testing
     const baseEmotions = {
-      angry: Math.random() * 0.1,
-      disgusted: Math.random() * 0.05,
-      fearful: Math.random() * 0.1,
-      happy: 0.3 + Math.random() * 0.4,
-      neutral: 0.4 + Math.random() * 0.3,
-      sad: Math.random() * 0.1,
-      surprised: Math.random() * 0.15
+      angry: 0,
+      disgusted: 0,
+      fearful: 0,
+      happy: 0,
+      neutral: 0,
+      sad: 0,
+      surprised: 0
     };
 
     // Normalize emotions to sum to 1

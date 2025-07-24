@@ -201,7 +201,7 @@ export class AdvancedSpeechAnalytics {
     const detectedFillers = (speakingMetrics.fillerWords || []).map((filler: string, index: number) => ({
       word: filler,
       timestamp: Date.now() - this.recordingStartTime + (index * 500),
-      confidence: Math.random() * 30 + 70 // Simulated confidence for filler detection
+      confidence: 0 // Only show when real filler detection confidence data available
     }));
 
     // Word-level analysis
@@ -237,9 +237,9 @@ export class AdvancedSpeechAnalytics {
 
     // Voice characteristics analysis
     const voiceCharacteristics = {
-      energy: Math.min(100, Math.max(30, speakingRate * 0.6 + Math.random() * 20)),
+      energy: speakingRate > 0 ? Math.min(100, speakingRate * 0.6) : 0,
       clarity: speakingMetrics.averageConfidence || 85,
-      variation: Math.random() * 40 + 60 // Simulated variation score
+      variation: 0 // Only show when real variation analysis data available
     };
 
     // Overall quality calculation

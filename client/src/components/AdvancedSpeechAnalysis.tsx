@@ -159,27 +159,27 @@ export default function AdvancedSpeechAnalysis() {
       setSpeechPatterns(prev => ({
         pauseAnalysis: {
           ...prev.pauseAnalysis,
-          strategicPauses: Math.max(40, Math.min(95, prev.pauseAnalysis.strategicPauses + (Math.random() - 0.5) * 6)),
-          pauseEffectiveness: Math.max(40, Math.min(95, prev.pauseAnalysis.pauseEffectiveness + (Math.random() - 0.5) * 4))
+          strategicPauses: 0, // Only show when real pause analysis data available
+          pauseEffectiveness: 0 // Only show when real pause analysis data available
         },
         intonationPatterns: {
           ...prev.intonationPatterns,
-          vocalVariety: Math.max(30, Math.min(95, prev.intonationPatterns.vocalVariety + (Math.random() - 0.5) * 8)),
-          monotoneRisk: Math.max(10, Math.min(70, prev.intonationPatterns.monotoneRisk + (Math.random() - 0.5) * 6))
+          vocalVariety: 0, // Only show when real vocal analysis data available
+          monotoneRisk: 0 // Only show when real vocal analysis data available
         },
         articulation: {
           ...prev.articulation,
-          consonantClarity: Math.max(60, Math.min(95, prev.articulation.consonantClarity + (Math.random() - 0.5) * 3)),
-          overallDiction: Math.max(60, Math.min(95, prev.articulation.overallDiction + (Math.random() - 0.5) * 3))
+          consonantClarity: 0, // Only show when real articulation analysis data available
+          overallDiction: 0 // Only show when real articulation analysis data available
         },
         rhetoricalDevices: prev.rhetoricalDevices
       }));
 
       setVocalDynamics(prev => ({
         ...prev,
-        breathControl: Math.max(50, Math.min(95, prev.breathControl + (Math.random() - 0.5) * 4)),
-        emotionalRange: Math.max(40, Math.min(95, prev.emotionalRange + (Math.random() - 0.5) * 6)),
-        vocalConfidence: Math.max(50, Math.min(95, prev.vocalConfidence + (Math.random() - 0.5) * 5))
+        breathControl: 0, // Only show when real breath analysis data available
+        emotionalRange: 0, // Only show when real emotional analysis data available
+        vocalConfidence: 0 // Only show when real vocal confidence analysis data available
       }));
     }, 5000);
 

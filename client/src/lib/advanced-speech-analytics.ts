@@ -104,43 +104,43 @@ export class RealTimeCoach {
   }
 
   private calculatePitchVariation(): number {
-    // Advanced pitch analysis implementation
-    return Math.random() * 100; // Placeholder
+    // Return 0 when no real audio analysis data available
+    return 0;
   }
 
   private calculateSpeakingRate(): number {
-    // Real-time WPM calculation
-    return Math.random() * 200 + 100;
+    // Return 0 when no real speech recognition data available
+    return 0;
   }
 
   private calculateVolumeConsistency(): number {
-    // Volume variation analysis
-    return Math.random() * 100;
+    // Return 0 when no real audio analysis data available
+    return 0;
   }
 
   private detectVocalFry(): boolean {
-    // Vocal fry detection algorithm
-    return Math.random() > 0.8;
+    // Return false when no real vocal analysis data available
+    return false;
   }
 
   private detectUptalkPatterns(): number {
-    // Uptalk pattern detection
-    return Math.floor(Math.random() * 10);
+    // Return 0 when no real speech pattern analysis data available
+    return 0;
   }
 
   private calculateClarityScore(): number {
-    // Speech clarity assessment
-    return Math.random() * 100;
+    // Return 0 when no real speech analysis data available
+    return 0;
   }
 
   private calculateCoherenceRating(): number {
-    // Content coherence analysis
-    return Math.random() * 100;
+    // Return 0 when no real content analysis data available
+    return 0;
   }
 
   private calculatePersuasivenessIndex(): number {
-    // Persuasiveness measurement
-    return Math.random() * 100;
+    // Return 0 when no real persuasiveness analysis data available
+    return 0;
   }
 
   private getDefaultMetrics(): AdvancedSpeechMetrics {
@@ -171,13 +171,13 @@ export class RealTimeCoach {
 // Enhanced Emotion Detection
 export class EmotionDetector {
   async analyze(videoFrame: ImageData): Promise<EmotionMap> {
-    // Using TensorFlow.js for emotion detection
+    // Return zero values when no real emotion detection data available
     return {
-      confidence: Math.random() * 100,
-      engagement: Math.random() * 100,
-      authenticity: Math.random() * 100,
-      nervousness: Math.random() * 100,
-      enthusiasm: Math.random() * 100
+      confidence: 0,
+      engagement: 0,
+      authenticity: 0,
+      nervousness: 0,
+      enthusiasm: 0
     };
   }
 }
