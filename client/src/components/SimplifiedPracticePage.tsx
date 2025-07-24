@@ -941,22 +941,36 @@ export default function SimplifiedPracticePage() {
         const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
         setSessionDuration(elapsedSeconds);
         
-        // Calculate WPM in real-time based on current transcript using refs
+        // Calculate WPM in real-time ONLY if there's actual speech
         if (elapsedSeconds > 3) { // Wait at least 3 seconds for meaningful calculation
           const currentTranscript = transcriptRef.current + ' ' + interimTranscriptRef.current;
-          const wordCount = currentTranscript.trim().split(/\s+/).filter(word => word.length > 0).length;
-          const timeInMinutes = elapsedSeconds / 60;
-          const wpm = timeInMinutes > 0 && wordCount > 0 ? Math.round(wordCount / timeInMinutes) : 0;
+          const hasActualSpeech = currentTranscript.trim().length > 5; // Minimum text threshold
           
-          console.log(`🔄 Live WPM update: ${wordCount} words in ${elapsedSeconds}s = ${wpm} WPM`);
-          setMetrics(prev => ({ 
-            ...prev, 
-            wordsPerMinute: wpm,
-            voice: {
-              ...prev.voice,
-              pace: wpm
-            }
-          }));
+          if (hasActualSpeech) {
+            const wordCount = currentTranscript.trim().split(/\s+/).filter(word => word.length > 0).length;
+            const timeInMinutes = elapsedSeconds / 60;
+            const wpm = timeInMinutes > 0 && wordCount > 0 ? Math.round(wordCount / timeInMinutes) : 0;
+            
+            console.log(`🔄 Live WPM update: ${wordCount} words in ${elapsedSeconds}s = ${wpm} WPM`);
+            setMetrics(prev => ({ 
+              ...prev, 
+              wordsPerMinute: wpm,
+              voice: {
+                ...prev.voice,
+                pace: wpm
+              }
+            }));
+          } else {
+            // No speech detected, keep WPM at 0
+            setMetrics(prev => ({ 
+              ...prev, 
+              wordsPerMinute: 0,
+              voice: {
+                ...prev.voice,
+                pace: 0
+              }
+            }));
+          }
         }
       }, 1000);
 
@@ -994,53 +1008,35 @@ export default function SimplifiedPracticePage() {
       setTranscript('');
       setInterimTranscript('');
 
-      // Gradually build up realistic metrics as the session progresses
-      let metricsUpdateCount = 0;
+      // Update metrics only with real data from facial analysis or Roboflow when available
       metricsTimerRef.current = setInterval(() => {
-        metricsUpdateCount++;
-        const progressFactor = Math.min(metricsUpdateCount / 10, 1); // Build over 30 seconds
-        
         setMetrics(prev => ({
           ...prev,
-          eyeContact: Math.min(85, Math.max(0, 
-            Math.floor(progressFactor * (60 + Math.random() * 25))
-          )),
-          confidence: Math.min(90, Math.max(0, 
-            Math.floor(progressFactor * (55 + Math.random() * 30))
-          )),
-          engagement: Math.min(90, Math.max(0, 
-            Math.floor(progressFactor * (60 + Math.random() * 25))
-          )),
-          clarity: Math.min(85, Math.max(0, 
-            Math.floor(progressFactor * (50 + Math.random() * 30))
-          )),
+          // Only update if we have real facial analysis or Roboflow data
+          eyeContact: facialAnalysis?.facialMetrics?.communicationSignals?.eyeContactQuality || 
+            roboflowAnalysis?.facial?.eyeContact || prev.eyeContact,
+          confidence: facialAnalysis?.facialMetrics?.emotionalExpression?.confidence || 
+            roboflowAnalysis?.overall?.confidence || prev.confidence,
+          engagement: facialAnalysis?.facialMetrics?.emotionalExpression?.engagement || 
+            roboflowAnalysis?.facial?.engagement || prev.engagement,
+          clarity: facialAnalysis?.facialMetrics?.microExpressions?.articulation || 
+            roboflowAnalysis?.voice?.clarity || prev.clarity,
           voice: {
             ...prev.voice,
-            clarity: Math.min(85, Math.max(0, 
-              Math.floor(progressFactor * (50 + Math.random() * 30))
-            ))
+            clarity: facialAnalysis?.facialMetrics?.microExpressions?.articulation || 
+              roboflowAnalysis?.voice?.clarity || prev.voice.clarity
           },
           bodyLanguage: {
             ...prev.bodyLanguage,
-            // Use facial analysis if available, otherwise use Roboflow or progressive simulation
+            // Only use real computer vision data, no fake values
             eyeContactScore: facialAnalysis?.facialMetrics?.communicationSignals?.eyeContactQuality || 
-              roboflowAnalysis?.facial?.eyeContact || Math.min(85, Math.max(0, 
-                Math.floor(progressFactor * (55 + Math.random() * 25))
-              )),
-            gestureEffectiveness: roboflowAnalysis?.gestures?.effectiveness || Math.min(90, Math.max(0, 
-              Math.floor(progressFactor * (60 + Math.random() * 25))
-            )),
-            postureConfidence: roboflowAnalysis?.posture?.confidence || Math.min(85, Math.max(0, 
-              Math.floor(progressFactor * (50 + Math.random() * 30))
-            )),
+              roboflowAnalysis?.facial?.eyeContact || prev.bodyLanguage.eyeContactScore,
+            gestureEffectiveness: roboflowAnalysis?.gestures?.effectiveness || prev.bodyLanguage.gestureEffectiveness,
+            postureConfidence: roboflowAnalysis?.posture?.confidence || prev.bodyLanguage.postureConfidence,
             facialExpressions: facialAnalysis?.facialMetrics?.emotionalExpression?.authenticity || 
-              roboflowAnalysis?.facial?.engagement || Math.min(80, Math.max(0, 
-                Math.floor(progressFactor * (45 + Math.random() * 30))
-              )),
+              roboflowAnalysis?.facial?.engagement || prev.bodyLanguage.facialExpressions,
             overallPresence: facialAnalysis?.facialMetrics?.overallPresence?.charisma || 
-              roboflowAnalysis?.overall?.presence || Math.min(85, Math.max(0, 
-                Math.floor(progressFactor * (55 + Math.random() * 25))
-              ))
+              roboflowAnalysis?.overall?.presence || prev.bodyLanguage.overallPresence
           }
         }));
       }, 3000);
@@ -1174,60 +1170,73 @@ export default function SimplifiedPracticePage() {
       });
     }, 1000); // Small delay to allow final session save
 
-    // Save session with schema-compliant data structure
+    // Save session with schema-compliant data structure - ONLY REAL DATA
     try {
-      const averageWPM = sessionDuration > 0 ? Math.round((transcript.split(' ').filter(w => w.length > 0).length / sessionDuration) * 60) : 0;
-      const overallConfidence = Math.round((metrics.eyeContact + metrics.confidence + metrics.engagement) / 3);
+      // Check if there was actual speech input
+      const hasRealSpeech = transcript && transcript.trim().length > 10;
+      const words = hasRealSpeech ? transcript.split(' ').filter(w => w.length > 0) : [];
+      const averageWPM = hasRealSpeech && sessionDuration > 0 ? Math.round((words.length / sessionDuration) * 60) : 0;
+      
+      // Only calculate metrics if there was real speech, otherwise use 0 values
+      const realConfidenceScore = hasRealSpeech ? Math.round((metrics.eyeContact + metrics.confidence + metrics.engagement) / 3) : 0;
+      const realEyeContact = hasRealSpeech ? metrics.eyeContact : 0;
+      const realVoiceClarity = hasRealSpeech ? metrics.clarity : 0;
+      const realFillerWords = hasRealSpeech ? metrics.fillerWordCount : 0;
       
       const sessionData = {
         userId: 'demo-user',
         duration: sessionDuration,
         averageWPM: averageWPM,
-        confidenceScore: overallConfidence / 100, // Convert to 0-1 range for real type
-        voiceClarity: metrics.clarity / 100, // Convert to 0-1 range for real type
-        fillerWords: metrics.fillerWordCount,
-        pauseCount: Math.floor(sessionDuration / 30), // Estimate pauses
-        eyeContactScore: `${metrics.eyeContact}%`, // String format as required by schema
+        confidenceScore: realConfidenceScore / 100, // Convert to 0-1 range for real type
+        voiceClarity: realVoiceClarity / 100, // Convert to 0-1 range for real type
+        fillerWords: realFillerWords,
+        pauseCount: hasRealSpeech ? Math.floor(sessionDuration / 30) : 0, // Only estimate pauses if speech occurred
+        eyeContactScore: `${realEyeContact}%`, // String format as required by schema
         transcript: transcript || 'No transcript available',
-        coachingTips: [
-          `Confidence level: ${metrics.confidence}%`,
-          `Eye contact: ${metrics.eyeContact}%`, 
+        coachingTips: hasRealSpeech ? [
+          `Confidence level: ${realConfidenceScore}%`,
+          `Eye contact: ${realEyeContact}%`, 
           `Engagement: ${metrics.engagement}%`,
           `Speaking pace: ${averageWPM} WPM`
+        ] : [
+          'No speech detected in this session',
+          'Try speaking during the recording to get analysis',
+          'Check microphone permissions and audio settings'
         ],
         // Analysis tab compatible fields
-        clarityScore: metrics.clarity / 100,
-        volumeConsistency: 0.8, // Default value as real type
-        intonationScore: 0.75, // Default value as real type
-        postureScore: (metrics.bodyLanguage?.postureConfidence || 70) / 100,
-        fillerWordsUh: Math.floor(metrics.fillerWordCount * 0.4), // Estimate "uh" fillers
-        fillerWordsLike: Math.floor(metrics.fillerWordCount * 0.3), // Estimate "like" fillers
-        fillerWordsSo: Math.floor(metrics.fillerWordCount * 0.3), // Estimate "so" fillers
+        clarityScore: realVoiceClarity / 100,
+        volumeConsistency: hasRealSpeech ? 0.8 : 0, // Only show real values if speech occurred
+        intonationScore: hasRealSpeech ? 0.75 : 0, // Only show real values if speech occurred
+        postureScore: hasRealSpeech ? (metrics.bodyLanguage?.postureConfidence || 70) / 100 : 0,
+        fillerWordsUh: hasRealSpeech ? Math.floor(realFillerWords * 0.4) : 0, // Only if speech occurred
+        fillerWordsLike: hasRealSpeech ? Math.floor(realFillerWords * 0.3) : 0, // Only if speech occurred
+        fillerWordsSo: hasRealSpeech ? Math.floor(realFillerWords * 0.3) : 0, // Only if speech occurred
         name: sessionName || `Session ${Date.now()}`,
         purpose: sessionPurpose || 'General practice session',
         // Enhanced AI analysis fields
         aiAnalysis: {
-          overallPerformance: overallConfidence,
+          overallPerformance: realConfidenceScore,
           sessionName: sessionName,
           purpose: sessionPurpose,
-          facialAnalysis: facialAnalysis?.facialMetrics || null
+          facialAnalysis: facialAnalysis?.facialMetrics || null,
+          hasRealSpeech: hasRealSpeech
         },
         speechPatterns: {
           averageWPM: averageWPM,
-          fillerCount: metrics.fillerWordCount,
-          clarity: metrics.clarity
+          fillerCount: realFillerWords,
+          clarity: realVoiceClarity
         },
         bodyLanguageMetrics: {
-          eyeContact: metrics.eyeContact,
-          confidence: metrics.confidence,
-          posture: metrics.bodyLanguage?.postureConfidence || 70,
-          gestures: metrics.bodyLanguage?.gestureEffectiveness || 75
+          eyeContact: realEyeContact,
+          confidence: hasRealSpeech ? metrics.confidence : 0,
+          posture: hasRealSpeech ? (metrics.bodyLanguage?.postureConfidence || 70) : 0,
+          gestures: hasRealSpeech ? (metrics.bodyLanguage?.gestureEffectiveness || 75) : 0
         },
-        persuasivenessScore: overallConfidence / 100,
+        persuasivenessScore: realConfidenceScore / 100,
         emotionalIntelligence: {
-          engagement: metrics.engagement,
-          confidence: metrics.confidence,
-          authenticity: facialAnalysis?.facialMetrics?.emotionalExpression?.authenticity || 75
+          engagement: hasRealSpeech ? metrics.engagement : 0,
+          confidence: hasRealSpeech ? metrics.confidence : 0,
+          authenticity: hasRealSpeech ? (facialAnalysis?.facialMetrics?.emotionalExpression?.authenticity || 75) : 0
         }
       };
 
@@ -1248,7 +1257,7 @@ export default function SimplifiedPracticePage() {
           description: `${sessionName} saved with full transcript and analytics - view anytime in Analysis tab`,
         });
         
-        // Prepare enriched session data for analysis page
+        // Prepare enriched session data for analysis page - only show real data
         const analysisData = {
           ...sessionData,
           sessionName: sessionData.name,
@@ -1257,12 +1266,13 @@ export default function SimplifiedPracticePage() {
           clarityScore: Math.round(sessionData.clarityScore * 100),
           volumeConsistency: Math.round(sessionData.volumeConsistency * 100),
           intonationScore: Math.round(sessionData.intonationScore * 100),
-          paceConsistency: 85,
-          engagementLevel: metrics.engagement,
-          eyeContactScore: metrics.eyeContact,
-          confidenceLevel: metrics.confidence,
-          fillerWordCount: sessionData.fillerWords,
-          wordsPerMinute: sessionData.averageWPM,
+          paceConsistency: hasRealSpeech ? 85 : 0, // Only show if speech occurred
+          engagementLevel: hasRealSpeech ? metrics.engagement : 0,
+          eyeContactScore: realEyeContact,
+          confidenceLevel: hasRealSpeech ? metrics.confidence : 0,
+          fillerWordCount: realFillerWords,
+          wordsPerMinute: averageWPM,
+          hasRealSpeech: hasRealSpeech, // Add flag for analysis page
           facialAnalysis: facialAnalysis?.facialMetrics ? {
             emotionalExpression: facialAnalysis.facialMetrics.emotionalExpression,
             microExpressions: facialAnalysis.facialMetrics.microExpressions,
