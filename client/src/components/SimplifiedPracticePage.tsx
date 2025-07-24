@@ -451,86 +451,38 @@ export default function SimplifiedPracticePage() {
           }
         });
         
-        // Enhanced backend filler word analysis for the complete transcript
-        const fullTranscript = transcript + ' ' + finalTranscript;
-        console.log('🔍 Sending for filler analysis:', { 
-          transcript: fullTranscript.substring(0, 100) + '...', 
-          length: fullTranscript.length,
-          duration: sessionDuration 
-        });
-        
-        if (fullTranscript.trim().length > 10) {
-          try {
-            const response = await fetch('/api/analyze-filler-words', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                transcript: fullTranscript,
-                duration: sessionDuration
-              })
-            });
-            
-            if (response.ok) {
-              const analysis = await response.json();
-              console.log('🎯 Advanced filler analysis:', analysis);
-              
-              // Update the total filler count for the entire session
-              console.log(`📊 Updating filler count to: ${analysis.totalFillers}`);
-              setMetrics(prev => ({
-                ...prev,
-                fillerWordCount: analysis.totalFillers,
-                voice: {
-                  ...prev.voice,
-                  fillerCount: analysis.totalFillers
-                }
-              }));
-              
-              if (analysis.totalFillers > 0) {
-                const feedbackMessage = analysis.suggestions[0] || 
-                  `${analysis.totalFillers} filler words detected (${analysis.frequencyPerMinute}/min)`;
-                
-                setLiveFeedback(prev => [...prev.slice(-4), {
-                  id: Date.now().toString(),
-                  message: feedbackMessage,
-                  type: analysis.severity === 'high' ? 'warning' : 'info',
-                  timestamp: Date.now()
-                }]);
-              }
+        // Local filler detection for live feedback only (no analytics stored)
+        if (detectedFillers.length > 0) {
+          console.log('🎯 Live filler words detected for feedback:', detectedFillers);
+          
+          // Count fillers in the full transcript for live display only
+          const fullTranscript = transcript + ' ' + finalTranscript;
+          const fullFillerCount = fullTranscript.toLowerCase().split(/\s+/).filter(word => {
+            const cleanWord = word.replace(/[.,!?;:'"()]/g, '');
+            return singleFillerWords.includes(cleanWord);
+          }).length;
+          
+          setMetrics(prev => ({
+            ...prev,
+            fillerWordCount: fullFillerCount,
+            voice: {
+              ...prev.voice,
+              fillerCount: fullFillerCount
             }
-          } catch (error) {
-            console.log('Fallback to local filler detection');
-            // Fallback to local detection if backend fails
-            if (detectedFillers.length > 0) {
-              console.log('🎯 Local filler words detected:', detectedFillers);
-              
-              // Count fillers in the full transcript
-              const fullFillerCount = fullTranscript.toLowerCase().split(/\s+/).filter(word => {
-                const cleanWord = word.replace(/[.,!?;:'"()]/g, '');
-                return singleFillerWords.includes(cleanWord);
-              }).length;
-              
-              setMetrics(prev => ({
-                ...prev,
-                fillerWordCount: fullFillerCount,
-                voice: {
-                  ...prev.voice,
-                  fillerCount: fullFillerCount
-                }
-              }));
-              
-              const uniqueFillers = Array.from(new Set(detectedFillers));
-              const feedbackMessage = uniqueFillers.length === 1 
-                ? `Reduce filler word: "${uniqueFillers[0]}"` 
-                : `Reduce filler words: ${uniqueFillers.slice(0, 2).join(', ')}`;
-              
-              setLiveFeedback(prev => [...prev.slice(-4), {
-                id: Date.now().toString(),
-                message: feedbackMessage,
-                type: 'warning',
-                timestamp: Date.now()
-              }]);
-            }
-          }
+          }));
+          
+          // Provide live feedback during recording only
+          const uniqueFillers = Array.from(new Set(detectedFillers));
+          const feedbackMessage = uniqueFillers.length === 1 
+            ? `Reduce filler word: "${uniqueFillers[0]}"` 
+            : `Reduce filler words: ${uniqueFillers.slice(0, 2).join(', ')}`;
+          
+          setLiveFeedback(prev => [...prev.slice(-4), {
+            id: Date.now().toString(),
+            message: feedbackMessage,
+            type: 'warning',
+            timestamp: Date.now()
+          }]);
         }
 
         // Calculate WPM using the complete transcript (after updating it)
