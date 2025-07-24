@@ -204,6 +204,20 @@
   .text-balance {
     text-wrap: balance;
   }
+  
+  .animate-gradient-x {
+    background-size: 400% 400%;
+    animation: gradient-x 15s ease infinite;
+  }
+}
+
+@keyframes gradient-x {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 /* Enhanced animations for Peppy AI Coach */
