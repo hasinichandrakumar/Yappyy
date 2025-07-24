@@ -1281,24 +1281,89 @@ export default function SimplifiedPracticePage() {
           } : undefined
         };
         
-        // Save video recording with session data
-        if (recordingData) {
-          const recordingId = sessionRecordingStorage.saveRecording(
-            recordingData,
-            transcript,
-            sessionData,
-            facialAnalysis?.facialMetrics
-          );
+        // Save session with video and transcript to database
+        try {
+          let base64Video = null;
+          if (recordingData) {
+            const videoData = await recordingData.videoBlob.arrayBuffer();
+            base64Video = btoa(String.fromCharCode(...new Uint8Array(videoData)));
+          }
           
-          // Set the current recording for playback
-          setCurrentRecording(recordingData);
-          
-          console.log('🎬 Video recording saved with session data:', recordingId);
-          toast({
-            title: "Video Recording Saved",
-            description: "Session video available for playback",
-            duration: 3000
+          const saveVideoResponse = await fetch('/api/sessions/save-with-video', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              sessionName: sessionName,
+              sessionPurpose: sessionPurpose,
+              transcript: transcript,
+              videoData: base64Video,
+              duration: sessionDuration,
+              metrics: {
+                confidence: realConfidenceScore,
+                clarity: realVoiceClarity,
+                pace: metrics.voice?.pace || 0,
+                eyeContact: realEyeContact,
+                gesture: metrics.bodyLanguage?.gestureEffectiveness || 0,
+                fillerWordCount: realFillerWords,
+                wordsPerMinute: averageWPM
+              },
+              facialAnalysis: facialAnalysis?.facialMetrics,
+              voiceMetrics: {
+                clarity: realVoiceClarity,
+                pace: metrics.voice?.pace || 0,
+                volume: metrics.voice?.volume || 0,
+                intonation: metrics.voice?.intonation || 0
+              }
+            })
           });
+
+          if (saveVideoResponse.ok) {
+            const savedVideoSession = await saveVideoResponse.json();
+            console.log('✅ Session with video/transcript saved to database:', savedVideoSession.sessionId);
+            
+            // Also save to local recording storage for immediate playback
+            if (recordingData) {
+              const recordingId = sessionRecordingStorage.saveRecording(
+                recordingData,
+                transcript,
+                sessionData,
+                facialAnalysis?.facialMetrics
+              );
+              setCurrentRecording(recordingData);
+              console.log('🎬 Video recording also saved locally:', recordingId);
+            }
+            
+            toast({
+              title: "Session & Video Saved Successfully",
+              description: `Session saved to database with ${savedVideoSession.hasVideo ? 'video recording' : 'transcript'} - view anytime in Analysis tab`,
+              duration: 4000
+            });
+          } else {
+            throw new Error('Failed to save video session to database');
+          }
+          
+        } catch (videoSaveError) {
+          console.error('❌ Failed to save session with video:', videoSaveError);
+          toast({
+            title: "Video Save Warning", 
+            description: "Session saved but video may not be available for review",
+            variant: "destructive",
+            duration: 5000
+          });
+          
+          // Fallback to local storage only
+          if (recordingData) {
+            const recordingId = sessionRecordingStorage.saveRecording(
+              recordingData,
+              transcript,
+              sessionData,
+              facialAnalysis?.facialMetrics
+            );
+            setCurrentRecording(recordingData);
+            console.log('🎬 Video saved locally as fallback:', recordingId);
+          }
         }
 
         setSessionAnalysisData(analysisData);

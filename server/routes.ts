@@ -1186,6 +1186,175 @@ CRITICAL: Evaluate how well this speech achieved its stated PURPOSE. Analyze the
     }
   });
 
+  // Save session with video and transcript  
+  app.post("/api/sessions/save-with-video", async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      const { sessionName, sessionPurpose, transcript, videoData, duration, metrics, facialAnalysis, voiceMetrics } = req.body;
+      
+      if (!transcript && !videoData) {
+        return res.status(400).json({ message: "Either transcript or video data is required" });
+      }
+
+      // Create practice session with comprehensive data
+      const sessionData = {
+        userId,
+        sessionName: sessionName || "Practice Session",
+        purpose: sessionPurpose || "",
+        transcript: transcript || "",
+        duration: duration || 0,
+        // Store video as base64 if provided
+        videoBlob: videoData ? Buffer.from(videoData, 'base64').toString('base64') : null,
+        // Extract metrics with proper defaults (using inline helper)
+        confidenceScore: metrics?.confidence || 0,
+        clarityScore: metrics?.clarity || 0,  
+        paceScore: metrics?.pace || 0,
+        eyeContactScore: (metrics?.eyeContact || 0).toString(),
+        gestureScore: metrics?.gesture || 0,
+        overallScore: 0, // Will calculate after creation
+        fillerWordCount: metrics?.fillerWordCount || 0,
+        wordsPerMinute: metrics?.wordsPerMinute || 0,
+        // Legacy required fields with defaults  
+        averageWPM: metrics?.wordsPerMinute || 0,
+        voiceClarity: metrics?.clarity || 0,
+        fillerWords: metrics?.fillerWordCount || 0,
+        pauseCount: metrics?.pauseCount || 0,
+        coachingTips: ["Session saved successfully"],
+        // Store additional analysis
+        facialAnalysis: facialAnalysis ? JSON.stringify(facialAnalysis) : null,
+        voiceMetrics: voiceMetrics ? JSON.stringify(voiceMetrics) : null
+      };
+
+      const session = await storage.createPracticeSession(sessionData);
+      
+      // Helper functions for metric extraction
+      function extractMetric(metrics: any, key: string, defaultValue: number): number {
+        if (!metrics) return defaultValue;
+        
+        const possiblePaths = [
+          metrics[key],
+          metrics.voice?.[key],
+          metrics.bodyLanguage?.[key],
+          metrics[key + 'Score'],
+          metrics[key + 'Percentage']
+        ];
+        
+        for (const value of possiblePaths) {
+          if (typeof value === 'number' && !isNaN(value)) {
+            return Math.max(0, Math.min(100, value));
+          }
+        }
+        return defaultValue;
+      }
+
+      function calculateOverallScore(metrics: any): number {
+        if (!metrics) return 0;
+        
+        const scores = [
+          extractMetric(metrics, 'confidence', 0),
+          extractMetric(metrics, 'clarity', 0),
+          extractMetric(metrics, 'eyeContact', 0),
+          extractMetric(metrics, 'engagement', 0)
+        ];
+        
+        const validScores = scores.filter(score => score > 0);
+        return validScores.length > 0 
+          ? Math.round(validScores.reduce((sum, score) => sum + score, 0) / validScores.length)
+          : 0;
+      }
+      
+      console.log('✅ Session saved with video and transcript:', session.id);
+      res.status(201).json({ 
+        sessionId: session.id,
+        message: "Session saved successfully with video and transcript",
+        hasVideo: !!videoData,
+        hasTranscript: !!transcript
+      });
+      
+    } catch (error: any) {
+      console.error('❌ Failed to save session with video:', error);
+      res.status(500).json({ message: "Failed to save session", error: error.message });
+    }
+  });
+
+  // Get session with video for playback
+  app.get("/api/sessions/:id/video", async (req: any, res) => {
+    try {
+      const sessionId = parseInt(req.params.id);
+      const userId = getUserId(req);
+      
+      const session = await storage.getPracticeSession(sessionId);
+      
+      if (!session) {
+        return res.status(404).json({ message: "Session not found" });
+      }
+      
+      if (session.userId !== userId && userId !== 'guest') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      // Return session data with video URL if available
+      const response = {
+        session: {
+          id: session.id,
+          sessionName: session.name || "Practice Session",
+          transcript: session.transcript,
+          duration: session.duration,
+          confidenceScore: session.confidenceScore,
+          overallScore: session.overallScore || 0,
+          createdAt: session.createdAt
+        },
+        hasVideo: !!session.videoBlob,
+        videoUrl: session.videoBlob ? `data:video/webm;base64,${session.videoBlob}` : null,
+        hasTranscript: !!session.transcript
+      };
+      
+      res.json(response);
+      
+    } catch (error: any) {
+      console.error('❌ Failed to get session video:', error);
+      res.status(500).json({ message: "Failed to retrieve session", error: error.message });
+    }
+  });
+
+  // Get all user sessions with video info for history viewer
+  app.get("/api/users/:userId/sessions-with-video", async (req: any, res) => {
+    try {
+      const userId = req.params.userId;
+      const requestingUserId = getUserId(req);
+      
+      // Check authorization (allow guest access for 'guest' userId)
+      if (userId !== 'guest' && userId !== requestingUserId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const sessions = await storage.getUserPracticeSessions(userId);
+      
+      // Map sessions to include video information  
+      const sessionsWithVideoInfo = sessions.map(session => ({
+        id: session.id,
+        sessionName: session.name || "Practice Session",
+        transcript: session.transcript || "",
+        duration: session.duration,
+        hasVideo: !!session.videoBlob,
+        videoSize: session.videoBlob ? session.videoBlob.length : undefined,
+        createdAt: session.createdAt,
+        confidenceScore: Math.round((session.confidenceScore || 0) * 100),
+        overallScore: session.overallScore || 0
+      }));
+      
+      // Sort by creation date, newest first
+      sessionsWithVideoInfo.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      
+      console.log(`📚 Retrieved ${sessionsWithVideoInfo.length} sessions for user ${userId}`);
+      res.json(sessionsWithVideoInfo);
+      
+    } catch (error: any) {
+      console.error('❌ Failed to get user sessions with video info:', error);
+      res.status(500).json({ message: "Failed to retrieve user sessions", error: error.message });
+    }
+  });
+
   // Add coaching feedback
   app.post("/api/coaching-feedback", async (req, res) => {
     try {

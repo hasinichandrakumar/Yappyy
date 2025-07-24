@@ -140,7 +140,15 @@ export const practiceSessions = pgTable("practice_sessions", {
   eyeContactScore: text("eye_contact_score").notNull(),
   transcript: text("transcript").notNull(),
   coachingTips: text("coaching_tips").array().notNull(),
-  videoBlob: text("video_blob"), // base64 encoded video data
+  videoBlob: text("video_blob"), // Video data storage
+  sessionName: varchar("session_name").notNull().default("Practice Session"),
+  paceScore: real("pace_score").default(0),
+  gestureScore: real("gesture_score").default(0),
+  overallScore: real("overall_score").default(0),
+  wordsPerMinute: integer("words_per_minute").default(0),
+  fillerWordCount: integer("filler_word_count").default(0),
+  facialAnalysis: jsonb("facial_analysis"),
+  voiceMetrics: jsonb("voice_metrics"),
   
   // Analysis tab compatible fields
   clarityScore: real("clarity_score"),
