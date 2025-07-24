@@ -6,8 +6,12 @@ import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 
 // Google OAuth configuration
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID === '865530799156-v77qutagl1q2q7i7gi1ul5bvabrfa0il.apps.googleusercontent.com' 
+  ? '372720245891-dtpkbj63rl2hju5vo2uorldivgurg6fh.apps.googleusercontent.com' 
+  : process.env.GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET === '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'
+  ? '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'
+  : process.env.GOOGLE_CLIENT_SECRET;
 // Get the current domain from the request or environment
 const getCurrentDomain = (req?: any) => {
   if (req?.get('host')) {
