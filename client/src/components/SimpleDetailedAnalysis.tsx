@@ -24,28 +24,38 @@ export default function SimpleDetailedAnalysis() {
   const getSessionMetrics = (session: any) => {
     if (!session) return null;
     
+    // Only use actual data - no fallback values
+    const eyeContactScore = session.eyeContactScore ? parseFloat(session.eyeContactScore) : null;
+    const wordCount = session.transcript ? session.transcript.split(' ').filter((word: string) => word.length > 0).length : 0;
+    
+    // Calculate overall body language score if we have at least one metric
+    const bodyLanguageScores = [session.postureScore, session.gestureNaturalness, eyeContactScore].filter(s => s !== null && s !== undefined);
+    const bodyLanguageOverall = bodyLanguageScores.length > 0 
+      ? bodyLanguageScores.reduce((sum, score) => sum + (score || 0), 0) / bodyLanguageScores.length 
+      : null;
+
     return {
       bodyLanguage: {
-        posture: session.postureScore || 85,
-        gestures: session.gestureNaturalness || 78,
-        eyeContact: 82,
-        overall: Math.round(((session.postureScore || 85) + (session.gestureNaturalness || 78) + 82) / 3)
+        posture: session.postureScore || null,
+        gestures: session.gestureNaturalness || null,
+        eyeContact: eyeContactScore,
+        overall: bodyLanguageOverall
       },
       voice: {
-        clarity: session.voiceClarity || 88,
-        pace: session.averageWPM || session.wpm || 145,
-        volume: session.volumeConsistency || 82,
-        fillerWords: Array.isArray(session.fillerWords) ? session.fillerWords.length : 3
+        clarity: session.voiceClarity || null,
+        pace: session.averageWPM || null,
+        volume: session.volumeConsistency || null,
+        fillerWords: session.fillerWords || 0
       },
       content: {
-        structure: session.structureScore || 85,
-        clarity: session.contentClarity || 78,
-        engagement: session.engagementScore || 82
+        structure: session.structureScore || null,
+        clarity: session.clarityScore || null,
+        engagement: session.engagementScore || session.persuasivenessScore || null
       },
       overall: {
-        score: session.overallScore || 83,
+        score: session.confidenceScore || null,
         duration: session.duration || 0,
-        wordCount: session.wordCount || (session.transcript?.split(' ').length) || 0
+        wordCount: wordCount
       }
     };
   };
@@ -80,11 +90,13 @@ export default function SimpleDetailedAnalysis() {
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <div className="text-2xl font-bold text-blue-600">{metrics.overall.score}%</div>
+                <div className="text-2xl font-bold text-blue-600">
+                  {metrics.overall.score ? `${Math.round(metrics.overall.score * 100)}%` : 'N/A'}
+                </div>
                 <div className="text-sm text-gray-600">Overall Score</div>
               </div>
               <div className="text-center p-4 bg-green-50 rounded-lg">
-                <div className="text-2xl font-bold text-green-600">{metrics.voice.pace}</div>
+                <div className="text-2xl font-bold text-green-600">{metrics.voice.pace || 'N/A'}</div>
                 <div className="text-sm text-gray-600">Words Per Minute</div>
               </div>
               <div className="text-center p-4 bg-purple-50 rounded-lg">
@@ -117,52 +129,70 @@ export default function SimpleDetailedAnalysis() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg">
-                  <div className="text-3xl font-bold text-blue-600 mb-2">{metrics.bodyLanguage.overall}%</div>
-                  <div className="text-lg font-medium text-gray-900 mb-1">Body Language Score</div>
-                  <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getScoreColor(metrics.bodyLanguage.overall)}`}>
-                    {getScoreLabel(metrics.bodyLanguage.overall)}
+                  <div className="text-3xl font-bold text-blue-600 mb-2">
+                    {metrics.bodyLanguage.overall ? `${Math.round(metrics.bodyLanguage.overall)}%` : 'N/A'}
                   </div>
+                  <div className="text-lg font-medium text-gray-900 mb-1">Body Language Score</div>
+                  {metrics.bodyLanguage.overall && (
+                    <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getScoreColor(metrics.bodyLanguage.overall)}`}>
+                      {getScoreLabel(metrics.bodyLanguage.overall)}
+                    </div>
+                  )}
                 </div>
                 
                 <div className="space-y-4">
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium">Posture</span>
-                      <Badge className={getScoreColor(metrics.bodyLanguage.posture)}>
-                        {metrics.bodyLanguage.posture}%
-                      </Badge>
+                  {metrics.bodyLanguage.posture && (
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium">Posture</span>
+                        <Badge className={getScoreColor(metrics.bodyLanguage.posture)}>
+                          {Math.round(metrics.bodyLanguage.posture * 100)}%
+                        </Badge>
+                      </div>
+                      <Progress value={metrics.bodyLanguage.posture * 100} className="h-3" />
+                      <p className="text-sm text-gray-600 mt-1">
+                        {metrics.bodyLanguage.posture >= 0.8 ? "Great posture! You looked confident and professional." : "Try standing straighter and keeping your shoulders back."}
+                      </p>
                     </div>
-                    <Progress value={metrics.bodyLanguage.posture} className="h-3" />
-                    <p className="text-sm text-gray-600 mt-1">
-                      {metrics.bodyLanguage.posture >= 80 ? "Great posture! You looked confident and professional." : "Try standing straighter and keeping your shoulders back."}
-                    </p>
-                  </div>
+                  )}
                   
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium">Hand Gestures</span>
-                      <Badge className={getScoreColor(metrics.bodyLanguage.gestures)}>
-                        {metrics.bodyLanguage.gestures}%
-                      </Badge>
+                  {metrics.bodyLanguage.gestures && (
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium">Hand Gestures</span>
+                        <Badge className={getScoreColor(metrics.bodyLanguage.gestures)}>
+                          {Math.round(metrics.bodyLanguage.gestures * 100)}%
+                        </Badge>
+                      </div>
+                      <Progress value={metrics.bodyLanguage.gestures * 100} className="h-3" />
+                      <p className="text-sm text-gray-600 mt-1">
+                        {metrics.bodyLanguage.gestures >= 0.8 ? "Your gestures looked natural and helped emphasize your points." : "Practice using your hands to help tell your story."}
+                      </p>
                     </div>
-                    <Progress value={metrics.bodyLanguage.gestures} className="h-3" />
-                    <p className="text-sm text-gray-600 mt-1">
-                      {metrics.bodyLanguage.gestures >= 80 ? "Your gestures looked natural and helped emphasize your points." : "Practice using your hands to help tell your story."}
-                    </p>
-                  </div>
+                  )}
                   
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium">Eye Contact</span>
-                      <Badge className={getScoreColor(metrics.bodyLanguage.eyeContact)}>
-                        {metrics.bodyLanguage.eyeContact}%
-                      </Badge>
+                  {metrics.bodyLanguage.eyeContact && (
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium">Eye Contact</span>
+                        <Badge className={getScoreColor(metrics.bodyLanguage.eyeContact)}>
+                          {Math.round(metrics.bodyLanguage.eyeContact)}%
+                        </Badge>
+                      </div>
+                      <Progress value={metrics.bodyLanguage.eyeContact} className="h-3" />
+                      <p className="text-sm text-gray-600 mt-1">
+                        {metrics.bodyLanguage.eyeContact >= 80 ? "Good eye contact helps connect with your audience." : "Try looking at the camera more often to connect with viewers."}
+                      </p>
                     </div>
-                    <Progress value={metrics.bodyLanguage.eyeContact} className="h-3" />
-                    <p className="text-sm text-gray-600 mt-1">
-                      {metrics.bodyLanguage.eyeContact >= 80 ? "Good eye contact helps connect with your audience." : "Try looking at the camera more often to connect with viewers."}
-                    </p>
-                  </div>
+                  )}
+                  
+                  {!metrics.bodyLanguage.posture && !metrics.bodyLanguage.gestures && !metrics.bodyLanguage.eyeContact && (
+                    <div className="text-center py-8 text-gray-500">
+                      <User className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                      <p className="text-sm">Body language data not available for this session.</p>
+                      <p className="text-xs mt-1">Make sure to enable camera access during recording.</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -177,58 +207,74 @@ export default function SimpleDetailedAnalysis() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
+                <div className="space-y-4">
+                  {metrics.voice.clarity && (
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium">Voice Clarity</span>
+                        <span className="font-medium">Clarity</span>
                         <Badge className={getScoreColor(metrics.voice.clarity)}>
-                          {metrics.voice.clarity}%
+                          {Math.round(metrics.voice.clarity * 100)}%
                         </Badge>
                       </div>
-                      <Progress value={metrics.voice.clarity} className="h-3" />
+                      <Progress value={metrics.voice.clarity * 100} className="h-3" />
                       <p className="text-sm text-gray-600 mt-1">
-                        {metrics.voice.clarity >= 85 ? "Your voice was clear and easy to understand." : "Speak a bit slower and pronounce words more clearly."}
+                        {metrics.voice.clarity >= 0.8 ? "Your speech was clear and easy to understand." : "Focus on speaking more clearly - practice articulation exercises."}
                       </p>
                     </div>
-                    
+                  )}
+                  
+                  {metrics.voice.pace && (
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium">Speaking Speed</span>
-                        <Badge variant="outline">
-                          {metrics.voice.pace} words/min
+                        <span className="font-medium">Speaking Pace</span>
+                        <Badge className={getScoreColor(metrics.voice.pace > 200 ? 40 : metrics.voice.pace < 120 ? 60 : 85)}>
+                          {metrics.voice.pace} WPM
                         </Badge>
                       </div>
-                      <Progress value={Math.min(100, (metrics.voice.pace / 200) * 100)} className="h-3" />
+                      <Progress value={Math.min(100, (metrics.voice.pace / 180) * 100)} className="h-3" />
                       <p className="text-sm text-gray-600 mt-1">
-                        {metrics.voice.pace < 120 ? "Try speaking a bit faster to keep audience engaged." : 
-                         metrics.voice.pace > 160 ? "Slow down a little so people can follow along." : 
-                         "Good pace - easy to follow."}
+                        {metrics.voice.pace > 200 ? "Too fast - slow down to help your audience follow along." : 
+                         metrics.voice.pace < 120 ? "Too slow - try to speak a bit faster to maintain engagement." :
+                         "Good pace - you spoke at an engaging speed."}
                       </p>
                     </div>
-                  </div>
+                  )}
                   
-                  <div className="space-y-4">
-                    <div className="text-center p-4 bg-gradient-to-br from-red-50 to-pink-50 rounded-lg">
-                      <div className="text-2xl font-bold text-red-600 mb-1">{metrics.voice.fillerWords}</div>
-                      <div className="text-sm text-gray-600 mb-2">Filler Words</div>
-                      <div className="text-xs text-gray-500">("um", "uh", "like")</div>
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium">Filler Words</span>
+                      <Badge className={getScoreColor(100 - Math.min(100, metrics.voice.fillerWords * 10))}>
+                        {metrics.voice.fillerWords} detected
+                      </Badge>
                     </div>
-                    
-                    <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg">
-                      <div className="text-2xl font-bold text-blue-600 mb-1">{metrics.voice.volume}%</div>
-                      <div className="text-sm text-gray-600">Volume Consistency</div>
-                    </div>
+                    <Progress value={Math.max(0, 100 - (metrics.voice.fillerWords * 10))} className="h-3" />
+                    <p className="text-sm text-gray-600 mt-1">
+                      {metrics.voice.fillerWords <= 2 ? "Great job avoiding filler words!" : "Try to reduce 'um', 'uh', and 'like' - pause instead."}
+                    </p>
                   </div>
-                </div>
-                
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h4 className="font-medium mb-2">Voice Tips:</h4>
-                  <ul className="text-sm text-gray-600 space-y-1">
-                    <li>• {metrics.voice.fillerWords > 5 ? "Try pausing instead of saying 'um' or 'uh'" : "Good control of filler words"}</li>
-                    <li>• {metrics.voice.pace < 120 ? "Speed up slightly to maintain energy" : metrics.voice.pace > 160 ? "Slow down for better understanding" : "Your speaking pace sounds natural"}</li>
-                    <li>• {metrics.voice.volume < 75 ? "Speak up to project confidence" : "Good volume level"}</li>
-                  </ul>
+
+                  {metrics.voice.volume && (
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium">Volume Consistency</span>
+                        <Badge className={getScoreColor(metrics.voice.volume)}>
+                          {Math.round(metrics.voice.volume * 100)}%
+                        </Badge>
+                      </div>
+                      <Progress value={metrics.voice.volume * 100} className="h-3" />
+                      <p className="text-sm text-gray-600 mt-1">
+                        {metrics.voice.volume >= 0.8 ? "Good volume control throughout your speech." : "Try to maintain consistent volume levels."}
+                      </p>
+                    </div>
+                  )}
+                  
+                  {!metrics.voice.clarity && !metrics.voice.pace && !metrics.voice.volume && (
+                    <div className="text-center py-8 text-gray-500">
+                      <Volume2 className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                      <p className="text-sm">Voice analysis data not available for this session.</p>
+                      <p className="text-xs mt-1">Make sure to enable microphone access during recording.</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -243,45 +289,69 @@ export default function SimpleDetailedAnalysis() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="text-center p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600 mb-2">{metrics.content.structure}%</div>
-                    <div className="text-sm text-gray-600 mb-1">Organization</div>
-                    <div className={`text-xs px-2 py-1 rounded-full ${getScoreColor(metrics.content.structure)}`}>
-                      {getScoreLabel(metrics.content.structure)}
+                <div className="space-y-4">
+                  {metrics.content.structure && (
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium">Structure & Organization</span>
+                        <Badge className={getScoreColor(metrics.content.structure)}>
+                          {Math.round(metrics.content.structure * 100)}%
+                        </Badge>
+                      </div>
+                      <Progress value={metrics.content.structure * 100} className="h-3" />
+                      <p className="text-sm text-gray-600 mt-1">
+                        {metrics.content.structure >= 0.8 ? "Good organization and flow in your presentation." : "Try organizing your points: intro, main ideas, conclusion."}
+                      </p>
                     </div>
-                  </div>
-                  <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600 mb-2">{metrics.content.clarity}%</div>
-                    <div className="text-sm text-gray-600 mb-1">Clarity</div>
-                    <div className={`text-xs px-2 py-1 rounded-full ${getScoreColor(metrics.content.clarity)}`}>
-                      {getScoreLabel(metrics.content.clarity)}
+                  )}
+
+                  {metrics.content.clarity && (
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium">Message Clarity</span>
+                        <Badge className={getScoreColor(metrics.content.clarity)}>
+                          {Math.round(metrics.content.clarity * 100)}%
+                        </Badge>
+                      </div>
+                      <Progress value={metrics.content.clarity * 100} className="h-3" />
+                      <p className="text-sm text-gray-600 mt-1">
+                        {metrics.content.clarity >= 0.8 ? "Your message was clear and easy to follow." : "Explain complex ideas in simpler terms."}
+                      </p>
                     </div>
-                  </div>
-                  <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-violet-50 rounded-lg">
-                    <div className="text-2xl font-bold text-purple-600 mb-2">{metrics.content.engagement}%</div>
-                    <div className="text-sm text-gray-600 mb-1">Engagement</div>
-                    <div className={`text-xs px-2 py-1 rounded-full ${getScoreColor(metrics.content.engagement)}`}>
-                      {getScoreLabel(metrics.content.engagement)}
+                  )}
+
+                  {metrics.content.engagement && (
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium">Audience Engagement</span>
+                        <Badge className={getScoreColor(metrics.content.engagement)}>
+                          {Math.round(metrics.content.engagement * 100)}%
+                        </Badge>
+                      </div>
+                      <Progress value={metrics.content.engagement * 100} className="h-3" />
+                      <p className="text-sm text-gray-600 mt-1">
+                        {metrics.content.engagement >= 0.8 ? "Your content was engaging and held attention." : "Add stories or examples to make your message more interesting."}
+                      </p>
                     </div>
-                  </div>
+                  )}
+                  
+                  {!metrics.content.structure && !metrics.content.clarity && !metrics.content.engagement && (
+                    <div className="text-center py-8 text-gray-500">
+                      <FileText className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                      <p className="text-sm">Content analysis data not available for this session.</p>
+                      <p className="text-xs mt-1">Content analysis requires AI processing of your transcript.</p>
+                    </div>
+                  )}
                 </div>
                 
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h4 className="font-medium mb-2">What You Said:</h4>
-                  <p className="text-sm text-gray-700 leading-relaxed">
-                    {selectedSession.transcript || "No transcript available for this session."}
-                  </p>
-                </div>
-
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <h4 className="font-medium mb-2">Content Tips:</h4>
-                  <ul className="text-sm text-gray-600 space-y-1">
-                    <li>• {metrics.content.structure >= 80 ? "Good organization and flow" : "Try organizing your points: intro, main ideas, conclusion"}</li>
-                    <li>• {metrics.content.clarity >= 80 ? "Your message was clear and easy to follow" : "Explain complex ideas in simpler terms"}</li>
-                    <li>• {metrics.content.engagement >= 80 ? "Good job keeping it interesting" : "Add stories or examples to make it more engaging"}</li>
-                  </ul>
-                </div>
+                {selectedSession.transcript && (
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-medium mb-2">What You Said:</h4>
+                    <p className="text-sm text-gray-700 leading-relaxed">
+                      {selectedSession.transcript}
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

@@ -36,35 +36,47 @@ export default function DetailedAnalysisWithSession() {
   const getSessionMetrics = (session: any) => {
     if (!session) return null;
     
+    // Only use actual data - no fallback values
+    const eyeContactScore = session.eyeContactScore ? 
+      (typeof session.eyeContactScore === 'string' ? parseFloat(session.eyeContactScore) : session.eyeContactScore) 
+      : null;
+    const wordCount = session.transcript ? session.transcript.split(' ').filter((word: string) => word.length > 0).length : 0;
+    
+    // Calculate overall scores only if we have actual data
+    const bodyLanguageScores = [session.postureScore, session.gestureNaturalness, eyeContactScore].filter(s => s !== null && s !== undefined);
+    const overallBodyLanguage = bodyLanguageScores.length > 0 
+      ? bodyLanguageScores.reduce((sum, score) => sum + (score || 0), 0) / bodyLanguageScores.length 
+      : null;
+    
     return {
       bodyLanguage: {
-        postureScore: session.postureScore || session.bodyLanguageMetrics?.postureScore || 85,
-        gestureNaturalness: session.gestureNaturalness || session.bodyLanguageMetrics?.gestureNaturalness || 78,
-        eyeContactScore: typeof session.eyeContactScore === 'string' ? 82 : (session.eyeContactScore || 82),
-        facialExpression: session.facialExpression || session.bodyLanguageMetrics?.facialExpression || 76,
-        overallBodyLanguage: Math.round(((session.postureScore || 85) + (session.gestureNaturalness || 78) + 82) / 3)
+        postureScore: session.postureScore || null,
+        gestureNaturalness: session.gestureNaturalness || null,
+        eyeContactScore: eyeContactScore,
+        facialExpression: session.facialExpression || null,
+        overallBodyLanguage: overallBodyLanguage
       },
       voice: {
-        clarity: session.voiceClarity || 88,
-        pace: session.averageWPM || session.wpm || 145,
-        volume: session.volumeConsistency || 82,
-        intonation: session.intonationVariety || (session.speechPatterns?.intonationRange * 100) || 75,
-        fillerCount: Array.isArray(session.fillerWords) ? session.fillerWords.length : (session.fillerWords || 3),
-        pauseEffectiveness: (session.speechPatterns?.pauseEffectiveness * 100) || 80
+        clarity: session.voiceClarity || null,
+        pace: session.averageWPM || null,
+        volume: session.volumeConsistency || null,
+        intonation: session.intonationScore || null,
+        fillerCount: session.fillerWords || 0,
+        pauseEffectiveness: session.speechPatterns?.pauseEffectiveness || null
       },
       content: {
-        structure: session.structureScore || 85,
-        clarity: session.contentClarity || 78,
-        engagement: session.engagementScore || 82,
-        persuasiveness: session.persuasivenessScore || 81,
-        relevance: session.relevanceScore || 88,
-        completeness: session.completenessScore || 85
+        structure: session.structureScore || null,
+        clarity: session.clarityScore || null,
+        engagement: session.engagementScore || null,
+        persuasiveness: session.persuasivenessScore || null,
+        relevance: session.relevanceScore || null,
+        completeness: session.completenessScore || null
       },
       overall: {
-        score: session.overallScore || session.aiAnalysis?.overallScore || 83,
+        score: session.confidenceScore || null,
         duration: session.duration || 0,
-        wordCount: session.wordCount || (session.transcript?.split(' ').length) || 0,
-        confidenceLevel: session.confidenceScore || 79
+        wordCount: wordCount,
+        confidenceLevel: session.confidenceScore || null
       }
     };
   };
@@ -84,13 +96,15 @@ export default function DetailedAnalysisWithSession() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-blue-600">{metrics.overall.score}%</div>
+              <div className="text-2xl font-bold text-blue-600">
+                {metrics.overall.score ? `${Math.round(metrics.overall.score * 100)}%` : 'N/A'}
+              </div>
               <div className="text-sm text-gray-600">Overall Score</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-green-600">{metrics.voice.pace}</div>
+              <div className="text-2xl font-bold text-green-600">{metrics.voice.pace || 'N/A'}</div>
               <div className="text-sm text-gray-600">Words Per Minute</div>
             </CardContent>
           </Card>
