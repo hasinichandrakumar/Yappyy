@@ -68,6 +68,15 @@ export function useFacialAnalysis() {
 
   const analyzeFacialFrame = useCallback(async (imageData: string): Promise<FacialAnalysisResult | null> => {
     try {
+      // Try client-side Face-api.js first for maximum accuracy
+      const { clientFaceDetection, convertClientDetectionToMetrics } = await import('@/lib/face-detection');
+      
+      let clientDetection = null;
+      if (videoRef.current && clientFaceDetection.isReady()) {
+        clientDetection = await clientFaceDetection.detectFace(videoRef.current);
+      }
+
+      // Send both client detection and image data to backend
       const response = await fetch('/api/facial-analysis/analyze', {
         method: 'POST',
         headers: {
@@ -75,12 +84,32 @@ export function useFacialAnalysis() {
         },
         body: JSON.stringify({
           imageData,
+          clientDetection: clientDetection,
           sessionId: Date.now().toString()
         }),
       });
 
       if (response.ok) {
         const data = await response.json();
+        
+        // If we have client-side detection, enhance the results
+        if (clientDetection) {
+          const clientMetrics = convertClientDetectionToMetrics(clientDetection);
+          console.log('🎭 Enhanced with Face-api.js client detection:', clientMetrics);
+          
+          // Blend client and server results for maximum accuracy
+          if (data.analysis?.facialMetrics) {
+            data.analysis.facialMetrics.emotionalExpression.confidence = Math.max(
+              data.analysis.facialMetrics.emotionalExpression.confidence,
+              clientMetrics.confidence
+            );
+            data.analysis.facialMetrics.emotionalExpression.engagement = Math.max(
+              data.analysis.facialMetrics.emotionalExpression.engagement,
+              clientMetrics.engagement
+            );
+          }
+        }
+        
         return data.analysis;
       } else {
         throw new Error('Facial analysis request failed');
