@@ -10,6 +10,11 @@ import yappyyLogoPath from '@assets/Untitled_design-11600-removebg-preview_17497
 export default function HomePage() {
   const { isAuthenticated, isLoading, user, logout } = useAuth();
   
+  // Check for OAuth errors in URL params
+  const urlParams = new URLSearchParams(window.location.search);
+  const error = urlParams.get('error');
+  const errorDetails = urlParams.get('details');
+  
   const getInitials = (name?: string, email?: string) => {
     if (name) {
       const names = name.split(' ');
@@ -22,6 +27,58 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* OAuth Error Banner */}
+      {error && (
+        <div className="bg-red-50 border-l-4 border-red-400 p-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">
+                Sign-in was cancelled
+              </h3>
+              <div className="mt-2 text-sm text-red-700">
+                <p>
+                  {errorDetails === 'The user did not consent' 
+                    ? 'You cancelled the Google sign-in process. To access your dashboard, please try signing in again and click "Allow" when Google asks for permissions.'
+                    : `Sign-in failed: ${errorDetails || error}`
+                  }
+                </p>
+              </div>
+              <div className="mt-4">
+                <div className="-mx-2 -my-1.5 flex">
+                  <Button
+                    onClick={() => {
+                      // Clear error params and retry
+                      window.history.replaceState({}, '', window.location.pathname);
+                      window.location.href = '/api/login';
+                    }}
+                    size="sm"
+                    className="bg-red-100 text-red-800 hover:bg-red-200"
+                  >
+                    Try Again
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      window.history.replaceState({}, '', window.location.pathname);
+                      window.location.reload();
+                    }}
+                    variant="ghost"
+                    size="sm"
+                    className="ml-3 text-red-800 hover:bg-red-200"
+                  >
+                    Dismiss
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Navigation */}
       <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
