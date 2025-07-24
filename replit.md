@@ -445,15 +445,15 @@ The application now provides complete video recording and playback functionality
 - **Client Secret**: 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 ✅ Configured in code
 - **Primary Domain**: https://yappyy.com ✅ Main landing page and OAuth callback
 - **OAuth Callback**: https://yappyy.com/oauth2callback
-- **User Flow**: yappyy.com (landing) → Google OAuth → yappyy.com/oauth2callback → dashboard (after login)
+- **User Flow**: yappyy.com (landing) → Google OAuth → yappyy.com/oauth2callback → yappyy.com/dashboard (after login)
 - **Status**: ✅ FULLY WORKING - Authentication successful with dashboard access
 - **Latest Test**: User "Hasini" (hasini.user@gmail.com) authenticated successfully on July 24, 2025
 - **OAuth Integration**: Complete end-to-end Google OAuth flow working with Replit domain callback
 
 **OAuth Redirect Configuration**:
-- **Success Redirect**: `https://yappyy.com/dashboard?auth=TOKEN` - Token-based cross-domain authentication
+- **Success Redirect**: `https://yappyy.com/dashboard` - Direct redirect to dashboard after successful authentication
 - **Failure Redirect**: `https://yappyy.com/` - Users return to landing page if authentication fails
-- **Callback URL**: `https://yappyy.com/oauth2callback` - Google sends users here first, then redirects with token
+- **Callback URL**: `https://yappyy.com/oauth2callback` - Google sends users here first, then redirects to dashboard
 
 **REQUIRED Google Cloud Console Configuration**:
 1. **CRITICAL**: Add `https://yappyy.com` to "Authorized JavaScript origins" section

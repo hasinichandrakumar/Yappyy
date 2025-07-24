@@ -148,10 +148,10 @@ export async function setupGoogleAuth(app: Express) {
         }
         
         console.log('✅ OAuth callback successful for user:', user.email);
-        console.log('✅ Redirecting to dashboard...');
+        console.log('✅ Redirecting to yappyy.com dashboard...');
         
-        // Simply redirect to dashboard - session is already established
-        res.redirect('/dashboard');
+        // Redirect to yappyy.com dashboard - session is already established
+        res.redirect('https://yappyy.com/dashboard');
       });
     })(req, res, next);
   });
@@ -198,7 +198,7 @@ export async function setupGoogleAuth(app: Express) {
           return res.redirect('/');
         }
         console.log('✅ Demo user logged in');
-        res.redirect('/dashboard');
+        res.redirect('https://yappyy.com/dashboard');
       });
     } catch (error) {
       console.error('Demo user creation error:', error);
