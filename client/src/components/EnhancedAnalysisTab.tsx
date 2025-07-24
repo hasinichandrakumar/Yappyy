@@ -139,7 +139,7 @@ export default function EnhancedAnalysisTab() {
             <div className="h-16 w-16 bg-gradient-to-br from-[#2563eb] to-[#22d3ee] rounded-full flex items-center justify-center">
               <BarChart3 className="h-8 w-8 text-white" />
             </div>
-            <h2 className="text-2xl font-bold text-slate-900">No Practice Sessions Yet</h2>
+            <h2 className="text-3xl font-extrabold text-slate-900">No Practice Sessions Yet</h2>
             <p className="text-slate-600 max-w-md">
               Complete your first practice session to see detailed analytics, transcripts, and AI-powered insights here.
             </p>
@@ -164,8 +164,8 @@ export default function EnhancedAnalysisTab() {
       <Card className="p-6 bg-white/70 backdrop-blur-sm border border-white/30 shadow-xl">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900">Speaking Analysis</h2>
-            <p className="text-slate-600">Detailed insights into your speaking performance ({sessionCount} session{sessionCount !== 1 ? 's' : ''})</p>
+            <h2 className="text-3xl font-extrabold text-slate-900">Speaking Analysis</h2>
+            <p className="text-lg font-semibold text-slate-700">Detailed insights into your speaking performance ({sessionCount} session{sessionCount !== 1 ? 's' : ''})</p>
           </div>
           <div className="flex items-center gap-3">
             <Select value={selectedSession} onValueChange={setSelectedSession}>
@@ -250,8 +250,8 @@ export default function EnhancedAnalysisTab() {
                 <Mic className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h3 className="text-2xl font-bold text-slate-900">Voice Analysis</h3>
-                <p className="text-slate-600">Detailed breakdown of your vocal performance</p>
+                <h3 className="text-2xl font-extrabold text-slate-900">Voice Analysis</h3>
+                <p className="text-base font-semibold text-slate-700">Detailed breakdown of your vocal performance</p>
               </div>
             </div>
 
@@ -267,11 +267,11 @@ export default function EnhancedAnalysisTab() {
                 <div className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
                   <div className="flex items-center gap-2 mb-4">
                     <Clock className="h-5 w-5 text-blue-600" />
-                    <h4 className="text-lg font-semibold text-blue-900">Speaking Pace</h4>
+                    <h4 className="text-lg font-bold text-blue-900">Speaking Pace</h4>
                   </div>
                   <div className="space-y-4">
                     <div className="text-center">
-                      <div className="text-3xl font-bold text-blue-800 mb-1">
+                      <div className="text-4xl font-extrabold text-blue-800 mb-1">
                         {Math.round(filteredSessions.reduce((sum: number, s: any) => sum + (s.speakingPace || s.averageWPM || 0), 0) / sessionCount)} WPM
                       </div>
                       <div className="text-sm text-blue-600">

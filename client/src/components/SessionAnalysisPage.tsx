@@ -256,11 +256,11 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
           <CardHeader>
             <div className="flex justify-between items-start">
               <div>
-                <CardTitle className="text-3xl font-bold text-blue-600 mb-2">
+                <CardTitle className="text-4xl font-extrabold text-blue-600 mb-2">
                   Session Analysis
                 </CardTitle>
-                <p className="text-lg text-gray-600">{sessionData.sessionName}</p>
-                <p className="text-sm text-gray-500">{sessionData.purpose}</p>
+                <p className="text-xl font-bold text-gray-700">{sessionData.sessionName}</p>
+                <p className="text-base font-medium text-gray-600">{sessionData.purpose}</p>
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" onClick={onClose}>
@@ -280,36 +280,36 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
           <Card className={`border-2 ${getScoreBg(normalizedData.overallPerformance)}`}>
             <CardContent className="p-4 text-center">
               <Star className={`w-8 h-8 mx-auto mb-2 ${getScoreColor(normalizedData.overallPerformance)}`} />
-              <div className={`text-2xl font-bold ${getScoreColor(normalizedData.overallPerformance)}`}>
+              <div className={`text-3xl font-extrabold ${getScoreColor(normalizedData.overallPerformance)}`}>
                 {normalizedData.overallPerformance}%
               </div>
-              <div className="text-sm text-gray-600">Overall Performance</div>
+              <div className="text-sm font-semibold text-gray-700">Overall Performance</div>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="p-4 text-center">
               <Clock className="w-8 h-8 mx-auto mb-2 text-blue-600" />
-              <div className="text-2xl font-bold text-blue-600">{formatDuration(normalizedData.duration)}</div>
-              <div className="text-sm text-gray-600">Session Duration</div>
+              <div className="text-3xl font-extrabold text-blue-600">{formatDuration(normalizedData.duration)}</div>
+              <div className="text-sm font-semibold text-gray-700">Session Duration</div>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="p-4 text-center">
               <Mic className="w-8 h-8 mx-auto mb-2 text-green-600" />
-              <div className="text-2xl font-bold text-green-600">{normalizedData.wordsPerMinute}</div>
-              <div className="text-sm text-gray-600">Words Per Minute</div>
+              <div className="text-3xl font-extrabold text-green-600">{normalizedData.wordsPerMinute}</div>
+              <div className="text-sm font-semibold text-gray-700">Words Per Minute</div>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="p-4 text-center">
               <MessageSquare className="w-8 h-8 mx-auto mb-2 text-red-600" />
-              <div className="text-2xl font-bold text-red-600">
+              <div className="text-3xl font-extrabold text-red-600">
                 {fillerAnalysis?.totalFillers ?? normalizedData.fillerWordCount}
               </div>
-              <div className="text-sm text-gray-600">Filler Words</div>
+              <div className="text-sm font-semibold text-gray-700">Filler Words</div>
             </CardContent>
           </Card>
         </div>
@@ -320,8 +320,8 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
           {/* Performance Breakdown */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="w-5 h-5" />
+              <CardTitle className="flex items-center gap-2 text-xl font-bold">
+                <BarChart3 className="w-6 h-6" />
                 Performance Breakdown
               </CardTitle>
             </CardHeader>
@@ -678,31 +678,31 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Confidence</span>
-                      <span className={getScoreColor(sessionData.facialAnalysis.emotionalExpression.confidence)}>
-                        {sessionData.facialAnalysis.emotionalExpression.confidence}%
+                      <span className={getScoreColor(sessionData.facialAnalysis?.emotionalExpression?.confidence || 0)}>
+                        {sessionData.facialAnalysis?.emotionalExpression?.confidence || 0}%
                       </span>
                     </div>
-                    <Progress value={sessionData.facialAnalysis.emotionalExpression.confidence} className="h-2" />
+                    <Progress value={sessionData.facialAnalysis?.emotionalExpression?.confidence || 0} className="h-2" />
                   </div>
                   
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Engagement</span>
-                      <span className={getScoreColor(sessionData.facialAnalysis.emotionalExpression.engagement)}>
-                        {sessionData.facialAnalysis.emotionalExpression.engagement}%
+                      <span className={getScoreColor(sessionData.facialAnalysis?.emotionalExpression?.engagement || 0)}>
+                        {sessionData.facialAnalysis?.emotionalExpression?.engagement || 0}%
                       </span>
                     </div>
-                    <Progress value={sessionData.facialAnalysis.emotionalExpression.engagement} className="h-2" />
+                    <Progress value={sessionData.facialAnalysis?.emotionalExpression?.engagement || 0} className="h-2" />
                   </div>
                   
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Authenticity</span>
-                      <span className={getScoreColor(sessionData.facialAnalysis.emotionalExpression.authenticity)}>
-                        {sessionData.facialAnalysis.emotionalExpression.authenticity}%
+                      <span className={getScoreColor(sessionData.facialAnalysis?.emotionalExpression?.authenticity || 0)}>
+                        {sessionData.facialAnalysis?.emotionalExpression?.authenticity || 0}%
                       </span>
                     </div>
-                    <Progress value={sessionData.facialAnalysis.emotionalExpression.authenticity} className="h-2" />
+                    <Progress value={sessionData.facialAnalysis?.emotionalExpression?.authenticity || 0} className="h-2" />
                   </div>
                 </div>
 
@@ -713,31 +713,31 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Eye Contact Quality</span>
-                      <span className={getScoreColor(sessionData.facialAnalysis.communicationSignals.eyeContactQuality)}>
-                        {sessionData.facialAnalysis.communicationSignals.eyeContactQuality}%
+                      <span className={getScoreColor(sessionData.facialAnalysis?.communicationSignals?.eyeContactQuality || 0)}>
+                        {sessionData.facialAnalysis?.communicationSignals?.eyeContactQuality || 0}%
                       </span>
                     </div>
-                    <Progress value={sessionData.facialAnalysis.communicationSignals.eyeContactQuality} className="h-2" />
+                    <Progress value={sessionData.facialAnalysis?.communicationSignals?.eyeContactQuality || 0} className="h-2" />
                   </div>
                   
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Gaze Focus</span>
-                      <span className={getScoreColor(sessionData.facialAnalysis.communicationSignals.gazeFocus)}>
-                        {sessionData.facialAnalysis.communicationSignals.gazeFocus}%
+                      <span className={getScoreColor(sessionData.facialAnalysis?.communicationSignals?.gazeFocus || 0)}>
+                        {sessionData.facialAnalysis?.communicationSignals?.gazeFocus || 0}%
                       </span>
                     </div>
-                    <Progress value={sessionData.facialAnalysis.communicationSignals.gazeFocus} className="h-2" />
+                    <Progress value={sessionData.facialAnalysis?.communicationSignals?.gazeFocus || 0} className="h-2" />
                   </div>
                   
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Facial Stability</span>
-                      <span className={getScoreColor(sessionData.facialAnalysis.communicationSignals.facialStability)}>
-                        {sessionData.facialAnalysis.communicationSignals.facialStability}%
+                      <span className={getScoreColor(sessionData.facialAnalysis?.communicationSignals?.facialStability || 0)}>
+                        {sessionData.facialAnalysis?.communicationSignals?.facialStability || 0}%
                       </span>
                     </div>
-                    <Progress value={sessionData.facialAnalysis.communicationSignals.facialStability} className="h-2" />
+                    <Progress value={sessionData.facialAnalysis?.communicationSignals?.facialStability || 0} className="h-2" />
                   </div>
                 </div>
 
@@ -748,31 +748,31 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Charisma</span>
-                      <span className={getScoreColor(sessionData.facialAnalysis.overallPresence.charisma)}>
-                        {sessionData.facialAnalysis.overallPresence.charisma}%
+                      <span className={getScoreColor(sessionData.facialAnalysis?.overallPresence?.charisma || 0)}>
+                        {sessionData.facialAnalysis?.overallPresence?.charisma || 0}%
                       </span>
                     </div>
-                    <Progress value={sessionData.facialAnalysis.overallPresence.charisma} className="h-2" />
+                    <Progress value={sessionData.facialAnalysis?.overallPresence?.charisma || 0} className="h-2" />
                   </div>
                   
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Trustworthiness</span>
-                      <span className={getScoreColor(sessionData.facialAnalysis.overallPresence.trustworthiness)}>
-                        {sessionData.facialAnalysis.overallPresence.trustworthiness}%
+                      <span className={getScoreColor(sessionData.facialAnalysis?.overallPresence?.trustworthiness || 0)}>
+                        {sessionData.facialAnalysis?.overallPresence?.trustworthiness || 0}%
                       </span>
                     </div>
-                    <Progress value={sessionData.facialAnalysis.overallPresence.trustworthiness} className="h-2" />
+                    <Progress value={sessionData.facialAnalysis?.overallPresence?.trustworthiness || 0} className="h-2" />
                   </div>
                   
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Professionalism</span>
-                      <span className={getScoreColor(sessionData.facialAnalysis.overallPresence.professionalism)}>
-                        {sessionData.facialAnalysis.overallPresence.professionalism}%
+                      <span className={getScoreColor(sessionData.facialAnalysis?.overallPresence?.professionalism || 0)}>
+                        {sessionData.facialAnalysis?.overallPresence?.professionalism || 0}%
                       </span>
                     </div>
-                    <Progress value={sessionData.facialAnalysis.overallPresence.professionalism} className="h-2" />
+                    <Progress value={sessionData.facialAnalysis?.overallPresence?.professionalism || 0} className="h-2" />
                   </div>
                 </div>
 

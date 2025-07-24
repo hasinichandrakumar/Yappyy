@@ -89,8 +89,8 @@ export default function Dashboard() {
             <div className="flex items-center space-x-3">
               <img src={yappyyLogoPath} alt="Yappyy" className="h-8" />
               <div className="hidden sm:block">
-                <h1 className="text-xl font-bold text-gray-900">Public Speaking Coach</h1>
-                <p className="text-sm font-medium text-gray-600">AI-Powered Speech Training Platform</p>
+                <h1 className="text-xl font-extrabold text-gray-900">Public Speaking Coach</h1>
+                <p className="text-sm font-semibold text-gray-600">AI-Powered Speech Training Platform</p>
               </div>
             </div>
             

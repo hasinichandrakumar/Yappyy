@@ -99,28 +99,28 @@ export default function DetailedAnalysisWithSession() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-blue-600">
+              <div className="text-3xl font-extrabold text-blue-600">
                 {metrics.overall.score ? `${Math.round(metrics.overall.score * 100)}%` : 'N/A'}
               </div>
-              <div className="text-sm text-gray-600">Overall Score</div>
+              <div className="text-sm font-semibold text-gray-700">Overall Score</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-green-600">{metrics.voice.pace || 'N/A'}</div>
-              <div className="text-sm text-gray-600">Words Per Minute</div>
+              <div className="text-3xl font-extrabold text-green-600">{metrics.voice.pace || 'N/A'}</div>
+              <div className="text-sm font-semibold text-gray-700">Words Per Minute</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-purple-600">{metrics.overall.wordCount}</div>
-              <div className="text-sm text-gray-600">Total Words</div>
+              <div className="text-3xl font-extrabold text-purple-600">{metrics.overall.wordCount}</div>
+              <div className="text-sm font-semibold text-gray-700">Total Words</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-orange-600">{Math.floor(metrics.overall.duration / 60)}:{String(metrics.overall.duration % 60).padStart(2, '0')}</div>
-              <div className="text-sm text-gray-600">Duration</div>
+              <div className="text-3xl font-extrabold text-orange-600">{Math.floor(metrics.overall.duration / 60)}:{String(metrics.overall.duration % 60).padStart(2, '0')}</div>
+              <div className="text-sm font-semibold text-gray-700">Duration</div>
             </CardContent>
           </Card>
         </div>
