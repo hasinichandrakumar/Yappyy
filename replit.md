@@ -447,6 +447,13 @@ The application now provides complete video recording and playback functionality
 - **User Flow**: yappyy.com (landing) → Google OAuth → yappyy.com/dashboard (after login)
 - **Status**: Fully configured for yappyy.com domain-first experience
 
+**Note**: The Google Cloud Console needs to be updated to:
+1. Set "Authorized domains" to `yappyy.com` (not the Replit dev domain)
+2. Update OAuth consent screen to show yappyy.com as the application domain
+3. Ensure redirect URIs include `https://yappyy.com/oauth2callback`
+
+This will fix the consent screen showing the correct domain (yappyy.com instead of the Replit dev URL).
+
 ### Previous Open Access Dashboard System - REPLACED ✅ (July 21, 2025)
 - **Replaced with Replit Auth**: Enhanced from open access to proper Replit user authentication
 - **Maintained Accessibility**: Demo mode still available for non-Replit users
