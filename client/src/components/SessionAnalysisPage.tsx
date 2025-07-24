@@ -76,7 +76,7 @@ interface SessionAnalysisPageProps {
 }
 
 export default function SessionAnalysisPage({ sessionData, onClose, onNewSession }: SessionAnalysisPageProps) {
-
+  const [fillerAnalysis, setFillerAnalysis] = useState<any>(null);
   const [isGeneratingInsights, setIsGeneratingInsights] = useState(true);
   const [aiInsights, setAIInsights] = useState<any>(null);
 
@@ -114,6 +114,21 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
 
   const analyzeSession = async () => {
     try {
+      // Analyze filler words
+      const fillerResponse = await fetch('/api/analyze-filler-words', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          transcript: sessionData.transcript,
+          duration: sessionData.duration
+        })
+      });
+      
+      if (fillerResponse.ok) {
+        const fillerData = await fillerResponse.json();
+        setFillerAnalysis(fillerData);
+      }
+
       // Generate comprehensive AI insights
       await generateAIInsights();
     } catch (error) {
@@ -130,6 +145,7 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           sessionData,
+          fillerCount: fillerAnalysis?.totalFillers ?? sessionData.fillerWordCount,
           duration: sessionData.duration,
           wpm: sessionData.wordsPerMinute
         })
@@ -168,11 +184,12 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
         eyeContactScore: normalizedData.eyeContactScore || 0,
         confidenceScore: normalizedData.confidenceLevel || 0,
         transcript: normalizedData.transcript || '',
-        fillerWords: [],
-        fillerWordCount: 0,
+        fillerWords: fillerAnalysis?.detectedFillers?.map((f: any) => f.word) || [],
+        fillerWordCount: fillerAnalysis?.totalFillers ?? (normalizedData.fillerWordCount || 0),
         analysis: {
           insights: aiInsights || {},
-          facialAnalysis: normalizedData.facialAnalysis
+          facialAnalysis: normalizedData.facialAnalysis,
+          fillerAnalysis: fillerAnalysis
         }
       };
       
@@ -221,7 +238,11 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
       insights.push({ type: 'success', message: 'Perfect speaking pace for clear communication' });
     }
 
-
+    if (fillerAnalysis?.totalFillers > 10) {
+      insights.push({ type: 'warning', message: `Reduce filler words (${fillerAnalysis.totalFillers} detected) by practicing strategic pauses` });
+    } else {
+      insights.push({ type: 'success', message: 'Great job minimizing filler words!' });
+    }
 
     return insights;
   };
@@ -284,9 +305,11 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
 
           <Card>
             <CardContent className="p-4 text-center">
-              <Target className="w-8 h-8 mx-auto mb-2 text-purple-600" />
-              <div className="text-2xl font-bold text-purple-600">{normalizedData.clarityScore}%</div>
-              <div className="text-sm text-gray-600">Clarity Score</div>
+              <MessageSquare className="w-8 h-8 mx-auto mb-2 text-red-600" />
+              <div className="text-2xl font-bold text-red-600">
+                {fillerAnalysis?.totalFillers ?? normalizedData.fillerWordCount}
+              </div>
+              <div className="text-sm text-gray-600">Filler Words</div>
             </CardContent>
           </Card>
         </div>
@@ -589,7 +612,48 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
           </Card>
         </div>
 
-
+        {/* Filler Word Analysis */}
+        {fillerAnalysis && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MessageSquare className="w-5 h-5" />
+                Filler Word Analysis
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div className="text-center p-4 bg-gray-50 rounded-lg">
+                  <div className="text-2xl font-bold text-gray-900">{fillerAnalysis.totalFillers}</div>
+                  <div className="text-sm text-gray-600">Total Fillers</div>
+                </div>
+                <div className="text-center p-4 bg-gray-50 rounded-lg">
+                  <div className="text-2xl font-bold text-gray-900">{fillerAnalysis.fillerPercentage?.toFixed(1)}%</div>
+                  <div className="text-sm text-gray-600">Filler Percentage</div>
+                </div>
+                <div className="text-center p-4 bg-gray-50 rounded-lg">
+                  <Badge variant={fillerAnalysis.severity === 'excellent' ? 'default' : 'destructive'}>
+                    {fillerAnalysis.severity}
+                  </Badge>
+                  <div className="text-sm text-gray-600 mt-1">Severity</div>
+                </div>
+              </div>
+              
+              {fillerAnalysis.detectedFillers?.length > 0 && (
+                <div>
+                  <h4 className="font-semibold mb-2">Most Common Fillers:</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {fillerAnalysis.detectedFillers.slice(0, 8).map((filler: any, index: number) => (
+                      <Badge key={index} variant="secondary">
+                        {filler.word} ({filler.count}x)
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Enhanced ML-Based Facial Analysis */}
         {normalizedData.facialAnalysis && (

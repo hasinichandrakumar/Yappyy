@@ -145,10 +145,12 @@ export default function LiveTranscript() {
             </div>
           </div>
           <div className="text-center bg-gray-50 rounded-lg p-3">
-            <div className="text-sm font-medium text-gray-600 mb-1">Live Detection</div>
+            <div className="text-sm font-medium text-gray-600 mb-1">Fillers</div>
             <div className="flex items-center justify-center gap-2">
-              <div className="text-sm font-medium text-gray-900">Active</div>
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+              <div className="text-2xl font-bold text-gray-900">{analysis?.fillerWords || fillerWords.length}</div>
+              {fillerWords.length > 3 && (
+                <AlertTriangle className="w-4 h-4 text-yellow-600" />
+              )}
             </div>
           </div>
         </div>

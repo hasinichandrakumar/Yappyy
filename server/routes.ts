@@ -791,9 +791,217 @@ CRITICAL: Evaluate how well this speech achieved its stated PURPOSE. Analyze the
     }
   });
 
-  // Removed filler word analytics endpoint per user request
-  // Live detection remains active during recording but no post-session analytics
-  
+  // Comprehensive filler word detection endpoint
+  app.post('/api/analyze-filler-words', async (req: any, res) => {
+    try {
+      const { transcript, duration = 10 } = req.body;
+      
+      if (!transcript) {
+        return res.status(400).json({ error: 'Transcript is required' });
+      }
+      
+      console.log('🎯 Analyzing filler words in transcript:', transcript.substring(0, 100) + '...');
+      
+      // Comprehensive filler word patterns - 60+ common speech fillers + custom words
+      const singleFillers = [
+        // Classic vocal fillers - PRIORITY DETECTION
+        'um', 'uh', 'uhm', 'umm', 'uhhh', 'ummm', 'er', 'err', 'ah', 'eh', 'mm', 'hmm', 'hm',
+        
+        // Custom vocal fillers - USER REQUESTED
+        'blah', 'bleh', 'meh', 'huh', 'erm', 'urm',
+        
+        // Discourse markers
+        'like', 'so', 'well', 'okay', 'ok', 'right', 'yeah', 'yes', 'yep', 'sure',
+        
+        // Intensifiers used as fillers
+        'actually', 'basically', 'literally', 'obviously', 'essentially', 'definitely',
+        'absolutely', 'totally', 'really', 'very', 'quite', 'pretty', 'super',
+        
+        // Hedging words
+        'just', 'maybe', 'perhaps', 'probably', 'possibly', 'kinda', 'sorta',
+        
+        // Transition fillers
+        'anyway', 'anyhow', 'meanwhile', 'however', 'furthermore', 'moreover',
+        
+        // Thinking fillers
+        'wait', 'hold on', 'hmm',
+        
+        // Agreement fillers
+        'exactly', 'precisely', 'indeed', 'certainly', 'surely', 'clearly',
+        
+        // Time fillers
+        'now', 'then', 'next', 'first', 'second', 'finally', 'lastly',
+        
+        // Emphasis fillers
+        'honestly', 'frankly', 'seriously', 'truly', 'genuinely', 'certainly',
+        
+        // Casual speech fillers
+        'dude', 'man', 'guys', 'folks', 'people', 'thing', 'stuff', 'things'
+      ];
+      
+      const multiWordFillers = [
+        // Classic multi-word fillers
+        'you know', 'i mean', 'kind of', 'sort of', 'i guess', 'you see',
+        'and stuff', 'or something', 'or whatever', 'and things', 'and all that',
+        
+        // Thinking phrases
+        'how do i put this', 'what i mean is', 'let me think', 'let me see',
+        'how can i say', 'what im trying to say', 'if you will', 'so to speak',
+        'give me a second', 'hold on a minute', 'wait a minute',
+        
+        // Hesitation phrases
+        'i dont know', 'im not sure', 'i think maybe', 'i suppose', 'i believe',
+        'it seems like', 'it appears that', 'i would say', 'in my opinion',
+        
+        // Clarification fillers
+        'what i mean', 'in other words', 'that is to say', 'or rather',
+        'to put it simply', 'in a sense', 'in a way', 'more or less',
+        
+        // Continuation fillers
+        'and so on', 'and so forth', 'et cetera', 'and whatnot', 'and such',
+        'and everything', 'and all', 'or anything', 'or nothing',
+        'blah blah blah', 'blah blah', 'and blah',
+        
+        // Approximation fillers
+        'more or less', 'give or take', 'around about', 'something like that',
+        'or thereabouts', 'in the ballpark', 'roughly speaking',
+        
+        // Emphasis phrases
+        'to be honest', 'to tell you the truth', 'as a matter of fact',
+        'the thing is', 'the point is', 'what im saying is', 'bottom line',
+        
+        // Filler combinations
+        'you know what', 'you know what i mean', 'if you know what i mean',
+        'know what i mean', 'do you know what', 'you get what im saying',
+        'like you know', 'so anyway', 'but like', 'and like', 'or like',
+        'i mean like', 'so like', 'well like', 'but anyway', 'so basically'
+      ];
+      
+      const text = transcript.toLowerCase().trim();
+      const words = text.split(/\s+/);
+      let detectedFillers: { word: string; count: number; positions: number[] }[] = [];
+      let totalCount = 0;
+      
+      // Analyze multi-word fillers
+      multiWordFillers.forEach(phrase => {
+        const regex = new RegExp(`\\b${phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+        const matches = [...text.matchAll(regex)];
+        if (matches.length > 0) {
+          const positions = matches.map(match => match.index || 0);
+          detectedFillers.push({
+            word: phrase,
+            count: matches.length,
+            positions
+          });
+          totalCount += matches.length;
+        }
+      });
+      
+      // Analyze single-word fillers
+      const fillerCounts: { [key: string]: { count: number; positions: number[] } } = {};
+      
+      words.forEach((word: string, index: number) => {
+        // Clean word by removing punctuation and converting to lowercase
+        const cleanWord = word.toLowerCase().replace(/[.,!?;:'"()[\]]/g, '');
+        
+        // Enhanced debug logging for "um" and "uh" detection
+        if (cleanWord === 'uh' || cleanWord === 'um' || cleanWord.includes('uh') || cleanWord.includes('um')) {
+          console.log(`🔍 Found UM/UH variant: "${word}" -> cleaned: "${cleanWord}" -> inList: ${singleFillers.includes(cleanWord)}`);
+        }
+        
+        // Special handling for common vocal fillers with variations
+        const isVocalFiller = singleFillers.includes(cleanWord) || 
+          /^u+h+$/i.test(cleanWord) ||  // Match "uh", "uhh", "uhhh" etc
+          /^u+m+$/i.test(cleanWord) ||  // Match "um", "umm", "ummm" etc
+          /^u+h+m+$/i.test(cleanWord);  // Match "uhm", "uhhm" etc
+        
+        if (isVocalFiller) {
+          // Normalize vocal filler variants to base forms
+          let normalizedWord = cleanWord;
+          if (/^u+h+$/i.test(cleanWord)) normalizedWord = 'uh';
+          else if (/^u+m+$/i.test(cleanWord)) normalizedWord = 'um';
+          else if (/^u+h+m+$/i.test(cleanWord)) normalizedWord = 'uhm';
+          
+          if (!fillerCounts[normalizedWord]) {
+            fillerCounts[normalizedWord] = { count: 0, positions: [] };
+          }
+          fillerCounts[normalizedWord].count++;
+          fillerCounts[normalizedWord].positions.push(index);
+          totalCount++;
+          
+          // Extra logging for "uh" and "um" detection
+          if (normalizedWord === 'uh' || normalizedWord === 'um') {
+            console.log(`✅ "${normalizedWord}" detected and counted at position ${index} (original: "${word}")`);
+          }
+        } else if (singleFillers.includes(cleanWord)) {
+          // Handle other filler words normally
+          if (!fillerCounts[cleanWord]) {
+            fillerCounts[cleanWord] = { count: 0, positions: [] };
+          }
+          fillerCounts[cleanWord].count++;
+          fillerCounts[cleanWord].positions.push(index);
+          totalCount++;
+        }
+      });
+      
+      // Convert to array format
+      Object.entries(fillerCounts).forEach(([word, data]) => {
+        detectedFillers.push({
+          word,
+          count: data.count,
+          positions: data.positions
+        });
+      });
+      
+      // Calculate metrics
+      const timeInMinutes = duration / 60;
+      const frequencyPerMinute = timeInMinutes > 0 ? totalCount / timeInMinutes : 0;
+      const wordCount = words.length;
+      const fillerPercentage = wordCount > 0 ? (totalCount / wordCount) * 100 : 0;
+      
+      // Generate severity assessment
+      let severity = 'excellent';
+      if (frequencyPerMinute > 5) severity = 'high';
+      else if (frequencyPerMinute > 3) severity = 'moderate';
+      else if (frequencyPerMinute > 1) severity = 'low';
+      
+      // Generate coaching suggestions
+      const suggestions = [];
+      if (totalCount > 0) {
+        const topFiller = detectedFillers.reduce((prev, current) => 
+          (prev.count > current.count) ? prev : current
+        );
+        suggestions.push(`Focus on reducing "${topFiller.word}" - detected ${topFiller.count} times`);
+        
+        if (frequencyPerMinute > 3) {
+          suggestions.push('Practice pausing instead of using filler words');
+          suggestions.push('Take deeper breaths to give yourself thinking time');
+        }
+      }
+      
+      const analysis = {
+        totalFillers: totalCount,
+        frequencyPerMinute: Math.round(frequencyPerMinute * 10) / 10,
+        fillerPercentage: Math.round(fillerPercentage * 10) / 10,
+        severity,
+        detectedFillers: detectedFillers.sort((a, b) => b.count - a.count),
+        suggestions,
+        analysis: {
+          mostCommonFiller: detectedFillers.length > 0 ? detectedFillers[0].word : null,
+          improvement: frequencyPerMinute < 2 ? 'excellent' : 'needs_improvement',
+          confidence: totalCount > 5 ? 0.95 : 0.8
+        }
+      };
+      
+      console.log('📊 Filler analysis result:', analysis);
+      res.json(analysis);
+      
+    } catch (error) {
+      console.error('Error analyzing filler words:', error);
+      res.status(500).json({ error: 'Failed to analyze filler words' });
+    }
+  });
+
   // Get user practice sessions with resilient error handling
   app.get("/api/practice-sessions", async (req: any, res) => {
     try {
