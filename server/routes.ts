@@ -778,27 +778,17 @@ CRITICAL: Evaluate how well this speech achieved its stated PURPOSE. Analyze the
       const audioPresent = req.body;
       const hasAudioData = audioPresent && Object.keys(audioPresent).length > 0;
       
-      // Increased detection probability when audio data is present
-      const detectionChance = hasAudioData ? 0.4 : 0.3; // 40% chance with audio, 30% without
-      const simulatedDetection = Math.random() < detectionChance;
+      // REMOVED FAKE DATA: Only detect actual vocal fillers from real audio analysis
+      // Browser speech recognition automatically filters out "um"/"uh" 
+      // This endpoint would need real audio processing to detect vocal fillers
+      const vocalFillers: string[] = []; // No fake detection - only real audio analysis
       
-      const fillerTypes = ['um', 'uh', 'er', 'ah', 'uhm', 'mm'];
-      const vocalFillers = simulatedDetection ? [fillerTypes[Math.floor(Math.random() * fillerTypes.length)]] : [];
-      
-      // Add occasional multiple filler detection for realism
-      if (simulatedDetection && Math.random() < 0.3) {
-        const secondFiller = fillerTypes[Math.floor(Math.random() * fillerTypes.length)];
-        if (secondFiller !== vocalFillers[0]) {
-          vocalFillers.push(secondFiller);
-        }
-      }
-      
-      console.log('🎯 Vocal filler detection result:', { vocalFillers, detected: simulatedDetection, audioData: hasAudioData });
+      console.log('🎯 Vocal filler detection result:', { vocalFillers, detected: false, audioData: hasAudioData });
       
       res.json({
         vocalFillers,
-        detected: simulatedDetection,
-        confidence: simulatedDetection ? (0.75 + Math.random() * 0.2) : 0,
+        detected: false, // No fake detection
+        confidence: 0, // No fake confidence - only real audio analysis results
         timestamp: Date.now(),
         audioProcessed: hasAudioData
       });

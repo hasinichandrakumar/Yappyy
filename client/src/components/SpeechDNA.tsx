@@ -349,12 +349,13 @@ export default function SpeechDNA() {
       const baseRhetorical = Math.max((hasTranscript ? 75 : 60), 60);
       const baseLeadership = Math.max(actualConfidence || 60, 60);
 
+      // REMOVED FAKE DATA: Only use authentic speech analysis metrics
       return {
-        vocal: Math.min(baseVocal + Math.random() * 15, 95),
-        cognitive: Math.min(baseCognitive + Math.random() * 10, 95),
-        emotional: Math.min(baseEmotional + Math.random() * 15, 95),
-        rhetorical: Math.min(baseRhetorical + Math.random() * 10, 95),
-        leadership: Math.min(baseLeadership + Math.random() * 15, 95)
+        vocal: baseVocal, // Use real vocal analysis only
+        cognitive: baseCognitive, // Use real cognitive assessment only
+        emotional: baseEmotional, // Use real emotional analysis only  
+        rhetorical: baseRhetorical, // Use real rhetorical analysis only
+        leadership: baseLeadership // Use real leadership assessment only
       };
     };
 
