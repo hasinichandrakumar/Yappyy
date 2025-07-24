@@ -193,12 +193,12 @@ export default function HomePage() {
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="text-center">
-            <h1 className="text-7xl md:text-9xl lg:text-[12rem] font-display text-white mb-16 font-bold leading-tight">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-display text-white mb-8 font-bold leading-tight">
               Talk Smart.
               <br />
               Talk Yappyy.
             </h1>
-            <p className="text-2xl md:text-3xl lg:text-4xl font-body text-white/90 mb-16 max-w-5xl mx-auto leading-relaxed">
+            <p className="text-lg md:text-xl lg:text-2xl font-body text-white/90 mb-12 max-w-4xl mx-auto leading-relaxed">
               AI-powered speech coaching that transforms your communication skills through real-time feedback and personalized training
             </p>
             <div className="flex justify-center mb-20">
