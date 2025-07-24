@@ -96,14 +96,16 @@ export function useFacialAnalysis() {
     if (isActive) return;
     
     try {
-      videoRef.current = videoElement;
+      if (videoRef.current !== videoElement) {
+        (videoRef as React.MutableRefObject<HTMLVideoElement | null>).current = videoElement;
+      }
       
       // Create hidden canvas for frame capture
       if (!canvasRef.current) {
         const canvas = document.createElement('canvas');
         canvas.style.display = 'none';
         document.body.appendChild(canvas);
-        canvasRef.current = canvas;
+        (canvasRef as React.MutableRefObject<HTMLCanvasElement | null>).current = canvas;
       }
       
       setIsActive(true);
@@ -145,7 +147,7 @@ export function useFacialAnalysis() {
     // Clean up hidden canvas
     if (canvasRef.current && canvasRef.current.parentNode) {
       canvasRef.current.parentNode.removeChild(canvasRef.current);
-      canvasRef.current = null;
+      (canvasRef as React.MutableRefObject<HTMLCanvasElement | null>).current = null;
     }
     
     setIsActive(false);
