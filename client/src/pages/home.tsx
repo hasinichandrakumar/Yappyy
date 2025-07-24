@@ -27,7 +27,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen">
       {/* OAuth Error Banner */}
       {error && (
         <div className="bg-red-50 border-l-4 border-red-400 p-4">
@@ -180,7 +180,7 @@ export default function HomePage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 bg-gradient-to-br from-blue-600 via-cyan-500 to-sky-400 animate-gradient-x">
+      <section className="relative overflow-hidden min-h-screen bg-gradient-to-br from-blue-600 via-cyan-500 to-sky-400 animate-gradient-x flex items-center">
         {/* Floating Background Bubbles */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-20 left-10 w-12 h-12 bg-white/10 rounded-full opacity-30"></div>
@@ -191,7 +191,7 @@ export default function HomePage() {
           <div className="absolute top-1/2 right-1/3 w-14 h-14 bg-white/10 rounded-full opacity-25"></div>
           <div className="absolute bottom-20 left-1/3 w-7 h-7 bg-white/10 rounded-full opacity-45"></div>
         </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="text-center">
             <h1 className="text-6xl md:text-8xl font-display text-white mb-6 font-bold">
               Talk Smart.
