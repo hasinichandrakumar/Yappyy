@@ -509,7 +509,9 @@ export default function HomePage() {
             <div>
               <h2 className="text-4xl font-heading text-slate-800 mb-6 flex items-center gap-3 flex-wrap">
                 Why Choose
-                <img src={yappyyLogoPath} alt="Yappyy" className="h-14" />
+                <span className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
+                  Yappyy
+                </span>
                 ?
               </h2>
               <div className="space-y-4">
