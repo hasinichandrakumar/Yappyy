@@ -111,6 +111,14 @@ export async function setupGoogleAuth(app: Express) {
     if (req.query.error) {
       console.error('❌ OAuth error from Google:', req.query.error);
       console.error('❌ OAuth error description:', req.query.error_description);
+      
+      // Special handling for redirect_uri_mismatch
+      if (req.query.error === 'redirect_uri_mismatch') {
+        console.error('❌ Redirect URI mismatch - callback URL not authorized in Google Cloud Console');
+        console.error('❌ Current callback URL:', `https://${process.env.REPLIT_DEV_DOMAIN}/oauth2callback`);
+        return res.redirect(`/?error=redirect_mismatch&callback_url=${encodeURIComponent(`https://${process.env.REPLIT_DEV_DOMAIN}/oauth2callback`)}`);
+      }
+      
       return res.redirect(`/?error=oauth_failed&details=${encodeURIComponent(req.query.error_description || req.query.error)}`);
     }
     

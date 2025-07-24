@@ -14,6 +14,7 @@ export default function HomePage() {
   const urlParams = new URLSearchParams(window.location.search);
   const error = urlParams.get('error');
   const errorDetails = urlParams.get('details');
+  const callbackUrl = urlParams.get('callback_url');
   
   const getInitials = (name?: string, email?: string) => {
     if (name) {
@@ -38,15 +39,33 @@ export default function HomePage() {
             </div>
             <div className="ml-3">
               <h3 className="text-sm font-medium text-red-800">
-                Sign-in was cancelled
+                {error === 'redirect_mismatch' ? 'Google OAuth Setup Required' : 'Sign-in was cancelled'}
               </h3>
               <div className="mt-2 text-sm text-red-700">
-                <p>
-                  {errorDetails === 'The user did not consent' 
-                    ? 'You cancelled the Google sign-in process. To access your dashboard, please try signing in again and click "Allow" when Google asks for permissions.'
-                    : `Sign-in failed: ${errorDetails || error}`
-                  }
-                </p>
+                {error === 'redirect_mismatch' ? (
+                  <div>
+                    <p className="font-medium mb-2">The Replit callback URL needs to be added to Google Cloud Console:</p>
+                    <div className="bg-gray-100 p-2 rounded font-mono text-xs break-all">
+                      {callbackUrl}
+                    </div>
+                    <p className="mt-2">
+                      1. Go to Google Cloud Console → APIs & Credentials
+                      <br />
+                      2. Edit your OAuth 2.0 Client ID: 372720245891-dtpkbj63rl2hju5vo2uorldivgurg6fh
+                      <br />
+                      3. Add the URL above to "Authorized redirect URIs"
+                      <br />
+                      4. Save and try signing in again
+                    </p>
+                  </div>
+                ) : (
+                  <p>
+                    {errorDetails === 'The user did not consent' 
+                      ? 'You cancelled the Google sign-in process. To access your dashboard, please try signing in again and click "Allow" when Google asks for permissions.'
+                      : `Sign-in failed: ${errorDetails || error}`
+                    }
+                  </p>
+                )}
               </div>
               <div className="mt-4">
                 <div className="-mx-2 -my-1.5 flex">
