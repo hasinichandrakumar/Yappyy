@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -16,6 +16,8 @@ import SimpleProfileForm from "@/components/SimpleProfileForm";
 import AppSettings from "@/components/AppSettings";
 import PrivacySettings from "@/components/PrivacySettings";
 import FunctionalProgressTracker from "@/components/FunctionalProgressTracker";
+import WelcomeMessage from "@/components/WelcomeMessage";
+import ReturningUserWelcome from "@/components/ReturningUserWelcome";
 import yappyyLogoPath from '@assets/Untitled_design-11600-removebg-preview_1749744306540.png';
 
 export default function Dashboard() {
@@ -23,9 +25,22 @@ export default function Dashboard() {
   const [showProfile, setShowProfile] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [showReturningWelcome, setShowReturningWelcome] = useState(false);
   const { user } = useAuth();
 
   const { logout } = useAuth();
+
+  // Check if user needs welcome message
+  useEffect(() => {
+    if (user?.isAuthenticated) {
+      if (user.isNewUser && !user.welcomeMessageShown) {
+        setShowWelcome(true);
+      } else if (!user.isNewUser && !user.welcomeMessageShown) {
+        setShowReturningWelcome(true);
+      }
+    }
+  }, [user]);
 
   const handleProfileClick = () => {
     setShowProfile(true);
@@ -199,6 +214,17 @@ export default function Dashboard() {
           <PrivacySettings />
         </DialogContent>
       </Dialog>
+
+      {/* Welcome Messages */}
+      <WelcomeMessage 
+        isOpen={showWelcome} 
+        onClose={() => setShowWelcome(false)} 
+      />
+      
+      <ReturningUserWelcome 
+        isOpen={showReturningWelcome} 
+        onClose={() => setShowReturningWelcome(false)} 
+      />
     </div>
   );
 }

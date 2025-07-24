@@ -145,6 +145,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Welcome message completion
+  app.post('/api/user/welcome-complete', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      await storage.updateUserProfile(userId, { 
+        welcomeMessageShown: true,
+        isNewUser: false 
+      });
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error marking welcome complete:", error);
+      res.status(500).json({ message: "Failed to update welcome status" });
+    }
+  });
+
+  // Daily goals endpoint
+  app.get('/api/daily-goals', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const goals = await storage.getUserDailyGoals(userId);
+      res.json(goals);
+    } catch (error) {
+      console.error("Error fetching daily goals:", error);
+      res.status(500).json({ message: "Failed to fetch daily goals" });
+    }
+  });
+
+  // Update goal progress
+  app.patch('/api/daily-goals/:goalId/progress', isAuthenticated, async (req: any, res) => {
+    try {
+      const { goalId } = req.params;
+      const { progress } = req.body;
+      const updatedGoal = await storage.updateDailyGoal(parseInt(goalId), { 
+        currentProgress: progress 
+      });
+      res.json(updatedGoal);
+    } catch (error) {
+      console.error("Error updating goal progress:", error);
+      res.status(500).json({ message: "Failed to update goal progress" });
+    }
+  });
+
+  // User statistics endpoint
+  app.get('/api/user/stats', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const sessions = await storage.getUserPracticeSessions(userId);
+      const streaks = await storage.getUserStreaks(userId);
+      
+      const stats = {
+        totalSessions: sessions.length,
+        totalMinutes: sessions.reduce((total, session) => {
+          return total + (session.durationSeconds ? Math.round(session.durationSeconds / 60) : 0);
+        }, 0),
+        currentStreak: streaks.find(s => s.streakType === 'daily_practice')?.currentCount || 0,
+        averageConfidence: sessions.length > 0 
+          ? sessions.reduce((total, session) => total + (session.overallScore || 0), 0) / sessions.length 
+          : 0
+      };
+      
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching user stats:", error);
+      res.status(500).json({ message: "Failed to fetch user stats" });
+    }
+  });
+
   // Template personalization route
   app.post('/api/openai/personalize-template', async (req: any, res) => {
     try {

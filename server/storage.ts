@@ -166,14 +166,90 @@ export class DatabaseStorage implements IStorage {
             welcomeMessageShown: isNewUser ? false : existingUser?.welcomeMessageShown
           })
           .onConflictDoUpdate({
-        target: users.id,
-        set: {
-          ...userData,
-          updatedAt: new Date(),
-        },
-      })
-      .returning();
-    return user;
+            target: users.id,
+            set: {
+              ...userData,
+              updatedAt: new Date(),
+              // Don't overwrite these fields on existing users
+              isNewUser: existingUser ? existingUser.isNewUser : isNewUser,
+              firstLoginAt: existingUser?.firstLoginAt || new Date(),
+              welcomeMessageShown: existingUser?.welcomeMessageShown || false
+            },
+          })
+          .returning()
+      );
+      
+      console.log('✅ User upserted successfully:', user.email, isNewUser ? '(NEW USER)' : '(EXISTING USER)');
+      
+      // If this is a new user, initialize their AI coach profile
+      if (isNewUser) {
+        await this.initializeNewUserData(user.id);
+      }
+      
+      return user;
+    });
+  }
+
+  // Initialize all data for a new user to ensure fresh start
+  async initializeNewUserData(userId: string): Promise<void> {
+    console.log('🔄 Initializing new user data for:', userId);
+    
+    try {
+      // Initialize AI coach profile with fresh neural network
+      await resilientQuery(
+        () => db
+          .insert(aiCoachProfiles)
+          .values({
+            userId,
+            personalityVector: JSON.stringify(Array(16).fill(0.5)), // Fresh neutral personality
+            learningPatterns: JSON.stringify({}),
+            adaptiveStrategies: JSON.stringify([]),
+            confidenceLevel: 0.6, // Starting confidence
+            trainingIterations: 0,
+            lastUpdated: new Date()
+          })
+          .onConflictDoNothing()
+      );
+
+      // Initialize user learning insights
+      await resilientQuery(
+        () => db
+          .insert(userLearningInsights)
+          .values({
+            userId,
+            insights: JSON.stringify({
+              focusAreas: [],
+              strengths: [],
+              challenges: [],
+              recommendations: ["Start with your first practice session to begin personalized learning!"]
+            }),
+            confidenceScore: 0.6,
+            adaptationLevel: 'beginner',
+            lastAnalysis: new Date()
+          })
+          .onConflictDoNothing()
+      );
+
+      // Create initial daily goals for new user
+      await this.generateDailyGoalsForUser(userId);
+
+      console.log('✅ New user data initialized for:', userId);
+    } catch (error) {
+      console.error('❌ Error initializing new user data:', error);
+    }
+  }
+
+  async updateUserProfile(userId: string, updates: Partial<UpsertUser>): Promise<User> {
+    return withRetry(async () => {
+      const [user] = await resilientQuery(
+        () => db
+          .update(users)
+          .set({ ...updates, updatedAt: new Date() })
+          .where(eq(users.id, userId))
+          .returning()
+      );
+      return user;
+    });
   }
 
   // Practice session operations
