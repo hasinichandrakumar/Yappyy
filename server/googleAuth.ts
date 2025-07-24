@@ -112,8 +112,13 @@ export async function setupGoogleAuth(app: Express) {
       console.log('✅ OAuth callback successful for user:', (req.user as any)?.email);
       console.log('✅ Session ID:', req.sessionID);
       
-      // Redirect with authentication token for cross-domain session transfer
-      res.redirect(`https://yappyy.com/dashboard?auth=${authToken}`);
+      // For development, redirect to local dashboard
+      if (process.env.NODE_ENV === 'development') {
+        res.redirect(`http://localhost:5000/dashboard?auth=${authToken}`);
+      } else {
+        // For production, redirect to yappyy.com dashboard
+        res.redirect(`https://yappyy.com/dashboard?auth=${authToken}`);
+      }
     }
   );
 

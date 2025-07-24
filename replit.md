@@ -457,7 +457,8 @@ The application now provides complete video recording and playback functionality
 3. Update OAuth consent screen application domain to `yappyy.com`
 4. Ensure redirect URIs include `https://yappyy.com/oauth2callback`
 
-**Current Issue**: "Service not available" error indicates Google Cloud Console configuration incomplete
+**Current Issue**: Authentication successful but redirect to dashboard not working automatically
+**Fix Applied**: Updated OAuth callback to redirect to localhost:5000/dashboard in development mode
 
 ### Previous Open Access Dashboard System - REPLACED ✅ (July 21, 2025)
 - **Replaced with Replit Auth**: Enhanced from open access to proper Replit user authentication

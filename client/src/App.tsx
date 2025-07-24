@@ -38,7 +38,6 @@ function Router() {
   if (!isAuthenticated) {
     return (
       <Switch>
-  
         <Route path="/" component={Home} />
         <Route component={Home} />
       </Switch>
@@ -47,14 +46,14 @@ function Router() {
 
   return (
     <Switch>
-      <Route path="/" component={Home} />
+      <Route path="/" component={Dashboard} />
       <Route path="/landing" component={Home} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/profile" component={UserProfile} />
       <Route path="/profile/:section" component={UserProfile} />
       <Route path="/clubs" component={ClubsHub} />
       <Route path="/logo" component={LogoExport} />
-      <Route path="*" component={Home} />
+      <Route path="*" component={Dashboard} />
     </Switch>
   );
 }
