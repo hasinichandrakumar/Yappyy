@@ -12,6 +12,7 @@ import PersonalizedSpeechDNA from "@/components/PersonalizedSpeechDNA";
 import Enhanced50PlusTemplates from "@/components/Enhanced50PlusTemplates";
 import ImprovedBadgeSystem from "@/components/ImprovedBadgeSystem";
 import EnhancedAnalysisTab from "@/components/EnhancedAnalysisTab";
+import DailyGoalWidget from "@/components/DailyGoalWidget";
 import SimpleProfileForm from "@/components/SimpleProfileForm";
 import AppSettings from "@/components/AppSettings";
 import PrivacySettings from "@/components/PrivacySettings";
@@ -35,14 +36,22 @@ export default function Dashboard() {
   useEffect(() => {
     if (user) {
       if (user.isAuthenticated) {
-        // For authenticated users
-        if (user.isNewUser && !user.welcomeMessageShown) {
+        // For authenticated users - check if they've seen welcome before
+        const hasSeenWelcome = localStorage.getItem(`welcomeShown_${user.id}`);
+        const todayKey = `dailyWelcomeShown_${user.id}_${new Date().toDateString()}`;
+        const hasSeenTodayWelcome = localStorage.getItem(todayKey);
+        
+        if (!hasSeenWelcome) {
+          // First time authenticated user
           setShowWelcome(true);
-        } else if (!user.isNewUser && !user.welcomeMessageShown) {
+          localStorage.setItem(`welcomeShown_${user.id}`, 'true');
+        } else if (!hasSeenTodayWelcome) {
+          // Returning authenticated user - show daily welcome with goals
           setShowReturningWelcome(true);
+          localStorage.setItem(todayKey, 'true');
         }
       } else {
-        // For guest users - always show welcome
+        // For guest users - always show welcome for new users
         if (user.isNewUser && !user.welcomeMessageShown) {
           setShowWelcome(true);
         }
@@ -141,7 +150,7 @@ export default function Dashboard() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-2 lg:grid-cols-5 gap-2 mb-8 h-auto p-2 bg-white border border-gray-200 shadow-sm rounded-xl">
+          <TabsList className="grid grid-cols-2 lg:grid-cols-6 gap-2 mb-8 h-auto p-2 bg-white border border-gray-200 shadow-sm rounded-xl">
             <TabsTrigger 
               value="practice" 
               className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
@@ -171,6 +180,13 @@ export default function Dashboard() {
               <span>Templates</span>
             </TabsTrigger>
             <TabsTrigger 
+              value="goals" 
+              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
+            >
+              <Target className="w-5 h-5" />
+              <span>Goals</span>
+            </TabsTrigger>
+            <TabsTrigger 
               value="achievements" 
               className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
             >
@@ -193,6 +209,10 @@ export default function Dashboard() {
 
           <TabsContent value="templates" className="space-y-6">
             <Enhanced50PlusTemplates />
+          </TabsContent>
+
+          <TabsContent value="goals" className="space-y-6">
+            <DailyGoalWidget />
           </TabsContent>
 
           <TabsContent value="achievements" className="space-y-6">
