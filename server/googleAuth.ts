@@ -104,17 +104,42 @@ export async function setupGoogleAuth(app: Express) {
   );
 
   // Handle the OAuth callback route - redirect to dashboard
-  app.get('/oauth2callback',
-    passport.authenticate('google', { failureRedirect: '/?error=oauth_failed' }),
-    (req, res) => {
-      console.log('✅ OAuth callback successful for user:', (req.user as any)?.email);
-      console.log('✅ Session ID:', req.sessionID);
-      console.log('✅ Redirecting to dashboard...');
-      
-      // Simply redirect to dashboard - session is already established
-      res.redirect('/dashboard');
+  app.get('/oauth2callback', (req, res, next) => {
+    console.log('🔄 OAuth callback received with query:', req.query);
+    
+    // Handle OAuth errors from Google
+    if (req.query.error) {
+      console.error('❌ OAuth error from Google:', req.query.error);
+      return res.redirect('/?error=oauth_failed');
     }
-  );
+    
+    // Process OAuth callback
+    passport.authenticate('google', (err: any, user: any, info: any) => {
+      if (err) {
+        console.error('❌ OAuth authentication error:', err);
+        return res.redirect('/?error=auth_failed');
+      }
+      
+      if (!user) {
+        console.error('❌ OAuth authentication failed - no user:', info);
+        return res.redirect('/?error=no_user');
+      }
+      
+      req.logIn(user, (err) => {
+        if (err) {
+          console.error('❌ Login error:', err);
+          return res.redirect('/?error=login_failed');
+        }
+        
+        console.log('✅ OAuth callback successful for user:', user.email);
+        console.log('✅ Session ID:', req.sessionID);
+        console.log('✅ Redirecting to dashboard...');
+        
+        // Simply redirect to dashboard - session is already established
+        res.redirect('/dashboard');
+      });
+    })(req, res, next);
+  });
 
   // Also handle the original route for compatibility
   app.get('/api/auth/google/callback',
