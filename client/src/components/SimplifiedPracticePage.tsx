@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { SessionDataViewer } from '@/components/SessionDataViewer';
 import { useRoboflowVision } from '@/hooks/useRoboflowVision';
 import { useFacialAnalysis } from '@/hooks/useFacialAnalysis';
+import { useMediaPipeBodyLanguage } from '@/hooks/useMediaPipeBodyLanguage';
 import SessionAnalysisPage from './SessionAnalysisPage';
 import VideoPlaybackViewer from './VideoPlaybackViewer';
 import RecordingLibrary from './RecordingLibrary';
@@ -142,6 +143,19 @@ export default function SimplifiedPracticePage() {
     getAverageFacialMetrics,
     error: facialAnalysisError
   } = useFacialAnalysis();
+
+  // MediaPipe body language analysis integration
+  const {
+    analysis: bodyLanguageAnalysis,
+    startAnalysis: startBodyLanguageAnalysis,
+    stopAnalysis: stopBodyLanguageAnalysis,
+    getAverageMetrics: getAverageBodyLanguageMetrics,
+    isActive: isBodyLanguageActive,
+    currentMetrics: currentBodyLanguageMetrics,
+    frameCount: bodyLanguageFrameCount,
+    processingTime: bodyLanguageProcessingTime,
+    error: bodyLanguageError
+  } = useMediaPipeBodyLanguage();
 
   // Refs
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -1028,14 +1042,18 @@ export default function SimplifiedPracticePage() {
           },
           bodyLanguage: {
             ...prev.bodyLanguage,
-            // Only use real computer vision data, no fake values
-            eyeContactScore: facialAnalysis?.facialMetrics?.communicationSignals?.eyeContactQuality || 
+            // Use MediaPipe body language data as primary source
+            eyeContactScore: currentBodyLanguageMetrics?.eyeContact?.engagement || 
+              facialAnalysis?.facialMetrics?.communicationSignals?.eyeContactQuality || 
               roboflowAnalysis?.facial?.eyeContact || prev.bodyLanguage.eyeContactScore,
-            gestureEffectiveness: roboflowAnalysis?.gestures?.effectiveness || prev.bodyLanguage.gestureEffectiveness,
-            postureConfidence: roboflowAnalysis?.posture?.confidence || prev.bodyLanguage.postureConfidence,
+            gestureEffectiveness: currentBodyLanguageMetrics?.gestures?.naturalness || 
+              roboflowAnalysis?.gestures?.effectiveness || prev.bodyLanguage.gestureEffectiveness,
+            postureConfidence: currentBodyLanguageMetrics?.posture?.confidence || 
+              roboflowAnalysis?.posture?.confidence || prev.bodyLanguage.postureConfidence,
             facialExpressions: facialAnalysis?.facialMetrics?.emotionalExpression?.authenticity || 
               roboflowAnalysis?.facial?.engagement || prev.bodyLanguage.facialExpressions,
-            overallPresence: facialAnalysis?.facialMetrics?.overallPresence?.charisma || 
+            overallPresence: currentBodyLanguageMetrics?.overall?.presence || 
+              facialAnalysis?.facialMetrics?.overallPresence?.charisma || 
               roboflowAnalysis?.overall?.presence || prev.bodyLanguage.overallPresence
           }
         }));
@@ -1056,6 +1074,18 @@ export default function SimplifiedPracticePage() {
           console.log('🎭 Facial analysis started');
         } catch (error) {
           console.warn('⚠️ Facial analysis unavailable, using fallback');
+        }
+      }
+
+      // Start MediaPipe body language analysis
+      if (videoRef.current) {
+        try {
+          const bodyLanguageStarted = await startBodyLanguageAnalysis(videoRef.current);
+          if (bodyLanguageStarted) {
+            console.log('🤖 MediaPipe body language analysis started');
+          }
+        } catch (error) {
+          console.warn('⚠️ MediaPipe body language analysis unavailable:', error);
         }
       }
 
@@ -1136,6 +1166,14 @@ export default function SimplifiedPracticePage() {
       console.log('🎭 Facial analysis stopped');
     } catch (error) {
       console.warn('⚠️ Error stopping facial analysis');
+    }
+
+    // Stop MediaPipe body language analysis
+    try {
+      stopBodyLanguageAnalysis();
+      console.log('🤖 MediaPipe body language analysis stopped');
+    } catch (error) {
+      console.warn('⚠️ Error stopping body language analysis');
     }
 
     setIsRecording(false);
@@ -1229,8 +1267,8 @@ export default function SimplifiedPracticePage() {
         bodyLanguageMetrics: {
           eyeContact: realEyeContact,
           confidence: hasRealSpeech ? metrics.confidence : 0,
-          posture: hasRealSpeech ? (metrics.bodyLanguage?.postureConfidence || 70) : 0,
-          gestures: hasRealSpeech ? (metrics.bodyLanguage?.gestureEffectiveness || 75) : 0
+          posture: hasRealSpeech ? (currentBodyLanguageMetrics?.posture?.confidence || metrics.bodyLanguage?.postureConfidence || 0) : 0,
+          gestures: hasRealSpeech ? (currentBodyLanguageMetrics?.gestures?.naturalness || metrics.bodyLanguage?.gestureEffectiveness || 0) : 0
         },
         persuasivenessScore: realConfidenceScore / 100,
         emotionalIntelligence: {
@@ -1649,6 +1687,12 @@ export default function SimplifiedPracticePage() {
                         <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
                           <Activity className="w-3 h-3 mr-1" />
                           FACIAL ANALYSIS ACTIVE
+                        </Badge>
+                      )}
+                      {isBodyLanguageActive && (
+                        <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
+                          <Activity className="w-3 h-3 mr-1" />
+                          MEDIAPIPE BODY LANGUAGE
                         </Badge>
                       )}
                     </div>
