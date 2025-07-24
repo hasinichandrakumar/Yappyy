@@ -64,7 +64,7 @@ export async function setupGoogleAuth(app: Express) {
     passport.use(new GoogleStrategy({
       clientID: GOOGLE_CLIENT_ID,
       clientSecret: GOOGLE_CLIENT_SECRET,
-      callbackURL: 'https://0c7fe059-a7da-4a46-a7cc-18655fec2a24-00-1znejaw22ebqj.picard.replit.dev/api/auth/google/callback'
+      callbackURL: 'https://yappyy.com/oauth2callback'
     }, async (accessToken, refreshToken, profile, done) => {
       try {
         // Create or update user with Google data
