@@ -1403,7 +1403,7 @@ export default function SimplifiedPracticePage() {
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
-                    <h1 className="text-3xl font-bold text-blue-600 cursor-pointer hover:text-blue-700" onClick={() => setIsEditingName(true)}>
+                    <h1 className="text-4xl font-extrabold text-blue-600 cursor-pointer hover:text-blue-700" onClick={() => setIsEditingName(true)}>
                       {sessionName}
                     </h1>
                     <Button variant="ghost" size="sm" onClick={() => setIsEditingName(true)}>
@@ -1426,7 +1426,7 @@ export default function SimplifiedPracticePage() {
                   </div>
                 ) : (
                   <div className="flex items-center gap-2 mt-2">
-                    <p className="text-lg text-gray-600">
+                    <p className="text-lg font-semibold text-gray-700">
                       {sessionPurpose || "Click to set your session goal"}
                     </p>
                     <Button variant="ghost" size="sm" onClick={() => setIsEditingPurpose(true)}>
@@ -1587,8 +1587,8 @@ export default function SimplifiedPracticePage() {
             {/* Live Feedback Insights */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5" />
+                <CardTitle className="text-xl font-bold flex items-center gap-2">
+                  <TrendingUp className="w-6 h-6" />
                   Live Insights
                 </CardTitle>
               </CardHeader>
@@ -1622,12 +1622,12 @@ export default function SimplifiedPracticePage() {
                 <div className="mt-4 pt-4 border-t border-gray-200">
                   <div className="grid grid-cols-2 gap-4 text-center">
                     <div>
-                      <div className="text-2xl font-bold text-blue-600">{metrics.wordsPerMinute}</div>
-                      <div className="text-xs text-gray-500">WPM</div>
+                      <div className="text-3xl font-extrabold text-blue-600">{metrics.wordsPerMinute}</div>
+                      <div className="text-sm font-semibold text-gray-600">WPM</div>
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-red-600">{metrics.fillerWordCount}</div>
-                      <div className="text-xs text-gray-500">Fillers</div>
+                      <div className="text-3xl font-extrabold text-red-600">{metrics.fillerWordCount}</div>
+                      <div className="text-sm font-semibold text-gray-600">Fillers</div>
                     </div>
                   </div>
                 </div>
@@ -1637,25 +1637,25 @@ export default function SimplifiedPracticePage() {
             {/* Quick Stats */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Session Stats</CardTitle>
+                <CardTitle className="text-xl font-bold">Session Stats</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Words Per Minute</span>
-                  <span className="font-semibold">{metrics.wordsPerMinute}</span>
+                  <span className="text-sm font-medium text-gray-600">Words Per Minute</span>
+                  <span className="font-bold">{metrics.wordsPerMinute}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Filler Words</span>
-                  <span className="font-semibold">{metrics.fillerWordCount}</span>
+                  <span className="text-sm font-medium text-gray-600">Filler Words</span>
+                  <span className="font-bold">{metrics.fillerWordCount}</span>
                 </div>
 
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Total Words</span>
-                  <span className="font-semibold">{transcript.split(' ').filter(w => w.length > 0).length}</span>
+                  <span className="text-sm font-medium text-gray-600">Total Words</span>
+                  <span className="font-bold">{transcript.split(' ').filter(w => w.length > 0).length}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Duration</span>
-                  <span className="font-semibold">
+                  <span className="text-sm font-medium text-gray-600">Duration</span>
+                  <span className="font-bold">
                     {Math.floor(sessionDuration / 60)}:{(sessionDuration % 60).toString().padStart(2, '0')}
                   </span>
                 </div>

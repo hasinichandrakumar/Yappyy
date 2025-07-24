@@ -83,9 +83,9 @@ export default function ReturningUserWelcome({ isOpen, onClose }: ReturningUserW
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="flex items-center space-x-2">
-            <Trophy className="h-6 w-6 text-purple-600" />
-            <span>Welcome Back, {user?.name}!</span>
+          <DialogTitle className="flex items-center space-x-2 text-2xl font-bold">
+            <Trophy className="h-7 w-7 text-purple-600" />
+            <span className="font-extrabold text-gray-900">Welcome Back, {user?.name}!</span>
           </DialogTitle>
         </DialogHeader>
         
@@ -96,22 +96,22 @@ export default function ReturningUserWelcome({ isOpen, onClose }: ReturningUserW
               <CardContent className="pt-4">
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div>
-                    <div className="text-2xl font-bold text-purple-600">
+                    <div className="text-3xl font-extrabold text-purple-600">
                       {userStats.totalSessions || 0}
                     </div>
-                    <div className="text-sm text-gray-600">Total Sessions</div>
+                    <div className="text-sm font-semibold text-gray-700">Total Sessions</div>
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-blue-600">
+                    <div className="text-3xl font-extrabold text-blue-600">
                       {userStats.totalMinutes || 0}
                     </div>
-                    <div className="text-sm text-gray-600">Minutes Practiced</div>
+                    <div className="text-sm font-semibold text-gray-700">Minutes Practiced</div>
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-green-600">
+                    <div className="text-3xl font-extrabold text-green-600">
                       {userStats.currentStreak || 0}
                     </div>
-                    <div className="text-sm text-gray-600">Day Streak</div>
+                    <div className="text-sm font-semibold text-gray-700">Day Streak</div>
                   </div>
                 </div>
               </CardContent>
@@ -120,9 +120,9 @@ export default function ReturningUserWelcome({ isOpen, onClose }: ReturningUserW
 
           {/* Today's Goals */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
-              <Target className="h-5 w-5 text-purple-600 mr-2" />
-              Today's Goals
+            <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center">
+              <Target className="h-6 w-6 text-purple-600 mr-2" />
+              <span className="font-extrabold">Today's Goals</span>
             </h3>
             
             {isLoading ? (

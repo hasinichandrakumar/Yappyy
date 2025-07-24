@@ -67,11 +67,27 @@
 }
 
 /* Modern & Friendly Bold Font System (Poppins) */
+* {
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
 .font-heading {
   font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
   font-weight: 700;
   letter-spacing: -0.015em;
   line-height: 1.2;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.font-extrabold {
+  font-weight: 800;
 }
 
 .font-display {

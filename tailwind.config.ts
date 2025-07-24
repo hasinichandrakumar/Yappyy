@@ -6,9 +6,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        'sans': ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        'display': ['Poppins', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        'body': ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        'sans': ['Poppins', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        'display': ['Poppins', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        'body': ['Poppins', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         'mono': ['ui-monospace', 'SFMono-Regular', 'Monaco', 'Consolas', 'monospace'],
         // Popular font options you can easily switch to:
         'inter': ['Inter', 'sans-serif'],

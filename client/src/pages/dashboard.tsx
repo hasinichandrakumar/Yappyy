@@ -89,8 +89,8 @@ export default function Dashboard() {
             <div className="flex items-center space-x-3">
               <img src={yappyyLogoPath} alt="Yappyy" className="h-8" />
               <div className="hidden sm:block">
-                <h1 className="text-xl font-semibold text-gray-900">Public Speaking Coach</h1>
-                <p className="text-sm text-gray-500">AI-Powered Speech Training Platform</p>
+                <h1 className="text-xl font-bold text-gray-900">Public Speaking Coach</h1>
+                <p className="text-sm font-medium text-gray-600">AI-Powered Speech Training Platform</p>
               </div>
             </div>
             
@@ -152,45 +152,45 @@ export default function Dashboard() {
           <TabsList className="grid grid-cols-2 lg:grid-cols-6 gap-2 mb-8 h-auto p-2 bg-white border border-gray-200 shadow-sm rounded-xl">
             <TabsTrigger 
               value="practice" 
-              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
+              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-semibold rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
             >
               <Mic className="w-5 h-5" />
-              <span>Practice</span>
+              <span className="font-bold">Practice</span>
             </TabsTrigger>
             <TabsTrigger 
               value="analysis" 
-              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
+              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-semibold rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
             >
               <BarChart3 className="w-5 h-5" />
-              <span>Analysis</span>
+              <span className="font-bold">Analysis</span>
             </TabsTrigger>
             <TabsTrigger 
               value="ai-coach" 
-              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
+              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-semibold rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
             >
               <Brain className="w-5 h-5" />
-              <span>AI Coach</span>
+              <span className="font-bold">AI Coach</span>
             </TabsTrigger>
             <TabsTrigger 
               value="templates" 
-              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
+              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-semibold rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
             >
               <FileText className="w-5 h-5" />
-              <span>Templates</span>
+              <span className="font-bold">Templates</span>
             </TabsTrigger>
             <TabsTrigger 
               value="goals" 
-              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
+              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-semibold rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
             >
               <Target className="w-5 h-5" />
-              <span>Goals</span>
+              <span className="font-bold">Goals</span>
             </TabsTrigger>
             <TabsTrigger 
               value="achievements" 
-              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
+              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-semibold rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
             >
               <Trophy className="w-5 h-5" />
-              <span>Progress</span>
+              <span className="font-bold">Progress</span>
             </TabsTrigger>
           </TabsList>
 
