@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { useAuth } from '@/hooks/useAuth';
 import MagicLinkLogin from '@/components/MagicLinkLogin';
-import yappyyLogoPath from '@assets/Y-removebg-preview_1753380214189.png';
+import yappyyLogoPath from '@assets/Y-2-removebg-preview_1753383888231.png';
 
 export default function LoginPage() {
   const [, setLocation] = useLocation();

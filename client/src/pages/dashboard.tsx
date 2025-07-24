@@ -19,7 +19,7 @@ import PrivacySettings from "@/components/PrivacySettings";
 import FunctionalProgressTracker from "@/components/FunctionalProgressTracker";
 import WelcomeMessage from "@/components/WelcomeMessage";
 import ReturningUserWelcome from "@/components/ReturningUserWelcome";
-import yappyyLogoPath from '@assets/Y-removebg-preview_1753380214189.png';
+import yappyyLogoPath from '@assets/Y-2-removebg-preview_1753383888231.png';
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("practice");
