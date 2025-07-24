@@ -8,7 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { apiRequest } from '@/lib/queryClient';
-import PDFExportControls from '@/components/PDFExportControls';
+
 import { 
   BarChart3, 
   TrendingUp, 
@@ -34,7 +34,6 @@ import {
   Play,
   Pause,
   Trophy,
-  Download,
   Lightbulb,
   Smile,
   Star,
@@ -223,7 +222,7 @@ export default function EnhancedAnalysisTab() {
       <Card className="bg-white/70 backdrop-blur-sm border border-white/30 shadow-xl">
         <Tabs defaultValue="voice" className="w-full">
           <div className="border-b border-slate-200/50 px-6 pt-6">
-            <TabsList className="grid w-full grid-cols-4 bg-slate-100/50 p-1 rounded-xl">
+            <TabsList className="grid w-full grid-cols-3 bg-slate-100/50 p-1 rounded-xl">
               <TabsTrigger value="voice" className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#2563eb] data-[state=active]:to-[#22d3ee] data-[state=active]:text-white data-[state=active]:shadow-lg whitespace-nowrap">
                 <Mic className="h-4 w-4" />
                 <span className="hidden sm:inline">Voice</span>
@@ -235,10 +234,6 @@ export default function EnhancedAnalysisTab() {
               <TabsTrigger value="transcript" className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#2563eb] data-[state=active]:to-[#22d3ee] data-[state=active]:text-white data-[state=active]:shadow-lg whitespace-nowrap">
                 <FileText className="h-4 w-4" />
                 <span className="hidden sm:inline">Transcript</span>
-              </TabsTrigger>
-              <TabsTrigger value="export" className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 data-[state=active]:bg-gradient-to-br data-[state=active]:from-[#2563eb] data-[state=active]:to-[#22d3ee] data-[state=active]:text-white data-[state=active]:shadow-lg whitespace-nowrap">
-                <Download className="h-4 w-4" />
-                <span className="hidden sm:inline">PDF Export</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -1133,23 +1128,7 @@ export default function EnhancedAnalysisTab() {
             )}
           </TabsContent>
 
-          {/* PDF Export Tab */}
-          <TabsContent value="export" className="space-y-6 p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="h-12 w-12 bg-gradient-to-br from-[#2563eb] to-[#22d3ee] rounded-full flex items-center justify-center">
-                <Download className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h3 className="text-2xl font-bold text-slate-900">PDF Export Center</h3>
-                <p className="text-slate-600">Download detailed analysis reports and performance summaries</p>
-              </div>
-            </div>
 
-            <PDFExportControls 
-              sessions={typedSessions} 
-              selectedSession={selectedSession !== 'all' ? typedSessions.find(s => s.id.toString() === selectedSession) : null}
-            />
-          </TabsContent>
         </Tabs>
       </Card>
     </div>
