@@ -148,7 +148,7 @@ export default function Dashboard() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-2 lg:grid-cols-6 gap-2 mb-8 h-auto p-2 bg-white border border-gray-200 shadow-sm rounded-xl">
+          <TabsList className="grid grid-cols-2 lg:grid-cols-5 gap-2 mb-8 h-auto p-2 bg-white border border-gray-200 shadow-sm rounded-xl">
             <TabsTrigger 
               value="practice" 
               className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-semibold rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
@@ -177,13 +177,7 @@ export default function Dashboard() {
               <FileText className="w-5 h-5" />
               <span className="font-bold">Templates</span>
             </TabsTrigger>
-            <TabsTrigger 
-              value="goals" 
-              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-semibold rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
-            >
-              <Target className="w-5 h-5" />
-              <span className="font-bold">Goals</span>
-            </TabsTrigger>
+
             <TabsTrigger 
               value="achievements" 
               className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-semibold rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
@@ -209,9 +203,7 @@ export default function Dashboard() {
             <Enhanced50PlusTemplates />
           </TabsContent>
 
-          <TabsContent value="goals" className="space-y-6">
-            <DailyGoalWidget />
-          </TabsContent>
+
 
           <TabsContent value="achievements" className="space-y-6">
             <FunctionalProgressTracker />
