@@ -429,33 +429,35 @@ The AI coach is now a true machine learning system with individual neural networ
 
 The application now provides complete video recording and playback functionality for comprehensive speech practice analysis, enabling users to review their sessions with full visual context alongside AI-powered insights.
 
-### Universal Google OAuth Authentication System - COMPLETED ✅ (January 23, 2025)
+### Universal Google OAuth Authentication System - IN PROGRESS ⚠️ (January 23, 2025)
 - **Universal Public Access**: Anyone with a Google account can sign in and use the platform
-- **No Restrictions**: No domain limitations, whitelist requirements, or access controls
+- **Cross-Domain Authentication**: Implemented token-based authentication to handle yappyy.com domain redirects
 - **Automatic User Creation**: New users are automatically created when they sign in with Google
 - **Full User Profiles**: Name, email, and profile images from Google accounts
-- **Secure Session Management**: PostgreSQL-backed sessions with HTTPS security
+- **Secure Session Management**: PostgreSQL-backed sessions with cross-domain token authentication
 - **Professional Integration**: Official Google OAuth branding and secure authentication flow
-- **Cross-Platform Access**: Works on any domain with proper redirect URI configuration
-- **OAuth Endpoints**: `/api/auth/google`, `/api/auth/google/callback`, `/api/login`, `/api/logout`
+- **OAuth Endpoints**: `/api/auth/google`, `/api/auth/token`, `/oauth2callback`, `/api/login`, `/api/logout`
 
 ### Google OAuth Configuration (January 23, 2025)
-- **Client ID**: 372720245891-dtpkbj63rl2hju5vo2uorldivgurg6fh.apps.googleusercontent.com ✅ Configured
-- **Client Secret**: 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 ✅ Configured
+- **Client ID**: 372720245891-dtpkbj63rl2hju5vo2uorldivgurg6fh.apps.googleusercontent.com ✅ Configured in code
+- **Client Secret**: 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 ✅ Configured in code
 - **Primary Domain**: https://yappyy.com ✅ Main landing page and OAuth callback
 - **OAuth Callback**: https://yappyy.com/oauth2callback
-- **User Flow**: yappyy.com (landing) → Google OAuth → yappyy.com/dashboard (after login)
-- **Status**: Fully configured for yappyy.com domain-first experience
+- **User Flow**: yappyy.com (landing) → Google OAuth → yappyy.com/dashboard?auth=TOKEN (after login)
+- **Status**: Backend configured, Google Cloud Console setup needed
 
 **OAuth Redirect Configuration**:
-- **Success Redirect**: `https://yappyy.com/dashboard` - Users land here after successful authentication
+- **Success Redirect**: `https://yappyy.com/dashboard?auth=TOKEN` - Token-based cross-domain authentication
 - **Failure Redirect**: `https://yappyy.com/` - Users return to landing page if authentication fails
-- **Callback URL**: `https://yappyy.com/oauth2callback` - Google sends users here first, then redirects to dashboard
+- **Callback URL**: `https://yappyy.com/oauth2callback` - Google sends users here first, then redirects with token
 
-**Google Cloud Console Configuration Needed**:
-1. Set "Authorized domains" to `yappyy.com` 
-2. Update OAuth consent screen application domain to `yappyy.com`
-3. Ensure redirect URIs include `https://yappyy.com/oauth2callback`
+**REQUIRED Google Cloud Console Configuration**:
+1. **CRITICAL**: Add `https://yappyy.com` to "Authorized JavaScript origins" section
+2. Set "Authorized domains" to `yappyy.com` 
+3. Update OAuth consent screen application domain to `yappyy.com`
+4. Ensure redirect URIs include `https://yappyy.com/oauth2callback`
+
+**Current Issue**: "Service not available" error indicates Google Cloud Console configuration incomplete
 
 ### Previous Open Access Dashboard System - REPLACED ✅ (July 21, 2025)
 - **Replaced with Replit Auth**: Enhanced from open access to proper Replit user authentication
