@@ -204,7 +204,7 @@ export default function HomePage() {
             <div className="flex justify-center mb-12">
               <Button 
                 size="lg" 
-                className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white font-button shadow-lg hover:shadow-xl transition-all duration-300 px-8 py-4"
+                className="bg-white hover:bg-gray-50 font-button shadow-lg hover:shadow-xl transition-all duration-300 px-8 py-4 border-0"
                 onClick={() => {
                   if (isAuthenticated) {
                     window.location.href = '/dashboard';
@@ -213,8 +213,10 @@ export default function HomePage() {
                   }
                 }}
               >
-                Start Practicing Now
-                <Mic className="ml-2 h-5 w-5" />
+                <span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent font-bold">
+                  Start Practicing Now
+                </span>
+                <Mic className="ml-2 h-5 w-5 text-blue-600" />
               </Button>
             </div>
 
