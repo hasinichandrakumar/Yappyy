@@ -8,6 +8,8 @@ interface User {
   username: string;
   authType: string;
   isAuthenticated: boolean;
+  isNewUser?: boolean;
+  welcomeMessageShown?: boolean;
   profileImageUrl?: string;
 }
 
@@ -41,9 +43,9 @@ export function useAuth() {
     }
   }, []);
   
-  // Fetch real user data from API - only for Google OAuth authenticated users
+  // Fetch real user data from API - works for both authenticated and guest users
   const { data: userData, isLoading, error } = useQuery({
-    queryKey: ['/api/user/info'],
+    queryKey: ['/api/auth/user'],
     enabled: typeof window !== 'undefined' && !isLoggedOut && window.sessionStorage.getItem('loggedOut') !== 'true'
   });
   

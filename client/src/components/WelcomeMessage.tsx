@@ -20,7 +20,11 @@ export default function WelcomeMessage({ isOpen, onClose }: WelcomeMessageProps)
   const markWelcomeShown = useMutation({
     mutationFn: () => apiRequest('/api/user/welcome-complete', 'POST'),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/user/info'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      onClose();
+    },
+    onError: () => {
+      // For guests, just close the welcome without marking as shown
       onClose();
     }
   });

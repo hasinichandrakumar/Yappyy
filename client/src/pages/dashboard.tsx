@@ -31,13 +31,21 @@ export default function Dashboard() {
 
   const { logout } = useAuth();
 
-  // Check if user needs welcome message
+  // Check if user needs welcome message - show for both authenticated and guest users
   useEffect(() => {
-    if (user?.isAuthenticated) {
-      if (user.isNewUser && !user.welcomeMessageShown) {
-        setShowWelcome(true);
-      } else if (!user.isNewUser && !user.welcomeMessageShown) {
-        setShowReturningWelcome(true);
+    if (user) {
+      if (user.isAuthenticated) {
+        // For authenticated users
+        if (user.isNewUser && !user.welcomeMessageShown) {
+          setShowWelcome(true);
+        } else if (!user.isNewUser && !user.welcomeMessageShown) {
+          setShowReturningWelcome(true);
+        }
+      } else {
+        // For guest users - always show welcome
+        if (user.isNewUser && !user.welcomeMessageShown) {
+          setShowWelcome(true);
+        }
       }
     }
   }, [user]);
