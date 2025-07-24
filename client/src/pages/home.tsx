@@ -193,7 +193,7 @@ export default function HomePage() {
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-5xl md:text-7xl font-display text-white mb-6 font-bold">
+            <h1 className="text-6xl md:text-8xl font-display text-white mb-6 font-bold">
               Talk Smart.
               <br />
               Talk Yappy.
@@ -213,7 +213,7 @@ export default function HomePage() {
                   }
                 }}
               >
-                <span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent font-bold">
+                <span className="bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 bg-clip-text text-transparent font-bold animate-gradient-x">
                   Start Practicing Now
                 </span>
                 <Mic className="ml-2 h-5 w-5 text-blue-600" />
