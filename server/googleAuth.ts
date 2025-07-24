@@ -64,12 +64,10 @@ export async function setupGoogleAuth(app: Express) {
     done(null, user);
   });
 
-  // Google OAuth Strategy - Custom domain callback
+  // Google OAuth Strategy - yappyy.com domain callback
   if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
-    // Use Replit dev domain to avoid localhost access issues
-    const callbackURL = process.env.REPLIT_DEV_DOMAIN 
-      ? `https://${process.env.REPLIT_DEV_DOMAIN}/oauth2callback`
-      : "https://yappyy.com/oauth2callback";
+    // Use yappyy.com domain for OAuth callback
+    const callbackURL = "https://yappyy.com/oauth2callback";
       
     console.log('🔧 Google OAuth Strategy Configuration:');
     console.log('  - Client ID:', GOOGLE_CLIENT_ID?.substring(0, 20) + '...');
@@ -124,11 +122,11 @@ export async function setupGoogleAuth(app: Express) {
       // Special handling for redirect_uri_mismatch
       if (req.query.error === 'redirect_uri_mismatch') {
         console.error('❌ Redirect URI mismatch - callback URL not authorized in Google Cloud Console');
-        console.error('❌ Current callback URL:', `https://${process.env.REPLIT_DEV_DOMAIN}/oauth2callback`);
-        return res.redirect(`/?error=redirect_mismatch&callback_url=${encodeURIComponent(`https://${process.env.REPLIT_DEV_DOMAIN}/oauth2callback`)}`);
+        console.error('❌ Current callback URL: https://yappyy.com/oauth2callback');
+        return res.redirect(`/?error=redirect_mismatch&callback_url=${encodeURIComponent('https://yappyy.com/oauth2callback')}`);
       }
       
-      return res.redirect(`/?error=oauth_failed&details=${encodeURIComponent(req.query.error_description || req.query.error)}`);
+      return res.redirect(`/?error=oauth_failed&details=${encodeURIComponent(String(req.query.error_description || req.query.error))}`);
     }
     
     // Process OAuth callback
