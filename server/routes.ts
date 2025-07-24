@@ -791,8 +791,11 @@ CRITICAL: Evaluate how well this speech achieved its stated PURPOSE. Analyze the
     }
   });
 
-  // Comprehensive filler word detection endpoint
-  app.post('/api/analyze-filler-words', async (req: any, res) => {
+  // Removed filler word analytics endpoint per user request
+  // Live detection remains active during recording but no post-session analytics
+  
+  // Get user practice sessions with resilient error handling
+  app.get("/api/practice-sessions", async (req: any, res) => {
     try {
       const { transcript, duration = 10 } = req.body;
       
