@@ -44,12 +44,9 @@ export default function ProfileLayout({ children }: ProfileLayoutProps) {
                 </Button>
               </Link>
               <div className="flex items-center space-x-3">
-                <img
-                  src={yappyyLogo}
-                  alt="YAPPYY Logo"
-                  className="w-8 h-8 rounded-lg"
-                />
-                <h1 className="text-xl font-semibold text-gray-900">YAPPYY</h1>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
+                  Yappyy
+                </h1>
               </div>
             </div>
             

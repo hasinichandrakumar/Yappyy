@@ -87,10 +87,9 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
-              <img src={yappyyLogoPath} alt="Yappyy" className="h-8" />
-              <div className="hidden sm:block">
-                {/* Header text removed per user request */}
-              </div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
+                Yappyy
+              </h1>
             </div>
             
             {/* Profile Section */}

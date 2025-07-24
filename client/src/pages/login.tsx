@@ -37,10 +37,9 @@ export default function LoginPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <img src={yappyyLogoPath} alt="Yappyy" className="h-8" />
-              <div className="hidden sm:block ml-3">
-                {/* Header text removed per user request */}
-              </div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
+                Yappyy
+              </h1>
             </div>
           </div>
         </div>
