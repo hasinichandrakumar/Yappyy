@@ -158,7 +158,7 @@ export async function sendMagicLinkEmail(email: string, token: string): Promise<
               <h1 style="color: #2563eb; font-size: 32px; margin: 0; background: linear-gradient(135deg, #2563eb 0%, #22d3ee 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
                 Yappyy
               </h1>
-              <p style="color: #6b7280; font-size: 16px; margin: 5px 0 0 0;">AI-Powered Speech Training Platform</p>
+              {/* Platform subtitle removed per user request */}
             </div>
             
             <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">

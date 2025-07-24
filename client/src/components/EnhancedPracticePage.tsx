@@ -2124,7 +2124,7 @@ export default function EnhancedPracticePage() {
                         {/* Advanced Coaching Test Button */}
                         <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
                           <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-medium text-sm">Advanced Public Speaking Coach</h4>
+                            <h4 className="font-medium text-sm">Advanced AI Coach</h4>
                             <Badge variant="secondary">Neural Network</Badge>
                           </div>
                           <p className="text-xs text-gray-600 mb-3">

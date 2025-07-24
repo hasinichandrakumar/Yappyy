@@ -39,8 +39,7 @@ export default function LoginPage() {
             <div className="flex items-center">
               <img src={yappyyLogoPath} alt="Yappyy" className="h-8" />
               <div className="hidden sm:block ml-3">
-                <h1 className="text-xl font-semibold text-gray-900">Public Speaking Coach</h1>
-                <p className="text-sm text-gray-500">AI-Powered Speech Training Platform</p>
+                {/* Header text removed per user request */}
               </div>
             </div>
           </div>

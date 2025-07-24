@@ -579,7 +579,7 @@ export default function HomePage() {
             <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 md:p-12 shadow-xl border border-blue-200">
               <div className="space-y-6 text-lg text-slate-700 leading-relaxed">
                 <p className="text-xl md:text-2xl font-medium text-slate-800">
-                  Our AI public speaking coach isn't just about giving speeches — it's about giving kids the courage to stand up, speak out, and share their ideas with the world.
+                  Our AI coach isn't just about giving speeches — it's about giving kids the courage to stand up, speak out, and share their ideas with the world.
                 </p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
