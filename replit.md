@@ -452,13 +452,17 @@ The application now provides complete video recording and playback functionality
 - **Callback URL**: `https://yappyy.com/oauth2callback` - Google sends users here first, then redirects with token
 
 **REQUIRED Google Cloud Console Configuration**:
-1. **CRITICAL**: Add `https://yappyy.com` to "Authorized JavaScript origins" section
+1. **CRITICAL**: Add both `https://yappyy.com` AND `http://localhost:5000` to "Authorized JavaScript origins" section
 2. Set "Authorized domains" to `yappyy.com` 
 3. Update OAuth consent screen application domain to `yappyy.com`
-4. Ensure redirect URIs include `https://yappyy.com/oauth2callback`
+4. **CRITICAL**: Add BOTH redirect URIs:
+   - `https://yappyy.com/oauth2callback` (for production)
+   - `http://localhost:5000/oauth2callback` (for development)
 
-**Current Issue**: Authentication successful but redirect to dashboard not working automatically
-**Fix Applied**: Updated OAuth callback to redirect to localhost:5000/dashboard in development mode
+**Latest Fix Applied**: 
+✓ Updated OAuth callback URL to use localhost:5000 in development mode
+✓ Fixed redirect to use relative path `/dashboard?auth=TOKEN` for better compatibility
+✓ Simplified authentication flow to work on current domain
 
 ### Previous Open Access Dashboard System - REPLACED ✅ (July 21, 2025)
 - **Replaced with Replit Auth**: Enhanced from open access to proper Replit user authentication

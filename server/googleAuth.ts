@@ -66,10 +66,15 @@ export async function setupGoogleAuth(app: Express) {
 
   // Google OAuth Strategy - Custom domain callback
   if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
+    // Use localhost callback in development for easier testing
+    const callbackURL = process.env.NODE_ENV === 'development' 
+      ? "http://localhost:5000/oauth2callback"
+      : "https://yappyy.com/oauth2callback";
+      
     passport.use(new GoogleStrategy({
       clientID: GOOGLE_CLIENT_ID,
       clientSecret: GOOGLE_CLIENT_SECRET,
-      callbackURL: 'https://yappyy.com/oauth2callback',
+      callbackURL: callbackURL,
       scope: ['profile', 'email']
     }, async (accessToken, refreshToken, profile, done) => {
       try {
@@ -100,7 +105,7 @@ export async function setupGoogleAuth(app: Express) {
 
   // Handle the OAuth callback route - redirect to yappyy.com/dashboard
   app.get('/oauth2callback',
-    passport.authenticate('google', { failureRedirect: 'https://yappyy.com/' }),
+    passport.authenticate('google', { failureRedirect: '/' }),
     (req, res) => {
       // Create a one-time token for cross-domain authentication
       const authToken = Buffer.from(JSON.stringify({
@@ -112,13 +117,8 @@ export async function setupGoogleAuth(app: Express) {
       console.log('✅ OAuth callback successful for user:', (req.user as any)?.email);
       console.log('✅ Session ID:', req.sessionID);
       
-      // For development, redirect to local dashboard
-      if (process.env.NODE_ENV === 'development') {
-        res.redirect(`http://localhost:5000/dashboard?auth=${authToken}`);
-      } else {
-        // For production, redirect to yappyy.com dashboard
-        res.redirect(`https://yappyy.com/dashboard?auth=${authToken}`);
-      }
+      // Redirect to dashboard after successful authentication
+      res.redirect(`/dashboard?auth=${authToken}`);
     }
   );
 
