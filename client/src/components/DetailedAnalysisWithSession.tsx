@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   User, 
@@ -20,7 +22,8 @@ import {
   Target,
   Zap,
   Play,
-  FileText
+  FileText,
+  Video
 } from "lucide-react";
 import SessionSelector from "./SessionSelector";
 import SessionRecordingPlayer from "./SessionRecordingPlayer";
@@ -327,10 +330,52 @@ export default function DetailedAnalysisWithSession() {
           <TabsContent value="transcript" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MessageSquare className="h-5 w-5" />
-                  Session Transcript
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <MessageSquare className="h-5 w-5" />
+                    Session Transcript
+                  </CardTitle>
+                  {(selectedSession.videoUrl || selectedSession.recordingUrl || selectedSession.videoData) && (
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="flex items-center gap-2"
+                        >
+                          <Video className="h-4 w-4" />
+                          Rewatch Video
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-4xl w-full">
+                        <DialogHeader>
+                          <DialogTitle>Session Video Playback</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div className="relative bg-black rounded-lg overflow-hidden">
+                            <video
+                              className="w-full h-96 object-contain"
+                              controls
+                              preload="metadata"
+                            >
+                              <source src={selectedSession.videoUrl || selectedSession.recordingUrl} type="video/mp4" />
+                              <source src={selectedSession.videoUrl || selectedSession.recordingUrl} type="video/webm" />
+                              Your browser does not support video playback.
+                            </video>
+                          </div>
+                          {selectedSession.transcript && (
+                            <div className="bg-gray-50 p-4 rounded-lg max-h-32 overflow-y-auto">
+                              <h4 className="font-medium text-sm mb-2">Session Transcript:</h4>
+                              <p className="text-xs text-gray-700 leading-relaxed">
+                                {selectedSession.transcript}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  )}
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="bg-gray-50 p-4 rounded-lg">
