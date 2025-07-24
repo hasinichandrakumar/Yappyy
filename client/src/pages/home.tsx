@@ -196,7 +196,7 @@ export default function HomePage() {
             <h1 className="text-6xl md:text-8xl font-display text-white mb-6 font-bold">
               Talk Smart.
               <br />
-              Talk Yappy.
+              Talk Yappyy.
             </h1>
             <p className="text-xl md:text-2xl font-body text-white/90 mb-8 max-w-3xl mx-auto">
               AI-powered speech coaching that transforms your communication skills through real-time feedback and personalized training
