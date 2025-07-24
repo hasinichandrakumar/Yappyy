@@ -47,7 +47,13 @@ import {
   type AiCoachProfile,
   type InsertAiCoachProfile,
   type UserLearningInsight,
-  type InsertUserLearningInsight
+  type InsertUserLearningInsight,
+  coachingAnalytics,
+  userProgressSnapshots,
+  type CoachingAnalytics,
+  type InsertCoachingAnalytics,
+  type UserProgressSnapshot,
+  type InsertUserProgressSnapshot
 } from "@shared/schema";
 import { db, resilientQuery } from "./db";
 import { eq, desc, and, gte, lte } from "drizzle-orm";
@@ -132,6 +138,16 @@ export interface IStorage {
   getUserLearningInsights(userId: string): Promise<UserLearningInsight[]>;
   createUserLearningInsight(insight: InsertUserLearningInsight): Promise<UserLearningInsight>;
   getSessionLearningInsights(sessionId: number): Promise<UserLearningInsight[]>;
+  
+  // Persistent Coaching Analytics operations (survives session deletion)
+  createCoachingAnalytics(analytics: InsertCoachingAnalytics): Promise<CoachingAnalytics>;
+  getUserCoachingAnalytics(userId: string): Promise<CoachingAnalytics[]>;
+  getCoachingAnalyticsByDateRange(userId: string, startDate: Date, endDate: Date): Promise<CoachingAnalytics[]>;
+  
+  // User Progress Snapshots operations
+  createUserProgressSnapshot(snapshot: InsertUserProgressSnapshot): Promise<UserProgressSnapshot>;
+  getUserProgressSnapshots(userId: string): Promise<UserProgressSnapshot[]>;
+  getLatestProgressSnapshot(userId: string): Promise<UserProgressSnapshot | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -786,6 +802,66 @@ export class DatabaseStorage implements IStorage {
       .from(userLearningInsights)
       .where(eq(userLearningInsights.sessionId, sessionId))
       .orderBy(desc(userLearningInsights.createdAt));
+  }
+
+  // Persistent Coaching Analytics operations (survives session deletion)
+  async createCoachingAnalytics(analytics: InsertCoachingAnalytics): Promise<CoachingAnalytics> {
+    console.log('💾 Creating persistent coaching analytics for user:', analytics.userId);
+    const [createdAnalytics] = await db
+      .insert(coachingAnalytics)
+      .values(analytics)
+      .returning();
+    return createdAnalytics;
+  }
+
+  async getUserCoachingAnalytics(userId: string): Promise<CoachingAnalytics[]> {
+    return await db
+      .select()
+      .from(coachingAnalytics)
+      .where(eq(coachingAnalytics.userId, userId))
+      .orderBy(desc(coachingAnalytics.sessionDate));
+  }
+
+  async getCoachingAnalyticsByDateRange(userId: string, startDate: Date, endDate: Date): Promise<CoachingAnalytics[]> {
+    return await db
+      .select()
+      .from(coachingAnalytics)
+      .where(
+        and(
+          eq(coachingAnalytics.userId, userId),
+          gte(coachingAnalytics.sessionDate, startDate),
+          lte(coachingAnalytics.sessionDate, endDate)
+        )
+      )
+      .orderBy(desc(coachingAnalytics.sessionDate));
+  }
+
+  // User Progress Snapshots operations
+  async createUserProgressSnapshot(snapshot: InsertUserProgressSnapshot): Promise<UserProgressSnapshot> {
+    console.log('📊 Creating progress snapshot for user:', snapshot.userId);
+    const [createdSnapshot] = await db
+      .insert(userProgressSnapshots)
+      .values(snapshot)
+      .returning();
+    return createdSnapshot;
+  }
+
+  async getUserProgressSnapshots(userId: string): Promise<UserProgressSnapshot[]> {
+    return await db
+      .select()
+      .from(userProgressSnapshots)
+      .where(eq(userProgressSnapshots.userId, userId))
+      .orderBy(desc(userProgressSnapshots.snapshotDate));
+  }
+
+  async getLatestProgressSnapshot(userId: string): Promise<UserProgressSnapshot | undefined> {
+    const [latestSnapshot] = await db
+      .select()
+      .from(userProgressSnapshots)
+      .where(eq(userProgressSnapshots.userId, userId))
+      .orderBy(desc(userProgressSnapshots.snapshotDate))
+      .limit(1);
+    return latestSnapshot;
   }
 }
 

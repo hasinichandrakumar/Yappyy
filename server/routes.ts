@@ -40,6 +40,7 @@ import { webrtcIntegration } from "./webrtc-integration";
 import { advancedComputerVision } from "./advanced-computer-vision";
 import { enhancedNeuralPipeline } from "./enhanced-neural-pipeline";
 import { roboflowVision, analyzeVideoFrame as roboflowAnalyzeFrame, trainCustomVisionModel } from './roboflow-computer-vision';
+import { persistentAIAnalytics } from './persistent-ai-analytics';
 import { graphqlHTTP } from 'express-graphql';
 import neuralGraphQL from './graphql-schema';
 
@@ -1174,14 +1175,35 @@ CRITICAL: Evaluate how well this speech achieved its stated PURPOSE. Analyze the
     }
   });
 
-  // Create new practice session
+  // Create new practice session with persistent analytics
   app.post("/api/practice-sessions", async (req: any, res) => {
     try {
       const validatedData = insertPracticeSessionSchema.parse({
         ...req.body,
         userId: getUserId(req)
       });
+      
+      // Create the practice session
       const session = await storage.createPracticeSession(validatedData);
+      
+      // Save persistent coaching analytics that survive session deletion
+      try {
+        await persistentAIAnalytics.saveSessionAnalytics(session);
+        console.log('✅ Persistent analytics saved for session:', session.id);
+      } catch (analyticsError) {
+        console.error('⚠️ Failed to save persistent analytics (session still saved):', analyticsError);
+      }
+      
+      // Create progress snapshot every few sessions
+      if (session.id % 3 === 0) { // Every 3rd session
+        try {
+          await persistentAIAnalytics.createProgressSnapshot(session.userId);
+          console.log('📊 Progress snapshot created for user:', session.userId);
+        } catch (snapshotError) {
+          console.error('⚠️ Failed to create progress snapshot:', snapshotError);
+        }
+      }
+      
       res.status(201).json(session);
     } catch (error: any) {
       res.status(400).json({ message: "Invalid session data", error: error.message });
@@ -1228,6 +1250,14 @@ CRITICAL: Evaluate how well this speech achieved its stated PURPOSE. Analyze the
       };
 
       const session = await storage.createPracticeSession(sessionData);
+      
+      // Save persistent coaching analytics for this comprehensive session
+      try {
+        await persistentAIAnalytics.saveSessionAnalytics(session);
+        console.log('💾 Persistent analytics saved for comprehensive session:', session.id);
+      } catch (analyticsError) {
+        console.error('⚠️ Failed to save persistent analytics (session still saved):', analyticsError);
+      }
       
       // Helper functions for metric extraction
       function extractMetric(metrics: any, key: string, defaultValue: number): number {
@@ -3417,6 +3447,150 @@ Respond with detailed analysis in JSON format:
         success: false,
         error: 'Stream analysis failed' 
       });
+    }
+  });
+
+  // Persistent Coaching Analytics API Endpoints
+  // These endpoints provide access to AI coaching data that survives session deletion
+
+  // Get comprehensive coaching data for AI analysis (used by AI coach)
+  app.get('/api/coaching-analytics/comprehensive/:userId', async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      
+      if (!userId) {
+        return res.status(400).json({ error: 'User ID is required' });
+      }
+
+      const comprehensiveData = await persistentAIAnalytics.getCoachingDataForAnalysis(userId);
+      
+      if (!comprehensiveData) {
+        return res.json({
+          totalSessions: 0,
+          recentAnalytics: [],
+          progressHistory: [],
+          aiProfile: null,
+          trends: {},
+          patterns: {},
+          recommendations: []
+        });
+      }
+
+      console.log('📊 Retrieved comprehensive coaching data for user:', userId);
+      res.json(comprehensiveData);
+    } catch (error) {
+      console.error('❌ Error fetching comprehensive coaching data:', error);
+      res.status(500).json({ error: 'Failed to fetch coaching data' });
+    }
+  });
+
+  // Get user's coaching analytics history
+  app.get('/api/coaching-analytics/:userId', async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const { startDate, endDate } = req.query;
+      
+      let analytics;
+      if (startDate && endDate) {
+        analytics = await storage.getCoachingAnalyticsByDateRange(
+          userId, 
+          new Date(startDate as string), 
+          new Date(endDate as string)
+        );
+      } else {
+        analytics = await storage.getUserCoachingAnalytics(userId);
+      }
+
+      console.log(`📈 Retrieved ${analytics.length} coaching analytics for user:`, userId);
+      res.json(analytics);
+    } catch (error) {
+      console.error('❌ Error fetching coaching analytics:', error);
+      res.status(500).json({ error: 'Failed to fetch analytics' });
+    }
+  });
+
+  // Get user's progress snapshots
+  app.get('/api/progress-snapshots/:userId', async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const snapshots = await storage.getUserProgressSnapshots(userId);
+      
+      console.log(`📊 Retrieved ${snapshots.length} progress snapshots for user:`, userId);
+      res.json(snapshots);
+    } catch (error) {
+      console.error('❌ Error fetching progress snapshots:', error);
+      res.status(500).json({ error: 'Failed to fetch progress snapshots' });
+    }
+  });
+
+  // Get latest progress snapshot for user
+  app.get('/api/progress-snapshots/:userId/latest', async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const snapshot = await storage.getLatestProgressSnapshot(userId);
+      
+      if (!snapshot) {
+        return res.json(null);
+      }
+
+      console.log('📊 Retrieved latest progress snapshot for user:', userId);
+      res.json(snapshot);
+    } catch (error) {
+      console.error('❌ Error fetching latest progress snapshot:', error);
+      res.status(500).json({ error: 'Failed to fetch latest snapshot' });
+    }
+  });
+
+  // Create progress snapshot on demand
+  app.post('/api/progress-snapshots/:userId', async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      
+      await persistentAIAnalytics.createProgressSnapshot(userId);
+      
+      console.log('📊 Created progress snapshot for user:', userId);
+      res.json({ success: true, message: 'Progress snapshot created' });
+    } catch (error) {
+      console.error('❌ Error creating progress snapshot:', error);
+      res.status(500).json({ error: 'Failed to create progress snapshot' });
+    }
+  });
+
+  // Enhanced AI coach endpoint that uses persistent analytics
+  app.post('/api/ai-coach/persistent-coaching', async (req: any, res) => {
+    try {
+      const { userId, message, context } = req.body;
+      
+      if (!userId) {
+        return res.status(400).json({ error: 'User ID is required' });
+      }
+
+      // Get comprehensive coaching data for personalized AI coaching
+      const coachingData = await persistentAIAnalytics.getCoachingDataForAnalysis(userId);
+      
+      // Enhanced AI coaching response using persistent data
+      const response = {
+        message: "I'm analyzing your speaking journey based on all your practice data...",
+        insights: coachingData ? {
+          totalSessions: coachingData.totalSessions,
+          trends: coachingData.trends,
+          patterns: coachingData.patterns,
+          recommendations: coachingData.recommendations
+        } : {
+          totalSessions: 0,
+          trends: {},
+          patterns: {},
+          recommendations: ["Complete practice sessions to unlock personalized insights"]
+        },
+        confidence: coachingData ? Math.min(0.95, 0.6 + (coachingData.totalSessions * 0.05)) : 0.6,
+        adaptiveStrategy: coachingData?.aiProfile?.adaptiveStrategy || 'supportive_development'
+      };
+
+      console.log('🤖 Generated persistent AI coaching response for user:', userId);
+      res.json(response);
+    } catch (error) {
+      console.error('❌ Error generating persistent AI coaching:', error);
+      res.status(500).json({ error: 'Failed to generate AI coaching' });
     }
   });
 

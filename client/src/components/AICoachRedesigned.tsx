@@ -18,6 +18,16 @@ import { apiRequest } from '@/lib/queryClient';
 import { useQuery } from '@tanstack/react-query';
 import { useNeuralAnalysis, useUserProgress } from '@/hooks/useGraphQLQuery';
 
+// Hook to fetch persistent coaching analytics that survive session deletion
+const usePersistentCoachingData = (userId: string | undefined) => {
+  return useQuery({
+    queryKey: [`/api/coaching-analytics/comprehensive/${userId}`],
+    enabled: !!userId,
+    retry: false,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
+
 // Simple AI Coach Avatar Component
 const AICoachAvatar = ({ 
   mood = 'happy', 
@@ -413,6 +423,9 @@ export default function AICoachRedesigned() {
     enabled: !!user
   });
 
+  // Query persistent coaching analytics that survive session deletion
+  const { data: persistentData, isLoading: persistentLoading } = usePersistentCoachingData(user?.id);
+
 
 
   const handleGoalSelection = (goal: string) => {
@@ -450,32 +463,62 @@ export default function AICoachRedesigned() {
     setIsTyping(true);
 
     try {
-      // Fetch user's practice session data for neural analysis
-      const practiceResponse = await fetch('/api/practice-sessions');
-      const sessions = await practiceResponse.json();
+      // Use persistent coaching data or fallback to practice sessions
+      let coachingResponse;
       
-      // Send message to world-class neural AI coach
-      const response = await fetch('/api/personalized-coaching', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: inputMessage,
-          sessionContext: {
-            currentGoal: currentGoal || 'general_improvement',
-            recentPerformance: {
-              confidence: sessions.length > 0 ? sessions.reduce((sum: number, s: any) => sum + (s.confidenceScore || 0.7), 0) / sessions.length * 100 : 70,
-              clarity: sessions.length > 0 ? sessions.reduce((sum: number, s: any) => sum + (s.clarityScore || 0.7), 0) / sessions.length * 100 : 70,
-              engagement: sessions.length > 0 ? sessions.reduce((sum: number, s: any) => sum + (s.contentQuality || 0.7), 0) / sessions.length * 100 : 70
+      if (persistentData && persistentData.totalSessions > 0) {
+        // Use persistent coaching analytics that survive session deletion
+        coachingResponse = await fetch('/api/ai-coach/persistent-coaching', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: user?.id,
+            message: inputMessage,
+            context: {
+              currentGoal: currentGoal || 'general_improvement',
+              persistentAnalytics: persistentData
+            }
+          })
+        }).then(res => res.json());
+      } else {
+        // Fallback to practice session data
+        const practiceResponse = await fetch('/api/practice-sessions');
+        const sessions = await practiceResponse.json();
+        
+        // Send message to world-class neural AI coach
+        coachingResponse = await fetch('/api/personalized-coaching', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: inputMessage,
+            sessionContext: {
+              currentGoal: currentGoal || 'general_improvement',
+              recentPerformance: {
+                confidence: sessions.length > 0 ? sessions.reduce((sum: number, s: any) => sum + (s.confidenceScore || 0.7), 0) / sessions.length * 100 : 70,
+                clarity: sessions.length > 0 ? sessions.reduce((sum: number, s: any) => sum + (s.clarityScore || 0.7), 0) / sessions.length * 100 : 70,
+                engagement: sessions.length > 0 ? sessions.reduce((sum: number, s: any) => sum + (s.contentQuality || 0.7), 0) / sessions.length * 100 : 70
+              },
+              sessionCount: sessions.length,
+              recentSessions: Array.isArray(sessions) ? sessions.slice(-3) : []
             },
-            sessionCount: sessions.length,
-            recentSessions: Array.isArray(sessions) ? sessions.slice(-3) : []
-          },
-          userFeedback: null
-        })
-      }).then(res => res.json());
+            userFeedback: null
+          })
+        }).then(res => res.json());
+      }
+      
+      const response = coachingResponse;
 
       if (response?.success && response?.coaching) {
         let aiResponseText = response.coaching;
+        
+        // Add persistent analytics data if available
+        if (persistentData && persistentData.totalSessions > 0) {
+          aiResponseText += `\n\n💾 **Persistent Analytics**: Based on ${persistentData.totalSessions} sessions`;
+          
+          if (persistentData.trends && Object.keys(persistentData.trends).length > 0) {
+            aiResponseText += `\n📈 **Trends**: ${Object.entries(persistentData.trends).slice(0, 2).map(([key, value]) => `${key}: ${value}%`).join(', ')}`;
+          }
+        }
         
         // Add personalized insights if available
         if (response?.insights && response.insights.length > 0) {
@@ -555,13 +598,26 @@ export default function AICoachRedesigned() {
                   <AICoachAvatar mood="encouraging" size="small" />
                   <div className="flex-1">
                     <h3 className="text-xl font-semibold mb-1">Your Personal Speech Coach</h3>
-                    <p className="text-purple-100 text-base">Personalized coaching based on your unique patterns</p>
+                    <p className="text-purple-100 text-base">
+                      {persistentData && persistentData.totalSessions > 0
+                        ? `Analyzing ${persistentData.totalSessions} sessions of your persistent data`
+                        : "Personalized coaching based on your unique patterns"
+                      }
+                    </p>
                   </div>
-                  {currentGoal && (
-                    <Badge className="bg-white/20 text-white px-4 py-2">
-                      {currentGoal.charAt(0).toUpperCase() + currentGoal.slice(1)}
-                    </Badge>
-                  )}
+                  <div className="flex gap-2">
+                    {persistentData && persistentData.totalSessions > 0 && (
+                      <Badge className="bg-green-100 text-green-700 px-3 py-1">
+                        <Database className="w-3 h-3 mr-1" />
+                        {persistentData.totalSessions} Sessions
+                      </Badge>
+                    )}
+                    {currentGoal && (
+                      <Badge className="bg-white/20 text-white px-4 py-2">
+                        {currentGoal.charAt(0).toUpperCase() + currentGoal.slice(1)}
+                      </Badge>
+                    )}
+                  </div>
                 </CardTitle>
               </CardHeader>
               
