@@ -1019,12 +1019,12 @@ export default function SimplifiedPracticePage() {
             roboflowAnalysis?.overall?.confidence || prev.confidence,
           engagement: facialAnalysis?.facialMetrics?.emotionalExpression?.engagement || 
             roboflowAnalysis?.facial?.engagement || prev.engagement,
-          clarity: facialAnalysis?.facialMetrics?.microExpressions?.articulation || 
-            roboflowAnalysis?.voice?.clarity || prev.clarity,
+          clarity: facialAnalysis?.facialMetrics?.emotionalExpression?.authenticity || 
+            roboflowAnalysis?.facial?.engagement || prev.clarity,
           voice: {
             ...prev.voice,
-            clarity: facialAnalysis?.facialMetrics?.microExpressions?.articulation || 
-              roboflowAnalysis?.voice?.clarity || prev.voice.clarity
+            clarity: facialAnalysis?.facialMetrics?.emotionalExpression?.authenticity || 
+              roboflowAnalysis?.facial?.engagement || prev.voice.clarity
           },
           bodyLanguage: {
             ...prev.bodyLanguage,
@@ -1286,7 +1286,9 @@ export default function SimplifiedPracticePage() {
           let base64Video = null;
           if (recordingData) {
             const videoData = await recordingData.videoBlob.arrayBuffer();
-            base64Video = btoa(String.fromCharCode(...new Uint8Array(videoData)));
+            const uint8Array = new Uint8Array(videoData);
+            const binaryString = Array.from(uint8Array, byte => String.fromCharCode(byte)).join('');
+            base64Video = btoa(binaryString);
           }
           
           const saveVideoResponse = await fetch('/api/sessions/save-with-video', {
