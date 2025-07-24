@@ -73,17 +73,7 @@ const AICoachAvatar = ({
         }}
       />
       
-      {/* Mood Indicator */}
-      <motion.div
-        className="absolute -top-2 -right-2 z-20"
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ delay: 0.5 }}
-      >
-        <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg">
-          AI
-        </div>
-      </motion.div>
+
     </div>
   );
 };
