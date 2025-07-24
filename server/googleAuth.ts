@@ -103,22 +103,16 @@ export async function setupGoogleAuth(app: Express) {
     passport.authenticate('google', { scope: ['profile', 'email'] })
   );
 
-  // Handle the OAuth callback route - redirect to yappyy.com/dashboard
+  // Handle the OAuth callback route - redirect to dashboard
   app.get('/oauth2callback',
-    passport.authenticate('google', { failureRedirect: '/' }),
+    passport.authenticate('google', { failureRedirect: '/?error=oauth_failed' }),
     (req, res) => {
-      // Create a one-time token for cross-domain authentication
-      const authToken = Buffer.from(JSON.stringify({
-        user: req.user,
-        timestamp: Date.now(),
-        sessionId: req.sessionID
-      })).toString('base64');
-      
       console.log('✅ OAuth callback successful for user:', (req.user as any)?.email);
       console.log('✅ Session ID:', req.sessionID);
+      console.log('✅ Redirecting to dashboard...');
       
-      // Redirect to dashboard after successful authentication
-      res.redirect(`/dashboard?auth=${authToken}`);
+      // Simply redirect to dashboard - session is already established
+      res.redirect('/dashboard');
     }
   );
 
