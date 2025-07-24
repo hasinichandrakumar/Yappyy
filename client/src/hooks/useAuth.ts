@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 interface User {
@@ -13,6 +13,33 @@ interface User {
 
 export function useAuth() {
   const [isLoggedOut, setIsLoggedOut] = useState(false);
+  
+  // Handle OAuth token authentication on page load
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const authToken = urlParams.get('auth');
+    
+    if (authToken) {
+      // Remove token from URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+      
+      // Authenticate with token
+      fetch('/api/auth/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: authToken })
+      }).then(response => {
+        if (response.ok) {
+          console.log('✅ Token authentication successful');
+          window.location.reload(); // Reload to get user data
+        } else {
+          console.error('Token authentication failed');
+        }
+      }).catch(error => {
+        console.error('Token authentication error:', error);
+      });
+    }
+  }, []);
   
   // Fetch real user data from API - only for Google OAuth authenticated users
   const { data: userData, isLoading, error } = useQuery({

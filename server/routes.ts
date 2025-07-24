@@ -57,12 +57,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup Google OAuth Authentication (primary and only auth system)
   await setupGoogleAuth(app);
 
+  // Authenticate with token (for cross-domain OAuth)
+  app.post('/api/auth/token', async (req: any, res) => {
+    try {
+      const { token } = req.body;
+      if (!token) {
+        return res.status(400).json({ error: 'Token required' });
+      }
+      
+      const decoded = JSON.parse(Buffer.from(token, 'base64').toString());
+      const { user, timestamp } = decoded;
+      
+      // Check if token is valid (within 5 minutes)
+      if (Date.now() - timestamp > 5 * 60 * 1000) {
+        return res.status(401).json({ error: 'Token expired' });
+      }
+      
+      // Create session with user data
+      req.login(user, (err: any) => {
+        if (err) {
+          console.error('Token login error:', err);
+          return res.status(500).json({ error: 'Login failed' });
+        }
+        
+        console.log('✅ Token authentication successful for:', user.email);
+        res.json({ success: true });
+      });
+    } catch (error) {
+      console.error('Token authentication error:', error);
+      res.status(401).json({ error: 'Invalid token' });
+    }
+  });
+
   // User info endpoint for debugging and profile display
   app.get('/api/user/info', (req: any, res) => {
     const userId = getUserId(req);
     const passportUser = req.user; // Google OAuth user from passport
     
-    if (passportUser) {
+    console.log('🔍 Session debug:', {
+      sessionId: req.sessionID,
+      hasUser: !!passportUser,
+      userId: userId,
+      isAuthenticated: req.isAuthenticated(),
+      email: passportUser?.email
+    });
+    
+    if (passportUser && req.isAuthenticated()) {
       const userInfo = {
         id: userId,
         isAuthenticated: true,

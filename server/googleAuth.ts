@@ -35,13 +35,14 @@ export function getSession() {
   return session({
     secret: process.env.SESSION_SECRET || 'dev-secret-key',
     store: sessionStore,
-    resave: false,
+    resave: true, // Changed to true for better session persistence
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: true, // Enable for HTTPS
+      secure: false, // Changed to false for development/HTTP
       sameSite: 'lax', // Allow cross-site requests for OAuth
       maxAge: sessionTtl,
+      domain: undefined, // Remove domain restriction for better compatibility
     },
   });
 }
@@ -99,10 +100,21 @@ export async function setupGoogleAuth(app: Express) {
 
   // Handle the OAuth callback route - redirect to yappyy.com/dashboard
   app.get('/oauth2callback',
-    passport.authenticate('google', { 
-      failureRedirect: 'https://yappyy.com/',
-      successRedirect: 'https://yappyy.com/dashboard'
-    })
+    passport.authenticate('google', { failureRedirect: 'https://yappyy.com/' }),
+    (req, res) => {
+      // Create a one-time token for cross-domain authentication
+      const authToken = Buffer.from(JSON.stringify({
+        user: req.user,
+        timestamp: Date.now(),
+        sessionId: req.sessionID
+      })).toString('base64');
+      
+      console.log('✅ OAuth callback successful for user:', (req.user as any)?.email);
+      console.log('✅ Session ID:', req.sessionID);
+      
+      // Redirect with authentication token for cross-domain session transfer
+      res.redirect(`https://yappyy.com/dashboard?auth=${authToken}`);
+    }
   );
 
   // Also handle the original route for compatibility
