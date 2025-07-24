@@ -12,6 +12,7 @@ import LogoExport from "@/pages/logo-export";
 import LoginPage from "@/pages/login";
 import NotFound from "@/pages/not-found";
 import ClubsHub from "@/components/ClubsHub";
+import AccuracyTestSuite from "@/components/AccuracyTestSuite";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -54,6 +55,7 @@ function Router() {
       <Route path="/profile/:section" component={UserProfile} />
       <Route path="/clubs" component={ClubsHub} />
       <Route path="/logo" component={LogoExport} />
+      <Route path="/test" component={AccuracyTestSuite} />
       <Route path="*" component={Dashboard} />
     </Switch>
   );

@@ -318,7 +318,8 @@ export class VoiceAnalysisEngine {
         }]
       });
       
-      return JSON.parse(response.content[0].text);
+      const textContent = response.content.find(block => block.type === 'text');
+      return JSON.parse(textContent ? textContent.text : '{}');
     } catch (error) {
       console.error('Anthropic voice analysis failed:', error);
       return { confidence: 75, authenticity: 80, charisma: 75 };
@@ -339,7 +340,7 @@ export class VoiceAnalysisEngine {
 
   private analyzeTemporalFeatures(audioData: Float32Array): any {
     return {
-      speaking_rate: this.calculateSpeakingRate(audioData),
+      speaking_rate: this.calculateSpeakingRateFromAudio(audioData),
       pause_patterns: this.detectPauses(audioData),
       rhythm_consistency: this.analyzeRhythm(audioData),
       breath_intervals: this.detectBreathIntervals(audioData)
@@ -368,7 +369,7 @@ export class VoiceAnalysisEngine {
     return Math.min(100, features.pitch.variation * 2);
   }
 
-  private calculateSpeakingRate(features: VoiceFeatures): number {
+  private getSpeakingRateFromFeatures(features: VoiceFeatures): number {
     return features.temporal.speaking_rate;
   }
 
@@ -476,7 +477,7 @@ export class VoiceAnalysisEngine {
     return Math.max(0, 100 - (variance / mean) * 100);
   }
 
-  private calculateSpeakingRate(audioData: Float32Array): number {
+  private calculateSpeakingRateFromAudio(audioData: Float32Array): number {
     // Estimate speaking rate from syllable detection
     const energy = this.calculateEnergy(audioData);
     const peaks = this.findPeaks(energy);
@@ -688,7 +689,8 @@ export async function analyzeVoiceQuality(req: Request, res: Response) {
       return res.status(400).json({ error: 'Audio buffer required' });
     }
     
-    const analysis = await voiceEngine.analyzeVoice(Buffer.from(audioBuffer, 'base64'));
+    const audioArrayBuffer = Buffer.from(audioBuffer, 'base64').buffer;
+    const analysis = await voiceEngine.analyzeVoice(audioArrayBuffer);
     res.json(analysis);
   } catch (error) {
     console.error('Voice quality analysis error:', error);
