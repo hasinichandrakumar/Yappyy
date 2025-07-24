@@ -55,6 +55,9 @@ export const users = pgTable("users", {
   themePreference: varchar("theme_preference").default("light"),
   hasCompletedOnboarding: boolean("has_completed_onboarding").default(false),
   onboardingCompletedAt: timestamp("onboarding_completed_at"),
+  isNewUser: boolean("is_new_user").default(true),
+  welcomeMessageShown: boolean("welcome_message_shown").default(false),
+  firstLoginAt: timestamp("first_login_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

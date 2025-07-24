@@ -149,10 +149,23 @@ export class DatabaseStorage implements IStorage {
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values(userData)
-      .onConflictDoUpdate({
+    console.log('💾 Upserting user:', userData.email);
+    
+    return withRetry(async () => {
+      // Check if user exists
+      const existingUser = await this.getUser(userData.id);
+      const isNewUser = !existingUser;
+      
+      const [user] = await resilientQuery(
+        () => db
+          .insert(users)
+          .values({
+            ...userData,
+            isNewUser,
+            firstLoginAt: isNewUser ? new Date() : existingUser?.firstLoginAt,
+            welcomeMessageShown: isNewUser ? false : existingUser?.welcomeMessageShown
+          })
+          .onConflictDoUpdate({
         target: users.id,
         set: {
           ...userData,
