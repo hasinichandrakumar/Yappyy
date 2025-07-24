@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { RealTimeSessionManager } from "./redis-realtime";
 import { insertPracticeSessionSchema, insertCoachingFeedbackSchema, insertCustomTemplateSchema } from "@shared/schema";
 import { setupGoogleAuth, isAuthenticated } from "./googleAuth";
+import { userOnboardingService } from "./user-onboarding";
 import { generateClubCoaching } from "./ai-coaching";
 import { 
   generateComprehensiveAnalysis, 
@@ -133,7 +134,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Auth routes for React Query - remove authentication requirement for access
+  // Auth routes for React Query with onboarding support
   app.get('/api/auth/user', async (req: any, res) => {
     try {
       // Check if user is authenticated
@@ -148,19 +149,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = getUserId(req);
       const user = await storage.getUser(userId);
       
-      // Check if user has any practice sessions to determine if they're truly new
-      const userSessions = await storage.getUserPracticeSessions(userId);
-      const hasRecordedSessions = userSessions && userSessions.length > 0;
+      // Get onboarding status using the new service
+      const onboardingStatus = await userOnboardingService.checkUserOnboardingStatus(userId);
       
-      // A user is "new" if they have never recorded any practice sessions
-      const isNewUser = !hasRecordedSessions;
-      
-      // Return user data with authentication info and proper new user status
+      // Return user data with complete onboarding information
       res.json({
         ...user,
         isAuthenticated: true,
-        isNewUser: isNewUser,
-        totalSessions: userSessions ? userSessions.length : 0
+        isNewUser: onboardingStatus.isNewUser,
+        shouldShowWelcome: onboardingStatus.shouldShowWelcome,
+        shouldShowDailyGoals: onboardingStatus.shouldShowDailyGoals,
+        sessionCount: onboardingStatus.sessionCount,
+        dailyGoals: onboardingStatus.dailyGoals || []
       });
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -181,10 +181,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const userId = getUserId(req);
-      await storage.updateUserProfile(userId, { 
-        welcomeMessageShown: true,
-        isNewUser: false 
-      });
+      await userOnboardingService.markWelcomeMessageShown(userId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error marking welcome complete:", error);
@@ -202,15 +199,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const userId = getUserId(req);
       
-      // Try to get existing goals first
-      let goals = await storage.getUserDailyGoals(userId);
-      
-      // If no goals exist, generate them immediately
-      if (goals.length === 0) {
-        console.log('🚀 No daily goals found, generating new ones for user:', userId);
-        goals = await storage.generateDailyGoalsForUser(userId);
-      }
-      
+      // Use the onboarding service to create daily goals
+      const goals = await userOnboardingService.createDailyGoals(userId);
       res.json(goals);
     } catch (error) {
       console.error("Error fetching daily goals:", error);
@@ -218,7 +208,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update goal progress
+  // Update goal progress based on session completion
+  app.post('/api/daily-goals/update-progress', async (req: any, res) => {
+    try {
+      if (!req.isAuthenticated() || !req.user) {
+        return res.json({ success: false, message: "Not authenticated" });
+      }
+
+      const userId = getUserId(req);
+      const { goalType, value } = req.body;
+      
+      await userOnboardingService.updateGoalProgress(userId, goalType, value);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating goal progress:", error);
+      res.json({ success: false, message: "Failed to update goal progress" });
+    }
+  });
+
+  // Update goal progress (legacy endpoint for direct goal updates)
   app.patch('/api/daily-goals/:goalId/progress', async (req: any, res) => {
     try {
       if (!req.isAuthenticated() || !req.user) {

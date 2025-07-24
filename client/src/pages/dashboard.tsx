@@ -19,6 +19,8 @@ import PrivacySettings from "@/components/PrivacySettings";
 import FunctionalProgressTracker from "@/components/FunctionalProgressTracker";
 import WelcomeMessage from "@/components/WelcomeMessage";
 import ReturningUserWelcome from "@/components/ReturningUserWelcome";
+import { WelcomeDialog } from "@/components/WelcomeDialog";
+import { DailyGoalsDialog } from "@/components/DailyGoalsDialog";
 import yappyyLogoPath from '@assets/Y-2-removebg-preview_1753384287580.png';
 
 export default function Dashboard() {
@@ -32,27 +34,21 @@ export default function Dashboard() {
 
   const { logout } = useAuth();
 
-  // Check if user needs welcome message - show for both authenticated and guest users
+  // Check if user needs onboarding dialogs based on new system
   useEffect(() => {
     if (user) {
-      if (user.isAuthenticated) {
-        // For authenticated users - determine by actual session data
-        const hasRecordedSessions = (user as any).totalSessions > 0;
-        const todayKey = `dailyWelcomeShown_${user.id}_${new Date().toDateString()}`;
-        const hasSeenTodayWelcome = localStorage.getItem(todayKey);
+      // Use the new onboarding system data from the backend
+      const userData = user as any; // Cast to access backend properties
+      if (userData.shouldShowWelcome) {
+        setShowWelcome(true);
+      } else if (userData.shouldShowDailyGoals) {
+        // Only show daily goals if we haven't shown them today
+        const todayKey = `dailyGoalsShown_${user.id}_${new Date().toDateString()}`;
+        const hasSeenTodayGoals = localStorage.getItem(todayKey);
         
-        if (!hasRecordedSessions) {
-          // New authenticated user with no recorded sessions - show first-time welcome
-          setShowWelcome(true);
-        } else if (!hasSeenTodayWelcome) {
-          // Returning authenticated user with sessions - show daily welcome with goals
+        if (!hasSeenTodayGoals) {
           setShowReturningWelcome(true);
           localStorage.setItem(todayKey, 'true');
-        }
-      } else {
-        // For guest users - always show welcome for new users
-        if (user.isNewUser && !user.welcomeMessageShown) {
-          setShowWelcome(true);
         }
       }
     }
@@ -232,15 +228,20 @@ export default function Dashboard() {
         </DialogContent>
       </Dialog>
 
-      {/* Welcome Messages */}
-      <WelcomeMessage 
+      {/* New User Welcome Dialog */}
+      <WelcomeDialog 
         isOpen={showWelcome} 
-        onClose={() => setShowWelcome(false)} 
+        onClose={() => setShowWelcome(false)}
+        userName={(user as any)?.firstName || user?.name}
       />
       
-      <ReturningUserWelcome 
+      {/* Returning User Daily Goals Dialog */}
+      <DailyGoalsDialog 
         isOpen={showReturningWelcome} 
-        onClose={() => setShowReturningWelcome(false)} 
+        onClose={() => setShowReturningWelcome(false)}
+        goals={(user as any)?.dailyGoals || []}
+        userName={(user as any)?.firstName || user?.name}
+        sessionCount={(user as any)?.sessionCount}
       />
     </div>
   );
