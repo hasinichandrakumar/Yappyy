@@ -200,7 +200,7 @@ export class DatabaseStorage implements IStorage {
         () => db
           .insert(aiCoachProfiles)
           .values({
-            userId,
+            id: userId,
             personalityVector: JSON.stringify(Array(16).fill(0.5)), // Fresh neutral personality
             learningPatterns: JSON.stringify({}),
             adaptiveStrategies: JSON.stringify([]),
@@ -216,7 +216,7 @@ export class DatabaseStorage implements IStorage {
         () => db
           .insert(userLearningInsights)
           .values({
-            userId,
+            id: userId,
             insights: JSON.stringify({
               focusAreas: [],
               strengths: [],
@@ -575,9 +575,11 @@ export class DatabaseStorage implements IStorage {
           .values({
             userId,
             ...goalData,
-            date: today.toISOString().split('T')[0],
-            createdAt: new Date(),
-            updatedAt: new Date()
+            title: goalData.goalType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()),
+            category: 'practice',
+            unit: 'count',
+            difficulty: 'medium',
+            createdAt: new Date()
           })
           .returning();
         return goal;
