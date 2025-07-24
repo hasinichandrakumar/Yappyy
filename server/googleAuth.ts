@@ -66,9 +66,9 @@ export async function setupGoogleAuth(app: Express) {
 
   // Google OAuth Strategy - Custom domain callback
   if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
-    // Use localhost callback in development for easier testing
-    const callbackURL = process.env.NODE_ENV === 'development' 
-      ? "http://localhost:5000/oauth2callback"
+    // Use Replit dev domain to avoid localhost access issues
+    const callbackURL = process.env.REPLIT_DEV_DOMAIN 
+      ? `https://${process.env.REPLIT_DEV_DOMAIN}/oauth2callback`
       : "https://yappyy.com/oauth2callback";
       
     passport.use(new GoogleStrategy({
