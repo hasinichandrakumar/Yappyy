@@ -18,62 +18,35 @@ import { apiRequest } from '@/lib/queryClient';
 import { useQuery } from '@tanstack/react-query';
 import { useNeuralAnalysis, useUserProgress } from '@/hooks/useGraphQLQuery';
 
-// Enhanced AI Coach Avatar Component with Multiple Moods
+// Simple AI Coach Avatar Component
 const AICoachAvatar = ({ 
   mood = 'happy', 
   size = 'large',
-  isAnimated = true 
+  isAnimated = false 
 }: { 
   mood?: 'happy' | 'thinking' | 'excited' | 'encouraging' | 'proud';
   size?: 'small' | 'medium' | 'large';
   isAnimated?: boolean;
 }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
   const sizeClasses = {
-    small: 'w-16 h-16',
-    medium: 'w-24 h-24', 
-    large: 'w-40 h-40'
+    small: 'w-12 h-12',
+    medium: 'w-16 h-16', 
+    large: 'w-20 h-20'
   };
 
-  const sizePixels = {
-    small: { width: 64, height: 64 },
-    medium: { width: 96, height: 96 },
-    large: { width: 160, height: 160 }
+  const getMoodIcon = () => {
+    switch (mood) {
+      case 'thinking': return <Brain className="w-full h-full text-purple-600" />;
+      case 'excited': return <Sparkles className="w-full h-full text-yellow-500" />;
+      case 'encouraging': return <Heart className="w-full h-full text-red-500" />;
+      case 'proud': return <Award className="w-full h-full text-green-600" />;
+      default: return <Brain className="w-full h-full text-blue-600" />;
+    }
   };
 
   return (
-    <div className="relative flex items-center justify-center">
-      {/* Animated Background Glow */}
-      <motion.div
-        className="absolute inset-0 rounded-full"
-        style={{
-          background: `radial-gradient(circle, 
-            rgba(139, 92, 246, 0.3) 0%, 
-            rgba(219, 39, 119, 0.2) 50%, 
-            rgba(59, 130, 246, 0.1) 100%)`
-        }}
-        animate={{
-          scale: isAnimated ? [1, 1.1, 1] : 1,
-          opacity: isAnimated ? [0.6, 0.8, 0.6] : 0.6
-        }}
-        transition={{
-          duration: 3,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-      />
-      
-      {/* AI Coach Canvas */}
-      <canvas
-        ref={canvasRef}
-        className={`${sizeClasses[size]} relative z-10 drop-shadow-lg`}
-        style={{
-          filter: 'drop-shadow(0 8px 16px rgba(139, 92, 246, 0.3))'
-        }}
-      />
-      
-
+    <div className={`${sizeClasses[size]} flex items-center justify-center bg-gray-100 rounded-full border-2 border-gray-200`}>
+      {getMoodIcon()}
     </div>
   );
 };
@@ -403,19 +376,14 @@ const CoachingGoals = ({ onGoalSelect }: { onGoalSelect: (goal: string) => void 
   return (
     <div className="grid grid-cols-2 gap-3 mb-4">
       {goals.map((goal, index) => (
-        <motion.button
+        <button
           key={goal.id}
           onClick={() => onGoalSelect(goal.id)}
-          className={`flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium hover:scale-105 transition-all ${goal.color}`}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: index * 0.1 }}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          className={`flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium hover:opacity-80 transition-opacity ${goal.color}`}
         >
           <goal.icon className="w-4 h-4" />
           {goal.label}
-        </motion.button>
+        </button>
       ))}
     </div>
   );
@@ -575,16 +543,16 @@ export default function AICoachRedesigned() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+    <div className="min-h-screen bg-gray-50">
       {/* Main Interface */}
       <div className="max-w-7xl mx-auto px-6 pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 lg:h-[700px]">
           {/* Main Coaching Area */}
           <div className="lg:col-span-3 flex">
-            <Card className="bg-white/70 backdrop-blur-sm border-purple-200 shadow-xl flex-1 flex flex-col">
-              <CardHeader className="bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-t-lg p-6">
+            <Card className="bg-white border-gray-200 shadow-lg flex-1 flex flex-col">
+              <CardHeader className="bg-blue-600 text-white rounded-t-lg p-6">
                 <CardTitle className="flex items-center gap-4">
-                  <AICoachAvatar mood="encouraging" size="small" isAnimated={true} />
+                  <AICoachAvatar mood="encouraging" size="small" />
                   <div className="flex-1">
                     <h3 className="text-xl font-semibold mb-1">Your Personal Speech Coach</h3>
                     <p className="text-purple-100 text-base">Personalized coaching based on your unique patterns</p>
@@ -620,16 +588,11 @@ export default function AICoachRedesigned() {
                     <div className="flex items-center gap-3 text-gray-500 text-sm py-4">
                       <AICoachAvatar mood="thinking" size="small" />
                       <span>AI Coach is analyzing your patterns...</span>
-                      <motion.div
-                        className="flex gap-1"
-                        initial={{ opacity: 0.5 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ repeat: Infinity, duration: 1 }}
-                      >
-                        <div className="w-2 h-2 bg-purple-400 rounded-full" />
-                        <div className="w-2 h-2 bg-purple-400 rounded-full" />
-                        <div className="w-2 h-2 bg-purple-400 rounded-full" />
-                      </motion.div>
+                      <div className="flex gap-1">
+                        <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" />
+                        <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse delay-100" />
+                        <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse delay-200" />
+                      </div>
                     </div>
                   )}
                 </div>
