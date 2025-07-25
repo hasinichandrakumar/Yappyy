@@ -51,6 +51,11 @@ function getUserId(req: any): string {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  
+  // Diagnostic route for OAuth testing
+  app.get('/oauth-diagnostic.html', (req, res) => {
+    res.sendFile(path.join(process.cwd(), 'oauth-diagnostic.html'));
+  });
   const server = createServer(app);
   
   // Initialize Enhanced Real-Time Processing Engine
