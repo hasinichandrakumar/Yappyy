@@ -43,6 +43,7 @@ import { roboflowVision, analyzeVideoFrame as roboflowAnalyzeFrame, trainCustomV
 import { persistentAIAnalytics } from './persistent-ai-analytics';
 import { graphqlHTTP } from 'express-graphql';
 import neuralGraphQL from './graphql-schema';
+import path from 'path';
 
 // Helper function to extract user ID from Google OAuth request
 function getUserId(req: any): string {
@@ -51,11 +52,6 @@ function getUserId(req: any): string {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  
-  // Diagnostic route for OAuth testing
-  app.get('/oauth-diagnostic.html', (req, res) => {
-    res.sendFile(path.join(process.cwd(), 'oauth-diagnostic.html'));
-  });
   const server = createServer(app);
   
   // Initialize Enhanced Real-Time Processing Engine
