@@ -104,8 +104,9 @@ export async function setupGoogleAuth(app: Express) {
   // Google OAuth routes - show Yappyy logo first
   app.get('/api/auth/google', (req, res) => {
     console.log('🚀 Showing Yappyy logo before Google OAuth...');
-    console.log('📋 User will see: Large animated Yappyy logo with gradient effects');
-    console.log('📋 Page includes: Title, main logo, footer branding, and loading animation');
+    console.log('📋 YAPPYY LOGO DISPLAY: 5rem size with cyan glow effects and animations');
+    console.log('📋 ENHANCED BRANDING: Title, main logo, subtitle, footer, and loading animation');
+    console.log('📋 USER EXPERIENCE: 2.5-second branded page before Google OAuth redirect');
     // Serve the loading page with Yappyy logo
     res.send(`
       <!DOCTYPE html>
@@ -139,15 +140,19 @@ export async function setupGoogleAuth(app: Express) {
             justify-content: center;
           }
           .logo-text {
-            font-size: 4rem;
+            font-size: 5rem;
             font-weight: 900;
+            color: #0BF9EA;
+            text-shadow: 0 0 20px rgba(11, 249, 234, 0.8), 0 0 40px rgba(11, 249, 234, 0.6);
             background: linear-gradient(135deg, #0BF9EA 0%, #22d3ee 25%, #06b6d4 50%, #0BF9EA 75%, #67e8f9 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
             background-size: 300% 300%;
             animation: yappyy-glow 3s ease-in-out infinite;
-            filter: drop-shadow(0 0 8px rgba(11, 249, 234, 0.3));
+            filter: drop-shadow(0 0 12px rgba(11, 249, 234, 0.5));
+            margin: 20px 0;
+            letter-spacing: 2px;
           }
           @keyframes yappyy-glow {
             0%, 100% {
@@ -243,6 +248,7 @@ export async function setupGoogleAuth(app: Express) {
         <div class="container">
           <div class="logo-placeholder">
             <div class="logo-text">Yappyy</div>
+            <div style="font-size: 1.2rem; color: #06b6d4; margin-top: 10px; font-weight: 600;">AI Speech Coach</div>
           </div>
           
           <div class="spinner"></div>
