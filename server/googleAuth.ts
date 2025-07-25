@@ -101,8 +101,184 @@ export async function setupGoogleAuth(app: Express) {
     console.warn('⚠️ Google OAuth credentials not found in environment variables');
   }
 
-  // Google OAuth routes
-  app.get('/api/auth/google', (req, res, next) => {
+  // Google OAuth routes - show Yappyy logo first
+  app.get('/api/auth/google', (req, res) => {
+    console.log('🚀 Showing Yappyy logo before Google OAuth...');
+    // Serve the loading page with Yappyy logo
+    res.send(`
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Yappyy - Connecting to Google</title>
+        <style>
+          body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #dbeafe 0%, #ffffff 50%, #faf5ff 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          .container {
+            text-align: center;
+            padding: 2rem;
+            max-width: 500px;
+          }
+          .logo-placeholder {
+            height: 120px;
+            width: 300px;
+            margin: 0 auto 2rem;
+            animation: pulse 2s infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          .logo-text {
+            font-size: 4rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #0BF9EA 0%, #22d3ee 25%, #06b6d4 50%, #0BF9EA 75%, #67e8f9 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 300% 300%;
+            animation: yappyy-glow 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 8px rgba(11, 249, 234, 0.3));
+          }
+          @keyframes yappyy-glow {
+            0%, 100% {
+              background-position: 0% 50%;
+              filter: drop-shadow(0 0 8px rgba(11, 249, 234, 0.3));
+            }
+            50% {
+              background-position: 100% 50%;
+              filter: drop-shadow(0 0 12px rgba(11, 249, 234, 0.5));
+            }
+          }
+          .spinner {
+            width: 64px;
+            height: 64px;
+            border: 4px solid #dbeafe;
+            border-top: 4px solid #2563eb;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 2rem;
+          }
+          .title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 1rem;
+          }
+          .subtitle {
+            color: #6b7280;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+          }
+          .progress-bar {
+            width: 256px;
+            height: 12px;
+            background: #e5e7eb;
+            border-radius: 6px;
+            margin: 0 auto 1rem;
+            overflow: hidden;
+          }
+          .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            width: 80%;
+            animation: pulse 2s infinite;
+          }
+          .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #6b7280;
+            width: 256px;
+            margin: 0 auto 2rem;
+          }
+          .branding {
+            background: linear-gradient(90deg, #dbeafe, #faf5ff);
+            border: 1px solid #bfdbfe;
+            border-radius: 12px;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+          }
+          .brand-logo {
+            height: 32px;
+            width: auto;
+          }
+          .brand-text {
+            text-align: center;
+          }
+          .brand-title {
+            font-size: 0.875rem;
+            font-weight: bold;
+            color: #1e40af;
+            margin: 0;
+          }
+          .brand-subtitle {
+            font-size: 0.75rem;
+            color: #2563eb;
+            margin: 0;
+          }
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+          @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="logo-placeholder">
+            <div class="logo-text">Yappyy</div>
+          </div>
+          
+          <div class="spinner"></div>
+          
+          <h1 class="title">Connecting to Google</h1>
+          <p class="subtitle">
+            Taking you to Google Sign-In to set up your personalized AI speech coaching experience with Yappyy.
+          </p>
+          
+          <div class="progress-bar">
+            <div class="progress-fill"></div>
+          </div>
+          <div class="progress-labels">
+            <span>Preparing authentication</span>
+            <span>Redirecting to Google</span>
+          </div>
+          
+          <div class="branding">
+            <div class="brand-text">
+              <p class="brand-title">Powered by Yappyy</p>
+              <p class="brand-subtitle">AI-powered speech improvement</p>
+            </div>
+          </div>
+        </div>
+        
+        <script>
+          // Redirect to Google OAuth after 2.5 seconds
+          setTimeout(() => {
+            window.location.href = '/api/auth/google/redirect';
+          }, 2500);
+        </script>
+      </body>
+      </html>
+    `);
+  });
+
+  // Actual Google OAuth redirect
+  app.get('/api/auth/google/redirect', (req, res, next) => {
     console.log('🚀 Starting Google OAuth flow...');
     passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
   });
