@@ -120,16 +120,69 @@ export async function setupGoogleAuth(app: Express) {
           body {
             margin: 0;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #dbeafe 0%, #ffffff 50%, #faf5ff 100%);
+            background: linear-gradient(135deg, #0BF9EA 0%, #06b6d4 50%, #0BF9EA 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
+            overflow: hidden;
+          }
+          /* FULLSCREEN YAPPYY BRANDING */
+          body::before {
+            content: "YAPPYY";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20vw;
+            font-weight: 900;
+            color: rgba(255,255,255,0.1);
+            z-index: 1;
+            pointer-events: none;
           }
           .container {
             text-align: center;
             padding: 2rem;
             max-width: 500px;
+            position: relative;
+            z-index: 10;
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            border: 3px solid #0BF9EA;
+          }
+          /* CORNER LOGOS */
+          .corner-logo {
+            position: fixed;
+            font-size: 3rem;
+            font-weight: 900;
+            color: #ffffff;
+            text-shadow: 0 0 20px rgba(11,249,234,1);
+            z-index: 9999;
+            animation: pulse 2s infinite;
+          }
+          .top-left { top: 20px; left: 20px; }
+          .top-right { top: 20px; right: 20px; }
+          .bottom-left { bottom: 20px; left: 20px; }
+          .bottom-right { bottom: 20px; right: 20px; }
+          /* FLOATING LOGOS */
+          .floating-logo {
+            position: fixed;
+            font-size: 4rem;
+            font-weight: 900;
+            color: #ffffff;
+            text-shadow: 0 0 30px rgba(11,249,234,1);
+            z-index: 9999;
+            animation: float 3s ease-in-out infinite;
+          }
+          @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
           }
           .logo-placeholder {
             height: 120px;
@@ -246,6 +299,18 @@ export async function setupGoogleAuth(app: Express) {
         </style>
       </head>
       <body>
+        <!-- CORNER LOGOS -->
+        <div class="corner-logo top-left">Yappyy</div>
+        <div class="corner-logo top-right">Yappyy</div>
+        <div class="corner-logo bottom-left">Yappyy</div>
+        <div class="corner-logo bottom-right">Yappyy</div>
+        
+        <!-- FLOATING SIDE LOGOS -->
+        <div class="floating-logo" style="top: 30%; left: 5%;">Yappyy</div>
+        <div class="floating-logo" style="top: 30%; right: 5%;">Yappyy</div>
+        <div class="floating-logo" style="top: 70%; left: 10%;">Yappyy</div>
+        <div class="floating-logo" style="top: 70%; right: 10%;">Yappyy</div>
+        
         <div class="container">
           <div class="logo-placeholder">
             <div class="logo-text">Yappyy</div>
