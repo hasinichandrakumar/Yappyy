@@ -370,15 +370,15 @@ export class BlazePoseEnhancedCV {
     const postureEnergy = this.calculatePostureEnergy(poseLandmarks);
     const energyLevel = (movement + postureEnergy) / 2;
 
-    // Calculate professionalism from posture and gestures
+    // Calculate professionalism from posture and gestures - AUTHENTIC DATA ONLY
     const postureScore = this.analyzePosture(poseLandmarks).overallPosture;
-    const gestureScore = this.gestureBuffer.length > 0 ? 75 : 60; // Placeholder for gesture analysis
-    const professionalism = (postureScore + gestureScore) / 2;
+    const gestureScore = this.gestureBuffer.length > 0 ? this.calculateGestureQuality() : 0; // Real gesture analysis only
+    const professionalism = gestureScore > 0 ? (postureScore + gestureScore) / 2 : postureScore;
 
-    // Calculate approachability from facial expressions and open gestures
-    const facialWarmth = faceLandmarks ? this.calculateFacialWarmth(faceLandmarks) : 50;
+    // Calculate approachability from facial expressions and open gestures - AUTHENTIC DATA ONLY
+    const facialWarmth = faceLandmarks ? this.calculateFacialWarmth(faceLandmarks) : 0; // Zero if no face data
     const openGestures = this.calculateOpenGestureFrequency();
-    const approachability = (facialWarmth + openGestures) / 2;
+    const approachability = facialWarmth > 0 && openGestures > 0 ? (facialWarmth + openGestures) / 2 : 0;
 
     // Calculate authority presence from posture and space usage
     const spaceUsage = this.calculateSpaceUsage(poseLandmarks);
@@ -610,33 +610,125 @@ export class BlazePoseEnhancedCV {
   }
 
   private calculateMovementVariation(gestures: any[]): number {
-    // Implementation for movement variation analysis
-    return 70; // Placeholder
+    if (!gestures || gestures.length < 2) return 0;
+    
+    // Calculate variation in gesture movements
+    let totalVariation = 0;
+    for (let i = 1; i < gestures.length; i++) {
+      const prev = gestures[i - 1];
+      const curr = gestures[i];
+      
+      if (prev && curr) {
+        const variation = this.calculateHandPositionChange(prev.left || prev.right, curr.left || curr.right);
+        totalVariation += variation;
+      }
+    }
+    
+    return gestures.length > 1 ? Math.round((totalVariation / (gestures.length - 1)) * 100) : 0;
   }
 
   private calculateGestureRhythm(gestures: any[]): number {
-    // Implementation for gesture rhythm analysis
-    return 75; // Placeholder
+    if (!gestures || gestures.length < 3) return 0;
+    
+    // Calculate rhythm consistency from gesture timing
+    let rhythmScore = 0;
+    let intervals: number[] = [];
+    
+    for (let i = 1; i < gestures.length; i++) {
+      if (gestures[i].timestamp && gestures[i - 1].timestamp) {
+        intervals.push(gestures[i].timestamp - gestures[i - 1].timestamp);
+      }
+    }
+    
+    if (intervals.length > 0) {
+      const avgInterval = intervals.reduce((sum, interval) => sum + interval, 0) / intervals.length;
+      const variance = intervals.reduce((sum, interval) => sum + Math.pow(interval - avgInterval, 2), 0) / intervals.length;
+      rhythmScore = Math.max(0, 100 - (Math.sqrt(variance) / avgInterval) * 100);
+    }
+    
+    return Math.round(rhythmScore);
   }
 
   private analyzeMouthExpression(faceLandmarks: FaceLandmark[]): { expression: number } {
-    // Implementation for mouth expression analysis
-    return { expression: 70 };
+    if (!faceLandmarks || faceLandmarks.length < 468) return { expression: 0 };
+    
+    // Analyze mouth expression using key landmarks
+    const mouthLeft = faceLandmarks[61];
+    const mouthRight = faceLandmarks[291];
+    const mouthTop = faceLandmarks[13];
+    const mouthBottom = faceLandmarks[14];
+    
+    if (!mouthLeft || !mouthRight || !mouthTop || !mouthBottom) return { expression: 0 };
+    
+    const mouthWidth = Math.abs(mouthRight.x - mouthLeft.x);
+    const mouthHeight = Math.abs(mouthTop.y - mouthBottom.y);
+    const expressionScore = mouthWidth / mouthHeight;
+    
+    return { expression: Math.min(100, Math.round(expressionScore * 50)) };
   }
 
   private analyzeEyebrowPosition(faceLandmarks: FaceLandmark[]): { movement: number } {
-    // Implementation for eyebrow analysis
-    return { movement: 65 };
+    if (!faceLandmarks || faceLandmarks.length < 468) return { movement: 0 };
+    
+    // Analyze eyebrow position using landmarks
+    const leftEyebrowOuter = faceLandmarks[46];
+    const leftEyebrowInner = faceLandmarks[70];
+    const rightEyebrowOuter = faceLandmarks[276];
+    const rightEyebrowInner = faceLandmarks[300];
+    
+    if (!leftEyebrowOuter || !leftEyebrowInner || !rightEyebrowOuter || !rightEyebrowInner) return { movement: 0 };
+    
+    // Calculate eyebrow height and movement
+    const leftHeight = Math.abs(leftEyebrowOuter.y - leftEyebrowInner.y);
+    const rightHeight = Math.abs(rightEyebrowOuter.y - rightEyebrowInner.y);
+    const movementScore = (leftHeight + rightHeight) * 100;
+    
+    return { movement: Math.min(100, Math.round(movementScore)) };
   }
 
   private analyzeEyeExpression(faceLandmarks: FaceLandmark[]): { movement: number } {
-    // Implementation for eye expression analysis
-    return { movement: 60 };
+    if (!faceLandmarks || faceLandmarks.length < 468) return { movement: 0 };
+    
+    // Analyze eye expression using eye landmarks
+    const leftEyeOuter = faceLandmarks[33];
+    const leftEyeInner = faceLandmarks[133];
+    const rightEyeOuter = faceLandmarks[362];
+    const rightEyeInner = faceLandmarks[263];
+    
+    if (!leftEyeOuter || !leftEyeInner || !rightEyeOuter || !rightEyeInner) return { movement: 0 };
+    
+    // Calculate eye openness and expression
+    const leftOpenness = Math.abs(leftEyeOuter.x - leftEyeInner.x);
+    const rightOpenness = Math.abs(rightEyeOuter.x - rightEyeInner.x);
+    const movementScore = (leftOpenness + rightOpenness) * 100;
+    
+    return { movement: Math.min(100, Math.round(movementScore)) };
   }
 
   private analyzeFacialSymmetry(faceLandmarks: FaceLandmark[]): { symmetry: number } {
-    // Implementation for facial symmetry analysis
-    return { symmetry: 85 };
+    if (!faceLandmarks || faceLandmarks.length < 468) return { symmetry: 0 };
+    
+    // Analyze facial symmetry using paired landmarks
+    const nose = faceLandmarks[1];
+    const leftMouth = faceLandmarks[61];
+    const rightMouth = faceLandmarks[291];
+    const leftEye = faceLandmarks[33];
+    const rightEye = faceLandmarks[263];
+    
+    if (!nose || !leftMouth || !rightMouth || !leftEye || !rightEye) return { symmetry: 0 };
+    
+    // Calculate symmetry based on distance from center
+    const noseCenterX = nose.x;
+    const leftMouthDistance = Math.abs(leftMouth.x - noseCenterX);
+    const rightMouthDistance = Math.abs(rightMouth.x - noseCenterX);
+    const leftEyeDistance = Math.abs(leftEye.x - noseCenterX);
+    const rightEyeDistance = Math.abs(rightEye.x - noseCenterX);
+    
+    const mouthSymmetry = 1 - Math.abs(leftMouthDistance - rightMouthDistance);
+    const eyeSymmetry = 1 - Math.abs(leftEyeDistance - rightEyeDistance);
+    
+    const symmetryScore = ((mouthSymmetry + eyeSymmetry) / 2) * 100;
+    return { symmetry: Math.max(0, Math.min(100, Math.round(symmetryScore))) };
   }
 
   private calculateConfidenceFromFace(mouth: any, eyebrow: any, eye: any): number {
@@ -655,39 +747,175 @@ export class BlazePoseEnhancedCV {
     return 100 - (eye.movement + mouth.expression) / 2;
   }
 
+  private calculateShoulderEnergy(poseLandmarks: PoseLandmark[]): number {
+    if (!poseLandmarks || poseLandmarks.length === 0) return 0;
+    
+    const leftShoulder = poseLandmarks[11];
+    const rightShoulder = poseLandmarks[12];
+    const nose = poseLandmarks[0];
+    
+    if (!leftShoulder || !rightShoulder || !nose) return 0;
+    
+    // Calculate shoulder alignment and openness
+    const shoulderHeight = Math.abs(leftShoulder.y - rightShoulder.y);
+    const shoulderWidth = Math.abs(leftShoulder.x - rightShoulder.x);
+    const centerAlignment = Math.abs((leftShoulder.x + rightShoulder.x) / 2 - nose.x);
+    
+    // Lower height difference and better alignment = higher energy/confidence
+    const alignmentScore = Math.max(0, 100 - shoulderHeight * 1000);
+    const widthScore = Math.min(100, shoulderWidth * 200);
+    const centerScore = Math.max(0, 100 - centerAlignment * 500);
+    
+    return Math.round((alignmentScore + widthScore + centerScore) / 3);
+  }
+
+  private calculateGestureQuality(): number {
+    if (this.gestureBuffer.length === 0) return 0;
+    
+    // Calculate quality of gestures from actual gesture data
+    let totalQuality = 0;
+    let validGestures = 0;
+    
+    for (const gesture of this.gestureBuffer) {
+      if (gesture.left || gesture.right) {
+        // Calculate naturalness and effectiveness of gestures
+        let gestureQuality = 0;
+        
+        if (gesture.left) {
+          gestureQuality += this.calculateOpenPalmScore([gesture.left]) * 10;
+        }
+        if (gesture.right) {
+          gestureQuality += this.calculateOpenPalmScore([gesture.right]) * 10;
+        }
+        
+        totalQuality += gestureQuality;
+        validGestures++;
+      }
+    }
+    
+    return validGestures > 0 ? Math.round(totalQuality / validGestures) : 0;
+  }
+
   private calculateBodyMovement(poseLandmarks: PoseLandmark[]): number {
-    // Implementation for body movement calculation
-    return 70;
+    if (!poseLandmarks || this.poseHistory.length < 2) return 0;
+    
+    // Calculate actual movement from pose history
+    const current = poseLandmarks;
+    const previous = this.poseHistory[this.poseHistory.length - 2];
+    
+    if (!previous) return 0;
+    
+    let totalMovement = 0;
+    let validLandmarks = 0;
+    
+    for (let i = 0; i < Math.min(current.length, previous.length); i++) {
+      if (current[i] && previous[i]) {
+        const dx = current[i].x - previous[i].x;
+        const dy = current[i].y - previous[i].y;
+        totalMovement += Math.sqrt(dx * dx + dy * dy);
+        validLandmarks++;
+      }
+    }
+    
+    return validLandmarks > 0 ? Math.round((totalMovement / validLandmarks) * 1000) : 0;
   }
 
   private calculatePostureEnergy(poseLandmarks: PoseLandmark[]): number {
-    // Implementation for posture energy calculation
-    return 75;
+    if (!poseLandmarks || poseLandmarks.length === 0) return 0;
+    
+    // Calculate energy from spine alignment and shoulder position
+    const spine = this.analyzePosture(poseLandmarks);
+    const shoulderEnergy = this.calculateShoulderEnergy(poseLandmarks);
+    
+    return Math.round((spine.overallPosture + shoulderEnergy) / 2);
   }
 
   private calculateFacialWarmth(faceLandmarks: FaceLandmark[]): number {
-    // Implementation for facial warmth calculation
-    return 80;
+    if (!faceLandmarks || faceLandmarks.length < 468) return 0;
+    
+    // Calculate facial warmth from mouth and eyebrow positions
+    const mouthCornerLeft = faceLandmarks[61];
+    const mouthCornerRight = faceLandmarks[291];
+    const mouthTop = faceLandmarks[13];
+    const mouthBottom = faceLandmarks[14];
+    
+    if (!mouthCornerLeft || !mouthCornerRight || !mouthTop || !mouthBottom) return 0;
+    
+    // Calculate smile indicator
+    const mouthWidth = Math.abs(mouthCornerRight.x - mouthCornerLeft.x);
+    const mouthHeight = Math.abs(mouthTop.y - mouthBottom.y);
+    const smileRatio = mouthWidth / mouthHeight;
+    
+    // Higher ratio indicates more smile/warmth
+    return Math.min(100, Math.round(smileRatio * 50));
   }
 
   private calculateOpenGestureFrequency(): number {
-    // Implementation for open gesture frequency
-    return 70;
+    if (this.gestureBuffer.length === 0) return 0;
+    
+    // Calculate actual open gesture frequency from gesture buffer
+    let openGestureCount = 0;
+    for (const gesture of this.gestureBuffer) {
+      if (gesture.left || gesture.right) {
+        // Check for open palm gestures in stored data
+        if (gesture.left) {
+          openGestureCount += this.calculateOpenPalmScore([gesture.left]);
+        }
+        if (gesture.right) {
+          openGestureCount += this.calculateOpenPalmScore([gesture.right]);
+        }
+      }
+    }
+    
+    // Calculate frequency as percentage
+    return this.gestureBuffer.length > 0 ? Math.round((openGestureCount / this.gestureBuffer.length) * 100) : 0;
   }
 
   private calculateSpaceUsage(poseLandmarks: PoseLandmark[]): number {
-    // Implementation for space usage calculation
-    return 75;
+    if (!poseLandmarks || poseLandmarks.length === 0) return 0;
+    
+    // Calculate actual space usage from pose landmarks
+    const leftShoulder = poseLandmarks[11];
+    const rightShoulder = poseLandmarks[12];
+    const leftHip = poseLandmarks[23];
+    const rightHip = poseLandmarks[24];
+    
+    if (!leftShoulder || !rightShoulder || !leftHip || !rightHip) return 0;
+    
+    const shoulderWidth = Math.abs(rightShoulder.x - leftShoulder.x);
+    const hipWidth = Math.abs(rightHip.x - leftHip.x);
+    const bodyWidth = Math.max(shoulderWidth, hipWidth);
+    
+    // Normalize based on frame width (assuming 0-1 coordinate system)
+    return Math.round(bodyWidth * 100);
   }
 
   private calculatePostureAuthority(poseLandmarks: PoseLandmark[]): number {
-    // Implementation for posture authority calculation
-    return 80;
+    if (!poseLandmarks || poseLandmarks.length === 0) return 0;
+    
+    const posture = this.analyzePosture(poseLandmarks);
+    const spaceUsage = this.calculateSpaceUsage(poseLandmarks);
+    
+    // Authority comes from good posture and confident space usage
+    return Math.round((posture.overallPosture * 0.7 + spaceUsage * 0.3));
   }
 
   private calculateEyeAspectRatio(faceLandmarks: FaceLandmark[]): number {
-    // Implementation for eye aspect ratio calculation (for blink detection)
-    return 0.3;
+    if (!faceLandmarks || faceLandmarks.length < 468) return 0;
+    
+    // Calculate actual Eye Aspect Ratio for blink detection
+    // Using MediaPipe face landmarks for left eye
+    const leftEyeTop = faceLandmarks[159];
+    const leftEyeBottom = faceLandmarks[145];
+    const leftEyeLeft = faceLandmarks[33];
+    const leftEyeRight = faceLandmarks[133];
+    
+    if (!leftEyeTop || !leftEyeBottom || !leftEyeLeft || !leftEyeRight) return 0;
+    
+    const eyeHeight = Math.abs(leftEyeTop.y - leftEyeBottom.y);
+    const eyeWidth = Math.abs(leftEyeRight.x - leftEyeLeft.x);
+    
+    return eyeWidth > 0 ? eyeHeight / eyeWidth : 0;
   }
 
   // Real-time streaming method

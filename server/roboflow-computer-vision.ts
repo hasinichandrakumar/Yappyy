@@ -1,4 +1,5 @@
 // Roboflow Computer Vision Integration - Enhanced Body Language and Gesture Analysis
+// @ts-ignore: Ignore TypeScript errors for roboflow module
 import * as roboflow from "roboflow";
 
 interface RoboflowConfig {
@@ -47,6 +48,7 @@ interface BodyLanguageMetrics {
 export class RoboflowVisionEngine {
   private models: Map<string, any> = new Map();
   private isInitialized = false;
+  private rf: any; // Roboflow instance
   private performanceMetrics = {
     totalFrames: 0,
     successfulAnalyses: 0,
@@ -65,7 +67,7 @@ export class RoboflowVisionEngine {
         return;
       }
 
-      this.rf = new Roboflow({
+      this.rf = (roboflow as any)({
         publishable_key: process.env.ROBOFLOW_API_KEY
       });
 
@@ -73,8 +75,8 @@ export class RoboflowVisionEngine {
       await this.loadModels();
       this.isInitialized = true;
       console.log('🤖 Roboflow Computer Vision Engine initialized successfully');
-    } catch (error) {
-      console.error('❌ Failed to initialize Roboflow:', error);
+    } catch (error: any) {
+      console.error('❌ Failed to initialize Roboflow:', error.message || error);
     }
   }
 
@@ -93,8 +95,8 @@ export class RoboflowVisionEngine {
       this.models.set('facial', await faceModel.load());
 
       console.log('📚 Roboflow models loaded: posture, gestures, facial');
-    } catch (error) {
-      console.warn('⚠️ Some Roboflow models failed to load, using fallback detection');
+    } catch (error: any) {
+      console.warn('⚠️ Some Roboflow models failed to load, using fallback detection:', error.message || error);
     }
   }
 
@@ -210,7 +212,7 @@ export class RoboflowVisionEngine {
       return confidenceScore;
     }
     
-    return 65; // Base confidence if limited detection
+    return 0; // No confidence if limited detection
   }
 
   private calculateAlignment(predictions: any[]): number {
@@ -223,7 +225,7 @@ export class RoboflowVisionEngine {
       return alignmentScore;
     }
     
-    return 70;
+    return 0; // No authentic data available
   }
 
   private calculateOpenness(predictions: any[]): number {
@@ -255,7 +257,7 @@ export class RoboflowVisionEngine {
       return movementScore;
     }
     
-    return 45;
+    return 0; // No authentic data available
   }
 
   private calculateGestureEffectiveness(predictions: any[]): number {
@@ -417,12 +419,12 @@ export async function analyzeVideoFrame(req: any, res: any) {
       timestamp: new Date().toISOString(),
       engine: 'roboflow-enhanced'
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Roboflow analysis error:', error);
     res.status(500).json({ 
       error: 'Analysis failed',
       fallback: true,
-      message: error.message 
+      message: error?.message || 'Unknown error'
     });
   }
 }
@@ -444,11 +446,11 @@ export async function trainCustomVisionModel(req: any, res: any) {
       message: success ? 'Training initiated' : 'Training failed',
       timestamp: new Date().toISOString()
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Model training error:', error);
     res.status(500).json({ 
       error: 'Training failed',
-      message: error.message 
+      message: error?.message || 'Unknown error'
     });
   }
 }
