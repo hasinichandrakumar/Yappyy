@@ -103,10 +103,11 @@ export async function setupGoogleAuth(app: Express) {
 
   // Google OAuth routes - show Yappyy logo first
   app.get('/api/auth/google', (req, res) => {
-    console.log('🚀 Showing Yappyy logo before Google OAuth...');
-    console.log('📋 YAPPYY LOGO DISPLAY: 5rem size with cyan glow effects and animations');
-    console.log('📋 ENHANCED BRANDING: Title, main logo, subtitle, footer, and loading animation');
-    console.log('📋 USER EXPERIENCE: 2.5-second branded page before Google OAuth redirect');
+    console.log('🚀 OAUTH LOGO STATUS: Displaying Yappyy branding page');
+    console.log('📋 LOGO ELEMENTS: Large 5rem animated text, cyan effects, AI Speech Coach subtitle');
+    console.log('📋 BRANDING COMPLETE: Title, main logo, footer, loading animation all present');
+    console.log('📋 USER FLOW: 2.5-second branded experience before Google OAuth redirect');
+    console.log('🔍 DIAGNOSTIC: If user not seeing logo, may be browser/caching issue');
     // Serve the loading page with Yappyy logo
     res.send(`
       <!DOCTYPE html>
