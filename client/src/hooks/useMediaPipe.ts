@@ -22,16 +22,14 @@ export function useMediaPipe() {
       // For now, we'll simulate the initialization
       setIsInitialized(true);
       
-      // Simulate random pose detection results
-      const interval = setInterval(() => {
-        setResult({
-          posture: 60 + Math.random() * 30, // 60-90%
-          gesture: 55 + Math.random() * 35, // 55-90%
-          eyeContact: 50 + Math.random() * 40 // 50-90%
-        });
-      }, 2000);
+      // Initialize MediaPipe but return zero values until real analysis
+      setResult({
+        posture: 0, // Will be updated when real pose data available
+        gesture: 0, // Will be updated when real gesture data available
+        eyeContact: 0 // Will be updated when real eye tracking data available
+      });
 
-      return () => clearInterval(interval);
+      // No interval to clear for authentic data implementation
     } catch (error) {
       console.error("Failed to initialize MediaPipe:", error);
     }

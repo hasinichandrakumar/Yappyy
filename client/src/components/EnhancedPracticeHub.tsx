@@ -689,46 +689,171 @@ export default function EnhancedPracticeHub() {
     }));
   };
 
-  // Helper functions for analysis calculations
-  const computeGazeVector = (leftIris: any[], rightIris: any[]) => ({ x: 0.5, y: 0.5 });
-  const isGazeDirectedAtCamera = (vector: any) => true;
-  const calculateGazeAccuracy = (vector: any) => 0.85;
-  const calculateGazeSteadiness = (vector: any) => 0.9;
-  const analyzeEyebrowDynamics = (landmarks: any[]) => ({ surprise: 0.3, concern: 0.2 });
-  const analyzeMouthDynamics = (landmarks: any[]) => ({ confidence: 0.8, tension: 0.2 });
-  const calculateFacialTension = (landmarks: any[]) => 0.3;
-  const calculateFacialEngagement = (landmarks: any[]) => 0.85;
-  const analyzeFacialConfidence = (landmarks: any[]) => ({ overall: 0.82 });
-  const analyzeSpinalAlignment = (landmarks: any[]) => ({ alignment: 0.88 });
-  const analyzeShoulderDynamics = (landmarks: any[]) => ({ symmetry: 0.92 });
-  const analyzeStanceStability = (landmarks: any[]) => ({ stability: 0.85 });
-  const calculatePresenceIndicators = (landmarks: any[]) => ({ overall: 0.87 });
-  const analyzeGestureRhythm = (left: any, right: any) => ({ energy: 0.75 });
-  const analyzeSpatialGestureUsage = (left: any, right: any) => ({ optimization: 0.8 });
-  const analyzeGestureSpeechSync = (left: any, right: any) => ({ sync: 0.82 });
-  const assessGestureProfessionalism = (left: any, right: any) => ({ score: 0.78 });
-
-  const handleFaceResults = (results: any) => {
-    // Process face mesh results for detailed analysis
+  // Real computer vision analysis functions - AUTHENTIC DATA ONLY
+  const computeGazeVector = (leftIris: any[], rightIris: any[]) => {
+    if (!leftIris?.length || !rightIris?.length) return { x: 0, y: 0 };
+    // Calculate actual gaze direction from iris landmarks
+    const leftCenter = { x: leftIris[0]?.x || 0, y: leftIris[0]?.y || 0 };
+    const rightCenter = { x: rightIris[0]?.x || 0, y: rightIris[0]?.y || 0 };
+    return { x: (leftCenter.x + rightCenter.x) / 2, y: (leftCenter.y + rightCenter.y) / 2 };
+  };
+  
+  const isGazeDirectedAtCamera = (vector: any) => {
+    if (!vector) return false;
+    // Check if gaze vector is within camera direction threshold
+    return Math.abs(vector.x - 0.5) < 0.2 && Math.abs(vector.y - 0.5) < 0.2;
+  };
+  
+  const calculateGazeAccuracy = (vector: any) => {
+    if (!vector) return 0;
+    // Calculate distance from center (0.5, 0.5) and convert to accuracy percentage
+    const distance = Math.sqrt(Math.pow(vector.x - 0.5, 2) + Math.pow(vector.y - 0.5, 2));
+    return Math.max(0, Math.min(100, (1 - distance) * 100));
+  };
+  
+  const calculateGazeSteadiness = (vector: any) => {
+    if (!vector) return 0;
+    // Real implementation would track gaze stability over time
+    return 0; // Return 0 until real tracking is implemented
+  };
+  
+  const analyzeEyebrowDynamics = (landmarks: any[]) => {
+    if (!landmarks?.length) return { surprise: 0, concern: 0 };
+    // Real eyebrow analysis would measure landmark distances
+    return { surprise: 0, concern: 0 }; // Return 0 until real analysis
+  };
+  
+  const analyzeMouthDynamics = (landmarks: any[]) => {
+    if (!landmarks?.length) return { confidence: 0, tension: 0 };
+    // Real mouth analysis would measure lip positions and curves
+    return { confidence: 0, tension: 0 }; // Return 0 until real analysis
+  };
+  
+  const calculateFacialTension = (landmarks: any[]) => {
+    if (!landmarks?.length) return 0;
+    // Real tension analysis would measure facial muscle indicators
+    return 0; // Return 0 until real analysis
+  };
+  
+  const calculateFacialEngagement = (landmarks: any[]) => {
+    if (!landmarks?.length) return 0;
+    // Real engagement analysis would measure facial expressions
+    return 0; // Return 0 until real analysis
+  };
+  
+  const analyzeFacialConfidence = (landmarks: any[]) => {
+    if (!landmarks?.length) return { overall: 0 };
+    // Real confidence analysis would measure facial cues
+    return { overall: 0 }; // Return 0 until real analysis
+  };
+  
+  const analyzeSpinalAlignment = (landmarks: any[]) => {
+    if (!landmarks?.length) return { alignment: 0 };
+    // Real spinal analysis would measure shoulder and hip alignment
+    return { alignment: 0 }; // Return 0 until real analysis
+  };
+  
+  const analyzeShoulderDynamics = (landmarks: any[]) => {
+    if (!landmarks?.length) return { symmetry: 0 };
+    // Real shoulder analysis would measure shoulder position symmetry
+    return { symmetry: 0 }; // Return 0 until real analysis
+  };
+  
+  const analyzeStanceStability = (landmarks: any[]) => {
+    if (!landmarks?.length) return { stability: 0 };
+    // Real stance analysis would measure body stability metrics
+    return { stability: 0 }; // Return 0 until real analysis
+  };
+  
+  const calculatePresenceIndicators = (landmarks: any[]) => {
+    if (!landmarks?.length) return { overall: 0 };
+    // Real presence analysis would combine multiple body language factors
+    return { overall: 0 }; // Return 0 until real analysis
+  };
+  
+  const analyzeGestureRhythm = (left: any, right: any) => {
+    if (!left && !right) return { energy: 0 };
+    // Real gesture rhythm would track hand movement patterns
+    return { energy: 0 }; // Return 0 until real analysis
+  };
+  
+  const analyzeSpatialGestureUsage = (left: any, right: any) => {
+    if (!left && !right) return { optimization: 0 };
+    // Real spatial analysis would measure gesture space usage
+    return { optimization: 0 }; // Return 0 until real analysis
+  };
+  
+  const analyzeGestureSpeechSync = (left: any, right: any) => {
+    if (!left && !right) return { sync: 0 };
+    // Real sync analysis would correlate gestures with speech timing
+    return { sync: 0 }; // Return 0 until real analysis
+  };
+  
+  const assessGestureProfessionalism = (left: any, right: any) => {
+    if (!left && !right) return { score: 0 };
+    // Real professionalism assessment would evaluate gesture appropriateness
+    return { score: 0 }; // Return 0 until real analysis
   };
 
-  // Live analytics and feedback updates
+  const handleFaceResults = (results: any) => {
+    // Process face mesh results for detailed analysis - AUTHENTIC DATA ONLY
+    if (results?.multiFaceLandmarks?.[0]) {
+      const landmarks = results.multiFaceLandmarks[0];
+      // Update facial analysis state with real data
+      facialAnalysisState.current = {
+        confidence: calculateFacialEngagement(landmarks),
+        engagement: analyzeFacialConfidence(landmarks).overall
+      };
+    } else {
+      // No face detected - return zero values
+      facialAnalysisState.current = { confidence: 0, engagement: 0 };
+    }
+  };
+
+  // Enhanced real-time state tracking for authentic computer vision data
+  const facialAnalysisState = useRef<any>({ confidence: 0, engagement: 0 });
+  const postureState = useRef<any>({ confidence: 0 });
+  const gestureState = useRef<any>({ naturalness: 0 });
+  const eyeContactState = useRef<any>({ percentage: 0 });
+
+  // Live analytics and feedback updates  
   useEffect(() => {
     if (!isRecording) return;
 
     const interval = setInterval(() => {
-      // Update analytics with realistic variations
+      // Get real-time metrics from computer vision and speech analysis
+      const currentMetrics = {
+        facialAnalysis: facialAnalysisState.current?.confidence ? {
+          confidence: facialAnalysisState.current.confidence,
+          engagement: facialAnalysisState.current.engagement
+        } : null,
+        speechAnalysis: null, // Will be updated with real speech analysis
+        eyeContact: eyeContactState.current ? {
+          percentage: eyeContactState.current.percentage
+        } : null,
+        posture: postureState.current ? {
+          confidence: postureState.current.confidence
+        } : null,
+        gestures: gestureState.current ? {
+          naturalness: gestureState.current.naturalness
+        } : null,
+        voiceAnalysis: null, // Will be updated with real voice analysis
+        bodyLanguage: null, // Will be updated with real body language analysis
+        overall: null // Will be updated with real overall analysis
+      };
+
+      // Update analytics with ONLY authentic data or 0
       setAnalytics(prev => ({
-        confidence: Math.max(0, Math.min(100, prev.confidence + (Math.random() - 0.5) * 5)),
-        engagement: Math.max(0, Math.min(100, prev.engagement + (Math.random() - 0.5) * 3)),
-        clarity: Math.max(0, Math.min(100, prev.clarity + (Math.random() - 0.5) * 2)),
-        pace: wordsPerMinute || Math.max(80, Math.min(220, prev.pace + (Math.random() - 0.5) * 10)),
-        eyeContact: Math.max(0, Math.min(100, prev.eyeContact + (Math.random() - 0.5) * 8)),
-        posture: Math.max(0, Math.min(100, prev.posture + (Math.random() - 0.5) * 4)),
-        gestures: Math.max(0, Math.min(100, prev.gestures + (Math.random() - 0.5) * 6)),
-        voiceStability: Math.max(0, Math.min(100, prev.voiceStability + (Math.random() - 0.5) * 3)),
-        energyLevel: Math.max(0, Math.min(100, prev.energyLevel + (Math.random() - 0.5) * 7)),
-        professionalPresence: Math.max(0, Math.min(100, prev.professionalPresence + (Math.random() - 0.5) * 2))
+        confidence: currentMetrics?.facialAnalysis?.confidence || 0, // Use real facial analysis or 0
+        engagement: currentMetrics?.facialAnalysis?.engagement || 0, // Use real facial analysis or 0  
+        clarity: currentMetrics?.speechAnalysis?.clarity || 0, // Use real speech analysis or 0
+        pace: wordsPerMinute || 0, // Use real WPM or 0
+        eyeContact: currentMetrics?.eyeContact?.percentage || 0, // Use real eye tracking or 0
+        posture: currentMetrics?.posture?.confidence || 0, // Use real posture analysis or 0
+        gestures: currentMetrics?.gestures?.naturalness || 0, // Use real gesture analysis or 0
+        voiceStability: currentMetrics?.voiceAnalysis?.stability || 0, // Use real voice analysis or 0
+        energyLevel: currentMetrics?.bodyLanguage?.energy || 0, // Use real body language or 0
+        professionalPresence: currentMetrics?.overall?.presence || 0 // Use real overall analysis or 0
       }));
 
       // Generate live feedback based on current analytics
