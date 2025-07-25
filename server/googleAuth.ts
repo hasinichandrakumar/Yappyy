@@ -104,8 +104,6 @@ export async function setupGoogleAuth(app: Express) {
   // Google OAuth routes - show Yappyy logo first
   app.get('/api/auth/google', (req, res) => {
     console.log('🚀 Showing Yappyy logo before Google OAuth...');
-    const fs = require('fs');
-    const logoBase64 = fs.readFileSync('attached_assets/Y-2-removebg-preview_1753400460424.png', 'base64');
     // Serve the loading page with Yappyy logo
     res.send(`
       <!DOCTYPE html>
@@ -242,7 +240,7 @@ export async function setupGoogleAuth(app: Express) {
       <body>
         <div class="container">
           <div class="logo-placeholder">
-            <img src="data:image/png;base64,${logoBase64}" alt="Yappyy" style="height: 80px; width: auto; filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.5));" />
+            <div class="logo-text">Yappyy</div>
           </div>
           
           <div class="spinner"></div>
