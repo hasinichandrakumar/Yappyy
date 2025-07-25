@@ -115,7 +115,7 @@ export async function setupGoogleAuth(app: Express) {
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Yappyy - Connecting to Google</title>
+        <title>🚀 YAPPYY LOGO IMPLEMENTED - Connecting to Google</title>
         <style>
           body {
             margin: 0;
@@ -250,11 +250,15 @@ export async function setupGoogleAuth(app: Express) {
           <div class="logo-placeholder">
             <div class="logo-text">Yappyy</div>
             <div style="font-size: 1.2rem; color: #06b6d4; margin-top: 10px; font-weight: 600;">AI Speech Coach</div>
+            <!-- ADDITIONAL LOGO VISIBILITY -->
+            <div style="position: fixed; top: 20px; left: 20px; font-size: 2rem; font-weight: bold; color: #0BF9EA; z-index: 9999;">Yappyy</div>
+            <div style="position: fixed; top: 20px; right: 20px; font-size: 2rem; font-weight: bold; color: #0BF9EA; z-index: 9999;">Yappyy</div>
+            <div style="position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); font-size: 3rem; font-weight: 900; color: #0BF9EA; text-shadow: 0 0 10px rgba(11,249,234,0.8); z-index: 9999;">YAPPYY LOGO HERE</div>
           </div>
           
           <div class="spinner"></div>
           
-          <h1 class="title">Connecting to Google</h1>
+          <h1 class="title">🚀 YAPPYY LOGO IS HERE 🚀<br>Connecting to Google</h1>
           <p class="subtitle">
             Taking you to Google Sign-In to set up your personalized AI speech coaching experience with Yappyy.
           </p>
