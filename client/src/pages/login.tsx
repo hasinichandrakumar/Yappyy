@@ -51,7 +51,7 @@ export default function LoginPage() {
           <div className="text-center mb-8">
             <div className="flex justify-center mb-6">
               <button onClick={() => window.location.href = '/'} className="hover:opacity-80 transition-opacity">
-                <img src={yappyyLogoPath} alt="Yappyy" className="h-16 w-auto" />
+                <img src={yappyyLogoPath} alt="Yappyy" className="h-20 w-auto" />
               </button>
             </div>
             <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back to Yappyy</h2>

@@ -28,7 +28,7 @@ export default function OAuthLoadingPage() {
           <img 
             src={yappyyLogo} 
             alt="Yappyy" 
-            className="h-24 w-auto animate-pulse"
+            className="h-28 w-auto animate-pulse"
           />
         </div>
         
