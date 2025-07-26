@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -11,7 +12,9 @@ import {
   Mic, Square, Edit3, Save, Eye, 
   Activity, TrendingUp, FileText, Users,
   Video, Play, Pause, RotateCcw, Download,
-  Library, Camera
+  Library, Camera, Briefcase, GraduationCap,
+  Heart, Target, BookOpen, BarChart3, Award,
+  Presentation, Building, Lightbulb
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { SessionDataViewer } from '@/components/SessionDataViewer';
@@ -61,6 +64,76 @@ interface LiveFeedback {
   type: 'success' | 'warning' | 'info';
   timestamp: number;
 }
+
+// Session purpose options that correlate with template categories
+const SESSION_PURPOSE_OPTIONS = [
+  { 
+    value: 'business-presentation', 
+    label: 'Business Presentation', 
+    icon: Briefcase,
+    description: 'Professional presentations, pitches, and reports'
+  },
+  { 
+    value: 'academic-presentation', 
+    label: 'Academic Presentation', 
+    icon: GraduationCap,
+    description: 'School projects, research, and educational talks'
+  },
+  { 
+    value: 'job-interview', 
+    label: 'Job Interview', 
+    icon: Users,
+    description: 'Interview preparation and career discussions'
+  },
+  { 
+    value: 'sales-presentation', 
+    label: 'Sales Pitch', 
+    icon: BarChart3,
+    description: 'Sales presentations and product demos'
+  },
+  { 
+    value: 'wedding-speech', 
+    label: 'Wedding Speech', 
+    icon: Heart,
+    description: 'Wedding toasts, ceremonies, and celebrations'
+  },
+  { 
+    value: 'motivational-speech', 
+    label: 'Motivational Speech', 
+    icon: Target,
+    description: 'Inspirational talks and team motivation'
+  },
+  { 
+    value: 'keynote-presentation', 
+    label: 'Keynote/TED Talk', 
+    icon: Presentation,
+    description: 'Conference keynotes and thought leadership'
+  },
+  { 
+    value: 'team-meeting', 
+    label: 'Team Meeting', 
+    icon: Building,
+    description: 'Team updates, project discussions, and meetings'
+  },
+  { 
+    value: 'storytelling', 
+    label: 'Storytelling', 
+    icon: BookOpen,
+    description: 'Narrative presentations and creative speaking'
+  },
+  { 
+    value: 'networking-pitch', 
+    label: 'Networking Pitch', 
+    icon: Lightbulb,
+    description: 'Elevator pitches and networking introductions'
+  },
+  { 
+    value: 'general-presentation', 
+    label: 'General Practice', 
+    icon: FileText,
+    description: 'General speaking practice and skill building'
+  }
+];
 
 export default function SimplifiedPracticePage() {
   // Core session state
@@ -1511,22 +1584,65 @@ export default function SimplifiedPracticePage() {
                 )}
                 
                 {isEditingPurpose ? (
-                  <div className="flex items-center gap-2 mt-2">
-                    <Textarea
-                      value={sessionPurpose}
-                      onChange={(e) => setSessionPurpose(e.target.value)}
-                      placeholder="What's your goal for this session?"
-                      className="min-h-[60px]"
-                    />
-                    <Button size="sm" onClick={saveSessionPurpose}>
-                      <Save className="w-4 h-4" />
-                    </Button>
+                  <div className="space-y-3 mt-2">
+                    <Select value={sessionPurpose} onValueChange={setSessionPurpose}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select session purpose..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SESSION_PURPOSE_OPTIONS.map((option) => {
+                          const IconComponent = option.icon;
+                          return (
+                            <SelectItem key={option.value} value={option.value}>
+                              <div className="flex items-center gap-2">
+                                <IconComponent className="w-4 h-4" />
+                                <div className="flex flex-col">
+                                  <span className="font-medium">{option.label}</span>
+                                  <span className="text-xs text-gray-500">{option.description}</span>
+                                </div>
+                              </div>
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={saveSessionPurpose}>
+                        <Save className="w-4 h-4" />
+                        Save Purpose
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => setIsEditingPurpose(false)}>
+                        Cancel
+                      </Button>
+                    </div>
                   </div>
                 ) : (
                   <div className="flex items-center gap-2 mt-2">
-                    <p className="text-lg font-semibold text-gray-700">
-                      {sessionPurpose || "Click to set your session goal"}
-                    </p>
+                    {sessionPurpose ? (
+                      <div className="flex items-center gap-2">
+                        {(() => {
+                          const purposeOption = SESSION_PURPOSE_OPTIONS.find(opt => opt.value === sessionPurpose);
+                          const IconComponent = purposeOption?.icon || FileText;
+                          return (
+                            <>
+                              <IconComponent className="w-5 h-5 text-blue-600" />
+                              <div className="flex flex-col">
+                                <span className="text-lg font-semibold text-gray-700">
+                                  {purposeOption?.label || sessionPurpose}
+                                </span>
+                                <span className="text-sm text-gray-500">
+                                  {purposeOption?.description || "Custom session purpose"}
+                                </span>
+                              </div>
+                            </>
+                          );
+                        })()}
+                      </div>
+                    ) : (
+                      <p className="text-lg font-semibold text-gray-700">
+                        Click to set your session purpose
+                      </p>
+                    )}
                     <Button variant="ghost" size="sm" onClick={() => setIsEditingPurpose(true)}>
                       <Edit3 className="w-4 h-4" />
                     </Button>
