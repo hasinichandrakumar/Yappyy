@@ -18,26 +18,33 @@ export default function OAuthLoadingPage() {
       <div className="text-center space-y-12 max-w-md">
         {/* Massive Yappyy Logo */}
         <div className="flex justify-center">
-          <div className="bg-white p-12 rounded-full shadow-2xl animate-bounce">
+          <div className="bg-white p-16 rounded-full shadow-2xl animate-pulse border-8 border-white/30">
             <img 
               src={yappyyLogo} 
               alt="Yappyy - AI Speech Training" 
-              className="h-32 w-auto"
+              className="h-40 w-auto"
             />
           </div>
         </div>
         
         {/* Welcome Message */}
-        <div className="space-y-6">
-          <h1 className="text-6xl font-extrabold text-white font-poppins drop-shadow-lg">
-            Welcome to
-          </h1>
-          <h2 className="text-8xl font-black text-white font-poppins drop-shadow-xl tracking-wider">
-            YAPPYY
-          </h2>
-          <p className="text-2xl text-white/90 font-medium drop-shadow-md">
-            Connecting to Google Authentication...
-          </p>
+        <div className="space-y-8">
+          <div className="space-y-4">
+            <h1 className="text-7xl font-extrabold text-white font-poppins drop-shadow-2xl">
+              Welcome to
+            </h1>
+            <h2 className="text-9xl font-black text-white font-poppins drop-shadow-2xl tracking-wider transform scale-110">
+              YAPPYY
+            </h2>
+          </div>
+          <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-6 border border-white/30">
+            <p className="text-3xl text-white font-bold drop-shadow-lg">
+              🚀 Connecting to Google
+            </p>
+            <p className="text-xl text-white/90 font-medium mt-2">
+              AI-Powered Speech Training
+            </p>
+          </div>
         </div>
         
         {/* Loading Animation */}
