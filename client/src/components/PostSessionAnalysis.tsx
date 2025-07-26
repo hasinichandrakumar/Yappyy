@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { useVoiceAnalysis } from "@/hooks/useVoiceAnalysis";
+import { useMutation } from '@tanstack/react-query';
 
 interface SessionAnalysis {
   overallScore: number;
@@ -34,6 +35,13 @@ interface SessionAnalysis {
   keyInsights: string[];
   roleplayContext?: string;
   audienceType?: string;
+  contentAnalysis?: {
+    overall: { score: number; grade: string; confidence: number };
+    persuasiveness: { score: number; techniques: string[]; credibilityScore: number };
+    clarity: { score: number; fleschScore: number; readabilityGrade: number };
+    engagement: { score: number; attentionHooks: string[]; urgencyLevel: number };
+    professionalism: { score: number; vocabularyLevel: number; grammarScore: number };
+  };
 }
 
 interface PostSessionAnalysisProps {
@@ -53,6 +61,18 @@ export default function PostSessionAnalysis({
   const { voiceClarity, confidenceScore } = useVoiceAnalysis();
   
   const [analysis, setAnalysis] = useState<SessionAnalysis | null>(null);
+
+  // Advanced content analysis mutation
+  const contentAnalysisMutation = useMutation({
+    mutationFn: async (text: string) => {
+      const response = await fetch('/api/advanced-content-analysis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transcript: text })
+      });
+      return await response.json();
+    }
+  });
   const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {

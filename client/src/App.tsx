@@ -16,6 +16,7 @@ import AccuracyTestSuite from "@/components/AccuracyTestSuite";
 import OAuthLoadingPage from "@/components/OAuthLoadingPage";
 import OAuthCallbackPage from "@/components/OAuthCallbackPage";
 import InteractiveCommunicationStats from "@/components/InteractiveCommunicationStats";
+import ContentAnalysisPage from "@/pages/content-analysis";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -62,6 +63,7 @@ function Router() {
       <Route path="/logo" component={LogoExport} />
       <Route path="/test" component={AccuracyTestSuite} />
       <Route path="/stats" component={InteractiveCommunicationStats} />
+      <Route path="/content-analysis" component={ContentAnalysisPage} />
       <Route path="/oauth-loading" component={OAuthLoadingPage} />
       <Route path="/oauth2callback" component={OAuthCallbackPage} />
       <Route path="*" component={Dashboard} />
