@@ -448,7 +448,7 @@ export default function PeppyAICoach() {
                 </Button>
                 {user.id === 'demo-user-123' && (
                   <Button
-                    onClick={() => window.location.href = '/oauth-loading'}
+                    onClick={() => window.location.href = '/api/auth/google'}
                     className="flex items-center gap-3 bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 shadow-md hover:shadow-lg transition-all duration-200"
                   >
                     <SiGoogle className="w-4 h-4" />
@@ -463,7 +463,7 @@ export default function PeppyAICoach() {
                   <p className="text-xs text-gray-500">Sign in to save your progress</p>
                 </div>
                 <Button
-                  onClick={() => window.location.href = '/oauth-loading'}
+                  onClick={() => window.location.href = '/api/auth/google'}
                   className="flex items-center gap-3 bg-white text-gray-700 border-2 border-blue-300 hover:bg-blue-50 hover:border-blue-400 px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-200 font-medium"
                 >
                   <SiGoogle className="w-5 h-5 text-red-500" />

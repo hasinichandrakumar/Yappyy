@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import yappyyLogo from '@assets/Y-2-removebg-preview_1753384287580.png';
 
@@ -7,52 +8,50 @@ export default function OAuthLoadingPage() {
     // Auto-redirect to Google OAuth after showing Yappyy branding
     const timer = setTimeout(() => {
       window.location.href = '/api/auth/google';
-    }, 2000);
+    }, 1500);
 
     return () => clearTimeout(timer);
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-cyan-500 flex items-center justify-center p-4 animate-gradient-x">
-      {/* Full Screen Yappyy Branding */}
-      <div className="text-center space-y-12 max-w-md">
-        {/* Massive Yappyy Logo */}
-        <div className="flex justify-center">
-          <div className="bg-white p-16 rounded-full shadow-2xl animate-pulse border-8 border-white/30">
-            <img 
-              src={yappyyLogo} 
-              alt="Yappyy - AI Speech Training" 
-              className="h-40 w-auto"
-            />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+      <Card className="w-full max-w-lg border-2 border-blue-100 shadow-2xl">
+        <CardContent className="p-12 text-center space-y-8">
+          {/* Large Yappyy Logo */}
+          <div className="flex justify-center">
+            <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-6 rounded-2xl shadow-2xl">
+              <img 
+                src={yappyyLogo} 
+                alt="Yappyy - AI Speech Training" 
+                className="h-16 w-auto filter brightness-0 invert animate-pulse"
+              />
+            </div>
           </div>
-        </div>
-        
-        {/* Welcome Message */}
-        <div className="space-y-8">
+          
+          {/* Connecting Message */}
           <div className="space-y-4">
-            <h1 className="text-7xl font-extrabold text-white font-poppins drop-shadow-2xl">
-              Welcome to
+            <h1 className="text-3xl font-extrabold text-gray-900 font-poppins">
+              Connecting to Google
             </h1>
-            <h2 className="text-9xl font-black text-white font-poppins drop-shadow-2xl tracking-wider transform scale-110">
-              YAPPYY
-            </h2>
-          </div>
-          <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-6 border border-white/30">
-            <p className="text-3xl text-white font-bold drop-shadow-lg">
-              🚀 Connecting to Google
-            </p>
-            <p className="text-xl text-white/90 font-medium mt-2">
-              AI-Powered Speech Training
+            <p className="text-lg text-gray-600 font-medium">
+              Redirecting you to Google's secure sign-in...
             </p>
           </div>
-        </div>
-        
-        {/* Loading Animation */}
-        <div className="flex justify-center items-center space-x-4">
-          <Loader2 className="h-8 w-8 animate-spin text-white" />
-          <span className="text-white text-xl font-semibold">Authenticating</span>
-        </div>
-      </div>
+          
+          {/* Loading Animation */}
+          <div className="flex justify-center items-center space-x-3">
+            <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+            <span className="text-blue-600 font-semibold">Authenticating</span>
+          </div>
+          
+          {/* Yappyy Branding Footer */}
+          <div className="pt-6 border-t border-gray-100">
+            <p className="text-sm text-gray-500">
+              Powered by <span className="font-bold text-blue-600">Yappyy</span> AI Speech Training
+            </p>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
