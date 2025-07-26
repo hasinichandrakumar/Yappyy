@@ -633,11 +633,11 @@ export class AdvancedComputerVisionEngine {
   }
 
   private calculateGestureEffectiveness(keypoints: HandKeypoint[]): number {
-    return 0.75 + 0
+    return 0; // No fake data - only real gesture metrics
   }
 
   private calculateNaturalFlow(keypoints: PoseKeypoint[]): number {
-    return 0.85 + 0
+    return 0; // No fake data - only real flow metrics
   }
 
   /**
