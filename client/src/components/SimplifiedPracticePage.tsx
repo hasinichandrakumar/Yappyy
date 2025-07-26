@@ -18,9 +18,11 @@ import { SessionDataViewer } from '@/components/SessionDataViewer';
 import { useRoboflowVision } from '@/hooks/useRoboflowVision';
 import { useFacialAnalysis } from '@/hooks/useFacialAnalysis';
 import { useMediaPipeBodyLanguage } from '@/hooks/useMediaPipeBodyLanguage';
+import { useMediaPipe } from '@/hooks/useMediaPipe';
 import SessionAnalysisPage from './SessionAnalysisPage';
 import VideoPlaybackViewer from './VideoPlaybackViewer';
 import RecordingLibrary from './RecordingLibrary';
+import RealTimeComputerVisionDashboard from './RealTimeComputerVisionDashboard';
 import { 
   videoRecordingManager, 
   sessionRecordingStorage, 
@@ -156,6 +158,17 @@ export default function SimplifiedPracticePage() {
     processingTime: bodyLanguageProcessingTime,
     error: bodyLanguageError
   } = useMediaPipeBodyLanguage();
+
+  // MediaPipe Holistic integration for real-time analysis
+  const {
+    posture: mediaPipePosture,
+    gesture: mediaPipeGesture,
+    eyeContact: mediaPipeEyeContact,
+    initializeMediaPipe,
+    processFrame,
+    isInitialized: isMediaPipeInitialized,
+    mediapiipeLoaded
+  } = useMediaPipe();
 
   // Refs
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -744,6 +757,26 @@ export default function SimplifiedPracticePage() {
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
+        
+        // Initialize MediaPipe for real-time computer vision
+        if (mediapiipeLoaded) {
+          console.log('🤖 Initializing MediaPipe for real-time body language analysis...');
+          await initializeMediaPipe();
+          
+          // Start real-time MediaPipe processing
+          if (isMediaPipeInitialized) {
+            const processVideoFrames = () => {
+              if (videoRef.current && isRecording && isMediaPipeInitialized) {
+                processFrame(videoRef.current);
+                requestAnimationFrame(processVideoFrames);
+              }
+            };
+            processVideoFrames();
+            console.log('🎯 MediaPipe real-time processing started');
+          }
+        } else {
+          console.log('⏳ MediaPipe libraries still loading...');
+        }
       }
 
       // Setup Web Audio API for direct vocal filler detection
@@ -1043,7 +1076,13 @@ export default function SimplifiedPracticePage() {
         }
       }
 
-      console.log('Recording started');
+      console.log('📹 Recording started with full computer vision integration:', {
+        mediaPipe: isMediaPipeInitialized,
+        roboflow: isRoboflowAnalyzing,
+        bodyLanguage: isBodyLanguageActive,
+        facialAnalysis: isFacialAnalysisActive,
+        videoRecording: videoRecordingEnabled
+      });
     } catch (error) {
       console.error('Failed to start recording:', error);
       toast({
@@ -1649,6 +1688,12 @@ export default function SimplifiedPracticePage() {
                           MEDIAPIPE BODY LANGUAGE
                         </Badge>
                       )}
+                      {isMediaPipeInitialized && (
+                        <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200">
+                          <Activity className="w-3 h-3 mr-1" />
+                          MEDIAPIPE HOLISTIC READY
+                        </Badge>
+                      )}
                     </div>
                   )}
                 </div>
@@ -1659,6 +1704,20 @@ export default function SimplifiedPracticePage() {
           {/* Key Stats */}
           <div className="space-y-4">
             
+            {/* Computer Vision Dashboard */}
+            <RealTimeComputerVisionDashboard
+              mediaPipePosture={mediaPipePosture}
+              mediaPipeGesture={mediaPipeGesture}
+              mediaPipeEyeContact={mediaPipeEyeContact}
+              isMediaPipeInitialized={isMediaPipeInitialized}
+              bodyLanguageMetrics={currentBodyLanguageMetrics}
+              isBodyLanguageActive={isBodyLanguageActive}
+              facialAnalysis={facialAnalysis}
+              isFacialAnalysisActive={isFacialAnalysisActive}
+              roboflowAnalysis={roboflowAnalysis}
+              isRoboflowAnalyzing={isRoboflowAnalyzing}
+            />
+
             {/* Live Feedback Insights */}
             <Card>
               <CardHeader>
