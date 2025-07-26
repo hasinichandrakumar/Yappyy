@@ -62,13 +62,16 @@ export default function PostSessionAnalysis({
   
   const [analysis, setAnalysis] = useState<SessionAnalysis | null>(null);
 
-  // Advanced content analysis mutation
+  // Advanced content analysis mutation with purpose
   const contentAnalysisMutation = useMutation({
-    mutationFn: async (text: string) => {
+    mutationFn: async ({ text, purpose }: { text: string; purpose?: string }) => {
       const response = await fetch('/api/advanced-content-analysis', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ transcript: text })
+        body: JSON.stringify({ 
+          transcript: text, 
+          purpose: purpose || roleplayContext || 'general-presentation'
+        })
       });
       return await response.json();
     }

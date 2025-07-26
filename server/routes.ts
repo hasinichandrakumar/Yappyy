@@ -2095,7 +2095,7 @@ RESPONSE FORMAT: Provide conversational coaching followed by specific neural ana
   // ADVANCED CONTENT ANALYSIS ENDPOINTS
   app.post('/api/advanced-content-analysis', async (req: any, res) => {
     try {
-      const { transcript } = req.body;
+      const { transcript, purpose } = req.body;
       
       if (!transcript || transcript.trim().length === 0) {
         return res.json({
@@ -2106,23 +2106,29 @@ RESPONSE FORMAT: Provide conversational coaching followed by specific neural ana
       }
 
       const { advancedContentAnalyzer } = await import('./advanced-content-analyzer');
-      const result = advancedContentAnalyzer.analyzeContent(transcript);
+      const result = advancedContentAnalyzer.analyzeContent(transcript, purpose);
       
       console.log('📊 Advanced content analysis completed:', {
         overall: result.overall.score,
         persuasiveness: result.persuasiveness.score,
         clarity: result.clarity.score,
-        professionalism: result.professionalism.score
+        professionalism: result.professionalism.score,
+        purpose: purpose || 'general'
       });
+
+      // Generate purpose-specific feedback
+      const purposeFeedback = advancedContentAnalyzer.generatePurposeSpecificFeedback(result, purpose);
 
       res.json({
         success: true,
         analysis: result,
+        purposeFeedback,
+        purpose: purpose || 'general',
         libraries: ['Compromise.js', 'Natural.js', 'Sentiment.js', 'Franc'],
         capabilities: [
-          'Persuasiveness analysis with rhetorical techniques',
-          'Clarity and readability scoring (Flesch, ARI)',
-          'Content structure evaluation',
+          'Purpose-driven persuasiveness analysis',
+          'Context-aware clarity and readability scoring',
+          'Content structure evaluation for specific scenarios',
           'Professional communication assessment',
           'Engagement factor analysis',
           'Advanced sentiment profiling',

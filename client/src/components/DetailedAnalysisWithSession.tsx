@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import SessionSelector from "./SessionSelector";
 import SessionRecordingPlayer from "./SessionRecordingPlayer";
+import SmartAIFeedback from "./SmartAIFeedback";
 
 export default function DetailedAnalysisWithSession() {
   const [selectedSession, setSelectedSession] = useState<any>(null);
@@ -576,20 +577,20 @@ export default function DetailedAnalysisWithSession() {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-3 gap-4">
                   <div className="text-center">
-                    <div className="text-lg font-bold text-purple-600">{metrics.totalWords}</div>
+                    <div className="text-lg font-bold text-purple-600">{metrics?.totalWords || 0}</div>
                     <div className="text-sm text-gray-600">Total Words</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-bold text-red-600">{metrics.totalFillers}</div>
+                    <div className="text-lg font-bold text-red-600">{metrics?.totalFillers || 0}</div>
                     <div className="text-sm text-gray-600">Filler Words</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-lg font-bold text-blue-600">{metrics.fillerRate?.toFixed(1)}%</div>
+                    <div className="text-lg font-bold text-blue-600">{metrics?.fillerRate?.toFixed(1) || 0}%</div>
                     <div className="text-sm text-gray-600">Filler Rate</div>
                   </div>
                 </div>
 
-                {selectedSession.transcript && (
+                {selectedSession?.transcript && (
                   <div className="bg-gray-50 rounded-lg p-4">
                     <h4 className="font-medium text-gray-900 mb-2">Session Transcript</h4>
                     <div className="max-h-32 overflow-y-auto text-sm text-gray-700">
@@ -598,12 +599,21 @@ export default function DetailedAnalysisWithSession() {
                   </div>
                 )}
 
+                {/* AI Coach Content Analysis */}
+                {selectedSession?.transcript && selectedSession.transcript.length > 20 && (
+                  <SmartAIFeedback 
+                    transcript={selectedSession.transcript}
+                    purpose={selectedSession.purpose || selectedSession.sessionType}
+                    sessionContext={selectedSession.context}
+                  />
+                )}
+
                 <div className="bg-purple-50 rounded-lg p-4">
                   <h4 className="font-medium text-purple-900 mb-2">Content Quality</h4>
                   <p className="text-sm text-purple-700">
-                    {metrics.fillerRate < 2
+                    {(metrics?.fillerRate || 0) < 2
                       ? "Excellent fluency with minimal filler words"
-                      : metrics.fillerRate > 5
+                      : (metrics?.fillerRate || 0) > 5
                       ? "Practice reducing filler words to improve message clarity"
                       : "Good content delivery with manageable filler word usage"
                     }

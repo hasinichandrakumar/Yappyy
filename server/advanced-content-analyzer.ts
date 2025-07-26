@@ -98,7 +98,7 @@ export class AdvancedContentAnalyzer {
     'analogy', 'contradiction', 'preview', 'mystery', 'problem statement'
   ];
 
-  public analyzeContent(text: string): ContentAnalysisResult {
+  public analyzeContent(text: string, purpose?: string): ContentAnalysisResult {
     if (!text || text.trim().length === 0) {
       return this.getEmptyAnalysis();
     }
@@ -108,12 +108,12 @@ export class AdvancedContentAnalyzer {
     const words = this.extractWords(text);
     const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim().length > 0);
 
-    // Core analysis components
-    const persuasivenessAnalysis = this.analyzePersuasiveness(text, sentences, words);
-    const clarityAnalysis = this.analyzeClarityAndReadability(text, sentences, words);
-    const structureAnalysis = this.analyzeStructure(text, sentences, paragraphs);
-    const professionalismAnalysis = this.analyzeProfessionalism(text, words);
-    const engagementAnalysis = this.analyzeEngagement(text, sentences);
+    // Core analysis components with purpose context
+    const persuasivenessAnalysis = this.analyzePersuasiveness(text, sentences, words, purpose);
+    const clarityAnalysis = this.analyzeClarityAndReadability(text, sentences, words, purpose);
+    const structureAnalysis = this.analyzeStructure(text, sentences, paragraphs, purpose);
+    const professionalismAnalysis = this.analyzeProfessionalism(text, words, purpose);
+    const engagementAnalysis = this.analyzeEngagement(text, sentences, purpose);
     const lexicalAnalysis = this.analyzeLexicalFeatures(text, words);
     const sentimentProfile = this.createSentimentProfile(text);
     const languageAnalysis = this.analyzeLanguage(text);
@@ -152,11 +152,14 @@ export class AdvancedContentAnalyzer {
     return text.toLowerCase().match(/\b[a-z]+\b/g) || [];
   }
 
-  private analyzePersuasiveness(text: string, sentences: string[], words: string[]): any {
+  private analyzePersuasiveness(text: string, sentences: string[], words: string[], purpose?: string): any {
     const lowerText = text.toLowerCase();
     
-    // Detect persuasive techniques
+    // Detect persuasive techniques with purpose context
     const detectedTechniques: string[] = [];
+    
+    // Purpose-specific technique weighting
+    const purposeBoosts = this.getPurposeBoosts(purpose);
     const detectedRhetorical: string[] = [];
 
     // Social proof indicators
@@ -230,7 +233,7 @@ export class AdvancedContentAnalyzer {
     };
   }
 
-  private analyzeClarityAndReadability(text: string, sentences: string[], words: string[]): any {
+  private analyzeClarityAndReadability(text: string, sentences: string[], words: string[], purpose?: string): any {
     const totalWords = words.length;
     const totalSentences = sentences.length;
     const totalSyllables = this.countSyllables(words);
@@ -266,7 +269,7 @@ export class AdvancedContentAnalyzer {
     };
   }
 
-  private analyzeStructure(text: string, sentences: string[], paragraphs: string[]): any {
+  private analyzeStructure(text: string, sentences: string[], paragraphs: string[], purpose?: string): any {
     // Sentence variety (length variance)
     const sentenceLengths = sentences.map(s => s.split(' ').length);
     const avgLength = sentenceLengths.reduce((a, b) => a + b, 0) / sentenceLengths.length || 0;
@@ -609,6 +612,212 @@ export class AdvancedContentAnalyzer {
       sentimentProfile: { overall: 0, confidence: 0, positive: 0, negative: 0, neutral: 0, emotions: { joy: 0, anger: 0, fear: 0, sadness: 0, surprise: 0, trust: 0 } },
       language: { detectedLanguage: 'Unknown', confidence: 0, multilingualElements: [] }
     };
+  }
+
+  private getPurposeBoosts(purpose?: string): { [key: string]: number } {
+    const boosts: { [key: string]: number } = {};
+    
+    switch (purpose) {
+      case 'sales-presentation':
+      case 'sales-pitch':
+        boosts.persuasiveness = 1.3;
+        boosts.urgency = 1.5;
+        boosts.credibility = 1.2;
+        boosts.emotional = 1.4;
+        break;
+      case 'job-interview':
+        boosts.professionalism = 1.4;
+        boosts.credibility = 1.5;
+        boosts.structure = 1.2;
+        boosts.clarity = 1.3;
+        break;
+      case 'academic-presentation':
+      case 'conference-presentation':
+        boosts.clarity = 1.4;
+        boosts.structure = 1.5;
+        boosts.professionalism = 1.3;
+        boosts.evidence = 1.4;
+        break;
+      case 'motivational-speech':
+        boosts.emotional = 1.5;
+        boosts.engagement = 1.4;
+        boosts.storytelling = 1.3;
+        break;
+      case 'team-meeting':
+        boosts.clarity = 1.3;
+        boosts.engagement = 1.2;
+        boosts.structure = 1.2;
+        break;
+      default:
+        boosts.persuasiveness = 1.0;
+        boosts.clarity = 1.0;
+        boosts.engagement = 1.0;
+    }
+    
+    return boosts;
+  }
+
+  public generatePurposeSpecificFeedback(analysis: ContentAnalysisResult, purpose?: string): string {
+    const { overall, persuasiveness, clarity, engagement, professionalism } = analysis;
+    
+    let feedback = `## Content Analysis for ${this.formatPurpose(purpose)}\n\n`;
+    
+    feedback += `**Overall Performance: ${overall.score}/100 (${overall.grade.toUpperCase()})**\n`;
+    feedback += `Analysis confidence: ${overall.confidence}%\n\n`;
+    
+    switch (purpose) {
+      case 'sales-presentation':
+      case 'sales-pitch':
+        feedback += this.getSalesFeedback(persuasiveness, engagement);
+        break;
+      case 'job-interview':
+        feedback += this.getInterviewFeedback(professionalism, clarity);
+        break;
+      case 'academic-presentation':
+      case 'conference-presentation':
+        feedback += this.getAcademicFeedback(clarity, professionalism);
+        break;
+      case 'motivational-speech':
+        feedback += this.getMotivationalFeedback(engagement, persuasiveness);
+        break;
+      default:
+        feedback += this.getGeneralFeedback(analysis);
+    }
+    
+    return feedback;
+  }
+
+  private formatPurpose(purpose?: string): string {
+    if (!purpose) return 'General Presentation';
+    return purpose.split('-').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+  }
+
+  private getSalesFeedback(persuasiveness: any, engagement: any): string {
+    let feedback = `### Sales Presentation Analysis\n\n`;
+    
+    feedback += `**Persuasiveness: ${persuasiveness.score}/100**\n`;
+    if (persuasiveness.score >= 75) {
+      feedback += `✅ Excellent persuasive power! Your message effectively uses ${persuasiveness.techniques.join(', ')}.\n`;
+    } else if (persuasiveness.score >= 60) {
+      feedback += `⚠️ Good persuasive elements, but consider adding more credibility indicators and emotional appeals.\n`;
+    } else {
+      feedback += `❌ Needs stronger persuasive techniques. Focus on social proof, authority, and urgency.\n`;
+    }
+    
+    feedback += `\n**Engagement: ${engagement.score}/100**\n`;
+    if (engagement.attentionHooks.length > 0) {
+      feedback += `✅ Strong attention hooks detected: ${engagement.attentionHooks.join(', ')}\n`;
+    } else {
+      feedback += `❌ Add attention-grabbing elements like statistics, questions, or customer stories.\n`;
+    }
+    
+    feedback += `\n**Sales-Specific Recommendations:**\n`;
+    feedback += `• Include specific ROI numbers and success metrics\n`;
+    feedback += `• Add customer testimonials or case studies\n`;
+    feedback += `• Create urgency with limited-time offers\n`;
+    feedback += `• Use "you" language to engage prospects directly\n\n`;
+    
+    return feedback;
+  }
+
+  private getInterviewFeedback(professionalism: any, clarity: any): string {
+    let feedback = `### Job Interview Analysis\n\n`;
+    
+    feedback += `**Professionalism: ${professionalism.score}/100**\n`;
+    if (professionalism.score >= 75) {
+      feedback += `✅ Excellent professional tone and vocabulary.\n`;
+    } else {
+      feedback += `⚠️ Consider using more formal language and industry-specific terminology.\n`;
+    }
+    
+    feedback += `\n**Clarity: ${clarity.score}/100**\n`;
+    feedback += `Reading level: Grade ${clarity.readabilityGrade}\n`;
+    if (clarity.score >= 70) {
+      feedback += `✅ Clear and well-structured responses.\n`;
+    } else {
+      feedback += `❌ Simplify complex sentences and improve logical flow.\n`;
+    }
+    
+    feedback += `\n**Interview-Specific Recommendations:**\n`;
+    feedback += `• Use STAR method (Situation, Task, Action, Result) for examples\n`;
+    feedback += `• Quantify achievements with specific numbers\n`;
+    feedback += `• Connect experiences to job requirements\n`;
+    feedback += `• Practice concise, confident delivery\n\n`;
+    
+    return feedback;
+  }
+
+  private getAcademicFeedback(clarity: any, professionalism: any): string {
+    let feedback = `### Academic Presentation Analysis\n\n`;
+    
+    feedback += `**Clarity: ${clarity.score}/100**\n`;
+    feedback += `Flesch Score: ${clarity.fleschScore} | Reading Grade: ${clarity.readabilityGrade}\n`;
+    if (clarity.score >= 75) {
+      feedback += `✅ Excellent clarity and readability for academic audience.\n`;
+    } else {
+      feedback += `⚠️ Consider simplifying complex concepts for broader understanding.\n`;
+    }
+    
+    feedback += `\n**Academic-Specific Recommendations:**\n`;
+    feedback += `• Support claims with peer-reviewed research\n`;
+    feedback += `• Use clear methodology and logical progression\n`;
+    feedback += `• Define technical terms for diverse audience\n`;
+    feedback += `• Include visual aids to support complex concepts\n\n`;
+    
+    return feedback;
+  }
+
+  private getMotivationalFeedback(engagement: any, persuasiveness: any): string {
+    let feedback = `### Motivational Speech Analysis\n\n`;
+    
+    feedback += `**Engagement: ${engagement.score}/100**\n`;
+    feedback += `Storytelling elements: ${engagement.storytellingElements}/100\n`;
+    if (engagement.score >= 75) {
+      feedback += `✅ Highly engaging with strong emotional connection.\n`;
+    } else {
+      feedback += `⚠️ Add more personal stories and interactive elements.\n`;
+    }
+    
+    feedback += `\n**Motivational-Specific Recommendations:**\n`;
+    feedback += `• Share personal transformation stories\n`;
+    feedback += `• Use powerful metaphors and analogies\n`;
+    feedback += `• Include audience participation moments\n`;
+    feedback += `• End with clear, actionable steps\n\n`;
+    
+    return feedback;
+  }
+
+  private getGeneralFeedback(analysis: ContentAnalysisResult): string {
+    const { persuasiveness, clarity, engagement, professionalism, structure } = analysis;
+    
+    let feedback = `### General Presentation Analysis\n\n`;
+    
+    const scores = [
+      { name: 'Persuasiveness', score: persuasiveness.score },
+      { name: 'Clarity', score: clarity.score },
+      { name: 'Engagement', score: engagement.score },
+      { name: 'Professionalism', score: professionalism.score },
+      { name: 'Structure', score: structure.score }
+    ];
+    
+    const topScore = scores.reduce((max, current) => current.score > max.score ? current : max);
+    const needsWork = scores.filter(s => s.score < 60);
+    
+    feedback += `**Strongest Area: ${topScore.name} (${topScore.score}/100)**\n`;
+    
+    if (needsWork.length > 0) {
+      feedback += `**Areas for Improvement: ${needsWork.map(s => s.name).join(', ')}**\n\n`;
+    }
+    
+    feedback += `**Key Recommendations:**\n`;
+    feedback += `• Practice with purpose-specific templates\n`;
+    feedback += `• Record and review your delivery\n`;
+    feedback += `• Focus on audience engagement techniques\n`;
+    feedback += `• Strengthen weakest scoring areas\n\n`;
+    
+    return feedback;
   }
 }
 
