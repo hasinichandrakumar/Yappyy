@@ -272,12 +272,9 @@ const DeepLearningAnalytics = ({ userId }: { userId?: string }) => {
       {neuralMetrics.length > 0 ? (
         <div className="space-y-3">
           {neuralMetrics.map((metric, index) => (
-            <motion.div
+            <div
               key={metric.metric}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100"
+              className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100 transition-opacity duration-300"
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">{metric.metric}</span>
@@ -308,7 +305,7 @@ const DeepLearningAnalytics = ({ userId }: { userId?: string }) => {
                 </span>
               </div>
               <p className="text-xs text-gray-600 mt-1">{metric.description}</p>
-            </motion.div>
+            </div>
           ))}
         </div>
       ) : (
@@ -322,12 +319,9 @@ const DeepLearningAnalytics = ({ userId }: { userId?: string }) => {
       {/* AI Insights */}
       <div className="space-y-3">
         {insights.map((insight, index) => (
-          <motion.div
+          <div
             key={index}
-            className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-purple-200"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.2 + 0.4 }}
+            className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-purple-200 transition-opacity duration-200"
           >
             <div className="flex items-start gap-3">
               <insight.icon className={`w-5 h-5 ${insight.color} mt-1`} />
@@ -336,7 +330,7 @@ const DeepLearningAnalytics = ({ userId }: { userId?: string }) => {
                 <p className="text-sm text-gray-600 leading-relaxed">{insight.message}</p>
               </div>
             </div>
-          </motion.div>
+          </div>
         ))}
       </div>
     </div>
@@ -353,11 +347,8 @@ const ChatMessage = ({
   isUser?: boolean; 
   timestamp?: string;
 }) => (
-  <motion.div
-    className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.3 }}
+  <div
+    className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4 opacity-100 transition-opacity duration-150`}
   >
     <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${
       isUser 
@@ -371,7 +362,7 @@ const ChatMessage = ({
         </p>
       )}
     </div>
-  </motion.div>
+  </div>
 );
 
 // Coaching Goal Buttons
@@ -389,7 +380,7 @@ const CoachingGoals = ({ onGoalSelect }: { onGoalSelect: (goal: string) => void 
         <button
           key={goal.id}
           onClick={() => onGoalSelect(goal.id)}
-          className={`flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium hover:opacity-80 transition-opacity ${goal.color}`}
+          className={`flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium hover:opacity-80 transition-all duration-200 ${goal.color}`}
         >
           <goal.icon className="w-4 h-4" />
           {goal.label}
@@ -644,8 +635,8 @@ export default function AICoachRedesigned() {
                       <span>AI Coach is analyzing your patterns...</span>
                       <div className="flex gap-1">
                         <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" />
-                        <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse delay-100" />
-                        <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse delay-200" />
+                        <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" />
+                        <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" />
                       </div>
                     </div>
                   )}
