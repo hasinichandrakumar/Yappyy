@@ -112,7 +112,7 @@ export default function LVIEFeedbackEngine({
         priority: "high",
         actionable: "Replace filler words with purposeful pauses"
       });
-    } else if (fillerWordCount === 0 && Math.random() > 0.7) {
+    } else if (fillerWordCount === 0) {
       newAlerts.push({
         id: `filler-good-${now.getTime()}`,
         type: "success",
@@ -141,7 +141,7 @@ export default function LVIEFeedbackEngine({
     }
 
     // Tone Analysis (simulated)
-    if (Math.random() > 0.8) {
+    if (false) { // Disabled fake random tone analysis
       newAlerts.push({
         id: `tone-flat-${now.getTime()}`,
         type: "info",

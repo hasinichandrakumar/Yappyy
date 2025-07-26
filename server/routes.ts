@@ -2889,12 +2889,12 @@ Respond with detailed analysis in JSON format:
       const wpm = wordCount > 0 ? Math.round(wordCount * 60 / 10) : 0; // Estimate based on 10-second window
       
       const liveMetrics = {
-        eyeContact: Math.random() * 20 + 70, // 70-90 range for demo
+        eyeContact: 0, // No fake data - only real computer vision data
         confidence: Math.max(50, Math.min(100, (volume || 50) + (pitch > 0 ? 20 : 0))),
         engagement: Math.max(60, Math.min(95, 80 + (wordCount > 5 ? 15 : 0))),
         voiceQuality: Math.max(60, Math.min(95, (volume || 70) + (pitch > 100 ? 10 : 0))),
         contentClarity: Math.max(50, 100 - (fillerWords * 15)),
-        overallPerformance: Math.round((75 + (wordCount > 0 ? 15 : 0) + (fillerWords === 0 ? 10 : 0)) * (Math.random() * 0.2 + 0.9)),
+        overallPerformance: Math.round((0 + (wordCount > 0 ? 15 : 0) + (fillerWords === 0 ? 10 : 0))),
         timestamp: Date.now(),
         wordCount,
         wpm,
@@ -2905,12 +2905,12 @@ Respond with detailed analysis in JSON format:
     } catch (error) {
       console.error('Fast live metrics error:', error);
       res.json({
-        eyeContact: 75,
-        confidence: 75,
-        engagement: 75,
-        voiceQuality: 75,
-        contentClarity: 80,
-        overallPerformance: 75,
+        eyeContact: 0,
+        confidence: 0,
+        engagement: 0,
+        voiceQuality: 0,
+        contentClarity: 0,
+        overallPerformance: 0,
         timestamp: Date.now(),
         wordCount: 0,
         wpm: 0,

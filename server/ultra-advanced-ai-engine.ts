@@ -297,7 +297,7 @@ export class UltraVoiceAnalyzer {
   
   private calculateMFCC(audioData: Float32Array): number[] {
     // Mel-frequency cepstral coefficients for voice characterization
-    return Array.from({ length: 13 }, (_, i) => Math.random() * 100);
+    return Array.from({ length: 13 }, (_, i) => 0);
   }
   
   private extractFormants(audioData: Float32Array): number[] {
@@ -307,17 +307,17 @@ export class UltraVoiceAnalyzer {
   
   private calculateHarmonicity(audioData: Float32Array): number {
     // Harmonics-to-noise ratio
-    return Math.random() * 100;
+    return 0
   }
   
   private calculateJitter(audioData: Float32Array): number {
     // Period-to-period variation
-    return Math.random() * 5;
+    return 0
   }
   
   private calculateShimmer(audioData: Float32Array): number {
     // Amplitude variation
-    return Math.random() * 10;
+    return 0
   }
   
   private synthesizeVoiceAnalysis(

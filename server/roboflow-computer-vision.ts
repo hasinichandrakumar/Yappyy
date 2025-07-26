@@ -334,25 +334,25 @@ export class RoboflowVisionEngine {
 
   private getFallbackPosture(): any {
     return {
-      confidence: 65 + Math.random() * 20,
-      alignment: 70 + Math.random() * 15,
-      openness: 60 + Math.random() * 25
+      confidence: 0,
+      alignment: 0,
+      openness: 0
     };
   }
 
   private getFallbackGestures(): any {
     return {
-      handMovements: 55 + Math.random() * 25,
-      effectiveness: 65 + Math.random() * 20,
-      timing: 70 + Math.random() * 15
+      handMovements: 0,
+      effectiveness: 0,
+      timing: 0
     };
   }
 
   private getFallbackFacial(): any {
     return {
-      engagement: 70 + Math.random() * 20,
-      authenticity: 75 + Math.random() * 15,
-      eyeContact: 65 + Math.random() * 25
+      engagement: 0,
+      authenticity: 0,
+      eyeContact: 0
     };
   }
 

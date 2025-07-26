@@ -330,17 +330,17 @@ export class EnhancedNeuralPipeline {
 
   private extractMFCC(buffer: Float32Array): number[] {
     // Simplified MFCC extraction
-    return new Array(13).fill(0).map((_, i) => Math.random() * 0.5 + 0.25);
+    return new Array(13).fill(0).map((_, i) => 0);
   }
 
   private extractPoseFeatures(videoFrame: ImageData): number[] {
     // Simplified pose feature extraction
-    return new Array(64).fill(0).map(() => Math.random() * 0.5 + 0.25);
+    return new Array(64).fill(0).map(() => 0);
   }
 
   private extractGestureFeatures(videoFrame: ImageData): number[] {
     // Simplified gesture feature extraction
-    return new Array(32).fill(0).map(() => Math.random() * 0.5 + 0.25);
+    return new Array(32).fill(0).map(() => 0);
   }
 
   private normalizeEmbedding(features: number[], targetSize: number): number[] {
@@ -391,7 +391,7 @@ export class EnhancedNeuralPipeline {
 
   private getUserSessionCount(userId: string): number {
     // In a real implementation, this would query the database
-    return Math.floor(Math.random() * 20) + 1;
+    return Math.floor(0) + 1;
   }
 
   private updatePerformanceMetrics(latency: number, success: boolean): void {

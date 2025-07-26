@@ -64,7 +64,7 @@ export default function LivePracticeInterface({
     const interval = setInterval(() => {
       setWaveformData(prev => {
         const newData = [...prev.slice(1)];
-        newData.push(Math.random() * audioLevel * 2);
+        newData.push(audioLevel || 0); // Use real audio level data only
         return newData;
       });
     }, 100);

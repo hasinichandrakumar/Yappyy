@@ -330,10 +330,10 @@ export class RealTimeCoachingPipeline {
   private async analyzeGaze(video: ImageData): Promise<GazeMetrics> {
     // Advanced gaze analysis using computer vision
     return {
-      audience_engagement: Math.random() * 100,
+      audience_engagement: 0,
       gaze_distribution: [25, 30, 20, 15, 10], // Center, left, right, top, bottom
       eye_contact_timing: [2.5, 1.8, 3.2], // Average contact durations
-      confidence_indicators: Math.random() * 100,
+      confidence_indicators: 0,
       attention_zones: {
         center: 45,
         periphery: 35,
@@ -352,18 +352,18 @@ class VoiceAnalyzer {
   async analyze(audio: AudioBuffer | ArrayBuffer): Promise<VoiceMetrics> {
     // Simulate advanced voice analysis
     return {
-      pitch_variation: Math.random() * 100,
-      speaking_rate: 120 + Math.random() * 80, // 120-200 WPM
-      volume_consistency: Math.random() * 100,
-      vocal_fry_percentage: Math.random() * 30,
-      uptalk_frequency: Math.random() * 20,
-      breath_control: Math.random() * 100,
-      articulation_clarity: Math.random() * 100,
-      resonance_quality: Math.random() * 100,
-      confidence_level: Math.random() * 100,
-      emotional_range: Math.random() * 100,
-      authenticity_score: Math.random() * 100,
-      stress_indicators: [Math.random() * 10, Math.random() * 10]
+      pitch_variation: 0,
+      speaking_rate: 120,
+      volume_consistency: 0,
+      vocal_fry_percentage: 0,
+      uptalk_frequency: 0,
+      breath_control: 0,
+      articulation_clarity: 0,
+      resonance_quality: 0,
+      confidence_level: 0,
+      emotional_range: 0,
+      authenticity_score: 0,
+      stress_indicators: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     };
   }
 }
@@ -373,14 +373,14 @@ class VisionAnalyzer {
   async analyze(video: ImageData): Promise<BodyLanguageMetrics> {
     // Simulate advanced computer vision analysis
     return {
-      posture_confidence: Math.random() * 100,
-      gesture_effectiveness: Math.random() * 100,
+      posture_confidence: 0,
+      gesture_effectiveness: 0,
       eye_contact_distribution: [25, 30, 20, 15, 10],
-      facial_authenticity: Math.random() * 100,
-      micro_expression_congruence: Math.random() * 100,
-      spatial_presence: Math.random() * 100,
-      hand_gesture_timing: Math.random() * 100,
-      shoulder_tension: Math.random() * 50
+      facial_authenticity: 0,
+      micro_expression_congruence: 0,
+      spatial_presence: 0,
+      hand_gesture_timing: 0,
+      shoulder_tension: 0
     };
   }
 }
@@ -411,14 +411,14 @@ class ContentAnalyzer {
       const analysis = JSON.parse(structureAnalysis.choices[0].message.content || '{}');
 
       return {
-        structure_clarity: analysis.structure_clarity || Math.random() * 100,
-        persuasive_power: analysis.persuasive_power || Math.random() * 100,
-        authenticity_score: analysis.authenticity_score || Math.random() * 100,
-        coherence_rating: analysis.coherence_rating || Math.random() * 100,
-        emotional_resonance: analysis.emotional_resonance || Math.random() * 100,
-        audience_alignment: analysis.audience_alignment || Math.random() * 100,
-        story_effectiveness: analysis.story_effectiveness || Math.random() * 100,
-        call_to_action_strength: analysis.call_to_action_strength || Math.random() * 100
+        structure_clarity: analysis.structure_clarity || 0,
+        persuasive_power: analysis.persuasive_power || 0,
+        authenticity_score: analysis.authenticity_score || 0,
+        coherence_rating: analysis.coherence_rating || 0,
+        emotional_resonance: analysis.emotional_resonance || 0,
+        audience_alignment: analysis.audience_alignment || 0,
+        story_effectiveness: analysis.story_effectiveness || 0,
+        call_to_action_strength: analysis.call_to_action_strength || 0
       };
     } catch (error) {
       console.error('Content analysis failed:', error);
@@ -428,14 +428,14 @@ class ContentAnalyzer {
 
   private getDefaultMetrics(): ContentMetrics {
     return {
-      structure_clarity: 50,
-      persuasive_power: 50,
-      authenticity_score: 50,
-      coherence_rating: 50,
-      emotional_resonance: 50,
-      audience_alignment: 50,
-      story_effectiveness: 50,
-      call_to_action_strength: 50
+      structure_clarity: 0,
+      persuasive_power: 0,
+      authenticity_score: 0,
+      coherence_rating: 0,
+      emotional_resonance: 0,
+      audience_alignment: 0,
+      story_effectiveness: 0,
+      call_to_action_strength: 0
     };
   }
 }
@@ -445,9 +445,9 @@ class EmotionAnalyzer {
   async analyze(data: any): Promise<any> {
     // Placeholder for emotion analysis
     return {
-      confidence: Math.random() * 100,
-      authenticity: Math.random() * 100,
-      engagement: Math.random() * 100
+      confidence: 0,
+      authenticity: 0,
+      engagement: 0
     };
   }
 }
@@ -456,7 +456,7 @@ class EmotionAnalyzer {
 class ConfidenceAnalyzer {
   async analyze(data: any): Promise<number> {
     // Placeholder for confidence analysis
-    return Math.random() * 100;
+    return 0;
   }
 }
 

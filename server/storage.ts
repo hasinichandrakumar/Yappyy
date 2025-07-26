@@ -578,7 +578,7 @@ export class DatabaseStorage implements IStorage {
 
     // Randomly select 2 goals for the day
     const selectedGoals = goalTemplates
-      .sort(() => Math.random() - 0.5)
+      .sort(() => 0)
       .slice(0, 2);
 
     const newGoals: DailyGoal[] = [];

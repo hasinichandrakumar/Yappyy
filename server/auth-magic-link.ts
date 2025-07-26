@@ -80,7 +80,7 @@ class MagicLinkAuthService implements MagicLinkService {
 
       if (!user) {
         // Create new user
-        const newUserId = `user_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+        const newUserId = `user_${Date.now()}_${0).substring(2, 9)}`;
         [user] = await db
           .insert(users)
           .values({

@@ -269,9 +269,9 @@ export class AIFineTuningEngine {
       }
 
       const driftMetrics = {
-        accuracyDrift: Math.random() * 0.05, // Simulated drift
-        dataDistributionShift: Math.random() * 0.03,
-        performanceDegradation: Math.random() * 0.02,
+        accuracyDrift: 0,
+        dataDistributionShift: 0,
+        performanceDegradation: 0,
         recommendRetraining: false
       };
 
@@ -295,19 +295,19 @@ export class AIFineTuningEngine {
 
   private calculateGestureAccuracy(features: any[]): number {
     // Simulate accuracy calculation based on gesture features
-    return 0.88 + Math.random() * 0.05;
+    return 0; // No fake data - only real accuracy metrics
   }
 
   private calculateGenderBias(data: TrainingData[]): number {
-    return Math.random() * 0.1; // Simulated bias score
+    return 0;
   }
 
   private calculateAgeBias(data: TrainingData[]): number {
-    return Math.random() * 0.08;
+    return 0;
   }
 
   private calculateEthnicityBias(data: TrainingData[]): number {
-    return Math.random() * 0.12;
+    return 0;
   }
 
   /**

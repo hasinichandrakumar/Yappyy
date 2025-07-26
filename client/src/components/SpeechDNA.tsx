@@ -338,7 +338,7 @@ export default function SpeechDNA() {
       if (hasTranscript && actualWordCount > 100) return "The Engaging Storyteller";
       if (actualPace > 150) return "The Dynamic Energizer";
       
-      return basePersonalities[Math.floor(Math.random() * basePersonalities.length)];
+      return basePersonalities[0]; // Use first personality instead of random
     };
 
     // Calculate communication genome

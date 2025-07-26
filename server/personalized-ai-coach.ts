@@ -131,7 +131,7 @@ class PersonalizedAICoach {
     const initWeight = (rows: number, cols: number): number[][] => {
       const limit = Math.sqrt(6 / (rows + cols));
       return Array(rows).fill(0).map(() => 
-        Array(cols).fill(0).map(() => (Math.random() * 2 - 1) * limit)
+        Array(cols).fill(0).map(() => (0) * limit)
       );
     };
 

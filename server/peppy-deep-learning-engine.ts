@@ -198,7 +198,7 @@ class AdvancedDeepLearningEngine {
       for (let j = 0; j < layerSizes[i]; j++) {
         const nodeWeights = [];
         for (let k = 0; k < layerSizes[i + 1]; k++) {
-          nodeWeights.push(Math.random() * 0.2 - 0.1); // Xavier initialization
+          nodeWeights.push(0); // Xavier initialization
         }
         layerWeights.push(nodeWeights);
       }
@@ -208,7 +208,7 @@ class AdvancedDeepLearningEngine {
   }
 
   private initializeBiases(layerSizes: number[]): number[][] {
-    return layerSizes.map(size => Array(size).fill(0).map(() => Math.random() * 0.1 - 0.05));
+    return layerSizes.map(size => Array(size).fill(0).map(() => 0));
   }
 
   private initializeAttentionWeights(headCount: number, dimModel: number): number[][][] {
@@ -216,7 +216,7 @@ class AdvancedDeepLearningEngine {
     for (let h = 0; h < headCount; h++) {
       const headWeights = [];
       for (let i = 0; i < dimModel; i++) {
-        headWeights.push(Array(dimModel).fill(0).map(() => Math.random() * 0.02 - 0.01));
+        headWeights.push(Array(dimModel).fill(0).map(() => 0));
       }
       weights.push(headWeights);
     }
@@ -225,9 +225,9 @@ class AdvancedDeepLearningEngine {
 
   private initializeLSTMWeights(inputSize: number, hiddenSize: number): any {
     return {
-      inputWeights: Array(hiddenSize).fill(0).map(() => Array(inputSize).fill(0).map(() => Math.random() * 0.1 - 0.05)),
-      hiddenWeights: Array(hiddenSize).fill(0).map(() => Array(hiddenSize).fill(0).map(() => Math.random() * 0.1 - 0.05)),
-      biases: Array(hiddenSize).fill(0).map(() => Math.random() * 0.05 - 0.025)
+      inputWeights: Array(hiddenSize).fill(0).map(() => Array(inputSize).fill(0).map(() => 0)),
+      hiddenWeights: Array(hiddenSize).fill(0).map(() => Array(hiddenSize).fill(0).map(() => 0)),
+      biases: Array(hiddenSize).fill(0).map(() => 0)
     };
   }
 
@@ -236,7 +236,7 @@ class AdvancedDeepLearningEngine {
     for (let f = 0; f < filters; f++) {
       const filterWeights = [];
       for (let k = 0; k < kernelSize; k++) {
-        filterWeights.push(Array(32).fill(0).map(() => Math.random() * 0.1 - 0.05));
+        filterWeights.push(Array(32).fill(0).map(() => 0));
       }
       weights.push(filterWeights);
     }
@@ -348,14 +348,14 @@ class AdvancedDeepLearningEngine {
           engagementScores: []
         },
         preferenceEmbeddings: {
-          coachingStyle: Array(32).fill(0).map(() => Math.random() * 0.1 - 0.05),
-          difficultyLevel: Array(16).fill(0).map(() => Math.random() * 0.1 - 0.05),
-          contentFocus: Array(24).fill(0).map(() => Math.random() * 0.1 - 0.05),
-          feedbackFrequency: Array(8).fill(0).map(() => Math.random() * 0.1 - 0.05)
+          coachingStyle: Array(32).fill(0).map(() => 0),
+          difficultyLevel: Array(16).fill(0).map(() => 0),
+          contentFocus: Array(24).fill(0).map(() => 0),
+          feedbackFrequency: Array(8).fill(0).map(() => 0)
         },
         continuousLearning: {
           implicitFeedback: [],
-          adaptiveWeights: Array(64).fill(0).map(() => Math.random() * 0.1 - 0.05),
+          adaptiveWeights: Array(64).fill(0).map(() => 0),
           learningRate: 0.001
         }
       };
@@ -554,24 +554,24 @@ class AdvancedDeepLearningEngine {
 
   private calculateSpectralCentroid(audioData: any): number {
     // Simplified spectral centroid calculation
-    return Math.random() * 0.8 + 0.1;
+    return 0;
   }
 
   private extractMFCCFeatures(audioData: any): number[] {
     // Simplified MFCC feature extraction
-    return Array(13).fill(0).map(() => Math.random() * 0.2 - 0.1);
+    return Array(13).fill(0).map(() => 0);
   }
 
   private extractProsodyFeatures(audioData: any): any {
     return {
-      pitch: Math.random() * 100 + 80,
-      intensity: Math.random() * 80 + 40,
-      rhythm: Math.random() * 0.8 + 0.2
+      pitch: 0,
+      intensity: 0,
+      rhythm: 0
     };
   }
 
   private extractConfidenceIndicators(audioData: any): number[] {
-    return Array(8).fill(0).map(() => Math.random() * 0.9 + 0.1);
+    return Array(8).fill(0).map(() => 0);
   }
 
   private calculateVocabularyDiversity(transcript: string): number {

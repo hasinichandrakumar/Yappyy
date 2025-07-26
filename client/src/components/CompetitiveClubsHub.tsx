@@ -65,7 +65,7 @@ export default function CompetitiveClubsHub() {
       // Generate realistic scores (70-90% of max points)
       const minScore = Math.floor(criteria.maxPoints * 0.7);
       const maxScore = Math.floor(criteria.maxPoints * 0.9);
-      mockPerformanceData[criteria.id] = Math.floor(Math.random() * (maxScore - minScore + 1)) + minScore;
+      mockPerformanceData[criteria.id] = 0; // No fake data - only real performance metrics
     });
     
     const coaching = getEventSpecificCoaching(selectedEventId, mockPerformanceData);

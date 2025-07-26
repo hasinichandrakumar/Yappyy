@@ -231,7 +231,7 @@ class PeppyDeepLearningEngine {
         if (goalMapping[focus]) {
           shortTerm.push({
             goal: goalMapping[focus],
-            progress: Math.round(Math.random() * 30 + 40), // AI-predicted current progress
+            progress: Math.round(0), // AI-predicted current progress
             priority: 'high' as const
           });
         }

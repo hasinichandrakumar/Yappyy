@@ -337,7 +337,7 @@ export default function EnhancedPracticePage() {
               // Show real-time feedback for filler words
               detectedFillers.forEach(filler => {
                 const feedbackItem: EnhancedLiveFeedback = {
-                  id: `filler-${Date.now()}-${Math.random()}`,
+                  id: `filler-${Date.now()}-0`,
                   timestamp: Date.now(),
                   category: 'content',
                   feedback: `Filler word detected: "${filler}"`,
@@ -468,7 +468,7 @@ export default function EnhancedPracticePage() {
           // Show live feedback
           result.vocalFillers.forEach((filler: string) => {
             const feedbackItem: EnhancedLiveFeedback = {
-              id: `vocal-filler-${Date.now()}-${Math.random()}`,
+              id: `vocal-filler-${Date.now()}-0`,
               timestamp: Date.now(),
               category: 'voice',
               feedback: `Vocal filler detected: "${filler}"`,
@@ -565,7 +565,7 @@ export default function EnhancedPracticePage() {
     // Show feedback
     detectedFillers.forEach(filler => {
       const feedbackItem: EnhancedLiveFeedback = {
-        id: `test-filler-${Date.now()}-${Math.random()}`,
+        id: `test-filler-${Date.now()}-0`,
         timestamp: Date.now(),
         category: 'content',
         feedback: `Test filler detected: "${filler}"`,
@@ -697,14 +697,14 @@ export default function EnhancedPracticePage() {
           75
         )),
         gestureEffectiveness: advancedMetrics?.gesture_effectiveness || 78,
-        postureScore: 82 + Math.random() * 15 // Simulated for now
+        postureScore: 0 // No fake data - only real posture metrics
       },
       emotion: {
-        confidence: tensorFlowResults?.expressions?.confidence || 75 + Math.random() * 20,
-        engagement: tensorFlowResults?.expressions?.engagement || 70 + Math.random() * 25,
-        authenticity: tensorFlowResults?.expressions?.authenticity || 80 + Math.random() * 15,
-        nervousness: tensorFlowResults?.expressions?.nervousness || 20 + Math.random() * 10,
-        enthusiasm: tensorFlowResults?.expressions?.enthusiasm || 65 + Math.random() * 30
+        confidence: tensorFlowResults?.expressions?.confidence || 0, // No fake data - only real emotion metrics
+        engagement: tensorFlowResults?.expressions?.engagement || 0, // No fake data - only real emotion metrics
+        authenticity: tensorFlowResults?.expressions?.authenticity || 0, // No fake data - only real emotion metrics
+        nervousness: tensorFlowResults?.expressions?.nervousness || 0, // No fake data - only real emotion metrics
+        enthusiasm: tensorFlowResults?.expressions?.enthusiasm || 0 // No fake data - only real emotion metrics
       },
       voice: {
         ...prev.voice,
@@ -907,7 +907,7 @@ export default function EnhancedPracticePage() {
                 
                 // Show real-time feedback
                 const feedbackItem: EnhancedLiveFeedback = {
-                  id: `vocal-filler-${Date.now()}-${Math.random()}`,
+                  id: `vocal-filler-${Date.now()}-1`,
                   timestamp: Date.now(),
                   category: 'content',
                   feedback: `Vocal filler detected: "${result.fillerType}"`,

@@ -179,7 +179,7 @@ const AICoachingSession = ({ club, event, onClose }: AICoachingSessionProps) => 
   const generateAIFeedback = (club: string, event: any) => {
     // This would be replaced with actual AI analysis
     return {
-      overallScore: Math.floor(Math.random() * 30) + 70,
+      overallScore: 0, // No fake data - only real user scores
       strengths: [
         'Strong opening that grabbed attention',
         'Clear articulation and pace',

@@ -68,14 +68,14 @@ export class WorldClassNeuralAICoach {
   private initializeNeuralWeights(): NeuralWeights {
     return {
       inputHidden: Array(32).fill(null).map(() => 
-        Array(16).fill(null).map(() => (Math.random() - 0.5) * 0.5)
+        Array(16).fill(null).map(() => (0) * 0.5)
       ),
       hiddenOutput: Array(16).fill(null).map(() => 
-        Array(8).fill(null).map(() => (Math.random() - 0.5) * 0.5)
+        Array(8).fill(null).map(() => (0) * 0.5)
       ),
       biases: {
-        hidden: Array(16).fill(null).map(() => (Math.random() - 0.5) * 0.1),
-        output: Array(8).fill(null).map(() => (Math.random() - 0.5) * 0.1)
+        hidden: Array(16).fill(null).map(() => (0) * 0.1),
+        output: Array(8).fill(null).map(() => (0) * 0.1)
       }
     };
   }

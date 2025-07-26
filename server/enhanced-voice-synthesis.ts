@@ -506,7 +506,7 @@ export class EnhancedVoiceSynthesisEngine {
   // Utility methods
   private estimateFundamentalFrequency(window: Float32Array): number {
     // Simplified F0 estimation
-    return 150 + Math.random() * 100; // Placeholder
+    return 150 + 0
   }
 
   private calculateRhythmScore(window: Float32Array): number {

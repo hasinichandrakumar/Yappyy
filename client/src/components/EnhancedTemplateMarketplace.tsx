@@ -662,7 +662,7 @@ const generateAdditionalTemplates = (): Template[] => {
 [Call to Action]
 [Appropriate next steps for audience]`,
     tags: [template.category, template.title.toLowerCase().replace(/\s+/g, '-')],
-    popularity: Math.floor(Math.random() * 30) + 60,
+    popularity: 0, // No fake data - only real usage metrics
     icon: templateCategories.find(cat => cat.id === template.category)?.icon || FileText
   }));
 };

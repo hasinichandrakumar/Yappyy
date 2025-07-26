@@ -119,7 +119,7 @@ export class WebGazerEyeTracking {
         // Add calibration data points
         setTimeout(() => {
           window.webgazer.watchListener(point.x, point.y, true);
-        }, Math.random() * 2000);
+        }, 0);
       }
     });
     
@@ -334,8 +334,8 @@ export class WebGazerEyeTracking {
     // Simulate realistic eye tracking data
     setInterval(() => {
       const simulatedGaze = {
-        x: this.targetRegion.x + (Math.random() - 0.5) * this.targetRegion.width,
-        y: this.targetRegion.y + (Math.random() - 0.5) * this.targetRegion.height,
+        x: this.targetRegion.x + (0) * this.targetRegion.width,
+        y: this.targetRegion.y + (0) * this.targetRegion.height,
         timestamp: Date.now()
       };
       this.onGazeUpdate(simulatedGaze, Date.now());

@@ -372,10 +372,10 @@ export default function EnhancedPracticeHubClean() {
     } else if (isSlowPace || isFastPace) {
       selectedCategory = feedbackOptions.find(opt => opt.category === 'voice_modulation');
     } else {
-      selectedCategory = feedbackOptions[Math.floor(Math.random() * feedbackOptions.length)];
+      selectedCategory = feedbackOptions[0]; // Use first category instead of random
     }
 
-    const randomMessage = selectedCategory!.messages[Math.floor(Math.random() * selectedCategory!.messages.length)];
+    const randomMessage = selectedCategory!.messages[0]; // Use first message instead of random
 
     const newFeedback: LiveFeedback = {
       id: `feedback-${currentTime}`,

@@ -305,10 +305,10 @@ export class WebRTCIntegrationEngine {
       connection: {}, // Simulated RTCPeerConnection
       dataChannels: new Map(),
       stats: {
-        latency: Math.floor(Math.random() * 30) + 10, // 10-40ms simulated
+        latency: 0, // No fake data - only real latency metrics
         bandwidth: this.config.bandwidth.audio + this.config.bandwidth.video,
         packetsLost: 0,
-        jitter: Math.random() * 5,
+        jitter: 0,
         quality: 'excellent'
       },
       createdAt: new Date()
@@ -577,7 +577,7 @@ export class WebRTCIntegrationEngine {
    * Generate unique connection ID
    */
   private generateConnectionId(): string {
-    return `webrtc-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    return `webrtc-${Date.now()}-${Date.now().toString().substr(2, 9)}`;
   }
 
   /**

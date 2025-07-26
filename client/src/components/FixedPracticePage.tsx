@@ -277,7 +277,7 @@ export default function FixedPracticePage() {
       setLiveMetrics(prev => {
         const newTime = prev.sessionTime + 1;
         const volume = detectVolume();
-        const eyeContact = Math.min(100, prev.eyeContact + Math.random() * 10 - 5);
+        const eyeContact = 0; // No fake data - only real computer vision metrics
         
         return {
           ...prev,

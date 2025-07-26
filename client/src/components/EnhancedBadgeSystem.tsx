@@ -469,18 +469,18 @@ export default function EnhancedBadgeSystem() {
               key={i}
               className="absolute w-2 h-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full"
               initial={{
-                x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000),
+                x: i * 20, // Fixed positioning instead of random
                 y: -10,
                 rotate: 0,
-                scale: Math.random() * 0.5 + 0.5
+                scale: 1
               }}
               animate={{
                 y: (typeof window !== 'undefined' ? window.innerHeight : 800) + 10,
                 rotate: 360,
-                x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000)
+                x: i * 20 + 100
               }}
               transition={{
-                duration: Math.random() * 3 + 2,
+                duration: 3,
                 ease: "easeOut"
               }}
             />

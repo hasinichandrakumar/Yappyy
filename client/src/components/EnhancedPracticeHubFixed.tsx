@@ -415,8 +415,8 @@ export default function EnhancedPracticeHubFixed() {
     ];
 
     // Randomly select feedback category and message
-    const randomCategory = feedbackOptions[Math.floor(Math.random() * feedbackOptions.length)];
-    const randomMessage = randomCategory.messages[Math.floor(Math.random() * randomCategory.messages.length)];
+    const randomCategory = feedbackOptions[0]; // Use first category instead of random
+    const randomMessage = randomCategory.messages[0]; // Use first message instead of random
 
     const newFeedback = {
       id: `feedback-${currentTime}`,

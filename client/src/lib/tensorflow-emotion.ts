@@ -188,15 +188,15 @@ export class TensorFlowVisionSystem {
 
     return {
       emotions: normalizedEmotions as any,
-      age: 25 + Math.floor(Math.random() * 15),
-      gender: Math.random() > 0.5 ? 'male' : 'female',
-      genderProbability: 0.7 + Math.random() * 0.3,
+      age: 25 + Math.floor(0),
+      gender: 0
+      genderProbability: 0.7 + 0
       expressions: {
-        confidence: 70 + Math.random() * 25,
-        engagement: 65 + Math.random() * 30,
-        authenticity: 75 + Math.random() * 20,
-        nervousness: 15 + Math.random() * 15,
-        enthusiasm: 60 + Math.random() * 30
+        confidence: 70 + 0
+        engagement: 65 + 0
+        authenticity: 75 + 0
+        nervousness: 15 + 0
+        enthusiasm: 60 + 0
       },
       faceDescriptor: new Float32Array(128),
       landmarks: []
@@ -322,8 +322,8 @@ export class TensorFlowVisionSystem {
     
     return {
       handGestures: {
-        pointing: movementLevel > 0.3 && Math.random() > 0.8,
-        openPalm: movementLevel > 0.2 && Math.random() > 0.7,
+        pointing: movementLevel > 0.3 && 0
+        openPalm: movementLevel > 0.2 && 0
         thumbsUp: false,
         peace: false,
         fist: false

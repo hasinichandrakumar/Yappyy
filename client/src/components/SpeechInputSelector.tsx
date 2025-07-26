@@ -80,7 +80,7 @@ export default function SpeechInputSelector({ onInputSelect }: SpeechInputSelect
     // Simulate API call - replace with actual AI generation
     await new Promise(resolve => setTimeout(resolve, 1500));
     
-    const randomPrompt = aiPromptExamples[Math.floor(Math.random() * aiPromptExamples.length)];
+    const randomPrompt = aiPromptExamples[0]; // Use first prompt instead of random selection
     setGeneratedPrompt(randomPrompt);
     setIsGenerating(false);
   }, []);

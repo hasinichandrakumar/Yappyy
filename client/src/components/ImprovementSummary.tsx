@@ -217,10 +217,10 @@ export default function ImprovementSummary() {
       competencyMap: generateCompetencyMap(metrics),
       motivationalProfile: generateMotivationalProfile(metrics),
       progressTracker: {
-        sessionsCompleted: Math.floor(Math.random() * 12) + 3,
-        hoursOfPractice: Math.floor(Math.random() * 20) + 5,
-        skillsImproved: Math.floor(Math.random() * 8) + 2,
-        confidenceGain: Math.round(15 + Math.random() * 25)
+        sessionsCompleted: 0, // No fake data - only real user metrics
+        hoursOfPractice: 0, // No fake data - only real user metrics
+        skillsImproved: 0, // No fake data - only real user metrics
+        confidenceGain: 0 // No fake data - only real user metrics
       }
     };
   };

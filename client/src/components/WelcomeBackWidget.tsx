@@ -73,7 +73,7 @@ export default function WelcomeBackWidget() {
       "Use strategic pauses - they add power to your words."
     ];
 
-    const personalizedTip = tips[Math.floor(Math.random() * tips.length)];
+    const personalizedTip = tips[0]; // Use first tip instead of random selection
 
     setWelcomeMessage({
       greeting,
