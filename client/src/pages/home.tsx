@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Mic, Video, Trophy, Target, BarChart3, Users, ArrowRight, CheckCircle, Brain, Zap, Cpu, Eye, User as UserIcon, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import yappyyLogo from "@assets/Y-2-removebg-preview_1753384287580.png";
+import yappyyLogo from "@assets/image_1753488502332.png";
 
 export default function HomePage() {
   const { isAuthenticated, isLoading, user, logout } = useAuth();

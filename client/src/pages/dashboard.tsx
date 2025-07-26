@@ -21,7 +21,7 @@ import WelcomeMessage from "@/components/WelcomeMessage";
 import ReturningUserWelcome from "@/components/ReturningUserWelcome";
 import { WelcomeDialog } from "@/components/WelcomeDialog";
 import { DailyGoalsDialog } from "@/components/DailyGoalsDialog";
-import yappyyLogo from '@assets/Y-2-removebg-preview_1753384287580.png';
+import yappyyLogo from '@assets/image_1753488502332.png';
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("practice");
