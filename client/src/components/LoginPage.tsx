@@ -6,7 +6,8 @@ import yappyyLogo from "@assets/Y-2-removebg-preview_1753384287580.png";
 
 export default function LoginPage() {
   const handleLogin = () => {
-    window.location.href = '/api/auth/google';
+    // Redirect to loading page first to show Yappyy branding
+    window.location.href = '/oauth-loading';
   };
 
   return (

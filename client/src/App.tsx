@@ -13,6 +13,7 @@ import LoginPage from "@/pages/login";
 import NotFound from "@/pages/not-found";
 import ClubsHub from "@/components/ClubsHub";
 import AccuracyTestSuite from "@/components/AccuracyTestSuite";
+import OAuthLoadingPage from "@/components/OAuthLoadingPage";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -41,6 +42,7 @@ function Router() {
       <Switch>
         <Route path="/" component={Home} />
         <Route path="/dashboard" component={Dashboard} />
+        <Route path="/oauth-loading" component={OAuthLoadingPage} />
         <Route component={Home} />
       </Switch>
     );
@@ -56,6 +58,7 @@ function Router() {
       <Route path="/clubs" component={ClubsHub} />
       <Route path="/logo" component={LogoExport} />
       <Route path="/test" component={AccuracyTestSuite} />
+      <Route path="/oauth-loading" component={OAuthLoadingPage} />
       <Route path="*" component={Dashboard} />
     </Switch>
   );
