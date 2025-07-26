@@ -10,7 +10,7 @@ import {
   ArrowLeft,
   Home
 } from "lucide-react";
-import yappyyLogo from "@assets/image_1753488502332.png";
+import yappyyLogo from "@assets/Y-2-removebg-preview_1753488645348.png";
 
 interface ProfileLayoutProps {
   children: React.ReactNode;
