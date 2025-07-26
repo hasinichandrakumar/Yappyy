@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Mic, Video, Trophy, Target, BarChart3, Users, ArrowRight, CheckCircle, Brain, Zap, Cpu, Eye, User as UserIcon, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import yappyyLogo from "@assets/Y-2-removebg-preview_1753488645348.png";
 
 
 export default function HomePage() {
@@ -193,7 +194,14 @@ export default function HomePage() {
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="text-center">
-
+            {/* Yappyy Logo at Top */}
+            <div className="flex justify-center mb-8">
+              <img 
+                src={yappyyLogo} 
+                alt="Yappyy" 
+                className="h-20 md:h-24 lg:h-28 w-auto filter drop-shadow-lg"
+              />
+            </div>
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-display text-white mb-12 font-bold leading-tight">
               Talk Smart.
               <br />
