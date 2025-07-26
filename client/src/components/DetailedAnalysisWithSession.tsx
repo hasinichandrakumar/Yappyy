@@ -28,9 +28,11 @@ import {
 import SessionSelector from "./SessionSelector";
 import SessionRecordingPlayer from "./SessionRecordingPlayer";
 import SmartAIFeedback from "./SmartAIFeedback";
+import VideoRewatchDialog from "./VideoRewatchDialog";
 
 export default function DetailedAnalysisWithSession() {
   const [selectedSession, setSelectedSession] = useState<any>(null);
+  const [videoDialogOpen, setVideoDialogOpen] = useState(false);
 
   const { data: sessions, isLoading } = useQuery({
     queryKey: ['/api/practice-sessions'],
@@ -450,6 +452,15 @@ export default function DetailedAnalysisWithSession() {
       />
       
       {renderSessionAnalysis()}
+
+      {/* Video Rewatch Dialog */}
+      <VideoRewatchDialog
+        isOpen={videoDialogOpen}
+        onClose={() => setVideoDialogOpen(false)}
+        sessionId={selectedSession?.id || 0}
+        sessionName={selectedSession?.sessionName || selectedSession?.name || "Practice Session"}
+        transcript={selectedSession?.transcript}
+      />
     </div>
   );
 }
@@ -592,7 +603,18 @@ export default function DetailedAnalysisWithSession() {
 
                 {selectedSession?.transcript && (
                   <div className="bg-gray-50 rounded-lg p-4">
-                    <h4 className="font-medium text-gray-900 mb-2">Session Transcript</h4>
+                    <div className="flex justify-between items-center mb-2">
+                      <h4 className="font-medium text-gray-900">Session Transcript</h4>
+                      <Button
+                        onClick={() => setVideoDialogOpen(true)}
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-2"
+                      >
+                        <Video className="h-4 w-4" />
+                        Rewatch Video
+                      </Button>
+                    </div>
                     <div className="max-h-32 overflow-y-auto text-sm text-gray-700">
                       {selectedSession.transcript}
                     </div>

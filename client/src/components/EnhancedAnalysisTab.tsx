@@ -42,11 +42,14 @@ import {
 } from 'lucide-react';
 
 import VideoSessionPlayer from './VideoSessionPlayer';
+import VideoRewatchDialog from './VideoRewatchDialog';
 
 export default function EnhancedAnalysisTab() {
   const [selectedSession, setSelectedSession] = useState('all');
   const [aiInsights, setAiInsights] = useState<any>(null);
   const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
+  const [videoDialogOpen, setVideoDialogOpen] = useState(false);
+  const [selectedVideoSession, setSelectedVideoSession] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -98,6 +101,12 @@ export default function EnhancedAnalysisTab() {
     if (selectedSession !== 'all') {
       deleteSessionMutation.mutate(parseInt(selectedSession));
     }
+  };
+
+  // Handle video rewatch for session
+  const handleVideoRewatch = (session: any) => {
+    setSelectedVideoSession(session);
+    setVideoDialogOpen(true);
   };
 
   // Generate AI insights for selected session
@@ -1098,6 +1107,15 @@ export default function EnhancedAnalysisTab() {
 
         </Tabs>
       </Card>
+
+      {/* Video Rewatch Dialog */}
+      <VideoRewatchDialog
+        isOpen={videoDialogOpen}
+        onClose={() => setVideoDialogOpen(false)}
+        sessionId={selectedVideoSession?.id || 0}
+        sessionName={selectedVideoSession?.sessionName || selectedVideoSession?.name || "Practice Session"}
+        transcript={selectedVideoSession?.transcript}
+      />
     </div>
   );
 }
