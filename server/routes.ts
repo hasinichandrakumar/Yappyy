@@ -49,6 +49,7 @@ import { alternativeSpeechAPIs } from './alternative-speech-apis';
 import { facialExpressionAnalysis } from './facial-expression-analysis';
 import { persistentAIAnalytics } from './persistent-ai-analytics';
 import { freeVoiceAnalysis } from './free-voice-analysis';
+// getNextSessionNumber is now defined inline in this file
 import { graphqlHTTP } from 'express-graphql';
 import neuralGraphQL from './graphql-schema';
 
@@ -56,6 +57,21 @@ import neuralGraphQL from './graphql-schema';
 function getUserId(req: any): string {
   // Google OAuth user (passport-based)
   return req.user?.id || 'guest';
+}
+
+// Helper function to get next session number
+async function getNextSessionNumber(userId: string): Promise<number> {
+  try {
+    const result = await db.select({ maxSessionNumber: max(practiceSessions.sessionNumber) })
+      .from(practiceSessions)
+      .where(eq(practiceSessions.userId, userId));
+    
+    const currentMax = result[0]?.maxSessionNumber || 0;
+    return currentMax + 1;
+  } catch (error) {
+    console.error('Error getting next session number:', error);
+    return 1; // Default to session 1 if error
+  }
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -1347,11 +1363,15 @@ CRITICAL: Evaluate how well this speech achieved its stated PURPOSE. Analyze the
         return res.status(403).json({ message: "Access denied" });
       }
 
+      // Convert videoBlob to data URL for video playback
+      const hasVideo = !!session.videoBlob;
+      const videoUrl = hasVideo ? `data:video/webm;base64,${session.videoBlob}` : null;
+
       // Return session data with video URL if available
       const response = {
         session: {
           id: session.id,
-          sessionName: session.name || "Practice Session",
+          sessionName: session.sessionName || session.name || "Practice Session",
           transcript: session.transcript,
           duration: session.duration,
           confidenceScore: session.confidenceScore,

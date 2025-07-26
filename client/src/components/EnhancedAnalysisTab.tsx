@@ -41,6 +41,8 @@ import {
   RotateCcw
 } from 'lucide-react';
 
+import VideoSessionPlayer from './VideoSessionPlayer';
+
 export default function EnhancedAnalysisTab() {
   const [selectedSession, setSelectedSession] = useState('all');
   const [aiInsights, setAiInsights] = useState<any>(null);
@@ -1070,46 +1072,11 @@ export default function EnhancedAnalysisTab() {
                   </div>
 
                   {/* Video Player Section */}
-                  {filteredSessions[0]?.videoRecording && (
-                    <Card className="p-4 bg-white/80 backdrop-blur-sm border border-blue-200/50">
-                      <div className="flex items-center gap-2 mb-3">
-                        <Video className="h-5 w-5 text-blue-600" />
-                        <h5 className="font-semibold text-blue-900">Session Recording</h5>
-                      </div>
-                      <div className="relative bg-black rounded-lg overflow-hidden">
-                        <video
-                          id="session-video-player"
-                          className="w-full max-h-96 object-contain"
-                          controls
-                          preload="metadata"
-                          poster="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTggNVYxOUwxOSAxMkw4IDVaIiBmaWxsPSIjNjM2NkYxIi8+Cjwvc3ZnPgo="
-                        >
-                          <source src={filteredSessions[0].videoRecording} type="video/webm" />
-                          <source src={filteredSessions[0].videoRecording} type="video/mp4" />
-                          Your browser does not support video playback.
-                        </video>
-                        <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
-                          Practice Session Recording
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between mt-3 text-sm text-blue-700">
-                        <span>Review your body language and delivery alongside the AI feedback</span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            const video = document.getElementById('session-video-player') as HTMLVideoElement;
-                            if (video) {
-                              video.currentTime = 0;
-                              video.play();
-                            }
-                          }}
-                        >
-                          <RotateCcw className="h-4 w-4 mr-1" />
-                          Restart
-                        </Button>
-                      </div>
-                    </Card>
+                  {selectedSession !== 'all' && filteredSessions[0] && (
+                    <VideoSessionPlayer 
+                      sessionId={parseInt(selectedSession)} 
+                      sessionData={filteredSessions[0]}
+                    />
                   )}
                 </div>
 
