@@ -130,8 +130,14 @@ export function useRoboflowVision() {
 
   // Start real-time analysis stream
   const startRealTimeAnalysis = useCallback(async (intervalMs: number = 2000) => {
-    const streamInitialized = await initializeVideoStream();
-    if (!streamInitialized) return false;
+    // If video ref already has a stream (from practice page), use it directly
+    if (videoRef.current && videoRef.current.srcObject) {
+      console.log('🤖 Using existing video stream for Roboflow analysis');
+    } else {
+      // Otherwise initialize our own stream
+      const streamInitialized = await initializeVideoStream();
+      if (!streamInitialized) return false;
+    }
 
     // Wait for video to be ready
     if (videoRef.current) {

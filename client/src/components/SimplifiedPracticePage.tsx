@@ -746,14 +746,53 @@ export default function SimplifiedPracticePage() {
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
         
-        // Initialize robust computer vision system
+        // Initialize ALL computer vision systems for gesture and posture monitoring
         try {
+          // Start Roboflow computer vision for gesture/posture analysis
+          console.log('🤖 Starting Roboflow computer vision for gestures and postures...');
+          
+          // Pass the existing video element and stream to Roboflow
+          if (roboflowVideoRef.current) {
+            roboflowVideoRef.current.srcObject = stream;
+            roboflowCanvasRef.current = canvasRef.current;
+          }
+          
+          // Wait for video to be ready before starting analysis
+          await new Promise<void>(resolve => {
+            const checkReady = () => {
+              if (videoRef.current && videoRef.current.readyState >= 3) {
+                resolve();
+              } else {
+                setTimeout(checkReady, 100);
+              }
+            };
+            checkReady();
+          });
+          
+          await startRealTimeAnalysis(1500); // Analyze every 1.5 seconds for performance
+          console.log('✅ Roboflow computer vision started successfully');
+        } catch (error) {
+          console.warn('⚠️ Roboflow computer vision failed:', error);
+        }
+
+        try {
+          // Start facial analysis system
+          console.log('🎭 Starting facial analysis system...');
+          await startFacialAnalysis(videoRef.current);
+          console.log('✅ Facial analysis started successfully');
+        } catch (error) {
+          console.warn('⚠️ Facial analysis failed:', error);
+        }
+
+        try {
+          // Start robust computer vision system
+          console.log('🛡️ Starting robust computer vision system...');
           const started = await startComputerVisionAnalysis(videoRef.current);
           if (started) {
-            console.log('🛡️ Robust computer vision started successfully');
+            console.log('✅ Robust computer vision started successfully');
           }
         } catch (error) {
-          console.warn('⚠️ Computer vision initialization failed:', error);
+          console.warn('⚠️ Robust computer vision initialization failed:', error);
         }
       }
 
@@ -1025,25 +1064,8 @@ export default function SimplifiedPracticePage() {
         }));
       }, 3000);
 
-      // Start Roboflow real-time computer vision analysis
-      try {
-        await startRealTimeAnalysis(3000); // Analyze every 3 seconds
-        console.log('🤖 Roboflow computer vision analysis started');
-      } catch (error) {
-        console.warn('⚠️ Roboflow analysis unavailable, using fallback');
-      }
-
-      // Start facial analysis
-      if (videoRef.current) {
-        try {
-          startFacialAnalysis(videoRef.current, 3000); // Analyze every 3 seconds
-          console.log('🎭 Facial analysis started');
-        } catch (error) {
-          console.warn('⚠️ Facial analysis unavailable, using fallback');
-        }
-      }
-
-      // Computer vision already started above, no additional initialization needed
+      // All computer vision systems already started above in the stream initialization
+      console.log('✅ All computer vision systems initialized during stream setup');
 
       console.log('📹 Recording started with robust computer vision integration:', {
         computerVision: isComputerVisionInitialized,
