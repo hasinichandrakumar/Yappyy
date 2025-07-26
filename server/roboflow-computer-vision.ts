@@ -68,17 +68,18 @@ export class RoboflowVisionEngine {
         return;
       }
 
-      // Initialize Roboflow with proper error handling
-      this.rf = await roboflow({
-        publishable_key: process.env.ROBOFLOW_API_KEY
-      });
-      
-      this.isAvailable = true;
-
-      // Load specialized models for public speaking analysis
-      await this.loadModels();
-      this.isInitialized = true;
-      console.log('🤖 Roboflow Computer Vision Engine initialized successfully');
+      // Initialize Roboflow with proper API - it's an object with methods
+      if (roboflow && typeof roboflow.detectObject === 'function') {
+        this.rf = roboflow;
+        this.isAvailable = true;
+        
+        // Load specialized models for public speaking analysis
+        await this.loadModels();
+        this.isInitialized = true;
+        console.log('🤖 Roboflow Computer Vision Engine initialized successfully');
+      } else {
+        throw new Error('Roboflow API methods not available');
+      }
     } catch (error: any) {
       console.error('❌ Failed to initialize Roboflow:', error.message || error);
     }
@@ -86,21 +87,15 @@ export class RoboflowVisionEngine {
 
   private async loadModels(): Promise<void> {
     try {
-      // Load pose detection model for posture analysis
-      const poseModel = this.rf.workspace("public-speaking-analysis").project("posture-detection").version(1);
-      this.models.set('posture', await poseModel.load());
-
-      // Load hand gesture recognition model
-      const gestureModel = this.rf.workspace("public-speaking-analysis").project("hand-gestures").version(1);
-      this.models.set('gestures', await gestureModel.load());
-
-      // Load facial expression analysis model
-      const faceModel = this.rf.workspace("public-speaking-analysis").project("facial-analysis").version(1);
-      this.models.set('facial', await faceModel.load());
-
-      console.log('📚 Roboflow models loaded: posture, gestures, facial');
+      // Roboflow v0.2.0 uses direct API calls - models are loaded on-demand
+      // Store reference to API methods for later use
+      this.models.set('detectObject', this.rf.detectObject);
+      this.models.set('classify', this.rf.classify);
+      this.models.set('instanceSegmentation', this.rf.instanceSegmentation);
+      
+      console.log('📚 Roboflow API methods loaded successfully');
     } catch (error: any) {
-      console.warn('⚠️ Some Roboflow models failed to load, using fallback detection:', error.message || error);
+      console.warn('⚠️ Failed to prepare Roboflow methods:', error.message || error);
     }
   }
 
