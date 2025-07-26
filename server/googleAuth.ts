@@ -190,8 +190,16 @@ export async function setupGoogleAuth(app: Express) {
             margin: 0 auto 2rem;
             animation: pulse 2s infinite;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+          }
+          .logo-image {
+            height: 80px;
+            width: auto;
+            margin-bottom: 1rem;
+            filter: drop-shadow(0 0 20px rgba(11, 249, 234, 0.6));
+            animation: float 3s ease-in-out infinite;
           }
           .logo-text {
             font-size: 5rem;
@@ -313,6 +321,7 @@ export async function setupGoogleAuth(app: Express) {
         
         <div class="container">
           <div class="logo-placeholder">
+            <img src="/assets/Y-2-removebg-preview_1753488645348-C0PWQit-.png" alt="Yappyy Logo" class="logo-image" />
             <div class="logo-text">Yappyy</div>
             <div style="font-size: 1.2rem; color: #06b6d4; margin-top: 10px; font-weight: 600;">AI Speech Coach</div>
             <!-- ADDITIONAL LOGO VISIBILITY -->
@@ -337,6 +346,7 @@ export async function setupGoogleAuth(app: Express) {
           </div>
           
           <div class="branding">
+            <img src="/assets/Y-2-removebg-preview_1753488645348-C0PWQit-.png" alt="Yappyy" class="brand-logo" />
             <div class="brand-text">
               <p class="brand-title">Powered by Yappyy</p>
               <p class="brand-subtitle">AI-powered speech improvement</p>
