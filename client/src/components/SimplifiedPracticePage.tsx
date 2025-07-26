@@ -635,7 +635,7 @@ export default function SimplifiedPracticePage() {
       console.error('Speech recognition error:', event.error);
     };
 
-    recognitionRef.current = recognition;
+    (recognitionRef as any).current = recognition;
   }, [sessionDuration, transcript]);
 
   // Enhanced comprehensive live insights system
