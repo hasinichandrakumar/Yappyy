@@ -68,7 +68,7 @@ export function useAuth() {
     // Redirect to Google OAuth login
     if (typeof window !== 'undefined') {
       window.sessionStorage.removeItem('loggedOut');
-      window.location.href = '/api/auth/google';
+      window.location.href = '/oauth-loading';
     }
   };
 

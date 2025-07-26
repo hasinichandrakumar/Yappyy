@@ -19,20 +19,23 @@ export default function OAuthLoadingPage() {
         <CardContent className="p-12 text-center space-y-8">
           {/* Large Yappyy Logo */}
           <div className="flex justify-center">
-            <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-6 rounded-2xl shadow-2xl">
+            <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-8 rounded-3xl shadow-2xl animate-pulse">
               <img 
                 src={yappyyLogo} 
                 alt="Yappyy - AI Speech Training" 
-                className="h-16 w-auto filter brightness-0 invert animate-pulse"
+                className="h-20 w-auto filter brightness-0 invert"
               />
             </div>
           </div>
           
           {/* Connecting Message */}
           <div className="space-y-4">
-            <h1 className="text-3xl font-extrabold text-gray-900 font-poppins">
-              Connecting to Google
+            <h1 className="text-4xl font-extrabold text-gray-900 font-poppins">
+              Welcome to Yappyy
             </h1>
+            <h2 className="text-2xl font-bold text-blue-600">
+              Connecting to Google
+            </h2>
             <p className="text-lg text-gray-600 font-medium">
               Redirecting you to Google's secure sign-in...
             </p>
