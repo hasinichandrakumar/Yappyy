@@ -41,6 +41,7 @@ import { advancedComputerVision } from "./advanced-computer-vision";
 import { enhancedNeuralPipeline } from "./enhanced-neural-pipeline";
 import { roboflowVision, analyzeVideoFrame as roboflowAnalyzeFrame, trainCustomVisionModel } from './roboflow-computer-vision';
 import { huggingFaceCV } from './huggingface-computer-vision';
+import { speechEmotionRecognition } from './speech-emotion-recognition';
 import { persistentAIAnalytics } from './persistent-ai-analytics';
 import { graphqlHTTP } from 'express-graphql';
 import neuralGraphQL from './graphql-schema';
@@ -2595,6 +2596,61 @@ Return only the improved content, maintaining the same format with [brackets] fo
       res.json(result);
     } catch (error: any) {
       res.status(500).json({ message: "Failed to analyze posture", error: error.message });
+    }
+  });
+
+  // Advanced Speech Emotion Recognition Endpoints
+  app.post("/api/speech-emotion/analyze-confidence", async (req, res) => {
+    try {
+      const { audioBase64 } = req.body;
+      
+      if (!audioBase64) {
+        return res.status(400).json({ message: "Audio data is required" });
+      }
+
+      const audioBuffer = Buffer.from(audioBase64, 'base64');
+      const confidenceAnalysis = await speechEmotionRecognition.analyzeVoiceConfidence(audioBuffer);
+      
+      console.log("🎯 Speech emotion confidence analysis completed");
+      res.json({
+        success: true,
+        analysis: confidenceAnalysis,
+        provider: 'huggingface_speech_emotion'
+      });
+    } catch (error: any) {
+      console.error("❌ Speech emotion analysis error:", error);
+      res.status(500).json({ 
+        success: false,
+        message: "Speech emotion analysis failed", 
+        error: error.message 
+      });
+    }
+  });
+
+  app.post("/api/speech-emotion/analyze-emotions", async (req, res) => {
+    try {
+      const { audioBase64 } = req.body;
+      
+      if (!audioBase64) {
+        return res.status(400).json({ message: "Audio data is required" });
+      }
+
+      const audioBuffer = Buffer.from(audioBase64, 'base64');
+      const emotionAnalysis = await speechEmotionRecognition.analyzeDetailedEmotions(audioBuffer);
+      
+      console.log("🎭 Speech emotion analysis completed");
+      res.json({
+        success: true,
+        analysis: emotionAnalysis,
+        provider: 'huggingface_wav2vec2'
+      });
+    } catch (error: any) {
+      console.error("❌ Speech emotion analysis error:", error);
+      res.status(500).json({ 
+        success: false,
+        message: "Emotion analysis failed", 
+        error: error.message 
+      });
     }
   });
 
