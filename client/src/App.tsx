@@ -15,6 +15,7 @@ import ClubsHub from "@/components/ClubsHub";
 import AccuracyTestSuite from "@/components/AccuracyTestSuite";
 import OAuthLoadingPage from "@/components/OAuthLoadingPage";
 import OAuthCallbackPage from "@/components/OAuthCallbackPage";
+import InteractiveCommunicationStats from "@/components/InteractiveCommunicationStats";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -60,6 +61,7 @@ function Router() {
       <Route path="/clubs" component={ClubsHub} />
       <Route path="/logo" component={LogoExport} />
       <Route path="/test" component={AccuracyTestSuite} />
+      <Route path="/stats" component={InteractiveCommunicationStats} />
       <Route path="/oauth-loading" component={OAuthLoadingPage} />
       <Route path="/oauth2callback" component={OAuthCallbackPage} />
       <Route path="*" component={Dashboard} />

@@ -241,50 +241,53 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             {/* Words - 7% */}
-            <div className="text-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
-              <div className="text-6xl font-bold bg-gradient-to-br from-[#2563eb] to-[#22d3ee] bg-clip-text text-transparent mb-4">
+            <Card className="text-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group hover:scale-105">
+              <div className="text-6xl font-bold bg-gradient-to-br from-[#2563eb] to-[#22d3ee] bg-clip-text text-transparent mb-4 group-hover:scale-110 transition-all duration-300">
                 7%
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Spoken Words</h3>
               <p className="text-gray-600">
                 Only 7% of communication impact comes from the actual words you speak
               </p>
-            </div>
+              <div className="absolute top-4 right-4 w-2 h-2 bg-blue-400 rounded-full group-hover:scale-150 group-hover:bg-blue-600 transition-all duration-300" />
+            </Card>
 
             {/* Tone - 38% */}
-            <div className="text-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
-              <div className="text-6xl font-bold bg-gradient-to-br from-[#2563eb] to-[#22d3ee] bg-clip-text text-transparent mb-4">
+            <Card className="text-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group hover:scale-105">
+              <div className="text-6xl font-bold bg-gradient-to-br from-[#2563eb] to-[#22d3ee] bg-clip-text text-transparent mb-4 group-hover:scale-110 transition-all duration-300">
                 38%
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Tone of Voice</h3>
               <p className="text-gray-600">
                 38% comes from your vocal delivery, pace, volume, and inflection
               </p>
-            </div>
+              <div className="absolute top-4 right-4 w-2 h-2 bg-blue-400 rounded-full group-hover:scale-150 group-hover:bg-blue-600 transition-all duration-300" />
+            </Card>
 
             {/* Body Language - 55% */}
-            <div className="text-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
-              <div className="text-6xl font-bold bg-gradient-to-br from-[#2563eb] to-[#22d3ee] bg-clip-text text-transparent mb-4">
+            <Card className="text-center p-8 bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer group hover:scale-105">
+              <div className="text-6xl font-bold bg-gradient-to-br from-[#2563eb] to-[#22d3ee] bg-clip-text text-transparent mb-4 group-hover:scale-110 transition-all duration-300">
                 55%
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">Body Language</h3>
               <p className="text-gray-600">
                 55% of your message impact comes from posture, gestures, and eye contact
               </p>
-            </div>
+              <div className="absolute top-4 right-4 w-2 h-2 bg-blue-400 rounded-full group-hover:scale-150 group-hover:bg-blue-600 transition-all duration-300" />
+            </Card>
           </div>
 
           <div className="mt-16">
             {/* Central 100% Statistic */}
             <div className="text-center">
-              <div className="inline-block relative">
-                <div className="bg-white p-16 rounded-full shadow-2xl border-4 border-blue-100 relative overflow-hidden">
+              <div className="inline-block relative group cursor-pointer">
+                <div className="bg-white p-16 rounded-full shadow-2xl border-4 border-blue-100 relative overflow-hidden group-hover:shadow-blue-300 group-hover:border-blue-200 group-hover:scale-105 transition-all duration-500">
                   <div className="text-center">
                     <p className="text-xl font-bold text-gray-700 mb-2">
                       We coach
                     </p>
                     <div className="relative">
-                      <div className="text-7xl md:text-8xl font-black bg-gradient-to-br from-[#2563eb] to-[#22d3ee] bg-clip-text text-transparent leading-none tracking-tighter">
+                      <div className="text-7xl md:text-8xl font-black bg-gradient-to-br from-[#2563eb] to-[#22d3ee] bg-clip-text text-transparent leading-none tracking-tighter group-hover:scale-110 transition-all duration-300">
                         100%
                       </div>
                     </div>
@@ -294,19 +297,43 @@ export default function HomePage() {
                   </div>
                 </div>
                 
-                {/* Bubble decorations around the circle */}
-                <div className="absolute -top-6 left-1/4 w-8 h-8 bubble-decoration opacity-70"></div>
-                <div className="absolute -bottom-4 right-1/4 w-6 h-6 bubble-decoration opacity-60"></div>
-                <div className="absolute top-1/3 -left-8 w-5 h-5 bubble-decoration opacity-50"></div>
-                <div className="absolute bottom-1/3 -right-6 w-4 h-4 bubble-decoration opacity-65"></div>
-                <div className="absolute -top-2 right-1/3 w-3 h-3 bubble-decoration opacity-55"></div>
-                <div className="absolute top-1/2 -right-10 w-7 h-7 bubble-decoration opacity-45"></div>
-                <div className="absolute bottom-1/4 -left-10 w-9 h-9 bubble-decoration opacity-40"></div>
+                {/* Interactive bubble decorations around the circle */}
+                <div className="absolute -top-6 left-1/4 w-8 h-8 bubble-decoration opacity-70 group-hover:scale-125 group-hover:opacity-90 transition-all duration-300"></div>
+                <div className="absolute -bottom-4 right-1/4 w-6 h-6 bubble-decoration opacity-60 group-hover:scale-125 group-hover:opacity-80 transition-all duration-300"></div>
+                <div className="absolute top-1/3 -left-8 w-5 h-5 bubble-decoration opacity-50 group-hover:scale-125 group-hover:opacity-75 transition-all duration-300"></div>
+                <div className="absolute bottom-1/3 -right-6 w-4 h-4 bubble-decoration opacity-65 group-hover:scale-125 group-hover:opacity-85 transition-all duration-300"></div>
+                <div className="absolute -top-2 right-1/3 w-3 h-3 bubble-decoration opacity-55 group-hover:scale-125 group-hover:opacity-75 transition-all duration-300"></div>
+                <div className="absolute top-1/2 -right-10 w-7 h-7 bubble-decoration opacity-45 group-hover:scale-125 group-hover:opacity-70 transition-all duration-300"></div>
+                <div className="absolute bottom-1/4 -left-10 w-9 h-9 bubble-decoration opacity-40 group-hover:scale-125 group-hover:opacity-65 transition-all duration-300"></div>
               </div>
               
               <p className="text-lg font-semibold text-gray-600 mt-8 max-w-md mx-auto">
                 Complete communication coaching across all aspects of your speaking skills
               </p>
+              
+              <div className="flex gap-4 justify-center mt-8">
+                <Button 
+                  size="lg" 
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg transition-all duration-300 hover:scale-105"
+                  onClick={() => {
+                    if (isAuthenticated) {
+                      window.location.href = '/dashboard';
+                    } else {
+                      window.location.href = '/oauth-loading';
+                    }
+                  }}
+                >
+                  Start Practicing
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="border-blue-600 text-blue-600 hover:bg-blue-50 px-8 py-3 text-lg transition-all duration-300 hover:scale-105"
+                  onClick={() => window.location.href = '/stats'}
+                >
+                  Interactive Demo
+                </Button>
+              </div>
             </div>
           </div>
         </div>
