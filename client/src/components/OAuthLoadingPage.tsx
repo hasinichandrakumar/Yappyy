@@ -17,37 +17,51 @@ export default function OAuthLoadingPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-lg border-2 border-blue-100 shadow-2xl">
         <CardContent className="p-12 text-center space-y-8">
-          {/* Large Yappyy Logo */}
+          {/* Extra Large Yappyy Logo with Enhanced Animation */}
           <div className="flex justify-center">
-            <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-6 rounded-2xl shadow-2xl">
-              <img 
-                src={yappyyLogo} 
-                alt="Yappyy - AI Speech Training" 
-                className="h-16 w-auto filter brightness-0 invert animate-pulse"
-              />
+            <div className="relative">
+              <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-8 rounded-3xl shadow-2xl animate-pulse">
+                <img 
+                  src={yappyyLogo} 
+                  alt="Yappyy - AI Speech Training" 
+                  className="h-20 w-auto filter brightness-0 invert"
+                />
+              </div>
+              <div className="absolute -inset-2 bg-gradient-to-r from-blue-400 to-purple-400 rounded-3xl opacity-30 animate-ping"></div>
             </div>
           </div>
           
-          {/* Connecting Message */}
+          {/* Enhanced Connecting Message */}
           <div className="space-y-4">
-            <h1 className="text-3xl font-extrabold text-gray-900 font-poppins">
-              Connecting to Google
+            <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 font-poppins">
+              Welcome to Yappyy
             </h1>
+            <h2 className="text-2xl font-bold text-gray-800">
+              Connecting to Google
+            </h2>
             <p className="text-lg text-gray-600 font-medium">
-              Redirecting you to Google's secure sign-in...
+              Redirecting you to Google's secure authentication...
             </p>
           </div>
           
-          {/* Loading Animation */}
-          <div className="flex justify-center items-center space-x-3">
-            <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-            <span className="text-blue-600 font-semibold">Authenticating</span>
+          {/* Enhanced Loading Animation */}
+          <div className="flex justify-center items-center space-x-4">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            <span className="text-xl text-blue-600 font-bold">Authenticating with Google</span>
           </div>
           
-          {/* Yappyy Branding Footer */}
+          {/* Progress Bar */}
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full animate-pulse" style={{ width: '75%' }}></div>
+          </div>
+          
+          {/* Enhanced Yappyy Branding Footer */}
           <div className="pt-6 border-t border-gray-100">
-            <p className="text-sm text-gray-500">
-              Powered by <span className="font-bold text-blue-600">Yappyy</span> AI Speech Training
+            <p className="text-lg text-gray-600">
+              Powered by <span className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Yappyy</span>
+            </p>
+            <p className="text-sm text-gray-500 mt-1">
+              AI-Powered Speech Training Platform
             </p>
           </div>
         </CardContent>
