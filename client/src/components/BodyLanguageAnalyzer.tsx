@@ -216,7 +216,10 @@ export default function BodyLanguageAnalyzer() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="text-center">
                 <div className={`text-2xl font-bold ${getScoreColor(metrics.overallPresence)}`}>
-                  {Math.round(metrics.overallPresence)}%
+                  {(() => {
+                    const presence = Number(metrics.overallPresence);
+                    return isNaN(presence) ? "0%" : `${Math.round(presence)}%`;
+                  })()}
                 </div>
                 <div className="text-sm text-gray-600">Overall Presence</div>
               </div>

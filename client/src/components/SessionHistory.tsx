@@ -109,7 +109,10 @@ export default function SessionHistory() {
                       <Badge 
                         className={`${getConfidenceBadgeColor(session.confidenceScore)} border-0`}
                       >
-                        {Math.round(session.confidenceScore)}%
+                        {(() => {
+                          const score = Number(session.confidenceScore);
+                          return isNaN(score) ? "0%" : `${Math.round(score)}%`;
+                        })()}
                       </Badge>
                     </td>
                     <td className="py-4 text-sm text-gray-600">

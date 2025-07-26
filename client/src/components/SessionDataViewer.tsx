@@ -315,13 +315,19 @@ export function SessionDataViewer({
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Clarity</span>
-                      <span>{Math.round(metrics.voice.clarity)}%</span>
+                      <span>{(() => {
+                        const clarity = Number(metrics.voice.clarity);
+                        return isNaN(clarity) ? "0%" : `${Math.round(clarity)}%`;
+                      })()}</span>
                     </div>
                     <Progress value={metrics.voice.clarity} className="h-2" />
                     
                     <div className="flex justify-between text-sm">
                       <span>Pace</span>
-                      <span>{Math.round(metrics.voice.pace)}%</span>
+                      <span>{(() => {
+                        const pace = Number(metrics.voice.pace);
+                        return isNaN(pace) ? "0%" : `${Math.round(pace)}%`;
+                      })()}</span>
                     </div>
                     <Progress value={metrics.voice.pace} className="h-2" />
                   </div>
@@ -332,13 +338,19 @@ export function SessionDataViewer({
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Eye Contact</span>
-                      <span>{Math.round(metrics.bodyLanguage.eyeContactScore)}%</span>
+                      <span>{(() => {
+                        const score = Number(metrics.bodyLanguage.eyeContactScore);
+                        return isNaN(score) ? "0%" : `${Math.round(score)}%`;
+                      })()}</span>
                     </div>
                     <Progress value={metrics.bodyLanguage.eyeContactScore} className="h-2" />
                     
                     <div className="flex justify-between text-sm">
                       <span>Posture</span>
-                      <span>{Math.round(metrics.bodyLanguage.postureConfidence)}%</span>
+                      <span>{(() => {
+                        const confidence = Number(metrics.bodyLanguage.postureConfidence);
+                        return isNaN(confidence) ? "0%" : `${Math.round(confidence)}%`;
+                      })()}</span>
                     </div>
                     <Progress value={metrics.bodyLanguage.postureConfidence} className="h-2" />
                   </div>
@@ -353,7 +365,10 @@ export function SessionDataViewer({
                   <div key={emotion}>
                     <div className="flex justify-between text-sm mb-1">
                       <span className="capitalize">{emotion}</span>
-                      <span>{Math.round(value as number)}%</span>
+                      <span>{(() => {
+                        const numValue = Number(value);
+                        return isNaN(numValue) ? "0%" : `${Math.round(numValue)}%`;
+                      })()}</span>
                     </div>
                     <Progress value={value as number} className="h-2" />
                   </div>

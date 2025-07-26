@@ -348,7 +348,10 @@ export default function PostSessionAICoach({ sessionData }: PostSessionAICoachPr
               <span>Session Performance Summary</span>
             </div>
             <Badge variant={overallScore >= 80 ? "default" : overallScore >= 60 ? "secondary" : "destructive"}>
-              {Math.round(overallScore)}% Overall
+              {(() => {
+                const score = Number(overallScore);
+                return isNaN(score) ? "0%" : `${Math.round(score)}%`;
+              })()} Overall
             </Badge>
           </CardTitle>
         </CardHeader>
@@ -410,7 +413,10 @@ export default function PostSessionAICoach({ sessionData }: PostSessionAICoachPr
                       <div className="flex justify-between text-sm mb-1">
                         <span>Purpose Alignment</span>
                         <span className={`font-medium ${getScoreColor(contentAnalysis.purposeAlignment)}`}>
-                          {Math.round(contentAnalysis.purposeAlignment)}%
+                          {(() => {
+                            const score = Number(contentAnalysis.purposeAlignment);
+                            return isNaN(score) ? "0%" : `${Math.round(score)}%`;
+                          })()}
                         </span>
                       </div>
                       <Progress value={contentAnalysis.purposeAlignment} className="h-2" />
@@ -420,7 +426,10 @@ export default function PostSessionAICoach({ sessionData }: PostSessionAICoachPr
                       <div className="flex justify-between text-sm mb-1">
                         <span>Speech Structure</span>
                         <span className={`font-medium ${getScoreColor(contentAnalysis.structureScore)}`}>
-                          {Math.round(contentAnalysis.structureScore)}%
+                          {(() => {
+                            const score = Number(contentAnalysis.structureScore);
+                            return isNaN(score) ? "0%" : `${Math.round(score)}%`;
+                          })()}
                         </span>
                       </div>
                       <Progress value={contentAnalysis.structureScore} className="h-2" />
@@ -430,7 +439,10 @@ export default function PostSessionAICoach({ sessionData }: PostSessionAICoachPr
                       <div className="flex justify-between text-sm mb-1">
                         <span>Message Clarity</span>
                         <span className={`font-medium ${getScoreColor(contentAnalysis.clarityScore)}`}>
-                          {Math.round(contentAnalysis.clarityScore)}%
+                          {(() => {
+                            const score = Number(contentAnalysis.clarityScore);
+                            return isNaN(score) ? "0%" : `${Math.round(score)}%`;
+                          })()}
                         </span>
                       </div>
                       <Progress value={contentAnalysis.clarityScore} className="h-2" />
@@ -440,7 +452,10 @@ export default function PostSessionAICoach({ sessionData }: PostSessionAICoachPr
                       <div className="flex justify-between text-sm mb-1">
                         <span>Audience Engagement</span>
                         <span className={`font-medium ${getScoreColor(contentAnalysis.engagementScore)}`}>
-                          {Math.round(contentAnalysis.engagementScore)}%
+                          {(() => {
+                            const score = Number(contentAnalysis.engagementScore);
+                            return isNaN(score) ? "0%" : `${Math.round(score)}%`;
+                          })()}
                         </span>
                       </div>
                       <Progress value={contentAnalysis.engagementScore} className="h-2" />
@@ -450,7 +465,10 @@ export default function PostSessionAICoach({ sessionData }: PostSessionAICoachPr
                       <div className="flex justify-between text-sm mb-1">
                         <span>Persuasiveness</span>
                         <span className={`font-medium ${getScoreColor(contentAnalysis.persuasivenessScore)}`}>
-                          {Math.round(contentAnalysis.persuasivenessScore)}%
+                          {(() => {
+                            const score = Number(contentAnalysis.persuasivenessScore);
+                            return isNaN(score) ? "0%" : `${Math.round(score)}%`;
+                          })()}
                         </span>
                       </div>
                       <Progress value={contentAnalysis.persuasivenessScore} className="h-2" />
@@ -541,7 +559,10 @@ export default function PostSessionAICoach({ sessionData }: PostSessionAICoachPr
                       <div className="flex justify-between items-center">
                         <span className="text-sm">Score</span>
                         <span className={`font-bold ${getScoreColor(voiceFeedback.clarity.score)}`}>
-                          {Math.round(voiceFeedback.clarity.score)}%
+                          {(() => {
+                            const score = Number(voiceFeedback.clarity.score);
+                            return isNaN(score) ? "0%" : `${Math.round(score)}%`;
+                          })()}
                         </span>
                       </div>
                       <Progress value={voiceFeedback.clarity.score} className="h-2" />
@@ -570,7 +591,10 @@ export default function PostSessionAICoach({ sessionData }: PostSessionAICoachPr
                       <div className="flex justify-between items-center">
                         <span className="text-sm">Score</span>
                         <span className={`font-bold ${getScoreColor(voiceFeedback.pace.score)}`}>
-                          {Math.round(voiceFeedback.pace.score)}%
+                          {(() => {
+                            const score = Number(voiceFeedback.pace.score);
+                            return isNaN(score) ? "0%" : `${Math.round(score)}%`;
+                          })()}
                         </span>
                       </div>
                       <Progress value={voiceFeedback.pace.score} className="h-2" />
@@ -599,7 +623,10 @@ export default function PostSessionAICoach({ sessionData }: PostSessionAICoachPr
                       <div className="flex justify-between items-center">
                         <span className="text-sm">Score</span>
                         <span className={`font-bold ${getScoreColor(voiceFeedback.volume.score)}`}>
-                          {Math.round(voiceFeedback.volume.score)}%
+                          {(() => {
+                            const score = Number(voiceFeedback.volume.score);
+                            return isNaN(score) ? "0%" : `${Math.round(score)}%`;
+                          })()}
                         </span>
                       </div>
                       <Progress value={voiceFeedback.volume.score} className="h-2" />
@@ -628,7 +655,10 @@ export default function PostSessionAICoach({ sessionData }: PostSessionAICoachPr
                       <div className="flex justify-between items-center">
                         <span className="text-sm">Score</span>
                         <span className={`font-bold ${getScoreColor(voiceFeedback.intonation.score)}`}>
-                          {Math.round(voiceFeedback.intonation.score)}%
+                          {(() => {
+                            const score = Number(voiceFeedback.intonation.score);
+                            return isNaN(score) ? "0%" : `${Math.round(score)}%`;
+                          })()}
                         </span>
                       </div>
                       <Progress value={voiceFeedback.intonation.score} className="h-2" />
@@ -666,7 +696,10 @@ export default function PostSessionAICoach({ sessionData }: PostSessionAICoachPr
                       <div className="flex justify-between items-center">
                         <span className="text-sm">Score</span>
                         <span className={`font-bold ${getScoreColor(bodyLanguageFeedback.eyeContact.score)}`}>
-                          {Math.round(bodyLanguageFeedback.eyeContact.score)}%
+                          {(() => {
+                            const score = Number(bodyLanguageFeedback.eyeContact.score);
+                            return isNaN(score) ? "0%" : `${Math.round(score)}%`;
+                          })()}
                         </span>
                       </div>
                       <Progress value={bodyLanguageFeedback.eyeContact.score} className="h-2" />
@@ -695,7 +728,10 @@ export default function PostSessionAICoach({ sessionData }: PostSessionAICoachPr
                       <div className="flex justify-between items-center">
                         <span className="text-sm">Score</span>
                         <span className={`font-bold ${getScoreColor(bodyLanguageFeedback.posture.score)}`}>
-                          {Math.round(bodyLanguageFeedback.posture.score)}%
+                          {(() => {
+                            const score = Number(bodyLanguageFeedback.posture.score);
+                            return isNaN(score) ? "0%" : `${Math.round(score)}%`;
+                          })()}
                         </span>
                       </div>
                       <Progress value={bodyLanguageFeedback.posture.score} className="h-2" />
@@ -724,7 +760,10 @@ export default function PostSessionAICoach({ sessionData }: PostSessionAICoachPr
                       <div className="flex justify-between items-center">
                         <span className="text-sm">Score</span>
                         <span className={`font-bold ${getScoreColor(bodyLanguageFeedback.gestures.score)}`}>
-                          {Math.round(bodyLanguageFeedback.gestures.score)}%
+                          {(() => {
+                            const score = Number(bodyLanguageFeedback.gestures.score);
+                            return isNaN(score) ? "0%" : `${Math.round(score)}%`;
+                          })()}
                         </span>
                       </div>
                       <Progress value={bodyLanguageFeedback.gestures.score} className="h-2" />
@@ -753,7 +792,10 @@ export default function PostSessionAICoach({ sessionData }: PostSessionAICoachPr
                       <div className="flex justify-between items-center">
                         <span className="text-sm">Score</span>
                         <span className={`font-bold ${getScoreColor(bodyLanguageFeedback.presence.score)}`}>
-                          {Math.round(bodyLanguageFeedback.presence.score)}%
+                          {(() => {
+                            const score = Number(bodyLanguageFeedback.presence.score);
+                            return isNaN(score) ? "0%" : `${Math.round(score)}%`;
+                          })()}
                         </span>
                       </div>
                       <Progress value={bodyLanguageFeedback.presence.score} className="h-2" />

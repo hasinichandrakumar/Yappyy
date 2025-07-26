@@ -470,7 +470,10 @@ export default function BadgeSystem() {
         <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
           <CardContent className="p-4 text-center">
             <Target className="w-8 h-8 mx-auto text-orange-600 mb-2" />
-            <div className="text-2xl font-bold text-orange-800">{Math.round((stats.unlockedBadges / stats.totalBadges) * 100)}%</div>
+            <div className="text-2xl font-bold text-orange-800">{(() => {
+              const percentage = (stats.unlockedBadges / stats.totalBadges) * 100;
+              return isNaN(percentage) ? "0%" : `${Math.round(percentage)}%`;
+            })()}</div>
             <div className="text-sm text-orange-600">Completion</div>
           </CardContent>
         </Card>

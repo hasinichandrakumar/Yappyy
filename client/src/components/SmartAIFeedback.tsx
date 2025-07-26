@@ -274,7 +274,10 @@ export default function SmartAIFeedback({ roleplayContext, audienceType }: Smart
                 <div className="text-xs text-blue-600">Words Spoken</div>
               </div>
               <div className="bg-white/50 rounded-lg p-3">
-                <div className="text-lg font-bold text-blue-900">{Math.round(voiceClarity)}%</div>
+                <div className="text-lg font-bold text-blue-900">{(() => {
+                  const clarity = Number(voiceClarity);
+                  return isNaN(clarity) ? "0%" : `${Math.round(clarity)}%`;
+                })()}</div>
                 <div className="text-xs text-blue-600">Voice Clarity</div>
               </div>
             </div>
@@ -297,7 +300,10 @@ export default function SmartAIFeedback({ roleplayContext, audienceType }: Smart
               <div className="flex justify-between text-xs">
                 <span>Clarity</span>
                 <span className={voiceClarity > 70 ? 'text-green-600' : voiceClarity > 40 ? 'text-yellow-600' : 'text-red-600'}>
-                  {Math.round(voiceClarity)}%
+                  {(() => {
+                    const clarity = Number(voiceClarity);
+                    return isNaN(clarity) ? "0%" : `${Math.round(clarity)}%`;
+                  })()}
                 </span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
@@ -325,7 +331,10 @@ export default function SmartAIFeedback({ roleplayContext, audienceType }: Smart
               <div className="flex justify-between text-xs">
                 <span>Confidence</span>
                 <span className={confidenceScore > 70 ? 'text-green-600' : confidenceScore > 40 ? 'text-yellow-600' : 'text-red-600'}>
-                  {Math.round(confidenceScore)}%
+                  {(() => {
+                    const confidence = Number(confidenceScore);
+                    return isNaN(confidence) ? "0%" : `${Math.round(confidence)}%`;
+                  })()}
                 </span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
@@ -420,7 +429,12 @@ export default function SmartAIFeedback({ roleplayContext, audienceType }: Smart
           <div className="grid grid-cols-2 gap-4">
             <div className="text-center p-3 bg-emerald-50 rounded-lg">
               <div className="text-lg font-bold text-emerald-700">
-                {Math.round((voiceClarity + confidenceScore) / 2)}%
+                {(() => {
+                  const clarity = Number(voiceClarity) || 0;
+                  const confidence = Number(confidenceScore) || 0;
+                  const average = (clarity + confidence) / 2;
+                  return isNaN(average) ? "0%" : `${Math.round(average)}%`;
+                })()}
               </div>
               <div className="text-xs text-emerald-600">Overall Score</div>
             </div>

@@ -305,7 +305,10 @@ export default function DailyGoalWidget() {
                   </div>
                   <div className="absolute inset-0 flex items-center justify-center">
                     <span className="text-xs font-bold text-white drop-shadow-sm">
-                      {Math.round((goal.current / goal.target) * 100)}%
+                      {(() => {
+                        const percentage = (goal.current / goal.target) * 100;
+                        return isNaN(percentage) ? "0%" : `${Math.round(percentage)}%`;
+                      })()}
                     </span>
                   </div>
                 </div>

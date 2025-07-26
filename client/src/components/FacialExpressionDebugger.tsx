@@ -172,7 +172,10 @@ export function FacialExpressionDebugger({
                         style={{ width: `${Math.min(100, intensity * 100)}%` }}
                       />
                     </div>
-                    <span className="text-xs w-8">{Math.round(intensity * 100)}%</span>
+                    <span className="text-xs w-8">{(() => {
+                      const percentage = intensity * 100;
+                      return isNaN(percentage) ? "0%" : `${Math.round(percentage)}%`;
+                    })()}</span>
                   </div>
                 </div>
               ))}
@@ -215,7 +218,10 @@ export function FacialExpressionDebugger({
               <div>
                 <span className="text-gray-600">Gender:</span>
                 <span className="ml-2 font-medium capitalize">{lastResults.gender}</span>
-                <span className="ml-1 text-xs text-gray-500">({Math.round(lastResults.genderProbability * 100)}%)</span>
+                <span className="ml-1 text-xs text-gray-500">({(() => {
+                  const percentage = lastResults.genderProbability * 100;
+                  return isNaN(percentage) ? "0%" : `${Math.round(percentage)}%`;
+                })()})</span>
               </div>
             </div>
           </div>

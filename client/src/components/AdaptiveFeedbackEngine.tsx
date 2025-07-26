@@ -132,7 +132,10 @@ export default function AdaptiveFeedbackEngine({ userProfile, currentPerformance
         id: 'celebration_1',
         type: 'celebration',
         complexity: 1,
-        message: `Your learning velocity is in the top 5% - you've improved ${Math.round(userProfile.learningVelocity * 100)}% faster than typical users`,
+        message: `Your learning velocity is in the top 5% - you've improved ${(() => {
+          const velocity = Number(userProfile.learningVelocity);
+          return isNaN(velocity) ? "0" : Math.round(velocity * 100).toString();
+        })()}% faster than typical users`,
         reasoning: "Recognizing exceptional progress to maintain motivation",
         nextSteps: ["Consider mentoring others", "Try challenging speaking scenarios", "Explore advanced rhetorical techniques"],
         confidenceScore: 0.98,
@@ -208,7 +211,10 @@ export default function AdaptiveFeedbackEngine({ userProfile, currentPerformance
               <TrendingUp className="h-4 w-4 text-cyan-600" />
               <span className="text-sm font-medium text-gray-700">Velocity</span>
             </div>
-            <div className="text-xl font-bold text-cyan-600">{Math.round(userProfile.learningVelocity * 100)}%</div>
+            <div className="text-xl font-bold text-cyan-600">{(() => {
+              const velocity = Number(userProfile.learningVelocity);
+              return isNaN(velocity) ? "0%" : `${Math.round(velocity * 100)}%`;
+            })()}</div>
           </div>
         </div>
 
@@ -235,7 +241,10 @@ export default function AdaptiveFeedbackEngine({ userProfile, currentPerformance
                 </div>
                 <div className="flex items-center space-x-1 text-xs">
                   <Zap className="h-3 w-3" />
-                  <span>{Math.round(feedback.novelty * 100)}% novel</span>
+                  <span>{(() => {
+                    const novelty = Number(feedback.novelty);
+                    return isNaN(novelty) ? "0%" : `${Math.round(novelty * 100)}%`;
+                  })()} novel</span>
                 </div>
               </div>
               
@@ -259,7 +268,10 @@ export default function AdaptiveFeedbackEngine({ userProfile, currentPerformance
               
               <div className="mt-3 pt-2 border-t border-current border-opacity-20">
                 <div className="flex items-center justify-between text-xs">
-                  <span>AI Confidence: {Math.round(feedback.confidenceScore * 100)}%</span>
+                  <span>AI Confidence: {(() => {
+                    const confidence = Number(feedback.confidenceScore);
+                    return isNaN(confidence) ? "0%" : `${Math.round(confidence * 100)}%`;
+                  })()}</span>
                   <Progress value={feedback.confidenceScore * 100} className="w-16 h-1" />
                 </div>
               </div>

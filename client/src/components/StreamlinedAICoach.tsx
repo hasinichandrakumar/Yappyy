@@ -316,11 +316,17 @@ export default function StreamlinedAICoach() {
               <div className="text-xs text-gray-600">Words</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">{Math.round(voiceClarity)}%</div>
+              <div className="text-2xl font-bold text-green-600">{(() => {
+                const clarity = Number(voiceClarity);
+                return isNaN(clarity) ? "0%" : `${Math.round(clarity)}%`;
+              })()}</div>
               <div className="text-xs text-gray-600">Clarity</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-purple-600">{Math.round(confidenceScore)}%</div>
+              <div className="text-2xl font-bold text-purple-600">{(() => {
+                const confidence = Number(confidenceScore);
+                return isNaN(confidence) ? "0%" : `${Math.round(confidence)}%`;
+              })()}</div>
               <div className="text-xs text-gray-600">Confidence</div>
             </div>
             <div className="text-center">
@@ -351,14 +357,20 @@ export default function StreamlinedAICoach() {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Clarity</span>
-                    <span className="font-medium">{Math.round(currentProfile.voiceSignature.clarity)}%</span>
+                    <span className="font-medium">{(() => {
+                      const clarity = Number(currentProfile.voiceSignature.clarity);
+                      return isNaN(clarity) ? "0%" : `${Math.round(clarity)}%`;
+                    })()}</span>
                   </div>
                   <Progress value={currentProfile.voiceSignature.clarity} className="h-2" />
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Variation</span>
-                    <span className="font-medium">{Math.round(currentProfile.voiceSignature.variation)}%</span>
+                    <span className="font-medium">{(() => {
+                      const variation = Number(currentProfile.voiceSignature.variation);
+                      return isNaN(variation) ? "0%" : `${Math.round(variation)}%`;
+                    })()}</span>
                   </div>
                   <Progress value={currentProfile.voiceSignature.variation} className="h-2" />
                 </div>
@@ -375,7 +387,10 @@ export default function StreamlinedAICoach() {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>Confidence</span>
-                    <span className="font-medium">{Math.round(currentProfile.presenceMetrics.confidence)}%</span>
+                    <span className="font-medium">{(() => {
+                      const confidence = Number(currentProfile.presenceMetrics.confidence);
+                      return isNaN(confidence) ? "0%" : `${Math.round(confidence)}%`;
+                    })()}</span>
                   </div>
                   <Progress value={currentProfile.presenceMetrics.confidence} className="h-2" />
                 </div>

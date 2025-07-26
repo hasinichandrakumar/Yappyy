@@ -737,7 +737,10 @@ export default function SpeechROIAnalyzer() {
                             {metric.replace(/([A-Z])/g, ' $1').trim()}
                           </h4>
                           <div className={`px-3 py-1 rounded-full ${getScoreColor(value)}`}>
-                            <span className="font-bold">{Math.round(value)}%</span>
+                            <span className="font-bold">{(() => {
+                              const numValue = Number(value);
+                              return isNaN(numValue) ? "0%" : `${Math.round(numValue)}%`;
+                            })()}</span>
                           </div>
                         </div>
                         <Progress value={value} className="h-3 mb-2" />
@@ -762,7 +765,10 @@ export default function SpeechROIAnalyzer() {
                             </h4>
                             <div className="flex items-center space-x-3">
                               <Badge className={getScoreColor(data.score)}>
-                                {Math.round(data.score)}% Expected
+                                {(() => {
+                                  const score = Number(data.score);
+                                  return isNaN(score) ? "0%" : `${Math.round(score)}%`;
+                                })()} Expected
                               </Badge>
                               <span className="text-sm text-gray-500">{data.timeframe}</span>
                             </div>
@@ -859,7 +865,10 @@ export default function SpeechROIAnalyzer() {
                               <Progress value={score} className="h-4" />
                             </div>
                             <div className="w-16 text-left">
-                              <span className="text-sm font-bold">{Math.round(score)}%</span>
+                              <span className="text-sm font-bold">{(() => {
+                                const numScore = Number(score);
+                                return isNaN(numScore) ? "0%" : `${Math.round(numScore)}%`;
+                              })()}</span>
                             </div>
                           </div>
                         ))}
