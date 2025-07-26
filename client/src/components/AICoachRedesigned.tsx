@@ -609,12 +609,7 @@ export default function AICoachRedesigned() {
                     </p>
                   </div>
                   <div className="flex gap-2">
-                    {persistentData && persistentData.totalSessions > 0 && (
-                      <Badge className="bg-green-100 text-green-700 px-3 py-1">
-                        <Database className="w-3 h-3 mr-1" />
-                        {persistentData.totalSessions} Sessions
-                      </Badge>
-                    )}
+
                     {currentGoal && (
                       <Badge className="bg-white/20 text-white px-4 py-2">
                         {currentGoal.charAt(0).toUpperCase() + currentGoal.slice(1)}
