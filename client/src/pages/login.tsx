@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { useAuth } from '@/hooks/useAuth';
 import MagicLinkLogin from '@/components/MagicLinkLogin';
-import yappyyLogoPath from '@assets/Y-2-removebg-preview_1753384287580.png';
+import yappyyLogo from '@assets/Y-2-removebg-preview_1753384287580.png';
 
 export default function LoginPage() {
   const [, setLocation] = useLocation();
@@ -38,7 +38,7 @@ export default function LoginPage() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <button onClick={() => window.location.href = '/'} className="hover:opacity-80 transition-opacity">
-                <img src={yappyyLogoPath} alt="Yappyy" className="h-10" />
+                <img src={yappyyLogo} alt="Yappyy" className="h-10" />
               </button>
             </div>
           </div>
@@ -51,7 +51,7 @@ export default function LoginPage() {
           <div className="text-center mb-8">
             <div className="flex justify-center mb-6">
               <button onClick={() => window.location.href = '/'} className="hover:opacity-80 transition-opacity">
-                <img src={yappyyLogoPath} alt="Yappyy" className="h-20 w-auto" />
+                <img src={yappyyLogo} alt="Yappyy" className="h-20 w-auto" />
               </button>
             </div>
             <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back to Yappyy</h2>

@@ -21,7 +21,7 @@ import WelcomeMessage from "@/components/WelcomeMessage";
 import ReturningUserWelcome from "@/components/ReturningUserWelcome";
 import { WelcomeDialog } from "@/components/WelcomeDialog";
 import { DailyGoalsDialog } from "@/components/DailyGoalsDialog";
-import yappyyLogoPath from '@assets/Y-2-removebg-preview_1753384287580.png';
+import yappyyLogo from '@assets/Y-2-removebg-preview_1753384287580.png';
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("practice");
@@ -84,7 +84,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
               <button onClick={() => window.location.href = '/'} className="hover:opacity-80 transition-opacity">
-                <img src={yappyyLogoPath} alt="Yappyy" className="h-8" />
+                <img src={yappyyLogo} alt="Yappyy" className="h-8" />
               </button>
             </div>
             
