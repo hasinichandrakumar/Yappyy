@@ -49,6 +49,7 @@ export class RoboflowVisionEngine {
   private models: Map<string, any> = new Map();
   private isInitialized = false;
   private rf: any; // Roboflow instance
+  private isAvailable = false;
   private performanceMetrics = {
     totalFrames: 0,
     successfulAnalyses: 0,
@@ -101,11 +102,19 @@ export class RoboflowVisionEngine {
   }
 
   async analyzeFrame(imageData: string | Buffer): Promise<BodyLanguageMetrics> {
-    if (!this.isInitialized) {
+    // Always provide fallback metrics if Roboflow is not available
+    if (!this.isInitialized || !this.isAvailable) {
+      console.log('🛡️ Using fallback computer vision metrics (Roboflow not available)');
       return this.getFallbackMetrics();
     }
 
     try {
+      // Check if we have valid image data
+      if (!imageData) {
+        console.warn('⚠️ No image data provided, using fallback metrics');
+        return this.getFallbackMetrics();
+      }
+
       const results = await Promise.all([
         this.analyzePosture(imageData),
         this.analyzeGestures(imageData),
@@ -320,14 +329,15 @@ export class RoboflowVisionEngine {
 
   // Fallback metrics when Roboflow is unavailable
   private getFallbackMetrics(): BodyLanguageMetrics {
+    console.log('🛡️ Returning zero fallback metrics (authentic data only)');
     return {
       posture: this.getFallbackPosture(),
       gestures: this.getFallbackGestures(),
       facial: this.getFallbackFacial(),
       overall: {
-        presence: 65,
-        confidence: 70,
-        professionalism: 68
+        presence: 0,
+        confidence: 0,
+        professionalism: 0
       }
     };
   }

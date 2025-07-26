@@ -17,8 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { SessionDataViewer } from '@/components/SessionDataViewer';
 import { useRoboflowVision } from '@/hooks/useRoboflowVision';
 import { useFacialAnalysis } from '@/hooks/useFacialAnalysis';
-import { useMediaPipeBodyLanguage } from '@/hooks/useMediaPipeBodyLanguage';
-import { useMediaPipe } from '@/hooks/useMediaPipe';
+import { useRobustComputerVision } from '@/hooks/useRobustComputerVision';
 import SessionAnalysisPage from './SessionAnalysisPage';
 import VideoPlaybackViewer from './VideoPlaybackViewer';
 import RecordingLibrary from './RecordingLibrary';
@@ -146,29 +145,18 @@ export default function SimplifiedPracticePage() {
     error: facialAnalysisError
   } = useFacialAnalysis();
 
-  // MediaPipe body language analysis integration
+  // Robust computer vision system with error handling
   const {
-    analysis: bodyLanguageAnalysis,
-    startAnalysis: startBodyLanguageAnalysis,
-    stopAnalysis: stopBodyLanguageAnalysis,
-    getAverageMetrics: getAverageBodyLanguageMetrics,
-    isActive: isBodyLanguageActive,
-    currentMetrics: currentBodyLanguageMetrics,
-    frameCount: bodyLanguageFrameCount,
-    processingTime: bodyLanguageProcessingTime,
-    error: bodyLanguageError
-  } = useMediaPipeBodyLanguage();
-
-  // MediaPipe Holistic integration for real-time analysis
-  const {
-    posture: mediaPipePosture,
-    gesture: mediaPipeGesture,
-    eyeContact: mediaPipeEyeContact,
-    initializeMediaPipe,
-    processFrame,
-    isInitialized: isMediaPipeInitialized,
-    mediapiipeLoaded
-  } = useMediaPipe();
+    metrics: computerVisionMetrics,
+    error: computerVisionError,
+    isInitialized: isComputerVisionInitialized,
+    isAnalyzing: isComputerVisionAnalyzing,
+    frameCount: computerVisionFrameCount,
+    successCount: computerVisionSuccessCount,
+    startAnalysis: startComputerVisionAnalysis,
+    stopAnalysis: stopComputerVisionAnalysis,
+    getAverageMetrics: getAverageComputerVisionMetrics
+  } = useRobustComputerVision();
 
   // Refs
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -758,24 +746,14 @@ export default function SimplifiedPracticePage() {
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
         
-        // Initialize MediaPipe for real-time computer vision
-        if (mediapiipeLoaded) {
-          console.log('🤖 Initializing MediaPipe for real-time body language analysis...');
-          await initializeMediaPipe();
-          
-          // Start real-time MediaPipe processing
-          if (isMediaPipeInitialized) {
-            const processVideoFrames = () => {
-              if (videoRef.current && isRecording && isMediaPipeInitialized) {
-                processFrame(videoRef.current);
-                requestAnimationFrame(processVideoFrames);
-              }
-            };
-            processVideoFrames();
-            console.log('🎯 MediaPipe real-time processing started');
+        // Initialize robust computer vision system
+        try {
+          const started = await startComputerVisionAnalysis(videoRef.current);
+          if (started) {
+            console.log('🛡️ Robust computer vision started successfully');
           }
-        } else {
-          console.log('⏳ MediaPipe libraries still loading...');
+        } catch (error) {
+          console.warn('⚠️ Computer vision initialization failed:', error);
         }
       }
 
@@ -1029,17 +1007,18 @@ export default function SimplifiedPracticePage() {
           },
           bodyLanguage: {
             ...prev.bodyLanguage,
-            // Use MediaPipe body language data as primary source
-            eyeContactScore: currentBodyLanguageMetrics?.eyeContact?.engagement || 
+            // Use computer vision data as primary source
+            eyeContactScore: computerVisionMetrics?.eyeContact || 
               facialAnalysis?.facialMetrics?.communicationSignals?.eyeContactQuality || 
               roboflowAnalysis?.facial?.eyeContact || prev.bodyLanguage.eyeContactScore,
-            gestureEffectiveness: currentBodyLanguageMetrics?.gestures?.naturalness || 
+            gestureEffectiveness: computerVisionMetrics?.gesture || 
               roboflowAnalysis?.gestures?.effectiveness || prev.bodyLanguage.gestureEffectiveness,
-            postureConfidence: currentBodyLanguageMetrics?.posture?.confidence || 
+            postureConfidence: computerVisionMetrics?.posture || 
               roboflowAnalysis?.posture?.confidence || prev.bodyLanguage.postureConfidence,
-            facialExpressions: facialAnalysis?.facialMetrics?.emotionalExpression?.authenticity || 
+            facialExpressions: computerVisionMetrics?.engagement || 
+              facialAnalysis?.facialMetrics?.emotionalExpression?.authenticity || 
               roboflowAnalysis?.facial?.engagement || prev.bodyLanguage.facialExpressions,
-            overallPresence: currentBodyLanguageMetrics?.overall?.presence || 
+            overallPresence: computerVisionMetrics?.confidence || 
               facialAnalysis?.facialMetrics?.overallPresence?.charisma || 
               roboflowAnalysis?.overall?.presence || prev.bodyLanguage.overallPresence
           }
@@ -1064,22 +1043,11 @@ export default function SimplifiedPracticePage() {
         }
       }
 
-      // Start MediaPipe body language analysis
-      if (videoRef.current) {
-        try {
-          const bodyLanguageStarted = await startBodyLanguageAnalysis(videoRef.current);
-          if (bodyLanguageStarted) {
-            console.log('🤖 MediaPipe body language analysis started');
-          }
-        } catch (error) {
-          console.warn('⚠️ MediaPipe body language analysis unavailable:', error);
-        }
-      }
+      // Computer vision already started above, no additional initialization needed
 
-      console.log('📹 Recording started with full computer vision integration:', {
-        mediaPipe: isMediaPipeInitialized,
+      console.log('📹 Recording started with robust computer vision integration:', {
+        computerVision: isComputerVisionInitialized,
         roboflow: isRoboflowAnalyzing,
-        bodyLanguage: isBodyLanguageActive,
         facialAnalysis: isFacialAnalysisActive,
         videoRecording: videoRecordingEnabled
       });
@@ -1161,12 +1129,12 @@ export default function SimplifiedPracticePage() {
       console.warn('⚠️ Error stopping facial analysis');
     }
 
-    // Stop MediaPipe body language analysis
+    // Stop computer vision analysis
     try {
-      stopBodyLanguageAnalysis();
-      console.log('🤖 MediaPipe body language analysis stopped');
+      stopComputerVisionAnalysis();
+      console.log('🛡️ Computer vision analysis stopped');
     } catch (error) {
-      console.warn('⚠️ Error stopping body language analysis');
+      console.warn('⚠️ Error stopping computer vision analysis');
     }
 
     setIsRecording(false);
@@ -1260,8 +1228,8 @@ export default function SimplifiedPracticePage() {
         bodyLanguageMetrics: {
           eyeContact: realEyeContact,
           confidence: hasRealSpeech ? metrics.confidence : 0,
-          posture: hasRealSpeech ? (currentBodyLanguageMetrics?.posture?.confidence || metrics.bodyLanguage?.postureConfidence || 0) : 0,
-          gestures: hasRealSpeech ? (currentBodyLanguageMetrics?.gestures?.naturalness || metrics.bodyLanguage?.gestureEffectiveness || 0) : 0
+          posture: hasRealSpeech ? (computerVisionMetrics?.posture || metrics.bodyLanguage?.postureConfidence || 0) : 0,
+          gestures: hasRealSpeech ? (computerVisionMetrics?.gesture || metrics.bodyLanguage?.gestureEffectiveness || 0) : 0
         },
         persuasivenessScore: realConfidenceScore / 100,
         emotionalIntelligence: {
@@ -1682,16 +1650,16 @@ export default function SimplifiedPracticePage() {
                           FACIAL ANALYSIS ACTIVE
                         </Badge>
                       )}
-                      {isBodyLanguageActive && (
+                      {isComputerVisionAnalyzing && (
                         <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
                           <Activity className="w-3 h-3 mr-1" />
-                          MEDIAPIPE BODY LANGUAGE
+                          COMPUTER VISION ACTIVE
                         </Badge>
                       )}
-                      {isMediaPipeInitialized && (
-                        <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200">
+                      {computerVisionError.hasError && (
+                        <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
                           <Activity className="w-3 h-3 mr-1" />
-                          MEDIAPIPE HOLISTIC READY
+                          CV ERROR - USING FALLBACK
                         </Badge>
                       )}
                     </div>
@@ -1706,12 +1674,12 @@ export default function SimplifiedPracticePage() {
             
             {/* Computer Vision Dashboard */}
             <RealTimeComputerVisionDashboard
-              mediaPipePosture={mediaPipePosture}
-              mediaPipeGesture={mediaPipeGesture}
-              mediaPipeEyeContact={mediaPipeEyeContact}
-              isMediaPipeInitialized={isMediaPipeInitialized}
-              bodyLanguageMetrics={currentBodyLanguageMetrics}
-              isBodyLanguageActive={isBodyLanguageActive}
+              mediaPipePosture={computerVisionMetrics?.posture || 0}
+              mediaPipeGesture={computerVisionMetrics?.gesture || 0}
+              mediaPipeEyeContact={computerVisionMetrics?.eyeContact || 0}
+              isMediaPipeInitialized={isComputerVisionInitialized}
+              bodyLanguageMetrics={computerVisionMetrics}
+              isBodyLanguageActive={isComputerVisionAnalyzing}
               facialAnalysis={facialAnalysis}
               isFacialAnalysisActive={isFacialAnalysisActive}
               roboflowAnalysis={roboflowAnalysis}
