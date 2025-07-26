@@ -274,7 +274,7 @@ const DeepLearningAnalytics = ({ userId }: { userId?: string }) => {
           {neuralMetrics.map((metric, index) => (
             <div
               key={metric.metric}
-              className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100 transition-opacity duration-300"
+              className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100"
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">{metric.metric}</span>
@@ -321,7 +321,7 @@ const DeepLearningAnalytics = ({ userId }: { userId?: string }) => {
         {insights.map((insight, index) => (
           <div
             key={index}
-            className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-purple-200 transition-opacity duration-200"
+            className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-purple-200"
           >
             <div className="flex items-start gap-3">
               <insight.icon className={`w-5 h-5 ${insight.color} mt-1`} />
@@ -348,7 +348,7 @@ const ChatMessage = ({
   timestamp?: string;
 }) => (
   <div
-    className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4 opacity-100 transition-opacity duration-150`}
+    className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}
   >
     <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${
       isUser 
@@ -380,7 +380,7 @@ const CoachingGoals = ({ onGoalSelect }: { onGoalSelect: (goal: string) => void 
         <button
           key={goal.id}
           onClick={() => onGoalSelect(goal.id)}
-          className={`flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium hover:opacity-80 transition-all duration-200 ${goal.color}`}
+          className={`flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium hover:opacity-90 ${goal.color}`}
         >
           <goal.icon className="w-4 h-4" />
           {goal.label}
