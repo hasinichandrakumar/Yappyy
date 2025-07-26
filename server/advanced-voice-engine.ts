@@ -477,13 +477,13 @@ export class VoiceAnalysisEngine {
     return Math.max(0, 100 - (variance / mean) * 100);
   }
 
-  private calculateSpeakingRateFromFeatures(features: VocalFeatures): number {
+  private calculateSpeakingRateFromFeatures(features: VoiceFeatures): number {
     // Calculate speaking rate from vocal features
-    if (!features.fundamental_frequency || features.fundamental_frequency.length === 0) return 0;
+    if (!features.pitch.fundamental || features.pitch.fundamental.length === 0) return 0;
     
     // Estimate speaking rate from pitch variations and energy patterns
-    const avgFreq = features.fundamental_frequency.reduce((sum, f) => sum + f, 0) / features.fundamental_frequency.length;
-    const energyVariations = features.energy.length;
+    const avgFreq = features.pitch.fundamental.reduce((sum, f) => sum + f, 0) / features.pitch.fundamental.length;
+    const energyVariations = features.spectral.formants.length;
     
     // Estimate words per minute based on energy patterns (rough approximation)
     const estimatedWPM = Math.min(200, Math.max(80, energyVariations * 2));
