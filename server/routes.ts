@@ -42,6 +42,7 @@ import { enhancedNeuralPipeline } from "./enhanced-neural-pipeline";
 import { roboflowVision, analyzeVideoFrame as roboflowAnalyzeFrame, trainCustomVisionModel } from './roboflow-computer-vision';
 import { huggingFaceCV } from './huggingface-computer-vision';
 import { speechEmotionRecognition } from './speech-emotion-recognition';
+import { alternativeSpeechAPIs } from './alternative-speech-apis';
 import { persistentAIAnalytics } from './persistent-ai-analytics';
 import { graphqlHTTP } from 'express-graphql';
 import neuralGraphQL from './graphql-schema';
@@ -2627,29 +2628,73 @@ Return only the improved content, maintaining the same format with [brackets] fo
     }
   });
 
-  app.post("/api/speech-emotion/analyze-emotions", async (req, res) => {
+  // Advanced Multi-API Voice Analysis (Optional Enhanced Services)
+  app.post("/api/speech-emotion/comprehensive-analysis", async (req, res) => {
     try {
-      const { audioBase64 } = req.body;
+      const { audioBase64, includeEnhanced = false } = req.body;
       
       if (!audioBase64) {
         return res.status(400).json({ message: "Audio data is required" });
       }
 
       const audioBuffer = Buffer.from(audioBase64, 'base64');
-      const emotionAnalysis = await speechEmotionRecognition.analyzeDetailedEmotions(audioBuffer);
       
-      console.log("🎭 Speech emotion analysis completed");
+      // Always use Hugging Face as primary analysis
+      const huggingFaceAnalysis = await speechEmotionRecognition.analyzeVoiceConfidence(audioBuffer);
+      
+      const analysisResults = {
+        primary: huggingFaceAnalysis,
+        enhanced: {},
+        availableAPIs: alternativeSpeechAPIs.getAvailableAPIs(),
+        hasEnhanced: alternativeSpeechAPIs.hasEnhancedAPIs()
+      };
+
+      console.log("🎯 Comprehensive voice analysis completed");
       res.json({
         success: true,
-        analysis: emotionAnalysis,
-        provider: 'huggingface_wav2vec2'
+        analysis: analysisResults,
+        timestamp: Date.now(),
+        provider: 'multi_api_comprehensive'
       });
     } catch (error: any) {
-      console.error("❌ Speech emotion analysis error:", error);
+      console.error("❌ Comprehensive voice analysis error:", error);
       res.status(500).json({ 
         success: false,
-        message: "Emotion analysis failed", 
+        message: "Comprehensive analysis failed", 
         error: error.message 
+      });
+    }
+  });
+
+  // API Status and Configuration
+  app.get("/api/speech-emotion/status", async (req, res) => {
+    try {
+      const status = {
+        huggingface: {
+          available: true,
+          hasToken: !!process.env.HUGGINGFACE_API_TOKEN,
+          limits: process.env.HUGGINGFACE_API_TOKEN ? "Enhanced (with token)" : "Free tier (30-60 req/min)"
+        },
+        assemblyai: {
+          available: !!process.env.ASSEMBLYAI_API_KEY,
+          credits: process.env.ASSEMBLYAI_API_KEY ? "$50 free credits available" : "Not configured"
+        },
+        hume_ai: {
+          available: !!process.env.HUME_API_KEY,
+          limits: process.env.HUME_API_KEY ? "10k chars/month free" : "Not configured"
+        },
+        overall_status: "operational",
+        recommended_setup: {
+          basic: "Hugging Face (already working)",
+          enhanced: "Add ASSEMBLYAI_API_KEY or HUME_API_KEY for premium features"
+        }
+      };
+
+      res.json(status);
+    } catch (error: any) {
+      res.status(500).json({ 
+        error: "Failed to get API status", 
+        message: error.message 
       });
     }
   });

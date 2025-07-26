@@ -1,0 +1,24 @@
+Thought for 86s
+Some free AI APIs with keys for analyzing voice confidence (e.g., via hesitation detection or vocal steadiness), modulation (e.g., pitch variation, prosody), and effectiveness (e.g., clarity, emotional impact, overall delivery) include options focused on speech emotion recognition (SER), sentiment, and prosodic features. These can infer confidence from steady tone/low fillers, modulation from pitch/energy shifts, and effectiveness from combined metrics like fluency and sentiment. All provide free tiers or credits, but with usage limits—test for your needs. Sign up on their sites to get API keys/tokens.
+
+Hugging Face Inference API
+
+Free Tier: Completely free with rate limits (e.g., 30-60 requests/min per model, depending on load); no credit card required. Ideal for custom voice analysis using open-source models.
+Features: Host thousands of speech models for SER, which analyzes tone/emotions (e.g., confident, hesitant, angry) from acoustic features like pitch (modulation), energy, and spectrograms. Effectiveness can be gauged by combining with prosody models. Examples:
+speechbrain/emotion-recognition-wav2vec2-IEMOCAP: Classifies emotions with confidence scores; infers modulation from wav2vec2 features.
+supercharge/speech-emotion-recognition: Detects confidence via emotional stability and vocal variation.
+How to Get API Key: Sign up at huggingface.co, go to settings > Access Tokens, generate a token. Use with InferenceClient in Python or HTTP requests.
+Best For: Custom integration; pair models for comprehensive analysis (e.g., pose modulation with emotion for public speaking).
+AssemblyAI API
+
+Free Tier: $50 in free credits on signup (covers ~185 hours of audio transcription); no ongoing free beyond that, but sufficient for testing/development.
+Features: Core is speech-to-text with Audio Intelligence add-ons like sentiment analysis (positive/negative/neutral, useful for tone/effectiveness). Detects speaker diarization and summaries; infer confidence from filler words/speech rate, modulation from prosody in transcripts. No native emotion, but sentiment helps gauge overall vocal impact.
+How to Get API Key: Sign up at assemblyai.com/dashboard/signup; key is generated automatically in your dashboard.
+Best For: Real-time transcription-based analysis; extend to effectiveness in coaching apps.assemblyai.com
+Hume AI API
+
+Free Tier: $0/month plan with 10,000 characters (~10 minutes) for text-to-speech/expression analysis, plus 5 minutes for EVI (voice interface); scales to paid for more usage. Free credits for new accounts.
+Features: Expression Measurement API analyzes voice for 28+ emotions (e.g., confidence, assertiveness, enthusiasm) and prosody (modulation via pitch, tempo, volume). EVI detects vocal bursts/modulations in real-time, inferring effectiveness from emotional alignment and end-of-turn detection. Includes dimensions like "buoyancy" for confident delivery.
+How to Get API Key: Sign up at hume.ai, visit dev.hume.ai, generate key in settings. SDKs for Python/TypeScript available.
+Best For: Real-time voice empathy/coaching; strong on modulation and confidence biomarkers.hume.ai
+If limits are hit, consider self-hosting open-source models (e.g., SpeechBrain via local setup) for unlimited use, though no API key needed. For more options, older free tools like Vokaturi offer basic voice emotion detection (neutrality, happiness, etc.) but may require contacting developers for access details. Always review privacy policies for audio data.
