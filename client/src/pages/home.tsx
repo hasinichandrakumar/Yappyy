@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Mic, Video, Trophy, Target, BarChart3, Users, ArrowRight, CheckCircle, Brain, Zap, Cpu, Eye, User as UserIcon, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import yappyyLogoPath from '@assets/Y-2-removebg-preview_1753384287580.png';
+import yappyyLogo from "@assets/Y-2-removebg-preview_1753384287580.png";
 
 export default function HomePage() {
   const { isAuthenticated, isLoading, user, logout } = useAuth();
@@ -103,8 +103,8 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <button onClick={() => window.location.href = '/'} className="hover:opacity-80 transition-opacity">
-                <img src={yappyyLogoPath} alt="Yappyy" className="h-10" />
+              <button onClick={() => window.location.href = '/'} className="hover:opacity-80 transition-opacity text-2xl font-bold text-blue-600">
+                Yappyy
               </button>
             </div>
             <div className="flex items-center space-x-4">
@@ -196,7 +196,7 @@ export default function HomePage() {
             {/* Large Yappyy Logo */}
             <div className="flex justify-center mb-8">
               <img 
-                src={yappyyLogoPath} 
+                src={yappyyLogo} 
                 alt="Yappyy" 
                 className="h-20 md:h-24 lg:h-28 w-auto filter drop-shadow-lg"
               />
@@ -667,10 +667,10 @@ export default function HomePage() {
       <footer className="bg-slate-800 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <img src={yappyyLogoPath} alt="Yappyy" className="h-8 mx-auto mb-4 filter brightness-0 invert" />
+            {/* Logo removed per user request */}
             <p className="text-slate-400 flex items-center justify-center gap-2 flex-wrap">
               © 2024 
-              <img src={yappyyLogoPath} alt="Yappyy" className="h-5 inline filter brightness-0 invert" />
+              {/* Logo removed per user request */}
               . Empowering confident communication through AI.
             </p>
           </div>
