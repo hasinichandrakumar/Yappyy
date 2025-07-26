@@ -311,7 +311,7 @@ export default function HomePage() {
                 Complete communication coaching across all aspects of your speaking skills
               </p>
               
-              <div className="flex gap-4 justify-center mt-8">
+              <div className="flex justify-center mt-8">
                 <Button 
                   size="lg" 
                   className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg transition-all duration-300 hover:scale-105"
@@ -324,14 +324,6 @@ export default function HomePage() {
                   }}
                 >
                   Start Practicing
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="lg" 
-                  className="border-blue-600 text-blue-600 hover:bg-blue-50 px-8 py-3 text-lg transition-all duration-300 hover:scale-105"
-                  onClick={() => window.location.href = '/stats'}
-                >
-                  Interactive Demo
                 </Button>
               </div>
             </div>
