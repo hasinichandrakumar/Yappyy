@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { huggingFaceCV } from "./huggingface-computer-vision";
 
 const app = express();
 app.use(express.json({ limit: '50mb' }));
@@ -37,6 +38,12 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Initialize Hugging Face Computer Vision System
+  console.log("🤗 Initializing Hugging Face Computer Vision for FREE AI analysis...");
+  if (huggingFaceCV.isReady()) {
+    console.log("✅ Hugging Face Computer Vision activated as Roboflow alternative");
+  }
+  
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

@@ -40,6 +40,7 @@ import { webrtcIntegration } from "./webrtc-integration";
 import { advancedComputerVision } from "./advanced-computer-vision";
 import { enhancedNeuralPipeline } from "./enhanced-neural-pipeline";
 import { roboflowVision, analyzeVideoFrame as roboflowAnalyzeFrame, trainCustomVisionModel } from './roboflow-computer-vision';
+import { huggingFaceCV } from './huggingface-computer-vision';
 import { persistentAIAnalytics } from './persistent-ai-analytics';
 import { graphqlHTTP } from 'express-graphql';
 import neuralGraphQL from './graphql-schema';
@@ -2452,6 +2453,94 @@ Return only the improved content, maintaining the same format with [brackets] fo
   app.post("/api/vision/analyze-frame",  roboflowAnalyzeFrame);
   app.post("/api/vision/analyze-posture",  analyzePosture);
   app.post("/api/vision/analyze-eye-contact",  analyzeEyeContact);
+
+  // Hugging Face Computer Vision Analysis (FREE Alternative)
+  app.post("/api/huggingface/analyze-body-language", async (req, res) => {
+    try {
+      const { imageBase64 } = req.body;
+      
+      if (!imageBase64) {
+        return res.status(400).json({ message: "Image data is required" });
+      }
+
+      // Convert base64 to buffer
+      const imageBuffer = Buffer.from(imageBase64, 'base64');
+      
+      // Analyze using Hugging Face computer vision
+      const bodyLanguageAnalysis = await huggingFaceCV.analyzeBodyLanguage(imageBuffer);
+      
+      console.log("🤗 Hugging Face body language analysis completed");
+      res.json({
+        success: true,
+        analysis: bodyLanguageAnalysis,
+        provider: 'huggingface',
+        timestamp: Date.now()
+      });
+    } catch (error: any) {
+      console.error("❌ Hugging Face body language analysis error:", error);
+      res.status(500).json({ 
+        success: false,
+        message: "Computer vision analysis failed", 
+        error: error.message 
+      });
+    }
+  });
+
+  // Hugging Face Pose Analysis Endpoint
+  app.post("/api/huggingface/analyze-pose", async (req, res) => {
+    try {
+      const { imageBase64 } = req.body;
+      
+      if (!imageBase64) {
+        return res.status(400).json({ message: "Image data is required" });
+      }
+
+      const imageBuffer = Buffer.from(imageBase64, 'base64');
+      const poseAnalysis = await huggingFaceCV.analyzePose(imageBuffer);
+      
+      console.log("🏃 Hugging Face pose analysis completed");
+      res.json({
+        success: true,
+        analysis: poseAnalysis,
+        provider: 'huggingface'
+      });
+    } catch (error: any) {
+      console.error("❌ Hugging Face pose analysis error:", error);
+      res.status(500).json({ 
+        success: false,
+        message: "Pose analysis failed", 
+        error: error.message 
+      });
+    }
+  });
+
+  // Hugging Face Facial Expression Analysis Endpoint
+  app.post("/api/huggingface/analyze-expression", async (req, res) => {
+    try {
+      const { imageBase64 } = req.body;
+      
+      if (!imageBase64) {
+        return res.status(400).json({ message: "Image data is required" });
+      }
+
+      const imageBuffer = Buffer.from(imageBase64, 'base64');
+      const expressionAnalysis = await huggingFaceCV.analyzeFacialExpression(imageBuffer);
+      
+      console.log("😊 Hugging Face expression analysis completed");
+      res.json({
+        success: true,
+        analysis: expressionAnalysis,
+        provider: 'huggingface'
+      });
+    } catch (error: any) {
+      console.error("❌ Hugging Face expression analysis error:", error);
+      res.status(500).json({ 
+        success: false,
+        message: "Expression analysis failed", 
+        error: error.message 
+      });
+    }
+  });
 
   // Analyze posture from image (simplified text-based analysis)
   app.post("/api/analyze-posture", async (req, res) => {
