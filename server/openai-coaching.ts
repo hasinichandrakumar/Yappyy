@@ -23,6 +23,81 @@ interface SessionData {
   }>;
 }
 
+// Fast session insights with minimal processing
+export async function generateFastSessionInsights(req: Request, res: Response) {
+  try {
+    const sessionData = req.body.sessionData || req.body;
+    
+    // Quick analysis without heavy AI processing
+    const quickInsights = {
+      success: true,
+      analysis: {
+        strengths: generateQuickStrengths(sessionData),
+        improvements: generateQuickImprovements(sessionData),
+        insights: generateQuickInsights(sessionData)
+      },
+      overallAssessment: generateQuickAssessment(sessionData),
+      progressSummary: generateQuickProgress(sessionData)
+    };
+    
+    res.json(quickInsights);
+  } catch (error) {
+    console.error('Error generating fast insights:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to generate insights' 
+    });
+  }
+}
+
+function generateQuickStrengths(sessionData: any): string[] {
+  const strengths = [];
+  
+  if (sessionData.overallPerformance > 70) strengths.push("Strong overall performance");
+  if (sessionData.clarityScore > 75) strengths.push("Clear and articulate speech");
+  if (sessionData.eyeContactScore > 70) strengths.push("Good eye contact engagement");
+  if (sessionData.confidenceLevel > 75) strengths.push("Confident delivery");
+  if (sessionData.fillerWordCount < 5) strengths.push("Minimal filler word usage");
+  if (sessionData.wordsPerMinute >= 120 && sessionData.wordsPerMinute <= 180) strengths.push("Optimal speaking pace");
+  
+  return strengths.length > 0 ? strengths : ["Completed practice session successfully"];
+}
+
+function generateQuickImprovements(sessionData: any): string[] {
+  const improvements = [];
+  
+  if (sessionData.clarityScore < 60) improvements.push("Focus on clearer articulation");
+  if (sessionData.eyeContactScore < 50) improvements.push("Improve eye contact with audience");
+  if (sessionData.confidenceLevel < 60) improvements.push("Build confidence through more practice");
+  if (sessionData.fillerWordCount > 10) improvements.push("Reduce filler words (um, uh, like)");
+  if (sessionData.wordsPerMinute < 120) improvements.push("Increase speaking pace slightly");
+  if (sessionData.wordsPerMinute > 200) improvements.push("Slow down speaking pace");
+  
+  return improvements.length > 0 ? improvements : ["Continue practicing regularly"];
+}
+
+function generateQuickInsights(sessionData: any): string[] {
+  const insights = [];
+  
+  if (sessionData.duration > 300) insights.push("Good session length for skill development");
+  if (sessionData.transcript && sessionData.transcript.length > 500) insights.push("Substantial content coverage");
+  if (sessionData.purpose === 'job-interview') insights.push("Interview preparation showing progress");
+  if (sessionData.purpose === 'sales-presentation') insights.push("Sales skills developing well");
+  
+  return insights.length > 0 ? insights : ["Session data recorded for progress tracking"];
+}
+
+function generateQuickAssessment(sessionData: any): string {
+  const score = sessionData.overallPerformance || 0;
+  if (score > 80) return "Excellent session with strong performance across multiple areas.";
+  if (score > 60) return "Good session with solid progress. Continue building on these foundations."; 
+  return "Practice session completed. Focus on consistent improvement.";
+}
+
+function generateQuickProgress(sessionData: any): string {
+  return `Session completed in ${Math.round(sessionData.duration / 60)} minutes with meaningful practice time.`;
+}
+
 export async function generateSessionInsights(req: Request, res: Response) {
   try {
     const { sessionId, userId, analysisType = 'single' } = req.body;

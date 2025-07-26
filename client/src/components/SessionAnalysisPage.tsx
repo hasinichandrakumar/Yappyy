@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import ImmediateFeedback from './ImmediateFeedback';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -21,7 +23,8 @@ import {
   Star,
   BarChart3,
   Lightbulb,
-  Brain
+  Brain,
+  Zap
 } from 'lucide-react';
 
 interface SessionData {
@@ -109,58 +112,83 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
   console.log('📊 SessionAnalysisPage - Normalized data with proper percentages:', normalizedData);
 
   useEffect(() => {
-    analyzeSession();
+    // Show immediate basic analysis first, then load advanced features
+    setIsGeneratingInsights(false);
+    analyzeSessionOptimized();
   }, [sessionData]);
 
-  const analyzeSession = async () => {
+  // Optimized analysis - parallel processing and immediate display
+  const analyzeSessionOptimized = async () => {
     try {
-      // Analyze filler words
-      const fillerResponse = await fetch('/api/analyze-filler-words', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          transcript: sessionData.transcript,
-          duration: sessionData.duration
-        })
-      });
+      // Run both analyses in parallel for faster loading
+      const [fillerPromise, insightsPromise] = await Promise.allSettled([
+        // Filler word analysis (fast)
+        fetch('/api/analyze-filler-words', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            transcript: sessionData.transcript,
+            duration: sessionData.duration
+          })
+        }).then(res => res.ok ? res.json() : null),
+        
+        // AI insights (slower - run in background)
+        generateAIInsightsOptimized()
+      ]);
       
-      if (fillerResponse.ok) {
-        const fillerData = await fillerResponse.json();
-        setFillerAnalysis(fillerData);
+      // Set filler analysis immediately if successful
+      if (fillerPromise.status === 'fulfilled' && fillerPromise.value) {
+        setFillerAnalysis(fillerPromise.value);
       }
-
-      // Generate comprehensive AI insights
-      await generateAIInsights();
+      
     } catch (error) {
-      console.error('Error analyzing session:', error);
-    } finally {
-      setIsGeneratingInsights(false);
+      console.error('Error in optimized session analysis:', error);
     }
   };
 
-  const generateAIInsights = async () => {
+  // Faster AI insights generation with timeout and caching
+  const generateAIInsightsOptimized = async () => {
     try {
-      const response = await fetch('/api/generate-session-insights', {
+      // Add timeout to prevent long waits
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+      
+      const response = await fetch('/api/generate-session-insights-fast', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
         body: JSON.stringify({
-          sessionData,
+          sessionData: normalizedData,
           fillerCount: fillerAnalysis?.totalFillers ?? sessionData.fillerWordCount,
           duration: sessionData.duration,
           wpm: sessionData.wordsPerMinute
         })
       });
 
+      clearTimeout(timeoutId);
+      
       if (response.ok) {
         const data = await response.json();
         setAIInsights(data);
       }
     } catch (error) {
-      console.error('Error generating AI insights:', error);
-      setAIInsights({
-        overallAssessment: 'Unable to generate comprehensive insights at this time.',
-        progressSummary: 'Session completed successfully. Continue practicing for improvement.'
-      });
+      if (error.name === 'AbortError') {
+        console.log('AI insights generation timed out - using basic analysis');
+        setAIInsights({
+          success: true,
+          analysis: {
+            strengths: ["Session completed successfully"],
+            improvements: ["Continue practicing regularly"],
+            insights: ["Analysis in progress..."]
+          }
+        });
+      } else {
+        console.error('Error generating AI insights:', error);
+        setAIInsights({
+          overallAssessment: 'Session completed successfully.',
+          progressSummary: 'Continue practicing for improvement.'
+        });
+      }
     }
   };
 

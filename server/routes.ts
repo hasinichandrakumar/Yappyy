@@ -14,7 +14,8 @@ import {
   generateCoachingInsights, 
   generateLiveFeedback, 
   personalizeTemplate,
-  generateSessionInsights
+  generateSessionInsights,
+  generateFastSessionInsights
 } from "./openai-coaching";
 import { 
   generateWorldClassCoaching, 
@@ -777,6 +778,9 @@ CRITICAL: Evaluate how well this speech achieved its stated PURPOSE. Analyze the
       res.json(fallbackInsights);
     }
   });
+
+  // Fast session insights for immediate feedback
+  app.post('/api/generate-session-insights-fast', generateFastSessionInsights);
 
   // Dedicated vocal filler detection endpoint for audio analysis
   app.post('/api/detect-vocal-fillers', async (req, res) => {
