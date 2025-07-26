@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-// Simplified animations - removed framer-motion for performance
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Brain, TrendingUp, Target, Sparkles, Heart, 
   Award, MessageCircle, BarChart3, Zap, Star,
@@ -272,8 +272,11 @@ const DeepLearningAnalytics = ({ userId }: { userId?: string }) => {
       {neuralMetrics.length > 0 ? (
         <div className="space-y-3">
           {neuralMetrics.map((metric, index) => (
-            <div
+            <motion.div
               key={metric.metric}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.1 }}
               className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100"
             >
               <div className="flex items-center justify-between mb-2">
@@ -305,7 +308,7 @@ const DeepLearningAnalytics = ({ userId }: { userId?: string }) => {
                 </span>
               </div>
               <p className="text-xs text-gray-600 mt-1">{metric.description}</p>
-            </div>
+            </motion.div>
           ))}
         </div>
       ) : (
@@ -319,9 +322,12 @@ const DeepLearningAnalytics = ({ userId }: { userId?: string }) => {
       {/* AI Insights */}
       <div className="space-y-3">
         {insights.map((insight, index) => (
-          <div
+          <motion.div
             key={index}
             className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-purple-200"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: index * 0.2 + 0.4 }}
           >
             <div className="flex items-start gap-3">
               <insight.icon className={`w-5 h-5 ${insight.color} mt-1`} />
@@ -330,7 +336,7 @@ const DeepLearningAnalytics = ({ userId }: { userId?: string }) => {
                 <p className="text-sm text-gray-600 leading-relaxed">{insight.message}</p>
               </div>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
     </div>
@@ -347,8 +353,11 @@ const ChatMessage = ({
   isUser?: boolean; 
   timestamp?: string;
 }) => (
-  <div
+  <motion.div
     className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.3 }}
   >
     <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${
       isUser 
@@ -362,7 +371,7 @@ const ChatMessage = ({
         </p>
       )}
     </div>
-  </div>
+  </motion.div>
 );
 
 // Coaching Goal Buttons
@@ -587,7 +596,7 @@ export default function AICoachRedesigned() {
           {/* Main Coaching Area */}
           <div className="lg:col-span-3 flex">
             <Card className="bg-white border-gray-200 shadow-lg flex-1 flex flex-col">
-              <CardHeader className="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-t-lg p-6">
+              <CardHeader className="bg-blue-600 text-white rounded-t-lg p-6">
                 <CardTitle className="flex items-center gap-4">
                   <AICoachAvatar mood="encouraging" size="small" />
                   <div className="flex-1">

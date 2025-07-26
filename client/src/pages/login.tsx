@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { useAuth } from '@/hooks/useAuth';
 import MagicLinkLogin from '@/components/MagicLinkLogin';
-import yappyyLogo from '@assets/Y-2-removebg-preview_1753488645348.png';
+import yappyyLogoPath from '@assets/Y-2-removebg-preview_1753384287580.png';
 
 export default function LoginPage() {
   const [, setLocation] = useLocation();
@@ -38,7 +38,7 @@ export default function LoginPage() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <button onClick={() => window.location.href = '/'} className="hover:opacity-80 transition-opacity">
-                <img src={yappyyLogo} alt="Yappyy" className="h-10" />
+                <img src={yappyyLogoPath} alt="Yappyy" className="h-8" />
               </button>
             </div>
           </div>
@@ -49,14 +49,9 @@ export default function LoginPage() {
       <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <div className="flex justify-center mb-6">
-              <button onClick={() => window.location.href = '/'} className="hover:opacity-80 transition-opacity">
-                <img src={yappyyLogo} alt="Yappyy" className="h-20 w-auto" />
-              </button>
-            </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back to Yappyy</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h2>
             <p className="text-gray-600">
-              Sign in to continue your AI-powered speaking improvement journey
+              Sign in to continue your speaking improvement journey
             </p>
           </div>
           

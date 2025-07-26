@@ -43,7 +43,6 @@ import { roboflowVision, analyzeVideoFrame as roboflowAnalyzeFrame, trainCustomV
 import { persistentAIAnalytics } from './persistent-ai-analytics';
 import { graphqlHTTP } from 'express-graphql';
 import neuralGraphQL from './graphql-schema';
-import path from 'path';
 
 // Helper function to extract user ID from Google OAuth request
 function getUserId(req: any): string {
