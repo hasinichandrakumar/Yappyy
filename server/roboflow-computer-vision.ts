@@ -1,6 +1,6 @@
 // Roboflow Computer Vision Integration - Enhanced Body Language and Gesture Analysis
 // @ts-ignore: Ignore TypeScript errors for roboflow module
-import * as roboflow from "roboflow";
+import roboflow from "roboflow";
 
 interface RoboflowConfig {
   apiKey: string;
@@ -68,9 +68,12 @@ export class RoboflowVisionEngine {
         return;
       }
 
-      this.rf = (roboflow as any)({
+      // Initialize Roboflow with proper error handling
+      this.rf = await roboflow({
         publishable_key: process.env.ROBOFLOW_API_KEY
       });
+      
+      this.isAvailable = true;
 
       // Load specialized models for public speaking analysis
       await this.loadModels();
