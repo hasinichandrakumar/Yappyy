@@ -216,7 +216,7 @@ export class DatabaseStorage implements IStorage {
         () => db
           .insert(aiCoachProfiles)
           .values({
-            id: userId,
+            userId: userId,
             personalityVector: JSON.stringify(Array(16).fill(0.5)), // Fresh neutral personality
             learningPatterns: JSON.stringify({}),
             adaptiveStrategies: JSON.stringify([]),
@@ -232,16 +232,17 @@ export class DatabaseStorage implements IStorage {
         () => db
           .insert(userLearningInsights)
           .values({
-            id: userId,
-            insights: JSON.stringify({
+            userId: userId,
+            category: 'welcome',
+            insightType: 'initial',
+            insight: JSON.stringify({
               focusAreas: [],
               strengths: [],
               challenges: [],
               recommendations: ["Start with your first practice session to begin personalized learning!"]
             }),
-            confidenceScore: 0.6,
-            adaptationLevel: 'beginner',
-            lastAnalysis: new Date()
+            confidence: 0.6,
+            priority: 'medium'
           })
           .onConflictDoNothing()
       );
@@ -270,8 +271,42 @@ export class DatabaseStorage implements IStorage {
     });
   }
 
-  // Practice session operations
-  async createPracticeSession(sessionData: InsertPracticeSession): Promise<PracticeSession> {
+  // Practice session operations with session numbering
+  async createPracticeSession(data: InsertPracticeSession): Promise<PracticeSession> {
+    return await withRetry(async () => {
+      console.log('💾 Creating practice session for user:', data.userId);
+      
+      // Ensure sessionNumber is included if not provided
+      if (!data.sessionNumber) {
+        const nextSessionNumber = await this.getNextSessionNumber(data.userId);
+        data.sessionNumber = nextSessionNumber;
+      }
+      
+      const [session] = await db.insert(practiceSessions).values(data).returning();
+      console.log(`✅ Practice session ${data.sessionNumber} created with ID:`, session.id);
+      return session;
+    });
+  }
+
+  // Helper method to get next session number
+  async getNextSessionNumber(userId: string): Promise<number> {
+    try {
+      const result = await db
+        .select()
+        .from(practiceSessions)
+        .where(eq(practiceSessions.userId, userId))
+        .orderBy(desc(practiceSessions.sessionNumber))
+        .limit(1);
+      
+      const lastSessionNumber = result[0]?.sessionNumber || 0;
+      return lastSessionNumber + 1;
+    } catch (error) {
+      console.error("Error getting next session number:", error);
+      return 1;
+    }
+  }
+
+  async createPracticeSessionOriginal(sessionData: InsertPracticeSession): Promise<PracticeSession> {
     const [session] = await db
       .insert(practiceSessions)
       .values(sessionData)

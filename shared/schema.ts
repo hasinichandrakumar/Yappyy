@@ -218,6 +218,9 @@ export const practiceSessions = pgTable("practice_sessions", {
   facialAnalysis: jsonb("facial_analysis"),
   voiceMetrics: jsonb("voice_metrics"),
   
+  // Session tracking for proper numbering
+  sessionNumber: integer("session_number").notNull().default(1),
+  
   // Analysis tab compatible fields
   clarityScore: real("clarity_score"),
   volumeConsistency: real("volume_consistency"),
@@ -238,7 +241,10 @@ export const practiceSessions = pgTable("practice_sessions", {
   rhetoricAnalysis: jsonb("rhetoric_analysis"), // Rhetorical devices, argument structure
   improvementPlan: jsonb("improvement_plan"), // Personalized development roadmap
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  userSessionIdx: index("user_session_idx").on(table.userId, table.sessionNumber),
+  userIdIdx: index("user_id_idx").on(table.userId),
+}));
 
 export const coachingFeedback = pgTable("coaching_feedback", {
   id: serial("id").primaryKey(),

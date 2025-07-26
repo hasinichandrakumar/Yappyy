@@ -21,6 +21,7 @@ import WelcomeMessage from "@/components/WelcomeMessage";
 import ReturningUserWelcome from "@/components/ReturningUserWelcome";
 import { WelcomeDialog } from "@/components/WelcomeDialog";
 import { DailyGoalsDialog } from "@/components/DailyGoalsDialog";
+import { SessionDashboard } from "@/components/SessionDashboard";
 import yappyyLogoPath from '@assets/Y-2-removebg-preview_1753384287580.png';
 
 export default function Dashboard() {
@@ -201,7 +202,10 @@ export default function Dashboard() {
 
 
           <TabsContent value="achievements" className="space-y-6">
-            <FunctionalProgressTracker />
+            <div className="space-y-6">
+              <SessionDashboard />
+              <FunctionalProgressTracker />
+            </div>
           </TabsContent>
 
         </Tabs>

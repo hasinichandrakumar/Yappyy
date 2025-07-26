@@ -22,6 +22,7 @@ export class SessionVideoStorage {
   // Save complete session with video and transcript
   async saveSessionWithVideo(sessionData: {
     userId: string;
+    sessionNumber?: number;
     sessionName: string;
     sessionPurpose: string;
     transcript: string;
@@ -38,6 +39,7 @@ export class SessionVideoStorage {
       // Create session record with video blob and transcript
       const session = await storage.createPracticeSession({
         userId: sessionData.userId,
+        sessionNumber: sessionData.sessionNumber || 1,
         sessionName: sessionData.sessionName,
         purpose: sessionData.sessionPurpose,
         transcript: sessionData.transcript,
@@ -55,8 +57,7 @@ export class SessionVideoStorage {
         // Store facial analysis if available
         facialAnalysis: sessionData.facialAnalysis ? JSON.stringify(sessionData.facialAnalysis) : null,
         // Store voice metrics if available
-        voiceMetrics: sessionData.voiceMetrics ? JSON.stringify(sessionData.voiceMetrics) : null,
-        createdAt: new Date()
+        voiceMetrics: sessionData.voiceMetrics ? JSON.stringify(sessionData.voiceMetrics) : null
       });
 
       console.log('✅ Session saved successfully with ID:', session.id);

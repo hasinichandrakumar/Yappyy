@@ -1,8 +1,10 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import { db } from "./db";
+import { eq, desc, asc, sql, max, not, and } from "drizzle-orm";
 import { storage } from "./storage";
 import { RealTimeSessionManager } from "./redis-realtime";
-import { insertPracticeSessionSchema, insertCoachingFeedbackSchema, insertCustomTemplateSchema } from "@shared/schema";
+import { insertPracticeSessionSchema, insertCoachingFeedbackSchema, insertCustomTemplateSchema, practiceSessions } from "@shared/schema";
 import { setupGoogleAuth, isAuthenticated } from "./googleAuth";
 import { userOnboardingService } from "./user-onboarding";
 import { generateClubCoaching } from "./ai-coaching";
@@ -1182,10 +1184,16 @@ CRITICAL: Evaluate how well this speech achieved its stated PURPOSE. Analyze the
   // Create new practice session with persistent analytics
   app.post("/api/practice-sessions", async (req: any, res) => {
     try {
+      const userId = getUserId(req);
+      const nextSessionNumber = await getNextSessionNumber(userId);
+      
       const validatedData = insertPracticeSessionSchema.parse({
         ...req.body,
-        userId: getUserId(req)
+        userId: userId,
+        sessionNumber: nextSessionNumber
       });
+      
+      console.log(`📝 Creating session ${nextSessionNumber} for user ${userId}`);
       
       // Create the practice session
       const session = await storage.createPracticeSession(validatedData);
@@ -1224,9 +1232,14 @@ CRITICAL: Evaluate how well this speech achieved its stated PURPOSE. Analyze the
         return res.status(400).json({ message: "Either transcript or video data is required" });
       }
 
+      // Get next session number for proper sequencing
+      const nextSessionNumber = await getNextSessionNumber(userId);
+      console.log(`📹 Saving video session ${nextSessionNumber} for user ${userId}`);
+
       // Create practice session with comprehensive data
       const sessionData = {
         userId,
+        sessionNumber: nextSessionNumber,
         sessionName: sessionName || "Practice Session",
         purpose: sessionPurpose || "",
         transcript: transcript || "",
@@ -2721,7 +2734,7 @@ Return only the improved content, maintaining the same format with [brackets] fo
       const combinedAnalysis = {
         speech: speechAnalysis || null,
         facial: facialAnalysis || null,
-        combined_metrics: this.calculateCombinedSpeakingMetrics(speechAnalysis, facialAnalysis),
+        combined_metrics: calculateCombinedSpeakingMetrics(speechAnalysis, facialAnalysis),
         timestamp: Date.now(),
         source: 'multimodal_speaking_analysis'
       };
@@ -4199,6 +4212,69 @@ Respond with detailed analysis in JSON format:
       console.error('❌ Audio enhancement error:', error);
       res.status(500).json({ 
         error: 'Audio enhancement failed' 
+      });
+    }
+  });
+
+  // Session Dashboard with proper numbering
+  app.get("/api/sessions/dashboard", async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      
+      // Get all sessions for the user with proper ordering by session number
+      const sessions = await db
+        .select({
+          id: practiceSessions.id,
+          sessionNumber: practiceSessions.sessionNumber,
+          sessionName: practiceSessions.sessionName,
+          transcript: practiceSessions.transcript,
+          duration: practiceSessions.duration,
+          confidenceScore: practiceSessions.confidenceScore,
+          voiceClarity: practiceSessions.voiceClarity,
+          overallScore: practiceSessions.overallScore,
+          hasVideo: sql<boolean>`CASE WHEN ${practiceSessions.videoBlob} IS NOT NULL THEN true ELSE false END`,
+          createdAt: practiceSessions.createdAt
+        })
+        .from(practiceSessions)
+        .where(eq(practiceSessions.userId, userId))
+        .orderBy(desc(practiceSessions.sessionNumber));
+      
+      // Get user stats
+      const stats = {
+        totalSessions: sessions.length,
+        averageConfidence: sessions.length > 0 ? 
+          Math.round(sessions.reduce((sum, s) => sum + (s.confidenceScore || 0), 0) / sessions.length * 100) : 0,
+        averageClarity: sessions.length > 0 ? 
+          Math.round(sessions.reduce((sum, s) => sum + (s.voiceClarity || 0), 0) / sessions.length * 100) : 0,
+        totalDuration: sessions.reduce((sum, s) => sum + (s.duration || 0), 0),
+        sessionsWithVideo: sessions.filter(s => s.hasVideo).length
+      };
+      
+      // Determine if user is new (no sessions)
+      const isNewUser = sessions.length === 0;
+      const nextSessionNumber = sessions.length > 0 ? Math.max(...sessions.map(s => s.sessionNumber || 1)) + 1 : 1;
+      
+      console.log(`📊 Session dashboard for ${userId}: ${sessions.length} sessions, next: ${nextSessionNumber}`);
+      
+      res.json({
+        sessions: sessions.map(session => ({
+          ...session,
+          confidenceScore: Math.round((session.confidenceScore || 0) * 100),
+          voiceClarity: Math.round((session.voiceClarity || 0) * 100),
+          overallScore: Math.round((session.overallScore || 0) * 100),
+          hasTranscript: !!session.transcript
+        })),
+        stats,
+        isNewUser,
+        nextSessionNumber,
+        userType: userId === 'guest' ? 'guest' : 'authenticated'
+      });
+      
+    } catch (error: any) {
+      console.error('❌ Failed to get session dashboard:', error);
+      res.status(500).json({ 
+        error: "Failed to get session dashboard", 
+        message: error.message 
       });
     }
   });
