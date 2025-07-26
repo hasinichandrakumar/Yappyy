@@ -88,18 +88,18 @@ export class HuggingFaceComputerVision {
   // Process pose detection results into body language metrics
   private processPoseResults(results: any): any {
     // Convert Hugging Face detection results to pose metrics
-    const confidence = Math.min(95, Math.max(60, 75 + Math.random() * 20));
+    const confidence = 0; // Authentic data only - no fake metrics
     
     return {
       posture: {
         spineAlignment: confidence,
-        shoulderLevel: confidence + Math.random() * 10,
-        headPosition: confidence - Math.random() * 5
+        shoulderLevel: 0, // Authentic data only
+        headPosition: 0 // Authentic data only
       },
       gestures: {
-        handMovements: Math.floor(Math.random() * 5),
+        handMovements: 0, // Authentic data only
         gestureNaturalness: confidence,
-        openPalm: Math.random() > 0.5
+        openPalm: false // Authentic data only
       },
       confidence: confidence
     };
@@ -118,11 +118,11 @@ export class HuggingFaceComputerVision {
     return {
       expressions: {
         confidence: confidence,
-        happiness: dominantEmotion?.label === 'happy' ? confidence : Math.random() * 30,
+        happiness: dominantEmotion?.label === 'happy' ? confidence : 0,
         engagement: confidence,
-        authenticity: confidence - Math.random() * 10
+        authenticity: 0 // Authentic data only
       },
-      eyeContact: Math.min(95, confidence + Math.random() * 15),
+      eyeContact: 0, // Authentic data only
       confidence: confidence
     };
   }

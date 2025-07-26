@@ -117,12 +117,12 @@ export function useRoboflowVision() {
       }));
 
       return result.analysis;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Frame analysis failed:', error);
       setState(prev => ({
         ...prev,
         isAnalyzing: false,
-        error: error.message
+        error: error?.message || 'Frame analysis failed'
       }));
       return null;
     }
@@ -208,12 +208,12 @@ export function useRoboflowVision() {
 
       console.log(`🤖 Roboflow batch analysis: ${result.frameCount} frames in ${result.processingTime}ms`);
       return result.analysis;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Batch analysis failed:', error);
       setState(prev => ({
         ...prev,
         isAnalyzing: false,
-        error: error.message
+        error: error?.message || 'Batch analysis failed'
       }));
       return null;
     }

@@ -40,8 +40,8 @@ export class SpeechEmotionRecognition {
           });
           console.log(`🎯 ${model} emotion analysis completed`);
           break;
-        } catch (modelError) {
-          console.log(`⏭️ Trying next model due to: ${modelError.message}`);
+        } catch (modelError: any) {
+          console.log(`⏭️ Trying next model due to: ${modelError?.message || 'Unknown error'}`);
           continue;
         }
       }
@@ -160,8 +160,8 @@ export class SpeechEmotionRecognition {
       return this.getFallbackDetailedEmotions();
     }
 
-    const emotions = {};
-    results.forEach(result => {
+    const emotions: Record<string, number> = {};
+    results.forEach((result: any) => {
       emotions[result.label] = Math.floor(result.score * 100);
     });
 
@@ -197,14 +197,14 @@ export class SpeechEmotionRecognition {
     
     // Higher stability if positive emotions dominate with less variance
     const stabilityScore = positiveEmotions.length > negativeEmotions.length ? 75 : 50;
-    return Math.min(90, Math.max(40, stabilityScore + Math.random() * 15));
+    return 0; // Authentic data only - no fake metrics
   }
 
   // Assess voice clarity indicators
   private assessVoiceClarity(basic: any): number {
     const confidence = basic.confidence || 50;
     // Higher confidence in emotion detection often correlates with clearer speech
-    return Math.min(95, Math.max(45, confidence + Math.random() * 20));
+    return 0; // Authentic data only - no fake metrics
   }
 
   // Analyze voice modulation patterns
@@ -224,11 +224,11 @@ export class SpeechEmotionRecognition {
     
     // Optimal public speaking has 2-4 distinct tones
     if (activeEmotions >= 2 && activeEmotions <= 4) {
-      return Math.floor(75 + Math.random() * 20);
+      return 0; // Authentic data only
     } else if (activeEmotions === 1) {
-      return Math.floor(50 + Math.random() * 15); // Monotone
+      return 0; // Authentic data only
     } else {
-      return Math.floor(45 + Math.random() * 10); // Too varied/scattered
+      return 0; // Authentic data only
     }
   }
 
