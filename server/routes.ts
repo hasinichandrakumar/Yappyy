@@ -43,6 +43,7 @@ import { roboflowVision, analyzeVideoFrame as roboflowAnalyzeFrame, trainCustomV
 import { huggingFaceCV } from './huggingface-computer-vision';
 import { speechEmotionRecognition } from './speech-emotion-recognition';
 import { alternativeSpeechAPIs } from './alternative-speech-apis';
+import { facialExpressionAnalysis } from './facial-expression-analysis';
 import { persistentAIAnalytics } from './persistent-ai-analytics';
 import { graphqlHTTP } from 'express-graphql';
 import neuralGraphQL from './graphql-schema';
@@ -2666,27 +2667,135 @@ Return only the improved content, maintaining the same format with [brackets] fo
     }
   });
 
+  // Comprehensive Facial Expression Analysis
+  app.post("/api/facial-emotion/analyze-expression", async (req, res) => {
+    try {
+      const { imageBase64 } = req.body;
+      
+      if (!imageBase64) {
+        return res.status(400).json({ message: "Image data is required" });
+      }
+
+      const facialAnalysis = await facialExpressionAnalysis.analyzeComprehensiveFacialExpressions(imageBase64);
+      
+      console.log("😊 Comprehensive facial expression analysis completed");
+      res.json({
+        success: true,
+        analysis: facialAnalysis,
+        timestamp: Date.now(),
+        provider: 'multi_service_facial'
+      });
+    } catch (error: any) {
+      console.error("❌ Facial expression analysis error:", error);
+      res.status(500).json({ 
+        success: false,
+        message: "Facial analysis failed", 
+        error: error.message 
+      });
+    }
+  });
+
+  // Multi-Modal Analysis: Speech + Facial Combined
+  app.post("/api/multimodal/analyze-speaking", async (req, res) => {
+    try {
+      const { audioBase64, imageBase64 } = req.body;
+      
+      if (!audioBase64 && !imageBase64) {
+        return res.status(400).json({ message: "Either audio or image data is required" });
+      }
+
+      const analysisPromises = [];
+      
+      if (audioBase64) {
+        const audioBuffer = Buffer.from(audioBase64, 'base64');
+        analysisPromises.push(speechEmotionRecognition.analyzeVoiceConfidence(audioBuffer));
+      }
+      
+      if (imageBase64) {
+        analysisPromises.push(facialExpressionAnalysis.analyzeComprehensiveFacialExpressions(imageBase64));
+      }
+
+      const [speechAnalysis, facialAnalysis] = await Promise.all(analysisPromises);
+      
+      // Combine speech and facial analysis for comprehensive feedback
+      const combinedAnalysis = {
+        speech: speechAnalysis || null,
+        facial: facialAnalysis || null,
+        combined_metrics: this.calculateCombinedSpeakingMetrics(speechAnalysis, facialAnalysis),
+        timestamp: Date.now(),
+        source: 'multimodal_speaking_analysis'
+      };
+      
+      console.log("🎯 Multi-modal speaking analysis completed");
+      res.json({
+        success: true,
+        analysis: combinedAnalysis,
+        provider: 'multimodal_comprehensive'
+      });
+    } catch (error: any) {
+      console.error("❌ Multi-modal analysis error:", error);
+      res.status(500).json({ 
+        success: false,
+        message: "Multi-modal analysis failed", 
+        error: error.message 
+      });
+    }
+  });
+
   // API Status and Configuration
   app.get("/api/speech-emotion/status", async (req, res) => {
     try {
       const status = {
-        huggingface: {
-          available: true,
-          hasToken: !!process.env.HUGGINGFACE_API_TOKEN,
-          limits: process.env.HUGGINGFACE_API_TOKEN ? "Enhanced (with token)" : "Free tier (30-60 req/min)"
+        speech_analysis: {
+          huggingface: {
+            available: true,
+            hasToken: !!process.env.HUGGINGFACE_API_TOKEN,
+            limits: process.env.HUGGINGFACE_API_TOKEN ? "Enhanced (with token)" : "Free tier (30-60 req/min)"
+          },
+          assemblyai: {
+            available: !!process.env.ASSEMBLYAI_API_KEY,
+            credits: process.env.ASSEMBLYAI_API_KEY ? "$50 free credits available" : "Not configured"
+          },
+          hume_ai: {
+            available: !!process.env.HUME_API_KEY,
+            limits: process.env.HUME_API_KEY ? "10k chars/month free" : "Not configured"
+          }
         },
-        assemblyai: {
-          available: !!process.env.ASSEMBLYAI_API_KEY,
-          credits: process.env.ASSEMBLYAI_API_KEY ? "$50 free credits available" : "Not configured"
-        },
-        hume_ai: {
-          available: !!process.env.HUME_API_KEY,
-          limits: process.env.HUME_API_KEY ? "10k chars/month free" : "Not configured"
+        facial_analysis: {
+          luxand: {
+            available: !!process.env.LUXAND_API_KEY,
+            limits: process.env.LUXAND_API_KEY ? "500 requests/month free" : "Not configured"
+          },
+          google_vision: {
+            available: !!process.env.GOOGLE_CLOUD_VISION_API_KEY,
+            limits: process.env.GOOGLE_CLOUD_VISION_API_KEY ? "1000 units/month free" : "Not configured"
+          },
+          aws_rekognition: {
+            available: !!(process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY),
+            limits: (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) ? "1000 images/month free (first 12 months)" : "Not configured"
+          },
+          azure_face: {
+            available: !!process.env.AZURE_FACE_API_KEY,
+            limits: process.env.AZURE_FACE_API_KEY ? "Available via credits" : "Not configured"
+          },
+          hugging_face: {
+            available: true,
+            limits: process.env.HUGGINGFACE_API_TOKEN ? "Enhanced limits" : "Rate limited"
+          },
+          opencv_mediapipe: {
+            available: true,
+            limits: "Always available (local processing)"
+          }
         },
         overall_status: "operational",
         recommended_setup: {
-          basic: "Hugging Face (already working)",
-          enhanced: "Add ASSEMBLYAI_API_KEY or HUME_API_KEY for premium features"
+          basic: "Hugging Face + MediaPipe (already working)",
+          enhanced_speech: "Add ASSEMBLYAI_API_KEY or HUME_API_KEY for premium speech features",
+          enhanced_facial: "Add LUXAND_API_KEY or GOOGLE_CLOUD_VISION_API_KEY for premium facial analysis"
+        },
+        available_services: {
+          speech: alternativeSpeechAPIs.getAvailableAPIs(),
+          facial: facialExpressionAnalysis.getAvailableServices()
         }
       };
 

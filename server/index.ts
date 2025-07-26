@@ -3,6 +3,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { huggingFaceCV } from "./huggingface-computer-vision";
 import { speechEmotionRecognition } from "./speech-emotion-recognition";
+import { facialExpressionAnalysis } from "./facial-expression-analysis";
 
 const app = express();
 app.use(express.json({ limit: '50mb' }));
@@ -48,6 +49,11 @@ app.use((req, res, next) => {
   console.log("🎤 Initializing Advanced Speech Emotion Recognition...");
   if (speechEmotionRecognition.isReady()) {
     console.log("✅ Speech Emotion Recognition activated with wav2vec2 models");
+  }
+  
+  console.log("😊 Initializing Advanced Facial Expression Analysis...");
+  if (facialExpressionAnalysis.isReady()) {
+    console.log("✅ Facial Expression Analysis activated with multiple AI services");
   }
   
   const server = await registerRoutes(app);
