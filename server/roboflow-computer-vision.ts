@@ -157,14 +157,10 @@ export class RoboflowVisionEngine {
   }
 
   private async performRealPostureAnalysis(imageData: string | Buffer): Promise<any> {
-    // AUTHENTIC DATA ONLY - Return 0 when Roboflow is unavailable
+    // AUTHENTIC DATA ONLY - Return null when Roboflow is unavailable so other engines can be tried
     if (!this.isAvailable || !this.rf) {
-      console.log('🚫 No authentic posture analysis available - Roboflow offline');
-      return {
-        confidence: 0,
-        alignment: 0,
-        openness: 0
-      };
+      console.log('🚫 No authentic Roboflow analysis available - engine offline');
+      return null;
     }
 
     // Only perform analysis if Roboflow is truly available
@@ -172,19 +168,11 @@ export class RoboflowVisionEngine {
       console.log('🎯 Performing authentic Roboflow posture analysis...');
       
       // Real Roboflow API would be called here
-      // For now, return 0 since Roboflow is not properly initialized
-      return {
-        confidence: 0,
-        alignment: 0,
-        openness: 0
-      };
+      // For now, return null since Roboflow is not properly initialized
+      return null;
     } catch (error) {
-      console.log('❌ Authentic posture analysis failed:', error);
-      return {
-        confidence: 0,
-        alignment: 0,  
-        openness: 0
-      };
+      console.log('❌ Authentic Roboflow posture analysis failed:', error);
+      return null;
     }
   }
 
@@ -268,8 +256,8 @@ export class RoboflowVisionEngine {
     console.log('🎭 Roboflow body language analysis starting...');
     
     if (!this.isInitialized || !this.isAvailable) {
-      console.log('🛡️ Roboflow unavailable, using enhanced fallback body language analysis');
-      return this.getEnhancedFallbackBodyLanguage(imageData);
+      console.log('🛡️ Roboflow unavailable - returning 0 values (AUTHENTIC DATA ONLY POLICY)');
+      return null; // Return null so other engines can be tried
     }
 
     try {

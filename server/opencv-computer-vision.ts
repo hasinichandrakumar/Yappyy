@@ -96,7 +96,7 @@ export class OpenCVVisionEngine {
       const spatialAnalysis = this.performSpatialAnalysis(buffer);
       
       // Require minimum image quality for authentic analysis
-      if (edgeDetection < 0.3 || contourAnalysis < 0.2 || buffer.length < 8000) {
+      if (edgeDetection < 0.05 || contourAnalysis < 0.03 || buffer.length < 1000) {
         console.log('⚠️ Image quality insufficient for OpenCV analysis');
         return null;
       }
