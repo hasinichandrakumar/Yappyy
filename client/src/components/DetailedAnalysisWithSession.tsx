@@ -29,6 +29,7 @@ import SessionSelector from "./SessionSelector";
 import SessionRecordingPlayer from "./SessionRecordingPlayer";
 import SmartAIFeedback from "./SmartAIFeedback";
 import VideoRewatchDialog from "./VideoRewatchDialog";
+import ContentAnalysisTab from "./ContentAnalysisTab";
 
 export default function DetailedAnalysisWithSession() {
   const [selectedSession, setSelectedSession] = useState<any>(null);
@@ -133,7 +134,7 @@ export default function DetailedAnalysisWithSession() {
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="body-language">Body Language</TabsTrigger>
             <TabsTrigger value="voice">Voice Analysis</TabsTrigger>
-            <TabsTrigger value="content">Content</TabsTrigger>
+            <TabsTrigger value="content">Content Analysis</TabsTrigger>
             <TabsTrigger value="transcript">Transcript</TabsTrigger>
           </TabsList>
 
@@ -278,56 +279,7 @@ export default function DetailedAnalysisWithSession() {
           </TabsContent>
 
           <TabsContent value="content" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
-                  Content Analysis
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="text-center p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600 mb-2">{metrics.content.structure}%</div>
-                    <div className="text-sm text-gray-600">Structure</div>
-                  </div>
-                  <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600 mb-2">{metrics.content.engagement}%</div>
-                    <div className="text-sm text-gray-600">Engagement</div>
-                  </div>
-                  <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-violet-50 rounded-lg">
-                    <div className="text-2xl font-bold text-purple-600 mb-2">{metrics.content.persuasiveness}%</div>
-                    <div className="text-sm text-gray-600">Persuasiveness</div>
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span>Content Clarity</span>
-                    <Badge variant={metrics.content.clarity >= 80 ? "default" : "secondary"}>
-                      {metrics.content.clarity}%
-                    </Badge>
-                  </div>
-                  <Progress value={metrics.content.clarity} className="h-2" />
-                  
-                  <div className="flex items-center justify-between">
-                    <span>Relevance</span>
-                    <Badge variant={metrics.content.relevance >= 85 ? "default" : "secondary"}>
-                      {metrics.content.relevance}%
-                    </Badge>
-                  </div>
-                  <Progress value={metrics.content.relevance} className="h-2" />
-                  
-                  <div className="flex items-center justify-between">
-                    <span>Completeness</span>
-                    <Badge variant={metrics.content.completeness >= 80 ? "default" : "secondary"}>
-                      {metrics.content.completeness}%
-                    </Badge>
-                  </div>
-                  <Progress value={metrics.content.completeness} className="h-2" />
-                </div>
-              </CardContent>
-            </Card>
+            <ContentAnalysisTab session={selectedSession} />
           </TabsContent>
 
           <TabsContent value="transcript" className="space-y-4">
