@@ -14,7 +14,8 @@ import {
   Video, Play, Pause, RotateCcw, Download,
   Library, Camera, Briefcase, GraduationCap,
   Heart, Target, BookOpen, BarChart3, Award,
-  Presentation, Building, Lightbulb
+  Presentation, Building, Lightbulb, CheckCircle,
+  AlertTriangle, Info
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { SessionDataViewer } from '@/components/SessionDataViewer';
@@ -638,7 +639,7 @@ export default function SimplifiedPracticePage() {
     (recognitionRef as any).current = recognition;
   }, [sessionDuration, transcript]);
 
-  // Enhanced comprehensive live insights system
+  // Enhanced comprehensive live insights system with improved effectiveness
   useEffect(() => {
     if (!isRecording) return;
 
@@ -648,115 +649,149 @@ export default function SimplifiedPracticePage() {
       const confidence = metrics.confidence;
       const eyeContact = metrics.eyeContact;
       const engagement = metrics.engagement;
-      const sessionMinutes = sessionDuration / 60000;
+      const sessionMinutes = sessionDuration / 60;
       const lastMessage = liveFeedback[liveFeedback.length - 1];
+      const timeSinceLastFeedback = lastMessage ? (Date.now() - lastMessage.timestamp) / 1000 : 999;
 
-      // Voice and Speech Analytics
-      if (currentWPM > 0) {
-        if (currentWPM >= 120 && currentWPM <= 180 && (!lastMessage || !lastMessage.message.includes('Perfect pace'))) {
-          setLiveFeedback(prev => [...prev.slice(-5), {
+      // Only generate feedback if enough time has passed (avoid spam)
+      if (timeSinceLastFeedback < 8) return;
+
+      // Starting feedback to get users engaged
+      if (sessionDuration >= 3 && sessionDuration < 10 && (!lastMessage || !lastMessage.message.includes('Welcome'))) {
+        setLiveFeedback(prev => [...prev.slice(-4), {
+          id: Date.now().toString(),
+          message: 'Recording started! Begin speaking naturally for live analysis',
+          type: 'info',
+          timestamp: Date.now()
+        }]);
+        return;
+      }
+
+      // Voice and Speech Analytics (improved thresholds)
+      if (currentWPM > 0 && sessionDuration >= 10) {
+        if (currentWPM >= 130 && currentWPM <= 170 && (!lastMessage || !lastMessage.message.includes('Perfect pace'))) {
+          setLiveFeedback(prev => [...prev.slice(-4), {
             id: Date.now().toString(),
-            message: `Perfect pace at ${currentWPM} WPM! Maintain this rhythm`,
+            message: `Great pace at ${currentWPM} WPM! Keep this rhythm going`,
             type: 'success',
             timestamp: Date.now()
           }]);
         } else if (currentWPM > 200 && (!lastMessage || !lastMessage.message.includes('too fast'))) {
-          setLiveFeedback(prev => [...prev.slice(-5), {
+          setLiveFeedback(prev => [...prev.slice(-4), {
             id: Date.now().toString(),
-            message: `Slow down! ${currentWPM} WPM is too fast for clarity`,
+            message: `Speaking quite fast at ${currentWPM} WPM - consider slowing down`,
             type: 'warning',
             timestamp: Date.now()
           }]);
-        } else if (currentWPM < 100 && currentWPM > 0 && sessionMinutes > 0.5 && (!lastMessage || !lastMessage.message.includes('increase pace'))) {
-          setLiveFeedback(prev => [...prev.slice(-5), {
+        } else if (currentWPM < 110 && currentWPM > 30 && sessionMinutes > 0.5 && (!lastMessage || !lastMessage.message.includes('increase energy'))) {
+          setLiveFeedback(prev => [...prev.slice(-4), {
             id: Date.now().toString(),
-            message: `Increase energy - ${currentWPM} WPM may lose audience attention`,
+            message: `Try increasing energy - current pace: ${currentWPM} WPM`,
             type: 'info',
             timestamp: Date.now()
           }]);
         }
       }
 
-      // Filler Word Analysis
-      if (sessionMinutes > 1) {
+      // Transcript length feedback  
+      const transcriptLength = transcript.trim().length;
+      if (sessionDuration >= 15 && transcriptLength < 50 && (!lastMessage || !lastMessage.message.includes('Keep talking'))) {
+        setLiveFeedback(prev => [...prev.slice(-4), {
+          id: Date.now().toString(),
+          message: 'Keep talking! I\'m analyzing your speech patterns',
+          type: 'info',
+          timestamp: Date.now()
+        }]);
+      }
+
+      // Filler Word Analysis (improved sensitivity)
+      if (sessionMinutes > 0.8) {
         const fillersPerMinute = fillerCount / sessionMinutes;
-        if (fillersPerMinute > 3 && (!lastMessage || !lastMessage.message.includes('filler'))) {
-          setLiveFeedback(prev => [...prev.slice(-5), {
+        if (fillersPerMinute > 4 && (!lastMessage || !lastMessage.message.includes('filler'))) {
+          setLiveFeedback(prev => [...prev.slice(-4), {
             id: Date.now().toString(),
-            message: `${Math.round(fillersPerMinute)} fillers/min detected - pause instead of "um"`,
+            message: `${Math.round(fillersPerMinute)} fillers/min detected - try pausing instead`,
             type: 'warning',
             timestamp: Date.now()
           }]);
-        } else if (fillersPerMinute <= 1 && fillerCount > 0 && (!lastMessage || !lastMessage.message.includes('clean speech'))) {
-          setLiveFeedback(prev => [...prev.slice(-5), {
+        } else if (fillersPerMinute <= 1 && fillerCount > 2 && (!lastMessage || !lastMessage.message.includes('clean speech'))) {
+          setLiveFeedback(prev => [...prev.slice(-4), {
             id: Date.now().toString(),
-            message: 'Excellent! Clean speech with minimal filler words',
+            message: 'Excellent! Very clean speech with minimal fillers',
             type: 'success',
             timestamp: Date.now()
           }]);
         }
       }
 
-      // Body Language Insights
-      if (eyeContact > 70 && (!lastMessage || !lastMessage.message.includes('eye contact'))) {
-        setLiveFeedback(prev => [...prev.slice(-5), {
+      // Computer Vision Feedback (only when real data available)
+      if (eyeContact > 75 && (!lastMessage || !lastMessage.message.includes('eye contact'))) {
+        setLiveFeedback(prev => [...prev.slice(-4), {
           id: Date.now().toString(),
-          message: 'Great eye contact! You\'re connecting with your audience',
+          message: 'Excellent eye contact! You\'re engaging your audience well',
           type: 'success',
           timestamp: Date.now()
         }]);
-      } else if (eyeContact < 50 && eyeContact > 0 && (!lastMessage || !lastMessage.message.includes('Look at camera'))) {
-        setLiveFeedback(prev => [...prev.slice(-5), {
+      } else if (eyeContact > 0 && eyeContact < 45 && (!lastMessage || !lastMessage.message.includes('Look at'))) {
+        setLiveFeedback(prev => [...prev.slice(-4), {
           id: Date.now().toString(),
-          message: 'Look at camera more - aim for 60-70% direct eye contact',
+          message: 'Try looking at the camera more - aim for 60%+ eye contact',
           type: 'info',
           timestamp: Date.now()
         }]);
       }
 
-      // Confidence and Energy Feedback
-      if (confidence > 80 && (!lastMessage || !lastMessage.message.includes('confident'))) {
-        setLiveFeedback(prev => [...prev.slice(-5), {
+      // Confidence feedback (when available)
+      if (confidence > 85 && (!lastMessage || !lastMessage.message.includes('confident'))) {
+        setLiveFeedback(prev => [...prev.slice(-4), {
           id: Date.now().toString(),
-          message: 'Excellent confidence! Your posture shows authority',
+          message: 'Great confidence! Your posture and presence look strong',
           type: 'success',
           timestamp: Date.now()
         }]);
-      } else if (confidence < 60 && confidence > 0 && (!lastMessage || !lastMessage.message.includes('Stand tall'))) {
-        setLiveFeedback(prev => [...prev.slice(-5), {
+      }
+
+      // Engagement encouragement
+      if (sessionDuration >= 30 && sessionDuration < 35 && (!lastMessage || !lastMessage.message.includes('doing great'))) {
+        setLiveFeedback(prev => [...prev.slice(-4), {
           id: Date.now().toString(),
-          message: 'Stand tall and use open gestures to boost confidence',
+          message: 'You\'re doing great! Keep practicing for better results',
           type: 'info',
           timestamp: Date.now()
         }]);
       }
 
-      // Professional Speaking Tips (rotating)
-      const professionalTips = [
-        { message: 'Use hand gestures naturally to emphasize key points', type: 'info' as const },
-        { message: 'Vary your vocal pitch to avoid monotone delivery', type: 'info' as const },
-        { message: 'Use strategic pauses for emphasis and clarity', type: 'info' as const },
-        { message: 'Project your voice from your diaphragm', type: 'info' as const },
-        { message: 'Smile when appropriate to increase warmth', type: 'info' as const },
-        { message: 'Keep shoulders relaxed and spine straight', type: 'info' as const },
-        { message: 'Use inclusive "you" language to engage audience', type: 'info' as const },
-        { message: 'Structure your message: intro, main points, conclusion', type: 'info' as const },
-        { message: 'Use concrete examples to illustrate concepts', type: 'info' as const },
-        { message: 'Practice smooth transitions between ideas', type: 'info' as const }
-      ];
-
-      // ELIMINATED: Random tip selection - Tips will only be shown based on actual analysis data
+      // Professional tips (less frequent, more targeted)
+      if (sessionDuration >= 45 && sessionDuration % 30 < 2 && (!lastMessage || timeSinceLastFeedback > 25)) {
+        const practicalTips = [
+          'Use hand gestures to emphasize key points',
+          'Vary your vocal pitch to maintain interest', 
+          'Use strategic pauses for impact',
+          'Project your voice from your diaphragm',
+          'Keep shoulders relaxed and spine straight'
+        ];
+        
+        const randomTip = practicalTips[Math.floor(sessionDuration / 30) % practicalTips.length];
+        if (!lastMessage || !lastMessage.message.includes(randomTip.substring(0, 10))) {
+          setLiveFeedback(prev => [...prev.slice(-4), {
+            id: Date.now().toString(),
+            message: randomTip,
+            type: 'info',
+            timestamp: Date.now()
+          }]);
+        }
+      }
     };
 
-    // Initial insight after 5 seconds, then every 15 seconds (fixed interval)
-    const initialTimeout = setTimeout(generateLiveInsights, 5000);
-    const interval = setInterval(generateLiveInsights, 15000); // Fixed interval, no randomness
+    // Start feedback after 3 seconds, then check every 8 seconds for better pacing
+    const initialTimeout = setTimeout(generateLiveInsights, 3000);
+    const interval = setInterval(generateLiveInsights, 8000);
     
     return () => {
       clearTimeout(initialTimeout);
       clearInterval(interval);
     };
-  }, [isRecording, metrics, sessionDuration, liveFeedback]);
+  }, [isRecording, metrics, sessionDuration, liveFeedback, transcript]);
 
   // Initialize video recording
   const initializeVideoRecording = async (): Promise<boolean> => {
@@ -827,7 +862,10 @@ export default function SimplifiedPracticePage() {
           // Pass the existing video element and stream to Roboflow
           if (roboflowVideoRef.current) {
             roboflowVideoRef.current.srcObject = stream;
-            roboflowCanvasRef.current = canvasRef.current;
+            // Set canvas reference safely
+            if (roboflowCanvasRef && canvasRef.current) {
+              roboflowCanvasRef.current = canvasRef.current;
+            }
           }
           
           // Wait for video to be ready before starting analysis
@@ -1825,37 +1863,50 @@ export default function SimplifiedPracticePage() {
             />
 
             {/* Live Feedback Insights */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl font-bold flex items-center gap-2">
-                  <TrendingUp className="w-6 h-6" />
-                  Live Insights
+            <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-white">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-xl font-bold flex items-center gap-2 text-blue-800">
+                  <TrendingUp className="w-6 h-6 text-blue-600" />
+                  Live AI Feedback
+                  {liveFeedback.length > 0 && (
+                    <Badge variant="secondary" className="ml-2 text-xs">
+                      {liveFeedback.length} insights
+                    </Badge>
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {liveFeedback.length === 0 ? (
-                  <div className="text-center text-gray-500 py-4">
-                    <Activity className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                    <p className="text-sm">Start speaking to get live feedback</p>
+                  <div className="text-center text-gray-500 py-6">
+                    <Activity className="w-10 h-10 mx-auto mb-3 opacity-50 animate-pulse" />
+                    <p className="font-medium">Ready for Live Analysis</p>
+                    <p className="text-sm mt-1">Start speaking to receive instant feedback</p>
                   </div>
                 ) : (
-                  liveFeedback.slice(-3).map((feedback) => (
-                    <div 
-                      key={feedback.id}
-                      className={`p-3 rounded-lg border-l-4 ${
-                        feedback.type === 'success' 
-                          ? 'bg-green-50 border-green-400 text-green-800' 
-                          : feedback.type === 'warning'
-                          ? 'bg-yellow-50 border-yellow-400 text-yellow-800'
-                          : 'bg-blue-50 border-blue-400 text-blue-800'
-                      }`}
-                    >
-                      <p className="text-sm font-medium">{feedback.message}</p>
-                      <p className="text-xs opacity-75 mt-1">
-                        {new Date(feedback.timestamp).toLocaleTimeString()}
-                      </p>
-                    </div>
-                  ))
+                  <div className="space-y-3 max-h-64 overflow-y-auto">
+                    {liveFeedback.slice(-4).reverse().map((feedback, index) => (
+                      <div 
+                        key={feedback.id}
+                        className={`p-4 rounded-lg border-l-4 transition-all duration-300 ${
+                          feedback.type === 'success' 
+                            ? 'bg-green-50 border-green-400 text-green-800 shadow-green-100' 
+                            : feedback.type === 'warning'
+                            ? 'bg-yellow-50 border-yellow-400 text-yellow-800 shadow-yellow-100'
+                            : 'bg-blue-50 border-blue-400 text-blue-800 shadow-blue-100'
+                        } ${index === 0 ? 'ring-2 ring-blue-200 shadow-lg' : 'shadow-md'}`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <p className="text-sm font-semibold flex-1 pr-2">{feedback.message}</p>
+                          {feedback.type === 'success' && <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />}
+                          {feedback.type === 'warning' && <AlertTriangle className="w-4 h-4 text-yellow-600 flex-shrink-0" />}
+                          {feedback.type === 'info' && <Info className="w-4 h-4 text-blue-600 flex-shrink-0" />}
+                        </div>
+                        <p className="text-xs opacity-75 mt-2 font-medium">
+                          {index === 0 ? 'Just now' : new Date(feedback.timestamp).toLocaleTimeString()}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
                 )}
                 
                 {/* Quick Stats */}
