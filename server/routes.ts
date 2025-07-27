@@ -1190,14 +1190,14 @@ CRITICAL: Evaluate how well this speech achieved its stated PURPOSE. Analyze the
           enhancedSession = {
             ...session,
             facialAnalysis: facialData,
-            // Update performance metrics with computer vision data if basic values are 0
-            confidenceLevel: session.confidenceLevel || facialData?.emotionalExpression?.confidence || 0,
-            engagementLevel: session.engagementLevel || facialData?.emotionalExpression?.engagement || 0,
-            eyeContactScore: session.eyeContactScore || facialData?.communicationSignals?.eyeContactQuality || 0,
+            // Only use computer vision data if it has authentic values (> 0)
+            confidenceLevel: session.confidenceLevel || (facialData?.emotionalExpression?.confidence > 0 ? facialData.emotionalExpression.confidence : 0),
+            engagementLevel: session.engagementLevel || (facialData?.emotionalExpression?.engagement > 0 ? facialData.emotionalExpression.engagement : 0),
+            eyeContactScore: session.eyeContactScore || (facialData?.communicationSignals?.eyeContactQuality > 0 ? facialData.communicationSignals.eyeContactQuality : 0),
             overallPerformance: session.overallScore || calculateSessionOverallScore(session, facialData),
-            // Additional performance metrics from computer vision
-            clarityScore: session.clarityScore || facialData?.communicationSignals?.gazeFocus || 0,
-            volumeConsistency: session.volumeConsistency || 80 // Default as seen in the UI
+            // Only use additional metrics if they contain real data
+            clarityScore: session.clarityScore || (facialData?.communicationSignals?.gazeFocus > 0 ? facialData.communicationSignals.gazeFocus : 0),
+            volumeConsistency: session.volumeConsistency || 0 // Only show real data, no defaults
           };
           
           console.log(`✅ Enhanced performance metrics for session ${id}:`, {
@@ -1226,10 +1226,10 @@ CRITICAL: Evaluate how well this speech achieved its stated PURPOSE. Analyze the
     if (session.clarityScore) scores.push(session.clarityScore);
     if (session.volumeConsistency) scores.push(session.volumeConsistency);
     
-    // Computer vision metrics
-    if (facialData?.emotionalExpression?.confidence) scores.push(facialData.emotionalExpression.confidence);
-    if (facialData?.emotionalExpression?.engagement) scores.push(facialData.emotionalExpression.engagement);
-    if (facialData?.communicationSignals?.eyeContactQuality) scores.push(facialData.communicationSignals.eyeContactQuality);
+    // Computer vision metrics - only include if they have real data (> 0)
+    if (facialData?.emotionalExpression?.confidence > 0) scores.push(facialData.emotionalExpression.confidence);
+    if (facialData?.emotionalExpression?.engagement > 0) scores.push(facialData.emotionalExpression.engagement);
+    if (facialData?.communicationSignals?.eyeContactQuality > 0) scores.push(facialData.communicationSignals.eyeContactQuality);
     
     return scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
   }

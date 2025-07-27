@@ -151,37 +151,35 @@ export class RoboflowVisionEngine {
   }
 
   private async performRealPostureAnalysis(imageData: string | Buffer): Promise<any> {
-    // Analyze image properties for authentic posture assessment
-    let confidence = 70;
-    let alignment = 65;
-    let openness = 68;
-    
-    if (imageData) {
-      if (typeof imageData === 'string') {
-        // Analyze string data characteristics for posture indicators
-        const dataLength = imageData.length;
-        const complexity = new Set(imageData.slice(0, 1000)).size;
-        
-        // Image quality indicators suggest posture confidence
-        confidence = Math.min(90, 65 + Math.floor(dataLength / 10000));
-        alignment = Math.min(88, 60 + Math.floor(complexity / 3));
-        openness = Math.min(85, 62 + Math.floor(dataLength / 15000));
-      } else if (Buffer.isBuffer(imageData)) {
-        // Buffer analysis for posture metrics
-        const bufferSize = imageData.length;
-        const variance = this.calculateBufferVariance(imageData.slice(0, 100));
-        
-        confidence = Math.min(92, 68 + Math.floor(bufferSize / 50000));
-        alignment = Math.min(89, 63 + Math.floor(variance * 20));
-        openness = Math.min(87, 65 + Math.floor(bufferSize / 60000));
-      }
+    // AUTHENTIC DATA ONLY - Return 0 when Roboflow is unavailable
+    if (!this.isAvailable || !this.rf) {
+      console.log('🚫 No authentic posture analysis available - Roboflow offline');
+      return {
+        confidence: 0,
+        alignment: 0,
+        openness: 0
+      };
     }
 
-    return {
-      confidence: Math.max(50, confidence),
-      alignment: Math.max(45, alignment),
-      openness: Math.max(48, openness)
-    };
+    // Only perform analysis if Roboflow is truly available
+    try {
+      console.log('🎯 Performing authentic Roboflow posture analysis...');
+      
+      // Real Roboflow API would be called here
+      // For now, return 0 since Roboflow is not properly initialized
+      return {
+        confidence: 0,
+        alignment: 0,
+        openness: 0
+      };
+    } catch (error) {
+      console.log('❌ Authentic posture analysis failed:', error);
+      return {
+        confidence: 0,
+        alignment: 0,  
+        openness: 0
+      };
+    }
   }
 
   private calculateBufferVariance(buffer: Buffer): number {
@@ -332,51 +330,38 @@ export class RoboflowVisionEngine {
   }
 
   private getEnhancedFallbackBodyLanguage(imageData?: string | Buffer): any {
-    console.log('🛡️ Using enhanced fallback for body language analysis');
+    console.log('🛡️ Roboflow unavailable - returning 0 values (AUTHENTIC DATA ONLY POLICY)');
     
-    // Analyze data properties for more authentic fallback
-    let dataQuality = 0.7;
-    let complexity = 0.6;
-    
-    if (imageData) {
-      if (typeof imageData === 'string') {
-        dataQuality = Math.min(0.9, imageData.length / 50000);
-        complexity = Math.min(0.8, new Set(imageData.split('').slice(0, 1000)).size / 64);
-      } else if (Buffer.isBuffer(imageData)) {
-        dataQuality = Math.min(0.9, imageData.length / 100000);
-        complexity = 0.75; // Good complexity for buffer data
-      }
-    }
-    
+    // AUTHENTIC DATA ONLY - Return 0 when no real computer vision is available
     return {
       posture: {
-        overallPosture: Math.max(70, Math.round(75 + dataQuality * 20)),
-        spineAlignment: Math.max(65, Math.round(70 + dataQuality * 25)),
-        shoulderLevel: Math.max(72, Math.round(76 + complexity * 18)),
-        headPosition: Math.max(68, Math.round(72 + dataQuality * 23))
+        overallPosture: 0,
+        spineAlignment: 0,
+        shoulderLevel: 0,
+        headPosition: 0
       },
       gestures: {
-        gestureNaturalness: Math.max(65, Math.round(70 + complexity * 25)),
-        handMovements: Math.max(60, Math.round(65 + complexity * 30)),
-        gestureFrequency: Math.max(55, Math.round(60 + complexity * 35)),
-        effectiveness: Math.max(68, Math.round(72 + dataQuality * 23))
+        gestureNaturalness: 0,
+        handMovements: 0,
+        gestureFrequency: 0,
+        effectiveness: 0
       },
       eyeContact: {
-        eyeContactPercentage: Math.max(75, Math.round(80 + dataQuality * 15)),
-        gazeStability: Math.max(70, Math.round(75 + complexity * 20)),
-        audienceEngagement: Math.max(72, Math.round(77 + dataQuality * 18))
+        eyeContactPercentage: 0,
+        gazeStability: 0,
+        audienceEngagement: 0
       },
       facialExpression: {
-        confidence: Math.max(75, Math.round(80 + dataQuality * 15)),
-        engagement: Math.max(70, Math.round(75 + complexity * 20)),
-        authenticity: Math.max(78, Math.round(82 + dataQuality * 13)),
-        enthusiasm: Math.max(65, Math.round(70 + complexity * 25))
+        confidence: 0,
+        engagement: 0,
+        authenticity: 0,
+        enthusiasm: 0
       },
       bodyLanguage: {
-        energyLevel: Math.max(70, Math.round(75 + complexity * 20)),
-        openness: Math.max(75, Math.round(80 + dataQuality * 15)),
-        professionalism: Math.max(78, Math.round(82 + dataQuality * 13)),
-        presence: Math.max(73, Math.round(78 + (dataQuality + complexity) * 10))
+        energyLevel: 0,
+        openness: 0,
+        professionalism: 0,
+        presence: 0
       }
     };
   }
@@ -397,36 +382,35 @@ export class RoboflowVisionEngine {
   }
 
   private async performRealGestureAnalysis(imageData: string | Buffer): Promise<any> {
-    // Analyze image properties for authentic gesture assessment
-    let handMovements = 60;
-    let effectiveness = 65;
-    let timing = 62;
-    
-    if (imageData) {
-      if (typeof imageData === 'string') {
-        // Analyze string data patterns for gesture indicators
-        const patterns = this.analyzeDataPatterns(imageData);
-        const rhythmicity = this.calculateRhythmicity(imageData);
-        
-        handMovements = Math.min(88, 55 + Math.floor(patterns * 25));
-        effectiveness = Math.min(85, 60 + Math.floor(rhythmicity * 20));
-        timing = Math.min(82, 58 + Math.floor(patterns * 18));
-      } else if (Buffer.isBuffer(imageData)) {
-        // Buffer analysis for gesture movement patterns
-        const entropy = this.calculateBufferEntropy(imageData.slice(0, 200));
-        const smoothness = this.calculateSmoothness(imageData.slice(0, 150));
-        
-        handMovements = Math.min(90, 58 + Math.floor(entropy * 30));
-        effectiveness = Math.min(87, 62 + Math.floor(smoothness * 22));
-        timing = Math.min(84, 60 + Math.floor(entropy * 20));
-      }
+    // AUTHENTIC DATA ONLY - Return 0 when Roboflow is unavailable
+    if (!this.isAvailable || !this.rf) {
+      console.log('🚫 No authentic gesture analysis available - Roboflow offline');
+      return {
+        handMovements: 0,
+        effectiveness: 0,
+        timing: 0
+      };
     }
 
-    return {
-      handMovements: Math.max(40, handMovements),
-      effectiveness: Math.max(45, effectiveness),
-      timing: Math.max(42, timing)
-    };
+    // Only perform analysis if Roboflow is truly available
+    try {
+      console.log('🎯 Performing authentic Roboflow gesture analysis...');
+      
+      // Real Roboflow API would be called here
+      // For now, return 0 since Roboflow is not properly initialized
+      return {
+        handMovements: 0,
+        effectiveness: 0,
+        timing: 0
+      };
+    } catch (error) {
+      console.log('❌ Authentic gesture analysis failed:', error);
+      return {
+        handMovements: 0,
+        effectiveness: 0,
+        timing: 0
+      };
+    }
   }
 
   private async analyzeFacial(imageData: string | Buffer): Promise<any> {
@@ -597,33 +581,29 @@ export class RoboflowVisionEngine {
   }
 
   private getFallbackPosture(): any {
-    // Enhanced fallback with meaningful metrics instead of zeros
-    const baseConfidence = 70 + Math.floor(Math.random() * 15); // 70-85
-    console.log('🛡️ Using enhanced posture fallback:', baseConfidence);
+    console.log('🚫 No authentic posture data available - returning 0 values (AUTHENTIC DATA ONLY)');
     return {
-      confidence: baseConfidence,
-      alignment: Math.max(65, baseConfidence - 5),
-      openness: Math.max(68, baseConfidence - 2)
+      confidence: 0,
+      alignment: 0,
+      openness: 0
     };
   }
 
   private getFallbackGestures(): any {
-    // Enhanced fallback with meaningful metrics instead of zeros
-    const baseEffectiveness = 65 + Math.floor(Math.random() * 20); // 65-85
+    console.log('🚫 No authentic gesture data available - returning 0 values (AUTHENTIC DATA ONLY)');
     return {
-      handMovements: Math.max(60, baseEffectiveness - 5),
-      effectiveness: baseEffectiveness,
-      timing: Math.max(62, baseEffectiveness - 3)
+      handMovements: 0,
+      effectiveness: 0,
+      timing: 0
     };
   }
 
   private getFallbackFacial(): any {
-    // Enhanced fallback with meaningful metrics instead of zeros
-    const baseEngagement = 72 + Math.floor(Math.random() * 18); // 72-90
+    console.log('🚫 No authentic facial data available - returning 0 values (AUTHENTIC DATA ONLY)');
     return {
-      engagement: baseEngagement,
-      authenticity: Math.max(70, baseEngagement - 2),
-      eyeContact: Math.max(75, baseEngagement + 3)
+      engagement: 0,
+      authenticity: 0,
+      eyeContact: 0
     };
   }
 

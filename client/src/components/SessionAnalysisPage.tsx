@@ -86,11 +86,11 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
   // AUTHENTIC DATA PROCESSING - Extract computer vision metrics for performance display
   const normalizedData = {
     ...sessionData,
-    // Convert decimal values to percentages if needed, integrate computer vision data
+    // Convert decimal values to percentages if needed, integrate computer vision data  
     overallPerformance: typeof sessionData.overallPerformance === 'number' ? 
       Math.round(sessionData.overallPerformance > 1 ? sessionData.overallPerformance : sessionData.overallPerformance * 100) : 
-      // Calculate from computer vision confidence if available
-      (sessionData.facialAnalysis?.emotionalExpression?.confidence || 0),
+      // Only use computer vision if it has real data (not 0)
+      (sessionData.facialAnalysis?.emotionalExpression?.confidence > 0 ? sessionData.facialAnalysis.emotionalExpression.confidence : 0),
     clarityScore: typeof sessionData.clarityScore === 'number' ? 
       Math.round(sessionData.clarityScore > 1 ? sessionData.clarityScore : sessionData.clarityScore * 100) : 
       // Use voice consistency as clarity metric if available
