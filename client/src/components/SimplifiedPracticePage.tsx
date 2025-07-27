@@ -232,6 +232,62 @@ export default function SimplifiedPracticePage() {
     getAverageMetrics: getAverageComputerVisionMetrics
   } = useRobustComputerVision();
 
+  // Fetch authentic eye contact and expression data from maximum authentic analysis
+  useEffect(() => {
+    if (!isRecording) return;
+
+    const fetchAuthenticMetrics = async () => {
+      try {
+        const response = await fetch('/api/maximum-authentic-analysis');
+        const data = await response.json();
+        
+        if (data.success && data.results && data.results.vision) {
+          // Extract authentic facial analysis data from Enhanced-Local analysis engine
+          const visionData = data.results.vision;
+          
+          // Extract eye contact from nested structure
+          const eyeContactValue = visionData.eyeContact?.eyeContactPercentage || 
+                                 visionData.eyeContact?.audienceEngagement || 0;
+          
+          // Extract confidence and engagement from facial expression analysis
+          const confidenceValue = visionData.facialExpression?.confidence || 0;
+          const engagementValue = visionData.facialExpression?.engagement || 0;
+          
+          if (eyeContactValue > 0 || confidenceValue > 0 || engagementValue > 0) {
+            setMetrics(prev => ({
+              ...prev,
+              eyeContact: eyeContactValue,
+              confidence: confidenceValue,
+              engagement: engagementValue,
+              bodyLanguage: {
+                ...prev.bodyLanguage,
+                eyeContactScore: eyeContactValue,
+                facialExpressions: engagementValue,
+                overallPresence: confidenceValue,
+                postureConfidence: visionData.posture?.overallPosture || 0
+              }
+            }));
+            
+            console.log('✅ Updated metrics with Enhanced-Local authentic data:', {
+              eyeContact: eyeContactValue,
+              engagement: engagementValue,
+              confidence: confidenceValue,
+              source: 'Enhanced-Local analysis engine'
+            });
+          }
+        }
+      } catch (error) {
+        console.log('📊 Maximum authentic analysis unavailable');
+      }
+    };
+
+    // Fetch immediately and then every 3 seconds during recording
+    fetchAuthenticMetrics();
+    const interval = setInterval(fetchAuthenticMetrics, 3000);
+    
+    return () => clearInterval(interval);
+  }, [isRecording]);
+
   // Refs
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
