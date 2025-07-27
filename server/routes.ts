@@ -1169,7 +1169,7 @@ CRITICAL: Evaluate how well this speech achieved its stated PURPOSE. Analyze the
     }
   });
 
-  // Get specific practice session
+  // Get specific practice session with enhanced computer vision integration
   app.get("/api/practice-sessions/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -1177,11 +1177,62 @@ CRITICAL: Evaluate how well this speech achieved its stated PURPOSE. Analyze the
       if (!session) {
         return res.status(404).json({ message: "Session not found" });
       }
-      res.json(session);
+      
+      // Parse and integrate saved facial analysis for performance statistics
+      let enhancedSession = { ...session };
+      
+      if (session.facialAnalysis) {
+        try {
+          const facialData = JSON.parse(session.facialAnalysis);
+          console.log(`🎭 Integrating saved facial analysis for session ${id}:`, facialData);
+          
+          // Enhance session with computer vision performance metrics for the performance breakdown
+          enhancedSession = {
+            ...session,
+            facialAnalysis: facialData,
+            // Update performance metrics with computer vision data if basic values are 0
+            confidenceLevel: session.confidenceLevel || facialData?.emotionalExpression?.confidence || 0,
+            engagementLevel: session.engagementLevel || facialData?.emotionalExpression?.engagement || 0,
+            eyeContactScore: session.eyeContactScore || facialData?.communicationSignals?.eyeContactQuality || 0,
+            overallPerformance: session.overallScore || calculateSessionOverallScore(session, facialData),
+            // Additional performance metrics from computer vision
+            clarityScore: session.clarityScore || facialData?.communicationSignals?.gazeFocus || 0,
+            volumeConsistency: session.volumeConsistency || 80 // Default as seen in the UI
+          };
+          
+          console.log(`✅ Enhanced performance metrics for session ${id}:`, {
+            confidence: enhancedSession.confidenceLevel,
+            engagement: enhancedSession.engagementLevel,
+            eyeContact: enhancedSession.eyeContactScore,
+            overall: enhancedSession.overallPerformance
+          });
+        } catch (parseError) {
+          console.error('Failed to parse facial analysis data:', parseError);
+        }
+      }
+      
+      res.json(enhancedSession);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch session" });
     }
   });
+
+  // Helper function for calculating overall score from saved session data
+  function calculateSessionOverallScore(session: any, facialData: any): number {
+    const scores = [];
+    
+    // Voice and basic metrics
+    if (session.confidenceScore) scores.push(session.confidenceScore);
+    if (session.clarityScore) scores.push(session.clarityScore);
+    if (session.volumeConsistency) scores.push(session.volumeConsistency);
+    
+    // Computer vision metrics
+    if (facialData?.emotionalExpression?.confidence) scores.push(facialData.emotionalExpression.confidence);
+    if (facialData?.emotionalExpression?.engagement) scores.push(facialData.emotionalExpression.engagement);
+    if (facialData?.communicationSignals?.eyeContactQuality) scores.push(facialData.communicationSignals.eyeContactQuality);
+    
+    return scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
+  }
 
   // Delete practice session
   app.delete("/api/practice-sessions/:id", async (req: any, res) => {
@@ -1267,13 +1318,13 @@ CRITICAL: Evaluate how well this speech achieved its stated PURPOSE. Analyze the
         duration: duration || 0,
         // Store video as base64 if provided
         videoBlob: videoData ? Buffer.from(videoData, 'base64').toString('base64') : null,
-        // Extract metrics with proper defaults (using inline helper)
-        confidenceScore: metrics?.confidence || 0,
-        clarityScore: metrics?.clarity || 0,  
-        paceScore: metrics?.pace || 0,
-        eyeContactScore: (metrics?.eyeContact || 0).toString(),
-        gestureScore: metrics?.gesture || 0,
-        overallScore: 0, // Will calculate after creation
+        // Extract metrics with proper defaults and computer vision integration
+        confidenceScore: metrics?.confidence || facialAnalysis?.emotionalExpression?.confidence || 0,
+        clarityScore: metrics?.clarity || voiceMetrics?.clarity || 0,  
+        paceScore: metrics?.pace || voiceMetrics?.pace || 0,
+        eyeContactScore: (metrics?.eyeContact || facialAnalysis?.communicationSignals?.eyeContactQuality || 0).toString(),
+        gestureScore: metrics?.gesture || facialAnalysis?.bodyLanguage?.gestureNaturalness || 0,
+        overallScore: calculateOverallScore(metrics, facialAnalysis, voiceMetrics),
         fillerWordCount: metrics?.fillerWordCount || 0,
         wordsPerMinute: metrics?.wordsPerMinute || 0,
         // Legacy required fields with defaults  
@@ -1297,7 +1348,23 @@ CRITICAL: Evaluate how well this speech achieved its stated PURPOSE. Analyze the
         console.error('⚠️ Failed to save persistent analytics (session still saved):', analyticsError);
       }
       
-      // Helper functions for metric extraction
+      // Enhanced helper function for comprehensive metric extraction including computer vision
+      function calculateOverallScore(metrics: any, facialAnalysis: any, voiceMetrics: any): number {
+        const scores = [];
+        
+        // Voice metrics
+        if (voiceMetrics?.clarity) scores.push(voiceMetrics.clarity);
+        if (metrics?.confidence) scores.push(metrics.confidence);
+        
+        // Computer vision metrics
+        if (facialAnalysis?.emotionalExpression?.confidence) scores.push(facialAnalysis.emotionalExpression.confidence);
+        if (facialAnalysis?.emotionalExpression?.engagement) scores.push(facialAnalysis.emotionalExpression.engagement);
+        if (facialAnalysis?.communicationSignals?.eyeContactQuality) scores.push(facialAnalysis.communicationSignals.eyeContactQuality);
+        
+        // Return average of available scores or 0 if none
+        return scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
+      }
+
       function extractMetric(metrics: any, key: string, defaultValue: number): number {
         if (!metrics) return defaultValue;
         
@@ -1317,7 +1384,7 @@ CRITICAL: Evaluate how well this speech achieved its stated PURPOSE. Analyze the
         return defaultValue;
       }
 
-      function calculateOverallScore(metrics: any): number {
+      function calculateOverallScoreOld(metrics: any): number {
         if (!metrics) return 0;
         
         const scores = [

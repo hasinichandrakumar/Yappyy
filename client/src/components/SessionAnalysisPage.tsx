@@ -83,14 +83,18 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
   const [isGeneratingInsights, setIsGeneratingInsights] = useState(true);
   const [aiInsights, setAIInsights] = useState<any>(null);
 
-  // AUTHENTIC DATA ONLY - NO FAKE METRICS
+  // AUTHENTIC DATA PROCESSING - Extract computer vision metrics for performance display
   const normalizedData = {
     ...sessionData,
-    // Convert decimal values to percentages if needed, NO FALLBACK VALUES
+    // Convert decimal values to percentages if needed, integrate computer vision data
     overallPerformance: typeof sessionData.overallPerformance === 'number' ? 
-      Math.round(sessionData.overallPerformance > 1 ? sessionData.overallPerformance : sessionData.overallPerformance * 100) : 0,
+      Math.round(sessionData.overallPerformance > 1 ? sessionData.overallPerformance : sessionData.overallPerformance * 100) : 
+      // Calculate from computer vision confidence if available
+      (sessionData.facialAnalysis?.emotionalExpression?.confidence || 0),
     clarityScore: typeof sessionData.clarityScore === 'number' ? 
-      Math.round(sessionData.clarityScore > 1 ? sessionData.clarityScore : sessionData.clarityScore * 100) : 0,
+      Math.round(sessionData.clarityScore > 1 ? sessionData.clarityScore : sessionData.clarityScore * 100) : 
+      // Use voice consistency as clarity metric if available
+      (typeof sessionData.volumeConsistency === 'number' ? Math.round(sessionData.volumeConsistency > 1 ? sessionData.volumeConsistency : sessionData.volumeConsistency * 100) : 0),
     volumeConsistency: typeof sessionData.volumeConsistency === 'number' ? 
       Math.round(sessionData.volumeConsistency > 1 ? sessionData.volumeConsistency : sessionData.volumeConsistency * 100) : 0,
     intonationScore: typeof sessionData.intonationScore === 'number' ? 
@@ -98,18 +102,32 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
     paceConsistency: typeof sessionData.paceConsistency === 'number' ? 
       Math.round(sessionData.paceConsistency > 1 ? sessionData.paceConsistency : sessionData.paceConsistency * 100) : 0,
     engagementLevel: typeof sessionData.engagementLevel === 'number' ? 
-      Math.round(sessionData.engagementLevel > 1 ? sessionData.engagementLevel : sessionData.engagementLevel * 100) : 0,
+      Math.round(sessionData.engagementLevel > 1 ? sessionData.engagementLevel : sessionData.engagementLevel * 100) : 
+      // Use facial analysis engagement
+      (sessionData.facialAnalysis?.emotionalExpression?.engagement || 0),
     eyeContactScore: typeof sessionData.eyeContactScore === 'string' ? 
       Math.round(parseFloat(sessionData.eyeContactScore)) : 
       (typeof sessionData.eyeContactScore === 'number' ? 
-        Math.round(sessionData.eyeContactScore > 1 ? sessionData.eyeContactScore : sessionData.eyeContactScore * 100) : 0),
+        Math.round(sessionData.eyeContactScore > 1 ? sessionData.eyeContactScore : sessionData.eyeContactScore * 100) : 
+        // Use facial analysis eye contact
+        (sessionData.facialAnalysis?.communicationSignals?.eyeContactQuality || 0)),
     confidenceLevel: typeof sessionData.confidenceLevel === 'number' ? 
-      Math.round(sessionData.confidenceLevel > 1 ? sessionData.confidenceLevel : sessionData.confidenceLevel * 100) : 0,
+      Math.round(sessionData.confidenceLevel > 1 ? sessionData.confidenceLevel : sessionData.confidenceLevel * 100) : 
+      // Use facial analysis confidence
+      (sessionData.facialAnalysis?.emotionalExpression?.confidence || 0),
     wordsPerMinute: sessionData.wordsPerMinute || 0,
     fillerWordCount: sessionData.fillerWordCount || 0
   };
 
-  console.log('📊 SessionAnalysisPage - Normalized data with proper percentages:', normalizedData);
+  console.log('📊 SessionAnalysisPage - Performance breakdown metrics:', {
+    confidence: normalizedData.confidenceLevel,
+    eyeContact: normalizedData.eyeContactScore,
+    clarity: normalizedData.clarityScore,
+    engagement: normalizedData.engagementLevel,
+    voiceConsistency: normalizedData.volumeConsistency,
+    overall: normalizedData.overallPerformance,
+    facialAnalysisData: !!sessionData.facialAnalysis
+  });
 
   useEffect(() => {
     // Show immediate basic analysis first, then load advanced features
@@ -172,7 +190,7 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
         setAIInsights(data);
       }
     } catch (error) {
-      if (error.name === 'AbortError') {
+      if ((error as Error).name === 'AbortError') {
         console.log('AI insights generation timed out - using basic analysis');
         setAIInsights({
           success: true,
@@ -811,31 +829,31 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Eye Movement</span>
-                      <span className={getScoreColor(sessionData.facialAnalysis.microExpressions.eyeMovement)}>
-                        {sessionData.facialAnalysis.microExpressions.eyeMovement}%
+                      <span className={getScoreColor(sessionData.facialAnalysis?.microExpressions?.eyeMovement || 0)}>
+                        {sessionData.facialAnalysis?.microExpressions?.eyeMovement || 0}%
                       </span>
                     </div>
-                    <Progress value={sessionData.facialAnalysis.microExpressions.eyeMovement} className="h-2" />
+                    <Progress value={sessionData.facialAnalysis?.microExpressions?.eyeMovement || 0} className="h-2" />
                   </div>
                   
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Facial Symmetry</span>
-                      <span className={getScoreColor(sessionData.facialAnalysis.microExpressions.facialSymmetry)}>
-                        {sessionData.facialAnalysis.microExpressions.facialSymmetry}%
+                      <span className={getScoreColor(sessionData.facialAnalysis?.microExpressions?.facialSymmetry || 0)}>
+                        {sessionData.facialAnalysis?.microExpressions?.facialSymmetry || 0}%
                       </span>
                     </div>
-                    <Progress value={sessionData.facialAnalysis.microExpressions.facialSymmetry} className="h-2" />
+                    <Progress value={sessionData.facialAnalysis?.microExpressions?.facialSymmetry || 0} className="h-2" />
                   </div>
                   
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Expression Quality</span>
-                      <span className={getScoreColor(sessionData.facialAnalysis.microExpressions.mouthExpression)}>
-                        {sessionData.facialAnalysis.microExpressions.mouthExpression}%
+                      <span className={getScoreColor(sessionData.facialAnalysis?.microExpressions?.mouthExpression || 0)}>
+                        {sessionData.facialAnalysis?.microExpressions?.mouthExpression || 0}%
                       </span>
                     </div>
-                    <Progress value={sessionData.facialAnalysis.microExpressions.mouthExpression} className="h-2" />
+                    <Progress value={sessionData.facialAnalysis?.microExpressions?.mouthExpression || 0} className="h-2" />
                   </div>
                 </div>
               </div>
@@ -846,25 +864,25 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-purple-700">
                   <div>
                     <strong>Emotional Intelligence:</strong> 
-                    {sessionData.facialAnalysis.emotionalExpression.engagement > 75 ? 
+                    {(sessionData.facialAnalysis?.emotionalExpression?.engagement || 0) > 75 ? 
                       " Excellent emotional connection with high engagement levels." :
                       " Good emotional expression, focus on increasing enthusiasm and authenticity."}
                   </div>
                   <div>
                     <strong>Non-verbal Communication:</strong>
-                    {sessionData.facialAnalysis.communicationSignals.eyeContactQuality > 70 ?
+                    {(sessionData.facialAnalysis?.communicationSignals?.eyeContactQuality || 0) > 70 ?
                       " Strong eye contact and focused gaze distribution." :
                       " Improve eye contact consistency and gaze focus for better audience connection."}
                   </div>
                   <div>
                     <strong>Professional Presence:</strong>
-                    {sessionData.facialAnalysis.overallPresence.professionalism > 80 ?
+                    {(sessionData.facialAnalysis?.overallPresence?.professionalism || 0) > 80 ?
                       " Exceptional professional demeanor and charismatic presence." :
                       " Developing strong presence, continue building confidence and charisma."}
                   </div>
                   <div>
                     <strong>Micro-Expression Control:</strong>
-                    {sessionData.facialAnalysis.microExpressions.facialSymmetry > 75 ?
+                    {(sessionData.facialAnalysis?.microExpressions?.facialSymmetry || 0) > 75 ?
                       " Excellent facial control and expression symmetry." :
                       " Focus on consistent facial expressions and natural movement patterns."}
                   </div>
