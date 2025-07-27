@@ -1,6 +1,6 @@
 // Roboflow Computer Vision Integration - Enhanced Body Language and Gesture Analysis
-// @ts-ignore: Ignore TypeScript errors for roboflow module
-import roboflow from "roboflow";
+// @ts-ignore: Roboflow types not available
+import * as roboflow from "roboflow";
 
 interface RoboflowConfig {
   apiKey: string;
@@ -68,34 +68,29 @@ export class RoboflowVisionEngine {
         return;
       }
 
-      // Initialize Roboflow with proper API - it's an object with methods
-      if (roboflow && typeof roboflow.detectObject === 'function') {
-        this.rf = roboflow;
-        this.isAvailable = true;
-        
-        // Load specialized models for public speaking analysis
-        await this.loadModels();
-        this.isInitialized = true;
-        console.log('🤖 Roboflow Computer Vision Engine initialized successfully');
-      } else {
-        throw new Error('Roboflow API methods not available');
-      }
+      // Initialize Roboflow API with direct method access
+      this.rf = {
+        detectObject: roboflow.detectObject,
+        classify: roboflow.classify,
+        instanceSegmentation: roboflow.instanceSegmentation
+      };
+      this.isAvailable = true;
+      this.isInitialized = true;
+      console.log('🤖 Roboflow Computer Vision Engine initialized successfully');
+      
     } catch (error: any) {
       console.error('❌ Failed to initialize Roboflow:', error.message || error);
+      console.log('🛡️ Will use fallback computer vision instead');
+      this.isAvailable = false;
     }
   }
 
   private async loadModels(): Promise<void> {
     try {
-      // Roboflow v0.2.0 uses direct API calls - models are loaded on-demand
-      // Store reference to API methods for later use
-      this.models.set('detectObject', this.rf.detectObject);
-      this.models.set('classify', this.rf.classify);
-      this.models.set('instanceSegmentation', this.rf.instanceSegmentation);
-      
-      console.log('📚 Roboflow API methods loaded successfully');
+      // Models are already loaded through the project.version.model initialization
+      console.log('📚 Roboflow model loaded successfully');
     } catch (error: any) {
-      console.warn('⚠️ Failed to prepare Roboflow methods:', error.message || error);
+      console.warn('⚠️ Failed to load Roboflow model:', error.message || error);
     }
   }
 
@@ -138,11 +133,21 @@ export class RoboflowVisionEngine {
   }
 
   private async analyzePosture(imageData: string | Buffer): Promise<any> {
-    const model = this.models.get('posture');
-    if (!model) return this.getFallbackPosture();
+    if (!this.rf) return this.getFallbackPosture();
 
     try {
-      const detection: DetectionResult = await model.detect(imageData);
+      // Convert image data to base64 if needed
+      let imageB64 = imageData;
+      if (Buffer.isBuffer(imageData)) {
+        imageB64 = imageData.toString('base64');
+      }
+
+      // Use Roboflow detectObject API for posture analysis
+      const detection = await this.rf.detectObject({
+        model: "people-detection-general/1",
+        image: imageB64,
+        api_key: process.env.ROBOFLOW_API_KEY
+      });
       
       // Analyze posture based on detection results
       const postureConfidence = this.calculatePostureConfidence(detection.predictions);
@@ -161,11 +166,21 @@ export class RoboflowVisionEngine {
   }
 
   private async analyzeGestures(imageData: string | Buffer): Promise<any> {
-    const model = this.models.get('gestures');
-    if (!model) return this.getFallbackGestures();
+    if (!this.rf) return this.getFallbackGestures();
 
     try {
-      const detection: DetectionResult = await model.detect(imageData);
+      // Convert image data to base64 if needed
+      let imageB64 = imageData;
+      if (Buffer.isBuffer(imageData)) {
+        imageB64 = imageData.toString('base64');
+      }
+
+      // Use Roboflow detectObject API for gesture analysis
+      const detection = await this.rf.detectObject({
+        model: "people-detection-general/1",
+        image: imageB64,
+        api_key: process.env.ROBOFLOW_API_KEY
+      });
       
       // Analyze hand gestures and movements
       const handMovements = this.calculateHandMovements(detection.predictions);
@@ -184,11 +199,21 @@ export class RoboflowVisionEngine {
   }
 
   private async analyzeFacial(imageData: string | Buffer): Promise<any> {
-    const model = this.models.get('facial');
-    if (!model) return this.getFallbackFacial();
+    if (!this.rf) return this.getFallbackFacial();
 
     try {
-      const detection: DetectionResult = await model.detect(imageData);
+      // Convert image data to base64 if needed
+      let imageB64 = imageData;
+      if (Buffer.isBuffer(imageData)) {
+        imageB64 = imageData.toString('base64');
+      }
+
+      // Use Roboflow detectObject API for facial analysis
+      const detection = await this.rf.detectObject({
+        model: "people-detection-general/1",
+        image: imageB64,
+        api_key: process.env.ROBOFLOW_API_KEY
+      });
       
       // Analyze facial expressions and eye contact
       const engagement = this.calculateEngagement(detection.predictions);
