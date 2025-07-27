@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { 
   Users, 
   Eye, 
-  Move3D, 
   Activity, 
   Target,
   AlertCircle,
@@ -25,7 +24,7 @@ interface BodyLanguageMetrics {
   facialExpression: string;
   headMovement: number;
   shoulderPosition: string;
-  armGestures: number;
+
   handPosition: string;
   stanceStability: number;
   weightShifting: number;
@@ -34,7 +33,7 @@ interface BodyLanguageMetrics {
   energyLevel: string;
   proximityToAudience: string;
   confidenceSignals: number;
-  gestureVariety: number;
+
   facialEngagement: number;
   postureAlignment: number;
   movementPurpose: number;
@@ -289,25 +288,7 @@ export default function BodyLanguageAnalyzer() {
           </CardContent>
         </Card>
 
-        {/* Gesture & Movement Analysis */}
-        <Card className="bg-surface rounded-xl shadow-sm border border-gray-200">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Move3D className="w-5 h-5 text-green-600" />
-              <span>Gestures & Movement</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium">Arm Gesture Frequency</span>
-                <Badge className={`${getScoreBg(metrics.armGestures)} ${getScoreColor(metrics.armGestures)} border-0`}>
-                  {Math.round(metrics.armGestures)}%
-                </Badge>
-              </div>
-              <Progress value={metrics.armGestures} className="h-2" />
-              <p className="text-xs text-gray-600">{getRecommendation('armGestures', metrics.armGestures)}</p>
-            </div>
+
 
             <div className="space-y-3">
               <div className="flex justify-between items-center">

@@ -157,40 +157,7 @@ export function useMediaPipeBodyLanguage() {
     }
   }, []);
 
-  // Calculate gesture metrics from hand landmarks
-  const calculateGestureMetrics = useCallback((handLandmarks: any[]) => {
-    if (!handLandmarks || handLandmarks.length === 0) {
-      return { handMovements: 0, naturalness: 0, effectiveness: 0, timing: 0 };
-    }
 
-    try {
-      // Basic gesture analysis
-      const handsDetected = handLandmarks.length;
-      const movementScore = Math.min(100, handsDetected * 50); // More hands = more movement
-      
-      // Calculate naturalness based on hand position relative to body
-      let naturalness = 0;
-      handLandmarks.forEach(hand => {
-        if (hand.landmarks && hand.landmarks.length > 0) {
-          const wrist = hand.landmarks[0]; // Wrist landmark
-          // Natural position is within reasonable bounds (not too high/low)
-          if (wrist.y > 0.3 && wrist.y < 0.8) {
-            naturalness += 50;
-          }
-        }
-      });
-
-      return {
-        handMovements: Math.round(movementScore),
-        naturalness: Math.round(Math.min(100, naturalness)),
-        effectiveness: Math.round(Math.min(100, movementScore * 0.8)),
-        timing: Math.round(Math.min(100, movementScore * 0.9))
-      };
-    } catch (error) {
-      console.warn('⚠️ Error calculating gesture metrics:', error);
-      return { handMovements: 0, naturalness: 0, effectiveness: 0, timing: 0 };
-    }
-  }, []);
 
   // Calculate eye contact metrics (simplified for pose detection)
   const calculateEyeContactMetrics = useCallback((poseLandmarks: any[]) => {

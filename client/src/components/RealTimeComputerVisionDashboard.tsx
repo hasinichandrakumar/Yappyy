@@ -7,7 +7,6 @@ import { Activity, Eye, User, Smile, TrendingUp } from 'lucide-react';
 interface ComputerVisionDashboardProps {
   // MediaPipe Holistic data
   mediaPipePosture: number | null;
-  mediaPipeGesture: number | null;
   mediaPipeEyeContact: number | null;
   isMediaPipeInitialized: boolean;
   
@@ -26,7 +25,6 @@ interface ComputerVisionDashboardProps {
 
 export default function RealTimeComputerVisionDashboard({
   mediaPipePosture,
-  mediaPipeGesture,
   mediaPipeEyeContact,
   isMediaPipeInitialized,
   bodyLanguageMetrics,
@@ -133,28 +131,7 @@ export default function RealTimeComputerVisionDashboard({
               </div>
             )}
             
-            {/* Gesture Effectiveness */}
-            {(mediaPipeGesture !== null || bodyLanguageMetrics?.gestures || roboflowAnalysis?.gestures) && (
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm font-medium flex items-center gap-1">
-                    <TrendingUp className="w-4 h-4" />
-                    Gestures
-                  </span>
-                  <span className="text-sm text-gray-600">
-                    {Math.round(mediaPipeGesture || 
-                      bodyLanguageMetrics?.gestures?.naturalness || 
-                      roboflowAnalysis?.gestures?.effectiveness || 0)}%
-                  </span>
-                </div>
-                <Progress 
-                  value={mediaPipeGesture || 
-                    bodyLanguageMetrics?.gestures?.naturalness || 
-                    roboflowAnalysis?.gestures?.effectiveness || 0}
-                  className="h-2"
-                />
-              </div>
-            )}
+
             
             {/* Facial Expression */}
             {facialAnalysis?.facialMetrics?.emotionalExpression && (

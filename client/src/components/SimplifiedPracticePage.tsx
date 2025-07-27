@@ -26,6 +26,7 @@ import SessionAnalysisPage from './SessionAnalysisPage';
 import VideoPlaybackViewer from './VideoPlaybackViewer';
 import RecordingLibrary from './RecordingLibrary';
 import RealTimeComputerVisionDashboard from './RealTimeComputerVisionDashboard';
+import AuthenticPostureDisplay from './AuthenticPostureDisplay';
 import { 
   videoRecordingManager, 
   sessionRecordingStorage, 
@@ -52,7 +53,6 @@ interface SimplifiedMetrics {
   };
   bodyLanguage: {
     eyeContactScore: number;
-    gestureEffectiveness: number;
     postureConfidence: number;
     facialExpressions: number;
     overallPresence: number;
@@ -1568,7 +1568,6 @@ export default function SimplifiedPracticePage() {
             },
             bodyLanguage: {
               eyeContactScore: 0,
-              gestureEffectiveness: 0,
               postureConfidence: 0,
               facialExpressions: 0,
               overallPresence: 0
@@ -1851,7 +1850,6 @@ export default function SimplifiedPracticePage() {
             {/* Computer Vision Dashboard */}
             <RealTimeComputerVisionDashboard
               mediaPipePosture={computerVisionMetrics?.posture || 0}
-              mediaPipeGesture={computerVisionMetrics?.gesture || 0}
               mediaPipeEyeContact={computerVisionMetrics?.eyeContact || 0}
               isMediaPipeInitialized={isComputerVisionInitialized}
               bodyLanguageMetrics={computerVisionMetrics}
@@ -1860,6 +1858,12 @@ export default function SimplifiedPracticePage() {
               isFacialAnalysisActive={isFacialAnalysisActive}
               roboflowAnalysis={roboflowAnalysis}
               isRoboflowAnalyzing={isRoboflowAnalyzing}
+            />
+
+            {/* Authentic Posture Display */}
+            <AuthenticPostureDisplay 
+              isRecording={isRecording}
+              className="border-2 border-green-200"
             />
 
             {/* Live Feedback Insights */}
