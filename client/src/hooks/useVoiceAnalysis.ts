@@ -78,44 +78,193 @@ export function useVoiceAnalysis(): VoiceAnalysisResult {
       return;
     }
 
-    // Get frequency data with faster processing
+    // Get frequency data
     analyserRef.current.getByteFrequencyData(dataArrayRef.current);
     
-    // Calculate metrics with optimized algorithms
-    const volume = calculateVolumeFast(dataArrayRef.current);
-    const pitchData = calculatePitchFast(dataArrayRef.current);
-    const confidence = calculateConfidenceFast(volume, pitchData.frequency);
-    const voiceStability = calculateStabilityFast();
-    const articulation = calculateArticulationScore(dataArrayRef.current, volume, pitchData);
-    const speechClarity = calculateSpeechClarityIndex(dataArrayRef.current, articulation);
+    // Calculate real voice metrics from audio data
+    const volume = calculateVolumeLevel(dataArrayRef.current);
+    const pitchData = calculatePitchDetection(dataArrayRef.current);
+    const clarity = calculateVoiceClarity(dataArrayRef.current, volume);
+    const confidence = calculateConfidenceFromVoice(volume, pitchData.frequency, clarity);
+    const voiceStability = calculateVoiceStability();
+    const articulation = calculateArticulationFromSpectrum(dataArrayRef.current);
+    const speechClarity = calculateSpeechClarityFromAudio(dataArrayRef.current, articulation);
     
-    // Update states immediately for faster UI response
-    setVolumeLevel(volume);
-    setPitch(pitchData.frequency);
-    setVoiceClarity(pitchData.clarity);
-    setConfidenceScore(confidence);
-    setStability(voiceStability);
-    setArticulationScore(articulation);
-    setSpeechClarityIndex(speechClarity);
+    // Update voice metrics with real audio analysis
+    setVolumeLevel(Math.round(volume));
+    setPitch(Math.round(pitchData.frequency));
+    setVoiceClarity(Math.round(clarity));
+    setConfidenceScore(Math.round(confidence));
+    setStability(Math.round(voiceStability));
+    setArticulationScore(Math.round(articulation));
+    setSpeechClarityIndex(Math.round(speechClarity));
 
-    // Update history less frequently to reduce overhead
-    if (Date.now() % 3 === 0) { // Update history every 3rd frame
-      updateHistory(volume, pitchData.frequency);
-    }
+    // Update history for stability calculation
+    updateHistory(volume, pitchData.frequency);
 
-    // Continue analysis with reduced frequency for better performance
+    // Continue analysis
     animationFrameRef.current = requestAnimationFrame(analyzeAudio);
   };
 
-  // Fast optimized calculation methods
-  const calculateVolumeFast = (dataArray: Uint8Array): number => {
+  // Real audio analysis calculation methods
+  const calculateVolumeLevel = (dataArray: Uint8Array): number => {
     let sum = 0;
-    // Sample every 4th element for speed
-    for (let i = 0; i < dataArray.length; i += 4) {
+    for (let i = 0; i < dataArray.length; i++) {
       sum += dataArray[i];
     }
-    const average = sum / (dataArray.length / 4);
-    return Math.min(100, (average / 128) * 100);
+    const average = sum / dataArray.length;
+    const volumeLevel = Math.min(100, (average / 128) * 100);
+    
+    // Only return volume when actually detected
+    return volumeLevel > 5 ? volumeLevel : 0;
+  };
+
+  const calculatePitchDetection = (dataArray: Uint8Array): { frequency: number; clarity: number } => {
+    // Find peak frequency using simple peak detection
+    let maxValue = 0;
+    let maxIndex = 0;
+    
+    // Focus on human speech range (80-500 Hz)
+    const minBin = Math.floor((80 * dataArray.length * 2) / (audioContextRef.current?.sampleRate || 44100));
+    const maxBin = Math.floor((500 * dataArray.length * 2) / (audioContextRef.current?.sampleRate || 44100));
+    
+    for (let i = minBin; i < Math.min(maxBin, dataArray.length); i++) {
+      if (dataArray[i] > maxValue) {
+        maxValue = dataArray[i];
+        maxIndex = i;
+      }
+    }
+    
+    const sampleRate = audioContextRef.current?.sampleRate || 44100;
+    const frequency = (maxIndex * sampleRate) / (2 * dataArray.length);
+    const clarity = Math.min(100, (maxValue / 255) * 100);
+    
+    return { 
+      frequency: frequency > 50 ? frequency : 0, 
+      clarity: maxValue > 30 ? clarity : 0
+    };
+  };
+
+  const calculateVoiceClarity = (dataArray: Uint8Array, volume: number): number => {
+    if (volume < 10) return 0;
+    
+    // Calculate spectral clarity - higher frequencies indicate clearer consonants
+    let highFreqEnergy = 0;
+    let totalEnergy = 0;
+    
+    for (let i = 0; i < dataArray.length; i++) {
+      totalEnergy += dataArray[i];
+      if (i > dataArray.length * 0.3) { // Higher frequency bins
+        highFreqEnergy += dataArray[i];
+      }
+    }
+    
+    const clarityRatio = totalEnergy > 0 ? (highFreqEnergy / totalEnergy) : 0;
+    return Math.min(100, clarityRatio * 200); // Scale to 0-100
+  };
+
+  const calculateConfidenceFromVoice = (volume: number, pitch: number, clarity: number): number => {
+    if (volume < 10) return 0;
+    
+    // Voice confidence based on stable volume, reasonable pitch, and clarity
+    const volumeScore = Math.min(100, volume);
+    const pitchScore = (pitch > 80 && pitch < 400) ? 100 : 50;
+    const clarityScore = clarity;
+    
+    return Math.round((volumeScore * 0.4 + pitchScore * 0.3 + clarityScore * 0.3));
+  };
+
+  const calculateVoiceStability = (): number => {
+    const pitchHistory = pitchHistoryRef.current;
+    const volumeHistory = volumeHistoryRef.current;
+    
+    if (pitchHistory.length < 5 || volumeHistory.length < 5) return 0;
+    
+    // Calculate variance in pitch and volume
+    const pitchVariance = calculateVariance(pitchHistory.slice(-10));
+    const volumeVariance = calculateVariance(volumeHistory.slice(-10));
+    
+    // Lower variance = higher stability
+    const pitchStability = Math.max(0, 100 - pitchVariance);
+    const volumeStability = Math.max(0, 100 - volumeVariance);
+    
+    return Math.round((pitchStability + volumeStability) / 2);
+  };
+
+  const calculateArticulationFromSpectrum = (dataArray: Uint8Array): number => {
+    // Articulation score based on high-frequency content (2-8kHz range for consonants)
+    const sampleRate = audioContextRef.current?.sampleRate || 44100;
+    const binSize = sampleRate / (dataArray.length * 2);
+    
+    let articulationEnergy = 0;
+    let totalEnergy = 0;
+    
+    for (let i = 0; i < dataArray.length; i++) {
+      const freq = i * binSize;
+      totalEnergy += dataArray[i];
+      
+      // Focus on consonant frequency range (2000-8000 Hz)
+      if (freq >= 2000 && freq <= 8000) {
+        articulationEnergy += dataArray[i];
+      }
+    }
+    
+    if (totalEnergy < 50) return 0; // No significant audio
+    
+    const articulationRatio = articulationEnergy / totalEnergy;
+    return Math.min(100, articulationRatio * 300); // Enhanced weighting for articulation
+  };
+
+  const calculateSpeechClarityFromAudio = (dataArray: Uint8Array, articulation: number): number => {
+    if (articulation < 10) return 0;
+    
+    // Speech clarity combines articulation with spectral balance
+    let lowFreqEnergy = 0;
+    let midFreqEnergy = 0;
+    let highFreqEnergy = 0;
+    
+    const third = Math.floor(dataArray.length / 3);
+    
+    for (let i = 0; i < dataArray.length; i++) {
+      if (i < third) {
+        lowFreqEnergy += dataArray[i];
+      } else if (i < third * 2) {
+        midFreqEnergy += dataArray[i];
+      } else {
+        highFreqEnergy += dataArray[i];
+      }
+    }
+    
+    const totalEnergy = lowFreqEnergy + midFreqEnergy + highFreqEnergy;
+    if (totalEnergy < 50) return 0;
+    
+    // Good speech clarity has balanced energy across frequencies
+    const balance = 1 - Math.abs(0.33 - (midFreqEnergy / totalEnergy));
+    const clarityIndex = (articulation * 0.7 + balance * 100 * 0.3);
+    
+    return Math.min(100, clarityIndex);
+  };
+
+  const calculateVariance = (values: number[]): number => {
+    if (values.length === 0) return 0;
+    
+    const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
+    const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
+    
+    return Math.sqrt(variance);
+  };
+
+  const updateHistory = (volume: number, pitch: number): void => {
+    // Keep last 20 values for stability calculation
+    pitchHistoryRef.current.push(pitch);
+    volumeHistoryRef.current.push(volume);
+    
+    if (pitchHistoryRef.current.length > 20) {
+      pitchHistoryRef.current = pitchHistoryRef.current.slice(-20);
+    }
+    if (volumeHistoryRef.current.length > 20) {
+      volumeHistoryRef.current = volumeHistoryRef.current.slice(-20);
+    }
   };
 
   const calculateVolume = (dataArray: Uint8Array): number => {
@@ -417,26 +566,7 @@ export function useVoiceAnalysis(): VoiceAnalysisResult {
     return (volumeStability + pitchStability) / 2;
   };
 
-  const calculateVariance = (values: number[]): number => {
-    if (values.length === 0) return 0;
-    
-    const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
-    const squaredDifferences = values.map(val => Math.pow(val - mean, 2));
-    return squaredDifferences.reduce((sum, val) => sum + val, 0) / values.length;
-  };
 
-  const updateHistory = (volume: number, pitch: number) => {
-    volumeHistoryRef.current.push(volume);
-    pitchHistoryRef.current.push(pitch);
-
-    // Keep only last 50 samples (about 2-3 seconds at 60fps)
-    if (volumeHistoryRef.current.length > 50) {
-      volumeHistoryRef.current.shift();
-    }
-    if (pitchHistoryRef.current.length > 50) {
-      pitchHistoryRef.current.shift();
-    }
-  };
 
   const cleanup = () => {
     if (animationFrameRef.current) {
