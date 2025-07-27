@@ -91,7 +91,7 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
     overallPerformance: typeof sessionData.overallPerformance === 'number' ? 
       Math.round(sessionData.overallPerformance > 1 ? sessionData.overallPerformance : sessionData.overallPerformance * 100) : 
       // Only use computer vision if it has real data (not 0)
-      (sessionData.facialAnalysis?.emotionalExpression?.confidence > 0 ? sessionData.facialAnalysis.emotionalExpression.confidence : 0),
+      (sessionData.facialAnalysis?.emotionalExpression?.confidence && sessionData.facialAnalysis.emotionalExpression.confidence > 0 ? sessionData.facialAnalysis.emotionalExpression.confidence : 0),
     clarityScore: typeof sessionData.clarityScore === 'number' ? 
       Math.round(sessionData.clarityScore > 1 ? sessionData.clarityScore : sessionData.clarityScore * 100) : 
       // Use voice consistency as clarity metric if available
