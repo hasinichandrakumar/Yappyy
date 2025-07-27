@@ -42,8 +42,10 @@ import { enhancedVoiceSynthesis } from "./enhanced-voice-synthesis";
 import { webrtcIntegration } from "./webrtc-integration";
 import { advancedComputerVision } from "./advanced-computer-vision";
 import { enhancedNeuralPipeline } from "./enhanced-neural-pipeline";
-import { roboflowVision, analyzeVideoFrame as roboflowAnalyzeFrame, trainCustomVisionModel } from './roboflow-computer-vision';
+import { RoboflowVisionEngine, roboflowVision, analyzeVideoFrame as roboflowAnalyzeFrame, trainCustomVisionModel } from './roboflow-computer-vision';
 import { huggingFaceCV } from './huggingface-computer-vision';
+import { mediaPipeEngine } from './mediapipe-computer-vision';
+import { openCVEngine } from './opencv-computer-vision';
 import { speechEmotionRecognition } from './speech-emotion-recognition';
 import { alternativeSpeechAPIs } from './alternative-speech-apis';
 import { facialExpressionAnalysis } from './facial-expression-analysis';
@@ -79,6 +81,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Initialize Enhanced Real-Time Processing Engine
   const processingEngine = new RealTimeProcessingEngine();
+
+  // Initialize Computer Vision Engines at the module level
+  let roboflowEngine: any = null;
+  try {
+    roboflowEngine = new RoboflowVisionEngine();
+    console.log('✅ Roboflow engine initialization attempted');
+  } catch (error) {
+    console.log('⚠️ Roboflow engine initialization failed:', error.message);
+    roboflowEngine = { 
+      analyzeBodyLanguage: () => Promise.resolve(null),
+      getStatus: () => ({ available: false, initialized: false, engine: 'Roboflow', error: error.message })
+    };
+  }
   
   // Setup Google OAuth Authentication (primary and only auth system)
   await setupGoogleAuth(app);
@@ -5022,6 +5037,8 @@ Respond with detailed analysis in JSON format:
     return Math.min(1, textureScore / 5000);
   }
 
+
+
   // New enhanced computer vision endpoint for maximum authentic data
   app.post("/api/maximum-authentic-analysis", async (req, res) => {
     try {
@@ -5035,21 +5052,53 @@ Respond with detailed analysis in JSON format:
         authenticDataFound: false
       };
 
-      // Multi-source computer vision analysis
+      // Multi-source computer vision analysis with comprehensive alternatives
       if (imageData) {
+        console.log('🔍 Attempting multiple computer vision engines for maximum authentic data...');
         const visionPromises = [
-          roboflowEngine.analyzeBodyLanguage(imageData).catch(() => null),
-          performEnhancedLocalAnalysis(imageData).catch(() => null),
-          performTensorFlowAnalysis(imageData).catch(() => null)
+          // Primary: Roboflow (if working)
+          roboflowEngine.analyzeBodyLanguage(imageData).catch(() => {
+            console.log('⚠️ Roboflow unavailable, trying alternatives...');
+            return null;
+          }),
+          // Alternative 1: MediaPipe Engine
+          mediaPipeEngine.analyzeFrame(imageData).catch(() => {
+            console.log('⚠️ MediaPipe unavailable, trying next...');
+            return null;
+          }),
+          // Alternative 2: OpenCV Engine
+          openCVEngine.analyzeBodyLanguage(imageData).catch(() => {
+            console.log('⚠️ OpenCV unavailable, trying next...');
+            return null;
+          }),
+          // Alternative 3: Enhanced local analysis
+          performEnhancedLocalAnalysis(imageData).catch(() => {
+            console.log('⚠️ Enhanced local analysis unavailable...');
+            return null;
+          }),
+          // Alternative 4: TensorFlow.js analysis
+          performTensorFlowAnalysis(imageData).catch(() => {
+            console.log('⚠️ TensorFlow analysis unavailable...');
+            return null;
+          })
         ];
 
         const visionResults = await Promise.allSettled(visionPromises);
-        for (const result of visionResults) {
+        
+        for (let i = 0; i < visionResults.length; i++) {
+          const result = visionResults[i];
+          const engines = ['Roboflow', 'MediaPipe', 'OpenCV', 'Enhanced-Local', 'TensorFlow.js'];
+          
           if (result.status === 'fulfilled' && result.value) {
             results.vision = result.value;
             results.authenticDataFound = true;
+            console.log(`✅ Computer vision successful using ${engines[i]} engine`);
             break;
           }
+        }
+        
+        if (!results.authenticDataFound) {
+          console.log('❌ All computer vision engines failed to provide authentic data');
         }
       }
 
@@ -5078,19 +5127,21 @@ Respond with detailed analysis in JSON format:
       }
 
       if (results.authenticDataFound) {
-        console.log('✅ Maximum authentic data extraction successful');
+        console.log('🚀 Maximum authentic data extraction successful');
         res.json({
           success: true,
           results,
           timestamp: Date.now(),
-          source: 'maximum-authentic-extraction'
+          source: 'maximum-authentic-extraction',
+          availableEngines: ['Roboflow', 'MediaPipe', 'OpenCV', 'Enhanced-Local', 'TensorFlow.js']
         });
       } else {
-        console.log('⚠️ No authentic data sources available');
+        console.log('⚠️ No authentic data sources available from any engine');
         res.json({
           success: false,
           results: null,
-          message: 'No authentic computer vision or audio data available'
+          message: 'No authentic computer vision or audio data available from any source',
+          testedEngines: ['Roboflow', 'MediaPipe', 'OpenCV', 'Enhanced-Local', 'TensorFlow.js']
         });
       }
     } catch (error) {
@@ -5098,6 +5149,48 @@ Respond with detailed analysis in JSON format:
       res.status(500).json({ 
         success: false, 
         error: error.message
+      });
+    }
+  });
+
+  // Computer Vision Status Endpoint - Check which engines are working
+  app.get("/api/computer-vision-status", async (req, res) => {
+    try {
+      console.log('🔍 Checking computer vision engine status...');
+      
+      const engineStatuses = {
+        roboflow: roboflowEngine?.getStatus() || { available: false, initialized: false, engine: 'Roboflow' },
+        mediapipe: mediaPipeEngine.getStatus(),
+        opencv: openCVEngine.getStatus(),
+        enhancedLocal: { available: true, initialized: true, engine: 'Enhanced-Local' },
+        tensorflow: { available: true, initialized: true, engine: 'TensorFlow.js' }
+      };
+
+      const availableEngines = Object.entries(engineStatuses)
+        .filter(([_, status]) => status.available && status.initialized)
+        .map(([name, status]) => ({ name, engine: status.engine }));
+
+      const workingCount = availableEngines.length;
+      
+      console.log(`✅ Computer vision status: ${workingCount}/5 engines available`);
+      
+      res.json({
+        success: true,
+        totalEngines: 5,
+        workingEngines: workingCount,
+        availableEngines,
+        engineStatuses,
+        recommendation: workingCount > 0 ? 
+          `${workingCount} computer vision engines available for maximum authentic data` :
+          'No computer vision engines available - check API keys and connections',
+        timestamp: Date.now()
+      });
+    } catch (error) {
+      console.error('❌ Computer vision status check failed:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: error.message,
+        workingEngines: 0
       });
     }
   });

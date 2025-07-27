@@ -1,6 +1,6 @@
 // Roboflow Computer Vision Integration - Enhanced Body Language and Gesture Analysis
 // @ts-ignore: Roboflow types not available
-import * as roboflow from "roboflow";
+import roboflow from "roboflow";
 
 interface RoboflowConfig {
   apiKey: string;
@@ -72,7 +72,7 @@ export class RoboflowVisionEngine {
       console.log('🔌 Initializing Roboflow with API key...');
       
       // Initialize Roboflow with proper API connection
-      this.rf = await roboflow.auth({
+      this.rf = roboflow({
         publishable_key: process.env.ROBOFLOW_API_KEY
       });
 
