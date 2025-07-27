@@ -149,56 +149,92 @@ export default function DetailedAnalysisWithSession() {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="flex items-center gap-2">
-                        <User className="h-4 w-4" />
-                        Posture Score
-                      </span>
-                      <Badge variant={metrics.bodyLanguage.postureScore >= 80 ? "default" : "secondary"}>
-                        {metrics.bodyLanguage.postureScore}%
-                      </Badge>
-                    </div>
-                    <Progress value={metrics.bodyLanguage.postureScore} className="h-2" />
+                    {/* Only show metrics with authentic data (> 0) */}
+                    {metrics.bodyLanguage.postureScore && metrics.bodyLanguage.postureScore > 0 && (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <span className="flex items-center gap-2">
+                            <User className="h-4 w-4" />
+                            Posture Score
+                          </span>
+                          <Badge variant={metrics.bodyLanguage.postureScore >= 80 ? "default" : "secondary"}>
+                            {metrics.bodyLanguage.postureScore}%
+                          </Badge>
+                        </div>
+                        <Progress value={metrics.bodyLanguage.postureScore} className="h-2" />
+                      </>
+                    )}
                     
-                    <div className="flex items-center justify-between">
-                      <span className="flex items-center gap-2">
-                        <Hand className="h-4 w-4" />
-                        Gesture Naturalness
-                      </span>
-                      <Badge variant={metrics.bodyLanguage.gestureNaturalness >= 75 ? "default" : "secondary"}>
-                        {metrics.bodyLanguage.gestureNaturalness}%
-                      </Badge>
-                    </div>
-                    <Progress value={metrics.bodyLanguage.gestureNaturalness} className="h-2" />
+                    {metrics.bodyLanguage.gestureNaturalness && metrics.bodyLanguage.gestureNaturalness > 0 && (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <span className="flex items-center gap-2">
+                            <Hand className="h-4 w-4" />
+                            Gesture Naturalness
+                          </span>
+                          <Badge variant={metrics.bodyLanguage.gestureNaturalness >= 75 ? "default" : "secondary"}>
+                            {metrics.bodyLanguage.gestureNaturalness}%
+                          </Badge>
+                        </div>
+                        <Progress value={metrics.bodyLanguage.gestureNaturalness} className="h-2" />
+                      </>
+                    )}
                     
-                    <div className="flex items-center justify-between">
-                      <span className="flex items-center gap-2">
-                        <Eye className="h-4 w-4" />
-                        Eye Contact
-                      </span>
-                      <Badge variant={metrics.bodyLanguage.eyeContactScore >= 75 ? "default" : "secondary"}>
-                        {metrics.bodyLanguage.eyeContactScore}%
-                      </Badge>
-                    </div>
-                    <Progress value={metrics.bodyLanguage.eyeContactScore} className="h-2" />
+                    {metrics.bodyLanguage.eyeContactScore && metrics.bodyLanguage.eyeContactScore > 0 && (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <span className="flex items-center gap-2">
+                            <Eye className="h-4 w-4" />
+                            Eye Contact
+                          </span>
+                          <Badge variant={metrics.bodyLanguage.eyeContactScore >= 75 ? "default" : "secondary"}>
+                            {metrics.bodyLanguage.eyeContactScore}%
+                          </Badge>
+                        </div>
+                        <Progress value={metrics.bodyLanguage.eyeContactScore} className="h-2" />
+                      </>
+                    )}
+                    
+                    {/* Show message when no body language data available */}
+                    {(!metrics.bodyLanguage.postureScore || metrics.bodyLanguage.postureScore === 0) &&
+                     (!metrics.bodyLanguage.gestureNaturalness || metrics.bodyLanguage.gestureNaturalness === 0) &&
+                     (!metrics.bodyLanguage.eyeContactScore || metrics.bodyLanguage.eyeContactScore === 0) && (
+                      <div className="text-center py-8 text-gray-500">
+                        <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                        <p className="text-lg font-medium mb-2">No Body Language Data</p>
+                        <p className="text-sm">Computer vision analysis requires camera access during recording</p>
+                      </div>
+                    )}
                   </div>
                   
                   <div className="space-y-4">
-                    <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg">
-                      <div className="text-3xl font-bold text-blue-600 mb-2">
-                        {metrics.bodyLanguage.overallBodyLanguage}%
+                    {/* Only show overall score if we have authentic body language data */}
+                    {metrics.bodyLanguage.overallBodyLanguage && metrics.bodyLanguage.overallBodyLanguage > 0 && (
+                      <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg">
+                        <div className="text-3xl font-bold text-blue-600 mb-2">
+                          {Math.round(metrics.bodyLanguage.overallBodyLanguage)}%
+                        </div>
+                        <div className="text-sm text-gray-600">Overall Body Language Score</div>
                       </div>
-                      <div className="text-sm text-gray-600">Overall Body Language Score</div>
-                    </div>
+                    )}
                     
-                    <div className="space-y-2">
-                      <h4 className="font-semibold">Key Observations:</h4>
-                      <ul className="text-sm space-y-1 text-gray-600">
-                        <li>• {metrics.bodyLanguage.postureScore >= 85 ? "Excellent posture maintained" : "Focus on maintaining upright posture"}</li>
-                        <li>• {metrics.bodyLanguage.gestureNaturalness >= 80 ? "Natural, expressive gestures" : "Work on more natural hand movements"}</li>
-                        <li>• {metrics.bodyLanguage.eyeContactScore >= 80 ? "Strong audience connection" : "Increase eye contact with audience"}</li>
-                      </ul>
-                    </div>
+                    {/* Only show observations if we have actual data */}
+                    {(metrics.bodyLanguage.postureScore > 0 || metrics.bodyLanguage.gestureNaturalness > 0 || metrics.bodyLanguage.eyeContactScore > 0) && (
+                      <div className="space-y-2">
+                        <h4 className="font-semibold">Key Observations:</h4>
+                        <ul className="text-sm space-y-1 text-gray-600">
+                          {metrics.bodyLanguage.postureScore > 0 && (
+                            <li>• {metrics.bodyLanguage.postureScore >= 85 ? "Excellent posture maintained" : "Focus on maintaining upright posture"}</li>
+                          )}
+                          {metrics.bodyLanguage.gestureNaturalness > 0 && (
+                            <li>• {metrics.bodyLanguage.gestureNaturalness >= 80 ? "Natural, expressive gestures" : "Work on more natural hand movements"}</li>
+                          )}
+                          {metrics.bodyLanguage.eyeContactScore > 0 && (
+                            <li>• {metrics.bodyLanguage.eyeContactScore >= 80 ? "Strong audience connection" : "Increase eye contact with audience"}</li>
+                          )}
+                        </ul>
+                      </div>
+                    )}
                   </div>
                 </div>
               </CardContent>
@@ -216,37 +252,65 @@ export default function DetailedAnalysisWithSession() {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span>Voice Clarity</span>
-                      <Badge variant={metrics.voice.clarity >= 85 ? "default" : "secondary"}>
-                        {metrics.voice.clarity}%
-                      </Badge>
-                    </div>
-                    <Progress value={metrics.voice.clarity} className="h-2" />
+                    {/* Only show voice metrics with authentic data (> 0) */}
+                    {metrics.voice.clarity && metrics.voice.clarity > 0 && (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <span>Voice Clarity</span>
+                          <Badge variant={metrics.voice.clarity >= 85 ? "default" : "secondary"}>
+                            {metrics.voice.clarity}%
+                          </Badge>
+                        </div>
+                        <Progress value={metrics.voice.clarity} className="h-2" />
+                      </>
+                    )}
                     
-                    <div className="flex items-center justify-between">
-                      <span>Speaking Pace</span>
-                      <Badge variant={metrics.voice.pace >= 120 && metrics.voice.pace <= 160 ? "default" : "secondary"}>
-                        {metrics.voice.pace} WPM
-                      </Badge>
-                    </div>
-                    <Progress value={Math.min(100, (metrics.voice.pace / 200) * 100)} className="h-2" />
+                    {metrics.voice.pace && metrics.voice.pace > 0 && (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <span>Speaking Pace</span>
+                          <Badge variant={metrics.voice.pace >= 120 && metrics.voice.pace <= 160 ? "default" : "secondary"}>
+                            {metrics.voice.pace} WPM
+                          </Badge>
+                        </div>
+                        <Progress value={Math.min(100, (metrics.voice.pace / 200) * 100)} className="h-2" />
+                      </>
+                    )}
                     
-                    <div className="flex items-center justify-between">
-                      <span>Volume Consistency</span>
-                      <Badge variant={metrics.voice.volume >= 75 ? "default" : "secondary"}>
-                        {metrics.voice.volume}%
-                      </Badge>
-                    </div>
-                    <Progress value={metrics.voice.volume} className="h-2" />
+                    {metrics.voice.volume && metrics.voice.volume > 0 && (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <span>Volume Consistency</span>
+                          <Badge variant={metrics.voice.volume >= 75 ? "default" : "secondary"}>
+                            {metrics.voice.volume}%
+                          </Badge>
+                        </div>
+                        <Progress value={metrics.voice.volume} className="h-2" />
+                      </>
+                    )}
                     
-                    <div className="flex items-center justify-between">
-                      <span>Intonation Variety</span>
-                      <Badge variant={metrics.voice.intonation >= 70 ? "default" : "secondary"}>
-                        {metrics.voice.intonation}%
-                      </Badge>
-                    </div>
-                    <Progress value={metrics.voice.intonation} className="h-2" />
+                    {metrics.voice.intonation && metrics.voice.intonation > 0 && (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <span>Intonation Variety</span>
+                          <Badge variant={metrics.voice.intonation >= 70 ? "default" : "secondary"}>
+                            {metrics.voice.intonation}%
+                          </Badge>
+                        </div>
+                        <Progress value={metrics.voice.intonation} className="h-2" />
+                      </>
+                    )}
+                    
+                    {/* Show message when no voice analysis data available */}
+                    {(!metrics.voice.clarity || metrics.voice.clarity === 0) &&
+                     (!metrics.voice.volume || metrics.voice.volume === 0) &&
+                     (!metrics.voice.intonation || metrics.voice.intonation === 0) && (
+                      <div className="text-center py-8 text-gray-500">
+                        <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                        <p className="text-lg font-medium mb-2">No Voice Analysis Data</p>
+                        <p className="text-sm">Voice metrics require audio recording and speech processing</p>
+                      </div>
+                    )}
                   </div>
                   
                   <div className="space-y-4">

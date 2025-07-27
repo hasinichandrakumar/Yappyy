@@ -24,7 +24,8 @@ import {
   BarChart3,
   Lightbulb,
   Brain,
-  Zap
+  Zap,
+  AlertCircle
 } from 'lucide-react';
 
 interface SessionData {
@@ -321,7 +322,7 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
           </CardHeader>
         </Card>
 
-        {/* Overall Performance Summary */}
+        {/* Overall Performance Summary - Only show authentic data */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card className={`border-2 ${getScoreBg(normalizedData.overallPerformance)}`}>
             <CardContent className="p-4 text-center">
@@ -373,45 +374,67 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-3">
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>Confidence Level</span>
-                    <span className={getScoreColor(normalizedData.confidenceLevel)}>{normalizedData.confidenceLevel}%</span>
+                {/* Only show metrics with authentic data (> 0) */}
+                {normalizedData.confidenceLevel > 0 && (
+                  <div>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span>Confidence Level</span>
+                      <span className={getScoreColor(normalizedData.confidenceLevel)}>{normalizedData.confidenceLevel}%</span>
+                    </div>
+                    <Progress value={normalizedData.confidenceLevel} className="h-2" />
                   </div>
-                  <Progress value={normalizedData.confidenceLevel} className="h-2" />
-                </div>
+                )}
 
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>Eye Contact</span>
-                    <span className={getScoreColor(normalizedData.eyeContactScore)}>{normalizedData.eyeContactScore}%</span>
+                {normalizedData.eyeContactScore > 0 && (
+                  <div>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span>Eye Contact</span>
+                      <span className={getScoreColor(normalizedData.eyeContactScore)}>{normalizedData.eyeContactScore}%</span>
+                    </div>
+                    <Progress value={normalizedData.eyeContactScore} className="h-2" />
                   </div>
-                  <Progress value={normalizedData.eyeContactScore} className="h-2" />
-                </div>
+                )}
 
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>Clarity & Articulation</span>
-                    <span className={getScoreColor(normalizedData.clarityScore)}>{normalizedData.clarityScore}%</span>
+                {normalizedData.clarityScore > 0 && (
+                  <div>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span>Clarity & Articulation</span>
+                      <span className={getScoreColor(normalizedData.clarityScore)}>{normalizedData.clarityScore}%</span>
+                    </div>
+                    <Progress value={normalizedData.clarityScore} className="h-2" />
                   </div>
-                  <Progress value={normalizedData.clarityScore} className="h-2" />
-                </div>
+                )}
 
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>Engagement Level</span>
-                    <span className={getScoreColor(normalizedData.engagementLevel)}>{normalizedData.engagementLevel}%</span>
+                {normalizedData.engagementLevel > 0 && (
+                  <div>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span>Engagement Level</span>
+                      <span className={getScoreColor(normalizedData.engagementLevel)}>{normalizedData.engagementLevel}%</span>
+                    </div>
+                    <Progress value={normalizedData.engagementLevel} className="h-2" />
                   </div>
-                  <Progress value={normalizedData.engagementLevel} className="h-2" />
-                </div>
+                )}
 
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>Voice Consistency</span>
-                    <span className={getScoreColor(normalizedData.volumeConsistency)}>{normalizedData.volumeConsistency}%</span>
+                {normalizedData.volumeConsistency > 0 && (
+                  <div>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span>Voice Consistency</span>
+                      <span className={getScoreColor(normalizedData.volumeConsistency)}>{normalizedData.volumeConsistency}%</span>
+                    </div>
+                    <Progress value={normalizedData.volumeConsistency} className="h-2" />
                   </div>
-                  <Progress value={normalizedData.volumeConsistency} className="h-2" />
-                </div>
+                )}
+
+                {/* Show message when no authentic computer vision data is available */}
+                {normalizedData.confidenceLevel === 0 && normalizedData.eyeContactScore === 0 && 
+                 normalizedData.clarityScore === 0 && normalizedData.engagementLevel === 0 && 
+                 normalizedData.volumeConsistency === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    <AlertCircle className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                    <p className="text-lg font-medium mb-2">No Computer Vision Data Available</p>
+                    <p className="text-sm">Performance metrics will appear when recording with camera enabled and computer vision active</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
