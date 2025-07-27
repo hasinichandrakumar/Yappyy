@@ -227,12 +227,15 @@ export class RoboflowVisionEngine {
     if (buffer.length === 0) return 0.5;
     
     const frequencies = new Map<number, number>();
-    for (const byte of buffer) {
+    for (let i = 0; i < buffer.length; i++) {
+      const byte = buffer[i];
       frequencies.set(byte, (frequencies.get(byte) || 0) + 1);
     }
     
     let entropy = 0;
-    for (const freq of frequencies.values()) {
+    const freqValues = Array.from(frequencies.values());
+    for (let i = 0; i < freqValues.length; i++) {
+      const freq = freqValues[i];
       const p = freq / buffer.length;
       entropy -= p * Math.log2(p);
     }

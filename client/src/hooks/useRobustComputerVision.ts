@@ -66,10 +66,40 @@ export function useRobustComputerVision() {
     }
   }, [error]);
 
-  // Safe facial analysis with robust error handling
+  // Enhanced body language analysis with proper data extraction
   const analyzeFacialData = useCallback(async (imageData: string): Promise<ComputerVisionMetrics | null> => {
     try {
-      const response = await fetch('/api/facial-analysis/analyze', {
+      // Try enhanced computer vision analysis first
+      const response = await fetch('/api/enhanced-computer-vision', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          imageData: imageData,
+          options: { comprehensive: true, timeout: 8000 }
+        })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('🎭 Enhanced CV Analysis Result:', result);
+        
+        if (result.success && (result.bodyLanguageMetrics || result.metrics)) {
+          const metrics = result.bodyLanguageMetrics || result.metrics;
+          successCount.current++;
+          
+          return {
+            posture: Math.round(metrics.posture?.overallPosture || 0),
+            gesture: Math.round(metrics.gestures?.gestureNaturalness || 0),
+            eyeContact: Math.round(metrics.eyeContact?.eyeContactPercentage || 0),
+            confidence: Math.round(metrics.facialExpression?.confidence || 0),
+            engagement: Math.round(metrics.facialExpression?.engagement || 0),
+            isActive: true
+          };
+        }
+      }
+
+      // Fallback to basic facial analysis
+      const fallbackResponse = await fetch('/api/facial-analysis/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -78,27 +108,27 @@ export function useRobustComputerVision() {
         })
       });
 
-      if (!response.ok) {
-        throw new Error(`Analysis failed: ${response.status}`);
+      if (!fallbackResponse.ok) {
+        throw new Error(`Analysis failed: ${fallbackResponse.status}`);
       }
 
-      const result = await response.json();
+      const fallbackResult = await fallbackResponse.json();
       
-      if (result.success && result.analysis) {
+      if (fallbackResult.success && fallbackResult.analysis) {
         successCount.current++;
         return {
-          posture: Math.round(result.analysis.posture || 0),
-          gesture: Math.round(result.analysis.gesture || 0),
-          eyeContact: Math.round(result.analysis.eyeContact || 0),
-          confidence: Math.round(result.analysis.confidence || 0),
-          engagement: Math.round(result.analysis.engagement || 0),
+          posture: Math.round(fallbackResult.analysis.posture || 0),
+          gesture: Math.round(fallbackResult.analysis.gesture || 0),
+          eyeContact: Math.round(fallbackResult.analysis.eyeContact || 0),
+          confidence: Math.round(fallbackResult.analysis.confidence || 0),
+          engagement: Math.round(fallbackResult.analysis.engagement || 0),
           isActive: true
         };
       }
       
       return null;
     } catch (error: any) {
-      handleError('Facial analysis failed', error);
+      handleError('Body language analysis failed', error);
       return null;
     }
   }, [handleError]);
