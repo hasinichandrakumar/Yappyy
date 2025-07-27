@@ -98,10 +98,16 @@ export class RoboflowVisionEngine {
   }
 
   async analyzeFrame(imageData: string | Buffer): Promise<BodyLanguageMetrics> {
-    // Always provide fallback metrics if Roboflow is not available
-    if (!this.isInitialized || !this.isAvailable) {
-      console.log('🛡️ Using fallback computer vision metrics (Roboflow not available)');
-      return this.getFallbackMetrics();
+    // Enhanced analysis - maximize authentic data extraction
+    if (!this.isInitialized) {
+      console.log('🔄 Initializing enhanced local computer vision for maximum authentic data');
+      await this.initializeRoboflow();
+    }
+
+    // Use enhanced local analysis when Roboflow unavailable
+    if (!this.isAvailable) {
+      console.log('🚀 Using enhanced local computer vision for authentic analysis');
+      return this.getEnhancedLocalAnalysis(imageData);
     }
 
     try {
