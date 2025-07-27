@@ -4,6 +4,7 @@ import { Progress } from "@/components/ui/progress";
 import { Eye, Volume2, Timer, Target, MessageSquare, Mic } from "lucide-react";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { useVoiceAnalysis } from "@/hooks/useVoiceAnalysis";
+import { useRobustComputerVision } from "@/hooks/useRobustComputerVision";
 
 export default function RealTimeMetrics() {
   const { isListening, wordCount } = useSpeechRecognition();
@@ -18,7 +19,14 @@ export default function RealTimeMetrics() {
     updateWordCount 
   } = useVoiceAnalysis();
   
-  const [eyeContact, setEyeContact] = useState(0);
+  // Integrate computer vision for authentic body language metrics
+  const { 
+    metrics: computerVisionMetrics, 
+    startAnalysis: startComputerVision,
+    stopAnalysis: stopComputerVision,
+    isAnalyzing: isComputerVisionActive
+  } = useRobustComputerVision();
+  
   const [sessionTime, setSessionTime] = useState(0);
   const sessionStartRef = useRef<number>(0);
   const [metrics, setMetrics] = useState({
@@ -31,11 +39,12 @@ export default function RealTimeMetrics() {
     speechClarity: 0
   });
 
-  // Start/stop voice analysis and session timing when listening changes
+  // Start/stop voice analysis and computer vision when listening changes
   useEffect(() => {
     if (isListening) {
-      console.log('Starting voice analysis and session timer...');
+      console.log('Starting voice analysis, computer vision, and session timer...');
       startVoiceAnalysis();
+      startComputerVision();
       sessionStartRef.current = Date.now();
       
       // Start session timer
@@ -46,56 +55,44 @@ export default function RealTimeMetrics() {
       
       return () => clearInterval(timerInterval);
     } else {
-      console.log('Stopping voice analysis...');
+      console.log('Stopping voice analysis and computer vision...');
       stopVoiceAnalysis();
+      stopComputerVision();
     }
-  }, [isListening, startVoiceAnalysis, stopVoiceAnalysis]);
+  }, [isListening, startVoiceAnalysis, stopVoiceAnalysis, startComputerVision, stopComputerVision]);
 
   // Update word count in voice analysis
   useEffect(() => {
     updateWordCount(wordCount);
   }, [wordCount, updateWordCount]);
 
-  // Simulate eye contact tracking (would connect to computer vision in real app)
-  useEffect(() => {
-    if (isListening) {
-      const interval = setInterval(() => {
-        setEyeContact(prev => {
-          const newValue = 0; // Only show when real metrics data available
-          return newValue;
-        });
-      }, 1000);
-      return () => clearInterval(interval);
-    }
-  }, [isListening]);
+  // Computer vision integration - no more simulation
+  // Eye contact and body language metrics now come from real computer vision analysis
 
-  // Update metrics based on real speech data with enhanced responsiveness
+  // Update metrics based on real speech and computer vision data
   useEffect(() => {
-    // Enhanced metrics calculation with better real-time responsiveness
+    // Integrate authentic voice analysis and computer vision metrics
     const newMetrics = {
-      eyeContact: Math.round(eyeContact),
-      voiceClarity: Math.round(Math.max(voiceClarity, isListening ? 20 : 0)), // Show activity when listening
-      speakingActivity: isListening && wordCount > 0 ? 75 : 0, // Simple activity indicator
-      confidence: Math.round(Math.max(confidenceScore, isListening ? 30 : 0)), // Show baseline when active
-      volume: Math.round(Math.max(volumeLevel, isListening ? 10 : 0)), // Show baseline when active
-      articulation: Math.round(articulationScore), // Articulation score from voice analysis
-      speechClarity: Math.round(speechClarityIndex) // Speech clarity index
+      eyeContact: Math.round(computerVisionMetrics.eyeContact || 0), // Real computer vision eye contact
+      voiceClarity: Math.round(voiceClarity || 0), // Authentic voice clarity only
+      speakingActivity: isListening && wordCount > 0 ? Math.min(100, wordCount * 2) : 0, // Based on actual word count
+      confidence: Math.round(Math.max(confidenceScore, computerVisionMetrics.confidence) || 0), // Max of voice and visual confidence
+      volume: Math.round(volumeLevel || 0), // Real volume detection only
+      articulation: Math.round(articulationScore || 0), // Authentic articulation analysis
+      speechClarity: Math.round(speechClarityIndex || 0) // Real speech clarity calculation
     };
 
     setMetrics(newMetrics);
     
     if (isListening) {
-      console.log('Live Metrics Update:', {
-        voiceClarity,
-        confidenceScore,
-        volumeLevel,
-        articulationScore,
-        speechClarityIndex,
+      console.log('Integrated Metrics Update:', {
+        voice: { voiceClarity, confidenceScore, volumeLevel, articulationScore, speechClarityIndex },
+        computerVision: computerVisionMetrics,
         wordCount,
-        calculated: newMetrics
+        final: newMetrics
       });
     }
-  }, [eyeContact, voiceClarity, confidenceScore, volumeLevel, articulationScore, speechClarityIndex, isListening, wordCount]);
+  }, [voiceClarity, confidenceScore, volumeLevel, articulationScore, speechClarityIndex, computerVisionMetrics, isListening, wordCount]);
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return "text-green-600";

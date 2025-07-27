@@ -1,5 +1,5 @@
 import { Switch, Route, useLocation } from "wouter";
-import { useEffect } from "react";
+import { useEffect, lazy } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -13,6 +13,8 @@ import LoginPage from "@/pages/login";
 import NotFound from "@/pages/not-found";
 import ClubsHub from "@/components/ClubsHub";
 import AccuracyTestSuite from "@/components/AccuracyTestSuite";
+
+const IntegratedAnalysisTest = lazy(() => import("@/components/IntegratedAnalysisTest"));
 import OAuthLoadingPage from "@/components/OAuthLoadingPage";
 import OAuthCallbackPage from "@/components/OAuthCallbackPage";
 import InteractiveCommunicationStats from "@/components/InteractiveCommunicationStats";
@@ -62,6 +64,7 @@ function Router() {
       <Route path="/clubs" component={ClubsHub} />
       <Route path="/logo" component={LogoExport} />
       <Route path="/test" component={AccuracyTestSuite} />
+      <Route path="/integrated-test" component={IntegratedAnalysisTest} />
       <Route path="/stats" component={InteractiveCommunicationStats} />
       <Route path="/content-analysis" component={ContentAnalysisPage} />
       <Route path="/oauth-loading" component={OAuthLoadingPage} />
