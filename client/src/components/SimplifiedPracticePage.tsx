@@ -263,8 +263,7 @@ export default function SimplifiedPracticePage() {
                 ...prev.bodyLanguage,
                 eyeContactScore: eyeContactValue,
                 facialExpressions: engagementValue,
-                overallPresence: confidenceValue,
-                postureConfidence: visionData.posture?.overallPosture || 0
+                overallPresence: confidenceValue
               }
             }));
             
