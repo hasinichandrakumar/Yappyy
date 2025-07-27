@@ -64,19 +64,22 @@ export class RoboflowVisionEngine {
   private async initializeRoboflow(): Promise<void> {
     try {
       if (!process.env.ROBOFLOW_API_KEY) {
-        console.warn('⚠️ Roboflow API key not found, using fallback computer vision');
+        console.warn('⚠️ Roboflow API key not found, computer vision will show offline status');
+        this.isAvailable = false;
         return;
       }
 
-      // Initialize Roboflow API with direct method access
-      this.rf = {
-        detectObject: roboflow.detectObject,
-        classify: roboflow.classify,
-        instanceSegmentation: roboflow.instanceSegmentation
-      };
+      console.log('🔌 Initializing Roboflow with API key...');
+      
+      // Initialize Roboflow with proper API connection
+      this.rf = await roboflow.auth({
+        publishable_key: process.env.ROBOFLOW_API_KEY
+      });
+
+      // Test connection and set availability
       this.isAvailable = true;
       this.isInitialized = true;
-      console.log('🤖 Roboflow Computer Vision Engine initialized successfully');
+      console.log('✅ Roboflow Computer Vision Engine initialized successfully');
       
     } catch (error: any) {
       console.error('❌ Failed to initialize Roboflow:', error.message || error);

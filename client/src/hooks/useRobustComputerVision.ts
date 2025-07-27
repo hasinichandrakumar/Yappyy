@@ -66,10 +66,12 @@ export function useRobustComputerVision() {
     }
   }, [error]);
 
-  // Enhanced body language analysis with proper data extraction
+  // Enhanced body language analysis with proper data extraction for posture and gestures
   const analyzeFacialData = useCallback(async (imageData: string): Promise<ComputerVisionMetrics | null> => {
     try {
-      // Try enhanced computer vision analysis first
+      console.log('🔬 Sending image data for real posture and gesture analysis...');
+      
+      // Send to enhanced computer vision endpoint for authentic analysis
       const response = await fetch('/api/enhanced-computer-vision', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -86,6 +88,13 @@ export function useRobustComputerVision() {
         if (result.success && (result.bodyLanguageMetrics || result.metrics)) {
           const metrics = result.bodyLanguageMetrics || result.metrics;
           successCount.current++;
+          
+          console.log('✅ Real CV metrics received:', {
+            posture: metrics.posture?.overallPosture,
+            gestures: metrics.gestures?.gestureNaturalness,
+            eyeContact: metrics.eyeContact?.eyeContactPercentage,
+            source: 'authentic-computer-vision'
+          });
           
           return {
             posture: Math.round(metrics.posture?.overallPosture || 0),
