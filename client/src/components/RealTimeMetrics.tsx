@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Eye, Volume2, Timer, Target } from "lucide-react";
+import { Eye, Volume2, Timer, Target, MessageSquare, Mic } from "lucide-react";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { useVoiceAnalysis } from "@/hooks/useVoiceAnalysis";
 
@@ -11,6 +11,8 @@ export default function RealTimeMetrics() {
     voiceClarity, 
     confidenceScore, 
     volumeLevel,
+    articulationScore,
+    speechClarityIndex,
     startVoiceAnalysis, 
     stopVoiceAnalysis,
     updateWordCount 
@@ -24,7 +26,9 @@ export default function RealTimeMetrics() {
     voiceClarity: 0,
     speakingActivity: 0,
     confidence: 0,
-    volume: 0
+    volume: 0,
+    articulation: 0,
+    speechClarity: 0
   });
 
   // Start/stop voice analysis and session timing when listening changes
@@ -73,7 +77,9 @@ export default function RealTimeMetrics() {
       voiceClarity: Math.round(Math.max(voiceClarity, isListening ? 20 : 0)), // Show activity when listening
       speakingActivity: isListening && wordCount > 0 ? 75 : 0, // Simple activity indicator
       confidence: Math.round(Math.max(confidenceScore, isListening ? 30 : 0)), // Show baseline when active
-      volume: Math.round(Math.max(volumeLevel, isListening ? 10 : 0)) // Show baseline when active
+      volume: Math.round(Math.max(volumeLevel, isListening ? 10 : 0)), // Show baseline when active
+      articulation: Math.round(articulationScore), // Articulation score from voice analysis
+      speechClarity: Math.round(speechClarityIndex) // Speech clarity index
     };
 
     setMetrics(newMetrics);
@@ -83,11 +89,13 @@ export default function RealTimeMetrics() {
         voiceClarity,
         confidenceScore,
         volumeLevel,
+        articulationScore,
+        speechClarityIndex,
         wordCount,
         calculated: newMetrics
       });
     }
-  }, [eyeContact, voiceClarity, confidenceScore, volumeLevel, isListening, wordCount]);
+  }, [eyeContact, voiceClarity, confidenceScore, volumeLevel, articulationScore, speechClarityIndex, isListening, wordCount]);
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return "text-green-600";
@@ -126,10 +134,26 @@ export default function RealTimeMetrics() {
     },
     {
       icon: Target,
-      title: "Confidence",
+      title: "Confidence", 
       value: metrics.confidence,
       unit: "%",
       target: "Build to 85%+"
+    },
+    {
+      icon: MessageSquare,
+      title: "Articulation",
+      value: metrics.articulation,
+      unit: "%",
+      target: "Clear speech 90%+",
+      subtitle: metrics.articulation > 0 ? "Speech clarity detected" : "No speech data"
+    },
+    {
+      icon: Mic,
+      title: "Speech Clarity",
+      value: metrics.speechClarity,
+      unit: "%", 
+      target: "Professional clarity",
+      subtitle: metrics.speechClarity > 0 ? "Voice analysis active" : "Processing audio"
     }
   ];
 
