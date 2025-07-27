@@ -2198,10 +2198,10 @@ RESPONSE FORMAT: Provide conversational coaching followed by specific neural ana
     });
   });
 
-  // ADVANCED CONTENT ANALYSIS ENDPOINTS
+  // SUPER ADVANCED CONTENT ANALYSIS ENDPOINTS
   app.post('/api/advanced-content-analysis', async (req: any, res) => {
     try {
-      const { transcript, purpose } = req.body;
+      const { transcript, purpose, sessionDuration, sessionId } = req.body;
       
       if (!transcript || transcript.trim().length === 0) {
         return res.json({
@@ -2211,46 +2211,153 @@ RESPONSE FORMAT: Provide conversational coaching followed by specific neural ana
         });
       }
 
-      const { advancedContentAnalyzer } = await import('./advanced-content-analyzer');
-      const result = advancedContentAnalyzer.analyzeContent(transcript, purpose);
+      console.log(`🧠 Starting super advanced content analysis for ${purpose || 'general-presentation'}`);
       
-      console.log('📊 Advanced content analysis completed:', {
+      const { superAdvancedContentAnalyzer } = await import('./super-advanced-content-analyzer');
+      const result = await superAdvancedContentAnalyzer.analyzeContent(transcript, purpose || 'general-presentation');
+      
+      console.log('🎯 Super advanced content analysis completed:', {
         overall: result.overall.score,
-        persuasiveness: result.persuasiveness.score,
-        clarity: result.clarity.score,
-        professionalism: result.professionalism.score,
-        purpose: purpose || 'general'
+        grade: result.overall.grade,
+        confidence: result.overall.confidence,
+        purpose: purpose || 'general-presentation',
+        framework: result.purposeAlignment.framework
       });
 
       // Generate purpose-specific feedback
-      const purposeFeedback = advancedContentAnalyzer.generatePurposeSpecificFeedback(result, purpose);
+      const purposeFeedback = await generatePurposeSpecificFeedback(transcript, purpose || 'general-presentation', result);
 
       res.json({
         success: true,
         analysis: result,
         purposeFeedback,
-        purpose: purpose || 'general',
-        libraries: ['Compromise.js', 'Natural.js', 'Sentiment.js', 'Franc'],
-        capabilities: [
-          'Purpose-driven persuasiveness analysis',
-          'Context-aware clarity and readability scoring',
-          'Content structure evaluation for specific scenarios',
-          'Professional communication assessment',
-          'Engagement factor analysis',
-          'Advanced sentiment profiling',
-          'Language detection and analysis'
-        ]
+        processingTime: Date.now() - Date.now(),
+        analysisType: 'super-advanced',
+        framework: result.purposeAlignment.framework
       });
 
-    } catch (error) {
-      console.error('❌ Advanced content analysis error:', error);
-      res.status(500).json({ 
-        error: 'Advanced content analysis failed',
+    } catch (error: any) {
+      console.error('❌ Super advanced content analysis error:', error);
+      res.json({ 
+        message: error.message,
+        error: 'Super advanced content analysis failed',
         success: false,
         fallback: true 
       });
     }
   });
+
+  // Purpose-specific feedback generation helper
+  async function generatePurposeSpecificFeedback(transcript: string, purpose: string, analysis: any): Promise<any> {
+    const purposeTemplates: any = {
+      'business-presentation': {
+        focus: 'Executive impact and business outcomes',
+        keyQuestions: [
+          'How clearly did you articulate the business value?',
+          'Were financial implications addressed?',
+          'Did you demonstrate competitive advantage?',
+          'Was the implementation timeline realistic?'
+        ],
+        improvements: [
+          'Quantify business impact with specific metrics',
+          'Address potential stakeholder concerns proactively',
+          'Include risk mitigation strategies',
+          'Strengthen ROI demonstration'
+        ]
+      },
+      'sales-presentation': {
+        focus: 'Persuasion and conversion optimization',
+        keyQuestions: [
+          'How effectively did you identify customer pain points?',
+          'Was the value proposition compelling?',
+          'Did you create urgency appropriately?',
+          'How strong was your call-to-action?'
+        ],
+        improvements: [
+          'Integrate more customer success stories',
+          'Address objections before they arise',
+          'Create stronger emotional connection',
+          'Enhance scarcity and urgency elements'
+        ]
+      },
+      'job-interview': {
+        focus: 'Competency demonstration and cultural fit',
+        keyQuestions: [
+          'Did you use the STAR method effectively?',
+          'Were your achievements quantified?',
+          'Did you demonstrate company knowledge?',
+          'How well did you express enthusiasm?'
+        ],
+        improvements: [
+          'Prepare more specific achievement examples',
+          'Research company culture more deeply',
+          'Practice answering behavioral questions',
+          'Develop stronger closing statements'
+        ]
+      },
+      'academic-presentation': {
+        focus: 'Research rigor and scholarly contribution',
+        keyQuestions: [
+          'Was your methodology clearly explained?',
+          'Were limitations appropriately discussed?',
+          'Did you cite relevant literature?',
+          'How significant is your contribution?'
+        ],
+        improvements: [
+          'Strengthen statistical analysis explanation',
+          'Expand literature review coverage',
+          'Clarify practical applications',
+          'Address peer review concerns'
+        ]
+      },
+      'motivational-speech': {
+        focus: 'Inspiration and transformation catalyst',
+        keyQuestions: [
+          'Did you share compelling personal stories?',
+          'Was the emotional journey clear?',
+          'Did you provide actionable takeaways?',
+          'How strong was the call to transformation?'
+        ],
+        improvements: [
+          'Include more relatable anecdotes',
+          'Strengthen emotional peaks and valleys',
+          'Provide clearer action steps',
+          'Enhance hope and possibility messaging'
+        ]
+      },
+      'team-meeting': {
+        focus: 'Collaboration and team effectiveness',
+        keyQuestions: [
+          'Were all voices encouraged to participate?',
+          'Was the agenda clear and followed?',
+          'Were action items specific and assigned?',
+          'Did you foster psychological safety?'
+        ],
+        improvements: [
+          'Improve meeting structure and timing',
+          'Enhance facilitation techniques',
+          'Strengthen follow-up processes',
+          'Develop better conflict resolution skills'
+        ]
+      }
+    };
+
+    const template = purposeTemplates[purpose] || purposeTemplates['business-presentation'];
+    
+    return {
+      purpose,
+      focus: template.focus,
+      score: analysis.overall.score,
+      grade: analysis.overall.grade,
+      framework: analysis.purposeAlignment.framework,
+      keyQuestions: template.keyQuestions,
+      suggestedImprovements: template.improvements,
+      specificFeedback: analysis.purposeSpecificFeedback.expertRecommendations,
+      nextLevelActions: analysis.purposeSpecificFeedback.nextLevelActions,
+      competitiveInsight: analysis.competitiveAnalysis.benchmarkComparison,
+      confidenceLevel: analysis.overall.confidence
+    };
+  }
 
   app.get('/api/content-analysis-info', async (req: any, res) => {
     res.json({
