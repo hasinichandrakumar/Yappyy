@@ -1,6 +1,5 @@
 // Roboflow Computer Vision Integration - Enhanced Body Language and Gesture Analysis
-// @ts-ignore: Roboflow types not available
-import roboflow from "roboflow";
+import * as roboflow from "roboflow";
 
 interface RoboflowConfig {
   apiKey: string;
@@ -72,9 +71,7 @@ export class RoboflowVisionEngine {
       console.log('🔌 Initializing Roboflow with API key...');
       
       // Initialize Roboflow with proper API connection
-      this.rf = roboflow({
-        publishable_key: process.env.ROBOFLOW_API_KEY
-      });
+      this.rf = roboflow;
 
       // Test connection and set availability
       this.isAvailable = true;
@@ -418,7 +415,7 @@ export class RoboflowVisionEngine {
       }
 
       // Use Roboflow detectObject API for facial analysis
-      const detection = await this.rf.detectObject({
+      const detection = await roboflow.detectObject({
         model: "people-detection-general/1",
         image: imageB64,
         api_key: process.env.ROBOFLOW_API_KEY
