@@ -143,6 +143,7 @@ export default function SimplifiedPracticePage() {
   const [showAnalysisPage, setShowAnalysisPage] = useState(false);
   const [sessionAnalysisData, setSessionAnalysisData] = useState<any>(null);
   const [sessionPurpose, setSessionPurpose] = useState("general-presentation");
+  const [sessionNumber, setSessionNumber] = useState(1);
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingPurpose, setIsEditingPurpose] = useState(false);
   const [sessionDuration, setSessionDuration] = useState(0);
@@ -286,6 +287,26 @@ export default function SimplifiedPracticePage() {
     
     return () => clearInterval(interval);
   }, [isRecording]);
+
+  // Fetch session number on component load
+  useEffect(() => {
+    const fetchSessionNumber = async () => {
+      try {
+        const response = await fetch('/api/sessions/next-number');
+        const data = await response.json();
+        const nextSessionNumber = data.sessionNumber;
+        
+        setSessionNumber(nextSessionNumber);
+        setSessionName(`Session ${nextSessionNumber}`);
+      } catch (error) {
+        console.log('Using default session number');
+        setSessionNumber(1);
+        setSessionName("Session 1");
+      }
+    };
+
+    fetchSessionNumber();
+  }, []);
 
   // Refs
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -1326,6 +1347,69 @@ export default function SimplifiedPracticePage() {
     }
 
     setIsRecording(false);
+
+    // Save session to database
+    try {
+      const sessionData = {
+        sessionName,
+        purpose: sessionPurpose,
+        duration: sessionDuration,
+        transcript: transcript,
+        averageWPM: metrics.wordsPerMinute,
+        confidenceScore: metrics.confidence,
+        voiceClarity: metrics.voice.clarity,
+        fillerWords: metrics.fillerWordCount,
+        pauseCount: 0, // Can be enhanced with real pause analysis
+        eyeContactScore: String(metrics.eyeContact),
+        coachingTips: [],
+        videoBlob: recordingData?.blob ? await recordingData.blob.text() : null,
+        facialAnalysis: {
+          eyeContact: metrics.eyeContact,
+          confidence: metrics.confidence,
+          engagement: metrics.engagement
+        },
+        voiceMetrics: {
+          clarity: metrics.voice.clarity,
+          pace: metrics.voice.pace,
+          volume: metrics.voice.volume,
+          fillerCount: metrics.fillerWordCount
+        },
+        bodyLanguageMetrics: {
+          eyeContactScore: metrics.bodyLanguage.eyeContactScore,
+          facialExpressions: metrics.bodyLanguage.facialExpressions,
+          overallPresence: metrics.bodyLanguage.overallPresence
+        },
+        persuasivenessScore: metrics.confidence
+      };
+
+      const response = await fetch('/api/sessions/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(sessionData)
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        console.log(`✅ Session ${result.session.sessionNumber} saved successfully`);
+        
+        // Update session number for next session
+        const nextSessionNumber = result.session.sessionNumber + 1;
+        setSessionNumber(nextSessionNumber);
+        setSessionName(`Session ${nextSessionNumber}`);
+        
+        toast({
+          title: "Session Saved",
+          description: `${result.message}`,
+          variant: "default"
+        });
+      } else {
+        console.warn('⚠️ Failed to save session:', result.message);
+      }
+    } catch (error) {
+      console.error('❌ Error saving session:', error);
+    }
 
     // Reset metrics to 0 after recording stops
     setTimeout(() => {

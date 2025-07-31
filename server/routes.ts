@@ -285,6 +285,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get next session number for authenticated users
+  app.get('/api/sessions/next-number', async (req: any, res) => {
+    try {
+      if (!req.isAuthenticated() || !req.user) {
+        return res.json({ sessionNumber: 1 }); // Default for guest users
+      }
+
+      const userId = getUserId(req);
+      const nextNumber = await getNextSessionNumber(userId);
+      
+      res.json({ sessionNumber: nextNumber });
+    } catch (error) {
+      console.error("Error getting next session number:", error);
+      res.json({ sessionNumber: 1 }); // Default fallback
+    }
+  });
+
+  // Save practice session with all data
+  app.post('/api/sessions/save', async (req: any, res) => {
+    try {
+      if (!req.isAuthenticated() || !req.user) {
+        return res.json({ success: false, message: "Not authenticated" });
+      }
+
+      const userId = getUserId(req);
+      const sessionData = req.body;
+      
+      // Get the next session number
+      const sessionNumber = await getNextSessionNumber(userId);
+      
+      // Create the session with all provided data
+      const session = await storage.createPracticeSession({
+        userId,
+        sessionNumber,
+        sessionName: sessionData.sessionName || `Session ${sessionNumber}`,
+        purpose: sessionData.purpose || 'general-presentation',
+        duration: sessionData.duration || 0,
+        transcript: sessionData.transcript || '',
+        averageWPM: sessionData.averageWPM || 0,
+        confidenceScore: sessionData.confidenceScore || 0,
+        voiceClarity: sessionData.voiceClarity || 0,
+        fillerWords: sessionData.fillerWords || 0,
+        pauseCount: sessionData.pauseCount || 0,
+        eyeContactScore: sessionData.eyeContactScore || '0',
+        coachingTips: sessionData.coachingTips || [],
+        videoBlob: sessionData.videoBlob || null,
+        facialAnalysis: sessionData.facialAnalysis || null,
+        voiceMetrics: sessionData.voiceMetrics || null,
+        aiAnalysis: sessionData.aiAnalysis || null,
+        speechPatterns: sessionData.speechPatterns || null,
+        bodyLanguageMetrics: sessionData.bodyLanguageMetrics || null,
+        persuasivenessScore: sessionData.persuasivenessScore || 0,
+        emotionalIntelligence: sessionData.emotionalIntelligence || null,
+        rhetoricAnalysis: sessionData.rhetoricAnalysis || null,
+        improvementPlan: sessionData.improvementPlan || null
+      });
+
+      // Update daily goals progress
+      await userOnboardingService.updateGoalProgress(userId, 'sessions', 1);
+      
+      res.json({ 
+        success: true, 
+        session,
+        message: `Session ${sessionNumber} saved successfully` 
+      });
+    } catch (error) {
+      console.error("Error saving practice session:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to save session" 
+      });
+    }
+  });
+
   // User statistics endpoint
   app.get('/api/user/stats', async (req: any, res) => {
     try {
