@@ -1718,11 +1718,11 @@ export default function SimplifiedPracticePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 p-4">
       <div className="max-w-6xl mx-auto space-y-6">
         
         {/* Header */}
-        <Card className="border-2 border-blue-200">
+        <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm">
           <CardHeader>
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
               <div className="flex-1">
@@ -1750,7 +1750,7 @@ export default function SimplifiedPracticePage() {
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
-                    <h1 className="text-4xl font-extrabold text-blue-600 cursor-pointer hover:text-blue-700" onClick={() => setIsEditingName(true)}>
+                    <h1 className="text-4xl font-extrabold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent cursor-pointer hover:from-blue-700 hover:to-cyan-600" onClick={() => setIsEditingName(true)}>
                       {sessionName}
                     </h1>
                     <Button variant="ghost" size="sm" onClick={() => setIsEditingName(true)}>
@@ -1899,16 +1899,16 @@ export default function SimplifiedPracticePage() {
 
         {/* Tips */}
         <div className="space-y-3">
-          <Alert className="border-green-200 bg-green-50">
-            <Eye className="h-4 w-4" />
-            <AlertDescription>
+          <Alert className="border-blue-200 bg-gradient-to-r from-blue-50 to-cyan-50 shadow-sm">
+            <Eye className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-blue-800">
               <strong>Tip:</strong> Look directly at your camera lens to maintain eye contact. Aim for 60-80% eye contact during your speech.
             </AlertDescription>
           </Alert>
           
-          <Alert className="border-orange-200 bg-orange-50">
-            <Activity className="h-4 w-4" />
-            <AlertDescription>
+          <Alert className="border-cyan-200 bg-gradient-to-r from-cyan-50 to-blue-50 shadow-sm">
+            <Activity className="h-4 w-4 text-cyan-600" />
+            <AlertDescription className="text-cyan-800">
               <strong>Note:</strong> Browser speech recognition automatically filters out "um" and "uh" sounds. The system detects other filler words like "like", "so", "you know" effectively.
             </AlertDescription>
           </Alert>
@@ -1919,7 +1919,7 @@ export default function SimplifiedPracticePage() {
           
           {/* Video Feed */}
           <div className="lg:col-span-2">
-            <Card>
+            <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm">
               <CardContent className="p-0">
                 <div className="relative aspect-video bg-gray-900 rounded-lg overflow-hidden">
                   <video
@@ -2006,7 +2006,7 @@ export default function SimplifiedPracticePage() {
             />
 
             {/* Live Feedback Insights */}
-            <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-white">
+            <Card className="border border-blue-200 shadow-lg bg-gradient-to-br from-blue-50 to-cyan-50 backdrop-blur-sm">
               <CardHeader className="pb-3">
                 <CardTitle className="text-xl font-bold flex items-center gap-2 text-blue-800">
                   <TrendingUp className="w-6 h-6 text-blue-600" />
@@ -2069,9 +2069,9 @@ export default function SimplifiedPracticePage() {
             </Card>
 
             {/* Quick Stats */}
-            <Card>
+            <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle className="text-xl font-bold">Session Stats</CardTitle>
+                <CardTitle className="text-xl font-bold text-blue-800">Session Stats</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex justify-between">
@@ -2102,12 +2102,12 @@ export default function SimplifiedPracticePage() {
 
         {/* Live Transcript Panel */}
         {showLiveTranscript && (
-          <Card className="border-2 border-blue-200">
+          <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <FileText className="w-5 h-5" />
-                  Live Transcript
+                  <FileText className="w-5 h-5 text-blue-600" />
+                  <span className="text-blue-800">Live Transcript</span>
                   {isRecording && (
                     <Badge variant="secondary" className="ml-2">
                       <Activity className="w-3 h-3 mr-1" />
@@ -2170,10 +2170,10 @@ export default function SimplifiedPracticePage() {
 
         {/* Original Transcript Display for Non-Live View */}
         {!showLiveTranscript && transcript && (
-          <Card>
+          <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="w-5 h-5" />
+              <CardTitle className="flex items-center gap-2 text-blue-800">
+                <FileText className="w-5 h-5 text-blue-600" />
                 Session Transcript
               </CardTitle>
             </CardHeader>
