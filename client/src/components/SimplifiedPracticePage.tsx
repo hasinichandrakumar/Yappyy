@@ -139,10 +139,10 @@ const SESSION_PURPOSE_OPTIONS = [
 export default function SimplifiedPracticePage() {
   // Core session state
   const [isRecording, setIsRecording] = useState(false);
-  const [sessionName, setSessionName] = useState("");
+  const [sessionName, setSessionName] = useState("Session 1");
   const [showAnalysisPage, setShowAnalysisPage] = useState(false);
   const [sessionAnalysisData, setSessionAnalysisData] = useState<any>(null);
-  const [sessionPurpose, setSessionPurpose] = useState("");
+  const [sessionPurpose, setSessionPurpose] = useState("general-presentation");
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingPurpose, setIsEditingPurpose] = useState(false);
   const [sessionDuration, setSessionDuration] = useState(0);
