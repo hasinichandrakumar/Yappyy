@@ -191,12 +191,8 @@ export default function RealTimeMetrics() {
                       ? 'bg-gradient-to-br from-green-400 to-green-600 shadow-lg' 
                       : 'bg-gradient-to-br from-blue-400 to-blue-600'
                   }`}>
-                    <metric.icon className={`w-5 h-5 text-white ${
-                      isListening && metric.value > 0 ? 'animate-pulse' : ''
-                    }`} />
-                    {isListening && metric.value > 0 && (
-                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-ping"></div>
-                    )}
+                    <metric.icon className="w-5 h-5 text-white" />
+
                   </div>
                   <div className="min-w-0 flex-1">
                     <h3 className="text-sm font-semibold text-gray-900 truncate">{metric.title}</h3>
