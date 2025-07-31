@@ -147,28 +147,28 @@ export default function Dashboard() {
           <TabsList className="grid grid-cols-2 lg:grid-cols-5 gap-2 mb-8 h-auto p-2 bg-white border border-gray-200 shadow-sm rounded-xl">
             <TabsTrigger 
               value="practice" 
-              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-semibold rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
+              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-semibold rounded-lg hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
             >
               <Mic className="w-5 h-5" />
               <span className="font-bold">Practice</span>
             </TabsTrigger>
             <TabsTrigger 
               value="analysis" 
-              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-semibold rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
+              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-semibold rounded-lg hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
             >
               <BarChart3 className="w-5 h-5" />
               <span className="font-bold">Analysis</span>
             </TabsTrigger>
             <TabsTrigger 
               value="ai-coach" 
-              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-semibold rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
+              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-semibold rounded-lg hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
             >
               <Brain className="w-5 h-5" />
               <span className="font-bold">AI Coach</span>
             </TabsTrigger>
             <TabsTrigger 
               value="templates" 
-              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-semibold rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
+              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-semibold rounded-lg hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
             >
               <FileText className="w-5 h-5" />
               <span className="font-bold">Templates</span>
@@ -176,7 +176,7 @@ export default function Dashboard() {
 
             <TabsTrigger 
               value="achievements" 
-              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-semibold rounded-lg transition-all duration-200 hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
+              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-semibold rounded-lg hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
             >
               <Trophy className="w-5 h-5" />
               <span className="font-bold">Progress</span>

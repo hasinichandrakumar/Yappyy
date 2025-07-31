@@ -1745,7 +1745,7 @@ export default function SimplifiedPracticePage() {
               {/* Recording Controls */}
               <div className="flex gap-2">
                 {!isRecording ? (
-                  <Button onClick={startRecording} className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white shadow-lg hover:shadow-xl transition-all duration-300">
+                  <Button onClick={startRecording} className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white shadow-lg hover:shadow-xl">
                     <Mic className="w-5 h-5 mr-2" />
                     Start Practice
                   </Button>
@@ -1754,7 +1754,7 @@ export default function SimplifiedPracticePage() {
                     <Button 
                       onClick={stopRecording} 
                       variant="destructive"
-                      className="bg-red-600 hover:bg-red-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 px-6"
+                      className="bg-red-600 hover:bg-red-700 text-white shadow-lg hover:shadow-xl px-6"
                       size="lg"
                     >
                       <Square className="w-5 h-5 mr-2" />
@@ -1860,7 +1860,7 @@ export default function SimplifiedPracticePage() {
                   
                   {isRecording && (
                     <div className="absolute top-4 left-4 space-y-2">
-                      <Badge variant="destructive" className="animate-pulse">
+                      <Badge variant="destructive">
                         <Activity className="w-3 h-3 mr-1" />
                         RECORDING {Math.floor(sessionDuration / 60)}:{(sessionDuration % 60).toString().padStart(2, '0')}
                       </Badge>
@@ -1937,7 +1937,7 @@ export default function SimplifiedPracticePage() {
               <CardContent className="space-y-3">
                 {liveFeedback.length === 0 ? (
                   <div className="text-center text-gray-500 py-6">
-                    <Activity className="w-10 h-10 mx-auto mb-3 opacity-50 animate-pulse" />
+                    <Activity className="w-10 h-10 mx-auto mb-3 opacity-50" />
                     <p className="font-medium">Ready for Live Analysis</p>
                     <p className="text-sm mt-1">Start speaking to receive instant feedback</p>
                   </div>
@@ -2061,7 +2061,7 @@ export default function SimplifiedPracticePage() {
                   <div className="text-center text-gray-500 py-8">
                     {isRecording ? (
                       <div className="flex items-center justify-center gap-2">
-                        <Activity className="w-4 h-4 animate-pulse" />
+                        <Activity className="w-4 h-4" />
                         <span>Listening for speech...</span>
                       </div>
                     ) : (
