@@ -493,21 +493,8 @@ export default function PeppyAICoach() {
             <div className="relative flex justify-center">
               <div className="relative">
                 <PeppyParrot isAnimated={true} mood={peppyAnimation as any} size="large" />
-                {/* Enhanced multilayer glow effects */}
-                <div className="absolute -inset-8 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 rounded-full blur-xl opacity-40 animate-pulse"></div>
-                <div className="absolute -inset-12 bg-gradient-to-r from-cyan-300 via-violet-400 to-rose-400 rounded-full blur-2xl opacity-20 animate-pulse animation-delay-1000"></div>
-                {/* Floating sparkles */}
-                <div className="absolute -top-6 -right-6 w-4 h-4 bg-yellow-400 rounded-full animate-ping"></div>
-                <div className="absolute -bottom-4 -left-4 w-3 h-3 bg-pink-400 rounded-full animate-ping animation-delay-500"></div>
-                <div className="absolute top-1/2 -right-8 w-2 h-2 bg-blue-400 rounded-full animate-ping animation-delay-1000"></div>
 
-                <motion.div 
-                  className="absolute -bottom-2 -left-2 w-6 h-6 bg-blue-400 rounded-full flex items-center justify-center text-white text-xs shadow-lg"
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                >
-                  🧠
-                </motion.div>
+
               </div>
             </div>
           </motion.div>
@@ -564,7 +551,7 @@ export default function PeppyAICoach() {
                   transition={{ duration: 2, repeat: Infinity }}
                 >
                   <PeppyParrot isAnimated={true} mood="thinking" size="medium" />
-                  <div className="absolute -inset-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full blur opacity-30 animate-pulse"></div>
+
                 </motion.div>
                 
                 <h3 className="text-2xl font-bold text-gray-800 mb-3">Peppy is Ready for Deep Analysis!</h3>
@@ -584,15 +571,15 @@ export default function PeppyAICoach() {
                 
                 <div className="flex justify-center gap-8 mt-8 text-sm text-gray-500">
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                     8 Attention Heads
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
                     LSTM Networks
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-pink-500 rounded-full animate-pulse"></div>
+                    <div className="w-2 h-2 bg-pink-500 rounded-full"></div>
                     Transformer Models
                   </div>
                 </div>
@@ -616,14 +603,8 @@ export default function PeppyAICoach() {
               <Card className="bg-gradient-to-br from-white to-blue-50 border-blue-200 shadow-lg hover:shadow-xl transition-all duration-300">
                 <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg">
                   <CardTitle className="flex items-center gap-3">
-                    <div className="relative">
-                      <MessageCircle className="w-6 h-6" />
-                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                    </div>
+                    <MessageCircle className="w-6 h-6" />
                     Chat with Peppy
-                    <Badge className="ml-auto bg-white/20 text-white border-white/30">
-                      Live AI
-                    </Badge>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6">
