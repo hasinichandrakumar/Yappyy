@@ -500,14 +500,7 @@ export default function PeppyAICoach() {
                 <div className="absolute -top-6 -right-6 w-4 h-4 bg-yellow-400 rounded-full animate-ping"></div>
                 <div className="absolute -bottom-4 -left-4 w-3 h-3 bg-pink-400 rounded-full animate-ping animation-delay-500"></div>
                 <div className="absolute top-1/2 -right-8 w-2 h-2 bg-blue-400 rounded-full animate-ping animation-delay-1000"></div>
-                {/* Floating AI indicators */}
-                <motion.div 
-                  className="absolute -top-2 -right-2 w-8 h-8 bg-green-400 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg"
-                  animate={{ y: [-2, 2, -2] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  AI
-                </motion.div>
+
                 <motion.div 
                   className="absolute -bottom-2 -left-2 w-6 h-6 bg-blue-400 rounded-full flex items-center justify-center text-white text-xs shadow-lg"
                   animate={{ scale: [1, 1.2, 1] }}
