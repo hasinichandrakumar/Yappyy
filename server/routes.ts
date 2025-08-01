@@ -1860,41 +1860,40 @@ Be specific, actionable, and encouraging while maintaining professional coaching
         if (response.status === 429) {
           console.log('🔄 Rate limit hit, providing comprehensive fallback analysis based on session data...');
           
-          // Extract authentic metrics from session data
-          const confidenceScore = session.confidenceScore || session.confidenceLevel || 75;
-          const voiceClarity = session.voiceClarity || session.clarityScore || 70;
-          const eyeContact = typeof session.eyeContactScore === 'string' ? 
-            parseFloat(session.eyeContactScore) : (session.eyeContactScore || 70);
-          const engagement = session.engagementLevel || 75;
+          // Extract ONLY authentic metrics from session data - NO DEFAULTS
+          const facialData = session.facialAnalysis ? JSON.parse(session.facialAnalysis) : null;
           
-          // Calculate scores based on real data
+          const confidenceScore = session.confidenceScore || facialData?.emotionalExpression?.confidence || 0;
+          const voiceClarity = session.voiceClarity || session.clarityScore || 0;
+          const eyeContact = typeof session.eyeContactScore === 'string' ? 
+            parseFloat(session.eyeContactScore) : (session.eyeContactScore || facialData?.communicationSignals?.eyeContactQuality || 0);
+          const engagement = facialData?.emotionalExpression?.engagement || 0;
+          
+          // Calculate scores based on ONLY real data
           const purposeAlignment = Math.round((confidenceScore + engagement) / 2);
           const executionQuality = Math.round((voiceClarity + eyeContact) / 2);
-          const improvementPotential = Math.min(95, Math.max(80, 100 - Math.round((confidenceScore + voiceClarity + eyeContact) / 3)));
+          const improvementPotential = (confidenceScore > 0 || engagement > 0 || voiceClarity > 0 || eyeContact > 0) ? 
+            Math.min(100, Math.max(70, 100 - Math.round((confidenceScore + voiceClarity + eyeContact) / 3))) : 0;
           
           const fallbackAnalysis = {
             purposeAlignment,
             executionQuality,
             improvementPotential,
-            overallAssessment: `This session demonstrates solid foundational skills with clear opportunities for growth. Your confidence level of ${confidenceScore}% and voice clarity of ${voiceClarity}% indicate strong basics, while your eye contact score of ${Math.round(eyeContact)}% shows good audience connection. Continue building on these strengths while focusing on the improvement areas identified below.`,
+            overallAssessment: (confidenceScore > 0 || engagement > 0 || voiceClarity > 0 || eyeContact > 0) ?
+              `Session analysis based on measured data: Confidence ${confidenceScore}%, voice clarity ${voiceClarity}%, eye contact ${Math.round(eyeContact)}%, engagement ${engagement}%. ${improvementPotential > 0 ? `${improvementPotential}% improvement potential identified.` : ''}` :
+              "Session completed. Comprehensive analysis requires recorded practice session data with voice and video metrics.",
             
             voiceAnalysis: {
               score: Math.round(voiceClarity),
-              strengths: voiceClarity >= 75 ? 
-                ["Clear articulation", "Consistent volume", "Good pace control"] :
-                voiceClarity >= 60 ? 
-                ["Clear articulation", "Steady delivery"] :
-                ["Voice foundation established"],
-              improvements: voiceClarity >= 75 ?
-                ["Add more vocal variety", "Enhance emotional expression", "Use strategic pauses"] :
-                voiceClarity >= 60 ?
-                ["Improve volume consistency", "Work on pace variation", "Enhance clarity"] :
-                ["Focus on basic clarity", "Practice volume control", "Slow down delivery"],
-              insights: voiceClarity >= 75 ?
-                "Your voice quality is strong and professional. Focus on adding more dynamic expression to enhance audience engagement." :
-                voiceClarity >= 60 ?
-                "Good voice foundation with room for consistency improvements. Practice regular vocal exercises." :
-                "Building voice confidence through regular practice will enhance your overall delivery."
+              strengths: voiceClarity > 0 ? 
+                (voiceClarity >= 75 ? ["Clear articulation", "Consistent volume"] : ["Voice clarity measured"]) :
+                [],
+              improvements: voiceClarity > 0 ? 
+                (voiceClarity >= 75 ? ["Add vocal variety", "Use strategic pauses"] : ["Improve consistency"]) :
+                ["Complete practice session for voice analysis"],
+              insights: voiceClarity > 0 ?
+                `Voice clarity measured at ${Math.round(voiceClarity)}%. ${voiceClarity >= 75 ? 'Strong foundation for advanced techniques.' : 'Continue building consistency.'}` :
+                "Complete practice session to receive authentic voice analysis."
             },
             
             deliveryAnalysis: {
@@ -2000,17 +1999,22 @@ Be specific, actionable, and encouraging while maintaining professional coaching
     } catch (error: any) {
       console.error("❌ Error generating comprehensive coaching analysis:", error);
       
-      // Final fallback with authentic session data
+      // Final fallback with ONLY authentic session data
+      const facialData = session.facialAnalysis ? JSON.parse(session.facialAnalysis) : null;
       const finalFallback = {
-        purposeAlignment: session.confidenceScore || 75,
-        executionQuality: session.voiceClarity || 70,
-        improvementPotential: 85,
-        overallAssessment: "Session analysis completed. Your speaking practice shows positive development patterns. Continue regular practice to build on these foundations.",
+        purposeAlignment: session.confidenceScore || facialData?.emotionalExpression?.confidence || 0,
+        executionQuality: session.voiceClarity || session.clarityScore || 0,
+        improvementPotential: facialData?.emotionalExpression?.engagement ? Math.min(100, facialData.emotionalExpression.engagement + 20) : 0,
+        overallAssessment: confidenceScore > 0 || engagement > 0 ? 
+          `Session analysis completed with authentic performance data. Your confidence shows at ${confidenceScore}% and engagement at ${engagement}%. Continue building on these measured results.` :
+          "Session completed. Analysis requires performance data from completed practice sessions.",
         voiceAnalysis: {
-          score: session.voiceClarity || session.clarityScore || 70,
-          strengths: ["Speech foundation established"],
-          improvements: ["Continue regular practice"],
-          insights: "Regular practice sessions will help build confidence and consistency in your speaking skills."
+          score: session.voiceClarity || session.clarityScore || 0,
+          strengths: (session.voiceClarity || session.clarityScore) > 0 ? ["Voice clarity measured"] : [],
+          improvements: (session.voiceClarity || session.clarityScore) > 0 ? ["Continue voice development"] : ["Complete practice session for voice analysis"],
+          insights: (session.voiceClarity || session.clarityScore) > 0 ? 
+            `Voice clarity measured at ${session.voiceClarity || session.clarityScore}%. Focus on building consistency.` :
+            "Complete practice session to receive authentic voice analysis."
         },
         recommendations: [
           {

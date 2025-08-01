@@ -355,7 +355,7 @@ export default function ModernAICoach() {
             <CardContent className="p-6 space-y-6">
               {/* Extract authentic metrics from session data */}
               {(() => {
-                // Calculate authentic metrics from session data
+                // Extract ONLY authentic metrics from session data - NO FALLBACKS
                 const getFacialAnalysisData = () => {
                   try {
                     return selectedSession.facialAnalysis ? JSON.parse(selectedSession.facialAnalysis) : null;
@@ -366,6 +366,7 @@ export default function ModernAICoach() {
                 
                 const facialData = getFacialAnalysisData();
                 
+                // Use ONLY authentic data from database - no placeholders
                 const confidenceLevel = selectedSession.confidenceScore || 
                   facialData?.emotionalExpression?.confidence || 0;
                 
@@ -376,10 +377,9 @@ export default function ModernAICoach() {
                 
                 const clarityScore = selectedSession.clarityScore || selectedSession.voiceClarity || 0;
                 
-                const engagementLevel = selectedSession.engagementLevel || 
-                  facialData?.emotionalExpression?.engagement || 0;
+                const engagementLevel = facialData?.emotionalExpression?.engagement || 0;
                 
-                const voiceConsistency = selectedSession.volumeConsistency || 80; // This was showing 80% in the image
+                const voiceConsistency = selectedSession.volumeConsistency || 0; // Only use real data
                 
                 const performanceMetrics = [
                   {
@@ -510,7 +510,7 @@ export default function ModernAICoach() {
                       <Star 
                         key={i} 
                         className={`w-5 h-5 ${
-                          i < Math.round((selectedSession.overallScore || 75) / 20) 
+                          i < Math.round((selectedSession.overallScore || 0) / 20) 
                             ? 'text-yellow-400 fill-yellow-400' 
                             : 'text-gray-300'
                         }`} 
@@ -573,19 +573,19 @@ export default function ModernAICoach() {
                   <div className="grid md:grid-cols-3 gap-6 mb-6">
                     <div className="text-center p-4 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl border border-emerald-200">
                       <div className="text-3xl font-bold text-emerald-600 mb-2">
-                        {aiAnalysis.purposeAlignment || 85}%
+                        {aiAnalysis.purposeAlignment || 0}%
                       </div>
                       <div className="text-sm font-medium text-emerald-800">Goal Achievement</div>
                     </div>
                     <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
                       <div className="text-3xl font-bold text-blue-600 mb-2">
-                        {aiAnalysis.executionQuality || 78}%
+                        {aiAnalysis.executionQuality || 0}%
                       </div>
                       <div className="text-sm font-medium text-blue-800">Execution Quality</div>
                     </div>
                     <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200">
                       <div className="text-3xl font-bold text-purple-600 mb-2">
-                        {aiAnalysis.improvementPotential || 92}%
+                        {aiAnalysis.improvementPotential || 0}%
                       </div>
                       <div className="text-sm font-medium text-purple-800">Growth Potential</div>
                     </div>
@@ -597,7 +597,7 @@ export default function ModernAICoach() {
                       Coach's Summary
                     </h4>
                     <p className="text-gray-700 leading-relaxed">
-                      {aiAnalysis.overallAssessment || "This session shows solid fundamentals with clear opportunities for enhancement. You demonstrate good command of your material but could benefit from more dynamic delivery techniques."}
+                      {aiAnalysis.overallAssessment || "No analysis available. Complete a practice session with recording to receive detailed coaching insights."}
                     </p>
                   </div>
                 </CardContent>

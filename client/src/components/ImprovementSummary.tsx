@@ -462,53 +462,62 @@ export default function ImprovementSummary() {
   };
 
   const generateAdvancedFallback = () => {
-    // Create sophisticated fallback based on available data
+    // Use ONLY authentic data - no placeholder values
+    const voiceConfidence = confidenceScore || 0;
+    const voiceClarityLevel = voiceClarity || 0;
+    const currentWordCount = wordCount || 0;
+    
     const fallbackAnalysis: ComprehensiveAnalysis = {
-      overallScore: 72,
-      improvementVelocity: 80,
+      overallScore: Math.round((voiceConfidence + voiceClarityLevel) / 2) || 0,
+      improvementVelocity: 0, // Only show when real progress data is available
       strengthsProfile: {
-        primary: ['Natural speaking rhythm', 'Clear voice projection'],
-        developing: ['Confident gestures', 'Audience connection'],
-        dormant: ['Advanced storytelling', 'Persuasive techniques']
+        primary: voiceConfidence > 0 || voiceClarityLevel > 0 ? 
+          ['Measured speaking metrics'] : [],
+        developing: currentWordCount > 0 ? ['Active speech patterns'] : [],
+        dormant: [] // Only show when analysis identifies dormant skills
       },
-      coachingInsights: [
+      coachingInsights: voiceConfidence > 0 || voiceClarityLevel > 0 ? [
         {
           type: 'improvement',
-          title: 'Voice Clarity Focus',
-          description: 'Concentrate on clear articulation to enhance message delivery',
+          title: 'Continue Practice Sessions',
+          description: `Voice confidence: ${voiceConfidence}%, clarity: ${voiceClarityLevel}%. Keep practicing to build consistency.`,
           actionable: true,
           urgency: 'medium',
           category: 'Voice',
-          impact: 80
-        },
-        {
-          type: 'strength',
-          title: 'Natural Confidence',
-          description: 'Your speaking confidence creates a positive foundation for growth',
-          actionable: false,
-          urgency: 'low',
-          category: 'Confidence',
-          impact: 85
+          impact: Math.round((voiceConfidence + voiceClarityLevel) / 2) || 0
         }
-      ],
-      personalizedGoals: generatePersonalizedGoals({}),
-      weeklyPlans: generateWeeklyPlans({}),
+      ] : [],
+      personalizedGoals: [], // Only show when sufficient data for personalization
+      weeklyPlans: [], // Only show when user has established practice patterns
       competencyMap: {
-        'Voice Control': { current: 70, potential: 88, priority: 8 },
-        'Body Language': { current: 65, potential: 85, priority: 7 },
-        'Content Structure': { current: 68, potential: 82, priority: 6 }
+        'Voice Control': { 
+          current: voiceClarityLevel || 0, 
+          potential: voiceClarityLevel > 0 ? Math.min(100, voiceClarityLevel + 20) : 0, 
+          priority: voiceClarityLevel > 0 ? 8 : 0 
+        },
+        'Confidence': { 
+          current: voiceConfidence || 0, 
+          potential: voiceConfidence > 0 ? Math.min(100, voiceConfidence + 15) : 0, 
+          priority: voiceConfidence > 0 ? 7 : 0 
+        },
+        'Speech Patterns': { 
+          current: currentWordCount > 0 ? 50 : 0, 
+          potential: currentWordCount > 0 ? 75 : 0, 
+          priority: currentWordCount > 0 ? 6 : 0 
+        }
       },
       motivationalProfile: {
-        communicationStyle: 'Balanced and Authentic',
-        learningPreference: 'Interactive Practice',
-        challengeLevel: 'Steady Progression',
-        feedbackStyle: 'Supportive Growth'
+        communicationStyle: voiceConfidence > 70 ? 'Confident Speaker' : 
+                            voiceConfidence > 0 ? 'Developing Speaker' : 'Beginning Journey',
+        learningPreference: currentWordCount > 50 ? 'Active Practice' : 'Foundation Building',
+        challengeLevel: voiceConfidence > 0 || voiceClarityLevel > 0 ? 'Progressive Growth' : 'Starting Point',
+        feedbackStyle: 'Data-Driven Coaching'
       },
       progressTracker: {
-        sessionsCompleted: 5,
-        hoursOfPractice: 8,
-        skillsImproved: 3,
-        confidenceGain: 22
+        sessionsCompleted: 0, // Only show real session count from database
+        hoursOfPractice: 0, // Only show real practice time
+        skillsImproved: 0, // Only show when improvements are measured
+        confidenceGain: 0 // Only show when baseline is established
       }
     };
 
