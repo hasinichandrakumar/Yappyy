@@ -34,6 +34,7 @@ import {
 } from '@/lib/video-recording';
 import { EnhancedAnalyticsIntegration } from './EnhancedAnalyticsIntegration';
 import { AuthenticAnalyticsDisplay } from './AuthenticAnalyticsDisplay';
+import { FillerWordHighlighter } from './FillerWordHighlighter';
 
 interface SimplifiedMetrics {
   eyeContact: number;
@@ -612,9 +613,9 @@ export default function SimplifiedPracticePage() {
           }
         });
         
-        // Enhanced backend filler word analysis for the complete transcript
+        // Enhanced backend filler word analysis with UM/UH detection
         const fullTranscript = transcript + ' ' + finalTranscript;
-        console.log('🔍 Sending for filler analysis:', { 
+        console.log('🔍 Sending for enhanced filler detection:', { 
           transcript: fullTranscript.substring(0, 100) + '...', 
           length: fullTranscript.length,
           duration: sessionDuration 
@@ -622,7 +623,8 @@ export default function SimplifiedPracticePage() {
         
         if (fullTranscript.trim().length > 10) {
           try {
-            const response = await fetch('/api/analyze-filler-words', {
+            // Use enhanced filler detection API that captures UM and UH
+            const response = await fetch('/api/detect-enhanced-fillers', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -632,28 +634,44 @@ export default function SimplifiedPracticePage() {
             });
             
             if (response.ok) {
-              const analysis = await response.json();
-              console.log('🎯 Advanced filler analysis:', analysis);
+              const result = await response.json();
+              const detection = result.detection;
+              console.log('🎯 Enhanced filler detection with UM/UH:', detection);
+              
+              // Update transcript with detected UM and UH words
+              let enhancedTranscript = fullTranscript;
+              if (detection.umCount > 0 || detection.uhCount > 0) {
+                // Add detected UM/UH to transcript for visibility
+                const fillerInserts = [];
+                if (detection.umCount > 0) fillerInserts.push(`[${detection.umCount} UM detected]`);
+                if (detection.uhCount > 0) fillerInserts.push(`[${detection.uhCount} UH detected]`);
+                enhancedTranscript += ' ' + fillerInserts.join(' ');
+                
+                // Update transcript to show detected fillers
+                setTranscript(enhancedTranscript);
+                transcriptRef.current = enhancedTranscript;
+              }
               
               // Update the total filler count for the entire session
-              console.log(`📊 Updating filler count to: ${analysis.totalFillers}`);
+              console.log(`📊 Updating filler count to: ${detection.totalFillers} (UM: ${detection.umCount}, UH: ${detection.uhCount})`);
               setMetrics(prev => ({
                 ...prev,
-                fillerWordCount: analysis.totalFillers,
+                fillerWordCount: detection.totalFillers,
                 voice: {
                   ...prev.voice,
-                  fillerCount: analysis.totalFillers
+                  fillerCount: detection.totalFillers
                 }
               }));
               
-              if (analysis.totalFillers > 0) {
-                const feedbackMessage = analysis.suggestions[0] || 
-                  `${analysis.totalFillers} filler words detected (${analysis.frequencyPerMinute}/min)`;
+              if (detection.totalFillers > 0) {
+                const umUhInfo = detection.umCount + detection.uhCount > 0 ? 
+                  ` (UM: ${detection.umCount}, UH: ${detection.uhCount})` : '';
+                const feedbackMessage = `${detection.totalFillers} filler words detected${umUhInfo}`;
                 
                 setLiveFeedback(prev => [...prev.slice(-4), {
                   id: Date.now().toString(),
                   message: feedbackMessage,
-                  type: analysis.severity === 'high' ? 'warning' : 'info',
+                  type: detection.totalFillers > 5 ? 'warning' : 'info',
                   timestamp: Date.now()
                 }]);
               }
@@ -1074,27 +1092,34 @@ export default function SimplifiedPracticePage() {
             
             try {
               // Send audio to backend for vocal filler analysis
-              const formData = new FormData();
-              formData.append('audio', audioBlob);
+              // Convert audio blob to base64 for enhanced filler detection
+              const arrayBuffer = await audioBlob.arrayBuffer();
+              const base64Audio = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
               
-              const response = await fetch('/api/detect-vocal-fillers', {
+              const response = await fetch('/api/detect-enhanced-fillers', {
                 method: 'POST',
-                body: formData
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  audioBuffer: base64Audio
+                })
               });
               
               if (response.ok) {
                 const result = await response.json();
-                if (result.vocalFillers && result.vocalFillers.length > 0) {
-                  console.log('🎯 VOCAL FILLERS DETECTED by audio analysis:', result.vocalFillers);
+                const detection = result.detection;
+                if (detection && detection.totalFillers > 0) {
+                  console.log('🎯 AUDIO UM/UH DETECTION:', detection);
                   
-                  result.vocalFillers.forEach((filler: string) => {
+                  // Add detected fillers to transcript
+                  detection.fillerWords.forEach((filler: string) => {
                     setVocalFillerBuffer(prev => [...prev, `${filler}_${Date.now()}`]);
                     
-                    // Add to transcript
+                    // Add to transcript with brackets for visibility
                     setTimeout(() => {
                       setTranscript(prev => {
-                        const enhanced = prev + ` [${filler}] `;
+                        const enhanced = prev + ` [${filler.toUpperCase()}] `;
                         transcriptRef.current = enhanced;
+                        console.log('🎯 Added to transcript:', filler.toUpperCase());
                         return enhanced;
                       });
                     }, 50);
@@ -2121,16 +2146,24 @@ export default function SimplifiedPracticePage() {
               <div className="bg-white border-2 border-gray-100 p-4 rounded-lg max-h-60 overflow-y-auto">
                 {transcript || interimTranscript ? (
                   <div className="text-sm leading-relaxed">
-                    <span 
+                    {/* Enhanced filler word highlighting including UM/UH detection */}
+                    <FillerWordHighlighter 
+                      text={transcript}
                       className="text-gray-900"
-                      dangerouslySetInnerHTML={{ 
-                        __html: highlightFillerWords(transcript) 
-                      }}
                     />
                     {interimTranscript && (
                       <span className="text-gray-400 italic">
                         {' ' + interimTranscript}
                       </span>
+                    )}
+                    
+                    {/* Show filler word count summary */}
+                    {metrics.fillerWordCount > 0 && (
+                      <div className="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs">
+                        <strong>Fillers detected:</strong> {metrics.fillerWordCount} words
+                        {transcript.includes('[UM') && ' (including UM sounds)'}
+                        {transcript.includes('[UH') && ' (including UH sounds)'}
+                      </div>
                     )}
                   </div>
                 ) : (

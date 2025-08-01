@@ -5398,6 +5398,50 @@ Respond with detailed analysis in JSON format:
   // Enhanced Analytics Integration Route
   app.post('/api/process-enhanced-analytics', processEnhancedAnalytics);
 
+  // Enhanced Filler Word Detection Route - Captures UM and UH
+  app.post('/api/detect-enhanced-fillers', async (req, res) => {
+    try {
+      const { transcript, audioBuffer } = req.body;
+      
+      if (!transcript && !audioBuffer) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Missing transcript or audio data' 
+        });
+      }
+
+      const { EnhancedFillerDetector } = await import('./enhanced-filler-detector.js');
+      const detector = new EnhancedFillerDetector();
+      
+      let result;
+      
+      if (audioBuffer) {
+        // Process audio buffer for UM/UH detection
+        const buffer = Buffer.from(audioBuffer, 'base64');
+        result = await detector.processAudioBuffer(buffer);
+      } else {
+        // Analyze transcript for all filler types
+        result = detector.analyzeTranscriptFillers(transcript);
+      }
+
+      console.log('🎯 Enhanced filler detection results:', result);
+
+      res.json({
+        success: true,
+        detection: result,
+        source: 'enhanced-filler-detection',
+        timestamp: Date.now()
+      });
+
+    } catch (error) {
+      console.error('❌ Enhanced filler detection error:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   // Authentic Analytics Processing Route - Extract real metrics from session data
   app.post('/api/process-authentic-analytics', async (req, res) => {
     try {
