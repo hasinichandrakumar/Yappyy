@@ -532,7 +532,63 @@ export default function ModernAICoach() {
 
         {/* Analysis Tab */}
         <TabsContent value="analysis" className="space-y-6">
-          {!aiAnalysis ? (
+          {/* Session Recording & Transcript */}
+          {(selectedSession.videoBlob || selectedSession.transcript) && (
+            <div className="grid md:grid-cols-2 gap-6 mb-6">
+              {/* Video Recording */}
+              {selectedSession.videoBlob && (
+                <Card className="border border-indigo-200">
+                  <CardHeader className="bg-gradient-to-r from-indigo-50 to-purple-50">
+                    <CardTitle className="flex items-center gap-2 text-indigo-800">
+                      <PlayCircle className="w-5 h-5" />
+                      Session Recording
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-4">
+                    <div className="bg-black rounded-lg overflow-hidden">
+                      <video 
+                        controls 
+                        className="w-full max-h-64 object-cover"
+                        src={`data:video/webm;base64,${selectedSession.videoBlob}`}
+                      >
+                        Your browser does not support video playback.
+                      </video>
+                    </div>
+                    <div className="mt-3 text-sm text-gray-600">
+                      Duration: {Math.floor((selectedSession.duration || 0) / 60)}m {((selectedSession.duration || 0) % 60)}s
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Transcript */}
+              {selectedSession.transcript && (
+                <Card className="border border-green-200">
+                  <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50">
+                    <CardTitle className="flex items-center gap-2 text-green-800">
+                      <MessageSquare className="w-5 h-5" />
+                      Session Transcript
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-4">
+                    <div className="bg-gray-50 rounded-lg p-4 max-h-64 overflow-y-auto">
+                      <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+                        {selectedSession.transcript}
+                      </p>
+                    </div>
+                    <div className="mt-3 flex items-center gap-4 text-sm text-gray-600">
+                      <span>Words: {selectedSession.transcript.split(' ').length}</span>
+                      <span>WPM: {selectedSession.averageWPM || selectedSession.wordsPerMinute || 'N/A'}</span>
+                      <span>Filler Words: {selectedSession.fillerWords || selectedSession.fillerWordCount || 0}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          )}
+
+          {/* Comprehensive Analysis Section */}
+          {!aiAnalysis && !selectedSession.aiAnalysis ? (
             <Card className="border-2 border-gray-200">
               <CardContent className="p-12 text-center">
                 <Brain className="w-16 h-16 text-gray-400 mx-auto mb-4" />
@@ -727,6 +783,230 @@ export default function ModernAICoach() {
                               </Badge>
                             </div>
                           </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Computer Vision Analysis */}
+              {selectedSession.facialAnalysis && (
+                <div className="grid md:grid-cols-2 gap-6 mt-6">
+                  <Card className="border border-yellow-200">
+                    <CardHeader className="bg-gradient-to-r from-yellow-50 to-orange-50">
+                      <CardTitle className="flex items-center gap-2 text-yellow-800">
+                        <Eye className="w-5 h-5" />
+                        Facial Analysis
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-6 space-y-4">
+                      {(() => {
+                        try {
+                          const facialData = JSON.parse(selectedSession.facialAnalysis);
+                          return (
+                            <div className="space-y-4">
+                              {/* Emotional Expression */}
+                              {facialData.emotionalExpression && (
+                                <div>
+                                  <h5 className="font-semibold text-gray-700 mb-2">Emotional Expression</h5>
+                                  <div className="grid grid-cols-2 gap-2 text-sm">
+                                    <div className="flex justify-between">
+                                      <span>Confidence:</span>
+                                      <Badge className="bg-blue-100 text-blue-800">{facialData.emotionalExpression.confidence}%</Badge>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span>Engagement:</span>
+                                      <Badge className="bg-green-100 text-green-800">{facialData.emotionalExpression.engagement}%</Badge>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span>Enthusiasm:</span>
+                                      <Badge className="bg-purple-100 text-purple-800">{facialData.emotionalExpression.enthusiasm}%</Badge>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span>Authenticity:</span>
+                                      <Badge className="bg-emerald-100 text-emerald-800">{facialData.emotionalExpression.authenticity}%</Badge>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Communication Signals */}
+                              {facialData.communicationSignals && (
+                                <div>
+                                  <h5 className="font-semibold text-gray-700 mb-2">Communication Quality</h5>
+                                  <div className="grid grid-cols-2 gap-2 text-sm">
+                                    <div className="flex justify-between">
+                                      <span>Eye Contact:</span>
+                                      <Badge className="bg-indigo-100 text-indigo-800">{facialData.communicationSignals.eyeContactQuality}%</Badge>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span>Gaze Focus:</span>
+                                      <Badge className="bg-cyan-100 text-cyan-800">{facialData.communicationSignals.gazeFocus}%</Badge>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span>Facial Stability:</span>
+                                      <Badge className="bg-teal-100 text-teal-800">{facialData.communicationSignals.facialStability}%</Badge>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span>Blink Rate:</span>
+                                      <Badge className="bg-orange-100 text-orange-800">{facialData.communicationSignals.blinkRate}%</Badge>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Overall Presence */}
+                              {facialData.overallPresence && (
+                                <div>
+                                  <h5 className="font-semibold text-gray-700 mb-2">Professional Presence</h5>
+                                  <div className="grid grid-cols-2 gap-2 text-sm">
+                                    <div className="flex justify-between">
+                                      <span>Charisma:</span>
+                                      <Badge className="bg-rose-100 text-rose-800">{facialData.overallPresence.charisma}%</Badge>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span>Trustworthiness:</span>
+                                      <Badge className="bg-blue-100 text-blue-800">{facialData.overallPresence.trustworthiness}%</Badge>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span>Professionalism:</span>
+                                      <Badge className="bg-gray-100 text-gray-800">{facialData.overallPresence.professionalism}%</Badge>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span>Approachability:</span>
+                                      <Badge className="bg-amber-100 text-amber-800">{facialData.overallPresence.approachability}%</Badge>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        } catch (e) {
+                          return <p className="text-gray-500 text-sm">Unable to parse facial analysis data</p>;
+                        }
+                      })()}
+                    </CardContent>
+                  </Card>
+
+                  {/* Body Language & Voice Metrics */}
+                  <Card className="border border-teal-200">
+                    <CardHeader className="bg-gradient-to-r from-teal-50 to-cyan-50">
+                      <CardTitle className="flex items-center gap-2 text-teal-800">
+                        <Activity className="w-5 h-5" />
+                        Performance Metrics
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-6 space-y-4">
+                      {/* Voice Metrics */}
+                      <div>
+                        <h5 className="font-semibold text-gray-700 mb-2">Voice Analysis</h5>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span>Confidence Score:</span>
+                            <Badge className="bg-blue-100 text-blue-800">{selectedSession.confidenceScore || 0}%</Badge>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Voice Clarity:</span>
+                            <Badge className="bg-green-100 text-green-800">{selectedSession.voiceClarity || selectedSession.clarityScore || 0}%</Badge>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Volume Consistency:</span>
+                            <Badge className="bg-purple-100 text-purple-800">{selectedSession.volumeConsistency || 0}%</Badge>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Pace Score:</span>
+                            <Badge className="bg-indigo-100 text-indigo-800">{selectedSession.paceScore || 0}%</Badge>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Body Language */}
+                      <div>
+                        <h5 className="font-semibold text-gray-700 mb-2">Body Language</h5>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span>Posture Score:</span>
+                            <Badge className="bg-emerald-100 text-emerald-800">{selectedSession.postureScore || 0}%</Badge>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Gesture Score:</span>
+                            <Badge className="bg-orange-100 text-orange-800">{selectedSession.gestureScore || 0}%</Badge>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Eye Contact:</span>
+                            <Badge className="bg-cyan-100 text-cyan-800">{selectedSession.eyeContactScore || 0}%</Badge>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Overall Score:</span>
+                            <Badge className="bg-yellow-100 text-yellow-800">{selectedSession.overallScore || 0}%</Badge>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Content Analysis */}
+                      <div>
+                        <h5 className="font-semibold text-gray-700 mb-2">Content Quality</h5>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span>Persuasiveness:</span>
+                            <Badge className="bg-rose-100 text-rose-800">{selectedSession.persuasivenessScore || 0}%</Badge>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Speaking Pace:</span>
+                            <Badge className="bg-teal-100 text-teal-800">{selectedSession.averageWPM || selectedSession.wordsPerMinute || 0} WPM</Badge>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Filler Words:</span>
+                            <Badge className={`${(selectedSession.fillerWords || selectedSession.fillerWordCount || 0) > 5 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
+                              {selectedSession.fillerWords || selectedSession.fillerWordCount || 0}
+                            </Badge>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Pause Count:</span>
+                            <Badge className="bg-blue-100 text-blue-800">{selectedSession.pauseCount || 0}</Badge>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+
+              {/* Stored AI Analysis */}
+              {selectedSession.aiAnalysis && (
+                <Card className="border border-purple-200 mt-6">
+                  <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50">
+                    <CardTitle className="flex items-center gap-2 text-purple-800">
+                      <Brain className="w-5 h-5" />
+                      Stored AI Analysis
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <pre className="text-sm text-gray-700 whitespace-pre-wrap">
+                        {JSON.stringify(selectedSession.aiAnalysis, null, 2)}
+                      </pre>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Coaching Tips */}
+              {selectedSession.coachingTips && selectedSession.coachingTips.length > 0 && (
+                <Card className="border border-emerald-200 mt-6">
+                  <CardHeader className="bg-gradient-to-r from-emerald-50 to-green-50">
+                    <CardTitle className="flex items-center gap-2 text-emerald-800">
+                      <Lightbulb className="w-5 h-5" />
+                      Coaching Tips
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    <div className="space-y-3">
+                      {selectedSession.coachingTips.map((tip: string, index: number) => (
+                        <div key={index} className="flex items-start gap-3 p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+                          <ArrowRight className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+                          <p className="text-sm text-emerald-800">{tip}</p>
                         </div>
                       ))}
                     </div>
