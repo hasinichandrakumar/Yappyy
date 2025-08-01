@@ -32,6 +32,7 @@ import {
   sessionRecordingStorage, 
   VideoRecordingData 
 } from '@/lib/video-recording';
+import { EnhancedAnalyticsIntegration } from './EnhancedAnalyticsIntegration';
 
 interface SimplifiedMetrics {
   eyeContact: number;
@@ -178,6 +179,9 @@ export default function SimplifiedPracticePage() {
 
   // Live feedback
   const [liveFeedback, setLiveFeedback] = useState<LiveFeedback[]>([]);
+  
+  // Enhanced analytics state
+  const [enhancedAnalytics, setEnhancedAnalytics] = useState<any>(null);
   
   // Vocal filler detection state
   const [vocalFillerBuffer, setVocalFillerBuffer] = useState<string[]>([]);
@@ -1967,6 +1971,12 @@ export default function SimplifiedPracticePage() {
             <AuthenticPostureDisplay 
               isRecording={isRecording}
               className="border-2 border-green-200"
+            />
+
+            {/* Enhanced Analytics Integration */}
+            <EnhancedAnalyticsIntegration
+              isRecording={isRecording}
+              onAnalyticsUpdate={(data) => setEnhancedAnalytics(data)}
             />
 
             {/* Live Feedback Insights */}

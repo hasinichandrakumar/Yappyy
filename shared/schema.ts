@@ -240,6 +240,14 @@ export const practiceSessions = pgTable("practice_sessions", {
   emotionalIntelligence: jsonb("emotional_intelligence"), // Emotional range, audience connection
   rhetoricAnalysis: jsonb("rhetoric_analysis"), // Rhetorical devices, argument structure
   improvementPlan: jsonb("improvement_plan"), // Personalized development roadmap
+  
+  // Enhanced Analytics Integration
+  enhancedContentAnalysis: jsonb("enhanced_content_analysis"), // VADER sentiment, readability, complexity
+  webSpeechMetrics: jsonb("web_speech_metrics"), // Web Speech API results
+  performanceMetrics: jsonb("performance_metrics"), // Browser performance data
+  webrtcQualityData: jsonb("webrtc_quality_data"), // Connection quality metrics
+  systemAnalytics: jsonb("system_analytics"), // Device, connection, browser metrics
+  
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (table) => ({
   userSessionIdx: index("user_session_idx").on(table.userId, table.sessionNumber),

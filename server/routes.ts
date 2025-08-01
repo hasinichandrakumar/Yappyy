@@ -54,6 +54,7 @@ import { freeVoiceAnalysis } from './free-voice-analysis';
 // getNextSessionNumber is now defined inline in this file
 import { graphqlHTTP } from 'express-graphql';
 import neuralGraphQL from './graphql-schema';
+import { processEnhancedAnalytics } from './analytics-route';
 
 // Helper function to extract user ID from Google OAuth request
 function getUserId(req: any): string {
@@ -5393,6 +5394,9 @@ Respond with detailed analysis in JSON format:
       });
     }
   });
+
+  // Enhanced Analytics Integration Route
+  app.post('/api/process-enhanced-analytics', processEnhancedAnalytics);
 
   return httpServer;
 }
