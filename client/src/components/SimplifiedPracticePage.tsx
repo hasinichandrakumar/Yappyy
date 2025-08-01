@@ -53,7 +53,6 @@ interface SimplifiedMetrics {
   };
   bodyLanguage: {
     eyeContactScore: number;
-    postureConfidence: number;
     facialExpressions: number;
     overallPresence: number;
   };
@@ -168,18 +167,10 @@ export default function SimplifiedPracticePage() {
     voice: {
       clarity: 0,
       pace: 0,
-      volume: 0, // Only show when real audio analysis available
-      intonation: 0, // Only show when real audio analysis available
-      fillerCount: 0,
-      pauseEffectiveness: 0, // Only show when real pause analysis available
-      pitchVariation: 0, // Only show when real pitch analysis available
-      vocalFryDetection: false,
-      uptalkPatterns: 0
+      fillerCount: 0
     },
     bodyLanguage: {
       eyeContactScore: 0,
-      gestureEffectiveness: 0,
-      postureConfidence: 0,
       facialExpressions: 0,
       overallPresence: 0
     }
@@ -1190,18 +1181,10 @@ export default function SimplifiedPracticePage() {
         voice: {
           clarity: 0,
           pace: 0,
-          volume: 0,
-          intonation: 0,
-          fillerCount: 0,
-          pauseEffectiveness: 0,
-          pitchVariation: 0,
-          vocalFryDetection: false,
-          uptalkPatterns: 0
+          fillerCount: 0
         },
         bodyLanguage: {
           eyeContactScore: 0,
-          gestureEffectiveness: 0,
-          postureConfidence: 0,
           facialExpressions: 0,
           overallPresence: 0
         }
@@ -1237,10 +1220,7 @@ export default function SimplifiedPracticePage() {
             eyeContactScore: computerVisionMetrics?.eyeContact || 
               facialAnalysis?.facialMetrics?.communicationSignals?.eyeContactQuality || 
               roboflowAnalysis?.facial?.eyeContact || prev.bodyLanguage.eyeContactScore,
-            gestureEffectiveness: computerVisionMetrics?.gesture || 
-              roboflowAnalysis?.gestures?.effectiveness || prev.bodyLanguage.gestureEffectiveness,
-            postureConfidence: computerVisionMetrics?.posture || 
-              roboflowAnalysis?.posture?.confidence || prev.bodyLanguage.postureConfidence,
+
             facialExpressions: computerVisionMetrics?.engagement || 
               facialAnalysis?.facialMetrics?.emotionalExpression?.authenticity || 
               roboflowAnalysis?.facial?.engagement || prev.bodyLanguage.facialExpressions,
@@ -1371,7 +1351,6 @@ export default function SimplifiedPracticePage() {
         voiceMetrics: {
           clarity: metrics.voice.clarity,
           pace: metrics.voice.pace,
-          volume: metrics.voice.volume,
           fillerCount: metrics.fillerWordCount
         },
         bodyLanguageMetrics: {
@@ -1423,13 +1402,7 @@ export default function SimplifiedPracticePage() {
         voice: {
           clarity: 0,
           pace: 0,
-          volume: 0,
-          intonation: 0,
-          fillerCount: 0,
-          pauseEffectiveness: 0,
-          pitchVariation: 0,
-          vocalFryDetection: false,
-          uptalkPatterns: 0
+          fillerCount: 0
         },
         bodyLanguage: {
           eyeContactScore: 0,
@@ -1476,9 +1449,8 @@ export default function SimplifiedPracticePage() {
         ],
         // Analysis tab compatible fields
         clarityScore: realVoiceClarity / 100,
-        volumeConsistency: hasRealSpeech ? 0.8 : 0, // Only show real values if speech occurred
-        intonationScore: hasRealSpeech ? 0.75 : 0, // Only show real values if speech occurred
-        postureScore: hasRealSpeech ? (metrics.bodyLanguage?.postureConfidence || 70) / 100 : 0,
+        // Volume and intonation analysis removed - not functional
+        postureScore: 0, // Posture analysis removed
         fillerWordsUh: hasRealSpeech ? Math.floor(realFillerWords * 0.4) : 0, // Only if speech occurred
         fillerWordsLike: hasRealSpeech ? Math.floor(realFillerWords * 0.3) : 0, // Only if speech occurred
         fillerWordsSo: hasRealSpeech ? Math.floor(realFillerWords * 0.3) : 0, // Only if speech occurred
@@ -1500,8 +1472,8 @@ export default function SimplifiedPracticePage() {
         bodyLanguageMetrics: {
           eyeContact: realEyeContact,
           confidence: hasRealSpeech ? metrics.confidence : 0,
-          posture: hasRealSpeech ? (computerVisionMetrics?.posture || metrics.bodyLanguage?.postureConfidence || 0) : 0,
-          gestures: hasRealSpeech ? (computerVisionMetrics?.gesture || metrics.bodyLanguage?.gestureEffectiveness || 0) : 0
+          posture: 0, // Posture analysis removed
+          gestures: 0 // Gesture analysis removed
         },
         persuasivenessScore: realConfidenceScore / 100,
         emotionalIntelligence: {
@@ -1535,8 +1507,7 @@ export default function SimplifiedPracticePage() {
           purpose: sessionData.purpose,
           overallPerformance: Math.round(sessionData.confidenceScore * 100),
           clarityScore: Math.round(sessionData.clarityScore * 100),
-          volumeConsistency: Math.round(sessionData.volumeConsistency * 100),
-          intonationScore: Math.round(sessionData.intonationScore * 100),
+          // Volume and intonation metrics removed
           paceConsistency: hasRealSpeech ? 85 : 0, // Only show if speech occurred
           engagementLevel: hasRealSpeech ? metrics.engagement : 0,
           eyeContactScore: realEyeContact,
@@ -1578,7 +1549,7 @@ export default function SimplifiedPracticePage() {
                 clarity: realVoiceClarity,
                 pace: metrics.voice?.pace || 0,
                 eyeContact: realEyeContact,
-                gesture: metrics.bodyLanguage?.gestureEffectiveness || 0,
+                gesture: 0, // Gesture analysis removed
                 fillerWordCount: realFillerWords,
                 wordsPerMinute: averageWPM
               },
@@ -1586,8 +1557,7 @@ export default function SimplifiedPracticePage() {
               voiceMetrics: {
                 clarity: realVoiceClarity,
                 pace: metrics.voice?.pace || 0,
-                volume: metrics.voice?.volume || 0,
-                intonation: metrics.voice?.intonation || 0
+                // Volume and intonation metrics removed
               }
             })
           });
@@ -1697,17 +1667,11 @@ export default function SimplifiedPracticePage() {
             voice: {
               clarity: 0,
               pace: 0,
-              volume: 0,
-              intonation: 0,
-              fillerCount: 0,
-              pauseEffectiveness: 0,
-              pitchVariation: 0,
-              vocalFryDetection: false,
-              uptalkPatterns: 0
+              fillerCount: 0
             },
             bodyLanguage: {
               eyeContactScore: 0,
-              postureConfidence: 0,
+
               facialExpressions: 0,
               overallPresence: 0
             }
