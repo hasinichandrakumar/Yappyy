@@ -64,8 +64,17 @@ function getUserId(req: any): string {
 
 // Helper function to get next session number
 async function getNextSessionNumber(userId: string): Promise<number> {
-  // Always start users from Session 1
-  return 1;
+  try {
+    const result = await db.select({ maxSessionNumber: max(practiceSessions.sessionNumber) })
+      .from(practiceSessions)
+      .where(eq(practiceSessions.userId, userId));
+    
+    const currentMax = result[0]?.maxSessionNumber || 0;
+    return currentMax + 1;
+  } catch (error) {
+    console.error('Error getting next session number:', error);
+    return 1; // Default to session 1 if error
+  }
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -280,10 +289,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get next session number for authenticated users
   app.get('/api/sessions/next-number', async (req: any, res) => {
     try {
-      if (!req.isAuthenticated() || !req.user) {
-        return res.json({ sessionNumber: 1 }); // Default for guest users
-      }
-
       const userId = getUserId(req);
       const nextNumber = await getNextSessionNumber(userId);
       
@@ -322,7 +327,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const completeSessionData = {
         userId,
         sessionNumber,
-        sessionName: sessionData.sessionName || `Session 1`,
+        sessionName: sessionData.sessionName || `Session ${sessionNumber}`,
         purpose: sessionData.purpose || 'general-presentation',
         duration: sessionData.duration || 0,
         transcript: sessionData.transcript || '',
@@ -375,7 +380,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ 
         success: true, 
         session,
-        message: `Session 1 saved successfully` 
+        message: `Session ${sessionNumber} saved successfully` 
       });
     } catch (error) {
       console.error("Error saving practice session:", error);

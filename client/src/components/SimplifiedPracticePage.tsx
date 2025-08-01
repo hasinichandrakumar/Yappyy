@@ -22,7 +22,7 @@ import { SessionDataViewer } from '@/components/SessionDataViewer';
 import { useRoboflowVision } from '@/hooks/useRoboflowVision';
 import { useFacialAnalysis } from '@/hooks/useFacialAnalysis';
 import { useRobustComputerVision } from '@/hooks/useRobustComputerVision';
-import SessionAnalysisPage from './SessionAnalysisPage';
+import AuthenticAnalysisPage from './AuthenticAnalysisPage';
 import VideoPlaybackViewer from './VideoPlaybackViewer';
 import RecordingLibrary from './RecordingLibrary';
 import RealTimeComputerVisionDashboard from './RealTimeComputerVisionDashboard';
@@ -1721,8 +1721,8 @@ export default function SimplifiedPracticePage() {
   // Show analysis page if session is complete
   if (showAnalysisPage && sessionAnalysisData) {
     return (
-      <SessionAnalysisPage
-        sessionData={sessionAnalysisData}
+      <AuthenticAnalysisPage
+        session={sessionAnalysisData}
         onClose={() => setShowAnalysisPage(false)}
         onNewSession={() => {
           setShowAnalysisPage(false);

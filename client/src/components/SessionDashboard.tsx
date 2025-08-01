@@ -105,7 +105,7 @@ export function SessionDashboard() {
           <CardHeader>
             <CardTitle className="text-blue-900 font-extrabold">Welcome to Yappyy Speaking Practice! 🎯</CardTitle>
             <CardDescription className="text-blue-700 font-semibold">
-              Start your speaking journey with Session 1. Every session begins fresh to help you practice and improve with authentic AI feedback.
+              Start your speaking journey with Session {nextSessionNumber}. Track your progress as you advance through numbered practice sessions.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -115,7 +115,7 @@ export function SessionDashboard() {
                 className="bg-blue-600 hover:bg-blue-700 font-bold"
               >
                 <Mic className="h-4 w-4 mr-2" />
-                Start Session 1
+                Start Session {nextSessionNumber}
               </Button>
               <Button 
                 variant="outline"
@@ -135,7 +135,7 @@ export function SessionDashboard() {
               Session Progress Dashboard
             </CardTitle>
             <CardDescription className="font-semibold">
-              Ready for Session 1? You've completed {stats.totalSessions} sessions with authentic AI analysis.
+              Ready for Session {nextSessionNumber}? You've completed {stats.totalSessions} sessions with authentic AI analysis.
             </CardDescription>
           </CardHeader>
         </Card>
@@ -274,7 +274,7 @@ export function SessionDashboard() {
           <div className="text-center">
             <Award className="h-12 w-12 text-green-600 mx-auto mb-4" />
             <h3 className="text-lg font-extrabold text-green-900 mb-2">
-              Ready for Session 1?
+              Ready for Session {nextSessionNumber}?
             </h3>
             <p className="text-green-700 mb-4 font-semibold">
               Continue your speaking improvement journey with authentic AI coaching and computer vision analysis.
@@ -290,7 +290,7 @@ export function SessionDashboard() {
                 className="bg-green-600 hover:bg-green-700 font-bold"
               >
                 <Mic className="h-4 w-4 mr-2" />
-                Start Session 1
+                Start Session {nextSessionNumber}
               </Button>
               <Button 
                 size="lg"
