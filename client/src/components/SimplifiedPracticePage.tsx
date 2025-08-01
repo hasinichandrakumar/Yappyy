@@ -1364,38 +1364,57 @@ export default function SimplifiedPracticePage() {
 
     setIsRecording(false);
 
-    // Save session to database
+    // Save session to database with comprehensive data
     try {
+      console.log('💾 Preparing to save session data...');
+      
       const sessionData = {
-        sessionName,
-        purpose: sessionPurpose,
+        sessionName: sessionName || `Session ${sessionNumber}`,
+        purpose: sessionPurpose || 'general-presentation',
         duration: sessionDuration,
-        transcript: transcript,
-        averageWPM: metrics.wordsPerMinute,
-        confidenceScore: metrics.confidence,
-        voiceClarity: metrics.voice.clarity,
-        fillerWords: metrics.fillerWordCount,
-        pauseCount: 0, // Can be enhanced with real pause analysis
-        eyeContactScore: String(metrics.eyeContact),
+        transcript: transcript || '',
+        averageWPM: metrics.wordsPerMinute || 0,
+        confidenceScore: metrics.confidence || 0,
+        voiceClarity: metrics.voice.clarity || 0,
+        fillerWords: metrics.fillerWordCount || 0,
+        pauseCount: 0,
+        eyeContactScore: String(metrics.eyeContact || 0),
         coachingTips: [],
-        videoBlob: recordingData?.blob ? await recordingData.blob.text() : null,
-        facialAnalysis: {
-          eyeContact: metrics.eyeContact,
-          confidence: metrics.confidence,
-          engagement: metrics.engagement
-        },
-        voiceMetrics: {
-          clarity: metrics.voice.clarity,
-          pace: metrics.voice.pace,
-          fillerCount: metrics.fillerWordCount
-        },
-        bodyLanguageMetrics: {
-          eyeContactScore: metrics.bodyLanguage.eyeContactScore,
-          facialExpressions: metrics.bodyLanguage.facialExpressions,
-          overallPresence: metrics.bodyLanguage.overallPresence
-        },
-        persuasivenessScore: metrics.confidence
+        videoBlob: recordingData?.blob ? await recordingData.blob.arrayBuffer().then(buffer => 
+          Buffer.from(buffer).toString('base64')
+        ) : null,
+        facialAnalysis: JSON.stringify({
+          eyeContact: metrics.eyeContact || 0,
+          confidence: metrics.confidence || 0,
+          engagement: metrics.engagement || 0,
+          bodyLanguage: metrics.bodyLanguage || {}
+        }),
+        voiceMetrics: JSON.stringify({
+          clarity: metrics.voice.clarity || 0,
+          pace: metrics.voice.pace || 0,
+          volume: metrics.voice.volume || 0,
+          fillerCount: metrics.fillerWordCount || 0
+        }),
+        bodyLanguageMetrics: JSON.stringify({
+          eyeContactScore: metrics.bodyLanguage?.eyeContactScore || 0,
+          facialExpressions: metrics.bodyLanguage?.facialExpressions || 0,
+          overallPresence: metrics.bodyLanguage?.overallPresence || 0
+        }),
+        aiAnalysis: JSON.stringify({
+          overallScore: Math.round((metrics.confidence + metrics.clarity + metrics.engagement) / 3) || 0,
+          strengths: [],
+          improvements: []
+        }),
+        persuasivenessScore: metrics.confidence || 0
       };
+
+      console.log('📊 Session data prepared:', {
+        name: sessionData.sessionName,
+        duration: sessionData.duration,
+        transcript_length: sessionData.transcript.length,
+        wpm: sessionData.averageWPM,
+        fillers: sessionData.fillerWords
+      });
 
       const response = await fetch('/api/sessions/save', {
         method: 'POST',
@@ -1405,7 +1424,13 @@ export default function SimplifiedPracticePage() {
         body: JSON.stringify(sessionData)
       });
 
+      if (!response.ok) {
+        console.error('❌ Session save failed with status:', response.status);
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
       const result = await response.json();
+      
       if (result.success) {
         console.log(`✅ Session ${result.session.sessionNumber} saved successfully`);
         
@@ -1415,15 +1440,25 @@ export default function SimplifiedPracticePage() {
         setSessionName(`Session ${nextSessionNumber}`);
         
         toast({
-          title: "Session Saved",
-          description: `${result.message}`,
+          title: "Session Saved!",
+          description: `${result.message} - Check the Analysis tab to view your session`,
           variant: "default"
         });
       } else {
-        console.warn('⚠️ Failed to save session:', result.message);
+        console.error('❌ Failed to save session:', result.message);
+        toast({
+          title: "Save Failed",
+          description: result.message || "Unable to save session",
+          variant: "destructive"
+        });
       }
     } catch (error) {
       console.error('❌ Error saving session:', error);
+      toast({
+        title: "Session Save Error",
+        description: "Session could not be saved. Please try again.",
+        variant: "destructive"
+      });
     }
 
     // Reset metrics to 0 after recording stops
