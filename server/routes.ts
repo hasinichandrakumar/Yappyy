@@ -5398,5 +5398,43 @@ Respond with detailed analysis in JSON format:
   // Enhanced Analytics Integration Route
   app.post('/api/process-enhanced-analytics', processEnhancedAnalytics);
 
+  // Authentic Analytics Processing Route - Extract real metrics from session data
+  app.post('/api/process-authentic-analytics', async (req, res) => {
+    try {
+      const { transcript, duration } = req.body;
+      
+      if (!transcript || !duration) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Missing transcript or duration' 
+        });
+      }
+
+      const { AuthenticAnalyticsProcessor } = await import('./authentic-analytics-processor.js');
+      const processor = new AuthenticAnalyticsProcessor();
+      
+      const metrics = await processor.processSession({
+        transcript,
+        duration
+      });
+
+      console.log('🔬 Authentic analytics processed:', metrics);
+
+      res.json({
+        success: true,
+        metrics,
+        source: 'authentic-analysis',
+        timestamp: Date.now()
+      });
+
+    } catch (error) {
+      console.error('❌ Authentic analytics processing error:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   return httpServer;
 }

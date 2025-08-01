@@ -33,6 +33,7 @@ import {
   VideoRecordingData 
 } from '@/lib/video-recording';
 import { EnhancedAnalyticsIntegration } from './EnhancedAnalyticsIntegration';
+import { AuthenticAnalyticsDisplay } from './AuthenticAnalyticsDisplay';
 
 interface SimplifiedMetrics {
   eyeContact: number;
@@ -934,8 +935,8 @@ export default function SimplifiedPracticePage() {
           if (roboflowVideoRef.current) {
             roboflowVideoRef.current.srcObject = stream;
             // Set canvas reference safely
-            if (roboflowCanvasRef && canvasRef.current) {
-              roboflowCanvasRef.current = canvasRef.current;
+            if (canvasRef.current && roboflowCanvasRef) {
+              (roboflowCanvasRef as any).current = canvasRef.current;
             }
           }
           
@@ -1185,7 +1186,13 @@ export default function SimplifiedPracticePage() {
         voice: {
           clarity: 0,
           pace: 0,
-          fillerCount: 0
+          volume: 0,
+          intonation: 0,
+          fillerCount: 0,
+          pauseEffectiveness: 0,
+          pitchVariation: 0,
+          vocalFryDetection: false,
+          uptalkPatterns: 0
         },
         bodyLanguage: {
           eyeContactScore: 0,
@@ -1406,12 +1413,16 @@ export default function SimplifiedPracticePage() {
         voice: {
           clarity: 0,
           pace: 0,
-          fillerCount: 0
+          volume: 0,
+          intonation: 0,
+          fillerCount: 0,
+          pauseEffectiveness: 0,
+          pitchVariation: 0,
+          vocalFryDetection: false,
+          uptalkPatterns: 0
         },
         bodyLanguage: {
           eyeContactScore: 0,
-          gestureEffectiveness: 0,
-          postureConfidence: 0,
           facialExpressions: 0,
           overallPresence: 0
         }
@@ -1971,6 +1982,13 @@ export default function SimplifiedPracticePage() {
             <AuthenticPostureDisplay 
               isRecording={isRecording}
               className="border-2 border-green-200"
+            />
+
+            {/* Authentic Analytics Display - Real metrics from session data */}
+            <AuthenticAnalyticsDisplay
+              transcript={transcript}
+              duration={sessionDuration}
+              isVisible={transcript.trim().length > 10}
             />
 
             {/* Enhanced Analytics Integration */}
