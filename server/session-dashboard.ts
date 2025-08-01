@@ -69,18 +69,6 @@ export async function createSessionDashboardEndpoint(app: any, getUserId: (req: 
 
 // Helper function to get next session number for a user
 export async function getNextSessionNumber(userId: string): Promise<number> {
-  try {
-    const result = await db
-      .select()
-      .from(practiceSessions)
-      .where(eq(practiceSessions.userId, userId))
-      .orderBy(desc(practiceSessions.sessionNumber))
-      .limit(1);
-    
-    const lastSessionNumber = result[0]?.sessionNumber || 0;
-    return lastSessionNumber + 1;
-  } catch (error) {
-    console.error("Error getting next session number:", error);
-    return 1;
-  }
+  // Always start users from Session 1
+  return 1;
 }

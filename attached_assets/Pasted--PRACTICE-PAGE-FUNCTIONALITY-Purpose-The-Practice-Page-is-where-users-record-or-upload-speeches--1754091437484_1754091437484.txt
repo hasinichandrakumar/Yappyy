@@ -1,0 +1,38 @@
+🗣️ PRACTICE PAGE FUNCTIONALITY
+Purpose:
+The Practice Page is where users record or upload speeches, rehearse presentations, or complete short speaking drills based on prompts (e.g. elevator pitch, debate opener, mock interview, etc.).
+Core Features:
+🎤 Record: Start/stop video/audio recording using the webcam/mic.
+📄 Upload: Option to upload existing speech video or audio.
+💡 Prompt Generator: Users can select a prompt or speaking scenario (e.g. business pitch, debate, TED-style talk).
+⏱️ Timer: Live countdown to practice time limits.
+🔁 Transcript & Filler Word Counter (Live): As the user speaks, a rough transcript and filler word counter appear in real-time (with post-processing accuracy later on).
+🚀 "Submit for Analysis" Button: Once done, users submit their speech for detailed AI feedback.
+📊 ANALYSIS PAGE FUNCTIONALITY
+Purpose:
+This is where users get detailed, intelligent feedback on their practice attempt. The goal is to simulate the kind of actionable, specific feedback they’d get from a human coach, but better — backed by AI, visuals, and metrics.
+Key Feedback Components:
+Transcript
+Auto-generated full transcript
+Filler words, repeated words, long pauses, and unclear segments highlighted
+Verbal Feedback Metrics
+📈 Speaking Rate (WPM)
+⏸️ Average Pause Length
+🔁 Filler Word Count + Specific Words ("um", "like", etc.)
+🔄 Word Repetition Tracker
+🔊 Volume Analysis (Too soft/loud?)
+🎵 Pitch Variation (monotone vs expressive)
+Non-Verbal Feedback Metrics (if video input is provided)
+👀 Eye Contact (measured through gaze direction and focus)
+😐 Facial Expression Tone (neutral, smiling, overly tense, etc.)
+🤲 Gesture Frequency & Type (open hands, pointing, etc.)
+🧍‍♂️ Posture Movement & Stability
+🚶 Walking Pattern (if any)
+Personalized Tips
+AI-generated suggestions like:
+"Try slowing down during key points,"
+"Vary your pitch more to maintain attention,"
+"Good use of eye contact — consider using more gestures to emphasize points."
+Progress Tracking (if user has account history)
+Comparison with past attempts (e.g., "25% fewer filler words than last time")
+Visual graphs showing improvement over time
