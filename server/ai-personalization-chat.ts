@@ -129,16 +129,77 @@ When you have sufficient information (at least purpose, audience, and goals), se
 
     return result;
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('AI personalization chat error:', error);
+    
+    // Handle quota exceeded or API issues with helpful fallback responses
+    if (error.status === 429 || error.code === 'insufficient_quota') {
+      // Provide intelligent fallback based on user input
+      const fallbackResponse = generateIntelligentFallback(userInput, collectedInfo, step);
+      return fallbackResponse;
+    }
+    
     return {
-      response: "I apologize, but I'm having trouble processing your request right now. Could you please try again?",
+      response: "I'm experiencing technical difficulties. Let me help you with a quick personalization instead. Could you briefly tell me: What's your main goal for this speech and who is your audience?",
       extractedInfo: {},
       readyToPersonalize: false,
-      missingInfo: ["All information"],
+      missingInfo: ["Purpose", "Audience"],
       finalInfo: null
     };
   }
+}
+
+function generateIntelligentFallback(
+  userInput: string,
+  collectedInfo: PersonalizationInfo,
+  step: string
+) {
+  const input = userInput.toLowerCase();
+  const extractedInfo: PersonalizationInfo = {};
+  
+  // Extract basic information from user input
+  if (input.includes('sales') || input.includes('selling') || input.includes('client')) {
+    extractedInfo.purpose = 'Sales presentation';
+    extractedInfo.audience = 'Potential clients';
+    extractedInfo.tone = 'Professional and persuasive';
+  } else if (input.includes('team') || input.includes('meeting')) {
+    extractedInfo.purpose = 'Team presentation';
+    extractedInfo.audience = 'Team members';
+    extractedInfo.tone = 'Collaborative and informative';
+  } else if (input.includes('conference') || input.includes('professional')) {
+    extractedInfo.purpose = 'Professional presentation';
+    extractedInfo.audience = 'Industry professionals';
+    extractedInfo.tone = 'Expert and authoritative';
+  } else if (input.includes('motivat') || input.includes('inspir')) {
+    extractedInfo.purpose = 'Motivational speech';
+    extractedInfo.audience = 'General audience';
+    extractedInfo.tone = 'Inspiring and uplifting';
+  }
+  
+  // Determine if we have enough info to personalize
+  const hasBasicInfo = extractedInfo.purpose && extractedInfo.audience;
+  
+  if (hasBasicInfo) {
+    return {
+      response: `Great! I understand you're preparing a ${extractedInfo.purpose.toLowerCase()} for ${extractedInfo.audience.toLowerCase()}. That's perfect for personalization!\n\nBased on what you've told me, I'll customize the template with:\n• ${extractedInfo.tone} tone\n• Content relevant to ${extractedInfo.purpose.toLowerCase()}\n• Language appropriate for ${extractedInfo.audience.toLowerCase()}\n\nReady to personalize your template now!`,
+      extractedInfo,
+      readyToPersonalize: true,
+      missingInfo: [],
+      finalInfo: {
+        ...collectedInfo,
+        ...extractedInfo,
+        context: extractedInfo.purpose?.includes('Sales') ? 'Business environment' : 'Professional setting'
+      }
+    };
+  }
+  
+  return {
+    response: "I'd love to help personalize your template! To get started, please tell me:\n\n• What's the main purpose of your speech?\n• Who will be your audience?\n• What outcome do you want to achieve?\n\nFor example: 'I'm giving a sales presentation to potential clients to convince them to buy our product.'",
+    extractedInfo,
+    readyToPersonalize: false,
+    missingInfo: ["Purpose", "Audience", "Goals"],
+    finalInfo: null
+  };
 }
 
 export async function generatePersonalizationSummary(
