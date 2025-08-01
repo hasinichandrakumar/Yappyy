@@ -680,7 +680,7 @@ export class FacialAnalysisEngine {
       realLandmarks: this.generateFallbackLandmarks(),
       realExpressions: this.generateFallbackExpressions(brightness),
       demographics: {
-        age: 25 + Math.floor(Math.random() * 20), // Reasonable age range
+        age: 30, // Neutral age estimation
         gender: { value: 'unknown', probability: 0.5 }
       },
       landmarks: this.generateFallbackLandmarks(),
@@ -719,9 +719,9 @@ export class FacialAnalysisEngine {
       neutral: Math.max(0.4, 0.8 - brightness * 0.3),
       happy: Math.max(0.1, brightness * 0.6),
       sad: Math.max(0.05, (1 - brightness) * 0.3),
-      angry: Math.max(0.02, Math.random() * 0.15),
-      fearful: Math.max(0.02, Math.random() * 0.1),
-      disgusted: Math.max(0.01, Math.random() * 0.05),
+      angry: Math.max(0.02, (1 - brightness) * 0.15),
+      fearful: Math.max(0.02, (1 - brightness) * 0.1),
+      disgusted: Math.max(0.01, (1 - brightness) * 0.05),
       surprised: Math.max(0.05, brightness * 0.2)
     };
   }
@@ -744,7 +744,7 @@ export class FacialAnalysisEngine {
       tension: Math.max(10, (1 - brightness) * 40),
       expressiveness: Math.max(40, brightness * 80 + quality * 20),
       articulation: Math.max(55, quality * 85),
-      forcedSmile: Math.max(5, Math.random() * 25)
+      forcedSmile: Math.max(5, (1 - brightness) * 25)
     };
   }
 
@@ -766,10 +766,10 @@ export class FacialAnalysisEngine {
 
   private getFallbackHeadPose(): any {
     return {
-      pitch: Math.random() * 10 - 5, // -5 to +5 degrees
-      yaw: Math.random() * 20 - 10,  // -10 to +10 degrees
-      roll: Math.random() * 6 - 3,   // -3 to +3 degrees
-      movementVariance: Math.max(0.15, Math.random() * 0.3)
+      pitch: 0, // Neutral head position
+      yaw: 0,   // Neutral head position
+      roll: 0,  // Neutral head position
+      movementVariance: Math.max(0.15, (1 - quality) * 0.3)
     };
   }
   

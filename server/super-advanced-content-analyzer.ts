@@ -277,7 +277,7 @@ Respond with detailed JSON analysis focusing on advanced insights and recommenda
       ]
     });
 
-    return JSON.parse(response.content[0].text || '{}');
+    return JSON.parse((response.content[0] as any).text || '{}');
   }
 
   private synthesizeAnalyses(primary: any, secondary: any, framework: any, purpose: string): SuperAdvancedAnalysis {
@@ -502,7 +502,7 @@ Respond with detailed JSON analysis focusing on advanced insights and recommenda
     const metrics: any = {};
     keyMetrics.forEach(metric => {
       metrics[metric] = {
-        score: Math.round(baseScore + (Math.random() - 0.5) * 10),
+        score: Math.round(baseScore * 0.95),
         analysis: `${metric} demonstrates solid foundation with opportunities for enhancement`,
         recommendations: [`Focus on strengthening ${metric} through targeted practice`]
       };
@@ -513,7 +513,7 @@ Respond with detailed JSON analysis focusing on advanced insights and recommenda
   private generateFallbackCriteriaScores(criteria: string[], baseScore: number): any {
     const scores: any = {};
     criteria.forEach(criterion => {
-      scores[criterion] = Math.round(baseScore + (Math.random() - 0.5) * 8);
+      scores[criterion] = Math.round(baseScore * 0.92);
     });
     return scores;
   }

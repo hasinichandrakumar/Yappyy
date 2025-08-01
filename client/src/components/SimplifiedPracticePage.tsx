@@ -1190,11 +1190,11 @@ export default function SimplifiedPracticePage() {
         voice: {
           clarity: 0,
           pace: 0,
-          volume: 85,
-          intonation: 75,
+          volume: 0,
+          intonation: 0,
           fillerCount: 0,
-          pauseEffectiveness: 80,
-          pitchVariation: 75,
+          pauseEffectiveness: 0,
+          pitchVariation: 0,
           vocalFryDetection: false,
           uptalkPatterns: 0
         },
@@ -1423,11 +1423,11 @@ export default function SimplifiedPracticePage() {
         voice: {
           clarity: 0,
           pace: 0,
-          volume: 85,
-          intonation: 75,
+          volume: 0,
+          intonation: 0,
           fillerCount: 0,
-          pauseEffectiveness: 80,
-          pitchVariation: 75,
+          pauseEffectiveness: 0,
+          pitchVariation: 0,
           vocalFryDetection: false,
           uptalkPatterns: 0
         },
@@ -1697,11 +1697,11 @@ export default function SimplifiedPracticePage() {
             voice: {
               clarity: 0,
               pace: 0,
-              volume: 85,
-              intonation: 75,
+              volume: 0,
+              intonation: 0,
               fillerCount: 0,
-              pauseEffectiveness: 80,
-              pitchVariation: 75,
+              pauseEffectiveness: 0,
+              pitchVariation: 0,
               vocalFryDetection: false,
               uptalkPatterns: 0
             },
