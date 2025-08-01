@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { EnhancedAIPersonalizer } from "./EnhancedAIPersonalizer";
+import AIPersonalizationChat from "./AIPersonalizationChat";
 
 interface Template {
   id: string;
@@ -591,6 +592,7 @@ export default function Enhanced50PlusTemplates() {
   const [editedContent, setEditedContent] = useState('');
   const [isAIGenerating, setIsAIGenerating] = useState(false);
   const [showAIPersonalizer, setShowAIPersonalizer] = useState(false);
+  const [showAIChat, setShowAIChat] = useState(false);
   const { toast } = useToast();
 
   const filteredTemplates = FIFTY_PLUS_TEMPLATES.filter(template => {
@@ -609,7 +611,7 @@ export default function Enhanced50PlusTemplates() {
 
   const handleAIPersonalize = () => {
     if (!selectedTemplate) return;
-    setShowAIPersonalizer(true);
+    setShowAIChat(true);
   };
 
   const handlePersonalizationComplete = (personalizedContent: string, improvements: string[], tips: string[]) => {
@@ -801,8 +803,9 @@ export default function Enhanced50PlusTemplates() {
                                     handleAIPersonalize();
                                   }}
                                   disabled={isAIGenerating}
+                                  className="bg-gradient-to-r from-purple-50 to-blue-50 hover:from-purple-100 hover:to-blue-100 border-purple-200"
                                 >
-                                  <Wand2 className="h-4 w-4 mr-1" />
+                                  <MessageSquare className="h-4 w-4 mr-1" />
                                   {isAIGenerating ? 'Personalizing...' : 'AI Personalize'}
                                 </Button>
                                 <Button
@@ -877,7 +880,17 @@ export default function Enhanced50PlusTemplates() {
         )}
       </Tabs>
 
-      {/* Enhanced AI Personalizer Dialog */}
+      {/* AI Personalization Chat Dialog */}
+      {selectedTemplate && (
+        <AIPersonalizationChat
+          template={selectedTemplate}
+          isOpen={showAIChat}
+          onClose={() => setShowAIChat(false)}
+          onPersonalized={handlePersonalizationComplete}
+        />
+      )}
+
+      {/* Enhanced AI Personalizer Dialog (Fallback) */}
       {selectedTemplate && (
         <EnhancedAIPersonalizer
           template={selectedTemplate}

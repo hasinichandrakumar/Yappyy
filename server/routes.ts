@@ -3285,6 +3285,30 @@ Return only the improved content, maintaining the same format with [brackets] fo
     }
   });
 
+  // AI Personalization Chat endpoint
+  app.post('/api/ai-personalization-chat', async (req: any, res) => {
+    try {
+      const { userInput, conversationHistory, template, collectedInfo, step } = req.body;
+      
+      const { processPersonalizationChat } = await import('./ai-personalization-chat');
+      const result = await processPersonalizationChat(
+        userInput,
+        conversationHistory,
+        template,
+        collectedInfo,
+        step
+      );
+      
+      res.json(result);
+    } catch (error: any) {
+      console.error('AI personalization chat error:', error);
+      res.status(500).json({ 
+        error: 'Failed to process chat message',
+        response: "I'm sorry, I'm having trouble right now. Could you please try again?"
+      });
+    }
+  });
+
   // OpenAI-powered comprehensive coaching endpoints
   app.post('/api/openai/comprehensive-analysis', generateComprehensiveAnalysis);
   app.post('/api/openai/speech-persona', generateSpeechPersona);
