@@ -406,7 +406,120 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Template personalization route
+  // Enhanced AI Personalization route with detailed user input
+  app.post('/api/ai-personalize-enhanced', async (req: any, res) => {
+    try {
+      const { template, userRequest, personalizationData } = req.body;
+      
+      if (!template || !template.content) {
+        return res.status(400).json({ error: 'Template with content is required' });
+      }
+
+      console.log('🤖 Enhanced AI personalization request:', {
+        template: template.title,
+        userRequest,
+        personalizationData
+      });
+
+      // Build comprehensive personalization prompt
+      let contextDetails = '';
+      if (personalizationData) {
+        if (personalizationData.industry) contextDetails += `Industry: ${personalizationData.industry}\n`;
+        if (personalizationData.audience) contextDetails += `Audience: ${personalizationData.audience}\n`;
+        if (personalizationData.tone) contextDetails += `Tone: ${personalizationData.tone}\n`;
+        if (personalizationData.context) contextDetails += `Context: ${personalizationData.context}\n`;
+        if (personalizationData.personalStory) contextDetails += `Personal Story to Include: ${personalizationData.personalStory}\n`;
+        if (personalizationData.specificGoals) contextDetails += `Goals: ${personalizationData.specificGoals}\n`;
+      }
+
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o',
+          messages: [
+            {
+              role: 'system',
+              content: `You are an expert speech writing coach and personalization specialist. Your job is to transform speech templates into highly personalized, engaging content that matches the user's specific needs and context.
+
+Key principles:
+- Maintain the original structure and flow
+- Add specific, relevant examples based on the user's context
+- Adjust language and tone to match the audience and setting
+- Incorporate personal elements naturally
+- Make transitions smoother and more conversational
+- Enhance emotional impact while staying authentic
+
+Always respond with valid JSON in this exact format:
+{
+  "personalizedContent": "the fully personalized and enhanced template content",
+  "improvements": ["list of specific improvements made"],
+  "deliveryTips": ["actionable tips for delivering this personalized version effectively"],
+  "keyChanges": ["most important changes that make this personalized for the user"]
+}`
+            },
+            {
+              role: 'user',
+              content: `Please personalize this speech template:
+
+TEMPLATE DETAILS:
+Title: ${template.title}
+Category: ${template.category}
+Description: ${template.description}
+Duration: ${template.duration}
+Difficulty: ${template.difficulty}
+
+PERSONALIZATION REQUEST:
+${userRequest}
+
+CONTEXT DETAILS:
+${contextDetails}
+
+ORIGINAL CONTENT:
+${template.content}
+
+Transform this template to be highly personalized and engaging based on the specific requirements above. Make it feel like it was written specifically for this user's situation while maintaining professional quality and effectiveness.`
+            }
+          ],
+          response_format: { type: "json_object" },
+          temperature: 0.8,
+          max_tokens: 2000
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('OpenAI API error:', response.status, errorText);
+        return res.status(500).json({ error: 'OpenAI API request failed' });
+      }
+
+      const data = await response.json();
+      const result = JSON.parse(data.choices[0].message.content);
+      
+      console.log('✅ AI personalization completed:', {
+        improvementsCount: result.improvements?.length || 0,
+        tipsCount: result.deliveryTips?.length || 0
+      });
+      
+      res.json({
+        personalizedContent: result.personalizedContent || template.content,
+        improvements: result.improvements || [],
+        deliveryTips: result.deliveryTips || [],
+        keyChanges: result.keyChanges || []
+      });
+    } catch (error: any) {
+      console.error('Enhanced AI personalization error:', error);
+      res.status(500).json({ 
+        error: 'Failed to personalize template',
+        details: error.message 
+      });
+    }
+  });
+
+  // Legacy template personalization route (keeping for compatibility)
   app.post('/api/openai/personalize-template', async (req: any, res) => {
     try {
       const { template, userRequest } = req.body;

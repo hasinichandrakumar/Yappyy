@@ -12,6 +12,7 @@ import {
   BookOpen, Target, Lightbulb, MessageSquare, Globe, Zap, BarChart3, Wand2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { EnhancedAIPersonalizer } from "./EnhancedAIPersonalizer";
 
 interface Template {
   id: string;
@@ -589,6 +590,7 @@ export default function Enhanced50PlusTemplates() {
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState('');
   const [isAIGenerating, setIsAIGenerating] = useState(false);
+  const [showAIPersonalizer, setShowAIPersonalizer] = useState(false);
   const { toast } = useToast();
 
   const filteredTemplates = FIFTY_PLUS_TEMPLATES.filter(template => {
@@ -605,46 +607,21 @@ export default function Enhanced50PlusTemplates() {
     setIsEditing(true);
   };
 
-  const handleAIPersonalize = async () => {
+  const handleAIPersonalize = () => {
     if (!selectedTemplate) return;
-    
-    setIsAIGenerating(true);
-    try {
-      const response = await fetch('/api/openai/personalize-template', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          template: selectedTemplate,
-          userRequest: 'Make this more engaging and personalized'
-        })
-      });
+    setShowAIPersonalizer(true);
+  };
 
-      if (response.ok) {
-        const result = await response.json();
-        setEditedContent(result.personalizedContent);
-        
-        // Show improvements if available
-        const improvementText = result.improvements && result.improvements.length > 0 
-          ? `Improvements: ${result.improvements.join(', ')}` 
-          : "AI has enhanced your template with personalized content";
-        
-        toast({
-          title: "Template Personalized ✨",
-          description: improvementText,
-        });
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to personalize template');
-      }
-    } catch (error: any) {
-      console.error('AI Personalization error:', error);
+  const handlePersonalizationComplete = (personalizedContent: string, improvements: string[], tips: string[]) => {
+    setEditedContent(personalizedContent);
+    setIsEditing(true);
+    
+    // Show success message with improvements
+    if (improvements.length > 0) {
       toast({
-        title: "AI Personalization Failed",
-        description: error.message || "Unable to personalize template. Please try again.",
-        variant: "destructive"
+        title: "Template Personalized Successfully!",
+        description: `${improvements.length} improvements made: ${improvements[0]}${improvements.length > 1 ? ' and more...' : ''}`,
       });
-    } finally {
-      setIsAIGenerating(false);
     }
   };
 
@@ -899,6 +876,16 @@ export default function Enhanced50PlusTemplates() {
           </div>
         )}
       </Tabs>
+
+      {/* Enhanced AI Personalizer Dialog */}
+      {selectedTemplate && (
+        <EnhancedAIPersonalizer
+          template={selectedTemplate}
+          isOpen={showAIPersonalizer}
+          onClose={() => setShowAIPersonalizer(false)}
+          onPersonalized={handlePersonalizationComplete}
+        />
+      )}
     </div>
   );
 }
