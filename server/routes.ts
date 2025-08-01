@@ -4250,6 +4250,43 @@ Respond with detailed analysis in JSON format:
   // ROBOFLOW COMPUTER VISION API ENDPOINTS
   // =====================================================
 
+  // Comprehensive Computer Vision Analysis with multiple engines
+  app.post('/api/vision/analyze-comprehensive', async (req: any, res) => {
+    try {
+      const { imageData } = req.body;
+      
+      if (!imageData) {
+        return res.status(400).json({ error: 'Image data is required' });
+      }
+
+      console.log('🔍 Analyzing image with comprehensive CV stack...');
+
+      // Import the comprehensive CV stack
+      const { comprehensiveCV } = await import('./enhanced-computer-vision-stack');
+      
+      // Analyze with multiple CV engines
+      const analysis = await comprehensiveCV.analyzeGesturesAndBodyLanguage(imageData);
+      
+      console.log('✅ Comprehensive CV analysis completed:', {
+        overallPresence: analysis.overallPresence,
+        posture: analysis.bodyPose.posture,
+        emotion: analysis.facialExpression.emotion
+      });
+
+      res.json({
+        success: true,
+        analysis,
+        engineStatus: comprehensiveCV.getEngineStatus()
+      });
+    } catch (error: any) {
+      console.error('Comprehensive CV analysis error:', error);
+      res.status(500).json({ 
+        error: 'Computer vision analysis failed',
+        details: error.message 
+      });
+    }
+  });
+
   // Enhanced video frame analysis with Roboflow
   app.post('/api/roboflow/analyze-frame', async (req, res) => {
     await roboflowAnalyzeFrame(req, res);

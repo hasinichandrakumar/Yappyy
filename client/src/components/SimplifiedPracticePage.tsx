@@ -27,6 +27,7 @@ import VideoPlaybackViewer from './VideoPlaybackViewer';
 import RecordingLibrary from './RecordingLibrary';
 import RealTimeComputerVisionDashboard from './RealTimeComputerVisionDashboard';
 import AuthenticPostureDisplay from './AuthenticPostureDisplay';
+import { ComprehensiveVisionDashboard } from './ComprehensiveVisionDashboard';
 import { 
   videoRecordingManager, 
   sessionRecordingStorage, 
@@ -2025,7 +2026,26 @@ export default function SimplifiedPracticePage() {
           {/* Key Stats */}
           <div className="space-y-4">
             
-            {/* Computer Vision Dashboard */}
+            {/* Comprehensive Computer Vision Dashboard */}
+            <ComprehensiveVisionDashboard 
+              isActive={isRecording}
+              onAnalysisUpdate={(analysis) => {
+                // Store comprehensive analysis for session data
+                setLiveMetrics(prev => ({
+                  ...prev,
+                  eyeContact: analysis.facialExpression?.eyeContact || prev.eyeContact,
+                  confidence: analysis.facialExpression?.confidence || prev.confidence,
+                  engagement: analysis.facialExpression?.engagement || prev.engagement,
+                  bodyLanguage: {
+                    eyeContactScore: analysis.facialExpression?.eyeContact || prev.bodyLanguage.eyeContactScore,
+                    facialExpressions: analysis.facialExpression?.engagement || prev.bodyLanguage.facialExpressions,
+                    overallPresence: analysis.overallPresence || prev.bodyLanguage.overallPresence
+                  }
+                }));
+              }}
+            />
+
+            {/* Legacy Computer Vision Dashboard (fallback) */}
             <RealTimeComputerVisionDashboard
               mediaPipePosture={computerVisionMetrics?.posture || 0}
               mediaPipeEyeContact={computerVisionMetrics?.eyeContact || 0}
