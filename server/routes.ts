@@ -312,12 +312,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('💾 Saving session for user:', userId);
       
       const sessionData = req.body;
+      console.log('📊 Session data received:', {
+        hasTranscript: !!sessionData.transcript,
+        duration: sessionData.duration,
+        wpm: sessionData.averageWPM,
+        confidence: sessionData.confidenceScore
+      });
       
       // Get the next session number (fallback for demo users)
-      const sessionNumber = await getNextSessionNumber(userId).catch(() => 1);
+      const sessionNumber = await getNextSessionNumber(userId).catch(() => {
+        console.warn('⚠️ Failed to get session number, using fallback');
+        return 1;
+      });
       
-      // Create the session with all provided data
-      const session = await storage.createPracticeSession({
+      console.log('🔢 Next session number:', sessionNumber);
+      
+      // Create comprehensive session data
+      const completeSessionData = {
         userId,
         sessionNumber,
         sessionName: sessionData.sessionName || `Session ${sessionNumber}`,
@@ -334,13 +345,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         videoBlob: sessionData.videoBlob || null,
         facialAnalysis: sessionData.facialAnalysis || null,
         voiceMetrics: sessionData.voiceMetrics || null,
-        aiAnalysis: sessionData.aiAnalysis || null,
-        speechPatterns: sessionData.speechPatterns || null,
         bodyLanguageMetrics: sessionData.bodyLanguageMetrics || null,
-        persuasivenessScore: sessionData.persuasivenessScore || 0,
-        emotionalIntelligence: sessionData.emotionalIntelligence || null,
-        rhetoricAnalysis: sessionData.rhetoricAnalysis || null,
-        improvementPlan: sessionData.improvementPlan || null
+        persuasivenessScore: sessionData.persuasivenessScore || 0
+      };
+      
+      console.log('📦 Complete session data prepared:', {
+        sessionNumber: completeSessionData.sessionNumber,
+        hasTranscript: !!completeSessionData.transcript,
+        hasFacialAnalysis: !!completeSessionData.facialAnalysis,
+        hasVideo: !!completeSessionData.videoBlob
+      });
+      
+      // Add additional fields to complete session data
+      completeSessionData.aiAnalysis = sessionData.aiAnalysis || null;
+      completeSessionData.speechPatterns = sessionData.speechPatterns || null;
+      completeSessionData.emotionalIntelligence = sessionData.emotionalIntelligence || null;
+      completeSessionData.rhetoricAnalysis = sessionData.rhetoricAnalysis || null;
+      completeSessionData.improvementPlan = sessionData.improvementPlan || null;
+      
+      // Create the session with all provided data
+      const session = await storage.createPracticeSession(completeSessionData);
+      
+      console.log('✅ Session created successfully:', {
+        id: session.id,
+        sessionNumber: session.sessionNumber,
+        userId: session.userId
       });
 
       // Update daily goals progress (skip for demo users)
