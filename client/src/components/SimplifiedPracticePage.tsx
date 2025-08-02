@@ -242,57 +242,160 @@ export default function SimplifiedPracticePage() {
     getFillerStatistics
   } = useAdvancedFillerDetection();
 
-  // Fetch authentic eye contact and expression data from maximum authentic analysis
+  // Enhanced multi-source authentic metrics fetching
   useEffect(() => {
     if (!isRecording) return;
 
-    const fetchAuthenticMetrics = async () => {
+    const fetchComprehensiveMetrics = async () => {
       try {
-        const response = await fetch('/api/maximum-authentic-analysis');
-        const data = await response.json();
-        
-        if (data.success && data.results && data.results.vision) {
-          // Extract authentic facial analysis data from Enhanced-Local analysis engine
-          const visionData = data.results.vision;
-          
-          // Extract eye contact from nested structure
-          const eyeContactValue = visionData.eyeContact?.eyeContactPercentage || 
-                                 visionData.eyeContact?.audienceEngagement || 0;
-          
-          // Extract confidence and engagement from facial expression analysis
-          const confidenceValue = visionData.facialExpression?.confidence || 0;
-          const engagementValue = visionData.facialExpression?.engagement || 0;
-          
-          if (eyeContactValue > 0 || confidenceValue > 0 || engagementValue > 0) {
-            setMetrics(prev => ({
-              ...prev,
-              eyeContact: eyeContactValue,
-              confidence: confidenceValue,
-              engagement: engagementValue,
-              bodyLanguage: {
-                ...prev.bodyLanguage,
-                eyeContactScore: eyeContactValue,
-                facialExpressions: engagementValue,
-                overallPresence: confidenceValue
-              }
-            }));
+        // Fetch from all available authentic sources
+        const [
+          maxAuthResponse,
+          roboflowResponse,
+          mediaPipeResponse,
+          facialResponse,
+          voiceResponse
+        ] = await Promise.allSettled([
+          fetch('/api/maximum-authentic-analysis'),
+          fetch('/api/roboflow-analysis'),
+          fetch('/api/mediapipe-analysis'),
+          fetch('/api/facial-analysis'),
+          fetch('/api/voice-analysis')
+        ]);
+
+        let hasAuthenticData = false;
+        let aggregatedMetrics = {
+          eyeContact: 0,
+          confidence: 0,
+          engagement: 0,
+          postureScore: 0,
+          gestureEffectiveness: 0,
+          facialExpressions: 0,
+          voiceClarity: 0,
+          fillerCount: 0
+        };
+
+        // Process Maximum Authentic Analysis
+        if (maxAuthResponse.status === 'fulfilled') {
+          const maxData = await maxAuthResponse.value.json();
+          if (maxData.success && maxData.results?.vision) {
+            const visionData = maxData.results.vision;
             
-            console.log('✅ Updated metrics with Enhanced-Local authentic data:', {
-              eyeContact: eyeContactValue,
-              engagement: engagementValue,
-              confidence: confidenceValue,
-              source: 'Enhanced-Local analysis engine'
-            });
+            aggregatedMetrics.eyeContact = Math.max(aggregatedMetrics.eyeContact, 
+              visionData.eyeContact?.eyeContactPercentage || 0);
+            aggregatedMetrics.confidence = Math.max(aggregatedMetrics.confidence,
+              visionData.facialExpression?.confidence || 0);
+            aggregatedMetrics.engagement = Math.max(aggregatedMetrics.engagement,
+              visionData.facialExpression?.engagement || 0);
+            
+            if (aggregatedMetrics.eyeContact > 0 || aggregatedMetrics.confidence > 0) {
+              hasAuthenticData = true;
+              console.log('✅ Enhanced-Local analysis data:', visionData);
+            }
           }
         }
+
+        // Process Roboflow Analysis
+        if (roboflowResponse.status === 'fulfilled') {
+          const roboflowData = await roboflowResponse.value.json();
+          if (roboflowData.success && roboflowData.analysis) {
+            const analysis = roboflowData.analysis;
+            
+            aggregatedMetrics.postureScore = Math.max(aggregatedMetrics.postureScore,
+              analysis.posture?.score * 100 || 0);
+            aggregatedMetrics.gestureEffectiveness = Math.max(aggregatedMetrics.gestureEffectiveness,
+              analysis.gestures?.effectiveness * 100 || 0);
+            aggregatedMetrics.confidence = Math.max(aggregatedMetrics.confidence,
+              analysis.overall?.confidence * 100 || 0);
+            
+            if (aggregatedMetrics.postureScore > 0 || aggregatedMetrics.gestureEffectiveness > 0) {
+              hasAuthenticData = true;
+              console.log('✅ Roboflow analysis data:', analysis);
+            }
+          }
+        }
+
+        // Process MediaPipe Analysis
+        if (mediaPipeService.current) {
+          const mpMetrics = mediaPipeService.current.getMetrics();
+          if (mpMetrics.hasAuthenticData) {
+            aggregatedMetrics.eyeContact = Math.max(aggregatedMetrics.eyeContact, mpMetrics.eyeContactPercentage);
+            aggregatedMetrics.confidence = Math.max(aggregatedMetrics.confidence, mpMetrics.confidenceLevel);
+            aggregatedMetrics.engagement = Math.max(aggregatedMetrics.engagement, mpMetrics.facialEngagement);
+            aggregatedMetrics.postureScore = Math.max(aggregatedMetrics.postureScore, mpMetrics.postureScore);
+            
+            hasAuthenticData = true;
+            console.log('✅ MediaPipe authentic data:', mpMetrics);
+          }
+        }
+
+        // Process Facial Analysis
+        if (facialResponse.status === 'fulfilled') {
+          const facialData = await facialResponse.value.json();
+          if (facialData.success && facialData.emotions) {
+            const emotions = facialData.emotions;
+            
+            aggregatedMetrics.facialExpressions = Math.max(aggregatedMetrics.facialExpressions,
+              emotions.engagement * 100 || 0);
+            aggregatedMetrics.confidence = Math.max(aggregatedMetrics.confidence,
+              emotions.confidence * 100 || 0);
+            
+            if (aggregatedMetrics.facialExpressions > 0) {
+              hasAuthenticData = true;
+              console.log('✅ Facial analysis data:', emotions);
+            }
+          }
+        }
+
+        // Process Voice Analysis
+        if (voiceResponse.status === 'fulfilled') {
+          const voiceData = await voiceResponse.value.json();
+          if (voiceData.success && voiceData.analysis) {
+            const voice = voiceData.analysis;
+            
+            aggregatedMetrics.voiceClarity = Math.max(aggregatedMetrics.voiceClarity,
+              voice.clarity * 100 || 0);
+            aggregatedMetrics.fillerCount = Math.max(aggregatedMetrics.fillerCount,
+              voice.fillerCount || 0);
+            
+            if (aggregatedMetrics.voiceClarity > 0) {
+              hasAuthenticData = true;
+              console.log('✅ Voice analysis data:', voice);
+            }
+          }
+        }
+
+        // Update metrics only if we have authentic data
+        if (hasAuthenticData) {
+          setMetrics(prev => ({
+            ...prev,
+            eyeContact: Math.round(aggregatedMetrics.eyeContact),
+            confidence: Math.round(aggregatedMetrics.confidence),
+            engagement: Math.round(aggregatedMetrics.engagement),
+            fillerWordCount: aggregatedMetrics.fillerCount,
+            voice: {
+              ...prev.voice,
+              clarity: Math.round(aggregatedMetrics.voiceClarity),
+              fillerCount: aggregatedMetrics.fillerCount
+            },
+            bodyLanguage: {
+              eyeContactScore: Math.round(aggregatedMetrics.eyeContact),
+              facialExpressions: Math.round(aggregatedMetrics.facialExpressions),
+              overallPresence: Math.round((aggregatedMetrics.confidence + aggregatedMetrics.postureScore) / 2)
+            }
+          }));
+          
+          console.log('🎯 UPDATED WITH AUTHENTIC MULTI-SOURCE DATA:', aggregatedMetrics);
+        }
+
       } catch (error) {
-        console.log('📊 Maximum authentic analysis unavailable');
+        console.log('📊 Comprehensive analysis fetch failed:', error);
       }
     };
 
-    // Fetch immediately and then every 3 seconds during recording
-    fetchAuthenticMetrics();
-    const interval = setInterval(fetchAuthenticMetrics, 3000);
+    // Fetch immediately and then every 2 seconds for real-time updates
+    fetchComprehensiveMetrics();
+    const interval = setInterval(fetchComprehensiveMetrics, 2000);
     
     return () => clearInterval(interval);
   }, [isRecording]);
