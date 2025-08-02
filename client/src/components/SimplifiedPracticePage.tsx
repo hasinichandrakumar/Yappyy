@@ -2001,100 +2001,42 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
             </Card>
           </div>
 
-          {/* Key Stats */}
+          {/* Simplified Stats - Just Essential Info */}
           <div className="space-y-4">
-            {/* Live Feedback Insights */}
+            {/* Essential Live Stats Only */}
             <Card className="border border-blue-200 shadow-lg bg-gradient-to-br from-blue-50 to-cyan-50 backdrop-blur-sm">
               <CardHeader className="pb-3">
                 <CardTitle className="text-xl font-bold flex items-center gap-2 text-blue-800">
-                  <TrendingUp className="w-6 h-6 text-blue-600" />
-                  Live AI Feedback
-                  {liveFeedback.length > 0 && (
-                    <Badge variant="secondary" className="ml-2 text-xs">
-                      {liveFeedback.length} insights
-                    </Badge>
-                  )}
+                  <BarChart3 className="w-6 h-6 text-blue-600" />
+                  Live Stats
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                {liveFeedback.length === 0 ? (
-                  <div className="text-center text-gray-500 py-6">
-                    <Activity className="w-10 h-10 mx-auto mb-3 opacity-50" />
-                    <p className="font-medium">Ready for Live Analysis</p>
-                    <p className="text-sm mt-1">Start speaking to receive instant feedback</p>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-4 text-center">
+                  <div>
+                    <div className="text-3xl font-extrabold text-blue-600">{metrics.wordsPerMinute}</div>
+                    <div className="text-sm font-semibold text-gray-600">WPM</div>
                   </div>
-                ) : (
-                  <div className="space-y-3 max-h-64 overflow-y-auto">
-                    {liveFeedback.slice(-4).reverse().map((feedback, index) => (
-                      <div 
-                        key={feedback.id}
-                        className={`p-4 rounded-lg border-l-4 transition-all duration-300 ${
-                          feedback.type === 'success' 
-                            ? 'bg-green-50 border-green-400 text-green-800 shadow-green-100' 
-                            : feedback.type === 'warning'
-                            ? 'bg-yellow-50 border-yellow-400 text-yellow-800 shadow-yellow-100'
-                            : 'bg-blue-50 border-blue-400 text-blue-800 shadow-blue-100'
-                        } ${index === 0 ? 'ring-2 ring-blue-200 shadow-lg' : 'shadow-md'}`}
-                      >
-                        <div className="flex items-start justify-between">
-                          <p className="text-sm font-semibold flex-1 pr-2">{feedback.message}</p>
-                          {feedback.type === 'success' && <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />}
-                          {feedback.type === 'warning' && <AlertTriangle className="w-4 h-4 text-yellow-600 flex-shrink-0" />}
-                          {feedback.type === 'info' && <Info className="w-4 h-4 text-blue-600 flex-shrink-0" />}
-                        </div>
-                        <p className="text-xs opacity-75 mt-2 font-medium">
-                          {index === 0 ? 'Just now' : new Date(feedback.timestamp).toLocaleTimeString()}
-                        </p>
-                      </div>
-                    ))}
+                  <div>
+                    <div className="text-3xl font-extrabold text-red-600">{metrics.fillerWordCount}</div>
+                    <div className="text-sm font-semibold text-gray-600">Fillers</div>
                   </div>
-                )}
+                </div>
                 
-                {/* Quick Stats */}
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <div className="grid grid-cols-2 gap-4 text-center">
-                    <div>
-                      <div className="text-3xl font-extrabold text-blue-600">{metrics.wordsPerMinute}</div>
-                      <div className="text-sm font-semibold text-gray-600">WPM</div>
-                    </div>
-                    <div>
-                      <div className="text-3xl font-extrabold text-red-600">{metrics.fillerWordCount}</div>
-                      <div className="text-sm font-semibold text-gray-600">Fillers</div>
-                    </div>
+                <div className="mt-4 pt-4 border-t border-gray-200 space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Total Words</span>
+                    <span className="font-medium">{transcript.split(' ').filter(w => w.length > 0).length}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Duration</span>
+                    <span className="font-medium">
+                      {Math.floor(sessionDuration / 60)}:{(sessionDuration % 60).toString().padStart(2, '0')}
+                    </span>
                   </div>
                 </div>
               </CardContent>
             </Card>
-
-            {/* Quick Stats */}
-            <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-xl font-bold text-blue-800">Session Stats</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-sm font-medium text-gray-600">Words Per Minute</span>
-                  <span className="font-bold">{metrics.wordsPerMinute}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm font-medium text-gray-600">Filler Words</span>
-                  <span className="font-bold">{metrics.fillerWordCount}</span>
-                </div>
-
-                <div className="flex justify-between">
-                  <span className="text-sm font-medium text-gray-600">Total Words</span>
-                  <span className="font-bold">{transcript.split(' ').filter(w => w.length > 0).length}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm font-medium text-gray-600">Duration</span>
-                  <span className="font-bold">
-                    {Math.floor(sessionDuration / 60)}:{(sessionDuration % 60).toString().padStart(2, '0')}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-
-
           </div>
         </div>
 
