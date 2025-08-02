@@ -82,6 +82,8 @@ const getScoreLabel = (score: number): string => {
 };
 
 export default function AuthenticAnalysisPage({ session, onClose, onNewSession }: AuthenticAnalysisProps) {
+  console.log('🔍 AuthenticAnalysisPage received session data:', session);
+  
   // Only display metrics that have authentic, validated data
   const authenticMetrics = {
     duration: validateMetric(session.duration) ? session.duration : null,

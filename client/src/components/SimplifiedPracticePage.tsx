@@ -1587,28 +1587,38 @@ export default function SimplifiedPracticePage() {
           description: `${sessionName} saved with full transcript and analytics - view anytime in Analysis tab`,
         });
         
-        // Prepare enriched session data for analysis page - only show real data
+        // Prepare analysis data that matches AuthenticAnalysisPage interface exactly
         const analysisData = {
-          ...sessionData,
-          sessionName: sessionData.name,
-          purpose: sessionData.purpose,
-          overallPerformance: Math.round(sessionData.confidenceScore * 100),
-          clarityScore: Math.round(sessionData.clarityScore * 100),
-          // Volume and intonation metrics removed
-          paceConsistency: hasRealSpeech ? 85 : 0, // Only show if speech occurred
-          engagementLevel: hasRealSpeech ? metrics.engagement : 0,
-          eyeContactScore: realEyeContact,
-          confidenceLevel: hasRealSpeech ? metrics.confidence : 0,
-          fillerWordCount: realFillerWords,
-          wordsPerMinute: averageWPM,
-          hasRealSpeech: hasRealSpeech, // Add flag for analysis page
-          facialAnalysis: facialAnalysis?.facialMetrics ? {
-            emotionalExpression: facialAnalysis.facialMetrics.emotionalExpression,
-            microExpressions: facialAnalysis.facialMetrics.microExpressions,
-            communicationSignals: facialAnalysis.facialMetrics.communicationSignals,
-            overallPresence: facialAnalysis.facialMetrics.overallPresence
-          } : undefined
+          id: Date.now(),
+          sessionNumber: 1, // This will be updated when database integration is complete
+          sessionName: sessionData.name || 'Practice Session',
+          purpose: sessionData.purpose || 'General Practice',
+          duration: sessionDuration,
+          transcript: transcript || 'No transcript available',
+          averageWPM: averageWPM,
+          confidenceScore: Math.round(sessionData.confidenceScore * 100),
+          voiceClarity: Math.round(sessionData.clarityScore * 100),
+          fillerWords: realFillerWords,
+          pauseCount: sessionData.pauseCount || 0,
+          eyeContactScore: `${realEyeContact}%`,
+          coachingTips: sessionData.coachingTips || [],
+          facialAnalysis: facialAnalysis?.facialMetrics,
+          voiceMetrics: {
+            clarity: Math.round(sessionData.clarityScore * 100),
+            pace: averageWPM,
+            fillerCount: realFillerWords
+          },
+          bodyLanguageMetrics: {
+            eyeContact: realEyeContact,
+            confidence: hasRealSpeech ? metrics.confidence : 0,
+            posture: 0
+          },
+          persuasivenessScore: hasRealSpeech ? Math.round((realConfidenceScore + realEyeContact) / 2) : 0,
+          createdAt: new Date().toISOString(),
+          hasRealSpeech: hasRealSpeech
         };
+        
+        console.log('📊 Analysis data prepared for AuthenticAnalysisPage:', analysisData);
         
         // Save session with video and transcript to database
         try {
@@ -1696,8 +1706,10 @@ export default function SimplifiedPracticePage() {
           }
         }
 
+        console.log('🔄 Setting analysis data and showing analysis page...');
         setSessionAnalysisData(analysisData);
         setShowAnalysisPage(true);
+        console.log('✅ Analysis page should now be visible with data:', { showAnalysisPage: true, hasAnalysisData: !!analysisData });
       }
     } catch (error) {
       console.error('Error saving session:', error);
