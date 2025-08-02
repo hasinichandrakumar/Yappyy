@@ -185,6 +185,9 @@ export default function SimplifiedPracticePage() {
   // Enhanced analytics state
   const [enhancedAnalytics, setEnhancedAnalytics] = useState<any>(null);
   
+  // Real-time analytics collection
+  const [collectedAnalytics, setCollectedAnalytics] = useState<any[]>([]);
+  
   // Vocal filler detection state
   const [vocalFillerBuffer, setVocalFillerBuffer] = useState<string[]>([]);
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
@@ -248,144 +251,100 @@ export default function SimplifiedPracticePage() {
 
     const fetchComprehensiveMetrics = async () => {
       try {
-        // Fetch from all available authentic sources
-        const [
-          maxAuthResponse,
-          roboflowResponse,
-          mediaPipeResponse,
-          facialResponse,
-          voiceResponse
-        ] = await Promise.allSettled([
-          fetch('/api/maximum-authentic-analysis'),
-          fetch('/api/roboflow-analysis'),
-          fetch('/api/mediapipe-analysis'),
-          fetch('/api/facial-analysis'),
-          fetch('/api/voice-analysis')
-        ]);
-
-        let hasAuthenticData = false;
-        let aggregatedMetrics = {
-          eyeContact: 0,
-          confidence: 0,
-          engagement: 0,
-          postureScore: 0,
-          gestureEffectiveness: 0,
-          facialExpressions: 0,
-          voiceClarity: 0,
-          fillerCount: 0
-        };
-
-        // Process Maximum Authentic Analysis
-        if (maxAuthResponse.status === 'fulfilled') {
-          const maxData = await maxAuthResponse.value.json();
-          if (maxData.success && maxData.results?.vision) {
-            const visionData = maxData.results.vision;
+        // Fetch real-time analytics from the new unified endpoint
+        const response = await fetch('/api/real-time-analytics');
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.analytics) {
+            console.log('📊 Real-time analytics received:', data.analytics);
             
-            aggregatedMetrics.eyeContact = Math.max(aggregatedMetrics.eyeContact, 
-              visionData.eyeContact?.eyeContactPercentage || 0);
-            aggregatedMetrics.confidence = Math.max(aggregatedMetrics.confidence,
-              visionData.facialExpression?.confidence || 0);
-            aggregatedMetrics.engagement = Math.max(aggregatedMetrics.engagement,
-              visionData.facialExpression?.engagement || 0);
-            
-            if (aggregatedMetrics.eyeContact > 0 || aggregatedMetrics.confidence > 0) {
+            // Process analytics from all sources
+            const { roboflow, mediapipe, facial, voice } = data.analytics;
+
+            let hasAuthenticData = false;
+            let aggregatedMetrics = {
+              eyeContact: 0,
+              confidence: 0,
+              engagement: 0,
+              postureScore: 0,
+              gestureEffectiveness: 0,
+              facialExpressions: 0,
+              voiceClarity: 0,
+              fillerCount: 0
+            };
+
+            // Process Roboflow Analysis
+            if (roboflow && (roboflow.posture?.confidence > 0 || roboflow.gestures?.effectiveness > 0)) {
+              aggregatedMetrics.postureScore = Math.max(aggregatedMetrics.postureScore, roboflow.posture?.confidence || 0);
+              aggregatedMetrics.gestureEffectiveness = Math.max(aggregatedMetrics.gestureEffectiveness, roboflow.gestures?.effectiveness || 0);
+              aggregatedMetrics.confidence = Math.max(aggregatedMetrics.confidence, roboflow.overall?.confidence || 0);
               hasAuthenticData = true;
-              console.log('✅ Enhanced-Local analysis data:', visionData);
+              console.log('✅ Roboflow analysis data:', roboflow);
             }
-          }
-        }
 
-        // Process Roboflow Analysis
-        if (roboflowResponse.status === 'fulfilled') {
-          const roboflowData = await roboflowResponse.value.json();
-          if (roboflowData.success && roboflowData.analysis) {
-            const analysis = roboflowData.analysis;
-            
-            aggregatedMetrics.postureScore = Math.max(aggregatedMetrics.postureScore,
-              analysis.posture?.score * 100 || 0);
-            aggregatedMetrics.gestureEffectiveness = Math.max(aggregatedMetrics.gestureEffectiveness,
-              analysis.gestures?.effectiveness * 100 || 0);
-            aggregatedMetrics.confidence = Math.max(aggregatedMetrics.confidence,
-              analysis.overall?.confidence * 100 || 0);
-            
-            if (aggregatedMetrics.postureScore > 0 || aggregatedMetrics.gestureEffectiveness > 0) {
+            // Process MediaPipe Analysis
+            if (mediapipe && mediapipe.hasAuthenticData) {
+              aggregatedMetrics.eyeContact = Math.max(aggregatedMetrics.eyeContact, mediapipe.eyeContact?.eyeContactPercentage || 0);
+              aggregatedMetrics.confidence = Math.max(aggregatedMetrics.confidence, mediapipe.facialExpression?.confidence || 0);
+              aggregatedMetrics.engagement = Math.max(aggregatedMetrics.engagement, mediapipe.facialExpression?.engagement || 0);
+              aggregatedMetrics.postureScore = Math.max(aggregatedMetrics.postureScore, mediapipe.posture?.overallPosture || 0);
               hasAuthenticData = true;
-              console.log('✅ Roboflow analysis data:', analysis);
+              console.log('✅ MediaPipe analysis data:', mediapipe);
             }
-          }
-        }
 
-        // Process MediaPipe Analysis
-        if (mediaPipeService.current) {
-          const mpMetrics = mediaPipeService.current.getMetrics();
-          if (mpMetrics.hasAuthenticData) {
-            aggregatedMetrics.eyeContact = Math.max(aggregatedMetrics.eyeContact, mpMetrics.eyeContactPercentage);
-            aggregatedMetrics.confidence = Math.max(aggregatedMetrics.confidence, mpMetrics.confidenceLevel);
-            aggregatedMetrics.engagement = Math.max(aggregatedMetrics.engagement, mpMetrics.facialEngagement);
-            aggregatedMetrics.postureScore = Math.max(aggregatedMetrics.postureScore, mpMetrics.postureScore);
-            
-            hasAuthenticData = true;
-            console.log('✅ MediaPipe authentic data:', mpMetrics);
-          }
-        }
-
-        // Process Facial Analysis
-        if (facialResponse.status === 'fulfilled') {
-          const facialData = await facialResponse.value.json();
-          if (facialData.success && facialData.emotions) {
-            const emotions = facialData.emotions;
-            
-            aggregatedMetrics.facialExpressions = Math.max(aggregatedMetrics.facialExpressions,
-              emotions.engagement * 100 || 0);
-            aggregatedMetrics.confidence = Math.max(aggregatedMetrics.confidence,
-              emotions.confidence * 100 || 0);
-            
-            if (aggregatedMetrics.facialExpressions > 0) {
+            // Process Facial Analysis
+            if (facial && (facial.engagement > 0 || facial.confidence > 0)) {
+              aggregatedMetrics.facialExpressions = Math.max(aggregatedMetrics.facialExpressions, facial.engagement || 0);
+              aggregatedMetrics.confidence = Math.max(aggregatedMetrics.confidence, facial.confidence || 0);
               hasAuthenticData = true;
-              console.log('✅ Facial analysis data:', emotions);
+              console.log('✅ Facial analysis data:', facial);
             }
-          }
-        }
 
-        // Process Voice Analysis
-        if (voiceResponse.status === 'fulfilled') {
-          const voiceData = await voiceResponse.value.json();
-          if (voiceData.success && voiceData.analysis) {
-            const voice = voiceData.analysis;
-            
-            aggregatedMetrics.voiceClarity = Math.max(aggregatedMetrics.voiceClarity,
-              voice.clarity * 100 || 0);
-            aggregatedMetrics.fillerCount = Math.max(aggregatedMetrics.fillerCount,
-              voice.fillerCount || 0);
-            
-            if (aggregatedMetrics.voiceClarity > 0) {
+            // Process Voice Analysis
+            if (voice && (voice.clarity > 0 || voice.fillerCount > 0)) {
+              aggregatedMetrics.voiceClarity = Math.max(aggregatedMetrics.voiceClarity, voice.clarity || 0);
+              aggregatedMetrics.fillerCount = Math.max(aggregatedMetrics.fillerCount, voice.fillerCount || 0);
               hasAuthenticData = true;
               console.log('✅ Voice analysis data:', voice);
             }
-          }
-        }
 
-        // Update metrics only if we have authentic data
-        if (hasAuthenticData) {
-          setMetrics(prev => ({
-            ...prev,
-            eyeContact: Math.round(aggregatedMetrics.eyeContact),
-            confidence: Math.round(aggregatedMetrics.confidence),
-            engagement: Math.round(aggregatedMetrics.engagement),
-            fillerWordCount: aggregatedMetrics.fillerCount,
-            voice: {
-              ...prev.voice,
-              clarity: Math.round(aggregatedMetrics.voiceClarity),
-              fillerCount: aggregatedMetrics.fillerCount
-            },
-            bodyLanguage: {
-              eyeContactScore: Math.round(aggregatedMetrics.eyeContact),
-              facialExpressions: Math.round(aggregatedMetrics.facialExpressions),
-              overallPresence: Math.round((aggregatedMetrics.confidence + aggregatedMetrics.postureScore) / 2)
+            // Update metrics only if we have authentic data
+            if (hasAuthenticData) {
+              setMetrics(prev => ({
+                ...prev,
+                eyeContact: Math.round(aggregatedMetrics.eyeContact),
+                confidence: Math.round(aggregatedMetrics.confidence),
+                engagement: Math.round(aggregatedMetrics.engagement),
+                fillerWordCount: aggregatedMetrics.fillerCount,
+                voice: {
+                  ...prev.voice,
+                  clarity: Math.round(aggregatedMetrics.voiceClarity),
+                  fillerCount: aggregatedMetrics.fillerCount
+                },
+                bodyLanguage: {
+                  eyeContactScore: Math.round(aggregatedMetrics.eyeContact),
+                  facialExpressions: Math.round(aggregatedMetrics.facialExpressions),
+                  overallPresence: Math.round((aggregatedMetrics.confidence + aggregatedMetrics.postureScore) / 2)
+                }
+              }));
+              
+              // Store analytics data for session saving
+              setCollectedAnalytics(prev => [...prev, {
+                timestamp: Date.now(),
+                source: 'real-time-multi-engine',
+                data: {
+                  roboflow,
+                  mediapipe,
+                  facial,
+                  voice,
+                  aggregatedMetrics
+                }
+              }]);
+              
+              console.log('🎯 UPDATED WITH AUTHENTIC MULTI-SOURCE DATA:', aggregatedMetrics);
             }
-          }));
-          
-          console.log('🎯 UPDATED WITH AUTHENTIC MULTI-SOURCE DATA:', aggregatedMetrics);
+          }
         }
 
       } catch (error) {
@@ -1333,6 +1292,9 @@ export default function SimplifiedPracticePage() {
         }
       }, 1000);
 
+      // Clear collected analytics at start of new session  
+      setCollectedAnalytics([]);
+      
       // Initialize metrics and refs with starting values when recording begins
       setMetrics({
         eyeContact: 0,
@@ -1549,7 +1511,19 @@ export default function SimplifiedPracticePage() {
           strengths: [],
           improvements: []
         }),
-        persuasivenessScore: metrics.confidence || 0
+        persuasivenessScore: metrics.confidence || 0,
+        realTimeAnalytics: JSON.stringify({
+          totalDataPoints: collectedAnalytics.length,
+          analyticsHistory: collectedAnalytics,
+          finalMetrics: {
+            eyeContact: metrics.eyeContact,
+            confidence: metrics.confidence,
+            engagement: metrics.engagement,
+            voiceClarity: metrics.voice.clarity,
+            fillerCount: metrics.fillerWordCount
+          },
+          timestamp: Date.now()
+        })
       };
 
       console.log('📊 Session data prepared:', {
@@ -1576,7 +1550,10 @@ export default function SimplifiedPracticePage() {
       const result = await response.json();
       
       if (result.success) {
-        console.log(`✅ Session ${result.session.sessionNumber} saved successfully`);
+        console.log(`✅ Session ${result.session.sessionNumber} saved successfully with ${collectedAnalytics.length} analytics data points`);
+        
+        // Clear collected analytics for next session
+        setCollectedAnalytics([]);
         
         // Update session number for next session
         const nextSessionNumber = result.session.sessionNumber + 1;

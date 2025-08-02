@@ -354,12 +354,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         hasVideo: !!completeSessionData.videoBlob
       });
       
-      // Add additional fields to complete session data
+      // Add additional fields to complete session data including real-time analytics
       completeSessionData.aiAnalysis = sessionData.aiAnalysis || null;
       completeSessionData.speechPatterns = sessionData.speechPatterns || null;
       completeSessionData.emotionalIntelligence = sessionData.emotionalIntelligence || null;
       completeSessionData.rhetoricAnalysis = sessionData.rhetoricAnalysis || null;
       completeSessionData.improvementPlan = sessionData.improvementPlan || null;
+      completeSessionData.realTimeAnalytics = sessionData.realTimeAnalytics || null; // NEW: Save real-time analytics data
       
       // Create the session with all provided data
       const session = await storage.createPracticeSession(completeSessionData);
@@ -5732,142 +5733,33 @@ Respond with detailed analysis in JSON format:
     }
   });
 
-  // Roboflow Computer Vision Analysis API
-  app.get('/api/roboflow-analysis', async (req, res) => {
+  // Real-time Analytics Collection API
+  app.get('/api/real-time-analytics', async (req, res) => {
     try {
-      console.log('🤖 Fetching Roboflow analysis...');
+      console.log('📊 Fetching real-time analytics from all sources...');
       
-      // Generate test image data for analysis
-      const testImageData = 'data:image/jpeg;base64,' + Buffer.from('test-roboflow-analysis').toString('base64');
+      // Collect analytics from all available engines
+      const analytics = {
+        roboflow: roboflowVision.getCurrentAnalysis(),
+        mediapipe: mediaPipeEngine.getCurrentMetrics(),
+        facial: facialExpressionAnalysis.getCurrentEmotions(),
+        voice: freeVoiceAnalysis.getCurrentAnalysis(),
+        timestamp: Date.now()
+      };
       
-      const analysis = await roboflowVision.analyzeFrame(testImageData);
-      
-      if (analysis && (analysis.posture?.score > 0 || analysis.gestures?.effectiveness > 0)) {
-        console.log('✅ Roboflow analysis successful:', analysis);
-        res.json({
-          success: true,
-          analysis: analysis,
-          timestamp: Date.now(),
-          source: 'Roboflow Computer Vision'
-        });
-      } else {
-        res.json({
-          success: false,
-          error: 'No Roboflow data available',
-          analysis: null
-        });
-      }
-    } catch (error) {
-      console.error('🤖 Roboflow analysis error:', error);
+      console.log('✅ Real-time analytics collected:', analytics);
       res.json({
-        success: false,
-        error: 'Roboflow analysis unavailable',
-        analysis: null
+        success: true,
+        analytics,
+        timestamp: Date.now(),
+        source: 'Multi-Engine Real-Time Analytics'
       });
-    }
-  });
-
-  // MediaPipe Analysis API
-  app.get('/api/mediapipe-analysis', async (req, res) => {
-    try {
-      console.log('🔬 Fetching MediaPipe analysis...');
-      
-      // Generate test image data for MediaPipe
-      const testImageData = 'data:image/jpeg;base64,' + Buffer.from('test-mediapipe-analysis').toString('base64');
-      
-      const analysis = await mediaPipeEngine.analyzeFrame(testImageData);
-      
-      if (analysis && analysis.hasAuthenticData) {
-        console.log('✅ MediaPipe analysis successful:', analysis);
-        res.json({
-          success: true,
-          metrics: analysis,
-          timestamp: Date.now(),
-          source: 'MediaPipe Computer Vision'
-        });
-      } else {
-        res.json({
-          success: false,
-          error: 'No MediaPipe data available',
-          metrics: null
-        });
-      }
     } catch (error) {
-      console.error('🔬 MediaPipe analysis error:', error);
+      console.error('📊 Real-time analytics error:', error);
       res.json({
         success: false,
-        error: 'MediaPipe analysis unavailable',
-        metrics: null
-      });
-    }
-  });
-
-  // Facial Expression Analysis API
-  app.get('/api/facial-analysis', async (req, res) => {
-    try {
-      console.log('😊 Fetching facial expression analysis...');
-      
-      // Generate test image data for facial analysis
-      const testImageData = 'data:image/jpeg;base64,' + Buffer.from('test-facial-analysis').toString('base64');
-      
-      const emotions = await facialExpressionAnalysis.analyzeEmotions(testImageData);
-      
-      if (emotions && (emotions.engagement > 0 || emotions.confidence > 0)) {
-        console.log('✅ Facial analysis successful:', emotions);
-        res.json({
-          success: true,
-          emotions: emotions,
-          timestamp: Date.now(),
-          source: 'Facial Expression Analysis'
-        });
-      } else {
-        res.json({
-          success: false,
-          error: 'No facial analysis data available',
-          emotions: null
-        });
-      }
-    } catch (error) {
-      console.error('😊 Facial analysis error:', error);
-      res.json({
-        success: false,
-        error: 'Facial analysis unavailable',
-        emotions: null
-      });
-    }
-  });
-
-  // Voice Analysis API
-  app.get('/api/voice-analysis', async (req, res) => {
-    try {
-      console.log('🎤 Fetching voice analysis...');
-      
-      // Generate test audio data for voice analysis
-      const testAudioData = Buffer.from('test-voice-analysis').toString('base64');
-      
-      const voiceData = await freeVoiceAnalysis.analyzeAudio(testAudioData);
-      
-      if (voiceData && (voiceData.clarity > 0 || voiceData.fillerCount > 0)) {
-        console.log('✅ Voice analysis successful:', voiceData);
-        res.json({
-          success: true,
-          analysis: voiceData,
-          timestamp: Date.now(),
-          source: 'Free Voice Analysis Engine'
-        });
-      } else {
-        res.json({
-          success: false,
-          error: 'No voice analysis data available',
-          analysis: null
-        });
-      }
-    } catch (error) {
-      console.error('🎤 Voice analysis error:', error);
-      res.json({
-        success: false,
-        error: 'Voice analysis unavailable',
-        analysis: null
+        error: 'Real-time analytics unavailable',
+        analytics: null
       });
     }
   });
