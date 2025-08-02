@@ -710,7 +710,7 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
           
           // Create live feedback for detected fillers
           const topFiller = Object.entries(fillerDetectionResult.fillerTypes)
-            .sort(([,a], [,b]) => b - a)[0]?.[0] || 'filler';
+            .sort(([,a], [,b]) => (b as number) - (a as number))[0]?.[0] || 'filler';
           
           const fillerMessage = fillerDetectionResult.totalFillers === 1 
             ? `Detected filler: "${topFiller}"`
@@ -1133,7 +1133,7 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
           // Start MediaPipe for authentic computer vision
           console.log('🔬 Starting MediaPipe for authentic metrics...');
           mediaPipeService.current = new MediaPipeService();
-          const mediaInitialized = await mediaPipeService.current.initialize(videoRef.current, canvasRef.current);
+          const mediaInitialized = await mediaPipeService.current.initialize(videoRef.current, canvasRef.current!);
           if (mediaInitialized) {
             await mediaPipeService.current.startAnalysis();
             console.log('✅ MediaPipe authentic computer vision started');
@@ -1260,7 +1260,7 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
               // Send audio to backend for vocal filler analysis
               // Convert audio blob to base64 for enhanced filler detection
               const arrayBuffer = await audioBlob.arrayBuffer();
-              const base64Audio = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+              const base64Audio = btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(arrayBuffer))));
               
               const response = await fetch('/api/detect-enhanced-fillers', {
                 method: 'POST',
@@ -1408,13 +1408,7 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
         voice: {
           clarity: 0,
           pace: 0,
-          volume: 0,
-          intonation: 0,
-          fillerCount: 0,
-          pauseEffectiveness: 0,
-          pitchVariation: 0,
-          vocalFryDetection: false,
-          uptalkPatterns: 0
+          fillerCount: 0
         },
         bodyLanguage: {
           eyeContactScore: 0,
@@ -1588,7 +1582,7 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
         pauseCount: 0,
         eyeContactScore: String(metrics.eyeContact || 0),
         coachingTips: [],
-        videoBlob: recordingData?.blob ? await recordingData.blob.arrayBuffer().then(buffer => 
+        videoBlob: recordingData?.videoBlob ? await recordingData.videoBlob.arrayBuffer().then(buffer => 
           Buffer.from(buffer).toString('base64')
         ) : null,
         facialAnalysis: JSON.stringify({
@@ -1600,7 +1594,7 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
         voiceMetrics: JSON.stringify({
           clarity: metrics.voice.clarity || 0,
           pace: metrics.voice.pace || 0,
-          volume: metrics.voice.volume || 0,
+
           fillerCount: metrics.fillerWordCount || 0
         }),
         bodyLanguageMetrics: JSON.stringify({
@@ -1708,13 +1702,7 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
         voice: {
           clarity: 0,
           pace: 0,
-          volume: 0,
-          intonation: 0,
-          fillerCount: 0,
-          pauseEffectiveness: 0,
-          pitchVariation: 0,
-          vocalFryDetection: false,
-          uptalkPatterns: 0
+          fillerCount: 0
         },
         bodyLanguage: {
           eyeContactScore: 0,
