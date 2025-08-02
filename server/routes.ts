@@ -64,17 +64,28 @@ function getUserId(req: any): string {
   return req.user?.id || 'guest';
 }
 
-// Helper function to get next session number
+// Helper function to get next session number with integrity check
 async function getNextSessionNumber(userId: string): Promise<number> {
   try {
-    const result = await db.select({ maxSessionNumber: max(practiceSessions.sessionNumber) })
+    // Get all sessions for this user ordered by creation date
+    const userSessions = await db.select()
       .from(practiceSessions)
-      .where(eq(practiceSessions.userId, userId));
+      .where(eq(practiceSessions.userId, userId))
+      .orderBy(practiceSessions.createdAt);
     
-    const currentMax = result[0]?.maxSessionNumber || 0;
-    return currentMax + 1;
+    if (userSessions.length === 0) {
+      console.log(`📊 First session for user ${userId}: returning 1`);
+      return 1;
+    }
+    
+    // Get the maximum session number
+    const maxSessionNumber = Math.max(...userSessions.map(s => s.sessionNumber));
+    const nextNumber = maxSessionNumber + 1;
+    
+    console.log(`📊 Session number calculation for user ${userId}: found ${userSessions.length} sessions, max = ${maxSessionNumber}, next = ${nextNumber}`);
+    return nextNumber;
   } catch (error) {
-    console.error('Error getting next session number:', error);
+    console.error('❌ Error getting next session number:', error);
     return 1; // Default to session 1 if error
   }
 }
@@ -100,6 +111,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Setup Google OAuth Authentication (primary and only auth system)
   await setupGoogleAuth(app);
+
+  // Get next session number for new sessions
+  app.get('/api/sessions/next-number', async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id || 'demo-user';
+      const nextSessionNumber = await getNextSessionNumber(userId);
+      
+      res.json({ 
+        nextSessionNumber,
+        userId 
+      });
+    } catch (error) {
+      console.error('❌ Error getting next session number:', error);
+      res.status(500).json({ 
+        error: 'Failed to get next session number',
+        nextSessionNumber: 1 // Fallback
+      });
+    }
+  });
 
   // Authenticate with token (for cross-domain OAuth)
   app.post('/api/auth/token', async (req: any, res) => {

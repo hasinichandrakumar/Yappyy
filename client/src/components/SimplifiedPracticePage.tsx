@@ -157,6 +157,27 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
   const [interimTranscript, setInterimTranscript] = useState<string>('');
   const [showLiveTranscript, setShowLiveTranscript] = useState(true);
 
+  // Fetch next session number when component loads
+  useEffect(() => {
+    const fetchNextSessionNumber = async () => {
+      try {
+        const response = await fetch('/api/sessions/next-number');
+        if (response.ok) {
+          const data = await response.json();
+          const nextNumber = data.nextSessionNumber;
+          setSessionNumber(nextNumber);
+          setSessionName(`Session ${nextNumber}`);
+          console.log('✅ Next session number loaded:', nextNumber);
+        }
+      } catch (error) {
+        console.error('❌ Failed to fetch next session number:', error);
+        // Keep default values if fetch fails
+      }
+    };
+    
+    fetchNextSessionNumber();
+  }, []);
+
   // Video recording state
   const [currentRecording, setCurrentRecording] = useState<VideoRecordingData | null>(null);
   const [showVideoPlayback, setShowVideoPlayback] = useState(false);
