@@ -1,0 +1,55 @@
+
+✅ 1. Core Programming Language
+Python
+Most libraries for AI, CV, and audio are Python-first.
+Easy prototyping and a huge developer community.
+✅ 2. Computer Vision Stack (Body language, gestures, eye contact, facial expressions)
+a. Model Frameworks
+MediaPipe (by Google)
+Real-time pose, face, and hand tracking.
+Lightweight and easy to integrate.
+OpenCV
+Classic CV tasks (frame processing, filters, image preprocessing).
+YOLOv8 or Faster R-CNN (if you want more advanced posture detection)
+Useful for custom object/person tracking.
+b. Facial & Gaze Tracking
+OpenFace 2.0 or Dlib + face landmarks
+For head pose, gaze direction, and emotion detection.
+DeepFace or FER+
+For real-time facial emotion recognition.
+✅ 3. Audio Processing Stack (Tone, filler words, pitch, pacing)
+a. Speech Recognition
+Whisper (OpenAI)
+High-accuracy transcription, even with background noise.
+Alternative: Google Speech-to-Text API (for production scaling)
+b. Paralinguistic Analysis
+Praat (via Parselmouth) or openSMILE
+Extracts pitch, jitter, intensity, speaking rate, etc.
+py-webrtcvad (for Voice Activity Detection)
+To separate speech from silence and detect filler word pauses.
+c. Filler Word Detection
+Combine Whisper transcripts + NLP analysis (see next section)
+✅ 4. NLP Stack (Content quality, filler word usage, clarity)
+SpaCy or NLTK
+For parsing sentence structure and detecting filler words.
+Transformers (HuggingFace)
+Use BERT or DistilBERT to analyze clarity, coherence, and tone.
+GloVe/Word2Vec + rule-based logic
+For mapping simplicity and vocabulary diversity.
+✅ 5. Frontend/Deployment Stack
+a. Web App
+React.js + Tailwind CSS
+Modern, responsive interface.
+Three.js or Chart.js
+Visualize body movement or vocal analytics.
+b. Backend
+Flask or FastAPI
+Lightweight, async-compatible REST APIs.
+c. Real-Time Video/Audio Capture
+WebRTC + MediaPipe in browser
+For in-browser recording and CV inference.
+OR Electron.js for a desktop app.
+✅ 6. Optional Add-ons
+Socket.IO / WebSockets – for real-time feedback
+FFmpeg – for video/audio stream processing
+ONNX – to convert models for cross-platform usage
