@@ -1955,90 +1955,45 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
           </Alert>
         </div>
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          
-          {/* Video Feed */}
-          <div className="lg:col-span-2">
-            <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm">
-              <CardContent className="p-0">
-                <div className="relative aspect-video bg-gray-900 rounded-lg overflow-hidden">
-                  <video
-                    ref={videoRef}
-                    className="w-full h-full object-cover"
-                    muted
-                    playsInline
-                  />
-                  
-                  {/* Hidden video element for recording */}
-                  <video
-                    ref={recordingVideoRef}
-                    className="hidden"
-                    muted
-                    playsInline
-                  />
-                  
-                  <canvas
-                    ref={canvasRef}
-                    className="absolute inset-0 w-full h-full pointer-events-none opacity-50"
-                  />
-                  
-                  {isRecording && (
-                    <div className="absolute top-4 left-4 space-y-2">
-                      <Badge variant="destructive">
-                        <Activity className="w-3 h-3 mr-1" />
-                        RECORDING {Math.floor(sessionDuration / 60)}:{(sessionDuration % 60).toString().padStart(2, '0')}
-                      </Badge>
-                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                        <Activity className="w-3 h-3 mr-1" />
-                        SMART FILLER DETECTION
-                      </Badge>
-
-                    </div>
-                  )}
+        {/* Main Content - Video Feed */}
+        <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm">
+          <CardContent className="p-0">
+            <div className="relative aspect-video bg-gray-900 rounded-lg overflow-hidden">
+              <video
+                ref={videoRef}
+                className="w-full h-full object-cover"
+                muted
+                playsInline
+              />
+              
+              {/* Hidden video element for recording */}
+              <video
+                ref={recordingVideoRef}
+                className="hidden"
+                muted
+                playsInline
+              />
+              
+              <canvas
+                ref={canvasRef}
+                className="absolute inset-0 w-full h-full pointer-events-none opacity-50"
+              />
+              
+              {isRecording && (
+                <div className="absolute top-4 left-4 space-y-2">
+                  <Badge variant="destructive">
+                    <Activity className="w-3 h-3 mr-1" />
+                    RECORDING {Math.floor(sessionDuration / 60)}:{(sessionDuration % 60).toString().padStart(2, '0')}
+                  </Badge>
+                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                    <Activity className="w-3 h-3 mr-1" />
+                    SMART FILLER DETECTION
+                  </Badge>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Simplified Stats - Just Essential Info */}
-          <div className="space-y-4">
-            {/* Essential Live Stats Only */}
-            <Card className="border border-blue-200 shadow-lg bg-gradient-to-br from-blue-50 to-cyan-50 backdrop-blur-sm">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-xl font-bold flex items-center gap-2 text-blue-800">
-                  <BarChart3 className="w-6 h-6 text-blue-600" />
-                  Live Stats
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4 text-center">
-                  <div>
-                    <div className="text-3xl font-extrabold text-blue-600">{metrics.wordsPerMinute}</div>
-                    <div className="text-sm font-semibold text-gray-600">WPM</div>
-                  </div>
-                  <div>
-                    <div className="text-3xl font-extrabold text-red-600">{metrics.fillerWordCount}</div>
-                    <div className="text-sm font-semibold text-gray-600">Fillers</div>
-                  </div>
-                </div>
-                
-                <div className="mt-4 pt-4 border-t border-gray-200 space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Total Words</span>
-                    <span className="font-medium">{transcript.split(' ').filter(w => w.length > 0).length}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Duration</span>
-                    <span className="font-medium">
-                      {Math.floor(sessionDuration / 60)}:{(sessionDuration % 60).toString().padStart(2, '0')}
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Live Transcript Panel */}
         {showLiveTranscript && (
