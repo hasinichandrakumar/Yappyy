@@ -26,16 +26,13 @@ import { useAdvancedFillerDetection } from '@/hooks/useAdvancedFillerDetection';
 import AuthenticAnalysisPage from './AuthenticAnalysisPage';
 import VideoPlaybackViewer from './VideoPlaybackViewer';
 import RecordingLibrary from './RecordingLibrary';
-import RealTimeComputerVisionDashboard from './RealTimeComputerVisionDashboard';
-import AuthenticPostureDisplay from './AuthenticPostureDisplay';
-import { ComprehensiveVisionDashboard } from './ComprehensiveVisionDashboard';
+
 import { 
   videoRecordingManager, 
   sessionRecordingStorage, 
   VideoRecordingData 
 } from '@/lib/video-recording';
-import { EnhancedAnalyticsIntegration } from './EnhancedAnalyticsIntegration';
-import { AuthenticAnalyticsDisplay } from './AuthenticAnalyticsDisplay';
+
 import { FillerWordHighlighter } from './FillerWordHighlighter';
 
 interface SimplifiedMetrics {
@@ -2039,58 +2036,6 @@ export default function SimplifiedPracticePage() {
 
           {/* Key Stats */}
           <div className="space-y-4">
-            
-            {/* Comprehensive Computer Vision Dashboard */}
-            <ComprehensiveVisionDashboard 
-              isActive={isRecording}
-              onAnalysisUpdate={(analysis) => {
-                // Store comprehensive analysis for session data
-                setLiveMetrics(prev => ({
-                  ...prev,
-                  eyeContact: analysis.facialExpression?.eyeContact || prev.eyeContact,
-                  confidence: analysis.facialExpression?.confidence || prev.confidence,
-                  engagement: analysis.facialExpression?.engagement || prev.engagement,
-                  bodyLanguage: {
-                    eyeContactScore: analysis.facialExpression?.eyeContact || prev.bodyLanguage.eyeContactScore,
-                    facialExpressions: analysis.facialExpression?.engagement || prev.bodyLanguage.facialExpressions,
-                    overallPresence: analysis.overallPresence || prev.bodyLanguage.overallPresence
-                  }
-                }));
-              }}
-            />
-
-            {/* Legacy Computer Vision Dashboard (fallback) */}
-            <RealTimeComputerVisionDashboard
-              mediaPipePosture={computerVisionMetrics?.posture || 0}
-              mediaPipeEyeContact={computerVisionMetrics?.eyeContact || 0}
-              isMediaPipeInitialized={isComputerVisionInitialized}
-              bodyLanguageMetrics={computerVisionMetrics}
-              isBodyLanguageActive={isComputerVisionAnalyzing}
-              facialAnalysis={facialAnalysis}
-              isFacialAnalysisActive={isFacialAnalysisActive}
-              roboflowAnalysis={roboflowAnalysis}
-              isRoboflowAnalyzing={isRoboflowAnalyzing}
-            />
-
-            {/* Authentic Posture Display */}
-            <AuthenticPostureDisplay 
-              isRecording={isRecording}
-              className="border-2 border-green-200"
-            />
-
-            {/* Authentic Analytics Display - Real metrics from session data */}
-            <AuthenticAnalyticsDisplay
-              transcript={transcript}
-              duration={sessionDuration}
-              isVisible={transcript.trim().length > 10}
-            />
-
-            {/* Enhanced Analytics Integration */}
-            <EnhancedAnalyticsIntegration
-              isRecording={isRecording}
-              onAnalyticsUpdate={(data) => setEnhancedAnalytics(data)}
-            />
-
             {/* Live Feedback Insights */}
             <Card className="border border-blue-200 shadow-lg bg-gradient-to-br from-blue-50 to-cyan-50 backdrop-blur-sm">
               <CardHeader className="pb-3">
