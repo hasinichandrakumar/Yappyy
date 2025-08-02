@@ -1921,16 +1921,6 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
                     <Library className="w-4 h-4" />
                     Library
                   </Button>
-                  
-                  {/* Live Transcript Toggle */}
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowLiveTranscript(!showLiveTranscript)}
-                    className="flex items-center gap-2"
-                  >
-                    <FileText className="w-4 h-4" />
-                    {showLiveTranscript ? 'Hide' : 'Show'} Transcript
-                  </Button>
                 </div>
 
               </div>
@@ -1938,22 +1928,7 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
           </CardHeader>
         </Card>
 
-        {/* Tips */}
-        <div className="space-y-3">
-          <Alert className="border-blue-200 bg-gradient-to-r from-blue-50 to-cyan-50 shadow-sm">
-            <Eye className="h-4 w-4 text-blue-600" />
-            <AlertDescription className="text-blue-800">
-              <strong>Tip:</strong> Look directly at your camera lens to maintain eye contact. Aim for 60-80% eye contact during your speech.
-            </AlertDescription>
-          </Alert>
-          
-          <Alert className="border-cyan-200 bg-gradient-to-r from-cyan-50 to-blue-50 shadow-sm">
-            <Activity className="h-4 w-4 text-cyan-600" />
-            <AlertDescription className="text-cyan-800">
-              <strong>Note:</strong> Browser speech recognition automatically filters out "um" and "uh" sounds. The system detects other filler words like "like", "so", "you know" effectively.
-            </AlertDescription>
-          </Alert>
-        </div>
+
 
         {/* Main Content - Video Feed */}
         <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm">
@@ -1995,100 +1970,9 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
           </CardContent>
         </Card>
 
-        {/* Live Transcript Panel */}
-        {showLiveTranscript && (
-          <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-blue-600" />
-                  <span className="text-blue-800">Live Transcript</span>
-                  {isRecording && (
-                    <Badge variant="secondary" className="ml-2">
-                      <Activity className="w-3 h-3 mr-1" />
-                      Live
-                    </Badge>
-                  )}
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowLiveTranscript(false)}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  ×
-                </Button>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="bg-white border-2 border-gray-100 p-4 rounded-lg max-h-60 overflow-y-auto">
-                {transcript || interimTranscript ? (
-                  <div className="text-sm leading-relaxed">
-                    {/* Enhanced filler word highlighting including UM/UH detection */}
-                    <FillerWordHighlighter 
-                      text={transcript}
-                      className="text-gray-900"
-                    />
-                    {interimTranscript && (
-                      <span className="text-gray-400 italic">
-                        {' ' + interimTranscript}
-                      </span>
-                    )}
-                    
-                    {/* Show filler word count summary */}
-                    {metrics.fillerWordCount > 0 && (
-                      <div className="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs">
-                        <strong>Fillers detected:</strong> {metrics.fillerWordCount} words
-                        {transcript.includes('[UM') && ' (including UM sounds)'}
-                        {transcript.includes('[UH') && ' (including UH sounds)'}
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="text-center text-gray-500 py-8">
-                    {isRecording ? (
-                      <div className="flex items-center justify-center gap-2">
-                        <Activity className="w-4 h-4" />
-                        <span>Listening for speech...</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-center gap-2">
-                        <Mic className="w-4 h-4" />
-                        <span>Start recording to see live transcript</span>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-              
-              {transcript && (
-                <div className="mt-4 flex justify-between items-center text-xs text-gray-600">
-                  <span>Words: {transcript.split(' ').filter(w => w.length > 0).length}</span>
-                  <span>Characters: {transcript.length}</span>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
 
-        {/* Original Transcript Display for Non-Live View */}
-        {!showLiveTranscript && transcript && (
-          <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-blue-800">
-                <FileText className="w-5 h-5 text-blue-600" />
-                Session Transcript
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="bg-gray-50 p-4 rounded-lg max-h-40 overflow-y-auto">
-                <p className="text-sm leading-relaxed">
-                  {transcript || "Start speaking to see your transcript here..."}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+
+
 
         {/* Post-Session Analytics Popup */}
         {showPostSessionPopup && completedSessionData && (
