@@ -23,6 +23,7 @@ import { SessionDataViewer } from '@/components/SessionDataViewer';
 import AuthenticAnalysisPage from './AuthenticAnalysisPage';
 import VideoPlaybackViewer from './VideoPlaybackViewer';
 import RecordingLibrary from './RecordingLibrary';
+import PostSessionAnalyticsPopup from './PostSessionAnalyticsPopup';
 
 
 import { 
@@ -200,6 +201,10 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
   
   // Enhanced analytics state
   const [enhancedAnalytics, setEnhancedAnalytics] = useState<any>(null);
+  
+  // Post-session analytics popup state
+  const [showPostSessionPopup, setShowPostSessionPopup] = useState(false);
+  const [completedSessionData, setCompletedSessionData] = useState<any>(null);
   
   // Real-time analytics collection
   const [collectedAnalytics, setCollectedAnalytics] = useState<any[]>([]);
@@ -1418,23 +1423,23 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
         setSessionNumber(nextSessionNumber);
         setSessionName(`Session ${nextSessionNumber}`);
         
+        // Show post-session analytics popup
+        setCompletedSessionData({
+          sessionName: sessionData.sessionName,
+          duration: sessionData.duration,
+          transcript: sessionData.transcript,
+          averageWPM: sessionData.averageWPM || 0,
+          confidenceScore: sessionData.confidenceScore || 0,
+          fillerWordCount: sessionData.fillerWords || 0,
+          eyeContactScore: parseFloat(sessionData.eyeContactScore || '0') || 0
+        });
+        setShowPostSessionPopup(true);
+        
         toast({
           title: "Session Saved!",
-          description: `${result.message} - Redirecting to Analysis tab`,
+          description: `${result.message}`,
           variant: "default"
         });
-        
-        // Navigate to Analysis tab after successful save
-        setTimeout(() => {
-          if (onNavigateToAnalysis) {
-            onNavigateToAnalysis();
-          } else {
-            // Fallback: try to trigger tab change via event
-            window.dispatchEvent(new CustomEvent('navigateToAnalysis', { 
-              detail: { sessionId: result.session.id } 
-            }));
-          }
-        }, 1500); // Short delay to show the success message
       } else {
         console.error('❌ Failed to save session:', result.message);
         toast({
@@ -2188,6 +2193,22 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
           </Card>
         )}
 
+        {/* Post-Session Analytics Popup */}
+        {showPostSessionPopup && completedSessionData && (
+          <PostSessionAnalyticsPopup
+            isOpen={showPostSessionPopup}
+            onClose={() => setShowPostSessionPopup(false)}
+            sessionData={completedSessionData}
+            onViewFullAnalysis={() => {
+              if (onNavigateToAnalysis) {
+                onNavigateToAnalysis();
+              } else {
+                // Fallback: try to trigger tab change via event
+                window.dispatchEvent(new CustomEvent('navigateToAnalysis'));
+              }
+            }}
+          />
+        )}
 
       </div>
     </div>
