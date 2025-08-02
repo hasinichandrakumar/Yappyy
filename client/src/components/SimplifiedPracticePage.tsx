@@ -19,14 +19,11 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { SessionDataViewer } from '@/components/SessionDataViewer';
-import { useRoboflowVision } from '@/hooks/useRoboflowVision';
-import { useFacialAnalysis } from '@/hooks/useFacialAnalysis';
-import { useRobustComputerVision } from '@/hooks/useRobustComputerVision';
-import { useAdvancedFillerDetection } from '@/hooks/useAdvancedFillerDetection';
+
 import AuthenticAnalysisPage from './AuthenticAnalysisPage';
 import VideoPlaybackViewer from './VideoPlaybackViewer';
 import RecordingLibrary from './RecordingLibrary';
-import { MediaPipeService, type MediaPipeMetrics } from '../services/MediaPipeService';
+
 
 import { 
   videoRecordingManager, 
@@ -213,170 +210,6 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
   const [analyzer, setAnalyzer] = useState<AnalyserNode | null>(null);
   const [vocalFillerRecorder, setVocalFillerRecorder] = useState<MediaRecorder | null>(null);
   const [isListeningForFillers, setIsListeningForFillers] = useState(false);
-
-  // MediaPipe integration for authentic computer vision
-  const [mediaPipeMetrics, setMediaPipeMetrics] = useState<MediaPipeMetrics | null>(null);
-  const mediaPipeService = useRef<MediaPipeService | null>(null);
-
-  // Roboflow computer vision integration
-  const {
-    isAnalyzing: isRoboflowAnalyzing,
-    analysis: roboflowAnalysis,
-    frameCount: roboflowFrameCount,
-    processingTime: roboflowProcessingTime,
-    error: roboflowError,
-    videoRef: roboflowVideoRef,
-    canvasRef: roboflowCanvasRef,
-    startRealTimeAnalysis,
-    stopRealTimeAnalysis,
-    analyzeSingleFrame,
-    cleanup: cleanupRoboflow
-  } = useRoboflowVision();
-
-  // Facial analysis integration
-  const {
-    isActive: isFacialAnalysisActive,
-    currentAnalysis: facialAnalysis,
-    startFacialAnalysis,
-    stopFacialAnalysis,
-    getAverageFacialMetrics,
-    error: facialAnalysisError
-  } = useFacialAnalysis();
-
-  // Robust computer vision system with error handling
-  const {
-    metrics: computerVisionMetrics,
-    error: computerVisionError,
-    isInitialized: isComputerVisionInitialized,
-    isAnalyzing: isComputerVisionAnalyzing,
-    frameCount: computerVisionFrameCount,
-    successCount: computerVisionSuccessCount,
-    startAnalysis: startComputerVisionAnalysis,
-    stopAnalysis: stopComputerVisionAnalysis,
-    getAverageMetrics: getAverageComputerVisionMetrics
-  } = useRobustComputerVision();
-
-  // Add advanced filler detection hook
-  const {
-    fillerResults,
-    performHybridDetection,
-    startRealTimeDetection,
-    getFillerStatistics
-  } = useAdvancedFillerDetection();
-
-  // Enhanced multi-source authentic metrics fetching
-  useEffect(() => {
-    if (!isRecording) return;
-
-    const fetchComprehensiveMetrics = async () => {
-      try {
-        // Fetch real-time analytics from the new unified endpoint
-        const response = await fetch('/api/real-time-analytics');
-        
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success && data.analytics) {
-            console.log('📊 Real-time analytics received:', data.analytics);
-            
-            // Process analytics from all sources
-            const { roboflow, mediapipe, facial, voice } = data.analytics;
-
-            let hasAuthenticData = false;
-            let aggregatedMetrics = {
-              eyeContact: 0,
-              confidence: 0,
-              engagement: 0,
-              postureScore: 0,
-              gestureEffectiveness: 0,
-              facialExpressions: 0,
-              voiceClarity: 0,
-              fillerCount: 0
-            };
-
-            // Process Roboflow Analysis
-            if (roboflow && (roboflow.posture?.confidence > 0 || roboflow.gestures?.effectiveness > 0)) {
-              aggregatedMetrics.postureScore = Math.max(aggregatedMetrics.postureScore, roboflow.posture?.confidence || 0);
-              aggregatedMetrics.gestureEffectiveness = Math.max(aggregatedMetrics.gestureEffectiveness, roboflow.gestures?.effectiveness || 0);
-              aggregatedMetrics.confidence = Math.max(aggregatedMetrics.confidence, roboflow.overall?.confidence || 0);
-              hasAuthenticData = true;
-              console.log('✅ Roboflow analysis data:', roboflow);
-            }
-
-            // Process MediaPipe Analysis
-            if (mediapipe && mediapipe.hasAuthenticData) {
-              aggregatedMetrics.eyeContact = Math.max(aggregatedMetrics.eyeContact, mediapipe.eyeContact?.eyeContactPercentage || 0);
-              aggregatedMetrics.confidence = Math.max(aggregatedMetrics.confidence, mediapipe.facialExpression?.confidence || 0);
-              aggregatedMetrics.engagement = Math.max(aggregatedMetrics.engagement, mediapipe.facialExpression?.engagement || 0);
-              aggregatedMetrics.postureScore = Math.max(aggregatedMetrics.postureScore, mediapipe.posture?.overallPosture || 0);
-              hasAuthenticData = true;
-              console.log('✅ MediaPipe analysis data:', mediapipe);
-            }
-
-            // Process Facial Analysis
-            if (facial && (facial.engagement > 0 || facial.confidence > 0)) {
-              aggregatedMetrics.facialExpressions = Math.max(aggregatedMetrics.facialExpressions, facial.engagement || 0);
-              aggregatedMetrics.confidence = Math.max(aggregatedMetrics.confidence, facial.confidence || 0);
-              hasAuthenticData = true;
-              console.log('✅ Facial analysis data:', facial);
-            }
-
-            // Process Voice Analysis
-            if (voice && (voice.clarity > 0 || voice.fillerCount > 0)) {
-              aggregatedMetrics.voiceClarity = Math.max(aggregatedMetrics.voiceClarity, voice.clarity || 0);
-              aggregatedMetrics.fillerCount = Math.max(aggregatedMetrics.fillerCount, voice.fillerCount || 0);
-              hasAuthenticData = true;
-              console.log('✅ Voice analysis data:', voice);
-            }
-
-            // Update metrics only if we have authentic data
-            if (hasAuthenticData) {
-              setMetrics(prev => ({
-                ...prev,
-                eyeContact: Math.round(aggregatedMetrics.eyeContact),
-                confidence: Math.round(aggregatedMetrics.confidence),
-                engagement: Math.round(aggregatedMetrics.engagement),
-                fillerWordCount: aggregatedMetrics.fillerCount,
-                voice: {
-                  ...prev.voice,
-                  clarity: Math.round(aggregatedMetrics.voiceClarity),
-                  fillerCount: aggregatedMetrics.fillerCount
-                },
-                bodyLanguage: {
-                  eyeContactScore: Math.round(aggregatedMetrics.eyeContact),
-                  facialExpressions: Math.round(aggregatedMetrics.facialExpressions),
-                  overallPresence: Math.round((aggregatedMetrics.confidence + aggregatedMetrics.postureScore) / 2)
-                }
-              }));
-              
-              // Store analytics data for session saving
-              setCollectedAnalytics(prev => [...prev, {
-                timestamp: Date.now(),
-                source: 'real-time-multi-engine',
-                data: {
-                  roboflow,
-                  mediapipe,
-                  facial,
-                  voice,
-                  aggregatedMetrics
-                }
-              }]);
-              
-              console.log('🎯 UPDATED WITH AUTHENTIC MULTI-SOURCE DATA:', aggregatedMetrics);
-            }
-          }
-        }
-
-      } catch (error) {
-        console.log('📊 Comprehensive analysis fetch failed:', error);
-      }
-    };
-
-    // Fetch immediately and then every 2 seconds for real-time updates
-    fetchComprehensiveMetrics();
-    const interval = setInterval(fetchComprehensiveMetrics, 2000);
-    
-    return () => clearInterval(interval);
-  }, [isRecording]);
 
   // Initialize speech recognition when component mounts
   useEffect(() => {
@@ -939,15 +772,7 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
         }
       }
 
-      // Computer Vision Feedback (only when real data available)
-      if (eyeContact > 75 && (!lastMessage || !lastMessage.message.includes('eye contact'))) {
-        setLiveFeedback(prev => [...prev.slice(-4), {
-          id: Date.now().toString(),
-          message: 'Excellent eye contact! You\'re engaging your audience well',
-          type: 'success',
-          timestamp: Date.now()
-        }]);
-      } else if (eyeContact > 0 && eyeContact < 45 && (!lastMessage || !lastMessage.message.includes('Look at'))) {
+      if (eyeContact > 0 && eyeContact < 45 && (!lastMessage || !lastMessage.message.includes('Look at'))) {
         setLiveFeedback(prev => [...prev.slice(-4), {
           id: Date.now().toString(),
           message: 'Try looking at the camera more - aim for 60%+ eye contact',
@@ -1097,70 +922,11 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
         
-        // Initialize ALL computer vision systems for gesture and posture monitoring
-        try {
-          // Start Roboflow computer vision for gesture/posture analysis
-          console.log('🤖 Starting Roboflow computer vision for gestures and postures...');
-          
-          // Pass the existing video element and stream to Roboflow
-          if (roboflowVideoRef?.current) {
-            roboflowVideoRef.current.srcObject = stream;
-            // Set canvas reference safely - only if defined
-            console.log('🤖 Setting up Roboflow canvas reference...');
-          }
-          
-          // Wait for video to be ready before starting analysis
-          await new Promise<void>(resolve => {
-            const checkReady = () => {
-              if (videoRef.current && videoRef.current.readyState >= 3) {
-                resolve();
-              } else {
-                setTimeout(checkReady, 100);
-              }
-            };
-            checkReady();
-          });
-          
-          await startRealTimeAnalysis(1500); // Analyze every 1.5 seconds for performance
-          console.log('✅ Roboflow computer vision started successfully');
-        } catch (error) {
-          console.warn('⚠️ Roboflow computer vision failed:', error);
-        }
 
 
 
-        try {
-          // Start MediaPipe for authentic computer vision
-          console.log('🔬 Starting MediaPipe for authentic metrics...');
-          mediaPipeService.current = new MediaPipeService();
-          const mediaInitialized = await mediaPipeService.current.initialize(videoRef.current, canvasRef.current!);
-          if (mediaInitialized) {
-            await mediaPipeService.current.startAnalysis();
-            console.log('✅ MediaPipe authentic computer vision started');
-          }
-        } catch (error) {
-          console.warn('⚠️ MediaPipe initialization failed:', error);
-        }
 
-        try {
-          // Start facial analysis system
-          console.log('🎭 Starting facial analysis system...');
-          await startFacialAnalysis(videoRef.current);
-          console.log('✅ Facial analysis started successfully');
-        } catch (error) {
-          console.warn('⚠️ Facial analysis failed:', error);
-        }
 
-        try {
-          // Start robust computer vision system
-          console.log('🛡️ Starting robust computer vision system...');
-          const started = await startComputerVisionAnalysis(videoRef.current);
-          if (started) {
-            console.log('✅ Robust computer vision started successfully');
-          }
-        } catch (error) {
-          console.warn('⚠️ Robust computer vision initialization failed:', error);
-        }
       }
 
       // Setup Web Audio API for direct vocal filler detection
@@ -1462,9 +1228,9 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
       console.log('✅ All computer vision systems initialized during stream setup');
 
       console.log('📹 Recording started with robust computer vision integration:', {
-        computerVision: isComputerVisionInitialized,
-        roboflow: isRoboflowAnalyzing,
-        facialAnalysis: isFacialAnalysisActive,
+        computerVision: false,
+        roboflow: false,
+
         videoRecording: videoRecordingEnabled
       });
     } catch (error) {
@@ -1555,11 +1321,7 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
 
     // Stop MediaPipe service
     try {
-      if (mediaPipeService.current) {
-        mediaPipeService.current.stopAnalysis();
-        mediaPipeService.current = null;
-        console.log('🔬 MediaPipe analysis stopped');
-      }
+
     } catch (error) {
       console.warn('⚠️ Error stopping MediaPipe:', error);
     }
@@ -1759,7 +1521,7 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
           overallPerformance: realConfidenceScore,
           sessionName: sessionName,
           purpose: sessionPurpose,
-          facialAnalysis: facialAnalysis?.facialMetrics || null,
+          facialAnalysis: null,
           hasRealSpeech: hasRealSpeech
         },
         speechPatterns: {
@@ -1777,7 +1539,7 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
         emotionalIntelligence: {
           engagement: hasRealSpeech ? metrics.engagement : 0,
           confidence: hasRealSpeech ? metrics.confidence : 0,
-          authenticity: hasRealSpeech ? (facialAnalysis?.facialMetrics?.emotionalExpression?.authenticity || 75) : 0
+          authenticity: hasRealSpeech ? 75 : 0
         }
       };
 
@@ -1813,7 +1575,7 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
           pauseCount: sessionData.pauseCount || 0,
           eyeContactScore: `${realEyeContact}%`,
           coachingTips: sessionData.coachingTips || [],
-          facialAnalysis: facialAnalysis?.facialMetrics,
+          facialAnalysis: null,
           voiceMetrics: {
             clarity: Math.round(sessionData.clarityScore * 100),
             pace: averageWPM,
@@ -1861,7 +1623,7 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
                 fillerWordCount: realFillerWords,
                 wordsPerMinute: averageWPM
               },
-              facialAnalysis: facialAnalysis?.facialMetrics,
+              facialAnalysis: null,
               voiceMetrics: {
                 clarity: realVoiceClarity,
                 pace: metrics.voice?.pace || 0,
@@ -1880,7 +1642,7 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
                 recordingData,
                 transcript,
                 sessionData,
-                facialAnalysis?.facialMetrics
+                null
               );
               setCurrentRecording(recordingData);
               console.log('🎬 Video recording also saved locally:', recordingId);
