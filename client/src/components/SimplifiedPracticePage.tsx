@@ -22,6 +22,7 @@ import { SessionDataViewer } from '@/components/SessionDataViewer';
 import { useRoboflowVision } from '@/hooks/useRoboflowVision';
 import { useFacialAnalysis } from '@/hooks/useFacialAnalysis';
 import { useRobustComputerVision } from '@/hooks/useRobustComputerVision';
+import { useAdvancedFillerDetection } from '@/hooks/useAdvancedFillerDetection';
 import AuthenticAnalysisPage from './AuthenticAnalysisPage';
 import VideoPlaybackViewer from './VideoPlaybackViewer';
 import RecordingLibrary from './RecordingLibrary';
@@ -230,6 +231,14 @@ export default function SimplifiedPracticePage() {
     stopAnalysis: stopComputerVisionAnalysis,
     getAverageMetrics: getAverageComputerVisionMetrics
   } = useRobustComputerVision();
+
+  // Add advanced filler detection hook
+  const {
+    fillerResults,
+    performHybridDetection,
+    startRealTimeDetection,
+    getFillerStatistics
+  } = useAdvancedFillerDetection();
 
   // Fetch authentic eye contact and expression data from maximum authentic analysis
   useEffect(() => {
@@ -566,53 +575,38 @@ export default function SimplifiedPracticePage() {
         setInterimTranscript(''); // Clear interim when we get final
         interimTranscriptRef.current = ''; // Clear ref too
         
-        // Comprehensive filler word detection with precise pattern matching
-        const singleFillerWords = [
-          'um', 'uh', 'uhm', 'umm', 'er', 'err', 'ah', 'eh', 'mm', 'hmm',
-          'like', 'so', 'well', 'okay', 'ok', 'right', 'actually', 'basically',
-          'literally', 'obviously', 'essentially', 'definitely', 'absolutely',
-          'totally', 'really', 'very', 'quite', 'just', 'maybe', 'perhaps', 'anyway'
-        ];
+        // Use advanced filler detection system for comprehensive analysis
+        const fillerDetectionResult = performHybridDetection(finalTranscript, Date.now());
+        console.log('🎯 Advanced filler detection result:', fillerDetectionResult);
         
-        const multiWordFillers = [
-          'you know', 'i mean', 'kind of', 'sort of', 'i guess', 'you see',
-          'and stuff', 'or something', 'or whatever', 'and things', 'and all that',
-          'how do i put this', 'what i mean is', 'let me think'
-        ];
-        
-        const text = finalTranscript.toLowerCase().trim();
-        const words = text.split(/\s+/);
-        let detectedFillers: string[] = [];
-        
-        // Check for multi-word fillers first
-        multiWordFillers.forEach(phrase => {
-          const regex = new RegExp(`\\b${phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
-          const matches = text.match(regex);
-          if (matches) {
-            detectedFillers = detectedFillers.concat(matches);
-          }
-        });
-        
-        // Enhanced single-word filler detection with regex patterns
-        words.forEach(word => {
-          const cleanWord = word.replace(/[.,!?;:'"()]/g, '');
+        // Update metrics with advanced filler detection results
+        if (fillerDetectionResult.totalFillers > 0) {
+          setMetrics(prev => ({
+            ...prev,
+            fillerWordCount: prev.fillerWordCount + fillerDetectionResult.totalFillers,
+            voice: {
+              ...prev.voice,
+              fillerCount: prev.voice.fillerCount + fillerDetectionResult.totalFillers
+            }
+          }));
           
-          // Check exact matches first
-          if (singleFillerWords.includes(cleanWord)) {
-            detectedFillers.push(cleanWord);
-          }
+          // Create live feedback for detected fillers
+          const topFiller = Object.entries(fillerDetectionResult.fillerTypes)
+            .sort(([,a], [,b]) => b - a)[0]?.[0] || 'filler';
           
-          // Enhanced regex detection for vocal filler variations (same as backend)
-          else if (/^u+h+$/i.test(cleanWord) || /^u+m+$/i.test(cleanWord) || /^u+h+m+$/i.test(cleanWord)) {
-            let normalizedWord = cleanWord;
-            if (/^u+h+$/i.test(cleanWord)) normalizedWord = 'uh';
-            else if (/^u+m+$/i.test(cleanWord)) normalizedWord = 'um';
-            else if (/^u+h+m+$/i.test(cleanWord)) normalizedWord = 'uhm';
-            
-            detectedFillers.push(normalizedWord);
-            console.log('🎯 REGEX FILLER detected in final transcript:', normalizedWord, 'from', cleanWord);
-          }
-        });
+          const fillerMessage = fillerDetectionResult.totalFillers === 1 
+            ? `Detected filler: "${topFiller}"`
+            : `Detected ${fillerDetectionResult.totalFillers} fillers (most common: "${topFiller}")`;
+          
+          const feedback: LiveFeedback = {
+            id: Date.now().toString() + Math.random(),
+            message: fillerMessage,
+            type: 'warning',
+            timestamp: Date.now()
+          };
+          
+          setLiveFeedback(prev => [feedback, ...prev.slice(0, 4)]);
+        }
         
         // Enhanced backend filler word analysis with UM/UH detection
         const fullTranscript = transcript + ' ' + finalTranscript;
@@ -625,7 +619,7 @@ export default function SimplifiedPracticePage() {
         if (fullTranscript.trim().length > 10) {
           try {
             // Use enhanced filler detection API that captures UM and UH
-            const response = await fetch('/api/detect-enhanced-fillers', {
+            const response = await fetch('/api/analyze-filler-words', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({

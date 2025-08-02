@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { db } from "./db";
 import { eq, desc, asc, sql, max, not, and } from "drizzle-orm";
 import { storage } from "./storage";
+import { advancedFillerDetectionEngine } from "./advanced-filler-detection";
 import { RealTimeSessionManager } from "./redis-realtime";
 import { insertPracticeSessionSchema, insertCoachingFeedbackSchema, insertCustomTemplateSchema, practiceSessions } from "@shared/schema";
 import { setupGoogleAuth, isAuthenticated } from "./googleAuth";
@@ -5853,6 +5854,64 @@ Respond with detailed analysis in JSON format:
       res.status(500).json({ 
         success: false, 
         error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Enhanced filler detection API using advanced detection engine
+  app.post('/api/detect-enhanced-fillers', async (req, res) => {
+    try {
+      const { transcript, duration = 0 } = req.body;
+      
+      if (!transcript || typeof transcript !== 'string') {
+        return res.status(400).json({ 
+          error: 'Invalid transcript provided',
+          success: false 
+        });
+      }
+
+      console.log('🎯 Advanced filler detection analysis:', {
+        transcriptLength: transcript.length,
+        duration,
+        preview: transcript.substring(0, 100) + '...'
+      });
+
+      // Use advanced filler detection engine
+      const detectionResult = advancedFillerDetectionEngine.performHybridDetection(
+        transcript, 
+        undefined, // No audio data for now
+        duration
+      );
+
+      // Get additional statistics
+      const statistics = advancedFillerDetectionEngine.getFillerStatistics(detectionResult);
+
+      const response = {
+        success: true,
+        ...detectionResult,
+        statistics,
+        analysisMetadata: {
+          transcriptLength: transcript.length,
+          sessionDuration: duration,
+          analysisTimestamp: new Date().toISOString(),
+          engineVersion: '2.0.0'
+        }
+      };
+
+      console.log('✅ Advanced filler detection complete:', {
+        totalFillers: detectionResult.totalFillers,
+        accuracy: detectionResult.accuracyScore,
+        severity: statistics.severityLevel,
+        method: detectionResult.detectionMethod
+      });
+
+      res.json(response);
+    } catch (error: any) {
+      console.error('❌ Advanced filler detection error:', error);
+      res.status(500).json({ 
+        success: false,
+        error: 'Failed to perform advanced filler detection',
+        details: error.message 
       });
     }
   });
