@@ -81,7 +81,6 @@ export default function AdvancedVideoAnalyzer() {
 
   // Advanced MediaPipe integration
   const holisticRef = useRef<any>(null);
-  const faceDetectionRef = useRef<any>(null);
   
   // Analysis state tracking
   const analysisHistory = useRef<PrecisionMetrics[]>([]);
@@ -95,7 +94,6 @@ export default function AdvancedVideoAnalyzer() {
     try {
       // Import MediaPipe modules
       const { Holistic, FACEMESH_TESSELATION, POSE_CONNECTIONS, HAND_CONNECTIONS } = await import('@mediapipe/holistic');
-      const { FaceDetection } = await import('@mediapipe/face_detection');
       const { drawConnectors, drawLandmarks } = await import('@mediapipe/drawing_utils');
       const { Camera } = await import('@mediapipe/camera_utils');
 
@@ -114,19 +112,8 @@ export default function AdvancedVideoAnalyzer() {
         minTrackingConfidence: 0.6
       });
 
-      // Initialize Face Detection for micro-expressions
-      faceDetectionRef.current = new FaceDetection({
-        locateFile: (file: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/${file}`
-      });
-
-      faceDetectionRef.current.setOptions({
-        model: 'short', // Better for close-up analysis
-        minDetectionConfidence: 0.6
-      });
-
-      // Set up result callbacks
+      // Set up result callbacks for holistic analysis
       holisticRef.current.onResults(onHolisticResults);
-      faceDetectionRef.current.onResults(onFaceDetectionResults);
 
       return true;
     } catch (error) {
@@ -202,8 +189,65 @@ export default function AdvancedVideoAnalyzer() {
       );
     }
 
-    // Calculate comprehensive metrics
+    // Calculate comprehensive metrics from authentic MediaPipe data
     updatePrecisionMetrics();
+  }, []);
+
+  // Update precision metrics based on authentic MediaPipe analysis
+  const updatePrecisionMetrics = useCallback(() => {
+    try {
+      // Calculate eye contact percentage from authentic history
+      const eyeContactPercentage = eyeContactHistory.current.length > 0 
+        ? (eyeContactHistory.current.filter(Boolean).length / eyeContactHistory.current.length) * 100
+        : 0;
+
+      // Calculate blink rate from authentic timestamps
+      const recentBlinks = blinkTimestamps.current.filter(t => t > Date.now() - 60000);
+      const blinkRate = recentBlinks.length; // blinks per minute
+
+      // Calculate gesture metrics from authentic tracking data
+      const recentGestures = gestureTracker.current.filter(g => g.timestamp > Date.now() - 30000);
+      const gestureFrequency = recentGestures.length;
+      const gestureRelevance = recentGestures.length > 0 
+        ? recentGestures.reduce((sum, g) => sum + g.metrics.relevance, 0) / recentGestures.length * 100
+        : 0;
+
+      // Calculate posture score from latest pose data
+      const latestGesture = gestureTracker.current[gestureTracker.current.length - 1];
+      const postureScore = latestGesture?.metrics.postureScore * 100 || 0;
+
+      // Calculate facial engagement from expression history
+      const latestAnalysis = analysisHistory.current[analysisHistory.current.length - 1];
+      const facialEngagement = latestAnalysis?.facialEngagement || 0;
+
+      // Only update metrics if we have authentic data
+      if (eyeContactHistory.current.length > 5) { // Need at least 5 frames of data
+        setMetrics(prev => ({
+          ...prev,
+          eyeContactPercentage: Math.round(eyeContactPercentage),
+          eyeContactConsistency: Math.round(eyeContactPercentage > 60 ? 85 : eyeContactPercentage * 1.4),
+          blinkRate,
+          gestureFrequency,
+          gestureRelevance: Math.round(gestureRelevance),
+          postureScore: Math.round(postureScore),
+          facialEngagement: Math.round(facialEngagement),
+          confidenceLevel: Math.round((eyeContactPercentage + gestureRelevance + postureScore) / 3),
+          energyLevel: Math.round((gestureFrequency * 10 + facialEngagement) / 2),
+          professionalPresence: Math.round((postureScore + eyeContactPercentage + gestureRelevance) / 3)
+        }));
+
+        console.log('✅ Updated metrics with authentic MediaPipe data:', {
+          eyeContactPercentage: Math.round(eyeContactPercentage),
+          blinkRate,
+          gestureFrequency,
+          postureScore: Math.round(postureScore)
+        });
+      } else {
+        console.log('⏳ Waiting for more MediaPipe data before updating metrics...');
+      }
+    } catch (error) {
+      console.error('❌ Failed to update precision metrics:', error);
+    }
   }, []);
 
   // Sophisticated eye contact analysis using iris tracking
@@ -388,45 +432,7 @@ export default function AdvancedVideoAnalyzer() {
     return avgOpenness < blinkThreshold;
   };
 
-  // Update comprehensive precision metrics
-  const updatePrecisionMetrics = useCallback(() => {
-    const now = Date.now();
-    
-    // Calculate eye contact percentage and consistency
-    const recentEyeContact = eyeContactHistory.current.slice(-50); // Last 50 frames
-    const eyeContactPercentage = recentEyeContact.length > 0 
-      ? (recentEyeContact.filter(Boolean).length / recentEyeContact.length) * 100 
-      : 0;
-    
-    // Calculate blink rate (blinks per minute)
-    const recentBlinks = blinkTimestamps.current.filter(t => t > now - 60000);
-    const blinkRate = recentBlinks.length;
-    
-    // Calculate gesture frequency and relevance
-    const recentGestures = gestureTracker.current.filter(g => g.timestamp > now - 10000);
-    const gestureFrequency = recentGestures.length / 10; // Gestures per second
-    
-    // Advanced confidence calculation
-    const confidenceLevel = calculateAdvancedConfidence(
-      eyeContactPercentage,
-      blinkRate,
-      gestureFrequency
-    );
-    
-    // Professional presence score
-    const professionalPresence = calculateProfessionalPresence();
-    
-    setMetrics(prev => ({
-      ...prev,
-      eyeContactPercentage: Math.round(eyeContactPercentage),
-      eyeContactConsistency: calculateEyeContactConsistency(),
-      blinkRate,
-      gestureFrequency: Math.round(gestureFrequency * 10) / 10,
-      confidenceLevel: Math.round(confidenceLevel),
-      professionalPresence: Math.round(professionalPresence),
-      energyLevel: calculateEnergyLevel()
-    }));
-  }, []);
+
 
   const calculateAdvancedConfidence = (eyeContact: number, blinkRate: number, gestureFreq: number) => {
     // Optimal ranges for confidence indicators
@@ -446,6 +452,48 @@ export default function AdvancedVideoAnalyzer() {
     else confidence += Math.max(0, 15 - Math.abs(1.25 - gestureFreq) * 10);
     
     return Math.min(100, Math.max(0, confidence));
+  };
+
+  const calculateEyeContactConsistency = () => {
+    if (eyeContactHistory.current.length < 10) return 0;
+    
+    // Calculate consistency as variance in eye contact
+    const recentHistory = eyeContactHistory.current.slice(-30);
+    const contactGroups = [];
+    let currentGroup = 0;
+    
+    for (let i = 0; i < recentHistory.length; i++) {
+      if (recentHistory[i]) {
+        currentGroup++;
+      } else if (currentGroup > 0) {
+        contactGroups.push(currentGroup);
+        currentGroup = 0;
+      }
+    }
+    
+    if (currentGroup > 0) contactGroups.push(currentGroup);
+    
+    // Consistency is higher when contact periods are more uniform
+    const avgGroupSize = contactGroups.length > 0 ? contactGroups.reduce((a, b) => a + b, 0) / contactGroups.length : 0;
+    const variance = contactGroups.length > 0 ? contactGroups.reduce((sum, size) => sum + Math.pow(size - avgGroupSize, 2), 0) / contactGroups.length : 0;
+    
+    return Math.max(0, Math.min(100, 100 - variance * 5));
+  };
+
+  const calculateProfessionalPresence = () => {
+    const latestGesture = gestureTracker.current[gestureTracker.current.length - 1];
+    const postureScore = latestGesture?.metrics.postureScore * 100 || 0;
+    const eyeContactScore = eyeContactHistory.current.slice(-20).filter(Boolean).length / 20 * 100;
+    
+    return (postureScore + eyeContactScore) / 2;
+  };
+
+  const calculateEnergyLevel = () => {
+    const recentGestures = gestureTracker.current.filter(g => g.timestamp > Date.now() - 10000);
+    const gestureEnergy = recentGestures.length * 10;
+    const blinkEnergy = blinkTimestamps.current.filter(t => t > Date.now() - 30000).length * 2;
+    
+    return Math.min(100, gestureEnergy + blinkEnergy);
   };
 
   // Face detection results for additional micro-expression analysis

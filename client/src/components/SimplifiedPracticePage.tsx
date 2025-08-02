@@ -26,6 +26,7 @@ import { useAdvancedFillerDetection } from '@/hooks/useAdvancedFillerDetection';
 import AuthenticAnalysisPage from './AuthenticAnalysisPage';
 import VideoPlaybackViewer from './VideoPlaybackViewer';
 import RecordingLibrary from './RecordingLibrary';
+import { MediaPipeService, type MediaPipeMetrics } from '../services/MediaPipeService';
 
 import { 
   videoRecordingManager, 
@@ -190,6 +191,10 @@ export default function SimplifiedPracticePage() {
   const [analyzer, setAnalyzer] = useState<AnalyserNode | null>(null);
   const [vocalFillerRecorder, setVocalFillerRecorder] = useState<MediaRecorder | null>(null);
   const [isListeningForFillers, setIsListeningForFillers] = useState(false);
+
+  // MediaPipe integration for authentic computer vision
+  const [mediaPipeMetrics, setMediaPipeMetrics] = useState<MediaPipeMetrics | null>(null);
+  const mediaPipeService = useRef<MediaPipeService | null>(null);
 
   // Roboflow computer vision integration
   const {
@@ -989,6 +994,19 @@ export default function SimplifiedPracticePage() {
         }
 
         try {
+          // Start MediaPipe for authentic computer vision
+          console.log('🔬 Starting MediaPipe for authentic metrics...');
+          mediaPipeService.current = new MediaPipeService();
+          const mediaInitialized = await mediaPipeService.current.initialize(videoRef.current, canvasRef.current);
+          if (mediaInitialized) {
+            await mediaPipeService.current.startAnalysis();
+            console.log('✅ MediaPipe authentic computer vision started');
+          }
+        } catch (error) {
+          console.warn('⚠️ MediaPipe initialization failed:', error);
+        }
+
+        try {
           // Start facial analysis system
           console.log('🎭 Starting facial analysis system...');
           await startFacialAnalysis(videoRef.current);
@@ -1372,6 +1390,17 @@ export default function SimplifiedPracticePage() {
       console.log('🛡️ Computer vision analysis stopped');
     } catch (error) {
       console.warn('⚠️ Error stopping computer vision analysis');
+    }
+
+    // Stop MediaPipe service
+    try {
+      if (mediaPipeService.current) {
+        mediaPipeService.current.stopAnalysis();
+        mediaPipeService.current = null;
+        console.log('🔬 MediaPipe analysis stopped');
+      }
+    } catch (error) {
+      console.warn('⚠️ Error stopping MediaPipe:', error);
     }
 
     setIsRecording(false);
