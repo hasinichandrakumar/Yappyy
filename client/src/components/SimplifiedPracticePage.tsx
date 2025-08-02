@@ -523,12 +523,13 @@ export default function SimplifiedPracticePage() {
             console.log('🎯 EXACT VOCAL FILLER detected in interim:', pattern);
             setVocalFillerBuffer(prev => [...prev, pattern]);
             
-            // Add to transcript immediately to ensure it's captured
+            // Add to transcript immediately with visual notation
             setTimeout(() => {
               setTranscript(prev => {
-                const enhanced = prev + ` ${pattern} `;
+                const fillerNotation = `[${pattern.toUpperCase()}]`;
+                const enhanced = prev + ` ${fillerNotation} `;
                 transcriptRef.current = enhanced;
-                console.log('✅ Added vocal filler to transcript:', pattern);
+                console.log('✅ Added vocal filler notation to transcript:', fillerNotation);
                 return enhanced;
               });
             }, 100);
@@ -553,9 +554,10 @@ export default function SimplifiedPracticePage() {
             
             setTimeout(() => {
               setTranscript(prev => {
-                const enhanced = prev + ` ${normalizedWord} `;
+                const fillerNotation = `[${normalizedWord.toUpperCase()}]`;
+                const enhanced = prev + ` ${fillerNotation} `;
                 transcriptRef.current = enhanced;
-                console.log('✅ Added regex vocal filler to transcript:', normalizedWord);
+                console.log('✅ Added regex vocal filler notation to transcript:', fillerNotation);
                 return enhanced;
               });
             }, 100);
@@ -579,7 +581,7 @@ export default function SimplifiedPracticePage() {
         const fillerDetectionResult = performHybridDetection(finalTranscript, Date.now());
         console.log('🎯 Advanced filler detection result:', fillerDetectionResult);
         
-        // Update metrics with advanced filler detection results
+        // Update metrics with advanced filler detection results and add fillers to transcript
         if (fillerDetectionResult.totalFillers > 0) {
           setMetrics(prev => ({
             ...prev,
@@ -589,6 +591,24 @@ export default function SimplifiedPracticePage() {
               fillerCount: prev.voice.fillerCount + fillerDetectionResult.totalFillers
             }
           }));
+          
+          // Add detected fillers to the transcript visually
+          const detectedFillersList = fillerDetectionResult.fillerTimestamps || [];
+          if (detectedFillersList.length > 0) {
+            const fillersToAdd = detectedFillersList
+              .filter(f => ['um', 'uh', 'uhm'].includes(f.word.toLowerCase()))
+              .map(f => `[${f.word.toUpperCase()}]`)
+              .join(' ');
+            
+            if (fillersToAdd) {
+              setTranscript(prev => {
+                const enhanced = prev + ' ' + fillersToAdd + ' ';
+                transcriptRef.current = enhanced;
+                console.log('✅ Added visual fillers to transcript:', fillersToAdd);
+                return enhanced;
+              });
+            }
+          }
           
           // Create live feedback for detected fillers
           const topFiller = Object.entries(fillerDetectionResult.fillerTypes)
