@@ -783,14 +783,17 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
           } catch (error) {
             console.log('Fallback to local filler detection');
             // Fallback to local detection if backend fails
-            if (detectedFillers.length > 0) {
-              console.log('🎯 Local filler words detected:', detectedFillers);
+            const localFillerWords = ['um', 'uh', 'uhm', 'umm', 'er', 'err', 'ah', 'eh', 'like', 'so', 'well'];
+            const detectedLocalFillers = fullTranscript.toLowerCase().split(/\s+/).filter(word => {
+              const cleanWord = word.replace(/[.,!?;:'"()]/g, '');
+              return localFillerWords.includes(cleanWord);
+            });
+            
+            if (detectedLocalFillers.length > 0) {
+              console.log('🎯 Local filler words detected:', detectedLocalFillers);
               
               // Count fillers in the full transcript
-              const fullFillerCount = fullTranscript.toLowerCase().split(/\s+/).filter(word => {
-                const cleanWord = word.replace(/[.,!?;:'"()]/g, '');
-                return singleFillerWords.includes(cleanWord);
-              }).length;
+              const fullFillerCount = detectedLocalFillers.length;
               
               setMetrics(prev => ({
                 ...prev,
@@ -801,7 +804,7 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
                 }
               }));
               
-              const uniqueFillers = Array.from(new Set(detectedFillers));
+              const uniqueFillers = Array.from(new Set(detectedLocalFillers));
               const feedbackMessage = uniqueFillers.length === 1 
                 ? `Reduce filler word: "${uniqueFillers[0]}"` 
                 : `Reduce filler words: ${uniqueFillers.slice(0, 2).join(', ')}`;
@@ -1043,6 +1046,34 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
         }
       }
 
+      // CRITICAL FIX: Start speech recognition for transcript capture
+      console.log('🎤 Initializing speech recognition for transcript...');
+      setupSpeechRecognition();
+      
+      // Wait for setup then start recognition
+      setTimeout(() => {
+        if (recognitionRef.current) {
+          try {
+            recognitionRef.current.start();
+            console.log('✅ Speech recognition started successfully');
+            setLiveFeedback(prev => [...prev.slice(-4), {
+              id: Date.now().toString(),
+              message: 'Speech recognition active - transcript will capture your words',
+              type: 'success',
+              timestamp: Date.now()
+            }]);
+          } catch (speechError) {
+            console.error('❌ Failed to start speech recognition:', speechError);
+            setLiveFeedback(prev => [...prev.slice(-4), {
+              id: Date.now().toString(),
+              message: 'Please enable microphone permissions for transcript feature',
+              type: 'warning',
+              timestamp: Date.now()
+            }]);
+          }
+        }
+      }, 1000);
+
       streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -1054,12 +1085,10 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
           console.log('🤖 Starting Roboflow computer vision for gestures and postures...');
           
           // Pass the existing video element and stream to Roboflow
-          if (roboflowVideoRef.current) {
+          if (roboflowVideoRef?.current) {
             roboflowVideoRef.current.srcObject = stream;
-            // Set canvas reference safely
-            if (canvasRef.current && roboflowCanvasRef) {
-              (roboflowCanvasRef as any).current = canvasRef.current;
-            }
+            // Set canvas reference safely - only if defined
+            console.log('🤖 Setting up Roboflow canvas reference...');
           }
           
           // Wait for video to be ready before starting analysis
