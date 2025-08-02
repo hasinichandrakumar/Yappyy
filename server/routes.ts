@@ -64,7 +64,7 @@ function getUserId(req: any): string {
   return req.user?.id || 'guest';
 }
 
-// Helper function to get next session number with integrity check
+// Helper function to get next session number with integrity check - INCREMENTS FOREVER
 async function getNextSessionNumber(userId: string): Promise<number> {
   try {
     // Get all sessions for this user ordered by creation date
@@ -78,15 +78,32 @@ async function getNextSessionNumber(userId: string): Promise<number> {
       return 1;
     }
     
-    // Get the maximum session number
+    // Get the maximum session number - this ensures infinite incrementing
     const maxSessionNumber = Math.max(...userSessions.map(s => s.sessionNumber));
     const nextNumber = maxSessionNumber + 1;
     
-    console.log(`📊 Session number calculation for user ${userId}: found ${userSessions.length} sessions, max = ${maxSessionNumber}, next = ${nextNumber}`);
+    // Additional safety check - ensure we never go backwards
+    if (nextNumber <= maxSessionNumber) {
+      console.warn(`⚠️ Session number collision detected! Forcing increment: ${maxSessionNumber} -> ${maxSessionNumber + 1}`);
+      return maxSessionNumber + 1;
+    }
+    
+    console.log(`📊 Session number calculation for user ${userId}: found ${userSessions.length} sessions, max = ${maxSessionNumber}, next = ${nextNumber} (infinite increment)`);
     return nextNumber;
   } catch (error) {
     console.error('❌ Error getting next session number:', error);
-    return 1; // Default to session 1 if error
+    // Even on error, try to get the last known max to continue sequence
+    try {
+      const fallbackResult = await db.select({ maxSessionNumber: max(practiceSessions.sessionNumber) })
+        .from(practiceSessions)
+        .where(eq(practiceSessions.userId, userId));
+      const fallbackMax = fallbackResult[0]?.maxSessionNumber || 0;
+      console.log(`📊 Fallback session number: ${fallbackMax + 1}`);
+      return fallbackMax + 1;
+    } catch (fallbackError) {
+      console.error('❌ Even fallback failed, starting from 1');
+      return 1;
+    }
   }
 }
 
