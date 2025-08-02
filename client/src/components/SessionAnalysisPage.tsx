@@ -90,7 +90,7 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
     // Convert decimal values to percentages if needed, integrate computer vision data  
     overallPerformance: typeof sessionData.overallPerformance === 'number' ? 
       Math.round(sessionData.overallPerformance > 1 ? sessionData.overallPerformance : sessionData.overallPerformance * 100) : 
-      // Only use computer vision if it has real data (not 0)
+      // Only use computer vision if it has real data (greater than 0)
       (sessionData.facialAnalysis?.emotionalExpression?.confidence && sessionData.facialAnalysis.emotionalExpression.confidence > 0 ? sessionData.facialAnalysis.emotionalExpression.confidence : 0),
     clarityScore: typeof sessionData.clarityScore === 'number' ? 
       Math.round(sessionData.clarityScore > 1 ? sessionData.clarityScore : sessionData.clarityScore * 100) : 
@@ -104,18 +104,18 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
       Math.round(sessionData.paceConsistency > 1 ? sessionData.paceConsistency : sessionData.paceConsistency * 100) : 0,
     engagementLevel: typeof sessionData.engagementLevel === 'number' ? 
       Math.round(sessionData.engagementLevel > 1 ? sessionData.engagementLevel : sessionData.engagementLevel * 100) : 
-      // Use facial analysis engagement
-      (sessionData.facialAnalysis?.emotionalExpression?.engagement || 0),
+      // Only use facial analysis engagement if it's actually greater than 0 (authentic data)
+      (sessionData.facialAnalysis?.emotionalExpression?.engagement && sessionData.facialAnalysis.emotionalExpression.engagement > 0 ? sessionData.facialAnalysis.emotionalExpression.engagement : 0),
     eyeContactScore: typeof sessionData.eyeContactScore === 'string' ? 
       Math.round(parseFloat(sessionData.eyeContactScore)) : 
       (typeof sessionData.eyeContactScore === 'number' ? 
         Math.round(sessionData.eyeContactScore > 1 ? sessionData.eyeContactScore : sessionData.eyeContactScore * 100) : 
-        // Use facial analysis eye contact
-        (sessionData.facialAnalysis?.communicationSignals?.eyeContactQuality || 0)),
+        // Only use facial analysis eye contact if it's actually greater than 0 (authentic data)
+        (sessionData.facialAnalysis?.communicationSignals?.eyeContactQuality && sessionData.facialAnalysis.communicationSignals.eyeContactQuality > 0 ? sessionData.facialAnalysis.communicationSignals.eyeContactQuality : 0)),
     confidenceLevel: typeof sessionData.confidenceLevel === 'number' ? 
       Math.round(sessionData.confidenceLevel > 1 ? sessionData.confidenceLevel : sessionData.confidenceLevel * 100) : 
-      // Use facial analysis confidence
-      (sessionData.facialAnalysis?.emotionalExpression?.confidence || 0),
+      // Only use facial analysis confidence if it's actually greater than 0 (authentic data)
+      (sessionData.facialAnalysis?.emotionalExpression?.confidence && sessionData.facialAnalysis.emotionalExpression.confidence > 0 ? sessionData.facialAnalysis.emotionalExpression.confidence : 0),
     wordsPerMinute: sessionData.wordsPerMinute || 0,
     fillerWordCount: sessionData.fillerWordCount || 0
   };
@@ -324,15 +324,17 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
 
         {/* Overall Performance Summary - Only show authentic data */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className={`border-2 ${getScoreBg(normalizedData.overallPerformance)}`}>
-            <CardContent className="p-4 text-center">
-              <Star className={`w-8 h-8 mx-auto mb-2 ${getScoreColor(normalizedData.overallPerformance)}`} />
-              <div className={`text-3xl font-extrabold ${getScoreColor(normalizedData.overallPerformance)}`}>
-                {normalizedData.overallPerformance}%
-              </div>
-              <div className="text-sm font-semibold text-gray-700">Overall Performance</div>
-            </CardContent>
-          </Card>
+          {normalizedData.overallPerformance > 0 && (
+            <Card className={`border-2 ${getScoreBg(normalizedData.overallPerformance)}`}>
+              <CardContent className="p-4 text-center">
+                <Star className={`w-8 h-8 mx-auto mb-2 ${getScoreColor(normalizedData.overallPerformance)}`} />
+                <div className={`text-3xl font-extrabold ${getScoreColor(normalizedData.overallPerformance)}`}>
+                  {normalizedData.overallPerformance}%
+                </div>
+                <div className="text-sm font-semibold text-gray-700">Overall Performance</div>
+              </CardContent>
+            </Card>
+          )}
 
           <Card>
             <CardContent className="p-4 text-center">
@@ -364,80 +366,73 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
         {/* Detailed Metrics */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
-          {/* Performance Breakdown */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-xl font-bold">
-                <BarChart3 className="w-6 h-6" />
-                Performance Breakdown
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3">
-                {/* Only show metrics with authentic data (> 0) */}
-                {normalizedData.confidenceLevel > 0 && (
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Confidence Level</span>
-                      <span className={getScoreColor(normalizedData.confidenceLevel)}>{normalizedData.confidenceLevel}%</span>
+          {/* Performance Breakdown - Only show if we have ANY authentic data */}
+          {(normalizedData.confidenceLevel > 0 || normalizedData.eyeContactScore > 0 || 
+            normalizedData.clarityScore > 0 || normalizedData.engagementLevel > 0 || 
+            normalizedData.volumeConsistency > 0) && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-xl font-bold">
+                  <BarChart3 className="w-6 h-6" />
+                  Performance Breakdown
+                  <Badge variant="outline" className="ml-2 text-xs">Authentic Data</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  {normalizedData.confidenceLevel > 0 && (
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>Confidence Level</span>
+                        <span className={getScoreColor(normalizedData.confidenceLevel)}>{normalizedData.confidenceLevel}%</span>
+                      </div>
+                      <Progress value={normalizedData.confidenceLevel} className="h-2" />
                     </div>
-                    <Progress value={normalizedData.confidenceLevel} className="h-2" />
-                  </div>
-                )}
+                  )}
 
-                {normalizedData.eyeContactScore > 0 && (
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Eye Contact</span>
-                      <span className={getScoreColor(normalizedData.eyeContactScore)}>{normalizedData.eyeContactScore}%</span>
+                  {normalizedData.eyeContactScore > 0 && (
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>Eye Contact</span>
+                        <span className={getScoreColor(normalizedData.eyeContactScore)}>{normalizedData.eyeContactScore}%</span>
+                      </div>
+                      <Progress value={normalizedData.eyeContactScore} className="h-2" />
                     </div>
-                    <Progress value={normalizedData.eyeContactScore} className="h-2" />
-                  </div>
-                )}
+                  )}
 
-                {normalizedData.clarityScore > 0 && (
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Clarity & Articulation</span>
-                      <span className={getScoreColor(normalizedData.clarityScore)}>{normalizedData.clarityScore}%</span>
+                  {normalizedData.clarityScore > 0 && (
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>Clarity & Articulation</span>
+                        <span className={getScoreColor(normalizedData.clarityScore)}>{normalizedData.clarityScore}%</span>
+                      </div>
+                      <Progress value={normalizedData.clarityScore} className="h-2" />
                     </div>
-                    <Progress value={normalizedData.clarityScore} className="h-2" />
-                  </div>
-                )}
+                  )}
 
-                {normalizedData.engagementLevel > 0 && (
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Engagement Level</span>
-                      <span className={getScoreColor(normalizedData.engagementLevel)}>{normalizedData.engagementLevel}%</span>
+                  {normalizedData.engagementLevel > 0 && (
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>Engagement Level</span>
+                        <span className={getScoreColor(normalizedData.engagementLevel)}>{normalizedData.engagementLevel}%</span>
+                      </div>
+                      <Progress value={normalizedData.engagementLevel} className="h-2" />
                     </div>
-                    <Progress value={normalizedData.engagementLevel} className="h-2" />
-                  </div>
-                )}
+                  )}
 
-                {normalizedData.volumeConsistency > 0 && (
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Voice Consistency</span>
-                      <span className={getScoreColor(normalizedData.volumeConsistency)}>{normalizedData.volumeConsistency}%</span>
+                  {normalizedData.volumeConsistency > 0 && (
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>Voice Consistency</span>
+                        <span className={getScoreColor(normalizedData.volumeConsistency)}>{normalizedData.volumeConsistency}%</span>
+                      </div>
+                      <Progress value={normalizedData.volumeConsistency} className="h-2" />
                     </div>
-                    <Progress value={normalizedData.volumeConsistency} className="h-2" />
-                  </div>
-                )}
-
-                {/* Show message when no authentic computer vision data is available */}
-                {normalizedData.confidenceLevel === 0 && normalizedData.eyeContactScore === 0 && 
-                 normalizedData.clarityScore === 0 && normalizedData.engagementLevel === 0 && 
-                 normalizedData.volumeConsistency === 0 && (
-                  <div className="text-center py-8 text-gray-500">
-                    <AlertCircle className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                    <p className="text-lg font-medium mb-2">No Computer Vision Data Available</p>
-                    <p className="text-sm">Performance metrics will appear when recording with camera enabled and computer vision active</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Comprehensive AI Analysis */}
           <Card>
