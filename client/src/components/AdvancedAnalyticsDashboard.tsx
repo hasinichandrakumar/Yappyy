@@ -20,48 +20,9 @@ export function AdvancedAnalyticsDashboard({
   analyticsError
 }: AdvancedAnalyticsDashboardProps) {
   
-  // Helper function to get color based on score
-  const getScoreColor = (score: number): string => {
-    if (score >= 80) return 'text-green-600';
-    if (score >= 60) return 'text-yellow-600';
-    return 'text-red-600';
-  };
-
-  // Helper function to get progress color
-  const getProgressColor = (score: number): string => {
-    if (score >= 80) return 'bg-green-500';
-    if (score >= 60) return 'bg-yellow-500';
-    return 'bg-red-500';
-  };
-
-  if (analyticsError) {
-    return (
-      <Card className="border-red-200 bg-red-50">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-2 text-red-600">
-            <AlertCircle className="h-4 w-4" />
-            <span className="text-sm">Analytics Error: {analyticsError}</span>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (isAnalyzing) {
-    return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-center gap-3">
-            <div className="animate-spin h-6 w-6 border-2 border-blue-500 border-t-transparent rounded-full"></div>
-            <span className="text-lg font-medium">Analyzing with advanced AI...</span>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  return (
-    <div className="space-y-6">
+  // Component disabled per user request - remove analytics boxes
+  return null;
+}
       {/* Multi-Modal Overview */}
       {multiModalMetrics && (
         <Card className="border-blue-200 bg-blue-50">

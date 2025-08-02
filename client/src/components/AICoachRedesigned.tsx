@@ -62,18 +62,10 @@ const AICoachAvatar = ({
 };
 
 // Personalized Insights Component
-// Enhanced Deep Learning Analytics Component with GraphQL Integration
+// Enhanced Deep Learning Analytics Component with GraphQL Integration - DISABLED per user request
 const DeepLearningAnalytics = ({ userId }: { userId?: string }) => {
-  const { data: practiceData } = useQuery({
-    queryKey: ['/api/practice-sessions'],
-    enabled: !!userId
-  });
-
-  const { data: neuralAnalysisData, isLoading: neuralLoading } = useNeuralAnalysis(userId || '');
-  const { data: userProgressData, isLoading: progressLoading } = useUserProgress(userId || '');
-  
-  const neuralAnalysis = neuralAnalysisData?.neuralAnalysis;
-  const userProgress = userProgressData?.userProgress;
+  // Component disabled per user request - remove analytics boxes
+  return null;
 
   const sessions = Array.isArray(practiceData) ? practiceData : [];
   
