@@ -68,6 +68,10 @@ interface LiveFeedback {
   timestamp: number;
 }
 
+interface SimplifiedPracticePageProps {
+  onNavigateToAnalysis?: () => void;
+}
+
 // Session purpose options that correlate with template categories
 const SESSION_PURPOSE_OPTIONS = [
   { 
@@ -138,7 +142,7 @@ const SESSION_PURPOSE_OPTIONS = [
   }
 ];
 
-export default function SimplifiedPracticePage() {
+export default function SimplifiedPracticePage({ onNavigateToAnalysis }: SimplifiedPracticePageProps = {}) {
   // Core session state
   const [isRecording, setIsRecording] = useState(false);
   const [sessionName, setSessionName] = useState("Session 1");
@@ -1562,9 +1566,21 @@ export default function SimplifiedPracticePage() {
         
         toast({
           title: "Session Saved!",
-          description: `${result.message} - Check the Analysis tab to view your session`,
+          description: `${result.message} - Redirecting to Analysis tab`,
           variant: "default"
         });
+        
+        // Navigate to Analysis tab after successful save
+        setTimeout(() => {
+          if (onNavigateToAnalysis) {
+            onNavigateToAnalysis();
+          } else {
+            // Fallback: try to trigger tab change via event
+            window.dispatchEvent(new CustomEvent('navigateToAnalysis', { 
+              detail: { sessionId: result.session.id } 
+            }));
+          }
+        }, 1500); // Short delay to show the success message
       } else {
         console.error('❌ Failed to save session:', result.message);
         toast({
