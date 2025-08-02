@@ -384,6 +384,12 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
     return () => clearInterval(interval);
   }, [isRecording]);
 
+  // Initialize speech recognition when component mounts
+  useEffect(() => {
+    console.log('🎤 Initializing speech recognition on component mount...');
+    setupSpeechRecognition();
+  }, []);
+
   // Fetch session number on component load
   useEffect(() => {
     const fetchSessionNumber = async () => {
@@ -666,9 +672,18 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
         setInterimTranscript(''); // Clear interim when we get final
         interimTranscriptRef.current = ''; // Clear ref too
         
-        // Use advanced filler detection system for comprehensive analysis
-        const fillerDetectionResult = performHybridDetection(finalTranscript, Date.now());
-        console.log('🎯 Advanced filler detection result:', fillerDetectionResult);
+        // Use simple filler detection system for comprehensive analysis
+        const fillerWords = ['um', 'uh', 'uhm', 'umm', 'er', 'err', 'ah', 'eh', 'like', 'so', 'well'];
+        const detectedFillers = finalTranscript.toLowerCase().split(/\s+/).filter(word => {
+          const cleanWord = word.replace(/[.,!?;:'"()]/g, '');
+          return fillerWords.includes(cleanWord);
+        });
+        const fillerDetectionResult = {
+          totalFillers: detectedFillers.length,
+          fillerTypes: {},
+          fillerTimestamps: detectedFillers.map(filler => ({ word: filler, timestamp: Date.now() }))
+        };
+        console.log('🎯 Simple filler detection result:', fillerDetectionResult);
         
         // Update metrics with advanced filler detection results and add fillers to transcript
         if (fillerDetectionResult.totalFillers > 0) {
@@ -831,10 +846,19 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
 
     recognition.onerror = (event: any) => {
       console.error('Speech recognition error:', event.error);
+      if (event.error === 'not-allowed') {
+        setLiveFeedback(prev => [...prev.slice(-4), {
+          id: Date.now().toString(),
+          message: 'Microphone access denied - please enable in browser settings',
+          type: 'warning',
+          timestamp: Date.now()
+        }]);
+      }
     };
 
-    (recognitionRef as any).current = recognition;
-  }, [sessionDuration, transcript]);
+    recognitionRef.current = recognition;
+    console.log('✅ Speech recognition setup completed and stored in ref');
+  }, []);
 
   // Enhanced comprehensive live insights system with improved effectiveness
   useEffect(() => {
@@ -1109,6 +1133,8 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
           console.warn('⚠️ Roboflow computer vision failed:', error);
         }
 
+
+
         try {
           // Start MediaPipe for authentic computer vision
           console.log('🔬 Starting MediaPipe for authentic metrics...');
@@ -1299,11 +1325,39 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
         console.warn('⚠️ Vocal filler recorder unavailable:', recorderError);
       }
 
-      // Start speech recognition
-      setupSpeechRecognition();
-      if (recognitionRef.current) {
-        recognitionRef.current.start();
+      // Start speech recognition - CRITICAL FIX
+      console.log('🎤 Starting speech recognition system...');
+      
+      // First setup the recognition if not already done
+      if (!recognitionRef.current) {
+        setupSpeechRecognition();
       }
+      
+      // Wait a moment then start recognition
+      setTimeout(() => {
+        if (recognitionRef.current) {
+          try {
+            recognitionRef.current.start();
+            console.log('✅ Speech recognition started for transcript capture');
+            setLiveFeedback(prev => [...prev.slice(-4), {
+              id: Date.now().toString(),
+              message: 'Speech recognition started - speak to see live transcript',
+              type: 'success',
+              timestamp: Date.now()
+            }]);
+          } catch (speechError) {
+            console.error('❌ Speech recognition failed to start:', speechError);
+            setLiveFeedback(prev => [...prev.slice(-4), {
+              id: Date.now().toString(),
+              message: 'Speech recognition unavailable - check microphone permissions',
+              type: 'warning',
+              timestamp: Date.now()
+            }]);
+          }
+        } else {
+          console.error('❌ Speech recognition not initialized');
+        }
+      }, 500);
 
       setIsRecording(true);
 
