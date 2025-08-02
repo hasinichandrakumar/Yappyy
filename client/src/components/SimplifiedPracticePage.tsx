@@ -46,13 +46,7 @@ interface SimplifiedMetrics {
   voice: {
     clarity: number;
     pace: number;
-    volume: number;
-    intonation: number;
     fillerCount: number;
-    pauseEffectiveness: number;
-    pitchVariation: number;
-    vocalFryDetection: boolean;
-    uptalkPatterns: number;
   };
   bodyLanguage: {
     eyeContactScore: number;
@@ -1883,7 +1877,7 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
               voiceMetrics: {
                 clarity: realVoiceClarity,
                 pace: metrics.voice?.pace || 0,
-                // Volume and intonation metrics removed
+                fillerCount: realFillerWords
               }
             })
           });
@@ -2244,30 +2238,7 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
                         <Activity className="w-3 h-3 mr-1" />
                         SMART FILLER DETECTION
                       </Badge>
-                      {isRoboflowAnalyzing && (
-                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                          <Activity className="w-3 h-3 mr-1" />
-                          COMPUTER VISION ACTIVE
-                        </Badge>
-                      )}
-                      {isFacialAnalysisActive && (
-                        <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
-                          <Activity className="w-3 h-3 mr-1" />
-                          FACIAL ANALYSIS ACTIVE
-                        </Badge>
-                      )}
-                      {isComputerVisionAnalyzing && (
-                        <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
-                          <Activity className="w-3 h-3 mr-1" />
-                          COMPUTER VISION ACTIVE
-                        </Badge>
-                      )}
-                      {computerVisionError.hasError && (
-                        <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
-                          <Activity className="w-3 h-3 mr-1" />
-                          CV ERROR - USING FALLBACK
-                        </Badge>
-                      )}
+
                     </div>
                   )}
                 </div>
