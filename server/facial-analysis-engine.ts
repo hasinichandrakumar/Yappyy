@@ -170,8 +170,45 @@ export class FacialAnalysisEngine {
   }
   
   private async performDetailedFacialAnalysis(imageData: string): Promise<FacialMetrics> {
+    console.log('🔍 AUTHENTIC FACIAL ANALYSIS - Checking for real computer vision data...');
+    
     try {
-      // ML-Based Facial Analysis with Computer Vision Pipeline
+      // STRICT POLICY: Only return authentic data, no placeholders or synthetic values
+      const hasRealCV = await this.checkForAuthenticFacialDetection(imageData);
+      
+      if (!hasRealCV) {
+        console.warn('❌ NO AUTHENTIC FACIAL ANALYSIS AVAILABLE - Returning zero values only');
+        return {
+          emotionalExpression: {
+            confidence: 0,
+            engagement: 0,
+            enthusiasm: 0,
+            nervousness: 0,
+            authenticity: 0
+          },
+          microExpressions: {
+            eyebrowMovement: 0,
+            eyeMovement: 0,
+            mouthExpression: 0,
+            facialSymmetry: 0
+          },
+          communicationSignals: {
+            eyeContactQuality: 0,
+            gazeFocus: 0,
+            blinkRate: 0,
+            facialStability: 0
+          },
+          overallPresence: {
+            charisma: 0,
+            trustworthiness: 0,
+            professionalism: 0,
+            approachability: 0
+          }
+        };
+      }
+
+      // Process with authentic computer vision only
+      console.log('✅ AUTHENTIC COMPUTER VISION DETECTED - Processing real facial data');
       const facialFeatures = await this.extractFacialFeatures(imageData);
       const emotionalState = await this.analyzeEmotionalExpression(facialFeatures);
       const microExpressions = await this.detectMicroExpressions(facialFeatures);
@@ -185,8 +222,35 @@ export class FacialAnalysisEngine {
         overallPresence
       };
     } catch (error) {
-      console.error('ML Facial Analysis Error:', error);
-      return this.getFallbackAnalysis().facialMetrics;
+      console.error('❌ Authentic facial analysis failed:', error);
+      // Return zeros when no authentic analysis possible
+      return {
+        emotionalExpression: {
+          confidence: 0,
+          engagement: 0,
+          enthusiasm: 0,
+          nervousness: 0,
+          authenticity: 0
+        },
+        microExpressions: {
+          eyebrowMovement: 0,
+          eyeMovement: 0,
+          mouthExpression: 0,
+          facialSymmetry: 0
+        },
+        communicationSignals: {
+          eyeContactQuality: 0,
+          gazeFocus: 0,
+          blinkRate: 0,
+          facialStability: 0
+        },
+        overallPresence: {
+          charisma: 0,
+          trustworthiness: 0,
+          professionalism: 0,
+          approachability: 0
+        }
+      };
     }
   }
 
@@ -236,47 +300,34 @@ export class FacialAnalysisEngine {
     }
   }
 
-  private async processRealImageData(imageData: string): Promise<any> {
-    // Process actual image data using TensorFlow.js computer vision
+  private async checkForAuthenticFacialDetection(imageData: string): Promise<boolean> {
+    // Check if we have access to authentic facial detection systems
     try {
-      // Import real computer vision engine
-      const { realComputerVisionEngine } = await import('./real-computer-vision-engine');
+      // For now, authentic facial detection is not available
+      // This would be where we'd integrate with Google Cloud Vision API, 
+      // AWS Rekognition, or other authenticated computer vision services
+      console.log('🔍 Checking for authentic facial detection APIs...');
       
-      console.log('🧠 Processing image with TensorFlow.js computer vision...');
-      
-      // Perform real computer vision analysis
-      const realFaceDetection = await realComputerVisionEngine.analyzeRealFacialImage(imageData);
-      
-      if (!realFaceDetection || realFaceDetection.confidence < 0.1) {
-        console.warn('⚠️ Very low quality CV detection - using enhanced fallback analysis');
-        // Use enhanced fallback that still provides meaningful metrics
-        return this.getEnhancedFallbackAnalysis(imageData);
-      }
-
-      console.log(`✅ HIGH-QUALITY CV Analysis: Confidence ${(realFaceDetection.confidence * 100).toFixed(1)}%`);
-      
-      // Convert ONLY high-confidence computer vision results
-      return {
-        hasRealData: true,
-        cvConfidence: realFaceDetection.confidence,
-        realLandmarks: realFaceDetection.landmarks,
-        realExpressions: realFaceDetection.expressions,
-        demographics: {
-          age: realFaceDetection.age,
-          gender: realFaceDetection.gender
-        },
-        landmarks: realFaceDetection.landmarks,
-        eyeMetrics: this.extractEyeMetricsFromCV(realFaceDetection),
-        mouthMetrics: this.extractMouthMetricsFromCV(realFaceDetection),
-        geometry: this.extractGeometryFromCV(realFaceDetection),
-        skinAnalysis: this.extractSkinAnalysisFromCV(realFaceDetection),
-        headPose: this.extractHeadPoseFromCV(realFaceDetection)
-      };
-      
+      // Return false until real CV integration is implemented
+      return false;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      console.warn('⚠️ TensorFlow.js processing failed:', errorMessage);
-      return this.getEnhancedFallbackAnalysis(imageData); // Enhanced fallback instead of null
+      console.warn('❌ No authentic facial detection available:', error);
+      return false;
+    }
+  }
+
+  private async processRealImageData(imageData: string): Promise<any> {
+    // This method would process with authentic computer vision APIs
+    // Currently returns null as no real CV integration is available
+    try {
+      console.log('🧠 Attempting real computer vision processing...');
+      
+      // Real computer vision would go here (Google Vision API, etc.)
+      // For now, return null to indicate no authentic data available
+      return null;
+    } catch (error) {
+      console.warn('❌ Real computer vision processing failed:', error);
+      return null;
     }
   }
 

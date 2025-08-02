@@ -50,6 +50,7 @@ import { openCVEngine } from './opencv-computer-vision';
 import { speechEmotionRecognition } from './speech-emotion-recognition';
 import { alternativeSpeechAPIs } from './alternative-speech-apis';
 import { facialExpressionAnalysis } from './facial-expression-analysis';
+import { authenticFacialAnalysis } from './authentic-facial-analysis';
 import { persistentAIAnalytics } from './persistent-ai-analytics';
 import { freeVoiceAnalysis } from './free-voice-analysis';
 // getNextSessionNumber is now defined inline in this file
