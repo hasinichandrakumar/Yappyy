@@ -1887,8 +1887,17 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
                 )}
               </div>
 
-              {/* Recording Controls */}
-              <div className="flex gap-2">
+              {/* Demo Button and Recording Controls */}
+              <div className="flex items-center gap-3">
+                <Button 
+                  variant="outline" 
+                  onClick={() => window.location.href = '/dashboard'}
+                  className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200 hover:from-purple-100 hover:to-pink-100 text-purple-700 hover:text-purple-800 shadow-sm"
+                >
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  Dashboard Demo
+                </Button>
+                
                 {!isRecording ? (
                   <Button onClick={startRecording} className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white shadow-lg hover:shadow-xl">
                     <Mic className="w-5 h-5 mr-2" />
