@@ -1960,22 +1960,7 @@ export default function SimplifiedPracticePage() {
           </CardHeader>
         </Card>
 
-        {/* Tips */}
-        <div className="space-y-3">
-          <Alert className="border-blue-200 bg-gradient-to-r from-blue-50 to-cyan-50 shadow-sm">
-            <Eye className="h-4 w-4 text-blue-600" />
-            <AlertDescription className="text-blue-800">
-              <strong>Tip:</strong> Look directly at your camera lens to maintain eye contact. Aim for 60-80% eye contact during your speech.
-            </AlertDescription>
-          </Alert>
-          
-          <Alert className="border-cyan-200 bg-gradient-to-r from-cyan-50 to-blue-50 shadow-sm">
-            <Activity className="h-4 w-4 text-cyan-600" />
-            <AlertDescription className="text-cyan-800">
-              <strong>Note:</strong> Browser speech recognition automatically filters out "um" and "uh" sounds. The system detects other filler words like "like", "so", "you know" effectively.
-            </AlertDescription>
-          </Alert>
-        </div>
+
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -2115,30 +2100,7 @@ export default function SimplifiedPracticePage() {
               </CardContent>
             </Card>
 
-            {/* Essential Live Metrics - Only WPM, Filler Words, and Eye Contact */}
-            <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-xl font-bold text-blue-800">Live Metrics</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{metrics.wordsPerMinute}</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Words/Min</div>
-                  </div>
-                  <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                    <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{metrics.fillerWordCount}</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Filler Words</div>
-                  </div>
-                  <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                      {Math.round(metrics.eyeContact)}%
-                    </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Eye Contact</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+
 
 
           </div>
@@ -2220,24 +2182,7 @@ export default function SimplifiedPracticePage() {
           </Card>
         )}
 
-        {/* Original Transcript Display for Non-Live View */}
-        {!showLiveTranscript && transcript && (
-          <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-blue-800">
-                <FileText className="w-5 h-5 text-blue-600" />
-                Session Transcript
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="bg-gray-50 p-4 rounded-lg max-h-40 overflow-y-auto">
-                <p className="text-sm leading-relaxed">
-                  {transcript || "Start speaking to see your transcript here..."}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+
 
 
       </div>
