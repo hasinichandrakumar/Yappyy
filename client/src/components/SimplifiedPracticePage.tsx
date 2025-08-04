@@ -199,9 +199,6 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
   // Live feedback
   const [liveFeedback, setLiveFeedback] = useState<LiveFeedback[]>([]);
   
-  // Enhanced analytics state
-  const [enhancedAnalytics, setEnhancedAnalytics] = useState<any>(null);
-  
   // Post-session analytics popup state
   const [showPostSessionPopup, setShowPostSessionPopup] = useState(false);
   const [completedSessionData, setCompletedSessionData] = useState<any>(null);
