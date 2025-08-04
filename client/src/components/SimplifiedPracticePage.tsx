@@ -687,6 +687,18 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
         }]);
       }
     };
+    
+    recognition.onend = () => {
+      console.log('Speech recognition ended');
+      if (isRecording && recognitionRef.current) {
+        try {
+          recognitionRef.current.start();
+          console.log('Speech recognition restarted automatically');
+        } catch (e) {
+          console.error('Failed to restart recognition:', e);
+        }
+      }
+    };
 
     recognitionRef.current = recognition;
     console.log('✅ Speech recognition setup completed and stored in ref');
@@ -910,6 +922,12 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
               type: 'success',
               timestamp: Date.now()
             }]);
+            
+            // Add debug info to help users
+            console.log('📊 FEATURE STATUS:');
+            console.log('- Transcript: ACTIVE (speak to see words)');
+            console.log('- WPM Calculator: ACTIVE (updates every second)');
+            console.log('- Filler Detector: ACTIVE (detects um, uh, etc.)');
           } catch (speechError) {
             console.error('❌ Failed to start speech recognition:', speechError);
             setLiveFeedback(prev => [...prev.slice(-4), {
@@ -919,6 +937,8 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
               timestamp: Date.now()
             }]);
           }
+        } else {
+          console.error('❌ Speech recognition not initialized properly');
         }
       }, 1000);
 
@@ -1979,7 +1999,12 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
                           <div className="text-xs opacity-80">Eye Contact</div>
                         </div>
                         <div className="text-center">
-                          <div className="text-2xl font-bold">{metrics.wordsPerMinute}</div>
+                          <div className="text-2xl font-bold">
+                            {metrics.wordsPerMinute}
+                            {transcript.length > 10 && (
+                              <span className="text-xs ml-1 text-green-400">●</span>
+                            )}
+                          </div>
                           <div className="text-xs opacity-80">WPM</div>
                         </div>
                         <div className="text-center">
@@ -2006,6 +2031,12 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
                     <Badge variant="secondary" size="sm">
                       <Activity className="w-3 h-3 mr-1" />
                       Live
+                    </Badge>
+                  )}
+                  {isRecording && recognitionRef.current && (
+                    <Badge variant="outline" size="sm" className="ml-2">
+                      <Mic className="w-3 h-3 mr-1 text-green-500" />
+                      Listening
                     </Badge>
                   )}
                 </CardTitle>
