@@ -2095,46 +2095,47 @@ export default function SimplifiedPracticePage() {
                   </div>
                 )}
                 
-                {/* Quick Stats */}
+                {/* Essential Live Stats */}
                 <div className="mt-4 pt-4 border-t border-gray-200">
-                  <div className="grid grid-cols-2 gap-4 text-center">
+                  <div className="grid grid-cols-3 gap-3 text-center">
                     <div>
-                      <div className="text-3xl font-extrabold text-blue-600">{metrics.wordsPerMinute}</div>
-                      <div className="text-sm font-semibold text-gray-600">WPM</div>
+                      <div className="text-2xl font-extrabold text-blue-600">{metrics.wordsPerMinute}</div>
+                      <div className="text-xs font-semibold text-gray-600">WPM</div>
                     </div>
                     <div>
-                      <div className="text-3xl font-extrabold text-red-600">{metrics.fillerWordCount}</div>
-                      <div className="text-sm font-semibold text-gray-600">Fillers</div>
+                      <div className="text-2xl font-extrabold text-purple-600">{metrics.fillerWordCount}</div>
+                      <div className="text-xs font-semibold text-gray-600">Fillers</div>
+                    </div>
+                    <div>
+                      <div className="text-2xl font-extrabold text-green-600">{Math.round(metrics.eyeContact)}%</div>
+                      <div className="text-xs font-semibold text-gray-600">Eye Contact</div>
                     </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Quick Stats */}
+            {/* Essential Live Metrics - Only WPM, Filler Words, and Eye Contact */}
             <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle className="text-xl font-bold text-blue-800">Session Stats</CardTitle>
+                <CardTitle className="text-xl font-bold text-blue-800">Live Metrics</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-sm font-medium text-gray-600">Words Per Minute</span>
-                  <span className="font-bold">{metrics.wordsPerMinute}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm font-medium text-gray-600">Filler Words</span>
-                  <span className="font-bold">{metrics.fillerWordCount}</span>
-                </div>
-
-                <div className="flex justify-between">
-                  <span className="text-sm font-medium text-gray-600">Total Words</span>
-                  <span className="font-bold">{transcript.split(' ').filter(w => w.length > 0).length}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm font-medium text-gray-600">Duration</span>
-                  <span className="font-bold">
-                    {Math.floor(sessionDuration / 60)}:{(sessionDuration % 60).toString().padStart(2, '0')}
-                  </span>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{metrics.wordsPerMinute}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Words/Min</div>
+                  </div>
+                  <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                    <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{metrics.fillerWordCount}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Filler Words</div>
+                  </div>
+                  <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                    <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                      {Math.round(metrics.eyeContact)}%
+                    </div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Eye Contact</div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
