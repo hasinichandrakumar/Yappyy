@@ -1962,14 +1962,13 @@ export default function SimplifiedPracticePage() {
 
 
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main Content - Simplified Layout */}
+        <div className="space-y-6">
           
           {/* Video Feed */}
-          <div className="lg:col-span-2">
-            <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm">
-              <CardContent className="p-0">
-                <div className="relative aspect-video bg-gray-900 rounded-lg overflow-hidden">
+          <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm">
+            <CardContent className="p-0">
+              <div className="relative aspect-video bg-gray-900 rounded-lg overflow-hidden">
                   <video
                     ref={videoRef}
                     className="w-full h-full object-cover"
@@ -2027,82 +2026,25 @@ export default function SimplifiedPracticePage() {
                     </div>
                   )}
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+            </CardContent>
+          </Card>
 
-          {/* Key Stats */}
-          <div className="space-y-4">
-            {/* Live Feedback Insights */}
-            <Card className="border border-blue-200 shadow-lg bg-gradient-to-br from-blue-50 to-cyan-50 backdrop-blur-sm">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-xl font-bold flex items-center gap-2 text-blue-800">
-                  <TrendingUp className="w-6 h-6 text-blue-600" />
-                  Live AI Feedback
-                  {liveFeedback.length > 0 && (
-                    <Badge variant="secondary" className="ml-2 text-xs">
-                      {liveFeedback.length} insights
-                    </Badge>
-                  )}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {liveFeedback.length === 0 ? (
-                  <div className="text-center text-gray-500 py-6">
-                    <Activity className="w-10 h-10 mx-auto mb-3 opacity-50" />
-                    <p className="font-medium">Ready for Live Analysis</p>
-                    <p className="text-sm mt-1">Start speaking to receive instant feedback</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3 max-h-64 overflow-y-auto">
-                    {liveFeedback.slice(-4).reverse().map((feedback, index) => (
-                      <div 
-                        key={feedback.id}
-                        className={`p-4 rounded-lg border-l-4 transition-all duration-300 ${
-                          feedback.type === 'success' 
-                            ? 'bg-green-50 border-green-400 text-green-800 shadow-green-100' 
-                            : feedback.type === 'warning'
-                            ? 'bg-yellow-50 border-yellow-400 text-yellow-800 shadow-yellow-100'
-                            : 'bg-blue-50 border-blue-400 text-blue-800 shadow-blue-100'
-                        } ${index === 0 ? 'ring-2 ring-blue-200 shadow-lg' : 'shadow-md'}`}
-                      >
-                        <div className="flex items-start justify-between">
-                          <p className="text-sm font-semibold flex-1 pr-2">{feedback.message}</p>
-                          {feedback.type === 'success' && <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />}
-                          {feedback.type === 'warning' && <AlertTriangle className="w-4 h-4 text-yellow-600 flex-shrink-0" />}
-                          {feedback.type === 'info' && <Info className="w-4 h-4 text-blue-600 flex-shrink-0" />}
-                        </div>
-                        <p className="text-xs opacity-75 mt-2 font-medium">
-                          {index === 0 ? 'Just now' : new Date(feedback.timestamp).toLocaleTimeString()}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                
-                {/* Essential Live Stats */}
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <div className="grid grid-cols-3 gap-3 text-center">
-                    <div>
-                      <div className="text-2xl font-extrabold text-blue-600">{metrics.wordsPerMinute}</div>
-                      <div className="text-xs font-semibold text-gray-600">WPM</div>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-extrabold text-purple-600">{metrics.fillerWordCount}</div>
-                      <div className="text-xs font-semibold text-gray-600">Fillers</div>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-extrabold text-green-600">{Math.round(metrics.eyeContact)}%</div>
-                      <div className="text-xs font-semibold text-gray-600">Eye Contact</div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-
-
-
+          {/* Essential Live Metrics - Minimal Display */}
+          <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-200">
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div>
+                <div className="text-3xl font-bold text-blue-600">{metrics.wordsPerMinute}</div>
+                <div className="text-sm text-gray-600">WPM</div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-purple-600">{metrics.fillerWordCount}</div>
+                <div className="text-sm text-gray-600">Fillers</div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-green-600">{Math.round(metrics.eyeContact)}%</div>
+                <div className="text-sm text-gray-600">Eye Contact</div>
+              </div>
+            </div>
           </div>
         </div>
 
