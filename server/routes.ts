@@ -4654,16 +4654,41 @@ Respond with detailed analysis in JSON format:
   // ROBOFLOW COMPUTER VISION API ENDPOINTS
   // =====================================================
 
-  // Comprehensive Computer Vision Analysis - DISABLED BY USER REQUEST
-  // User explicitly requested removal of all analytics boxes during practice
+  // Comprehensive Computer Vision Analysis with multiple engines
   app.post('/api/vision/analyze-comprehensive', async (req: any, res) => {
-    // This endpoint is completely disabled to remove analytics boxes from UI
-    res.json({
-      success: false,
-      analysis: null,
-      engineStatus: null,
-      message: 'Computer vision analysis disabled by user request'
-    });
+    try {
+      const { imageData } = req.body;
+      
+      if (!imageData) {
+        return res.status(400).json({ error: 'Image data is required' });
+      }
+
+      console.log('🔍 Analyzing image with comprehensive CV stack...');
+
+      // Import the comprehensive CV stack
+      const { comprehensiveCV } = await import('./enhanced-computer-vision-stack');
+      
+      // Analyze with multiple CV engines
+      const analysis = await comprehensiveCV.analyzeGesturesAndBodyLanguage(imageData);
+      
+      console.log('✅ Comprehensive CV analysis completed:', {
+        overallPresence: analysis.overallPresence,
+        posture: analysis.bodyPose.posture,
+        emotion: analysis.facialExpression.emotion
+      });
+
+      res.json({
+        success: true,
+        analysis,
+        engineStatus: comprehensiveCV.getEngineStatus()
+      });
+    } catch (error: any) {
+      console.error('Comprehensive CV analysis error:', error);
+      res.status(500).json({ 
+        error: 'Computer vision analysis failed',
+        details: error.message 
+      });
+    }
   });
 
   // Enhanced video frame analysis with Roboflow
@@ -5961,15 +5986,8 @@ Respond with detailed analysis in JSON format:
     }
   });
 
-  // Enhanced Analytics Integration Route - DISABLED BY USER REQUEST
-  // User explicitly requested removal of all analytics boxes during practice
-  app.post('/api/process-enhanced-analytics', (req, res) => {
-    res.json({
-      success: false,
-      message: 'Enhanced analytics disabled by user request',
-      data: null
-    });
-  });
+  // Enhanced Analytics Integration Route
+  app.post('/api/process-enhanced-analytics', processEnhancedAnalytics);
 
   // Enhanced Filler Word Detection Route - Captures UM and UH
   app.post('/api/detect-enhanced-fillers', async (req, res) => {
