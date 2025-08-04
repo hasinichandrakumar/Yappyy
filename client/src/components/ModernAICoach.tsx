@@ -601,8 +601,8 @@ export default function ModernAICoach() {
                 </Card>
               )}
 
-              {/* Computer Vision Analysis */}
-              {selectedSession.facialAnalysis && (
+              {/* Computer Vision Analysis - UI removed per user request, functionality preserved */}
+              {false && selectedSession.facialAnalysis && (
                 <div className="grid md:grid-cols-2 gap-6 mt-6">
                   <Card className="border border-yellow-200">
                     <CardHeader className="bg-gradient-to-r from-yellow-50 to-orange-50">

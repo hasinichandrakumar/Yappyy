@@ -2104,8 +2104,8 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
 
 
 
-        {/* Post-Session Analytics Popup */}
-        {showPostSessionPopup && completedSessionData && (
+        {/* Post-Session Analytics Popup - UI disabled per user request, functionality preserved */}
+        {false && showPostSessionPopup && completedSessionData && (
           <PostSessionAnalyticsPopup
             isOpen={showPostSessionPopup}
             onClose={() => setShowPostSessionPopup(false)}
