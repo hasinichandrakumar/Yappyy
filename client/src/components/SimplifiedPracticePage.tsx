@@ -19,12 +19,13 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { SessionDataViewer } from '@/components/SessionDataViewer';
-
+import { useRoboflowVision } from '@/hooks/useRoboflowVision';
+import { useFacialAnalysis } from '@/hooks/useFacialAnalysis';
+import { useRobustComputerVision } from '@/hooks/useRobustComputerVision';
+import { useAdvancedFillerDetection } from '@/hooks/useAdvancedFillerDetection';
 import AuthenticAnalysisPage from './AuthenticAnalysisPage';
 import VideoPlaybackViewer from './VideoPlaybackViewer';
 import RecordingLibrary from './RecordingLibrary';
-import PostSessionAnalyticsPopup from './PostSessionAnalyticsPopup';
-
 
 import { 
   videoRecordingManager, 
@@ -44,7 +45,13 @@ interface SimplifiedMetrics {
   voice: {
     clarity: number;
     pace: number;
+    volume: number;
+    intonation: number;
     fillerCount: number;
+    pauseEffectiveness: number;
+    pitchVariation: number;
+    vocalFryDetection: boolean;
+    uptalkPatterns: number;
   };
   bodyLanguage: {
     eyeContactScore: number;
@@ -58,10 +65,6 @@ interface LiveFeedback {
   message: string;
   type: 'success' | 'warning' | 'info';
   timestamp: number;
-}
-
-interface SimplifiedPracticePageProps {
-  onNavigateToAnalysis?: () => void;
 }
 
 // Session purpose options that correlate with template categories
@@ -134,7 +137,7 @@ const SESSION_PURPOSE_OPTIONS = [
   }
 ];
 
-export default function SimplifiedPracticePage({ onNavigateToAnalysis }: SimplifiedPracticePageProps = {}) {
+export default function SimplifiedPracticePage() {
   // Core session state
   const [isRecording, setIsRecording] = useState(false);
   const [sessionName, setSessionName] = useState("Session 1");
@@ -148,27 +151,6 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
   const [transcript, setTranscript] = useState<string>('');
   const [interimTranscript, setInterimTranscript] = useState<string>('');
   const [showLiveTranscript, setShowLiveTranscript] = useState(true);
-
-  // Fetch next session number when component loads
-  useEffect(() => {
-    const fetchNextSessionNumber = async () => {
-      try {
-        const response = await fetch('/api/sessions/next-number');
-        if (response.ok) {
-          const data = await response.json();
-          const nextNumber = data.nextSessionNumber;
-          setSessionNumber(nextNumber);
-          setSessionName(`Session ${nextNumber}`);
-          console.log('✅ Next session number loaded:', nextNumber);
-        }
-      } catch (error) {
-        console.error('❌ Failed to fetch next session number:', error);
-        // Keep default values if fetch fails
-      }
-    };
-    
-    fetchNextSessionNumber();
-  }, []);
 
   // Video recording state
   const [currentRecording, setCurrentRecording] = useState<VideoRecordingData | null>(null);
@@ -199,12 +181,8 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
   // Live feedback
   const [liveFeedback, setLiveFeedback] = useState<LiveFeedback[]>([]);
   
-  // Post-session analytics popup state
-  const [showPostSessionPopup, setShowPostSessionPopup] = useState(false);
-  const [completedSessionData, setCompletedSessionData] = useState<any>(null);
-  
-  // Real-time analytics collection
-  const [collectedAnalytics, setCollectedAnalytics] = useState<any[]>([]);
+  // Enhanced analytics state
+  const [enhancedAnalytics, setEnhancedAnalytics] = useState<any>(null);
   
   // Vocal filler detection state
   const [vocalFillerBuffer, setVocalFillerBuffer] = useState<string[]>([]);
@@ -213,11 +191,106 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
   const [vocalFillerRecorder, setVocalFillerRecorder] = useState<MediaRecorder | null>(null);
   const [isListeningForFillers, setIsListeningForFillers] = useState(false);
 
-  // Initialize speech recognition when component mounts
+  // Roboflow computer vision integration
+  const {
+    isAnalyzing: isRoboflowAnalyzing,
+    analysis: roboflowAnalysis,
+    frameCount: roboflowFrameCount,
+    processingTime: roboflowProcessingTime,
+    error: roboflowError,
+    videoRef: roboflowVideoRef,
+    canvasRef: roboflowCanvasRef,
+    startRealTimeAnalysis,
+    stopRealTimeAnalysis,
+    analyzeSingleFrame,
+    cleanup: cleanupRoboflow
+  } = useRoboflowVision();
+
+  // Facial analysis integration
+  const {
+    isActive: isFacialAnalysisActive,
+    currentAnalysis: facialAnalysis,
+    startFacialAnalysis,
+    stopFacialAnalysis,
+    getAverageFacialMetrics,
+    error: facialAnalysisError
+  } = useFacialAnalysis();
+
+  // Robust computer vision system with error handling
+  const {
+    metrics: computerVisionMetrics,
+    error: computerVisionError,
+    isInitialized: isComputerVisionInitialized,
+    isAnalyzing: isComputerVisionAnalyzing,
+    frameCount: computerVisionFrameCount,
+    successCount: computerVisionSuccessCount,
+    startAnalysis: startComputerVisionAnalysis,
+    stopAnalysis: stopComputerVisionAnalysis,
+    getAverageMetrics: getAverageComputerVisionMetrics
+  } = useRobustComputerVision();
+
+  // Add advanced filler detection hook
+  const {
+    fillerResults,
+    performHybridDetection,
+    startRealTimeDetection,
+    getFillerStatistics
+  } = useAdvancedFillerDetection();
+
+  // Fetch authentic eye contact and expression data from maximum authentic analysis
   useEffect(() => {
-    console.log('🎤 Initializing speech recognition on component mount...');
-    setupSpeechRecognition();
-  }, []);
+    if (!isRecording) return;
+
+    const fetchAuthenticMetrics = async () => {
+      try {
+        const response = await fetch('/api/maximum-authentic-analysis');
+        const data = await response.json();
+        
+        if (data.success && data.results && data.results.vision) {
+          // Extract authentic facial analysis data from Enhanced-Local analysis engine
+          const visionData = data.results.vision;
+          
+          // Extract eye contact from nested structure
+          const eyeContactValue = visionData.eyeContact?.eyeContactPercentage || 
+                                 visionData.eyeContact?.audienceEngagement || 0;
+          
+          // Extract confidence and engagement from facial expression analysis
+          const confidenceValue = visionData.facialExpression?.confidence || 0;
+          const engagementValue = visionData.facialExpression?.engagement || 0;
+          
+          if (eyeContactValue > 0 || confidenceValue > 0 || engagementValue > 0) {
+            setMetrics(prev => ({
+              ...prev,
+              eyeContact: eyeContactValue,
+              confidence: confidenceValue,
+              engagement: engagementValue,
+              bodyLanguage: {
+                ...prev.bodyLanguage,
+                eyeContactScore: eyeContactValue,
+                facialExpressions: engagementValue,
+                overallPresence: confidenceValue
+              }
+            }));
+            
+            console.log('✅ Updated metrics with Enhanced-Local authentic data:', {
+              eyeContact: eyeContactValue,
+              engagement: engagementValue,
+              confidence: confidenceValue,
+              source: 'Enhanced-Local analysis engine'
+            });
+          }
+        }
+      } catch (error) {
+        console.log('📊 Maximum authentic analysis unavailable');
+      }
+    };
+
+    // Fetch immediately and then every 3 seconds during recording
+    fetchAuthenticMetrics();
+    const interval = setInterval(fetchAuthenticMetrics, 3000);
+    
+    return () => clearInterval(interval);
+  }, [isRecording]);
 
   // Fetch session number on component load
   useEffect(() => {
@@ -501,18 +574,9 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
         setInterimTranscript(''); // Clear interim when we get final
         interimTranscriptRef.current = ''; // Clear ref too
         
-        // Use simple filler detection system for comprehensive analysis
-        const fillerWords = ['um', 'uh', 'uhm', 'umm', 'er', 'err', 'ah', 'eh', 'like', 'so', 'well'];
-        const detectedFillers = finalTranscript.toLowerCase().split(/\s+/).filter(word => {
-          const cleanWord = word.replace(/[.,!?;:'"()]/g, '');
-          return fillerWords.includes(cleanWord);
-        });
-        const fillerDetectionResult = {
-          totalFillers: detectedFillers.length,
-          fillerTypes: {},
-          fillerTimestamps: detectedFillers.map(filler => ({ word: filler, timestamp: Date.now() }))
-        };
-        console.log('🎯 Simple filler detection result:', fillerDetectionResult);
+        // Use advanced filler detection system for comprehensive analysis
+        const fillerDetectionResult = performHybridDetection(finalTranscript, Date.now());
+        console.log('🎯 Advanced filler detection result:', fillerDetectionResult);
         
         // Update metrics with advanced filler detection results and add fillers to transcript
         if (fillerDetectionResult.totalFillers > 0) {
@@ -545,7 +609,7 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
           
           // Create live feedback for detected fillers
           const topFiller = Object.entries(fillerDetectionResult.fillerTypes)
-            .sort(([,a], [,b]) => (b as number) - (a as number))[0]?.[0] || 'filler';
+            .sort(([,a], [,b]) => b - a)[0]?.[0] || 'filler';
           
           const fillerMessage = fillerDetectionResult.totalFillers === 1 
             ? `Detected filler: "${topFiller}"`
@@ -627,17 +691,14 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
           } catch (error) {
             console.log('Fallback to local filler detection');
             // Fallback to local detection if backend fails
-            const localFillerWords = ['um', 'uh', 'uhm', 'umm', 'er', 'err', 'ah', 'eh', 'like', 'so', 'well'];
-            const detectedLocalFillers = fullTranscript.toLowerCase().split(/\s+/).filter(word => {
-              const cleanWord = word.replace(/[.,!?;:'"()]/g, '');
-              return localFillerWords.includes(cleanWord);
-            });
-            
-            if (detectedLocalFillers.length > 0) {
-              console.log('🎯 Local filler words detected:', detectedLocalFillers);
+            if (detectedFillers.length > 0) {
+              console.log('🎯 Local filler words detected:', detectedFillers);
               
               // Count fillers in the full transcript
-              const fullFillerCount = detectedLocalFillers.length;
+              const fullFillerCount = fullTranscript.toLowerCase().split(/\s+/).filter(word => {
+                const cleanWord = word.replace(/[.,!?;:'"()]/g, '');
+                return singleFillerWords.includes(cleanWord);
+              }).length;
               
               setMetrics(prev => ({
                 ...prev,
@@ -648,7 +709,7 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
                 }
               }));
               
-              const uniqueFillers = Array.from(new Set(detectedLocalFillers));
+              const uniqueFillers = Array.from(new Set(detectedFillers));
               const feedbackMessage = uniqueFillers.length === 1 
                 ? `Reduce filler word: "${uniqueFillers[0]}"` 
                 : `Reduce filler words: ${uniqueFillers.slice(0, 2).join(', ')}`;
@@ -675,31 +736,10 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
 
     recognition.onerror = (event: any) => {
       console.error('Speech recognition error:', event.error);
-      if (event.error === 'not-allowed') {
-        setLiveFeedback(prev => [...prev.slice(-4), {
-          id: Date.now().toString(),
-          message: 'Microphone access denied - please enable in browser settings',
-          type: 'warning',
-          timestamp: Date.now()
-        }]);
-      }
-    };
-    
-    recognition.onend = () => {
-      console.log('Speech recognition ended');
-      if (isRecording && recognitionRef.current) {
-        try {
-          recognitionRef.current.start();
-          console.log('Speech recognition restarted automatically');
-        } catch (e) {
-          console.error('Failed to restart recognition:', e);
-        }
-      }
     };
 
-    recognitionRef.current = recognition;
-    console.log('✅ Speech recognition setup completed and stored in ref');
-  }, []);
+    (recognitionRef as any).current = recognition;
+  }, [sessionDuration, transcript]);
 
   // Enhanced comprehensive live insights system with improved effectiveness
   useEffect(() => {
@@ -786,7 +826,15 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
         }
       }
 
-      if (eyeContact > 0 && eyeContact < 45 && (!lastMessage || !lastMessage.message.includes('Look at'))) {
+      // Computer Vision Feedback (only when real data available)
+      if (eyeContact > 75 && (!lastMessage || !lastMessage.message.includes('eye contact'))) {
+        setLiveFeedback(prev => [...prev.slice(-4), {
+          id: Date.now().toString(),
+          message: 'Excellent eye contact! You\'re engaging your audience well',
+          type: 'success',
+          timestamp: Date.now()
+        }]);
+      } else if (eyeContact > 0 && eyeContact < 45 && (!lastMessage || !lastMessage.message.includes('Look at'))) {
         setLiveFeedback(prev => [...prev.slice(-4), {
           id: Date.now().toString(),
           message: 'Try looking at the camera more - aim for 60%+ eye contact',
@@ -903,52 +951,62 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
         }
       }
 
-      // CRITICAL FIX: Start speech recognition for transcript capture
-      console.log('🎤 Initializing speech recognition for transcript...');
-      setupSpeechRecognition();
-      
-      // Wait for setup then start recognition
-      setTimeout(() => {
-        if (recognitionRef.current) {
-          try {
-            recognitionRef.current.start();
-            console.log('✅ Speech recognition started successfully');
-            setLiveFeedback(prev => [...prev.slice(-4), {
-              id: Date.now().toString(),
-              message: 'Speech recognition active - transcript will capture your words',
-              type: 'success',
-              timestamp: Date.now()
-            }]);
-            
-            // Add debug info to help users
-            console.log('📊 FEATURE STATUS:');
-            console.log('- Transcript: ACTIVE (speak to see words)');
-            console.log('- WPM Calculator: ACTIVE (updates every second)');
-            console.log('- Filler Detector: ACTIVE (detects um, uh, etc.)');
-          } catch (speechError) {
-            console.error('❌ Failed to start speech recognition:', speechError);
-            setLiveFeedback(prev => [...prev.slice(-4), {
-              id: Date.now().toString(),
-              message: 'Please enable microphone permissions for transcript feature',
-              type: 'warning',
-              timestamp: Date.now()
-            }]);
-          }
-        } else {
-          console.error('❌ Speech recognition not initialized properly');
-        }
-      }, 1000);
-
       streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
         
+        // Initialize ALL computer vision systems for gesture and posture monitoring
+        try {
+          // Start Roboflow computer vision for gesture/posture analysis
+          console.log('🤖 Starting Roboflow computer vision for gestures and postures...');
+          
+          // Pass the existing video element and stream to Roboflow
+          if (roboflowVideoRef.current) {
+            roboflowVideoRef.current.srcObject = stream;
+            // Set canvas reference safely
+            if (canvasRef.current && roboflowCanvasRef) {
+              (roboflowCanvasRef as any).current = canvasRef.current;
+            }
+          }
+          
+          // Wait for video to be ready before starting analysis
+          await new Promise<void>(resolve => {
+            const checkReady = () => {
+              if (videoRef.current && videoRef.current.readyState >= 3) {
+                resolve();
+              } else {
+                setTimeout(checkReady, 100);
+              }
+            };
+            checkReady();
+          });
+          
+          await startRealTimeAnalysis(1500); // Analyze every 1.5 seconds for performance
+          console.log('✅ Roboflow computer vision started successfully');
+        } catch (error) {
+          console.warn('⚠️ Roboflow computer vision failed:', error);
+        }
 
+        try {
+          // Start facial analysis system
+          console.log('🎭 Starting facial analysis system...');
+          await startFacialAnalysis(videoRef.current);
+          console.log('✅ Facial analysis started successfully');
+        } catch (error) {
+          console.warn('⚠️ Facial analysis failed:', error);
+        }
 
-
-
-
+        try {
+          // Start robust computer vision system
+          console.log('🛡️ Starting robust computer vision system...');
+          const started = await startComputerVisionAnalysis(videoRef.current);
+          if (started) {
+            console.log('✅ Robust computer vision started successfully');
+          }
+        } catch (error) {
+          console.warn('⚠️ Robust computer vision initialization failed:', error);
+        }
       }
 
       // Setup Web Audio API for direct vocal filler detection
@@ -1048,7 +1106,7 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
               // Send audio to backend for vocal filler analysis
               // Convert audio blob to base64 for enhanced filler detection
               const arrayBuffer = await audioBlob.arrayBuffer();
-              const base64Audio = btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(arrayBuffer))));
+              const base64Audio = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
               
               const response = await fetch('/api/detect-enhanced-fillers', {
                 method: 'POST',
@@ -1107,39 +1165,11 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
         console.warn('⚠️ Vocal filler recorder unavailable:', recorderError);
       }
 
-      // Start speech recognition - CRITICAL FIX
-      console.log('🎤 Starting speech recognition system...');
-      
-      // First setup the recognition if not already done
-      if (!recognitionRef.current) {
-        setupSpeechRecognition();
+      // Start speech recognition
+      setupSpeechRecognition();
+      if (recognitionRef.current) {
+        recognitionRef.current.start();
       }
-      
-      // Wait a moment then start recognition
-      setTimeout(() => {
-        if (recognitionRef.current) {
-          try {
-            recognitionRef.current.start();
-            console.log('✅ Speech recognition started for transcript capture');
-            setLiveFeedback(prev => [...prev.slice(-4), {
-              id: Date.now().toString(),
-              message: 'Speech recognition started - speak to see live transcript',
-              type: 'success',
-              timestamp: Date.now()
-            }]);
-          } catch (speechError) {
-            console.error('❌ Speech recognition failed to start:', speechError);
-            setLiveFeedback(prev => [...prev.slice(-4), {
-              id: Date.now().toString(),
-              message: 'Speech recognition unavailable - check microphone permissions',
-              type: 'warning',
-              timestamp: Date.now()
-            }]);
-          }
-        } else {
-          console.error('❌ Speech recognition not initialized');
-        }
-      }, 500);
 
       setIsRecording(true);
 
@@ -1182,9 +1212,6 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
         }
       }, 1000);
 
-      // Clear collected analytics at start of new session  
-      setCollectedAnalytics([]);
-      
       // Initialize metrics and refs with starting values when recording begins
       setMetrics({
         eyeContact: 0,
@@ -1196,7 +1223,13 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
         voice: {
           clarity: 0,
           pace: 0,
-          fillerCount: 0
+          volume: 0,
+          intonation: 0,
+          fillerCount: 0,
+          pauseEffectiveness: 0,
+          pitchVariation: 0,
+          vocalFryDetection: false,
+          uptalkPatterns: 0
         },
         bodyLanguage: {
           eyeContactScore: 0,
@@ -1250,9 +1283,9 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
       console.log('✅ All computer vision systems initialized during stream setup');
 
       console.log('📹 Recording started with robust computer vision integration:', {
-        computerVision: false,
-        roboflow: false,
-
+        computerVision: isComputerVisionInitialized,
+        roboflow: isRoboflowAnalyzing,
+        facialAnalysis: isFacialAnalysisActive,
         videoRecording: videoRecordingEnabled
       });
     } catch (error) {
@@ -1341,13 +1374,6 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
       console.warn('⚠️ Error stopping computer vision analysis');
     }
 
-    // Stop MediaPipe service
-    try {
-
-    } catch (error) {
-      console.warn('⚠️ Error stopping MediaPipe:', error);
-    }
-
     setIsRecording(false);
 
     // Save session to database with comprehensive data
@@ -1366,7 +1392,7 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
         pauseCount: 0,
         eyeContactScore: String(metrics.eyeContact || 0),
         coachingTips: [],
-        videoBlob: recordingData?.videoBlob ? await recordingData.videoBlob.arrayBuffer().then(buffer => 
+        videoBlob: recordingData?.blob ? await recordingData.blob.arrayBuffer().then(buffer => 
           Buffer.from(buffer).toString('base64')
         ) : null,
         facialAnalysis: JSON.stringify({
@@ -1378,7 +1404,7 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
         voiceMetrics: JSON.stringify({
           clarity: metrics.voice.clarity || 0,
           pace: metrics.voice.pace || 0,
-
+          volume: metrics.voice.volume || 0,
           fillerCount: metrics.fillerWordCount || 0
         }),
         bodyLanguageMetrics: JSON.stringify({
@@ -1391,19 +1417,7 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
           strengths: [],
           improvements: []
         }),
-        persuasivenessScore: metrics.confidence || 0,
-        realTimeAnalytics: JSON.stringify({
-          totalDataPoints: collectedAnalytics.length,
-          analyticsHistory: collectedAnalytics,
-          finalMetrics: {
-            eyeContact: metrics.eyeContact,
-            confidence: metrics.confidence,
-            engagement: metrics.engagement,
-            voiceClarity: metrics.voice.clarity,
-            fillerCount: metrics.fillerWordCount
-          },
-          timestamp: Date.now()
-        })
+        persuasivenessScore: metrics.confidence || 0
       };
 
       console.log('📊 Session data prepared:', {
@@ -1430,31 +1444,16 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
       const result = await response.json();
       
       if (result.success) {
-        console.log(`✅ Session ${result.session.sessionNumber} saved successfully with ${collectedAnalytics.length} analytics data points`);
-        
-        // Clear collected analytics for next session
-        setCollectedAnalytics([]);
+        console.log(`✅ Session ${result.session.sessionNumber} saved successfully`);
         
         // Update session number for next session
         const nextSessionNumber = result.session.sessionNumber + 1;
         setSessionNumber(nextSessionNumber);
         setSessionName(`Session ${nextSessionNumber}`);
         
-        // Show post-session analytics popup
-        setCompletedSessionData({
-          sessionName: sessionData.sessionName,
-          duration: sessionData.duration,
-          transcript: sessionData.transcript,
-          averageWPM: sessionData.averageWPM || 0,
-          confidenceScore: sessionData.confidenceScore || 0,
-          fillerWordCount: sessionData.fillerWords || 0,
-          eyeContactScore: parseFloat(sessionData.eyeContactScore || '0') || 0
-        });
-        setShowPostSessionPopup(true);
-        
         toast({
           title: "Session Saved!",
-          description: `${result.message}`,
+          description: `${result.message} - Check the Analysis tab to view your session`,
           variant: "default"
         });
       } else {
@@ -1486,7 +1485,13 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
         voice: {
           clarity: 0,
           pace: 0,
-          fillerCount: 0
+          volume: 0,
+          intonation: 0,
+          fillerCount: 0,
+          pauseEffectiveness: 0,
+          pitchVariation: 0,
+          vocalFryDetection: false,
+          uptalkPatterns: 0
         },
         bodyLanguage: {
           eyeContactScore: 0,
@@ -1543,7 +1548,7 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
           overallPerformance: realConfidenceScore,
           sessionName: sessionName,
           purpose: sessionPurpose,
-          facialAnalysis: null,
+          facialAnalysis: facialAnalysis?.facialMetrics || null,
           hasRealSpeech: hasRealSpeech
         },
         speechPatterns: {
@@ -1561,7 +1566,7 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
         emotionalIntelligence: {
           engagement: hasRealSpeech ? metrics.engagement : 0,
           confidence: hasRealSpeech ? metrics.confidence : 0,
-          authenticity: hasRealSpeech ? 75 : 0
+          authenticity: hasRealSpeech ? (facialAnalysis?.facialMetrics?.emotionalExpression?.authenticity || 75) : 0
         }
       };
 
@@ -1597,7 +1602,7 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
           pauseCount: sessionData.pauseCount || 0,
           eyeContactScore: `${realEyeContact}%`,
           coachingTips: sessionData.coachingTips || [],
-          facialAnalysis: null,
+          facialAnalysis: facialAnalysis?.facialMetrics,
           voiceMetrics: {
             clarity: Math.round(sessionData.clarityScore * 100),
             pace: averageWPM,
@@ -1645,11 +1650,11 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
                 fillerWordCount: realFillerWords,
                 wordsPerMinute: averageWPM
               },
-              facialAnalysis: null,
+              facialAnalysis: facialAnalysis?.facialMetrics,
               voiceMetrics: {
                 clarity: realVoiceClarity,
                 pace: metrics.voice?.pace || 0,
-                fillerCount: realFillerWords
+                // Volume and intonation metrics removed
               }
             })
           });
@@ -1664,7 +1669,7 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
                 recordingData,
                 transcript,
                 sessionData,
-                null
+                facialAnalysis?.facialMetrics
               );
               setCurrentRecording(recordingData);
               console.log('🎬 Video recording also saved locally:', recordingId);
@@ -1884,17 +1889,8 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
                 )}
               </div>
 
-              {/* Demo Button and Recording Controls */}
-              <div className="flex items-center gap-3">
-                <Button 
-                  variant="outline" 
-                  onClick={() => window.location.href = '/dashboard'}
-                  className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200 hover:from-purple-100 hover:to-pink-100 text-purple-700 hover:text-purple-800 shadow-sm"
-                >
-                  <BarChart3 className="w-4 h-4 mr-2" />
-                  Dashboard Demo
-                </Button>
-                
+              {/* Recording Controls */}
+              <div className="flex gap-2">
                 {!isRecording ? (
                   <Button onClick={startRecording} className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white shadow-lg hover:shadow-xl">
                     <Mic className="w-5 h-5 mr-2" />
@@ -1947,6 +1943,16 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
                     <Library className="w-4 h-4" />
                     Library
                   </Button>
+                  
+                  {/* Live Transcript Toggle */}
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowLiveTranscript(!showLiveTranscript)}
+                    className="flex items-center gap-2"
+                  >
+                    <FileText className="w-4 h-4" />
+                    {showLiveTranscript ? 'Hide' : 'Show'} Transcript
+                  </Button>
                 </div>
 
               </div>
@@ -1954,10 +1960,26 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
           </CardHeader>
         </Card>
 
+        {/* Tips */}
+        <div className="space-y-3">
+          <Alert className="border-blue-200 bg-gradient-to-r from-blue-50 to-cyan-50 shadow-sm">
+            <Eye className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-blue-800">
+              <strong>Tip:</strong> Look directly at your camera lens to maintain eye contact. Aim for 60-80% eye contact during your speech.
+            </AlertDescription>
+          </Alert>
+          
+          <Alert className="border-cyan-200 bg-gradient-to-r from-cyan-50 to-blue-50 shadow-sm">
+            <Activity className="h-4 w-4 text-cyan-600" />
+            <AlertDescription className="text-cyan-800">
+              <strong>Note:</strong> Browser speech recognition automatically filters out "um" and "uh" sounds. The system detects other filler words like "like", "so", "you know" effectively.
+            </AlertDescription>
+          </Alert>
+        </div>
 
-
-        {/* Main Content - Video Feed with Live Metrics */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
           {/* Video Feed */}
           <div className="lg:col-span-2">
             <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm">
@@ -1993,133 +2015,229 @@ export default function SimplifiedPracticePage({ onNavigateToAnalysis }: Simplif
                         <Activity className="w-3 h-3 mr-1" />
                         SMART FILLER DETECTION
                       </Badge>
-                    </div>
-                  )}
-                  
-                  {/* Live Metrics Overlay */}
-                  {isRecording && (
-                    <div className="absolute bottom-4 left-4 right-4 bg-black/70 backdrop-blur-sm rounded-lg p-3">
-                      <div className="grid grid-cols-3 gap-4 text-white">
-                        <div className="text-center">
-                          <div className="text-2xl font-bold">{Math.round(metrics.eyeContact)}%</div>
-                          <div className="text-xs opacity-80">Eye Contact</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-2xl font-bold">
-                            {metrics.wordsPerMinute}
-                            {transcript.length > 10 && (
-                              <span className="text-xs ml-1 text-green-400">●</span>
-                            )}
-                          </div>
-                          <div className="text-xs opacity-80">WPM</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-2xl font-bold">{metrics.fillerWordCount}</div>
-                          <div className="text-xs opacity-80">Filler Words</div>
-                        </div>
-                      </div>
+                      {isRoboflowAnalyzing && (
+                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                          <Activity className="w-3 h-3 mr-1" />
+                          COMPUTER VISION ACTIVE
+                        </Badge>
+                      )}
+                      {isFacialAnalysisActive && (
+                        <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                          <Activity className="w-3 h-3 mr-1" />
+                          FACIAL ANALYSIS ACTIVE
+                        </Badge>
+                      )}
+                      {isComputerVisionAnalyzing && (
+                        <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
+                          <Activity className="w-3 h-3 mr-1" />
+                          COMPUTER VISION ACTIVE
+                        </Badge>
+                      )}
+                      {computerVisionError.hasError && (
+                        <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+                          <Activity className="w-3 h-3 mr-1" />
+                          CV ERROR - USING FALLBACK
+                        </Badge>
+                      )}
                     </div>
                   )}
                 </div>
               </CardContent>
             </Card>
           </div>
-          
-          {/* Live Transcript and Feedback */}
+
+          {/* Key Stats */}
           <div className="space-y-4">
-            {/* Live Transcript */}
-            <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm">
+            {/* Live Feedback Insights */}
+            <Card className="border border-blue-200 shadow-lg bg-gradient-to-br from-blue-50 to-cyan-50 backdrop-blur-sm">
               <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-blue-600" />
-                  Live Transcript
-                  {isRecording && (
-                    <Badge variant="secondary" size="sm">
-                      <Activity className="w-3 h-3 mr-1" />
-                      Live
-                    </Badge>
-                  )}
-                  {isRecording && recognitionRef.current && (
-                    <Badge variant="outline" size="sm" className="ml-2">
-                      <Mic className="w-3 h-3 mr-1 text-green-500" />
-                      Listening
+                <CardTitle className="text-xl font-bold flex items-center gap-2 text-blue-800">
+                  <TrendingUp className="w-6 h-6 text-blue-600" />
+                  Live AI Feedback
+                  {liveFeedback.length > 0 && (
+                    <Badge variant="secondary" className="ml-2 text-xs">
+                      {liveFeedback.length} insights
                     </Badge>
                   )}
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="bg-white border border-gray-200 rounded-lg p-4 max-h-[300px] overflow-y-auto">
-                  {transcript || interimTranscript ? (
-                    <div className="text-sm leading-relaxed space-y-2">
-                      <FillerWordHighlighter 
-                        text={transcript}
-                        className="text-gray-900"
-                      />
-                      {interimTranscript && (
-                        <span className="text-gray-400 italic">
-                          {' ' + interimTranscript}
-                        </span>
-                      )}
+              <CardContent className="space-y-3">
+                {liveFeedback.length === 0 ? (
+                  <div className="text-center text-gray-500 py-6">
+                    <Activity className="w-10 h-10 mx-auto mb-3 opacity-50" />
+                    <p className="font-medium">Ready for Live Analysis</p>
+                    <p className="text-sm mt-1">Start speaking to receive instant feedback</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3 max-h-64 overflow-y-auto">
+                    {liveFeedback.slice(-4).reverse().map((feedback, index) => (
+                      <div 
+                        key={feedback.id}
+                        className={`p-4 rounded-lg border-l-4 transition-all duration-300 ${
+                          feedback.type === 'success' 
+                            ? 'bg-green-50 border-green-400 text-green-800 shadow-green-100' 
+                            : feedback.type === 'warning'
+                            ? 'bg-yellow-50 border-yellow-400 text-yellow-800 shadow-yellow-100'
+                            : 'bg-blue-50 border-blue-400 text-blue-800 shadow-blue-100'
+                        } ${index === 0 ? 'ring-2 ring-blue-200 shadow-lg' : 'shadow-md'}`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <p className="text-sm font-semibold flex-1 pr-2">{feedback.message}</p>
+                          {feedback.type === 'success' && <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />}
+                          {feedback.type === 'warning' && <AlertTriangle className="w-4 h-4 text-yellow-600 flex-shrink-0" />}
+                          {feedback.type === 'info' && <Info className="w-4 h-4 text-blue-600 flex-shrink-0" />}
+                        </div>
+                        <p className="text-xs opacity-75 mt-2 font-medium">
+                          {index === 0 ? 'Just now' : new Date(feedback.timestamp).toLocaleTimeString()}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Quick Stats */}
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <div className="grid grid-cols-2 gap-4 text-center">
+                    <div>
+                      <div className="text-3xl font-extrabold text-blue-600">{metrics.wordsPerMinute}</div>
+                      <div className="text-sm font-semibold text-gray-600">WPM</div>
                     </div>
-                  ) : (
-                    <div className="text-center text-gray-500 py-8">
-                      <Mic className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                      <p className="text-sm">Start speaking to see your transcript...</p>
+                    <div>
+                      <div className="text-3xl font-extrabold text-red-600">{metrics.fillerWordCount}</div>
+                      <div className="text-sm font-semibold text-gray-600">Fillers</div>
                     </div>
-                  )}
+                  </div>
                 </div>
               </CardContent>
             </Card>
-            
-            {/* Live Feedback */}
-            {isRecording && liveFeedback.length > 0 && (
-              <Card className="border border-green-200 shadow-lg bg-white/90 backdrop-blur-sm">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Lightbulb className="w-5 h-5 text-green-600" />
-                    Live Feedback
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2 max-h-[200px] overflow-y-auto">
-                    {liveFeedback.slice(-3).map((feedback) => (
-                      <Alert key={feedback.id} className={`
-                        ${feedback.type === 'success' ? 'border-green-200 bg-green-50' : ''}
-                        ${feedback.type === 'warning' ? 'border-yellow-200 bg-yellow-50' : ''}
-                        ${feedback.type === 'info' ? 'border-blue-200 bg-blue-50' : ''}
-                      `}>
-                        <AlertDescription className="text-sm">
-                          {feedback.message}
-                        </AlertDescription>
-                      </Alert>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+
+            {/* Quick Stats */}
+            <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-xl font-bold text-blue-800">Session Stats</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-sm font-medium text-gray-600">Words Per Minute</span>
+                  <span className="font-bold">{metrics.wordsPerMinute}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm font-medium text-gray-600">Filler Words</span>
+                  <span className="font-bold">{metrics.fillerWordCount}</span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span className="text-sm font-medium text-gray-600">Total Words</span>
+                  <span className="font-bold">{transcript.split(' ').filter(w => w.length > 0).length}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm font-medium text-gray-600">Duration</span>
+                  <span className="font-bold">
+                    {Math.floor(sessionDuration / 60)}:{(sessionDuration % 60).toString().padStart(2, '0')}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+
+
           </div>
         </div>
 
-
-
-
-
-        {/* Post-Session Analytics Popup - UI disabled per user request, functionality preserved */}
-        {false && showPostSessionPopup && completedSessionData && (
-          <PostSessionAnalyticsPopup
-            isOpen={showPostSessionPopup}
-            onClose={() => setShowPostSessionPopup(false)}
-            sessionData={completedSessionData}
-            onViewFullAnalysis={() => {
-              if (onNavigateToAnalysis) {
-                onNavigateToAnalysis();
-              } else {
-                // Fallback: try to trigger tab change via event
-                window.dispatchEvent(new CustomEvent('navigateToAnalysis'));
-              }
-            }}
-          />
+        {/* Live Transcript Panel */}
+        {showLiveTranscript && (
+          <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-blue-600" />
+                  <span className="text-blue-800">Live Transcript</span>
+                  {isRecording && (
+                    <Badge variant="secondary" className="ml-2">
+                      <Activity className="w-3 h-3 mr-1" />
+                      Live
+                    </Badge>
+                  )}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowLiveTranscript(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  ×
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="bg-white border-2 border-gray-100 p-4 rounded-lg max-h-60 overflow-y-auto">
+                {transcript || interimTranscript ? (
+                  <div className="text-sm leading-relaxed">
+                    {/* Enhanced filler word highlighting including UM/UH detection */}
+                    <FillerWordHighlighter 
+                      text={transcript}
+                      className="text-gray-900"
+                    />
+                    {interimTranscript && (
+                      <span className="text-gray-400 italic">
+                        {' ' + interimTranscript}
+                      </span>
+                    )}
+                    
+                    {/* Show filler word count summary */}
+                    {metrics.fillerWordCount > 0 && (
+                      <div className="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs">
+                        <strong>Fillers detected:</strong> {metrics.fillerWordCount} words
+                        {transcript.includes('[UM') && ' (including UM sounds)'}
+                        {transcript.includes('[UH') && ' (including UH sounds)'}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center text-gray-500 py-8">
+                    {isRecording ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <Activity className="w-4 h-4" />
+                        <span>Listening for speech...</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center gap-2">
+                        <Mic className="w-4 h-4" />
+                        <span>Start recording to see live transcript</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              
+              {transcript && (
+                <div className="mt-4 flex justify-between items-center text-xs text-gray-600">
+                  <span>Words: {transcript.split(' ').filter(w => w.length > 0).length}</span>
+                  <span>Characters: {transcript.length}</span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         )}
+
+        {/* Original Transcript Display for Non-Live View */}
+        {!showLiveTranscript && transcript && (
+          <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-blue-800">
+                <FileText className="w-5 h-5 text-blue-600" />
+                Session Transcript
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="bg-gray-50 p-4 rounded-lg max-h-40 overflow-y-auto">
+                <p className="text-sm leading-relaxed">
+                  {transcript || "Start speaking to see your transcript here..."}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
 
       </div>
     </div>

@@ -257,54 +257,9 @@ export default function EnhancedAnalysisTab() {
               </div>
               <div>
                 <h3 className="text-2xl font-extrabold text-slate-900">Voice Analysis</h3>
-                <p className="text-base font-semibold text-slate-700">Detailed breakdown of your vocal performance with real-time data</p>
+                <p className="text-base font-semibold text-slate-700">Detailed breakdown of your vocal performance</p>
               </div>
             </div>
-
-            {/* Real-Time Analytics Summary - only show for individual sessions */}
-            {selectedSession !== 'all' && filteredSessions.length === 1 && filteredSessions[0].realTimeAnalytics && (
-              <Card className="p-6 bg-gradient-to-br from-cyan-50 to-blue-50 border border-cyan-200">
-                <div className="flex items-center gap-2 mb-4">
-                  <Activity className="h-5 w-5 text-cyan-600" />
-                  <h4 className="text-lg font-semibold text-cyan-900">Real-Time Analytics Data</h4>
-                </div>
-                {(() => {
-                  try {
-                    const realTimeData = JSON.parse(filteredSessions[0].realTimeAnalytics);
-                    return (
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="text-center p-3 bg-white rounded-lg border border-cyan-200">
-                          <div className="text-2xl font-bold text-cyan-800 mb-1">
-                            {realTimeData.totalDataPoints || 0}
-                          </div>
-                          <div className="text-xs text-cyan-600">Data Points Collected</div>
-                        </div>
-                        <div className="text-center p-3 bg-white rounded-lg border border-cyan-200">
-                          <div className="text-2xl font-bold text-cyan-800 mb-1">
-                            {realTimeData.finalMetrics?.eyeContact || 0}%
-                          </div>
-                          <div className="text-xs text-cyan-600">Final Eye Contact</div>
-                        </div>
-                        <div className="text-center p-3 bg-white rounded-lg border border-cyan-200">
-                          <div className="text-2xl font-bold text-cyan-800 mb-1">
-                            {realTimeData.finalMetrics?.confidence || 0}%
-                          </div>
-                          <div className="text-xs text-cyan-600">Final Confidence</div>
-                        </div>
-                        <div className="text-center p-3 bg-white rounded-lg border border-cyan-200">
-                          <div className="text-2xl font-bold text-cyan-800 mb-1">
-                            {realTimeData.finalMetrics?.engagement || 0}%
-                          </div>
-                          <div className="text-xs text-cyan-600">Final Engagement</div>
-                        </div>
-                      </div>
-                    );
-                  } catch (e) {
-                    return <div className="text-sm text-slate-500">Real-time analytics data could not be parsed</div>;
-                  }
-                })()}
-              </Card>
-            )}
 
             {sessionCount === 0 ? (
               <div className="text-center py-12">
@@ -366,20 +321,8 @@ export default function EnhancedAnalysisTab() {
                       <div className="text-3xl font-bold text-emerald-800 mb-1">
                         {(() => {
                           const total = filteredSessions.reduce((sum: number, s: any) => {
-                            // Use real-time analytics data if available
-                            let clarity = 0;
-                            if (s.realTimeAnalytics) {
-                              try {
-                                const realTimeData = JSON.parse(s.realTimeAnalytics);
-                                clarity = realTimeData.finalMetrics?.voiceClarity || 0;
-                              } catch (e) {
-                                // Fallback to existing fields
-                                clarity = s.clarityScore || s.voiceClarity || s.confidenceScore || 0;
-                              }
-                            } else {
-                              // Convert decimal values to percentages (0.39 -> 39%)
-                              clarity = s.clarityScore || s.voiceClarity || s.confidenceScore || 0;
-                            }
+                            // Convert decimal values to percentages (0.39 -> 39%)
+                            let clarity = s.clarityScore || s.voiceClarity || s.confidenceScore || 0;
                             // If value is between 0-1, convert to percentage
                             if (clarity > 0 && clarity <= 1) {
                               clarity = clarity * 100;
@@ -744,18 +687,7 @@ export default function EnhancedAnalysisTab() {
                     <div className="text-4xl font-bold text-blue-800 mb-2">
                       {(() => {
                         const total = filteredSessions.reduce((sum: number, s: any) => {
-                          let score = 0;
-                          // Use real-time analytics data if available
-                          if (s.realTimeAnalytics) {
-                            try {
-                              const realTimeData = JSON.parse(s.realTimeAnalytics);
-                              score = realTimeData.finalMetrics?.eyeContact || 0;
-                            } catch (e) {
-                              score = s.eyeContactScore || 0;
-                            }
-                          } else {
-                            score = s.eyeContactScore || 0;
-                          }
+                          let score = s.eyeContactScore || 0;
                           if (typeof score === 'string') score = parseFloat(score);
                           if (score > 0 && score <= 1) score = score * 100;
                           return sum + score;
@@ -839,27 +771,7 @@ export default function EnhancedAnalysisTab() {
                   <div className="text-center">
                     <div className="text-4xl font-bold text-purple-800 mb-2">
                       {(() => {
-                        const total = filteredSessions.reduce((sum: number, s: any) => {
-                          let gestureScore = 0;
-                          // Use real-time analytics data if available
-                          if (s.realTimeAnalytics) {
-                            try {
-                              const realTimeData = JSON.parse(s.realTimeAnalytics);
-                              // Check if analytics history contains gesture data
-                              if (realTimeData.analyticsHistory && realTimeData.analyticsHistory.length > 0) {
-                                const gestureDataPoints = realTimeData.analyticsHistory.filter((point: any) => point.gestureScore > 0);
-                                if (gestureDataPoints.length > 0) {
-                                  gestureScore = gestureDataPoints.reduce((sum: number, point: any) => sum + point.gestureScore, 0) / gestureDataPoints.length;
-                                }
-                              }
-                            } catch (e) {
-                              gestureScore = s.gestureScore || 0;
-                            }
-                          } else {
-                            gestureScore = s.gestureScore || 0;
-                          }
-                          return sum + gestureScore;
-                        }, 0);
+                        const total = filteredSessions.reduce((sum: number, s: any) => sum + (s.gestureScore || 0), 0);
                         const average = sessionCount > 0 ? total / sessionCount : 0;
                         return Math.round(isNaN(average) ? 0 : average);
                       })()}%

@@ -89,8 +89,14 @@ interface ComprehensiveMetrics {
 }
 
 export default function EnhancedPracticePage() {
-  // Component disabled per user request - remove analytics boxes
-  return null;
+  // Session State
+  const [isRecording, setIsRecording] = useState(false);
+  const [sessionName, setSessionName] = useState("");
+  const [sessionPurpose, setSessionPurpose] = useState("");
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [isEditingPurpose, setIsEditingPurpose] = useState(false);
+  const [sessionDuration, setSessionDuration] = useState(0);
+  const [transcript, setTranscript] = useState<string>('');
 
   // Enhanced Metrics & Feedback
   const [metrics, setMetrics] = useState<ComprehensiveMetrics>({

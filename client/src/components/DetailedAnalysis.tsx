@@ -47,9 +47,6 @@ interface Session {
 }
 
 export default function DetailedAnalysis() {
-  // User explicitly requested removal of all analytics boxes during practice
-  // This component is completely disabled
-  return null;
   const { posture, eyeContact } = useMediaPipe();
   const { voiceClarity, confidenceScore, volumeLevel } = useVoiceAnalysis();
   const { transcript, wordCount } = useSpeechRecognition();

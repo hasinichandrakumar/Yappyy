@@ -94,7 +94,7 @@ export class WorldClassNeuralAICoach {
     // Calculate from actual session data
     const avgConfidence = sessions.reduce((sum, s) => sum + (s.confidenceScore || 0.5), 0) / sessions.length;
     const avgClarity = sessions.reduce((sum, s) => sum + (s.clarityScore || 0.6), 0) / sessions.length;
-    const avgEngagement = sessions.reduce((sum, s) => sum + ((s as any).engagementScore || 0.5), 0) / sessions.length;
+    const avgEngagement = sessions.reduce((sum, s) => sum + (s.engagementScore || 0.5), 0) / sessions.length;
 
     return {
       confidence: avgConfidence,
@@ -273,7 +273,7 @@ My algorithm has analyzed your behavioral patterns and identified this as your o
       'content_structuring': 'Strengthen message organization',
       'authentic_communication': 'Find and express your authentic voice'
     };
-    return translations[strategy as keyof typeof translations] || 'Balanced skill development';
+    return translations[strategy] || 'Balanced skill development';
   }
 
   private getFocusAreas(features: FeatureVector, output: number[]): string[] {
@@ -344,68 +344,7 @@ My algorithm has analyzed your behavioral patterns and identified this as your o
     const areas = ['confidence', 'clarity', 'engagement'];
     return areas.slice(0, 2);
   }
-  
-  // Generate personalized coaching based on analysis results
-  async generatePersonalizedCoaching(data: {
-    userId: string;
-    sessionData: any;
-    analysisResults: any;
-  }): Promise<any> {
-    const profile = await this.initializeUser(data.userId);
-    
-    // Extract key metrics from comprehensive analysis
-    const keyMetrics = {
-      confidence: data.analysisResults?.overall?.confidenceScore || 0,
-      engagement: data.analysisResults?.overall?.engagementScore || 0,
-      authenticity: data.analysisResults?.overall?.authenticityScore || 0,
-      fillerCount: data.analysisResults?.voice?.fillerWords?.count || 0,
-      eyeContact: data.analysisResults?.bodyLanguage?.eyeContact?.percentage || 0,
-      clarity: data.analysisResults?.content?.clarity?.score || 0
-    };
-    
-    // Generate personalized insights
-    const insights = [];
-    
-    if (keyMetrics.confidence > 80) {
-      insights.push("Your confidence shines through - maintain this strong presence");
-    } else if (keyMetrics.confidence < 50) {
-      insights.push("Focus on projecting more confidence through posture and voice");
-    }
-    
-    if (keyMetrics.fillerCount > 10) {
-      insights.push(`Work on reducing filler words (${keyMetrics.fillerCount} detected)`);
-    }
-    
-    if (keyMetrics.eyeContact < 60) {
-      insights.push("Increase eye contact with the camera for better engagement");
-    }
-    
-    // Generate improvement recommendations
-    const recommendations = [];
-    
-    if (data.analysisResults?.overall?.improvementAreas?.length > 0) {
-      recommendations.push(...data.analysisResults.overall.improvementAreas);
-    }
-    
-    if (data.analysisResults?.overall?.strengths?.length > 0) {
-      insights.push(`Strengths: ${data.analysisResults.overall.strengths.join(', ')}`);
-    }
-    
-    return {
-      insights,
-      recommendations,
-      keyMetrics,
-      personalizedMessage: this.buildCoachingMessage(
-        profile,
-        { confidence: profile.confidence, strategy: 'adaptive', focusAreas: recommendations, priority: 'balanced' },
-        data.sessionData.transcript || ''
-      )
-    };
-  }
 }
-
-// Export singleton instance
-export const worldClassNeuralAICoach = new WorldClassNeuralAICoach();
 
 // Types for the neural network system
 interface NeuralProfile {
@@ -498,3 +437,5 @@ interface CoachingResponse {
   personalizedProfile: any;
   neuralNetworkAnalysis: any;
 }
+
+export const worldClassNeuralAICoach = new WorldClassNeuralAICoach();

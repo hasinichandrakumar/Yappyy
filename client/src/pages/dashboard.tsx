@@ -184,7 +184,7 @@ export default function Dashboard() {
           </TabsList>
 
           <TabsContent value="practice" className="space-y-8 pb-16">
-            <SimplifiedPracticePage onNavigateToAnalysis={() => setActiveTab("analysis")} />
+            <SimplifiedPracticePage />
           </TabsContent>
 
           <TabsContent value="analysis" className="space-y-6">

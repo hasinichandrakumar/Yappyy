@@ -48,28 +48,6 @@ export class FreeVoiceAnalysisEngine {
     }
   }
 
-  // Method to provide current analysis for API endpoints
-  getCurrentAnalysis(): any {
-    return {
-      clarity: 79,
-      fillerCount: 3,
-      sentiment: 0.8,
-      confidence: 82,
-      hasData: true
-    };
-  }
-
-  // Method to analyze audio data
-  async analyzeAudio(audioData: string | Buffer): Promise<any> {
-    try {
-      console.log('🎤 Analyzing voice audio...');
-      return this.getCurrentAnalysis();
-    } catch (error) {
-      console.error('🎤 Voice analysis error:', error);
-      return this.getCurrentAnalysis();
-    }
-  }
-
   async analyzeTranscript(transcript: string): Promise<FreeVoiceAnalysis> {
     if (!transcript || transcript.trim().length === 0) {
       return this.getFallbackAnalysis();

@@ -232,10 +232,14 @@ export default function ModernAICoach() {
 
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200">
+        <TabsList className="grid w-full grid-cols-5 bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200">
           <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:text-purple-700">
             <BarChart3 className="w-4 h-4 mr-2" />
             Overview
+          </TabsTrigger>
+          <TabsTrigger value="breakdown" className="data-[state=active]:bg-white data-[state=active]:text-purple-700">
+            <PieChart className="w-4 h-4 mr-2" />
+            Performance
           </TabsTrigger>
           <TabsTrigger value="analysis" className="data-[state=active]:bg-white data-[state=active]:text-purple-700">
             <Brain className="w-4 h-4 mr-2" />
@@ -339,7 +343,192 @@ export default function ModernAICoach() {
           </Card>
         </TabsContent>
 
+        {/* Performance Breakdown Tab */}
+        <TabsContent value="breakdown" className="space-y-6">
+          <Card className="border-2 border-blue-100 shadow-lg">
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100">
+              <CardTitle className="flex items-center gap-2 text-blue-800">
+                <PieChart className="w-5 h-5" />
+                Performance Breakdown
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 space-y-6">
+              {/* Extract authentic metrics from session data */}
+              {(() => {
+                // Extract ONLY authentic metrics from session data - NO FALLBACKS
+                const getFacialAnalysisData = () => {
+                  try {
+                    return selectedSession.facialAnalysis ? JSON.parse(selectedSession.facialAnalysis) : null;
+                  } catch (e) {
+                    return null;
+                  }
+                };
+                
+                const facialData = getFacialAnalysisData();
+                
+                // Use ONLY authentic data from database - no placeholders
+                const confidenceLevel = selectedSession.confidenceScore || 
+                  facialData?.emotionalExpression?.confidence || 0;
+                
+                const eyeContactScore = typeof selectedSession.eyeContactScore === 'string' ? 
+                  parseFloat(selectedSession.eyeContactScore) : 
+                  (selectedSession.eyeContactScore || 
+                    facialData?.communicationSignals?.eyeContactQuality || 0);
+                
+                const clarityScore = selectedSession.clarityScore || selectedSession.voiceClarity || 0;
+                
+                const engagementLevel = facialData?.emotionalExpression?.engagement || 0;
+                
+                const voiceConsistency = selectedSession.volumeConsistency || 0; // Only use real data
+                
+                const performanceMetrics = [
+                  {
+                    name: 'Confidence Level',
+                    score: Math.round(confidenceLevel),
+                    icon: Target,
+                    color: 'text-emerald-600',
+                    bgColor: 'bg-emerald-50'
+                  },
+                  {
+                    name: 'Eye Contact',
+                    score: Math.round(eyeContactScore),
+                    icon: Eye,
+                    color: 'text-blue-600',
+                    bgColor: 'bg-blue-50'
+                  },
+                  {
+                    name: 'Clarity & Articulation',
+                    score: Math.round(clarityScore),
+                    icon: Mic,
+                    color: 'text-purple-600',
+                    bgColor: 'bg-purple-50'
+                  },
+                  {
+                    name: 'Engagement Level',
+                    score: Math.round(engagementLevel),
+                    icon: Zap,
+                    color: 'text-orange-600',
+                    bgColor: 'bg-orange-50'
+                  },
+                  {
+                    name: 'Voice Consistency',
+                    score: Math.round(voiceConsistency),
+                    icon: Activity,
+                    color: 'text-indigo-600',
+                    bgColor: 'bg-indigo-50'
+                  }
+                ];
 
+                return performanceMetrics.map((metric) => {
+                  const Icon = metric.icon;
+                  const progressColor = metric.score >= 80 ? 'bg-emerald-500' : 
+                                      metric.score >= 60 ? 'bg-blue-500' :
+                                      metric.score >= 40 ? 'bg-amber-500' : 'bg-red-500';
+                  
+                  return (
+                    <div key={metric.name} className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-lg ${metric.bgColor}`}>
+                            <Icon className={`w-5 h-5 ${metric.color}`} />
+                          </div>
+                          <span className="font-medium text-gray-900">{metric.name}</span>
+                        </div>
+                        <div className={`text-lg font-bold ${metric.score === 0 ? 'text-red-600' : metric.color}`}>
+                          {metric.score}%
+                        </div>
+                      </div>
+                      <div className="relative">
+                        <Progress 
+                          value={metric.score} 
+                          className="h-3"
+                        />
+                        <div 
+                          className={`absolute top-0 left-0 h-3 rounded-full transition-all duration-500 ${progressColor}`}
+                          style={{ width: `${metric.score}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                });
+              })()}
+            </CardContent>
+          </Card>
+
+          {/* Additional Session Metrics */}
+          <div className="grid md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-gray-800">
+                  <Clock className="w-5 h-5" />
+                  Session Metrics
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span className="text-sm font-medium text-gray-600">Duration</span>
+                  <span className="font-semibold">
+                    {Math.floor(selectedSession.duration / 60)}:{(selectedSession.duration % 60).toString().padStart(2, '0')}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span className="text-sm font-medium text-gray-600">Words Per Minute</span>
+                  <span className="font-semibold">{selectedSession.averageWPM || selectedSession.wordsPerMinute || 0}</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <span className="text-sm font-medium text-gray-600">Filler Words</span>
+                  <span className="font-semibold text-red-600">{selectedSession.fillerWords || selectedSession.fillerWordCount || 0}</span>
+                </div>
+                <div className="flex justify-between items-center py-2">
+                  <span className="text-sm font-medium text-gray-600">Session Type</span>
+                  <Badge variant="outline">{selectedSession.purpose || 'General Practice'}</Badge>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-gray-800">
+                  <Brain className="w-5 h-5" />
+                  AI Analysis Summary
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="text-center py-6">
+                  {/* Overall Performance Score */}
+                  <div className="text-4xl font-bold text-blue-600 mb-2">
+                    {selectedSession.overallScore || Math.round((
+                      (selectedSession.confidenceScore || 0) + 
+                      (selectedSession.voiceClarity || 0) + 
+                      (parseFloat(selectedSession.eyeContactScore) || 0)
+                    ) / 3) || 0}
+                  </div>
+                  <div className="text-sm font-medium text-gray-600 mb-4">Overall Performance Score</div>
+                  
+                  <div className="flex justify-center gap-2 mb-4">
+                    {Array.from({ length: 5 }, (_, i) => (
+                      <Star 
+                        key={i} 
+                        className={`w-5 h-5 ${
+                          i < Math.round((selectedSession.overallScore || 0) / 20) 
+                            ? 'text-yellow-400 fill-yellow-400' 
+                            : 'text-gray-300'
+                        }`} 
+                      />
+                    ))}
+                  </div>
+                  
+                  <p className="text-sm text-gray-600">
+                    {selectedSession.overallScore >= 85 ? 'Excellent performance! Keep up the great work.' :
+                     selectedSession.overallScore >= 70 ? 'Good performance with room for improvement.' :
+                     selectedSession.overallScore >= 55 ? 'Solid foundation, focus on key areas.' :
+                     'Great potential! Let\'s work on building confidence.'}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
 
         {/* Analysis Tab */}
         <TabsContent value="analysis" className="space-y-6">
@@ -601,8 +790,8 @@ export default function ModernAICoach() {
                 </Card>
               )}
 
-              {/* Computer Vision Analysis - UI removed per user request, functionality preserved */}
-              {false && selectedSession.facialAnalysis && (
+              {/* Computer Vision Analysis */}
+              {selectedSession.facialAnalysis && (
                 <div className="grid md:grid-cols-2 gap-6 mt-6">
                   <Card className="border border-yellow-200">
                     <CardHeader className="bg-gradient-to-r from-yellow-50 to-orange-50">

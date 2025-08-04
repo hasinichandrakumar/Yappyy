@@ -54,36 +54,6 @@ export class MediaPipeVisionEngine {
     }
   }
 
-  // Method to provide current metrics for API endpoints
-  getCurrentMetrics(): (ComputerVisionMetrics & { hasAuthenticData: boolean }) | null {
-    if (!this.isAvailable) {
-      return null;
-    }
-    
-    return {
-      posture: {
-        overallPosture: 76,
-        spineAlignment: 81,
-        shoulderLevel: 78
-      },
-      gestures: {
-        gestureNaturalness: 83,
-        handMovements: 77,
-        effectiveness: 79
-      },
-      eyeContact: {
-        eyeContactPercentage: 72,
-        gazeStability: 84
-      },
-      facialExpression: {
-        confidence: 80,
-        engagement: 75,
-        authenticity: 82
-      },
-      hasAuthenticData: true
-    };
-  }
-
   async analyzeFrame(imageData: string | Buffer): Promise<ComputerVisionMetrics | null> {
     if (!this.isInitialized || !this.isAvailable) {
       console.log('⚠️ MediaPipe not available');

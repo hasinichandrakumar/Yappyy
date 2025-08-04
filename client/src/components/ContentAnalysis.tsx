@@ -90,8 +90,6 @@ interface ContentInsights {
 }
 
 export default function ContentAnalysis() {
-  // User explicitly requested removal of all analytics boxes during practice
-  return null;
   const [transcript, setTranscript] = useState<TranscriptSegment[]>([]);
   const [metrics, setMetrics] = useState<ContentMetrics | null>(null);
   const [insights, setInsights] = useState<ContentInsights | null>(null);

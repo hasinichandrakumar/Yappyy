@@ -13,8 +13,6 @@ interface CoachingTip {
 }
 
 export default function CoachingTips() {
-  // User explicitly requested removal of all analytics boxes during practice
-  return null;
   const { transcript } = useSpeechRecognition();
   const { speakingPace, voiceClarity, confidenceScore } = useVoiceAnalysis();
   const [lastAnalysisTime, setLastAnalysisTime] = useState(0);

@@ -33,8 +33,6 @@ interface TestResult {
 }
 
 export default function IntegratedAnalysisTest() {
-  // User explicitly requested removal of all analytics boxes during practice
-  return null;
   const [isRunning, setIsRunning] = useState(false);
   const [testResults, setTestResults] = useState<TestResult[]>([]);
   const [logs, setLogs] = useState<string[]>([]);

@@ -247,7 +247,6 @@ export const practiceSessions = pgTable("practice_sessions", {
   performanceMetrics: jsonb("performance_metrics"), // Browser performance data
   webrtcQualityData: jsonb("webrtc_quality_data"), // Connection quality metrics
   systemAnalytics: jsonb("system_analytics"), // Device, connection, browser metrics
-  realTimeAnalytics: jsonb("real_time_analytics"), // Real-time analytics collected during session
   
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (table) => ({

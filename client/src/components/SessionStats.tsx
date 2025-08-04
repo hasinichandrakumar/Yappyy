@@ -4,8 +4,6 @@ import { useVoiceAnalysis } from "@/hooks/useVoiceAnalysis";
 import { useMediaPipe } from "@/hooks/useMediaPipe";
 
 export default function SessionStats() {
-  // User explicitly requested removal of all analytics boxes during practice
-  return null;
   const { sessionTime, wordCount } = useSpeechRecognition();
   const { speakingPace, fillerWords, pauseCount } = useVoiceAnalysis();
   const { eyeContact } = useMediaPipe();

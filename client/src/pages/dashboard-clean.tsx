@@ -56,27 +56,6 @@ export default function Dashboard() {
     completeOnboardingMutation.mutate();
   };
 
-  // Listen for navigation to analysis tab from practice sessions
-  useEffect(() => {
-    const handleNavigateToAnalysis = (event: CustomEvent) => {
-      setActiveTab("detailed");
-      if (event.detail?.sessionId) {
-        setStudyingSessionId(event.detail.sessionId);
-      }
-    };
-
-    window.addEventListener('navigateToAnalysis', handleNavigateToAnalysis as EventListener);
-    
-    return () => {
-      window.removeEventListener('navigateToAnalysis', handleNavigateToAnalysis as EventListener);
-    };
-  }, []);
-
-  // Function to pass to practice components
-  const navigateToAnalysis = () => {
-    setActiveTab("detailed");
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Clean Navigation Header */}
@@ -213,7 +192,7 @@ export default function Dashboard() {
               <div className="space-y-6">
                 <WelcomeBackWidget />
 
-                <EnhancedPracticeHubFixed onNavigateToAnalysis={navigateToAnalysis} />
+                <EnhancedPracticeHubFixed />
               </div>
             </TabsContent>
 

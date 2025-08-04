@@ -53,8 +53,17 @@ interface TranscriptWord {
 }
 
 export default function EnhancedPracticeDashboard() {
-  // Component disabled per user request - remove analytics boxes
-  return null;
+  const [activeTab, setActiveTab] = useState("pathway");
+  const [sessionData, setSessionData] = useState<SessionData>({
+    isRecording: false,
+    isPaused: false,
+    duration: 0,
+    audioLevel: 45,
+    speechRate: 125,
+    confidenceScore: 78,
+    fillerWordCount: 2,
+    transcript: []
+  });
 
   // REMOVED: No more fake transcript generation - only use real speech recognition data
 

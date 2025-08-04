@@ -57,8 +57,6 @@ import { freeVoiceAnalysis } from './free-voice-analysis';
 import { graphqlHTTP } from 'express-graphql';
 import neuralGraphQL from './graphql-schema';
 import { processEnhancedAnalytics } from './analytics-route';
-import { comprehensiveAI } from './comprehensive-ai-integration';
-import { worldClassNeuralAICoach } from './world-class-neural-ai-coach';
 
 // Helper function to extract user ID from Google OAuth request
 function getUserId(req: any): string {
@@ -66,46 +64,18 @@ function getUserId(req: any): string {
   return req.user?.id || 'guest';
 }
 
-// Helper function to get next session number with integrity check - INCREMENTS FOREVER
+// Helper function to get next session number
 async function getNextSessionNumber(userId: string): Promise<number> {
   try {
-    // Get all sessions for this user ordered by creation date
-    const userSessions = await db.select()
+    const result = await db.select({ maxSessionNumber: max(practiceSessions.sessionNumber) })
       .from(practiceSessions)
-      .where(eq(practiceSessions.userId, userId))
-      .orderBy(practiceSessions.createdAt);
+      .where(eq(practiceSessions.userId, userId));
     
-    if (userSessions.length === 0) {
-      console.log(`📊 First session for user ${userId}: returning 1`);
-      return 1;
-    }
-    
-    // Get the maximum session number - this ensures infinite incrementing
-    const maxSessionNumber = Math.max(...userSessions.map(s => s.sessionNumber));
-    const nextNumber = maxSessionNumber + 1;
-    
-    // Additional safety check - ensure we never go backwards
-    if (nextNumber <= maxSessionNumber) {
-      console.warn(`⚠️ Session number collision detected! Forcing increment: ${maxSessionNumber} -> ${maxSessionNumber + 1}`);
-      return maxSessionNumber + 1;
-    }
-    
-    console.log(`📊 Session number calculation for user ${userId}: found ${userSessions.length} sessions, max = ${maxSessionNumber}, next = ${nextNumber} (infinite increment)`);
-    return nextNumber;
+    const currentMax = result[0]?.maxSessionNumber || 0;
+    return currentMax + 1;
   } catch (error) {
-    console.error('❌ Error getting next session number:', error);
-    // Even on error, try to get the last known max to continue sequence
-    try {
-      const fallbackResult = await db.select({ maxSessionNumber: max(practiceSessions.sessionNumber) })
-        .from(practiceSessions)
-        .where(eq(practiceSessions.userId, userId));
-      const fallbackMax = fallbackResult[0]?.maxSessionNumber || 0;
-      console.log(`📊 Fallback session number: ${fallbackMax + 1}`);
-      return fallbackMax + 1;
-    } catch (fallbackError) {
-      console.error('❌ Even fallback failed, starting from 1');
-      return 1;
-    }
+    console.error('Error getting next session number:', error);
+    return 1; // Default to session 1 if error
   }
 }
 
@@ -130,25 +100,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Setup Google OAuth Authentication (primary and only auth system)
   await setupGoogleAuth(app);
-
-  // Get next session number for new sessions
-  app.get('/api/sessions/next-number', async (req: any, res) => {
-    try {
-      const userId = req.user?.claims?.sub || req.user?.id || 'demo-user';
-      const nextSessionNumber = await getNextSessionNumber(userId);
-      
-      res.json({ 
-        nextSessionNumber,
-        userId 
-      });
-    } catch (error) {
-      console.error('❌ Error getting next session number:', error);
-      res.status(500).json({ 
-        error: 'Failed to get next session number',
-        nextSessionNumber: 1 // Fallback
-      });
-    }
-  });
 
   // Authenticate with token (for cross-domain OAuth)
   app.post('/api/auth/token', async (req: any, res) => {
@@ -403,13 +354,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         hasVideo: !!completeSessionData.videoBlob
       });
       
-      // Add additional fields to complete session data including real-time analytics
+      // Add additional fields to complete session data
       completeSessionData.aiAnalysis = sessionData.aiAnalysis || null;
       completeSessionData.speechPatterns = sessionData.speechPatterns || null;
       completeSessionData.emotionalIntelligence = sessionData.emotionalIntelligence || null;
       completeSessionData.rhetoricAnalysis = sessionData.rhetoricAnalysis || null;
       completeSessionData.improvementPlan = sessionData.improvementPlan || null;
-      completeSessionData.realTimeAnalytics = sessionData.realTimeAnalytics || null; // NEW: Save real-time analytics data
       
       // Create the session with all provided data
       const session = await storage.createPracticeSession(completeSessionData);
@@ -479,100 +429,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         totalMinutes: 0,
         currentStreak: 0,
         averageConfidence: 0
-      });
-    }
-  });
-
-  // Comprehensive Analytics Endpoint - Integrates all AI/CV/Audio systems
-  app.post('/api/comprehensive-analytics', async (req: any, res) => {
-    try {
-      const {
-        videoFrames = [],
-        audioData,
-        transcript = '',
-        duration = 0,
-        purpose = 'general',
-        sessionData = {}
-      } = req.body;
-
-      console.log('🔬 Starting comprehensive analytics processing...');
-      console.log('📊 Input data:', {
-        hasVideo: videoFrames.length > 0,
-        hasAudio: !!audioData,
-        transcriptLength: transcript.length,
-        duration,
-        purpose
-      });
-
-      // Process through comprehensive AI integration
-      const analysis = await comprehensiveAI.analyzeSession({
-        videoFrames,
-        audioData,
-        transcript,
-        duration,
-        purpose
-      });
-
-      // Generate coaching insights based on analysis
-      const coachingInsights = await worldClassNeuralAICoach.generatePersonalizedCoaching({
-        userId: getUserId(req),
-        sessionData: {
-          ...sessionData,
-          transcript,
-          duration,
-          metrics: {
-            confidence: analysis.overall.confidenceScore,
-            engagement: analysis.overall.engagementScore,
-            authenticity: analysis.overall.authenticityScore,
-            wordsPerMinute: analysis.voice.pace.wordsPerMinute,
-            fillerCount: analysis.voice.fillerWords.count,
-            eyeContact: analysis.bodyLanguage.eyeContact.percentage,
-            posture: analysis.bodyLanguage.posture.score,
-            clarity: analysis.content.clarity.score
-          }
-        },
-        analysisResults: analysis
-      });
-
-      // Get processing metrics
-      const metrics = comprehensiveAI.getMetrics();
-
-      console.log('✅ Comprehensive analysis complete:', {
-        overallConfidence: analysis.overall.confidenceScore,
-        enginesUsed: analysis.metadata.enginesUsed.length,
-        processingTime: analysis.metadata.processingTime,
-        dataQuality: analysis.metadata.dataQuality
-      });
-
-      res.json({
-        success: true,
-        analysis,
-        coaching: coachingInsights,
-        processingMetrics: metrics,
-        timestamp: new Date().toISOString()
-      });
-
-    } catch (error: any) {
-      console.error('❌ Comprehensive analytics error:', error);
-      res.status(500).json({
-        success: false,
-        error: 'Failed to process comprehensive analytics',
-        details: error.message,
-        fallbackAnalysis: {
-          overall: {
-            confidenceScore: 0,
-            engagementScore: 0,
-            authenticityScore: 0,
-            improvementAreas: ['Unable to process - please try again'],
-            strengths: []
-          },
-          metadata: {
-            processingTime: 0,
-            enginesUsed: [],
-            dataQuality: 0,
-            timestamp: new Date()
-          }
-        }
       });
     }
   });
@@ -1688,37 +1544,6 @@ CRITICAL: Evaluate how well this speech achieved its stated PURPOSE. Analyze the
       const nextSessionNumber = await getNextSessionNumber(userId);
       console.log(`📹 Saving video session ${nextSessionNumber} for user ${userId}`);
 
-      // Process comprehensive analytics if transcript available
-      let comprehensiveAnalysis = null;
-      if (transcript && transcript.length > 10) {
-        try {
-          console.log('🔬 Running comprehensive analytics for session save...');
-          
-          // Extract video frames if available
-          const videoFrames = [];
-          if (videoData) {
-            // For now, we'll analyze without frames - in production, extract frames from video
-            console.log('📹 Video data available for analysis');
-          }
-          
-          comprehensiveAnalysis = await comprehensiveAI.analyzeSession({
-            videoFrames,
-            audioData: undefined, // Audio processing can be added later
-            transcript,
-            duration: duration || 60,
-            purpose: sessionPurpose || 'general'
-          });
-          
-          console.log('✅ Comprehensive analysis complete:', {
-            confidence: comprehensiveAnalysis.overall.confidenceScore,
-            engagement: comprehensiveAnalysis.overall.engagementScore,
-            enginesUsed: comprehensiveAnalysis.metadata.enginesUsed
-          });
-        } catch (analysisError) {
-          console.error('⚠️ Comprehensive analysis failed, using basic metrics:', analysisError);
-        }
-      }
-
       // Create practice session with comprehensive data
       const sessionData = {
         userId,
@@ -1729,30 +1554,24 @@ CRITICAL: Evaluate how well this speech achieved its stated PURPOSE. Analyze the
         duration: duration || 0,
         // Store video as base64 if provided
         videoBlob: videoData ? Buffer.from(videoData, 'base64').toString('base64') : null,
-        // Extract metrics with comprehensive analysis integration
-        confidenceScore: comprehensiveAnalysis?.overall?.confidenceScore || metrics?.confidence || facialAnalysis?.emotionalExpression?.confidence || 0,
-        clarityScore: comprehensiveAnalysis?.content?.clarity?.score || metrics?.clarity || voiceMetrics?.clarity || 0,  
-        paceScore: comprehensiveAnalysis?.voice?.pace?.wordsPerMinute || metrics?.pace || voiceMetrics?.pace || 0,
-        eyeContactScore: (comprehensiveAnalysis?.bodyLanguage?.eyeContact?.percentage || metrics?.eyeContact || facialAnalysis?.communicationSignals?.eyeContactQuality || 0).toString(),
-        gestureScore: comprehensiveAnalysis?.bodyLanguage?.gestures?.score || metrics?.gesture || facialAnalysis?.bodyLanguage?.gestureNaturalness || 0,
-        overallScore: comprehensiveAnalysis?.overall?.confidenceScore || calculateOverallScore(metrics, facialAnalysis, voiceMetrics),
-        fillerWordCount: comprehensiveAnalysis?.voice?.fillerWords?.count || metrics?.fillerWordCount || 0,
-        wordsPerMinute: comprehensiveAnalysis?.voice?.pace?.wordsPerMinute || metrics?.wordsPerMinute || 0,
+        // Extract metrics with proper defaults and computer vision integration
+        confidenceScore: metrics?.confidence || facialAnalysis?.emotionalExpression?.confidence || 0,
+        clarityScore: metrics?.clarity || voiceMetrics?.clarity || 0,  
+        paceScore: metrics?.pace || voiceMetrics?.pace || 0,
+        eyeContactScore: (metrics?.eyeContact || facialAnalysis?.communicationSignals?.eyeContactQuality || 0).toString(),
+        gestureScore: metrics?.gesture || facialAnalysis?.bodyLanguage?.gestureNaturalness || 0,
+        overallScore: calculateOverallScore(metrics, facialAnalysis, voiceMetrics),
+        fillerWordCount: metrics?.fillerWordCount || 0,
+        wordsPerMinute: metrics?.wordsPerMinute || 0,
         // Legacy required fields with defaults  
-        averageWPM: comprehensiveAnalysis?.voice?.pace?.wordsPerMinute || metrics?.wordsPerMinute || 0,
-        voiceClarity: comprehensiveAnalysis?.voice?.clarity?.articulation || metrics?.clarity || 0,
-        fillerWords: comprehensiveAnalysis?.voice?.fillerWords?.count || metrics?.fillerWordCount || 0,
-        pauseCount: comprehensiveAnalysis?.voice?.pace?.pauseAnalysis?.count || metrics?.pauseCount || 0,
-        coachingTips: comprehensiveAnalysis?.overall?.improvementAreas || ["Session saved successfully"],
+        averageWPM: metrics?.wordsPerMinute || 0,
+        voiceClarity: metrics?.clarity || 0,
+        fillerWords: metrics?.fillerWordCount || 0,
+        pauseCount: metrics?.pauseCount || 0,
+        coachingTips: ["Session saved successfully"],
         // Store additional analysis
-        facialAnalysis: comprehensiveAnalysis ? JSON.stringify(comprehensiveAnalysis.bodyLanguage) : (facialAnalysis ? JSON.stringify(facialAnalysis) : null),
-        voiceMetrics: comprehensiveAnalysis ? JSON.stringify(comprehensiveAnalysis.voice) : (voiceMetrics ? JSON.stringify(voiceMetrics) : null),
-        // Store comprehensive analysis metadata
-        aiAnalysis: comprehensiveAnalysis ? JSON.stringify({
-          overall: comprehensiveAnalysis.overall,
-          content: comprehensiveAnalysis.content,
-          metadata: comprehensiveAnalysis.metadata
-        }) : null
+        facialAnalysis: facialAnalysis ? JSON.stringify(facialAnalysis) : null,
+        voiceMetrics: voiceMetrics ? JSON.stringify(voiceMetrics) : null
       };
 
       const session = await storage.createPracticeSession(sessionData);
@@ -5909,37 +5728,6 @@ Respond with detailed analysis in JSON format:
       res.status(500).json({ 
         success: false, 
         error: error.message
-      });
-    }
-  });
-
-  // Real-time Analytics Collection API
-  app.get('/api/real-time-analytics', async (req, res) => {
-    try {
-      console.log('📊 Fetching real-time analytics from all sources...');
-      
-      // Collect analytics from all available engines
-      const analytics = {
-        roboflow: roboflowVision.getCurrentAnalysis(),
-        mediapipe: mediaPipeEngine.getCurrentMetrics(),
-        facial: facialExpressionAnalysis.getCurrentEmotions(),
-        voice: freeVoiceAnalysis.getCurrentAnalysis(),
-        timestamp: Date.now()
-      };
-      
-      console.log('✅ Real-time analytics collected:', analytics);
-      res.json({
-        success: true,
-        analytics,
-        timestamp: Date.now(),
-        source: 'Multi-Engine Real-Time Analytics'
-      });
-    } catch (error) {
-      console.error('📊 Real-time analytics error:', error);
-      res.json({
-        success: false,
-        error: 'Real-time analytics unavailable',
-        analytics: null
       });
     }
   });
