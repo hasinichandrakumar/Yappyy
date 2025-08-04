@@ -293,8 +293,9 @@ class OpenPoseEngine implements ComputerVisionEngine {
 }
 
 /**
- * Comprehensive Computer Vision Coordinator
- * Manages multiple CV engines with fallback system
+ * Comprehensive Computer Vision Coordinator - DISABLED BY USER REQUEST
+ * User explicitly requested removal of all analytics boxes during practice
+ * This service is completely disabled and will not generate any analytics content
  */
 export class ComprehensiveComputerVisionStack {
   private engines: ComputerVisionEngine[] = [];
