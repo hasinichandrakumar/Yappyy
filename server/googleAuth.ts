@@ -64,10 +64,12 @@ export async function setupGoogleAuth(app: Express) {
     done(null, user);
   });
 
-  // Google OAuth Strategy - yappyy.com domain callback
+  // Google OAuth Strategy - dynamic callback URL
   if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
-    // Use yappyy.com domain for OAuth callback
-    const callbackURL = "https://yappyy.com/oauth2callback";
+    // Use dynamic callback URL based on current domain
+    const callbackURL = process.env.NODE_ENV === 'production' 
+      ? "https://yappyy.com/oauth2callback"
+      : "https://0c7fe059-a7da-4a46-a7cc-18655fec2a24-00-1znejaw22ebqj.picard.replit.dev/oauth2callback";
       
     console.log('🔧 Google OAuth Strategy Configuration:');
     console.log('  - Client ID:', GOOGLE_CLIENT_ID?.substring(0, 20) + '...');
@@ -122,8 +124,11 @@ export async function setupGoogleAuth(app: Express) {
       // Special handling for redirect_uri_mismatch
       if (req.query.error === 'redirect_uri_mismatch') {
         console.error('❌ Redirect URI mismatch - callback URL not authorized in Google Cloud Console');
-        console.error('❌ Current callback URL: https://yappyy.com/oauth2callback');
-        return res.redirect(`/?error=redirect_mismatch&callback_url=${encodeURIComponent('https://yappyy.com/oauth2callback')}`);
+        const currentCallbackURL = process.env.NODE_ENV === 'production' 
+          ? 'https://yappyy.com/oauth2callback'
+          : 'https://0c7fe059-a7da-4a46-a7cc-18655fec2a24-00-1znejaw22ebqj.picard.replit.dev/oauth2callback';
+        console.error('❌ Current callback URL:', currentCallbackURL);
+        return res.redirect(`/?error=redirect_mismatch&callback_url=${encodeURIComponent(currentCallbackURL)}`);
       }
       
       return res.redirect(`/?error=oauth_failed&details=${encodeURIComponent(String(req.query.error_description || req.query.error))}`);
@@ -148,10 +153,10 @@ export async function setupGoogleAuth(app: Express) {
         }
         
         console.log('✅ OAuth callback successful for user:', user.email);
-        console.log('✅ Redirecting to yappyy.com dashboard...');
+        console.log('✅ Redirecting to dashboard...');
         
-        // Redirect to yappyy.com dashboard - session is already established
-        res.redirect('https://yappyy.com/dashboard');
+        // Redirect to dashboard - session is already established
+        res.redirect('/dashboard');
       });
     })(req, res, next);
   });
@@ -159,8 +164,8 @@ export async function setupGoogleAuth(app: Express) {
   // Also handle the original route for compatibility
   app.get('/api/auth/google/callback',
     passport.authenticate('google', { 
-      failureRedirect: 'https://yappyy.com/',
-      successRedirect: 'https://yappyy.com/dashboard'
+      failureRedirect: '/',
+      successRedirect: '/dashboard'
     })
   );
 
@@ -176,7 +181,7 @@ export async function setupGoogleAuth(app: Express) {
         console.error('Logout error:', err);
       }
       req.session.destroy(() => {
-        res.redirect('https://yappyy.com/');
+        res.redirect('/');
       });
     });
   });
@@ -198,7 +203,7 @@ export async function setupGoogleAuth(app: Express) {
           return res.redirect('/');
         }
         console.log('✅ Demo user logged in');
-        res.redirect('https://yappyy.com/dashboard');
+        res.redirect('/dashboard');
       });
     } catch (error) {
       console.error('Demo user creation error:', error);

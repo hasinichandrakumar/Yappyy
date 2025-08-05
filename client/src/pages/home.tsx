@@ -199,6 +199,7 @@ export default function HomePage() {
               <br />
               Talk Yappyy.
             </h1>
+
             <p className="text-xl md:text-2xl lg:text-3xl font-body text-white/90 mb-16 max-w-5xl mx-auto leading-relaxed">
               AI-powered speech coaching that transforms your communication skills through real-time feedback and personalized training
             </p>
@@ -215,9 +216,8 @@ export default function HomePage() {
                 }}
               >
                 <span className="bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 bg-clip-text text-transparent font-bold animate-gradient-x">
-                  Start Practicing Now
+                  🎤 &nbsp;Start Practicing Now
                 </span>
-                <Mic className="ml-3 h-6 w-6 text-blue-600" />
               </Button>
             </div>
 
