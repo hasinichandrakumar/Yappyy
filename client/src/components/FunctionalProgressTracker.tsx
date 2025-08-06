@@ -311,266 +311,87 @@ export default function FunctionalProgressTracker() {
   }
 
   return (
-    <div className="space-y-8">
-      {/* Enhanced Header with Controls */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-        <div className="space-y-2">
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
-            Progress Tracking
-          </h2>
-          <p className="text-gray-600 text-lg">Your speaking improvement journey with AI insights</p>
-        </div>
-        <div className="flex gap-3">
-          <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="w-48 bg-white border-2 border-blue-200 hover:border-blue-300 transition-colors">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Time</SelectItem>
-              <SelectItem value="3months">Last 3 Months</SelectItem>
-              <SelectItem value="month">Last Month</SelectItem>
-              <SelectItem value="week">Last Week</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+    <div className="space-y-6">
+      {/* Simple Header */}
+      <div className="text-center space-y-2">
+        <h2 className="text-2xl font-bold text-gray-900">Your Progress</h2>
+        <p className="text-gray-600">Track your speaking improvement journey</p>
       </div>
 
-      {/* Enhanced Overview Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-200 shadow-lg hover:shadow-xl transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <p className="text-sm font-semibold text-blue-600 uppercase tracking-wide">Total Sessions</p>
-                <p className="text-4xl font-bold text-blue-700">{progressMetrics.totalSessions}</p>
-                <p className="text-xs text-blue-600">Practice sessions completed</p>
-              </div>
-              <div className="p-3 bg-blue-100 rounded-full">
-                <Mic className="w-8 h-8 text-blue-600" />
-              </div>
-            </div>
-          </CardContent>
+      {/* Key Stats - Simplified */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="text-center p-4">
+          <div className="text-2xl font-bold text-blue-600">{progressMetrics.totalSessions}</div>
+          <div className="text-sm text-gray-600">Sessions</div>
         </Card>
-
-        <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 shadow-lg hover:shadow-xl transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <p className="text-sm font-semibold text-green-600 uppercase tracking-wide">Practice Time</p>
-                <p className="text-4xl font-bold text-green-700">{progressMetrics.totalPracticeTime}m</p>
-                <p className="text-xs text-green-600">Minutes of practice</p>
-              </div>
-              <div className="p-3 bg-green-100 rounded-full">
-                <Clock className="w-8 h-8 text-green-600" />
-              </div>
-            </div>
-          </CardContent>
+        <Card className="text-center p-4">
+          <div className="text-2xl font-bold text-green-600">{progressMetrics.totalPracticeTime}m</div>
+          <div className="text-sm text-gray-600">Practice Time</div>
         </Card>
-
-        <Card className="bg-gradient-to-br from-purple-50 to-indigo-50 border-2 border-purple-200 shadow-lg hover:shadow-xl transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <p className="text-sm font-semibold text-purple-600 uppercase tracking-wide">Avg Performance</p>
-                <p className="text-4xl font-bold text-purple-700">{progressMetrics.averagePerformance}%</p>
-                <p className="text-xs text-purple-600">Overall score</p>
-              </div>
-              <div className="p-3 bg-purple-100 rounded-full">
-                <BarChart3 className="w-8 h-8 text-purple-600" />
-              </div>
-            </div>
-          </CardContent>
+        <Card className="text-center p-4">
+          <div className="text-2xl font-bold text-purple-600">{progressMetrics.averagePerformance}%</div>
+          <div className="text-sm text-gray-600">Avg Score</div>
         </Card>
-
-        <Card className="bg-gradient-to-br from-orange-50 to-red-50 border-2 border-orange-200 shadow-lg hover:shadow-xl transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <p className="text-sm font-semibold text-orange-600 uppercase tracking-wide">Current Streak</p>
-                <p className="text-4xl font-bold text-orange-700">{progressMetrics.currentStreak} days</p>
-                <p className="text-xs text-orange-600">Consecutive days</p>
-              </div>
-              <div className="p-3 bg-orange-100 rounded-full">
-                <Zap className="w-8 h-8 text-orange-600" />
-              </div>
-            </div>
-          </CardContent>
+        <Card className="text-center p-4">
+          <div className="text-2xl font-bold text-orange-600">{progressMetrics.currentStreak}</div>
+          <div className="text-sm text-gray-600">Day Streak</div>
         </Card>
       </div>
 
-      {/* Enhanced Tabs */}
-      <Tabs defaultValue="goals" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 bg-gray-100 p-1 rounded-xl">
-          <TabsTrigger value="goals" className="data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-blue-600 rounded-lg transition-all duration-200">
-            <Target className="w-4 h-4 mr-2" />
-            Daily Goals
+      {/* Simplified Tabs */}
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList className="grid w-full grid-cols-3 bg-gray-100 p-1 rounded-lg">
+          <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-600 rounded-md transition-all duration-200">
+            Overview
           </TabsTrigger>
-          <TabsTrigger value="trends" className="data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-blue-600 rounded-lg transition-all duration-200">
-            <TrendingUp className="w-4 h-4 mr-2" />
-            Skill Trends
+          <TabsTrigger value="skills" className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-600 rounded-md transition-all duration-200">
+            Skills
           </TabsTrigger>
-          <TabsTrigger value="milestones" className="data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-blue-600 rounded-lg transition-all duration-200">
-            <Award className="w-4 h-4 mr-2" />
-            Milestones
-          </TabsTrigger>
-          <TabsTrigger value="analytics" className="data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-blue-600 rounded-lg transition-all duration-200">
-            <BarChart3 className="w-4 h-4 mr-2" />
-            Analytics
+          <TabsTrigger value="achievements" className="data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-blue-600 rounded-md transition-all duration-200">
+            Achievements
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="goals" className="space-y-6">
-          <Card className="border-2 border-blue-200 shadow-lg">
-            <CardHeader className="bg-gradient-to-r from-blue-50 to-cyan-50 border-b border-blue-200">
-              <CardTitle className="flex items-center gap-3 text-blue-900">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <Target className="w-6 h-6 text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold">Today's Goals</h3>
-                  <p className="text-sm text-blue-700 font-medium">Complete these challenges to earn YapX and improve your skills</p>
-                </div>
-              </CardTitle>
-            </CardHeader>
+        <TabsContent value="overview" className="space-y-4">
+          <Card>
             <CardContent className="p-6">
-              {dailyGoals.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="p-4 bg-gray-100 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
-                    <Target className="w-10 h-10 text-gray-400" />
+              <h3 className="text-lg font-semibold mb-4">Quick Summary</h3>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                  <span className="text-gray-700">Total Practice Time</span>
+                  <span className="font-semibold text-blue-600">{progressMetrics.totalPracticeTime} minutes</span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                  <span className="text-gray-700">Average Performance</span>
+                  <span className="font-semibold text-green-600">{progressMetrics.averagePerformance}%</span>
+                </div>
+                <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
+                  <span className="text-gray-700">Current Streak</span>
+                  <span className="font-semibold text-purple-600">{progressMetrics.currentStreak} days</span>
+                </div>
+                {progressMetrics.improvementRate > 0 && (
+                  <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg">
+                    <span className="text-gray-700">Improvement Rate</span>
+                    <span className="font-semibold text-orange-600">+{progressMetrics.improvementRate}%</span>
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">No goals for today</h3>
-                  <p className="text-gray-600 mb-6">Complete a practice session to generate personalized daily goals</p>
-                  <Button 
-                    onClick={() => window.location.hash = '#practice'}
-                    className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600"
-                  >
-                    <Mic className="w-4 h-4 mr-2" />
-                    Start Practice Session
-                  </Button>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {dailyGoals.map((goal, index) => (
-                    <div key={index} className={`p-6 rounded-xl border-2 transition-all duration-300 hover:shadow-lg ${
-                      goal.completed 
-                        ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-300 shadow-md' 
-                        : 'bg-white border-gray-200 hover:border-blue-300 hover:shadow-lg'
-                    }`}>
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-4">
-                          <div className={`p-3 rounded-xl ${goal.color} text-white shadow-lg`}>
-                            {goal.icon || <Target className="w-5 h-5" />}
-                          </div>
-                          <div className="space-y-1">
-                            <h4 className="font-bold text-gray-900 text-lg">{goal.title}</h4>
-                            <p className="text-sm text-gray-600">{goal.description}</p>
-                          </div>
-                        </div>
-                        <Badge variant={goal.difficulty === 'hard' ? 'destructive' : goal.difficulty === 'medium' ? 'default' : 'secondary'} className="text-xs font-semibold px-3 py-1">
-                          {goal.difficulty}
-                        </Badge>
-                      </div>
-                      
-                      <div className="mb-4">
-                        <div className="flex justify-between text-sm font-medium text-gray-700 mb-2">
-                          <span>Progress</span>
-                          <span>{goal.current} / {goal.target} {goal.unit}</span>
-                        </div>
-                        <Progress value={(goal.current / goal.target) * 100} className="h-3" />
-                      </div>
-                      
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-3 text-sm text-gray-600">
-                          <div className="flex items-center gap-1">
-                            <Clock className="w-4 h-4" />
-                            <span>{goal.timeEstimate}</span>
-                          </div>
-                          <div className="flex items-center gap-1 text-purple-600 font-semibold">
-                            <Star className="w-4 h-4" />
-                            <span>+{goal.yapX} YapX</span>
-                          </div>
-                        </div>
-                        {!goal.completed ? (
-                          <Button 
-                            size="sm" 
-                            onClick={() => completeGoalMutation.mutate(goal.id)}
-                            disabled={completeGoalMutation.isPending}
-                            className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-semibold px-4 py-2"
-                          >
-                            {completeGoalMutation.isPending ? (
-                              <div className="flex items-center gap-2">
-                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                Completing...
-                              </div>
-                            ) : (
-                              'Complete'
-                            )}
-                          </Button>
-                        ) : (
-                          <div className="flex items-center gap-2 text-green-600 font-semibold">
-                            <CheckCircle className="w-5 h-5" />
-                            <span>Completed!</span>
-                          </div>
-                        )}
-                      </div>
-                      
-                      {goal.motivationalMessage && (
-                        <div className="p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-200">
-                          <div className="flex items-start gap-2">
-                            <Sparkles className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                            <p className="text-sm text-blue-800 font-medium">{goal.motivationalMessage}</p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
+                )}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="trends" className="space-y-6">
-          <Card className="border-2 border-green-200 shadow-lg">
-            <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 border-b border-green-200">
-              <CardTitle className="flex items-center gap-3 text-green-900">
-                <div className="p-2 bg-green-100 rounded-lg">
-                  <TrendingUp className="w-6 h-6 text-green-600" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold">Skill Improvement Trends</h3>
-                  <p className="text-sm text-green-700 font-medium">Track your progress across different speaking skills</p>
-                </div>
-              </CardTitle>
-            </CardHeader>
+        <TabsContent value="skills" className="space-y-4">
+          <Card>
             <CardContent className="p-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <h3 className="text-lg font-semibold mb-4">Your Skills</h3>
+              <div className="space-y-4">
                 {progressMetrics.skillTrends.map((skill, index) => (
-                  <div key={index} className="p-6 border-2 border-gray-200 rounded-xl hover:border-green-300 transition-all duration-300 hover:shadow-lg">
-                    <div className="flex items-center justify-between mb-4">
-                      <h4 className="font-bold text-gray-900 text-lg">{skill.skill}</h4>
-                      <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-full ${
-                          skill.trend === 'up' ? 'bg-green-100' :
-                          skill.trend === 'down' ? 'bg-red-100' : 'bg-gray-100'
-                        }`}>
-                          {skill.trend === 'up' && <TrendingUp className="w-5 h-5 text-green-600" />}
-                          {skill.trend === 'down' && <TrendingDown className="w-5 h-5 text-red-600" />}
-                          {skill.trend === 'stable' && <Minus className="w-5 h-5 text-gray-600" />}
-                        </div>
-                        <span className={`text-lg font-bold ${
-                          skill.trend === 'up' ? 'text-green-600' :
-                          skill.trend === 'down' ? 'text-red-600' : 'text-gray-600'
-                        }`}>
-                          {skill.change > 0 ? '+' : ''}{skill.change}%
-                        </span>
-                      </div>
+                  <div key={index} className="p-4 border rounded-lg">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-medium text-gray-700">{skill.skill}</span>
+                      <span className="text-lg font-bold text-blue-600">{skill.current}%</span>
                     </div>
-                    <Progress value={skill.current} className="h-3 mb-3" />
-                    <div className="flex justify-between text-sm font-medium text-gray-600">
-                      <span>Current Score</span>
-                      <span className="text-lg font-bold text-gray-900">{skill.current}%</span>
-                    </div>
+                    <Progress value={skill.current} className="h-2" />
                   </div>
                 ))}
               </div>
@@ -578,44 +399,28 @@ export default function FunctionalProgressTracker() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="milestones" className="space-y-6">
-          <Card className="border-2 border-purple-200 shadow-lg">
-            <CardHeader className="bg-gradient-to-r from-purple-50 to-indigo-50 border-b border-purple-200">
-              <CardTitle className="flex items-center gap-3 text-purple-900">
-                <div className="p-2 bg-purple-100 rounded-lg">
-                  <Award className="w-6 h-6 text-purple-600" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold">Achievement Milestones</h3>
-                  <p className="text-sm text-purple-700 font-medium">Unlock achievements as you progress in your speaking journey</p>
-                </div>
-              </CardTitle>
-            </CardHeader>
+        <TabsContent value="achievements" className="space-y-4">
+          <Card>
             <CardContent className="p-6">
-              <div className="space-y-6">
+              <h3 className="text-lg font-semibold mb-4">Achievements</h3>
+              <div className="space-y-3">
                 {progressMetrics.milestones.map((milestone, index) => (
-                  <div key={index} className={`flex items-center gap-6 p-6 border-2 rounded-xl transition-all duration-300 hover:shadow-lg ${
-                    milestone.achieved 
-                      ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-300 shadow-md' 
-                      : 'bg-white border-gray-200 hover:border-purple-300'
+                  <div key={index} className={`flex items-center gap-3 p-3 rounded-lg border ${
+                    milestone.achieved ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'
                   }`}>
-                    <div className={`p-4 rounded-full ${
+                    <div className={`p-2 rounded-full ${
                       milestone.achieved ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
                     }`}>
-                      {milestone.achieved ? <CheckCircle className="w-6 h-6" /> : <Target className="w-6 h-6" />}
+                      {milestone.achieved ? <CheckCircle className="w-4 h-4" /> : <Target className="w-4 h-4" />}
                     </div>
-                    <div className="flex-1 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-bold text-gray-900 text-lg">{milestone.name}</h4>
-                        <Badge variant={milestone.achieved ? "default" : "secondary"} className="text-xs font-semibold px-3 py-1">
-                          {milestone.achieved ? 'Completed' : 'In Progress'}
-                        </Badge>
+                    <div className="flex-1">
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium text-gray-700">{milestone.name}</span>
+                        <span className="text-sm text-gray-500">
+                          {milestone.progress} / {milestone.target}
+                        </span>
                       </div>
-                      <Progress value={(milestone.progress / milestone.target) * 100} className="h-3" />
-                      <div className="flex justify-between text-sm font-medium text-gray-600">
-                        <span>{milestone.progress} / {milestone.target}</span>
-                        <span className="text-lg font-bold text-gray-900">{Math.round((milestone.progress / milestone.target) * 100)}%</span>
-                      </div>
+                      <Progress value={(milestone.progress / milestone.target) * 100} className="h-1 mt-1" />
                     </div>
                   </div>
                 ))}
@@ -624,77 +429,7 @@ export default function FunctionalProgressTracker() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="analytics" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="border-2 border-blue-200 shadow-lg">
-              <CardHeader className="bg-gradient-to-r from-blue-50 to-cyan-50 border-b border-blue-200">
-                <CardTitle className="flex items-center gap-3 text-blue-900">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <BarChart3 className="w-6 h-6 text-blue-600" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold">Weekly Progress</h3>
-                    <p className="text-sm text-blue-700 font-medium">Track your performance over the last 4 weeks</p>
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="space-y-6">
-                  {progressMetrics.weeklyProgress.map((week, index) => (
-                    <div key={index} className="p-4 border-2 border-gray-200 rounded-xl hover:border-blue-300 transition-all duration-300">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-lg font-bold text-gray-900">{week.week}</span>
-                        <div className="flex items-center gap-3">
-                          <Badge variant="outline" className="text-xs font-semibold">
-                            {week.sessions} sessions
-                          </Badge>
-                          <span className="text-lg font-bold text-blue-600">{week.avgScore}%</span>
-                        </div>
-                      </div>
-                      <Progress value={week.avgScore} className="h-3" />
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
 
-            <Card className="border-2 border-orange-200 shadow-lg">
-              <CardHeader className="bg-gradient-to-r from-orange-50 to-red-50 border-b border-orange-200">
-                <CardTitle className="flex items-center gap-3 text-orange-900">
-                  <div className="p-2 bg-orange-100 rounded-lg">
-                    <TrendingUp className="w-6 h-6 text-orange-600" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold">Improvement Insights</h3>
-                    <p className="text-sm text-orange-700 font-medium">Key metrics and performance indicators</p>
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="space-y-6">
-                  <div className="p-6 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border-2 border-blue-200">
-                    <div className="flex items-center gap-3 mb-2">
-                      <TrendingUp className="w-5 h-5 text-blue-600" />
-                      <p className="text-sm font-semibold text-blue-800 uppercase tracking-wide">Improvement Rate</p>
-                    </div>
-                    <p className="text-3xl font-bold text-blue-600 mb-1">
-                      {progressMetrics.improvementRate > 0 ? '+' : ''}{progressMetrics.improvementRate}%
-                    </p>
-                    <p className="text-xs text-blue-600">Comparing recent vs early sessions</p>
-                  </div>
-                  <div className="p-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border-2 border-green-200">
-                    <div className="flex items-center gap-3 mb-2">
-                      <Flame className="w-5 h-5 text-green-600" />
-                      <p className="text-sm font-semibold text-green-800 uppercase tracking-wide">Longest Streak</p>
-                    </div>
-                    <p className="text-3xl font-bold text-green-600 mb-1">{progressMetrics.longestStreak} days</p>
-                    <p className="text-xs text-green-600">Your best consistency record</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
       </Tabs>
     </div>
   );

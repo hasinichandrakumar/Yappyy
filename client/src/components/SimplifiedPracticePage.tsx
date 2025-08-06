@@ -1974,99 +1974,97 @@ export default function SimplifiedPracticePage() {
 
 
 
-        {/* Main Content - Full Width Layout */}
-        <div className="w-full space-y-8">
-          
-          {/* Video Feed - Full Width */}
-          <Card className="border border-blue-200 shadow-xl bg-white/90 backdrop-blur-sm rounded-xl overflow-hidden">
-            <CardContent className="p-0">
-              <div className="relative aspect-video bg-gray-900 rounded-xl overflow-hidden">
-                <video
-                  ref={videoRef}
-                  className="w-full h-full object-cover"
-                  muted
-                  playsInline
-                />
-                
-                {/* Hidden video element for recording */}
-                <video
-                  ref={recordingVideoRef}
-                  className="hidden"
-                  muted
-                  playsInline
-                />
-                
-                <canvas
-                  ref={canvasRef}
-                  className="absolute inset-0 w-full h-full pointer-events-none opacity-50"
-                />
-                
-                {isRecording && (
-                  <div className="absolute top-6 left-6 space-y-3">
-                    <Badge variant="destructive" className="px-4 py-2 text-sm font-semibold shadow-lg">
-                      <Activity className="w-4 h-4 mr-2" />
-                      RECORDING {Math.floor(sessionDuration / 60)}:{(sessionDuration % 60).toString().padStart(2, '0')}
-                    </Badge>
-                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 px-4 py-2 text-sm font-semibold shadow-lg">
-                      <Activity className="w-4 h-4 mr-2" />
-                      SMART FILLER DETECTION
-                    </Badge>
-                    {isRoboflowAnalyzing && (
-                      <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 px-4 py-2 text-sm font-semibold shadow-lg">
-                        <Activity className="w-4 h-4 mr-2" />
-                        COMPUTER VISION ACTIVE
-                      </Badge>
-                    )}
-                    {isFacialAnalysisActive && (
-                      <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 px-4 py-2 text-sm font-semibold shadow-lg">
-                        <Activity className="w-4 h-4 mr-2" />
-                        FACIAL ANALYSIS ACTIVE
-                      </Badge>
-                    )}
-                    {isComputerVisionAnalyzing && (
-                      <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200 px-4 py-2 text-sm font-semibold shadow-lg">
-                        <Activity className="w-4 h-4 mr-2" />
-                        COMPUTER VISION ACTIVE
-                      </Badge>
-                    )}
-                    {computerVisionError.hasError && (
-                      <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200 px-4 py-2 text-sm font-semibold shadow-lg">
-                        <Activity className="w-4 h-4 mr-2" />
-                        CV ERROR - USING FALLBACK
-                      </Badge>
+        {/* Main Content - Side by Side Layout */}
+        <div className="w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            {/* Left Side - Video Feed (2/3 width) */}
+            <div className="lg:col-span-2 space-y-6">
+              <Card className="border border-blue-200 shadow-xl bg-white/90 backdrop-blur-sm rounded-xl overflow-hidden">
+                <CardContent className="p-0">
+                  <div className="relative aspect-video bg-gray-900 rounded-xl overflow-hidden">
+                    <video
+                      ref={videoRef}
+                      className="w-full h-full object-cover"
+                      muted
+                      playsInline
+                    />
+                    
+                    {/* Hidden video element for recording */}
+                    <video
+                      ref={recordingVideoRef}
+                      className="hidden"
+                      muted
+                      playsInline
+                    />
+                    
+                    <canvas
+                      ref={canvasRef}
+                      className="absolute inset-0 w-full h-full pointer-events-none opacity-50"
+                    />
+                    
+                    {isRecording && (
+                      <div className="absolute top-4 left-4 space-y-2">
+                        <Badge variant="destructive" className="px-3 py-1.5 text-xs font-semibold shadow-lg">
+                          <Activity className="w-3 h-3 mr-1.5" />
+                          RECORDING {Math.floor(sessionDuration / 60)}:{(sessionDuration % 60).toString().padStart(2, '0')}
+                        </Badge>
+                        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 px-3 py-1.5 text-xs font-semibold shadow-lg">
+                          <Activity className="w-3 h-3 mr-1.5" />
+                          SMART FILLER DETECTION
+                        </Badge>
+                        {isRoboflowAnalyzing && (
+                          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 px-3 py-1.5 text-xs font-semibold shadow-lg">
+                            <Activity className="w-3 h-3 mr-1.5" />
+                            COMPUTER VISION ACTIVE
+                          </Badge>
+                        )}
+                        {isFacialAnalysisActive && (
+                          <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 px-3 py-1.5 text-xs font-semibold shadow-lg">
+                            <Activity className="w-3 h-3 mr-1.5" />
+                            FACIAL ANALYSIS ACTIVE
+                          </Badge>
+                        )}
+                        {isComputerVisionAnalyzing && (
+                          <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200 px-3 py-1.5 text-xs font-semibold shadow-lg">
+                            <Activity className="w-3 h-3 mr-1.5" />
+                            COMPUTER VISION ACTIVE
+                          </Badge>
+                        )}
+                        {computerVisionError.hasError && (
+                          <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200 px-3 py-1.5 text-xs font-semibold shadow-lg">
+                            <Activity className="w-3 h-3 mr-1.5" />
+                            CV ERROR - USING FALLBACK
+                          </Badge>
+                        )}
+                      </div>
                     )}
                   </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
 
-          {/* Bottom Row - Metrics and AI Coach Side by Side */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            
-            {/* Essential Live Metrics - Takes 3 columns */}
-            <div className="lg:col-span-3">
+              {/* Essential Live Metrics - Below Video */}
               <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm rounded-xl">
-                <CardContent className="p-8">
-                  <div className="grid grid-cols-3 gap-8 text-center">
-                    <div className="space-y-3">
-                      <div className="text-5xl font-bold text-blue-600">{metrics.wordsPerMinute}</div>
-                      <div className="text-sm text-gray-600 font-semibold uppercase tracking-wide">Words Per Minute</div>
+                <CardContent className="p-6">
+                  <div className="grid grid-cols-3 gap-6 text-center">
+                    <div className="space-y-2">
+                      <div className="text-4xl font-bold text-blue-600">{metrics.wordsPerMinute}</div>
+                      <div className="text-sm text-gray-600 font-semibold uppercase tracking-wide leading-tight">Words Per Minute</div>
                     </div>
-                    <div className="space-y-3">
-                      <div className="text-5xl font-bold text-purple-600">{metrics.fillerWordCount}</div>
-                      <div className="text-sm text-gray-600 font-semibold uppercase tracking-wide">Filler Words</div>
+                    <div className="space-y-2">
+                      <div className="text-4xl font-bold text-purple-600">{metrics.fillerWordCount}</div>
+                      <div className="text-sm text-gray-600 font-semibold uppercase tracking-wide leading-tight">Filler Words</div>
                     </div>
-                    <div className="space-y-3">
-                      <div className="text-5xl font-bold text-green-600">{Math.round(metrics.eyeContact)}%</div>
-                      <div className="text-sm text-gray-600 font-semibold uppercase tracking-wide">Eye Contact</div>
+                    <div className="space-y-2">
+                      <div className="text-4xl font-bold text-green-600">{Math.round(metrics.eyeContact)}%</div>
+                      <div className="text-sm text-gray-600 font-semibold uppercase tracking-wide leading-tight">Eye Contact</div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Right Side - AI Speaking Coach - Takes 1 column */}
+            {/* Right Side - Live AI Coaching Tips (1/3 width) */}
             <div className="lg:col-span-1">
               {showLiveMetrics && (
                 <div className="sticky top-6">
@@ -2077,7 +2075,7 @@ export default function SimplifiedPracticePage() {
                       eyeContact: metrics.eyeContact > 0 ? metrics.eyeContact / 100 : null,
                       confidence: metrics.confidence > 0 ? metrics.confidence / 100 : null,
                       fillerWords: metrics.fillerWordCount,
-                      volume: null, // Could be added later with audio analysis
+                      volume: null,
                       clarity: metrics.clarity > 0 ? metrics.clarity / 100 : null,
                       posture: metrics.bodyLanguage.overallPresence > 0 ? metrics.bodyLanguage.overallPresence / 100 : null
                     }}

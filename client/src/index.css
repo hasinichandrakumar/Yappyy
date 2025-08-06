@@ -37,33 +37,34 @@
   --logo-sky: 199 89% 48%; /* #0EA5E9 */
 }
 
+/* Dark mode disabled - forcing light mode only */
 .dark {
-  --background: 224 71.4% 4.1%; /* Dark navy background */
-  --foreground: 210 20% 98%; /* Light text */
-  --muted: 215 27.9% 16.9%; /* Dark muted */
-  --muted-foreground: 217.9 10.6% 64.9%; /* Muted text */
-  --popover: 224 71.4% 4.1%; /* Dark popover */
-  --popover-foreground: 210 20% 98%; /* Light popover text */
-  --card: 224 71.4% 4.1%; /* Dark card */
-  --card-foreground: 210 20% 98%; /* Light card text */
-  --border: 215 27.9% 16.9%; /* Dark border */
-  --input: 215 27.9% 16.9%; /* Dark input */
-  --primary: 217 91% 60%; /* Keep blue primary */
-  --primary-foreground: 0 0% 100%; /* White text on blue */
-  --secondary: 188 95% 43%; /* Keep cyan secondary */
-  --secondary-foreground: 0 0% 100%; /* White text on cyan */
-  --accent: 199 89% 48%; /* Keep sky accent */
-  --accent-foreground: 0 0% 100%; /* White text on sky */
+  --background: 214 100% 98%; /* Light blue background matching logo */
+  --foreground: 214 100% 8%; /* Deep navy text */
+  --muted: 214 50% 95%; /* Muted blue */
+  --muted-foreground: 214 10% 50%;
+  --popover: 214 100% 99%;
+  --popover-foreground: 214 15% 15%;
+  --card: 214 100% 99%; /* Pure white with blue tint */
+  --card-foreground: 214 15% 15%;
+  --border: 214 30% 88%; /* Blue border */
+  --input: 214 30% 90%; /* Blue input */
+  --primary: 217 91% 60%; /* #3B82F6 - Blue from logo */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 188 95% 43%; /* #06B6D4 - Cyan from logo */
+  --secondary-foreground: 0 0% 100%;
+  --accent: 199 89% 48%; /* #0EA5E9 - Sky from logo */
+  --accent-foreground: 0 0% 100%;
   --warning: 39 100% 47%; /* Keep warning orange */
   --warning-foreground: 60 9.1% 97.8%;
   --error: 4 90% 58%; /* Keep error red */
   --error-foreground: 60 9.1% 97.8%;
-  --destructive: 0 62.8% 30.6%; /* Darker destructive */
-  --destructive-foreground: 210 20% 98%; /* Light destructive text */
-  --ring: 217 91% 60%; /* Blue ring */
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 60 9.1% 97.8%;
+  --ring: 217 91% 60%; /* Blue ring matching primary */
   
-  /* Dark mode custom colors */
-  --surface: 224 71.4% 4.1%; /* Dark surface */
+  /* Custom colors from logo */
+  --surface: 214 100% 99%; /* Pure white with blue tint */
 }
 
 /* Modern & Friendly Bold Font System (Poppins) */
@@ -174,30 +175,31 @@
   max-width: 200px;
 }
 
+/* Dark mode disabled - forcing light mode only */
 .dark {
-  --background: 210 20% 8%; /* Dark blue background */
-  --foreground: 190 100% 95%; /* Light aqua-white text */
-  --muted: 200 15% 18%; /* Dark blue muted */
-  --muted-foreground: 190 20% 70%; /* Light blue-gray text */
-  --popover: 210 25% 12%; /* Dark blue popover */
-  --popover-foreground: 190 100% 95%;
-  --card: 210 25% 12%; /* Dark blue card */
-  --card-foreground: 190 100% 95%;
-  --border: 200 15% 18%; /* Dark blue border */
-  --input: 200 15% 18%; /* Dark blue input */
-  --primary: 180 90% 70%; /* Bright aqua primary */
-  --primary-foreground: 210 20% 8%;
-  --secondary: 160 80% 60%; /* Green-aqua secondary */
-  --secondary-foreground: 210 20% 8%;
-  --accent: 200 80% 60%; /* Blue-aqua accent */
-  --accent-foreground: 210 20% 8%;
-  --warning: 39 100% 47%; /* Orange warning */
-  --warning-foreground: 260 20% 8%;
-  --error: 4 90% 58%; /* Red error */
-  --error-foreground: 260 20% 8%;
-  --destructive: 0 62.8% 50%;
-  --destructive-foreground: 250 100% 95%;
-  --ring: 270 90% 70%; /* Bright purple ring */
+  --background: 214 100% 98%; /* Light blue background matching logo */
+  --foreground: 214 100% 8%; /* Deep navy text */
+  --muted: 214 50% 95%; /* Muted blue */
+  --muted-foreground: 214 10% 50%;
+  --popover: 214 100% 99%;
+  --popover-foreground: 214 15% 15%;
+  --card: 214 100% 99%; /* Pure white with blue tint */
+  --card-foreground: 214 15% 15%;
+  --border: 214 30% 88%; /* Blue border */
+  --input: 214 30% 90%; /* Blue input */
+  --primary: 217 91% 60%; /* #3B82F6 - Blue from logo */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 188 95% 43%; /* #06B6D4 - Cyan from logo */
+  --secondary-foreground: 0 0% 100%;
+  --accent: 199 89% 48%; /* #0EA5E9 - Sky from logo */
+  --accent-foreground: 0 0% 100%;
+  --warning: 39 100% 47%; /* Keep warning orange */
+  --warning-foreground: 60 9.1% 97.8%;
+  --error: 4 90% 58%; /* Keep error red */
+  --error-foreground: 60 9.1% 97.8%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 60 9.1% 97.8%;
+  --ring: 217 91% 60%; /* Blue ring matching primary */
 }
 
 @layer utilities {
@@ -269,13 +271,12 @@
     min-height: 100vh;
   }
   
+  /* Dark mode disabled - forcing light mode only */
   .dark body {
     background: linear-gradient(135deg, 
-      hsl(260, 20%, 8%) 0%, 
-      hsl(250, 25%, 10%) 25%, 
-      hsl(270, 30%, 12%) 50%, 
-      hsl(240, 25%, 10%) 75%, 
-      hsl(280, 20%, 8%) 100%);
+      hsl(210, 40%, 98%) 0%, 
+      hsl(200, 50%, 96%) 50%, 
+      hsl(190, 40%, 97%) 100%);
   }
 }
 
@@ -614,20 +615,22 @@
     border: 1px solid hsl(217, 30%, 88%);
   }
 
+  /* Dark mode disabled - forcing light mode only */
   .dark .gradient-card {
     background: linear-gradient(135deg, 
-      hsl(217, 25%, 12%) 0%, 
-      hsl(188, 20%, 15%) 50%, 
-      hsl(199, 25%, 18%) 100%);
-    border: 1px solid hsl(217, 15%, 18%);
+      hsl(217, 91%, 99%) 0%, 
+      hsl(188, 95%, 97%) 50%, 
+      hsl(199, 89%, 95%) 100%);
+    border: 1px solid hsl(217, 30%, 88%);
   }
 
   .purple-glow {
     box-shadow: 0 0 30px hsla(217, 91%, 60%, 0.3);
   }
 
+  /* Dark mode disabled - forcing light mode only */
   .dark .purple-glow {
-    box-shadow: 0 0 30px hsla(188, 95%, 70%, 0.2);
+    box-shadow: 0 0 30px hsla(217, 91%, 60%, 0.3);
   }
 
   /* Additional gradient utilities */
