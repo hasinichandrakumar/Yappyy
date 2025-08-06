@@ -9,7 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import SimplifiedPracticePage from "@/components/SimplifiedPracticePage";
 import AICoachRedesigned from "@/components/AICoachRedesigned";
 import PersonalizedSpeechDNA from "@/components/PersonalizedSpeechDNA";
-import Enhanced50PlusTemplates from "@/components/Enhanced50PlusTemplates";
+import EnhancedTemplateMarketplace from "@/components/EnhancedTemplateMarketplace";
 import ImprovedBadgeSystem from "@/components/ImprovedBadgeSystem";
 import EnhancedAnalysisTab from "@/components/EnhancedAnalysisTab";
 import DailyGoalWidget from "@/components/DailyGoalWidget";
@@ -196,7 +196,7 @@ export default function Dashboard() {
           </TabsContent>
 
           <TabsContent value="templates" className="space-y-6">
-            <Enhanced50PlusTemplates />
+            <EnhancedTemplateMarketplace />
           </TabsContent>
 
 

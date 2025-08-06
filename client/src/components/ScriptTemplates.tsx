@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { AITemplatePersonalization } from "./AITemplatePersonalization";
 import { 
   FileText, 
   Briefcase, 
@@ -23,7 +24,8 @@ import {
   Rocket,
   UserCheck,
   AlertTriangle,
-  BookOpen
+  BookOpen,
+  MessageSquare
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -1263,6 +1265,7 @@ export default function ScriptTemplates() {
   const [generatedScript, setGeneratedScript] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [showAIGenerator, setShowAIGenerator] = useState<boolean>(false);
+  const [showAIPersonalization, setShowAIPersonalization] = useState<boolean>(false);
   const [aiPrompt, setAiPrompt] = useState<string>("");
   const [isGeneratingAI, setIsGeneratingAI] = useState<boolean>(false);
   const [useRoleplay, setUseRoleplay] = useState<boolean>(false);
@@ -1778,6 +1781,15 @@ Thank you for your time and attention.`;
                         Download
                       </Button>
                     </div>
+
+                    {/* AI Personalization Button */}
+                    <Button
+                      onClick={() => setShowAIPersonalization(true)}
+                      className="w-full mt-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:opacity-90"
+                    >
+                      <MessageSquare className="w-4 h-4 mr-2" />
+                      Personalize with AI Assistant
+                    </Button>
                   </div>
                 ) : (
                   <div className="text-center text-gray-500 py-12">
@@ -1787,6 +1799,22 @@ Thank you for your time and attention.`;
                 )}
               </CardContent>
             </Card>
+          </div>
+        </div>
+      )}
+
+      {/* AI Personalization Dialog */}
+      {showAIPersonalization && generatedScript && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="w-full max-w-4xl">
+            <AITemplatePersonalization
+              template={generatedScript}
+              onTemplateUpdate={(newTemplate) => {
+                setGeneratedScript(newTemplate);
+                setShowAIPersonalization(false);
+              }}
+              onClose={() => setShowAIPersonalization(false)}
+            />
           </div>
         </div>
       )}

@@ -1,343 +1,371 @@
 // Content Analysis API - Advanced AI-Powered Speech Content Analysis
-import { Request, Response } from 'express';
-import OpenAI from 'openai';
-import Anthropic from '@anthropic-ai/sdk';
+import { Express } from 'express';
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-// Only initialize Anthropic if API key is available
-let anthropic: Anthropic | null = null;
-if (process.env.ANTHROPIC_API_KEY) {
-  anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-}
-
-interface ContentAnalysisRequest {
-  transcript: string;
-  purpose?: string; // Simple format for compatibility
-  speechPurpose?: {
-    type: string;
-    description: string;
-    audience: string;
-    objectives: string[];
-    keyElements: string[];
-  };
-  sessionDuration?: number;
-  sessionId?: string;
-  analysisType?: string;
-}
-
-interface ContentAnalysisResponse {
-  success: boolean;
-  analysis: {
-    overallScore: number;
-    structureScore: number;
-    persuasivenessScore: number;
-    coherenceScore: number;
-    audienceAlignmentScore: number;
-    purposeAlignment: number;
-    keyInsights: string[];
-    improvementAreas: string[];
-    strengths: string[];
-    specificFeedback: Array<{
-      category: string;
-      severity: string;
-      feedback: string;
-      suggestion: string;
-      confidence: number;
-    }>;
-    recommendations: string[];
-  };
-  processingTime: number;
-  error?: string;
-}
-
-export async function processContentAnalysis(req: Request, res: Response): Promise<void> {
-  const startTime = Date.now();
-  
-  try {
-    const { transcript, purpose, speechPurpose, sessionDuration, sessionId, analysisType }: ContentAnalysisRequest = req.body;
-    
-    if (!transcript || transcript.trim().length < 10) {
-      res.status(400).json({
-        success: false,
-        error: 'Transcript is required and must be at least 10 characters long'
-      });
-      return;
-    }
-
-    // Handle both simple and complex purpose formats
-    const purposeData = speechPurpose || {
-      type: purpose || 'general',
-      description: `${purpose || 'General'} speaking practice`,
-      audience: 'general audience',
-      objectives: ['improve communication skills', 'build confidence'],
-      keyElements: ['clarity', 'engagement', 'structure']
-    };
-
-    // Perform advanced content analysis using OpenAI and optionally Anthropic
-    const openaiAnalysis = await analyzeWithOpenAI(transcript, purposeData);
-    let anthropicAnalysis = {};
-    
-    if (anthropic) {
-      try {
-        anthropicAnalysis = await analyzeWithAnthropic(transcript, purposeData);
-      } catch (error) {
-        console.log('Anthropic analysis failed, using OpenAI only:', error.message);
-      }
-    }
-
-    // Combine and synthesize results
-    const synthesizedAnalysis = synthesizeAnalysis(openaiAnalysis, anthropicAnalysis, purposeData);
-
-    const processingTime = Date.now() - startTime;
-
-    const response: ContentAnalysisResponse = {
-      success: true,
-      analysis: synthesizedAnalysis,
-      processingTime
-    };
-
-    res.json(response);
-
-  } catch (error) {
-    console.error('Content analysis error:', error);
-    
-    // Provide fallback analysis
-    const fallbackAnalysis = {
-      overallScore: 75,
-      structureScore: 70,
-      persuasivenessScore: 72,
-      coherenceScore: 78,
-      audienceAlignmentScore: 74,
-      purposeAlignment: 76,
-      keyInsights: [
-        'Content demonstrates clear communication intent',
-        'Message structure shows logical flow',
-        'Speaking style appears confident and engaging'
-      ],
-      improvementAreas: [
-        'Consider adding more specific examples to support main points',
-        'Strengthen transitions between different topics',
-        'Enhance conclusion with clear call-to-action'
-      ],
-      strengths: [
-        'Clear articulation of main message',
-        'Appropriate pacing throughout delivery',
-        'Engaging tone and style'
-      ],
-      specificFeedback: [{
-        category: 'Content Structure',
-        severity: 'medium',
-        feedback: 'Good overall structure with room for improvement',
-        suggestion: 'Add more transitional phrases between main points',
-        confidence: 0.8
-      }],
-      recommendations: [
-        'Practice with more specific examples',
-        'Work on stronger opening and closing statements',
-        'Consider audience engagement techniques'
-      ]
-    };
-    
-    res.json({
-      success: true,
-      analysis: fallbackAnalysis,
-      processingTime: Date.now() - startTime
-    });
-  }
-}
-
-async function analyzeWithOpenAI(transcript: string, speechPurpose: any) {
-  const prompt = `
-    Analyze the following speech transcript for a ${speechPurpose.type} targeting ${speechPurpose.audience}.
-    
-    Transcript: "${transcript}"
-    
-    Speech Purpose: ${speechPurpose.description}
-    Key Elements Expected: ${speechPurpose.keyElements.join(', ')}
-    Objectives: ${speechPurpose.objectives.join(', ')}
-    
-    Please provide a comprehensive analysis in JSON format with the following structure:
-    {
-      "structureScore": number (0-100),
-      "persuasivenessScore": number (0-100),
-      "coherenceScore": number (0-100),
-      "audienceAlignmentScore": number (0-100),
-      "purposeAlignment": number (0-100),
-      "keyInsights": ["insight1", "insight2", ...],
-      "improvementAreas": ["area1", "area2", ...],
-      "strengths": ["strength1", "strength2", ...],
-      "recommendations": ["rec1", "rec2", ...]
-    }
-    
-    Focus on:
-    1. Speech structure (introduction, body, conclusion)
-    2. Persuasive elements and rhetoric
-    3. Coherence and flow
-    4. Audience engagement and alignment
-    5. Purpose-specific effectiveness
-  `;
-
-  const response = await openai.chat.completions.create({
-    model: 'gpt-4o', // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-    messages: [{ role: 'user', content: prompt }],
-    response_format: { type: 'json_object' },
-    temperature: 0.3
-  });
-
-  return JSON.parse(response.choices[0].message.content || '{}');
-}
-
-async function analyzeWithAnthropic(transcript: string, speechPurpose: any) {
-  const prompt = `
-    Please analyze this speech transcript for content quality and effectiveness.
-    
-    Speech Type: ${speechPurpose.type}
-    Target Audience: ${speechPurpose.audience}
-    Expected Elements: ${speechPurpose.keyElements.join(', ')}
-    
-    Transcript: "${transcript}"
-    
-    Provide detailed analysis focusing on:
-    1. Content structure and organization
-    2. Persuasive techniques and effectiveness
-    3. Clarity and coherence
-    4. Audience connection and engagement
-    5. Purpose alignment and achievement
-    
-    Return analysis as JSON with specific scores (0-100) and detailed feedback.
-  `;
-
-  const response = await anthropic.messages.create({
-    model: 'claude-3-5-sonnet-20241022',
-    max_tokens: 1024,
-    messages: [{ role: 'user', content: prompt }],
-    temperature: 0.3
-  });
-
-  // Extract JSON from Anthropic response
-  const content = response.content[0].text;
-  const jsonMatch = content.match(/\{[\s\S]*\}/);
-  
-  if (jsonMatch) {
+export async function createContentAnalysisEndpoint(app: Express) {
+  app.post("/api/analyze-content", async (req, res) => {
     try {
-      return JSON.parse(jsonMatch[0]);
-    } catch (error) {
-      console.error('Error parsing Anthropic JSON:', error);
-      return {};
+      const { transcript, purpose, sessionData } = req.body;
+
+      if (!transcript || !purpose) {
+        return res.status(400).json({ 
+          error: "Transcript and purpose are required" 
+        });
+      }
+
+      console.log(`🧠 Analyzing content for purpose: ${purpose}`);
+
+      // Perform comprehensive content analysis
+      const analysis = await performContentAnalysis(transcript, purpose, sessionData);
+
+      res.json(analysis);
+    } catch (error: any) {
+      console.error('❌ Content analysis failed:', error);
+      res.status(500).json({ 
+        error: "Content analysis failed", 
+        message: error.message 
+      });
     }
-  }
-  
-  return {};
+  });
 }
 
-function synthesizeAnalysis(openaiResult: any, anthropicResult: any, speechPurpose: any) {
-  // Combine and average scores from both AI models
-  const averageScore = (openaiScore: number, anthropicScore: number) => {
-    return Math.round((openaiScore + anthropicScore) / 2);
-  };
+async function performContentAnalysis(transcript: string, purpose: string, sessionData?: any) {
+  const words = transcript.split(/\s+/).filter(word => word.length > 0);
+  const sentences = transcript.split(/[.!?]+/).filter(sentence => sentence.trim().length > 0);
+  const uniqueWords = new Set(words.map(word => word.toLowerCase().replace(/[^\w]/g, '')));
+  
+  // Calculate basic metrics
+  const wordCount = words.length;
+  const sentenceCount = sentences.length;
+  const averageSentenceLength = sentenceCount > 0 ? wordCount / sentenceCount : 0;
+  const vocabularyDiversity = wordCount > 0 ? (uniqueWords.size / wordCount) * 100 : 0;
 
-  const synthesized = {
-    structureScore: averageScore(
-      openaiResult.structureScore || 0,
-      anthropicResult.structureScore || 0
-    ),
-    persuasivenessScore: averageScore(
-      openaiResult.persuasivenessScore || 0,
-      anthropicResult.persuasivenessScore || 0
-    ),
-    coherenceScore: averageScore(
-      openaiResult.coherenceScore || 0,
-      anthropicResult.coherenceScore || 0
-    ),
-    audienceAlignmentScore: averageScore(
-      openaiResult.audienceAlignmentScore || 0,
-      anthropicResult.audienceAlignmentScore || 0
-    ),
-    purposeAlignment: averageScore(
-      openaiResult.purposeAlignment || 0,
-      anthropicResult.purposeAlignment || 0
-    ),
-    keyInsights: [
-      ...(openaiResult.keyInsights || []),
-      ...(anthropicResult.keyInsights || [])
-    ].slice(0, 5), // Top 5 insights
-    improvementAreas: [
-      ...(openaiResult.improvementAreas || []),
-      ...(anthropicResult.improvementAreas || [])
-    ].slice(0, 4), // Top 4 improvement areas
-    strengths: [
-      ...(openaiResult.strengths || []),
-      ...(anthropicResult.strengths || [])
-    ].slice(0, 4), // Top 4 strengths
-    recommendations: [
-      ...(openaiResult.recommendations || []),
-      ...(anthropicResult.recommendations || [])
-    ].slice(0, 5), // Top 5 recommendations
-    specificFeedback: generateSpecificFeedback(openaiResult, anthropicResult, speechPurpose)
-  };
+  // Analyze purpose alignment
+  const purposeKeywords = getPurposeKeywords(purpose);
+  const purposeAlignment = calculatePurposeAlignment(transcript, purposeKeywords);
 
-  // Calculate overall score
-  const overallScore = Math.round(
-    (synthesized.structureScore * 0.25) +
-    (synthesized.persuasivenessScore * 0.25) +
-    (synthesized.coherenceScore * 0.2) +
-    (synthesized.audienceAlignmentScore * 0.15) +
-    (synthesized.purposeAlignment * 0.15)
-  );
+  // Analyze content structure
+  const contentStructure = analyzeContentStructure(transcript, sentences);
+
+  // Analyze vocabulary
+  const vocabularyAnalysis = analyzeVocabulary(words, purpose);
+
+  // Analyze rhetorical devices
+  const rhetoricalDevices = analyzeRhetoricalDevices(transcript);
+
+  // Analyze audience engagement
+  const audienceEngagement = analyzeAudienceEngagement(transcript, purpose, vocabularyAnalysis);
+
+  // Generate recommendations
+  const recommendations = generateRecommendations(transcript, purpose, contentStructure, vocabularyAnalysis);
+
+  // Generate vocabulary suggestions
+  const vocabularySuggestions = generateVocabularySuggestions(purpose, words);
 
   return {
-    overallScore,
-    ...synthesized
+    purposeAlignment,
+    contentStructure,
+    vocabularyAnalysis,
+    rhetoricalDevices,
+    audienceEngagement,
+    recommendations,
+    vocabularySuggestions,
+    keyMetrics: {
+      wordCount,
+      sentenceCount,
+      averageSentenceLength: Math.round(averageSentenceLength * 10) / 10,
+      uniqueWords: uniqueWords.size,
+      vocabularyDiversity: Math.round(vocabularyDiversity)
+    }
   };
 }
 
-function generateSpecificFeedback(openaiResult: any, anthropicResult: any, speechPurpose: any) {
-  const feedback = [];
+function getPurposeKeywords(purpose: string): string[] {
+  const purposeMap: { [key: string]: string[] } = {
+    'business': ['strategy', 'growth', 'revenue', 'market', 'customer', 'product', 'service', 'team', 'leadership', 'profit', 'investment', 'scalability'],
+    'sales': ['customer', 'benefit', 'value', 'solution', 'problem', 'need', 'offer', 'deal', 'close', 'pitch', 'conversion', 'prospect', 'qualification'],
+    'presentation': ['inform', 'educate', 'explain', 'demonstrate', 'show', 'present', 'share', 'discuss', 'overview', 'summary', 'highlight'],
+    'persuasion': ['convince', 'persuade', 'influence', 'change', 'believe', 'agree', 'support', 'action', 'compelling', 'evidence', 'argument'],
+    'storytelling': ['story', 'narrative', 'experience', 'journey', 'character', 'plot', 'emotion', 'connection', 'personal', 'authentic', 'relatable'],
+    'training': ['learn', 'teach', 'skill', 'knowledge', 'practice', 'improve', 'develop', 'master', 'technique', 'method', 'approach'],
+    'motivation': ['inspire', 'motivate', 'encourage', 'energize', 'passion', 'drive', 'success', 'achievement', 'potential', 'transformation', 'breakthrough'],
+    'technical': ['technical', 'system', 'process', 'implementation', 'architecture', 'framework', 'methodology', 'specification', 'configuration'],
+    'academic': ['research', 'study', 'analysis', 'findings', 'methodology', 'conclusion', 'hypothesis', 'evidence', 'theory', 'data'],
+    'creative': ['creative', 'innovative', 'unique', 'original', 'artistic', 'expressive', 'imaginative', 'visionary', 'breakthrough', 'revolutionary']
+  };
 
-  // Structure feedback
-  const structureScore = Math.round((openaiResult.structureScore + anthropicResult.structureScore) / 2);
-  if (structureScore < 60) {
-    feedback.push({
-      category: 'structure',
-      severity: 'warning',
-      feedback: 'Speech structure needs improvement',
-      suggestion: 'Focus on clear introduction, body, and conclusion',
-      confidence: 0.8
-    });
-  } else if (structureScore >= 80) {
-    feedback.push({
-      category: 'structure',
-      severity: 'excellent',
-      feedback: 'Excellent speech structure',
-      suggestion: 'Maintain this clear organizational pattern',
-      confidence: 0.9
-    });
+  const lowerPurpose = purpose.toLowerCase();
+  for (const [key, keywords] of Object.entries(purposeMap)) {
+    if (lowerPurpose.includes(key)) {
+      return keywords;
+    }
+  }
+  return ['effective', 'clear', 'engaging', 'professional', 'compelling', 'impactful'];
+}
+
+function calculatePurposeAlignment(transcript: string, keywords: string[]): number {
+  const lowerTranscript = transcript.toLowerCase();
+  let matches = 0;
+  let totalOccurrences = 0;
+  
+  keywords.forEach(keyword => {
+    const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
+    const occurrences = (transcript.match(regex) || []).length;
+    if (occurrences > 0) {
+      matches++;
+      totalOccurrences += occurrences;
+    }
+  });
+
+  // Score based on both keyword presence and frequency
+  const presenceScore = (matches / keywords.length) * 60;
+  const frequencyScore = Math.min(40, (totalOccurrences / keywords.length) * 10);
+  
+  return Math.min(100, Math.max(0, Math.round(presenceScore + frequencyScore)));
+}
+
+function analyzeContentStructure(transcript: string, sentences: string[]): any {
+  const totalSentences = sentences.length;
+  if (totalSentences === 0) {
+    return {
+      introduction: 0,
+      body: 0,
+      conclusion: 0,
+      overall: 0
+    };
   }
 
-  // Persuasiveness feedback
-  const persuasivenessScore = Math.round((openaiResult.persuasivenessScore + anthropicResult.persuasivenessScore) / 2);
-  if (persuasivenessScore < 50) {
-    feedback.push({
-      category: 'persuasiveness',
-      severity: 'warning',
-      feedback: 'Limited persuasive impact',
-      suggestion: 'Include more compelling arguments and evidence',
-      confidence: 0.7
-    });
+  // Simple structure analysis based on sentence distribution
+  const introSentences = Math.max(1, Math.floor(totalSentences * 0.15));
+  const conclusionSentences = Math.max(1, Math.floor(totalSentences * 0.15));
+  const bodySentences = totalSentences - introSentences - conclusionSentences;
+
+  // Check for structural indicators
+  const hasIntroduction = sentences[0]?.length > 20 || 
+    /^(hello|hi|good|welcome|today|i'm|my name)/i.test(sentences[0] || '');
+  
+  const hasConclusion = sentences[sentences.length - 1]?.length > 15 ||
+    /(thank you|in conclusion|to summarize|finally|in summary)/i.test(sentences[sentences.length - 1] || '');
+
+  return {
+    introduction: hasIntroduction ? 85 : 60,
+    body: Math.min(100, Math.max(0, (bodySentences / Math.max(1, Math.floor(totalSentences * 0.7))) * 100)),
+    conclusion: hasConclusion ? 85 : 60,
+    overall: Math.min(100, Math.max(0, ((introSentences + bodySentences + conclusionSentences) / totalSentences) * 100))
+  };
+}
+
+function analyzeVocabulary(words: string[], purpose: string): any {
+  const uniqueWords = new Set(words.map(word => word.toLowerCase().replace(/[^\w]/g, '')));
+  
+  // Calculate complexity based on word length and uniqueness
+  const longWords = words.filter(word => word.length > 8);
+  const complexity = Math.min(100, Math.max(0, 
+    ((uniqueWords.size / words.length) * 60) + ((longWords.length / words.length) * 40)
+  ));
+
+  // Calculate variety
+  const variety = Math.min(100, Math.max(0, (uniqueWords.size / words.length) * 150));
+  
+  // Count technical/sophisticated words
+  const sophisticatedWords = words.filter(word => 
+    word.length > 8 || 
+    /[A-Z]/.test(word) || 
+    ['therefore', 'however', 'furthermore', 'consequently', 'nevertheless', 'moreover', 'additionally'].includes(word.toLowerCase())
+  );
+  const technicalTerms = Math.min(100, Math.max(0, (sophisticatedWords.length / words.length) * 100));
+
+  // Calculate appropriateness based on purpose
+  const purposeKeywords = getPurposeKeywords(purpose);
+  const purposeWordMatches = words.filter(word => 
+    purposeKeywords.some(keyword => word.toLowerCase().includes(keyword))
+  );
+  const appropriateness = Math.min(100, Math.max(0, (purposeWordMatches.length / words.length) * 200));
+
+  return {
+    complexity: Math.round(complexity),
+    appropriateness: Math.round(appropriateness),
+    variety: Math.round(variety),
+    technicalTerms: Math.round(technicalTerms)
+  };
+}
+
+function analyzeRhetoricalDevices(transcript: string): any {
+  const devices = {
+    metaphors: (transcript.match(/like|as|similar to|reminds me of/gi) || []).length,
+    questions: (transcript.match(/\?/g) || []).length,
+    repetition: countRepetition(transcript),
+    alliteration: countAlliteration(transcript),
+    statistics: (transcript.match(/\d+%|\d+ percent|\d+ out of \d+/gi) || []).length
+  };
+
+  const totalDevices = Object.values(devices).reduce((sum, count) => sum + count, 0);
+  const effectiveness = Math.min(100, Math.max(0, totalDevices * 10));
+
+  return {
+    count: totalDevices,
+    effectiveness,
+    types: Object.entries(devices)
+      .filter(([_, count]) => count > 0)
+      .map(([type, count]) => `${type}: ${count}`)
+  };
+}
+
+function countRepetition(transcript: string): number {
+  const words = transcript.toLowerCase().split(/\s+/);
+  const wordCount: { [key: string]: number } = {};
+  
+  words.forEach(word => {
+    if (word.length > 3) {
+      wordCount[word] = (wordCount[word] || 0) + 1;
+    }
+  });
+
+  return Object.values(wordCount).filter(count => count > 2).length;
+}
+
+function countAlliteration(transcript: string): number {
+  const sentences = transcript.split(/[.!?]+/);
+  let alliterationCount = 0;
+
+  sentences.forEach(sentence => {
+    const words = sentence.split(/\s+/).filter(word => word.length > 2);
+    for (let i = 0; i < words.length - 2; i++) {
+      const first = words[i].toLowerCase()[0];
+      const second = words[i + 1].toLowerCase()[0];
+      const third = words[i + 2].toLowerCase()[0];
+      
+      if (first === second && second === third && first.match(/[a-z]/)) {
+        alliterationCount++;
+      }
+    }
+  });
+
+  return alliterationCount;
+}
+
+function analyzeAudienceEngagement(transcript: string, purpose: string, vocabularyAnalysis: any): any {
+  // Calculate clarity based on sentence structure and vocabulary
+  const sentences = transcript.split(/[.!?]+/).filter(s => s.trim().length > 0);
+  const avgSentenceLength = sentences.reduce((sum, s) => sum + s.split(/\s+/).length, 0) / sentences.length;
+  const clarity = Math.max(0, Math.min(100, 100 - (avgSentenceLength - 15) * 2));
+
+  // Calculate relevance based on purpose alignment
+  const purposeKeywords = getPurposeKeywords(purpose);
+  const relevance = calculatePurposeAlignment(transcript, purposeKeywords);
+
+  // Calculate impact based on multiple factors
+  const impact = Math.min(100, Math.max(0, 
+    (clarity * 0.3) + (relevance * 0.4) + (vocabularyAnalysis.appropriateness * 0.3)
+  ));
+
+  return {
+    clarity: Math.round(clarity),
+    relevance: Math.round(relevance),
+    impact: Math.round(impact)
+  };
+}
+
+function generateRecommendations(transcript: string, purpose: string, structure: any, vocabulary: any): any {
+  const recommendations = {
+    structure: [] as string[],
+    vocabulary: [] as string[],
+    delivery: [] as string[],
+    content: [] as string[]
+  };
+
+  // Structure recommendations
+  if (structure.introduction < 70) {
+    recommendations.structure.push("Strengthen your introduction with a clear hook and purpose statement");
+    recommendations.structure.push("Start with an engaging opening that captures attention");
+  }
+  if (structure.body < 70) {
+    recommendations.structure.push("Expand the main content with more detailed points and examples");
+    recommendations.structure.push("Add supporting evidence and specific details");
+  }
+  if (structure.conclusion < 70) {
+    recommendations.structure.push("Add a stronger conclusion that summarizes key points and calls to action");
+    recommendations.structure.push("End with a memorable closing statement");
   }
 
-  // Purpose alignment feedback
-  const purposeScore = Math.round((openaiResult.purposeAlignment + anthropicResult.purposeAlignment) / 2);
-  if (purposeScore >= 80) {
-    feedback.push({
-      category: 'purpose',
-      severity: 'excellent',
-      feedback: `Excellent alignment with ${speechPurpose.type} objectives`,
-      suggestion: 'Continue focusing on your defined purpose',
-      confidence: 0.9
-    });
+  // Vocabulary recommendations
+  if (vocabulary.complexity < 50) {
+    recommendations.vocabulary.push("Consider using more sophisticated vocabulary to enhance credibility");
+    recommendations.vocabulary.push("Incorporate industry-specific terminology");
+  }
+  if (vocabulary.variety < 60) {
+    recommendations.vocabulary.push("Increase vocabulary variety to maintain audience engagement");
+    recommendations.vocabulary.push("Avoid repetitive word choices");
+  }
+  if (vocabulary.technicalTerms < 30) {
+    recommendations.vocabulary.push("Incorporate industry-specific terminology for professional impact");
+    recommendations.vocabulary.push("Use technical terms appropriately for your audience");
+  }
+  if (vocabulary.appropriateness < 60) {
+    recommendations.vocabulary.push("Align vocabulary more closely with your presentation purpose");
+    recommendations.vocabulary.push("Use purpose-specific keywords and phrases");
   }
 
-  return feedback;
+  // Content recommendations based on purpose
+  if (purpose.toLowerCase().includes('business')) {
+    recommendations.content.push("Include specific metrics and data points to support your business case");
+    recommendations.content.push("Address potential objections and provide solutions");
+    recommendations.content.push("Focus on ROI and business value");
+  }
+  if (purpose.toLowerCase().includes('sales')) {
+    recommendations.content.push("Emphasize customer benefits and value proposition");
+    recommendations.content.push("Include clear call-to-action statements");
+    recommendations.content.push("Address customer pain points and solutions");
+  }
+  if (purpose.toLowerCase().includes('presentation')) {
+    recommendations.content.push("Add visual cues and transition phrases for better flow");
+    recommendations.content.push("Include examples and anecdotes to illustrate key points");
+    recommendations.content.push("Structure information in digestible chunks");
+  }
+  if (purpose.toLowerCase().includes('persuasion')) {
+    recommendations.content.push("Include compelling evidence and logical arguments");
+    recommendations.content.push("Address counterarguments and provide rebuttals");
+    recommendations.content.push("Use emotional appeals and storytelling elements");
+  }
+
+  // Delivery recommendations
+  recommendations.delivery.push("Practice pacing and pauses for emphasis");
+  recommendations.delivery.push("Use vocal variety to maintain engagement");
+  recommendations.delivery.push("Incorporate gestures and body language");
+  recommendations.delivery.push("Maintain eye contact with your audience");
+
+  return recommendations;
+}
+
+function generateVocabularySuggestions(purpose: string, words: string[]): any {
+  const suggestions = {
+    advanced: [] as string[],
+    alternatives: [] as string[],
+    industrySpecific: [] as string[]
+  };
+
+  // Generate suggestions based on purpose
+  if (purpose.toLowerCase().includes('business')) {
+    suggestions.advanced.push('strategic', 'optimization', 'leverage', 'synergy', 'paradigm', 'scalable', 'sustainable');
+    suggestions.industrySpecific.push('ROI', 'KPI', 'stakeholder', 'scalability', 'disruption', 'innovation', 'transformation');
+    suggestions.alternatives.push('good → exceptional', 'important → crucial', 'big → substantial', 'help → facilitate');
+  }
+  if (purpose.toLowerCase().includes('sales')) {
+    suggestions.advanced.push('compelling', 'transformative', 'innovative', 'premium', 'exclusive', 'revolutionary');
+    suggestions.industrySpecific.push('conversion', 'pipeline', 'prospect', 'qualification', 'closing', 'deal', 'opportunity');
+    suggestions.alternatives.push('good → outstanding', 'help → enable', 'show → demonstrate', 'tell → explain');
+  }
+  if (purpose.toLowerCase().includes('presentation')) {
+    suggestions.advanced.push('comprehensive', 'systematic', 'methodical', 'analytical', 'strategic', 'thorough');
+    suggestions.alternatives.push('excellent → outstanding', 'good → exceptional', 'important → crucial', 'show → illustrate');
+  }
+  if (purpose.toLowerCase().includes('persuasion')) {
+    suggestions.advanced.push('compelling', 'convincing', 'persuasive', 'influential', 'powerful', 'impactful');
+    suggestions.alternatives.push('good → compelling', 'important → critical', 'help → enable', 'show → prove');
+  }
+  if (purpose.toLowerCase().includes('storytelling')) {
+    suggestions.advanced.push('captivating', 'engaging', 'immersive', 'authentic', 'relatable', 'memorable');
+    suggestions.alternatives.push('good → remarkable', 'story → narrative', 'tell → share', 'show → reveal');
+  }
+
+  return suggestions;
 }

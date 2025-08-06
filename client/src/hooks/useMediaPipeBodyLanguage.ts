@@ -1,5 +1,6 @@
 // Real MediaPipe Body Language Analysis Hook
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { KalmanFilter } from '../utils/KalmanFilter';
 import { Pose, Results } from '@mediapipe/pose';
 import { Hands, Results as HandsResults } from '@mediapipe/hands';
 
@@ -56,6 +57,27 @@ export function useMediaPipeBodyLanguage() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const metricsHistoryRef = useRef<BodyLanguageMetrics[]>([]);
+  
+  // Kalman filters for each metric
+  const postureFilters = useRef({
+    confidence: new KalmanFilter(0.1, 0.1),
+    spineAlignment: new KalmanFilter(0.1, 0.1),
+    shoulderPosition: new KalmanFilter(0.1, 0.1),
+    stability: new KalmanFilter(0.1, 0.1)
+  });
+  
+  const eyeContactFilters = useRef({
+    engagement: new KalmanFilter(0.1, 0.1),
+    consistency: new KalmanFilter(0.1, 0.1),
+    quality: new KalmanFilter(0.1, 0.1)
+  });
+  
+  const gestureFilters = useRef({
+    handMovements: new KalmanFilter(0.1, 0.1),
+    naturalness: new KalmanFilter(0.1, 0.1),
+    effectiveness: new KalmanFilter(0.1, 0.1),
+    timing: new KalmanFilter(0.1, 0.1)
+  });
 
   // Initialize MediaPipe models
   const initializeModels = useCallback(async () => {
@@ -68,12 +90,13 @@ export function useMediaPipeBodyLanguage() {
       });
 
       pose.setOptions({
-        modelComplexity: 1,
+        modelComplexity: 2, // Increased from 1 to 2 for higher accuracy
         smoothLandmarks: true,
-        enableSegmentation: false,
-        smoothSegmentation: false,
-        minDetectionConfidence: 0.5,
-        minTrackingConfidence: 0.5
+        enableSegmentation: true, // Enable for better isolation of the subject
+        smoothSegmentation: true,
+        refineFaceLandmarks: true, // Enable detailed face landmark detection
+        minDetectionConfidence: 0.7, // Increased from 0.5 for higher confidence
+        minTrackingConfidence: 0.7  // Increased from 0.5 for more stable tracking
       });
 
       // Initialize Hands model
@@ -84,8 +107,10 @@ export function useMediaPipeBodyLanguage() {
       hands.setOptions({
         maxNumHands: 2,
         modelComplexity: 1,
-        minDetectionConfidence: 0.5,
-        minTrackingConfidence: 0.5
+        minDetectionConfidence: 0.7, // Increased for higher confidence
+        minTrackingConfidence: 0.7,  // Increased for more stable tracking
+        staticImageMode: false,      // Enable dynamic tracking
+        selfieMode: true            // Mirror mode for front-facing camera
       });
 
       poseRef.current = pose;
@@ -103,7 +128,7 @@ export function useMediaPipeBodyLanguage() {
     }
   }, []);
 
-  // Calculate posture metrics from pose landmarks
+  // Calculate posture metrics from pose landmarks with enhanced accuracy
   const calculatePostureMetrics = useCallback((poseLandmarks: any[]) => {
     if (!poseLandmarks || poseLandmarks.length === 0) {
       return { confidence: 0, spineAlignment: 0, shoulderPosition: 0, stability: 0 };
@@ -111,45 +136,79 @@ export function useMediaPipeBodyLanguage() {
 
     try {
       // Key pose landmarks indices (MediaPipe format)
+      const nose = poseLandmarks[0];
+      const leftEye = poseLandmarks[2];
+      const rightEye = poseLandmarks[5];
       const leftShoulder = poseLandmarks[11];
       const rightShoulder = poseLandmarks[12];
+      const leftElbow = poseLandmarks[13];
+      const rightElbow = poseLandmarks[14];
       const leftHip = poseLandmarks[23];
       const rightHip = poseLandmarks[24];
-      const nose = poseLandmarks[0];
+      const leftKnee = poseLandmarks[25];
+      const rightKnee = poseLandmarks[26];
 
       if (!leftShoulder || !rightShoulder || !leftHip || !rightHip || !nose) {
         return { confidence: 0, spineAlignment: 0, shoulderPosition: 0, stability: 0 };
       }
 
-      // Calculate shoulder alignment (level shoulders indicate good posture)
+      // Enhanced shoulder alignment calculation
       const shoulderLevelness = 1 - Math.abs(leftShoulder.y - rightShoulder.y);
+      const shoulderDepth = 1 - Math.abs(leftShoulder.z - rightShoulder.z);
+      const shoulderScore = (shoulderLevelness + shoulderDepth) / 2;
       
-      // Calculate spine alignment (vertical alignment from head to hips)
+      // Enhanced spine alignment calculation
       const shoulderCenter = {
         x: (leftShoulder.x + rightShoulder.x) / 2,
-        y: (leftShoulder.y + rightShoulder.y) / 2
+        y: (leftShoulder.y + rightShoulder.y) / 2,
+        z: (leftShoulder.z + rightShoulder.z) / 2
       };
       const hipCenter = {
         x: (leftHip.x + rightHip.x) / 2,
-        y: (leftHip.y + rightHip.y) / 2
+        y: (leftHip.y + rightHip.y) / 2,
+        z: (leftHip.z + rightHip.z) / 2
       };
       
-      const spineAlignment = 1 - Math.abs(shoulderCenter.x - hipCenter.x);
+      // Calculate vertical alignment
+      const verticalAlignment = 1 - Math.abs(shoulderCenter.x - hipCenter.x);
       
-      // Calculate stability (based on landmark visibility and confidence)
-      const averageVisibility = poseLandmarks
-        .filter(landmark => landmark.visibility !== undefined)
-        .reduce((sum, landmark) => sum + landmark.visibility, 0) / poseLandmarks.length;
+      // Calculate forward lean
+      const leanAngle = Math.atan2(
+        hipCenter.z - shoulderCenter.z,
+        hipCenter.y - shoulderCenter.y
+      );
+      const idealLeanAngle = Math.PI / 2; // 90 degrees (vertical)
+      const leanScore = 1 - Math.min(1, Math.abs(leanAngle - idealLeanAngle) / (Math.PI / 4));
+      
+      // Enhanced spine alignment score combining vertical and lean
+      const spineAlignment = (verticalAlignment * 0.6 + leanScore * 0.4);
+      
+      // Enhanced stability calculation using multiple points
+      const keyPoints = [nose, leftEye, rightEye, leftShoulder, rightShoulder, 
+                        leftElbow, rightElbow, leftHip, rightHip, leftKnee, rightKnee];
+      
+      const stabilityScores = keyPoints
+        .filter(point => point && point.visibility !== undefined)
+        .map(point => ({
+          visibility: point.visibility,
+          movement: point.z ? Math.abs(point.z - 0.5) : 0 // Depth stability
+        }));
+      
+      const averageVisibility = stabilityScores.reduce((sum, score) => sum + score.visibility, 0) / stabilityScores.length;
+      const movementStability = 1 - stabilityScores.reduce((sum, score) => sum + score.movement, 0) / stabilityScores.length;
+      const stabilityScore = (averageVisibility * 0.7 + movementStability * 0.3);
 
-      // Overall confidence based on shoulder width (indicates facing camera)
+      // Enhanced confidence calculation
       const shoulderWidth = Math.abs(leftShoulder.x - rightShoulder.x);
-      const confidenceScore = Math.min(1, shoulderWidth * 3); // Normalize shoulder width
+      const facingScore = Math.min(1, shoulderWidth * 2.5); // Adjusted multiplier
+      const visibilityConfidence = keyPoints.reduce((sum, point) => sum + (point?.visibility || 0), 0) / keyPoints.length;
+      const confidenceScore = (facingScore * 0.7 + visibilityConfidence * 0.3);
 
       return {
         confidence: Math.round(confidenceScore * 100),
         spineAlignment: Math.round(spineAlignment * 100),
-        shoulderPosition: Math.round(shoulderLevelness * 100),
-        stability: Math.round(averageVisibility * 100)
+        shoulderPosition: Math.round(shoulderScore * 100),
+        stability: Math.round(stabilityScore * 100)
       };
     } catch (error) {
       console.warn('⚠️ Error calculating posture metrics:', error);
@@ -159,37 +218,69 @@ export function useMediaPipeBodyLanguage() {
 
 
 
-  // Calculate eye contact metrics (simplified for pose detection)
+  // Calculate eye contact metrics with enhanced accuracy
   const calculateEyeContactMetrics = useCallback((poseLandmarks: any[]) => {
     if (!poseLandmarks || poseLandmarks.length === 0) {
       return { engagement: 0, consistency: 0, quality: 0 };
     }
 
     try {
+      // Key facial landmarks
       const nose = poseLandmarks[0];
       const leftEye = poseLandmarks[2];
       const rightEye = poseLandmarks[5];
+      const leftEyeOuter = poseLandmarks[3];
+      const rightEyeOuter = poseLandmarks[4];
+      const leftEyeInner = poseLandmarks[1];
+      const rightEyeInner = poseLandmarks[6];
 
       if (!nose || !leftEye || !rightEye) {
         return { engagement: 0, consistency: 0, quality: 0 };
       }
 
-      // Calculate head orientation (facing camera indicates eye contact)
+      // Enhanced head orientation calculation
       const eyeCenter = {
         x: (leftEye.x + rightEye.x) / 2,
-        y: (leftEye.y + rightEye.y) / 2
+        y: (leftEye.y + rightEye.y) / 2,
+        z: (leftEye.z + rightEye.z) / 2
       };
 
-      // Face orientation score (closer to center = better eye contact)
-      const faceDirection = 1 - Math.abs(0.5 - eyeCenter.x);
-      const headTilt = 1 - Math.abs(0.5 - eyeCenter.y);
-      
-      const engagementScore = (faceDirection + headTilt) / 2;
-      
+      // Calculate eye symmetry (indicates direct gaze)
+      const leftEyeWidth = Math.abs(leftEyeOuter?.x - leftEyeInner?.x) || 0;
+      const rightEyeWidth = Math.abs(rightEyeOuter?.x - rightEyeInner?.x) || 0;
+      const eyeSymmetry = 1 - Math.abs(leftEyeWidth - rightEyeWidth) / Math.max(leftEyeWidth, rightEyeWidth);
+
+      // Enhanced face direction calculation
+      const horizontalGaze = 1 - Math.abs(0.5 - eyeCenter.x);
+      const verticalGaze = 1 - Math.abs(0.5 - eyeCenter.y);
+      const depthAlignment = 1 - Math.abs(eyeCenter.z - nose.z);
+
+      // Calculate head rotation using eye positions
+      const eyeAngle = Math.atan2(rightEye.y - leftEye.y, rightEye.x - leftEye.x);
+      const rotationScore = 1 - Math.abs(eyeAngle) / (Math.PI / 4); // Normalize to [0,1]
+
+      // Enhanced engagement calculation
+      const gazeDirectness = (horizontalGaze * 0.4 + verticalGaze * 0.3 + depthAlignment * 0.3);
+      const engagementScore = (gazeDirectness * 0.6 + eyeSymmetry * 0.2 + rotationScore * 0.2);
+
+      // Calculate consistency based on stable head position
+      const stabilityScore = 1 - Math.abs(nose.z - 0.5);
+      const consistencyScore = (engagementScore * 0.7 + stabilityScore * 0.3);
+
+      // Quality score factors in all aspects
+      const qualityScore = (
+        engagementScore * 0.4 +
+        consistencyScore * 0.3 +
+        eyeSymmetry * 0.15 +
+        rotationScore * 0.15
+      );
+
+      // Apply smoothing and normalization
+      const smoothFactor = 0.85;
       return {
-        engagement: Math.round(engagementScore * 100),
-        consistency: Math.round(engagementScore * 90), // Slightly lower for realism
-        quality: Math.round(engagementScore * 85)
+        engagement: Math.round(engagementScore * 100 * smoothFactor),
+        consistency: Math.round(consistencyScore * 100 * smoothFactor),
+        quality: Math.round(qualityScore * 100 * smoothFactor)
       };
     } catch (error) {
       console.warn('⚠️ Error calculating eye contact metrics:', error);
@@ -228,10 +319,28 @@ export function useMediaPipeBodyLanguage() {
         })
       ]);
 
-      // Calculate metrics from results
-      const postureMetrics = calculatePostureMetrics(poseResults.poseLandmarks || []);
-      const gestureMetrics = calculateGestureMetrics(handsResults.multiHandLandmarks || []);
-      const eyeContactMetrics = calculateEyeContactMetrics(poseResults.poseLandmarks || []);
+      // Helper function to apply Kalman filtering to metrics
+      const applyKalmanFilter = (metrics: any, filters: any) => {
+        const filtered: any = {};
+        for (const [key, value] of Object.entries(metrics)) {
+          if (typeof value === 'number' && filters[key]) {
+            filtered[key] = Math.round(filters[key].filter(value));
+          } else {
+            filtered[key] = value;
+          }
+        }
+        return filtered;
+      };
+
+      // Calculate raw metrics
+      const rawPostureMetrics = calculatePostureMetrics(poseResults.poseLandmarks || []);
+      const rawGestureMetrics = calculateGestureMetrics(handsResults.multiHandLandmarks || []);
+      const rawEyeContactMetrics = calculateEyeContactMetrics(poseResults.poseLandmarks || []);
+
+      // Apply Kalman filtering to all metrics
+      const postureMetrics = applyKalmanFilter(rawPostureMetrics, postureFilters.current);
+      const gestureMetrics = applyKalmanFilter(rawGestureMetrics, gestureFilters.current);
+      const eyeContactMetrics = applyKalmanFilter(rawEyeContactMetrics, eyeContactFilters.current);
 
       // Calculate overall metrics
       const overallPresence = Math.round((postureMetrics.confidence + gestureMetrics.naturalness + eyeContactMetrics.engagement) / 3);

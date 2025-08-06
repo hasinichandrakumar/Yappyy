@@ -31,7 +31,7 @@ import { analyzeVoiceQuality, analyzeFillerWords, generateVoiceCoaching } from "
 import { processUltraAdvancedAnalysis } from "./ultra-advanced-ai-engine";
 import { processRealTimeFrame, getPerformanceMetrics, realTimeEngine } from "./realtime-processing-engine";
 import { RealTimeProcessingEngine } from "./realtime-processing-engine";
-import { processContentAnalysis } from "./content-analysis-api";
+import { createContentAnalysisEndpoint } from "./content-analysis-api";
 import { getAdaptiveCoaching, getUserLearningProgress, getAdvancedPublicSpeakingCoaching } from "./deep-learning-coach";
 import { peppyDeepLearningAnalysis, peppyConversation } from "./peppy-deep-learning-coach";
 import { advancedNeuralAnalysis } from "./peppy-deep-learning-engine";
@@ -3192,7 +3192,7 @@ Provide specific, actionable coaching tips to improve this presentation. Focus o
   });
 
   // Custom Templates API endpoints
-  app.post('/api/custom-templates',  async (req: any, res) => {
+  app.post('/api/custom-templates', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user?.id;
       if (!userId) {
@@ -3212,7 +3212,7 @@ Provide specific, actionable coaching tips to improve this presentation. Focus o
     }
   });
 
-  app.get('/api/custom-templates',  async (req: any, res) => {
+  app.get('/api/custom-templates', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user?.id;
       if (!userId) {
@@ -3227,7 +3227,7 @@ Provide specific, actionable coaching tips to improve this presentation. Focus o
     }
   });
 
-  app.post('/api/improve-template',  async (req: any, res) => {
+  app.post('/api/improve-template', isAuthenticated, async (req: any, res) => {
     try {
       const { title, category, description, content } = req.body;
 
@@ -3304,6 +3304,109 @@ Return only the improved content, maintaining the same format with [brackets] fo
         error: 'Failed to process chat message',
         response: "I'm sorry, I'm having trouble right now. Could you please try again?"
       });
+    }
+  });
+
+  // AI Template Generator endpoint
+  app.post('/api/generate-template', async (req: any, res) => {
+    try {
+      const { title, category, description, audience, duration, tone, includeExamples, includeCallToAction } = req.body;
+
+      const prompt = `Create a professional speech template with the following specifications:
+
+Title: ${title}
+Category: ${category}
+Description: ${description}
+Target Audience: ${audience}
+Duration: ${duration}
+Tone: ${tone}
+Include Examples: ${includeExamples ? 'Yes' : 'No'}
+Include Call to Action: ${includeCallToAction ? 'Yes' : 'No'}
+
+Create a well-structured speech template that includes:
+1. A compelling opening hook
+2. Clear main sections with [customizable placeholders]
+3. Smooth transitions between sections
+4. ${includeExamples ? 'Specific examples and illustrations' : 'Placeholder spots for examples'}
+5. ${includeCallToAction ? 'A strong call to action' : 'An impactful conclusion'}
+
+Format the template with clear section headers and use [brackets] for parts the user should customize.
+Make it engaging, professional, and appropriate for the ${category} category.
+Length should be suitable for a ${duration} presentation.
+
+Return only the template content, no additional commentary.`;
+
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are an expert speech writing coach and professional speechwriter. Create engaging, well-structured speech templates that help users deliver powerful presentations.'
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          temperature: 0.8,
+          max_tokens: 2000
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`OpenAI API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const generatedContent = data.choices[0].message.content;
+
+      // Also enhance the description if it's brief
+      let enhancedDescription = description;
+      if (description.length < 50) {
+        const descPrompt = `Enhance this speech description to be more detailed and compelling: "${description}". Keep it under 150 characters and make it engaging for the ${category} category.`;
+        
+        const descResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o',
+            messages: [
+              {
+                role: 'system',
+                content: 'You write compelling, concise descriptions for speech templates.'
+              },
+              {
+                role: 'user',
+                content: descPrompt
+              }
+            ],
+            temperature: 0.7,
+            max_tokens: 100
+          })
+        });
+
+        if (descResponse.ok) {
+          const descData = await descResponse.json();
+          enhancedDescription = descData.choices[0].message.content.replace(/"/g, '');
+        }
+      }
+
+      res.json({ 
+        generatedContent,
+        enhancedDescription: enhancedDescription !== description ? enhancedDescription : undefined
+      });
+    } catch (error: any) {
+      console.error('Failed to generate template:', error);
+      res.status(500).json({ error: 'AI template generation temporarily unavailable' });
     }
   });
 
@@ -5434,13 +5537,13 @@ Respond with detailed analysis in JSON format:
         .where(eq(practiceSessions.userId, userId))
         .orderBy(desc(practiceSessions.sessionNumber));
       
-      // Get user stats
+      // Get user stats - Values are already stored as percentages in the database
       const stats = {
         totalSessions: sessions.length,
         averageConfidence: sessions.length > 0 ? 
-          Math.round(sessions.reduce((sum, s) => sum + (s.confidenceScore || 0), 0) / sessions.length * 100) : 0,
+          Math.round(sessions.reduce((sum, s) => sum + (s.confidenceScore || 0), 0) / sessions.length) : 0,
         averageClarity: sessions.length > 0 ? 
-          Math.round(sessions.reduce((sum, s) => sum + (s.voiceClarity || 0), 0) / sessions.length * 100) : 0,
+          Math.round(sessions.reduce((sum, s) => sum + (s.voiceClarity || 0), 0) / sessions.length) : 0,
         totalDuration: sessions.reduce((sum, s) => sum + (s.duration || 0), 0),
         sessionsWithVideo: sessions.filter(s => s.hasVideo).length
       };
@@ -5454,9 +5557,9 @@ Respond with detailed analysis in JSON format:
       res.json({
         sessions: sessions.map(session => ({
           ...session,
-          confidenceScore: Math.round((session.confidenceScore || 0) * 100),
-          voiceClarity: Math.round((session.voiceClarity || 0) * 100),
-          overallScore: Math.round((session.overallScore || 0) * 100),
+          confidenceScore: Math.round(session.confidenceScore || 0),
+          voiceClarity: Math.round(session.voiceClarity || 0),
+          overallScore: Math.round(session.overallScore || 0),
           hasTranscript: !!session.transcript
         })),
         stats,
@@ -5916,6 +6019,9 @@ Respond with detailed analysis in JSON format:
       });
     }
   });
+
+  // Initialize content analysis endpoint
+  await createContentAnalysisEndpoint(app);
 
   return httpServer;
 }

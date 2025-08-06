@@ -34,6 +34,7 @@ import {
 } from '@/lib/video-recording';
 
 import { FillerWordHighlighter } from './FillerWordHighlighter';
+import { LiveMetricsBox } from './LiveMetricsBox';
 
 interface SimplifiedMetrics {
   eyeContact: number;
@@ -151,6 +152,7 @@ export default function SimplifiedPracticePage() {
   const [transcript, setTranscript] = useState<string>('');
   const [interimTranscript, setInterimTranscript] = useState<string>('');
   const [showLiveTranscript, setShowLiveTranscript] = useState(true);
+  const [showLiveMetrics, setShowLiveMetrics] = useState(true);
 
   // Video recording state
   const [currentRecording, setCurrentRecording] = useState<VideoRecordingData | null>(null);
@@ -1596,15 +1598,15 @@ export default function SimplifiedPracticePage() {
           duration: sessionDuration,
           transcript: transcript || 'No transcript available',
           averageWPM: averageWPM,
-          confidenceScore: Math.round(sessionData.confidenceScore * 100),
-          voiceClarity: Math.round(sessionData.clarityScore * 100),
+          confidenceScore: Math.round(sessionData.confidenceScore),
+          voiceClarity: Math.round(sessionData.clarityScore),
           fillerWords: realFillerWords,
           pauseCount: sessionData.pauseCount || 0,
           eyeContactScore: `${realEyeContact}%`,
           coachingTips: sessionData.coachingTips || [],
           facialAnalysis: facialAnalysis?.facialMetrics,
           voiceMetrics: {
-            clarity: Math.round(sessionData.clarityScore * 100),
+            clarity: Math.round(sessionData.clarityScore),
             pace: averageWPM,
             fillerCount: realFillerWords
           },
@@ -1953,6 +1955,16 @@ export default function SimplifiedPracticePage() {
                     <FileText className="w-4 h-4" />
                     {showLiveTranscript ? 'Hide' : 'Show'} Transcript
                   </Button>
+                  
+                  {/* AI Coach Toggle */}
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowLiveMetrics(!showLiveMetrics)}
+                    className="flex items-center gap-2"
+                  >
+                    <Activity className="w-4 h-4" />
+                    {showLiveMetrics ? 'Hide' : 'Show'} AI Coach
+                  </Button>
                 </div>
 
               </div>
@@ -1962,13 +1974,15 @@ export default function SimplifiedPracticePage() {
 
 
 
-        {/* Main Content - Simplified Layout */}
-        <div className="space-y-6">
+        {/* Main Content - Side by Side Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
-          {/* Video Feed */}
-          <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm">
-            <CardContent className="p-0">
-              <div className="relative aspect-video bg-gray-900 rounded-lg overflow-hidden">
+          {/* Left Side - Video Feed and Metrics */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Video Feed */}
+            <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm">
+              <CardContent className="p-0">
+                <div className="relative aspect-video bg-gray-900 rounded-lg overflow-hidden">
                   <video
                     ref={videoRef}
                     className="w-full h-full object-cover"
@@ -2029,22 +2043,43 @@ export default function SimplifiedPracticePage() {
             </CardContent>
           </Card>
 
-          {/* Essential Live Metrics - Minimal Display */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-200">
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div>
-                <div className="text-3xl font-bold text-blue-600">{metrics.wordsPerMinute}</div>
-                <div className="text-sm text-gray-600">WPM</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-purple-600">{metrics.fillerWordCount}</div>
-                <div className="text-sm text-gray-600">Fillers</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-green-600">{Math.round(metrics.eyeContact)}%</div>
-                <div className="text-sm text-gray-600">Eye Contact</div>
+            {/* Essential Live Metrics - Minimal Display */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-200">
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <div className="text-3xl font-bold text-blue-600">{metrics.wordsPerMinute}</div>
+                  <div className="text-sm text-gray-600">WPM</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-purple-600">{metrics.fillerWordCount}</div>
+                  <div className="text-sm text-gray-600">Fillers</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-green-600">{Math.round(metrics.eyeContact)}%</div>
+                  <div className="text-sm text-gray-600">Eye Contact</div>
+                </div>
               </div>
             </div>
+          </div>
+
+          {/* Right Side - AI Speaking Coach */}
+          <div className="lg:col-span-1">
+            {showLiveMetrics && (
+              <LiveMetricsBox
+                isRecording={isRecording}
+                metrics={{
+                  wpm: metrics.wordsPerMinute > 0 ? metrics.wordsPerMinute : null,
+                  eyeContact: metrics.eyeContact > 0 ? metrics.eyeContact / 100 : null,
+                  confidence: metrics.confidence > 0 ? metrics.confidence / 100 : null,
+                  fillerWords: metrics.fillerWordCount,
+                  volume: null, // Could be added later with audio analysis
+                  clarity: metrics.clarity > 0 ? metrics.clarity / 100 : null,
+                  posture: metrics.bodyLanguage.overallPresence > 0 ? metrics.bodyLanguage.overallPresence / 100 : null
+                }}
+                onClose={() => setShowLiveMetrics(false)}
+                position="sidebar"
+              />
+            )}
           </div>
         </div>
 
@@ -2123,7 +2158,6 @@ export default function SimplifiedPracticePage() {
             </CardContent>
           </Card>
         )}
-
 
 
 

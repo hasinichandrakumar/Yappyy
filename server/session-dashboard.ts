@@ -26,13 +26,13 @@ export async function createSessionDashboardEndpoint(app: any, getUserId: (req: 
         .where(eq(practiceSessions.userId, userId))
         .orderBy(desc(practiceSessions.sessionNumber));
       
-      // Get user stats
+      // Get user stats - Values are already stored as percentages in the database
       const stats = {
         totalSessions: sessions.length,
         averageConfidence: sessions.length > 0 ? 
-          Math.round(sessions.reduce((sum, s) => sum + (s.confidenceScore || 0), 0) / sessions.length * 100) : 0,
+          Math.round(sessions.reduce((sum, s) => sum + (s.confidenceScore || 0), 0) / sessions.length) : 0,
         averageClarity: sessions.length > 0 ? 
-          Math.round(sessions.reduce((sum, s) => sum + (s.voiceClarity || 0), 0) / sessions.length * 100) : 0,
+          Math.round(sessions.reduce((sum, s) => sum + (s.voiceClarity || 0), 0) / sessions.length) : 0,
         totalDuration: sessions.reduce((sum, s) => sum + (s.duration || 0), 0),
         sessionsWithVideo: sessions.filter(s => s.hasVideo).length
       };
@@ -46,9 +46,9 @@ export async function createSessionDashboardEndpoint(app: any, getUserId: (req: 
       res.json({
         sessions: sessions.map(session => ({
           ...session,
-          confidenceScore: Math.round((session.confidenceScore || 0) * 100),
-          voiceClarity: Math.round((session.voiceClarity || 0) * 100),
-          overallScore: Math.round((session.overallScore || 0) * 100),
+          confidenceScore: Math.round(session.confidenceScore || 0),
+          voiceClarity: Math.round(session.voiceClarity || 0),
+          overallScore: Math.round(session.overallScore || 0),
           hasTranscript: !!session.transcript
         })),
         stats,

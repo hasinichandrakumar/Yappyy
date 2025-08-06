@@ -5,13 +5,14 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Mic, Video, Square, Play, Pause, Edit3, Save, X, Trophy, FileText, Target, Eye } from 'lucide-react';
+import { Mic, Video, Square, Play, Pause, Edit3, Save, X, Trophy, FileText, Eye, Target } from 'lucide-react';
+import AICoachIcon from './AICoachIcon';
 import { useToast } from '@/hooks/use-toast';
 
 interface LiveFeedbackItem {
   id: string;
   timestamp: number;
-  category: 'content' | 'voice' | 'body_language';
+  category: 'content' | 'voice' | 'body_language' | 'engagement';
   feedback: string;
   severity: 'good' | 'warning' | 'improvement';
 }
@@ -93,7 +94,7 @@ export default function ImprovedPracticePage() {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     
-    if (!ctx) return;
+    if (!ctx || !canvas) return;
 
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
@@ -611,7 +612,7 @@ export default function ImprovedPracticePage() {
             const uhUmVariations = /\b(um+|uh+|uhm+|umm+|er+|ah+)\b/g;
             const uhUmMatches = fullTranscript.match(uhUmVariations);
             if (uhUmMatches) {
-              uhUmMatches.forEach(match => {
+              uhUmMatches.forEach((match: string) => {
                 newFillers.push(match);
                 console.log('🎯 Primary filler detected:', match);
               });
@@ -1087,6 +1088,8 @@ export default function ImprovedPracticePage() {
       
       if (!ctx || !video || video.videoWidth === 0) return;
 
+      if (!canvas) return;
+
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -1492,8 +1495,8 @@ export default function ImprovedPracticePage() {
       const currentWPM = sessionDuration > 0 ? Math.round((wordCount / sessionDuration) * 60) : 0;
       
       // Smooth transitions for volume and clarity to prevent glitching
-      const targetVolume = currentVol; // Use actual detected volume
-      const targetClarity = currentVol > 50 ? 85 : 70; // Base clarity on real volume
+      const targetVolume = sessionMetrics.volume; // Use actual detected volume
+      const targetClarity = sessionMetrics.volume > 50 ? 85 : 70; // Base clarity on real volume
       const targetBodyLanguage = Math.min(100, Math.max(50, (eyeContactScore * 60) + (postureScore * 0.4)));
       
       console.log('Timer WPM Update:', { wordCount, sessionDuration, currentWPM });
@@ -2634,18 +2637,14 @@ export default function ImprovedPracticePage() {
                 {/* AI Speech Coach */}
                 <Card className="p-6 mb-6 bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-200">
                   <div className="flex items-center gap-3 mb-5">
-                    <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-xl flex items-center justify-center">
-                      <Target className="h-5 w-5 text-white" />
-                    </div>
+                    <AICoachIcon variant="brain" size="md" />
                     <h3 className="text-xl font-bold text-slate-800">Your AI Speech Coach</h3>
                   </div>
 
                   {/* Human-like Coach Persona */}
                   <div className="mb-6 p-4 bg-white rounded-xl border border-indigo-200 shadow-sm">
                     <div className="flex items-start gap-3">
-                      <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-                        <span className="text-white font-bold text-lg">🎯</span>
-                      </div>
+                      <AICoachIcon variant="circuit" size="lg" className="rounded-full" />
                       <div className="flex-1">
                         <h4 className="font-bold text-indigo-800 mb-2">Your AI Coach</h4>
                         <div className="text-slate-700 leading-relaxed space-y-2">

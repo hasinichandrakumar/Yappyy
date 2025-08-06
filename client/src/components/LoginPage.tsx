@@ -1,8 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LogIn, User, Shield, Mic } from "lucide-react";
-import yappyyMicIcon from "@assets/image_1749675190198.png";
-import yappyyLogo from "@assets/Y-2-removebg-preview_1753384287580.png";
+import { LogIn, User, Shield } from "lucide-react";
+import YappyyAILogo from "./YappyyAILogo";
 
 export default function LoginPage() {
   const handleLogin = () => {
@@ -15,13 +14,13 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-4">
           <div className="flex justify-center">
-            <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg flex items-center justify-center">
-              <img src={yappyyMicIcon} alt="Yappyy" className="w-12 h-12" />
+            <div className="w-20 h-20 flex items-center justify-center">
+              <YappyyAILogo width={80} height={80} />
             </div>
           </div>
           <div>
             <button onClick={() => window.location.href = '/'} className="hover:opacity-80 transition-opacity mb-2">
-              <img src={yappyyLogo} alt="Yappyy" className="h-12" />
+              <YappyyAILogo width={120} height={120} />
             </button>
             <CardTitle className="text-xl font-bold gradient-text font-display">
               Welcome
@@ -32,36 +31,27 @@ export default function LoginPage() {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="space-y-4">
-            <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
-              <User className="w-5 h-5 text-blue-600" />
-              <div>
-                <p className="font-medium text-sm font-heading">Personalized Coaching</p>
-                <p className="text-xs text-gray-600 font-body">AI analysis tailored to your speaking style</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-3 p-3 bg-purple-50 rounded-lg">
-              <Shield className="w-5 h-5 text-purple-600" />
-              <div>
-                <p className="font-medium text-sm font-heading">Secure & Private</p>
-                <p className="text-xs text-gray-600 font-body">Your practice sessions stay confidential</p>
-              </div>
-            </div>
+          <div className="space-y-2">
+            <Button
+              className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white"
+              size="lg"
+              onClick={handleLogin}
+            >
+              <LogIn className="w-5 h-5 mr-2" />
+              Sign in with Google
+            </Button>
           </div>
 
-          <Button 
-            onClick={handleLogin}
-            className="w-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center space-x-2"
-            size="lg"
-          >
-            <LogIn className="w-5 h-5" />
-            <span className="font-button">Continue with Google</span>
-          </Button>
-
-          <p className="text-xs text-gray-500 text-center">
-            By continuing, you agree to our terms of service and privacy policy
-          </p>
+          <div className="space-y-4 text-sm text-gray-600">
+            <div className="flex items-center gap-2">
+              <User className="w-4 h-4 text-blue-500" />
+              <span>Create your personalized speaking profile</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Shield className="w-4 h-4 text-blue-500" />
+              <span>Your data is secure and private</span>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>

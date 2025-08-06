@@ -1,5 +1,16 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 
+// Helper function to calculate eye aspect ratio (EAR)
+function calculateEyeAspectRatio(outer: any, inner: any, top: any, bottom: any) {
+  if (!outer || !inner || !top || !bottom) return 0;
+  
+  const verticalDist = Math.abs(top.y - bottom.y);
+  const horizontalDist = Math.abs(outer.x - inner.x);
+  
+  if (horizontalDist === 0) return 0;
+  return verticalDist / horizontalDist;
+}
+
 interface MediaPipeResult {
   posture: number | null;
   gesture: number | null;
@@ -68,13 +79,14 @@ export function useMediaPipe() {
       });
 
       holisticModel.setOptions({
-        modelComplexity: 1,
+        modelComplexity: 2, // Higher accuracy with more complex model
         smoothLandmarks: true,
-        enableSegmentation: false,
+        enableSegmentation: true, // Enable for better isolation
         smoothSegmentation: true,
         refineFaceLandmarks: true,
-        minDetectionConfidence: 0.5,
-        minTrackingConfidence: 0.5
+        minDetectionConfidence: 0.7, // Higher confidence threshold
+        minTrackingConfidence: 0.7, // Higher tracking confidence
+        selfieMode: true // Mirror mode for front-facing camera
       });
 
       holisticModel.onResults((results: any) => {
@@ -95,6 +107,7 @@ export function useMediaPipe() {
     let postureScore = 0;
     let gestureScore = 0;
     let eyeContactScore = 0;
+    let confidenceThreshold = 0.7; // Minimum confidence for valid detection
 
     try {
       // Process pose landmarks for posture analysis
@@ -104,16 +117,54 @@ export function useMediaPipe() {
         // Calculate shoulder alignment (landmarks 11 and 12)
         const leftShoulder = pose[11];
         const rightShoulder = pose[12];
+        const leftHip = pose[23];
+        const rightHip = pose[24];
+        const nose = pose[0];
         
-        if (leftShoulder && rightShoulder) {
-          const shoulderDiff = Math.abs(leftShoulder.y - rightShoulder.y);
-          const shoulderAlignment = Math.max(0, 100 - (shoulderDiff * 1000));
+        if (leftShoulder && rightShoulder && leftHip && rightHip && nose &&
+            leftShoulder.visibility > confidenceThreshold &&
+            rightShoulder.visibility > confidenceThreshold) {
           
-          // Calculate head position (landmark 0)
-          const nose = pose[0];
-          const headPosition = nose ? Math.max(0, 100 - Math.abs(nose.x - 0.5) * 200) : 0;
+          // Shoulder alignment (vertical and depth)
+          const shoulderVerticalDiff = Math.abs(leftShoulder.y - rightShoulder.y);
+          const shoulderDepthDiff = Math.abs(leftShoulder.z - rightShoulder.z);
+          const shoulderAlignment = Math.max(0, 100 - (shoulderVerticalDiff * 800) - (shoulderDepthDiff * 500));
           
-          postureScore = (shoulderAlignment + headPosition) / 2;
+          // Spine alignment
+          const hipCenter = {
+            x: (leftHip.x + rightHip.x) / 2,
+            y: (leftHip.y + rightHip.y) / 2,
+            z: (leftHip.z + rightHip.z) / 2
+          };
+          const shoulderCenter = {
+            x: (leftShoulder.x + rightShoulder.x) / 2,
+            y: (leftShoulder.y + rightShoulder.y) / 2,
+            z: (leftShoulder.z + rightShoulder.z) / 2
+          };
+          
+          // Calculate spine tilt
+          const spineAngle = Math.atan2(
+            shoulderCenter.x - hipCenter.x,
+            shoulderCenter.y - hipCenter.y
+          ) * (180 / Math.PI);
+          const spineTilt = Math.max(0, 100 - Math.abs(spineAngle) * 2);
+          
+          // Head position relative to shoulders
+          const headOffset = {
+            x: nose.x - shoulderCenter.x,
+            z: nose.z - shoulderCenter.z
+          };
+          const headPosition = Math.max(0, 100 - 
+            (Math.abs(headOffset.x) * 300) - 
+            (Math.abs(headOffset.z) * 200)
+          );
+          
+          // Weighted average of all posture components
+          postureScore = (
+            shoulderAlignment * 0.4 +
+            spineTilt * 0.4 +
+            headPosition * 0.2
+          );
         }
       }
 
@@ -151,19 +202,76 @@ export function useMediaPipe() {
       if (results.faceLandmarks && results.faceLandmarks.length > 0) {
         const face = results.faceLandmarks;
         
-        // Eye landmarks: left eye (33, 133), right eye (362, 263)
-        const leftEye = { outer: face[33], inner: face[133] };
-        const rightEye = { outer: face[362], inner: face[263] };
+        // Enhanced eye landmarks for more accurate gaze tracking
+        const leftEyePoints = {
+          outer: face[33],
+          inner: face[133],
+          top: face[159],
+          bottom: face[145],
+          center: face[468]
+        };
         
-        if (leftEye.outer && leftEye.inner && rightEye.outer && rightEye.inner) {
-          // Calculate gaze direction based on eye landmark positions
-          const leftGaze = (leftEye.outer.x + leftEye.inner.x) / 2;
-          const rightGaze = (rightEye.outer.x + rightEye.inner.x) / 2;
-          const avgGaze = (leftGaze + rightGaze) / 2;
+        const rightEyePoints = {
+          outer: face[362],
+          inner: face[263],
+          top: face[386],
+          bottom: face[374],
+          center: face[473]
+        };
+        
+        if (Object.values(leftEyePoints).every(point => point?.visibility > confidenceThreshold) &&
+            Object.values(rightEyePoints).every(point => point?.visibility > confidenceThreshold)) {
           
-          // Score based on how close gaze is to center (0.5)
-          const gazeScore = Math.max(0, 100 - Math.abs(avgGaze - 0.5) * 300);
-          eyeContactScore = Math.min(100, gazeScore);
+          // Calculate eye aspect ratio (EAR) to detect blinks/squints
+          const leftEAR = calculateEyeAspectRatio(
+            leftEyePoints.outer,
+            leftEyePoints.inner,
+            leftEyePoints.top,
+            leftEyePoints.bottom
+          );
+          
+          const rightEAR = calculateEyeAspectRatio(
+            rightEyePoints.outer,
+            rightEyePoints.inner,
+            rightEyePoints.top,
+            rightEyePoints.bottom
+          );
+          
+          const avgEAR = (leftEAR + rightEAR) / 2;
+          const eyeOpenness = Math.min(100, Math.max(0, (avgEAR - 0.15) * 500));
+          
+          // Calculate gaze direction using iris centers
+          const leftGaze = {
+            x: leftEyePoints.center.x,
+            y: leftEyePoints.center.y,
+            z: leftEyePoints.center.z
+          };
+          
+          const rightGaze = {
+            x: rightEyePoints.center.x,
+            y: rightEyePoints.center.y,
+            z: rightEyePoints.center.z
+          };
+          
+          // Calculate horizontal gaze angle
+          const horizontalGaze = (leftGaze.x + rightGaze.x) / 2;
+          const horizontalScore = Math.max(0, 100 - Math.abs(horizontalGaze - 0.5) * 250);
+          
+          // Calculate vertical gaze angle
+          const verticalGaze = (leftGaze.y + rightGaze.y) / 2;
+          const verticalScore = Math.max(0, 100 - Math.abs(verticalGaze - 0.45) * 250);
+          
+          // Calculate depth (z-axis) for eye contact
+          const depthGaze = (leftGaze.z + rightGaze.z) / 2;
+          const depthScore = Math.max(0, 100 - Math.abs(depthGaze) * 200);
+          
+          // Weighted combination of all factors
+          eyeContactScore = Math.min(100, (
+            horizontalScore * 0.4 +
+            verticalScore * 0.3 +
+            depthScore * 0.2 +
+            eyeOpenness * 0.1
+          ));
         }
       }
 

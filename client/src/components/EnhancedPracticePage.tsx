@@ -1930,6 +1930,85 @@ export default function EnhancedPracticePage() {
             </Card>
           </div>
 
+          {/* Live Feedback Box */}
+          <div className="fixed right-4 top-4 w-96 bg-white rounded-lg shadow-lg overflow-hidden">
+            {/* Header */}
+            <div className="bg-blue-600 text-white px-4 py-3">
+              <h2 className="text-lg font-semibold">Live AI Feedback</h2>
+            </div>
+
+            {/* Metrics Overview */}
+            <div className="p-4 border-b border-gray-200">
+              <div className="grid grid-cols-2 gap-4">
+                {/* WPM */}
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <div className="text-sm text-gray-500">Speaking Rate</div>
+                  <div className="text-xl font-semibold">
+                    {metrics.content.wpmData.currentWPM} WPM
+                  </div>
+                </div>
+
+                {/* Eye Contact */}
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <div className="text-sm text-gray-500">Eye Contact</div>
+                  <div className="text-xl font-semibold">
+                    {Math.round(metrics.bodyLanguage.eyeContactScore)}%
+                  </div>
+                </div>
+
+                {/* Confidence */}
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <div className="text-sm text-gray-500">Confidence</div>
+                  <div className="text-xl font-semibold">
+                    {Math.round(metrics.emotion.confidence)}%
+                  </div>
+                </div>
+
+                {/* Filler Words */}
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <div className="text-sm text-gray-500">Filler Words</div>
+                  <div className="text-xl font-semibold">
+                    {metrics.content.fillerWords.length}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Live Feedback Messages */}
+            <div className="p-4 max-h-64 overflow-y-auto">
+              {liveFeedback.length > 0 ? (
+                <ul className="space-y-3">
+                  {liveFeedback.map((msg, index) => (
+                    <li 
+                      key={`${msg.id}-${index}`}
+                      className={`p-3 rounded-lg text-sm ${
+                        msg.severity === 'excellent' ? 'bg-green-50 text-green-700' :
+                        msg.severity === 'good' ? 'bg-blue-50 text-blue-700' :
+                        msg.severity === 'warning' ? 'bg-yellow-50 text-yellow-700' :
+                        'bg-red-50 text-red-700'
+                      }`}
+                    >
+                      <div className="flex justify-between items-start mb-1">
+                        <Badge variant="outline" className="capitalize">
+                          {msg.category.replace('_', ' ')}
+                        </Badge>
+                        <span className="text-xs opacity-75">
+                          {Math.round(msg.confidence * 100)}% confidence
+                        </span>
+                      </div>
+                      <p className="font-medium">{msg.feedback}</p>
+                      <p className="text-xs mt-1 opacity-75">{msg.actionable}</p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="text-center text-gray-500">
+                  Start speaking to see live feedback
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Live Feedback and Achievements Panel */}
           <div className="space-y-4">
             

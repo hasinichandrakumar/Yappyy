@@ -38,6 +38,9 @@ import {
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { allComprehensiveTemplates } from '@/lib/comprehensive-templates-collection';
+import { businessPitchTemplates, salesPitchTemplates } from '@/lib/business-pitch-templates';
+import { additionalTemplatesExpansion } from '@/lib/additional-templates-expansion';
 
 interface Template {
   id: string;
@@ -57,6 +60,7 @@ interface Template {
 
 const templateCategories = [
   { id: 'all', label: 'All', icon: FileText },
+  { id: 'custom', label: 'My Templates', icon: User, color: 'text-purple-600' },
   { id: 'business', label: 'Work & Business', icon: Briefcase },
   { id: 'academic', label: 'School & Education', icon: GraduationCap },
   { id: 'personal', label: 'Wedding & Events', icon: Heart },
@@ -667,10 +671,18 @@ const generateAdditionalTemplates = (): Template[] => {
   }));
 };
 
-const allTemplates = [...sampleTemplates, ...generateAdditionalTemplates()];
+const staticTemplates = [
+  ...sampleTemplates, 
+  ...generateAdditionalTemplates(),
+  ...allComprehensiveTemplates,
+  ...businessPitchTemplates,
+  ...salesPitchTemplates,
+  ...additionalTemplatesExpansion
+];
 
 export default function EnhancedTemplateMarketplace() {
   const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState('all');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
@@ -685,22 +697,64 @@ export default function EnhancedTemplateMarketplace() {
   const [showCreateTemplate, setShowCreateTemplate] = useState(false);
   const queryClient = useQueryClient();
 
-  const filteredTemplates = allTemplates.filter(template => {
-    const matchesCategory = selectedCategory === 'all' || template.category === selectedCategory;
-    const matchesSearch = template.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         template.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         template.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-    return matchesCategory && matchesSearch;
+  // Fetch user's custom templates
+  const { data: customTemplates = [], error: customTemplatesError, isLoading: customTemplatesLoading } = useQuery({
+    queryKey: ['/api/custom-templates'],
+    enabled: true,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
+
+  console.log('Custom templates state:', { customTemplates, customTemplatesError, customTemplatesLoading });
+
+  // Combine static and custom templates with error handling
+  const allTemplates = [
+    ...staticTemplates,
+    ...(Array.isArray(customTemplates) ? customTemplates.map((template: any) => ({
+      ...template,
+      icon: templateCategories.find(cat => cat.id === template.category)?.icon || FileText,
+      color: templateCategories.find(cat => cat.id === template.category)?.color || 'text-gray-600',
+      tags: template.tags || [template.category, 'custom'],
+      contentAdvice: 'Custom template created by you. Feel free to edit and personalize as needed.',
+      voiceAdvice: 'Practice with confidence and adapt your delivery style to match your personal speaking preference.',
+      bodyLanguageAdvice: 'Use natural gestures and maintain good posture throughout your speech.'
+    })) : [])
+  ];
+
+  const getFilteredTemplates = (tabType: string) => {
+    let templates = allTemplates;
+    
+    // Filter by tab first
+    if (tabType === 'custom') {
+      templates = allTemplates.filter(template => template.tags?.includes('custom') || false);
+    } else {
+      templates = staticTemplates; // Only show built-in templates for "All Templates" tab
+    }
+    
+    // Then filter by category
+    let matchesCategory = true;
+    if (selectedCategory !== 'all' && selectedCategory !== 'custom') {
+      templates = templates.filter(template => template.category === selectedCategory);
+    }
+    
+    // Finally filter by search
+    if (searchQuery) {
+      templates = templates.filter(template => 
+        template.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        template.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        template.tags?.some((tag: string) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
+    }
+    
+    return templates;
+  };
+
+  const filteredTemplates = getFilteredTemplates(activeTab);
 
   // Save custom template mutation
   const saveCustomTemplateMutation = useMutation({
     mutationFn: async (templateData: any) => {
-      const response = await apiRequest('/api/custom-templates', {
-        method: 'POST',
-        body: JSON.stringify(templateData)
-      });
-      return response;
+      const response = await apiRequest('/api/custom-templates', 'POST', templateData);
+      return await response.json();
     },
     onSuccess: () => {
       // Reset form and show success
@@ -711,23 +765,32 @@ export default function EnhancedTemplateMarketplace() {
         content: ''
       });
       setShowCreateTemplate(false);
-      // Optionally show success notification
-      alert('Template saved successfully! You can now find it in your personal collection.');
+      // Switch to My Templates tab to show the new template
+      setActiveTab('custom');
+      setSelectedCategory('all');
+      // Refetch custom templates to show the new one
+      queryClient.invalidateQueries({ queryKey: ['/api/custom-templates'] });
+      // Show success notification
+      toast({
+        title: "Success!",
+        description: "Template saved successfully! Check the 'My Templates' tab to see it.",
+      });
     },
     onError: (error) => {
       console.error('Failed to save template:', error);
-      alert('Failed to save template. Please try again.');
+      toast({
+        title: "Error",
+        description: "Failed to save template. Please try again.",
+        variant: "destructive",
+      });
     }
   });
 
   // AI help mutation for template improvement
   const aiHelpMutation = useMutation({
     mutationFn: async (templateData: any) => {
-      const response = await apiRequest('/api/improve-template', {
-        method: 'POST',
-        body: JSON.stringify(templateData)
-      });
-      return response;
+      const response = await apiRequest('/api/improve-template', 'POST', templateData);
+      return await response.json();
     },
     onSuccess: (data) => {
       if (data.improvedContent) {
@@ -736,7 +799,11 @@ export default function EnhancedTemplateMarketplace() {
     },
     onError: (error) => {
       console.error('Failed to get AI help:', error);
-      alert('AI assistance is temporarily unavailable. Please try again later.');
+      toast({
+        title: "AI Help Unavailable",
+        description: "AI assistance is temporarily unavailable. Please try again later.",
+        variant: "destructive",
+      });
     }
   });
 
@@ -791,28 +858,88 @@ export default function EnhancedTemplateMarketplace() {
     }
   };
 
+  // AI Template Generator mutation
+  const generateTemplateMutation = useMutation({
+    mutationFn: async (templateData: any) => {
+      const response = await apiRequest('/api/generate-template', 'POST', templateData);
+      return await response.json();
+    },
+    onSuccess: (data) => {
+      if (data.generatedContent) {
+        setCustomTemplate(prev => ({ 
+          ...prev, 
+          content: data.generatedContent,
+          description: data.enhancedDescription || prev.description 
+        }));
+        toast({
+          title: "Template Generated! ✨",
+          description: "Your AI-powered template is ready! You can edit and customize it further.",
+        });
+      }
+    },
+    onError: (error) => {
+      console.error('Failed to generate template:', error);
+      toast({
+        title: "Generation Failed",
+        description: "AI template generation is temporarily unavailable. Try writing your template manually.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Generate template function
+  const handleGenerateTemplate = () => {
+    generateTemplateMutation.mutate({
+      title: customTemplate.title,
+      category: customTemplate.category,
+      description: customTemplate.description,
+      audience: 'general',
+      duration: '5-10 minutes',
+      tone: 'professional',
+      includeExamples: true,
+      includeCallToAction: true
+    });
+  };
+
   const handleSaveCustomTemplate = () => {
-    if (!customTemplate.title || !customTemplate.content) {
-      alert('Please fill in both the title and content fields.');
+    if (!customTemplate.title?.trim()) {
+      toast({
+        title: "Title Required",
+        description: "Please enter a title for your template.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!customTemplate.content?.trim()) {
+      toast({
+        title: "Content Required",
+        description: "Please enter content for your template.",
+        variant: "destructive",
+      });
       return;
     }
 
     const templateData = {
-      ...customTemplate,
-      id: `custom-${Date.now()}`,
+      title: customTemplate.title.trim(),
+      category: customTemplate.category,
+      description: customTemplate.description?.trim() || '',
+      content: customTemplate.content.trim(),
       difficulty: 'Beginner' as const,
       duration: '5-10 minutes',
-      tags: [customTemplate.category, 'custom'],
-      popularity: 0,
-      icon: templateCategories.find(cat => cat.id === customTemplate.category)?.icon || FileText
+      tags: [customTemplate.category, 'custom']
     };
 
     saveCustomTemplateMutation.mutate(templateData);
   };
 
   const handleAIHelp = () => {
-    if (!customTemplate.content) {
-      alert('Please write some content first so AI can help improve it.');
+    if (!customTemplate.content?.trim()) {
+      toast({
+        title: "Content Required",
+        description: "Please write some content first so AI can help improve it.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -828,8 +955,8 @@ export default function EnhancedTemplateMarketplace() {
     if (!selectedTemplate) return;
     
     try {
-      // Import the new PDF export service
-      const { TemplatePDFExportService } = await import('@/lib/template-pdf-export');
+      // Import the new enhanced PDF export
+      const { generateTemplatePDF } = await import('@/lib/pdf-export');
       
       // Create template data object
       const templateData = {
@@ -845,16 +972,13 @@ export default function EnhancedTemplateMarketplace() {
         description: selectedTemplate.description || ''
       };
       
-      // Generate and download PDF
-      const pdfService = new TemplatePDFExportService();
-      await pdfService.generateTemplateReport(templateData);
-      
+      // Generate and download PDF with enhanced styling
       const filename = `${selectedTemplate.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_template.pdf`;
-      await pdfService.downloadPDF(filename);
+      await generateTemplatePDF(templateData, filename);
       
       toast({
-        title: "PDF Downloaded Successfully!",
-        description: "Your professional template guide has been saved.",
+        title: "PDF Downloaded Successfully! 📄",
+        description: "Your beautifully formatted template guide has been saved with Poppins font and modern styling.",
       });
       
     } catch (error) {
@@ -908,7 +1032,7 @@ export default function EnhancedTemplateMarketplace() {
                 </span>
               </div>
               <div className="flex flex-wrap gap-1">
-                {template.tags.slice(0, 3).map((tag, index) => (
+                {template.tags.slice(0, 3).map((tag: string, index: number) => (
                   <Badge key={index} variant="outline" className="text-xs">
                     {tag}
                   </Badge>
@@ -1151,6 +1275,25 @@ export default function EnhancedTemplateMarketplace() {
                   className="text-base"
                 />
               </div>
+              
+              {/* AI Template Generator */}
+              <div className="pt-4 border-t border-gray-200">
+                <div className="text-center space-y-3">
+                  <h4 className="font-medium text-gray-900">Need help getting started?</h4>
+                  <Button 
+                    onClick={handleGenerateTemplate}
+                    className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium text-base"
+                    size="lg"
+                    disabled={!customTemplate.title || !customTemplate.description || generateTemplateMutation.isPending}
+                  >
+                    <Sparkles className="h-5 w-5 mr-2" />
+                    {generateTemplateMutation.isPending ? 'Generating Amazing Template...' : '✨ Generate Template with AI'}
+                  </Button>
+                  <p className="text-sm text-gray-500">
+                    Our AI will create a professional template based on your details
+                  </p>
+                </div>
+              </div>
             </div>
           </Card>
         </div>
@@ -1215,12 +1358,12 @@ Tips:
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-poppins">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Speech Templates</h1>
-          <p className="text-gray-600">Choose from 50+ ready-to-use speech templates</p>
+          <p className="text-gray-600">Choose from professional templates or create your own</p>
         </div>
         <Button 
           onClick={() => setShowCreateTemplate(true)}
@@ -1232,52 +1375,150 @@ Tips:
         </Button>
       </div>
 
-      {/* Search and Filters */}
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-          <Input
-            placeholder="Search templates..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-      </div>
+      {/* Tab Navigation */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-2 max-w-md">
+          <TabsTrigger value="all" className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            All Templates
+          </TabsTrigger>
+          <TabsTrigger value="custom" className="flex items-center gap-2">
+            <User className="h-4 w-4" />
+            My Templates
+            {Array.isArray(customTemplates) && customTemplates.length > 0 && (
+              <Badge variant="secondary" className="ml-1 text-xs">
+                {customTemplates.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+        </TabsList>
 
-      {/* Category Filters */}
-      <div className="w-full overflow-x-auto">
-        <div className="flex gap-2 min-w-max pb-2">
-          {templateCategories.map((category) => {
-            const IconComponent = category.icon;
-            return (
-              <Button
-                key={category.id}
-                variant={selectedCategory === category.id ? "default" : "outline"}
-                onClick={() => setSelectedCategory(category.id)}
-                className="flex items-center gap-2 whitespace-nowrap flex-shrink-0"
-              >
-                <IconComponent className="h-4 w-4" />
-                <span className="hidden sm:inline">{category.label}</span>
-                <span className="sm:hidden">{category.label.split(' ')[0]}</span>
-              </Button>
-            );
-          })}
-        </div>
-      </div>
+        <TabsContent value="all" className="space-y-6 mt-6">
+          {/* Search and Filters for All Templates */}
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search templates..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </div>
 
-      {/* Results Summary */}
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-600">
-          Showing {filteredTemplates.length} of {allTemplates.length} templates
-        </p>
-        <Badge variant="outline">
-          {allTemplates.length} Total Templates
-        </Badge>
-      </div>
+          {/* Category Filters */}
+          <div className="w-full overflow-x-auto">
+            <div className="flex gap-2 min-w-max pb-2">
+              {templateCategories.filter(cat => cat.id !== 'custom').map((category) => {
+                const IconComponent = category.icon;
+                return (
+                  <Button
+                    key={category.id}
+                    variant={selectedCategory === category.id ? "default" : "outline"}
+                    onClick={() => setSelectedCategory(category.id)}
+                    className="flex items-center gap-2 whitespace-nowrap flex-shrink-0"
+                  >
+                    <IconComponent className="h-4 w-4" />
+                    <span className="hidden sm:inline">{category.label}</span>
+                    <span className="sm:hidden">{category.label.split(' ')[0]}</span>
+                  </Button>
+                );
+              })}
+            </div>
+          </div>
 
-      {/* Templates Grid */}
-      {renderTemplateGrid()}
+          {/* Results Summary */}
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-gray-600">
+              Showing {filteredTemplates.length} of {staticTemplates.length} templates
+            </p>
+            <Badge variant="outline">
+              {staticTemplates.length} Built-in Templates
+            </Badge>
+          </div>
+
+          {/* Templates Grid */}
+          {renderTemplateGrid()}
+        </TabsContent>
+
+        <TabsContent value="custom" className="space-y-6 mt-6">
+          {/* Search for Custom Templates */}
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search your templates..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </div>
+
+          {/* Custom Templates Content */}
+          {customTemplatesLoading ? (
+            <Card className="p-12 text-center">
+              <div className="flex flex-col items-center space-y-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <p className="text-gray-600">Loading your templates...</p>
+              </div>
+            </Card>
+          ) : customTemplatesError ? (
+            <Card className="p-12 text-center">
+              <div className="flex flex-col items-center space-y-4">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                  <FileText className="w-8 h-8 text-red-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Error loading templates</h3>
+                  <p className="text-gray-600 mt-2">Please try refreshing the page</p>
+                </div>
+                <Button 
+                  onClick={() => window.location.reload()}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  Refresh Page
+                </Button>
+              </div>
+            </Card>
+          ) : !Array.isArray(customTemplates) || customTemplates.length === 0 ? (
+            <Card className="p-12 text-center">
+              <div className="flex flex-col items-center space-y-4">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                  <FileText className="w-8 h-8 text-gray-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">No custom templates yet</h3>
+                  <p className="text-gray-600 mt-2">Create your first custom template to get started</p>
+                </div>
+                <Button 
+                  onClick={() => setShowCreateTemplate(true)}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Your First Template
+                </Button>
+              </div>
+            </Card>
+          ) : (
+            <>
+              {/* Results Summary for Custom Templates */}
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-gray-600">
+                  Showing {filteredTemplates.length} of {customTemplates.length} custom templates
+                </p>
+                <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                  {customTemplates.length} My Templates
+                </Badge>
+              </div>
+
+              {/* Custom Templates Grid */}
+              {renderTemplateGrid()}
+            </>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

@@ -13,6 +13,7 @@ import {
   Send, Timer, Eye, Trophy, Settings, Activity,
   Layers, Cpu, Database, TrendingDown
 } from 'lucide-react';
+import AICoachIcon from './AICoachIcon';
 import { useAuth } from '@/hooks/useAuth';
 import { apiRequest } from '@/lib/queryClient';
 import { useQuery } from '@tanstack/react-query';
@@ -38,26 +39,31 @@ const AICoachAvatar = ({
   size?: 'small' | 'medium' | 'large';
   isAnimated?: boolean;
 }) => {
-  const sizeClasses = {
-    small: 'w-12 h-12',
-    medium: 'w-16 h-16', 
-    large: 'w-20 h-20'
+  const getIconVariant = () => {
+    switch (mood) {
+      case 'thinking': return 'brain';
+      case 'excited': return 'sparkle';
+      case 'encouraging': return 'circuit';
+      case 'proud': return 'robot';
+      default: return 'brain';
+    }
   };
 
-  const getMoodIcon = () => {
-    switch (mood) {
-      case 'thinking': return <Brain className="w-full h-full text-purple-600" />;
-      case 'excited': return <Sparkles className="w-full h-full text-yellow-500" />;
-      case 'encouraging': return <Heart className="w-full h-full text-red-500" />;
-      case 'proud': return <Award className="w-full h-full text-green-600" />;
-      default: return <Brain className="w-full h-full text-blue-600" />;
+  const getIconSize = () => {
+    switch (size) {
+      case 'small': return 'sm';
+      case 'medium': return 'md';
+      case 'large': return 'lg';
+      default: return 'md';
     }
   };
 
   return (
-    <div className={`${sizeClasses[size]} flex items-center justify-center bg-gray-100 rounded-full border-2 border-gray-200`}>
-      {getMoodIcon()}
-    </div>
+    <AICoachIcon 
+      variant={getIconVariant() as any} 
+      size={getIconSize() as any}
+      className={isAnimated ? 'animate-pulse' : ''}
+    />
   );
 };
 
@@ -587,7 +593,7 @@ export default function AICoachRedesigned() {
           {/* Main Coaching Area */}
           <div className="lg:col-span-3 flex">
             <Card className="bg-white border-gray-200 shadow-lg flex-1 flex flex-col">
-              <CardHeader className="bg-blue-600 text-white rounded-t-lg p-6">
+              <CardHeader className="bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 text-white rounded-t-lg p-6">
                 <CardTitle className="flex items-center gap-4">
                   <AICoachAvatar mood="encouraging" size="small" />
                   <div className="flex-1">
