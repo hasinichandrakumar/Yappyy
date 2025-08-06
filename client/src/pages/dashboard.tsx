@@ -144,7 +144,8 @@ export default function Dashboard() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-2 lg:grid-cols-5 gap-2 mb-8 h-auto p-2 bg-white border border-gray-200 shadow-sm rounded-xl">
+          {/* Central Navigation Tabs - This defines the width constraint */}
+          <TabsList className="grid grid-cols-2 lg:grid-cols-5 gap-2 mb-8 h-auto p-2 bg-white border border-gray-200 shadow-sm rounded-xl max-w-full">
             <TabsTrigger 
               value="practice" 
               className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-semibold rounded-lg hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
@@ -183,30 +184,31 @@ export default function Dashboard() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="practice" className="space-y-8 pb-16">
-            <SimplifiedPracticePage />
-          </TabsContent>
+          {/* All tab content constrained to same width as navigation tabs */}
+          <div className="w-full max-w-full">
+            <TabsContent value="practice" className="space-y-8 pb-16">
+              <SimplifiedPracticePage />
+            </TabsContent>
 
-          <TabsContent value="analysis" className="space-y-6">
-            <EnhancedAnalysisTab />
-          </TabsContent>
+            <TabsContent value="analysis" className="space-y-6">
+              <EnhancedAnalysisTab />
+            </TabsContent>
 
-          <TabsContent value="ai-coach" className="space-y-6">
-            <AICoachRedesigned />
-          </TabsContent>
+            <TabsContent value="ai-coach" className="space-y-6">
+              <AICoachRedesigned />
+            </TabsContent>
 
-          <TabsContent value="templates" className="space-y-6">
-            <EnhancedTemplateMarketplace />
-          </TabsContent>
+            <TabsContent value="templates" className="space-y-6">
+              <EnhancedTemplateMarketplace />
+            </TabsContent>
 
-
-
-          <TabsContent value="achievements" className="space-y-6">
-            <div className="space-y-6">
-              <SessionDashboard />
-              <FunctionalProgressTracker />
-            </div>
-          </TabsContent>
+            <TabsContent value="achievements" className="space-y-6">
+              <div className="space-y-6">
+                <SessionDashboard />
+                <FunctionalProgressTracker />
+              </div>
+            </TabsContent>
+          </div>
 
         </Tabs>
       </div>

@@ -252,20 +252,22 @@ export function LiveMetricsBox({
 
   const containerClass = position === 'floating' 
     ? 'fixed right-4 top-4 w-96 z-50'
-    : 'w-full h-fit sticky top-4';
+    : 'w-full h-full';
 
   return (
-    <Card className={`${containerClass} bg-white shadow-lg border border-gray-200`}>
-      <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+    <Card className={`${containerClass} bg-white/95 backdrop-blur-sm shadow-xl border border-blue-200 rounded-xl overflow-hidden`}>
+      <CardHeader className="bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 text-white p-4">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-semibold flex items-center gap-2">
-            <Brain className="h-5 w-5" />
-            AI Speaking Coach
+          <CardTitle className="text-lg font-bold flex items-center gap-3">
+            <div className="p-2 bg-white/20 rounded-lg">
+              <Brain className="h-5 w-5" />
+            </div>
+            <span className="tracking-wide">AI Speaking Coach</span>
           </CardTitle>
           <div className="flex items-center gap-2">
             {isRecording && (
-              <Badge variant="secondary" className="bg-red-500 text-white animate-pulse">
-                <div className="w-2 h-2 bg-white rounded-full mr-1"></div>
+              <Badge variant="secondary" className="bg-red-500/90 text-white animate-pulse border-0 px-3 py-1">
+                <div className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse"></div>
                 LIVE
               </Badge>
             )}
@@ -274,7 +276,7 @@ export function LiveMetricsBox({
                 variant="ghost" 
                 size="sm" 
                 onClick={onClose}
-                className="text-white hover:bg-white/20"
+                className="text-white hover:bg-white/20 rounded-lg transition-all duration-200"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -283,38 +285,42 @@ export function LiveMetricsBox({
         </div>
       </CardHeader>
 
-      <CardContent className="p-4">
+      <CardContent className="p-6">
         {/* Live Feedback Messages */}
         <div>
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-medium text-gray-700">Coaching Tips</h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-gray-800 text-base">Coaching Tips</h3>
             {isRecording && (
-              <div className="flex items-center gap-1 text-xs text-gray-500">
+              <div className="flex items-center gap-2 text-xs text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
                 <Timer className="h-3 w-3" />
                 Next tip in {Math.ceil((20000 - (Date.now() - lastFeedbackTime)) / 1000)}s
               </div>
             )}
           </div>
 
-          <div className="space-y-2 max-h-80 overflow-y-auto">
+          <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
             {feedbackMessages.length > 0 ? (
               feedbackMessages.map((message) => {
                 const IconComponent = getSeverityIcon(message.severity);
                 return (
                   <div
                     key={message.id}
-                    className={`p-3 rounded-lg border text-sm ${getSeverityColor(message.severity)}`}
+                    className={`p-4 rounded-xl border-2 text-sm shadow-sm transition-all duration-200 hover:shadow-md ${getSeverityColor(message.severity)}`}
                   >
-                    <div className="flex items-start gap-2">
-                      <IconComponent className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                      <div className="flex-1">
-                        <p className="font-medium">{message.message}</p>
+                    <div className="flex items-start gap-3">
+                      <div className="p-1.5 rounded-lg bg-white/50">
+                        <IconComponent className="h-4 w-4 flex-shrink-0" />
+                      </div>
+                      <div className="flex-1 space-y-2">
+                        <p className="font-medium leading-relaxed">{message.message}</p>
                         {message.actionable && (
-                          <p className="text-xs mt-1 opacity-75">
-                            💡 {message.actionable}
-                          </p>
+                          <div className="bg-white/60 rounded-lg p-2 border border-white/30">
+                            <p className="text-xs font-medium text-gray-700">
+                              💡 {message.actionable}
+                            </p>
+                          </div>
                         )}
-                        <div className="text-xs opacity-60 mt-1">
+                        <div className="text-xs opacity-70 font-medium">
                           {new Date(message.timestamp).toLocaleTimeString()}
                         </div>
                       </div>
@@ -323,11 +329,21 @@ export function LiveMetricsBox({
                 );
               })
             ) : (
-              <div className="text-center text-gray-500 py-6">
-                {isRecording ? 
-                  'AI coach is listening and analyzing...' : 
-                  'Start practicing to receive coaching tips'
-                }
+              <div className="text-center text-gray-500 py-12">
+                <div className="space-y-3">
+                  <Brain className="h-12 w-12 mx-auto text-gray-300" />
+                  <p className="font-medium">
+                    {isRecording ? 
+                      'AI coach is listening and analyzing...' : 
+                      'Start practicing to receive coaching tips'
+                    }
+                  </p>
+                  {!isRecording && (
+                    <p className="text-xs text-gray-400">
+                      Real-time feedback will appear here
+                    </p>
+                  )}
+                </div>
               </div>
             )}
           </div>
@@ -335,8 +351,8 @@ export function LiveMetricsBox({
 
         {/* Coaching Summary */}
         {feedbackCount > 0 && (
-          <div className="mt-4 pt-4 border-t border-gray-200">
-            <div className="text-xs text-gray-500 text-center">
+          <div className="mt-6 pt-4 border-t border-gray-200">
+            <div className="text-xs text-gray-600 text-center font-medium bg-gray-50 py-2 px-3 rounded-lg">
               {feedbackCount} coaching tip{feedbackCount !== 1 ? 's' : ''} provided
             </div>
           </div>

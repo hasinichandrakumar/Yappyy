@@ -1783,13 +1783,13 @@ export default function SimplifiedPracticePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 p-4">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
         
         {/* Header */}
         <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm">
-          <CardHeader>
-            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+          <CardHeader className="pb-4">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
               <div className="flex-1">
                 {isEditingName ? (
                   <div className="flex items-center gap-2">
@@ -1815,17 +1815,17 @@ export default function SimplifiedPracticePage() {
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
-                    <h1 className="text-4xl font-extrabold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent cursor-pointer hover:from-blue-700 hover:to-cyan-600" onClick={() => setIsEditingName(true)}>
+                    <h1 className="text-4xl font-extrabold bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent cursor-pointer hover:from-blue-700 hover:to-cyan-600 transition-all duration-200" onClick={() => setIsEditingName(true)}>
                       {sessionName}
                     </h1>
-                    <Button variant="ghost" size="sm" onClick={() => setIsEditingName(true)}>
+                    <Button variant="ghost" size="sm" onClick={() => setIsEditingName(true)} className="hover:bg-blue-50">
                       <Edit3 className="w-4 h-4" />
                     </Button>
                   </div>
                 )}
                 
                 {isEditingPurpose ? (
-                  <div className="space-y-3 mt-2">
+                  <div className="space-y-3 mt-3">
                     <Select value={sessionPurpose} onValueChange={setSessionPurpose}>
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select session purpose..." />
@@ -1858,7 +1858,7 @@ export default function SimplifiedPracticePage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2 mt-2">
+                  <div className="flex items-center gap-2 mt-3">
                     {sessionPurpose ? (
                       <div className="flex items-center gap-2">
                         {(() => {
@@ -1884,7 +1884,7 @@ export default function SimplifiedPracticePage() {
                         Click to set your session purpose
                       </p>
                     )}
-                    <Button variant="ghost" size="sm" onClick={() => setIsEditingPurpose(true)}>
+                    <Button variant="ghost" size="sm" onClick={() => setIsEditingPurpose(true)} className="hover:bg-blue-50">
                       <Edit3 className="w-4 h-4" />
                     </Button>
                   </div>
@@ -1892,9 +1892,9 @@ export default function SimplifiedPracticePage() {
               </div>
 
               {/* Recording Controls */}
-              <div className="flex gap-2">
+              <div className="flex flex-col lg:flex-row gap-3">
                 {!isRecording ? (
-                  <Button onClick={startRecording} className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white shadow-lg hover:shadow-xl">
+                  <Button onClick={startRecording} className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white shadow-lg hover:shadow-xl transition-all duration-200">
                     <Mic className="w-5 h-5 mr-2" />
                     Start Practice
                   </Button>
@@ -1903,7 +1903,7 @@ export default function SimplifiedPracticePage() {
                     <Button 
                       onClick={stopRecording} 
                       variant="destructive"
-                      className="bg-red-600 hover:bg-red-700 text-white shadow-lg hover:shadow-xl px-6"
+                      className="bg-red-600 hover:bg-red-700 text-white shadow-lg hover:shadow-xl px-6 transition-all duration-200"
                       size="lg"
                     >
                       <Square className="w-5 h-5 mr-2" />
@@ -1916,11 +1916,11 @@ export default function SimplifiedPracticePage() {
                 )}
                 
                 {/* Video Recording Controls */}
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <Button
                     variant="outline"
                     onClick={() => setVideoRecordingEnabled(!videoRecordingEnabled)}
-                    className={`flex items-center gap-2 ${videoRecordingEnabled ? 'bg-purple-50 border-purple-200' : ''}`}
+                    className={`flex items-center gap-2 transition-all duration-200 ${videoRecordingEnabled ? 'bg-purple-50 border-purple-200 text-purple-700' : ''}`}
                   >
                     <Video className="w-4 h-4" />
                     {videoRecordingEnabled ? 'Video ON' : 'Video OFF'}
@@ -1930,7 +1930,7 @@ export default function SimplifiedPracticePage() {
                     <Button
                       variant="outline"
                       onClick={() => setShowVideoPlayback(true)}
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 hover:bg-blue-50 hover:border-blue-200 transition-all duration-200"
                     >
                       <Play className="w-4 h-4" />
                       Watch Recording
@@ -1940,7 +1940,7 @@ export default function SimplifiedPracticePage() {
                   <Button
                     variant="outline"
                     onClick={() => setShowRecordingLibrary(true)}
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 hover:bg-blue-50 hover:border-blue-200 transition-all duration-200"
                   >
                     <Library className="w-4 h-4" />
                     Library
@@ -1950,7 +1950,7 @@ export default function SimplifiedPracticePage() {
                   <Button
                     variant="outline"
                     onClick={() => setShowLiveTranscript(!showLiveTranscript)}
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 hover:bg-blue-50 hover:border-blue-200 transition-all duration-200"
                   >
                     <FileText className="w-4 h-4" />
                     {showLiveTranscript ? 'Hide' : 'Show'} Transcript
@@ -1960,7 +1960,7 @@ export default function SimplifiedPracticePage() {
                   <Button
                     variant="outline"
                     onClick={() => setShowLiveMetrics(!showLiveMetrics)}
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 hover:bg-blue-50 hover:border-blue-200 transition-all duration-200"
                   >
                     <Activity className="w-4 h-4" />
                     {showLiveMetrics ? 'Hide' : 'Show'} AI Coach
@@ -1974,125 +1974,132 @@ export default function SimplifiedPracticePage() {
 
 
 
-        {/* Main Content - Side by Side Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main Content - Full Width Layout */}
+        <div className="w-full space-y-8">
           
-          {/* Left Side - Video Feed and Metrics */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Video Feed */}
-            <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm">
-              <CardContent className="p-0">
-                <div className="relative aspect-video bg-gray-900 rounded-lg overflow-hidden">
-                  <video
-                    ref={videoRef}
-                    className="w-full h-full object-cover"
-                    muted
-                    playsInline
-                  />
-                  
-                  {/* Hidden video element for recording */}
-                  <video
-                    ref={recordingVideoRef}
-                    className="hidden"
-                    muted
-                    playsInline
-                  />
-                  
-                  <canvas
-                    ref={canvasRef}
-                    className="absolute inset-0 w-full h-full pointer-events-none opacity-50"
-                  />
-                  
-                  {isRecording && (
-                    <div className="absolute top-4 left-4 space-y-2">
-                      <Badge variant="destructive">
-                        <Activity className="w-3 h-3 mr-1" />
-                        RECORDING {Math.floor(sessionDuration / 60)}:{(sessionDuration % 60).toString().padStart(2, '0')}
+          {/* Video Feed - Full Width */}
+          <Card className="border border-blue-200 shadow-xl bg-white/90 backdrop-blur-sm rounded-xl overflow-hidden">
+            <CardContent className="p-0">
+              <div className="relative aspect-video bg-gray-900 rounded-xl overflow-hidden">
+                <video
+                  ref={videoRef}
+                  className="w-full h-full object-cover"
+                  muted
+                  playsInline
+                />
+                
+                {/* Hidden video element for recording */}
+                <video
+                  ref={recordingVideoRef}
+                  className="hidden"
+                  muted
+                  playsInline
+                />
+                
+                <canvas
+                  ref={canvasRef}
+                  className="absolute inset-0 w-full h-full pointer-events-none opacity-50"
+                />
+                
+                {isRecording && (
+                  <div className="absolute top-6 left-6 space-y-3">
+                    <Badge variant="destructive" className="px-4 py-2 text-sm font-semibold shadow-lg">
+                      <Activity className="w-4 h-4 mr-2" />
+                      RECORDING {Math.floor(sessionDuration / 60)}:{(sessionDuration % 60).toString().padStart(2, '0')}
+                    </Badge>
+                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 px-4 py-2 text-sm font-semibold shadow-lg">
+                      <Activity className="w-4 h-4 mr-2" />
+                      SMART FILLER DETECTION
+                    </Badge>
+                    {isRoboflowAnalyzing && (
+                      <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 px-4 py-2 text-sm font-semibold shadow-lg">
+                        <Activity className="w-4 h-4 mr-2" />
+                        COMPUTER VISION ACTIVE
                       </Badge>
-                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                        <Activity className="w-3 h-3 mr-1" />
-                        SMART FILLER DETECTION
+                    )}
+                    {isFacialAnalysisActive && (
+                      <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 px-4 py-2 text-sm font-semibold shadow-lg">
+                        <Activity className="w-4 h-4 mr-2" />
+                        FACIAL ANALYSIS ACTIVE
                       </Badge>
-                      {isRoboflowAnalyzing && (
-                        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                          <Activity className="w-3 h-3 mr-1" />
-                          COMPUTER VISION ACTIVE
-                        </Badge>
-                      )}
-                      {isFacialAnalysisActive && (
-                        <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
-                          <Activity className="w-3 h-3 mr-1" />
-                          FACIAL ANALYSIS ACTIVE
-                        </Badge>
-                      )}
-                      {isComputerVisionAnalyzing && (
-                        <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
-                          <Activity className="w-3 h-3 mr-1" />
-                          COMPUTER VISION ACTIVE
-                        </Badge>
-                      )}
-                      {computerVisionError.hasError && (
-                        <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
-                          <Activity className="w-3 h-3 mr-1" />
-                          CV ERROR - USING FALLBACK
-                        </Badge>
-                      )}
-                    </div>
-                  )}
-                </div>
+                    )}
+                    {isComputerVisionAnalyzing && (
+                      <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200 px-4 py-2 text-sm font-semibold shadow-lg">
+                        <Activity className="w-4 h-4 mr-2" />
+                        COMPUTER VISION ACTIVE
+                      </Badge>
+                    )}
+                    {computerVisionError.hasError && (
+                      <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200 px-4 py-2 text-sm font-semibold shadow-lg">
+                        <Activity className="w-4 h-4 mr-2" />
+                        CV ERROR - USING FALLBACK
+                      </Badge>
+                    )}
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
 
-            {/* Essential Live Metrics - Minimal Display */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-200">
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div>
-                  <div className="text-3xl font-bold text-blue-600">{metrics.wordsPerMinute}</div>
-                  <div className="text-sm text-gray-600">WPM</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-bold text-purple-600">{metrics.fillerWordCount}</div>
-                  <div className="text-sm text-gray-600">Fillers</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-bold text-green-600">{Math.round(metrics.eyeContact)}%</div>
-                  <div className="text-sm text-gray-600">Eye Contact</div>
-                </div>
-              </div>
+          {/* Bottom Row - Metrics and AI Coach Side by Side */}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            
+            {/* Essential Live Metrics - Takes 3 columns */}
+            <div className="lg:col-span-3">
+              <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm rounded-xl">
+                <CardContent className="p-8">
+                  <div className="grid grid-cols-3 gap-8 text-center">
+                    <div className="space-y-3">
+                      <div className="text-5xl font-bold text-blue-600">{metrics.wordsPerMinute}</div>
+                      <div className="text-sm text-gray-600 font-semibold uppercase tracking-wide">Words Per Minute</div>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="text-5xl font-bold text-purple-600">{metrics.fillerWordCount}</div>
+                      <div className="text-sm text-gray-600 font-semibold uppercase tracking-wide">Filler Words</div>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="text-5xl font-bold text-green-600">{Math.round(metrics.eyeContact)}%</div>
+                      <div className="text-sm text-gray-600 font-semibold uppercase tracking-wide">Eye Contact</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          </div>
 
-          {/* Right Side - AI Speaking Coach */}
-          <div className="lg:col-span-1">
-            {showLiveMetrics && (
-              <LiveMetricsBox
-                isRecording={isRecording}
-                metrics={{
-                  wpm: metrics.wordsPerMinute > 0 ? metrics.wordsPerMinute : null,
-                  eyeContact: metrics.eyeContact > 0 ? metrics.eyeContact / 100 : null,
-                  confidence: metrics.confidence > 0 ? metrics.confidence / 100 : null,
-                  fillerWords: metrics.fillerWordCount,
-                  volume: null, // Could be added later with audio analysis
-                  clarity: metrics.clarity > 0 ? metrics.clarity / 100 : null,
-                  posture: metrics.bodyLanguage.overallPresence > 0 ? metrics.bodyLanguage.overallPresence / 100 : null
-                }}
-                onClose={() => setShowLiveMetrics(false)}
-                position="sidebar"
-              />
-            )}
+            {/* Right Side - AI Speaking Coach - Takes 1 column */}
+            <div className="lg:col-span-1">
+              {showLiveMetrics && (
+                <div className="sticky top-6">
+                  <LiveMetricsBox
+                    isRecording={isRecording}
+                    metrics={{
+                      wpm: metrics.wordsPerMinute > 0 ? metrics.wordsPerMinute : null,
+                      eyeContact: metrics.eyeContact > 0 ? metrics.eyeContact / 100 : null,
+                      confidence: metrics.confidence > 0 ? metrics.confidence / 100 : null,
+                      fillerWords: metrics.fillerWordCount,
+                      volume: null, // Could be added later with audio analysis
+                      clarity: metrics.clarity > 0 ? metrics.clarity / 100 : null,
+                      posture: metrics.bodyLanguage.overallPresence > 0 ? metrics.bodyLanguage.overallPresence / 100 : null
+                    }}
+                    onClose={() => setShowLiveMetrics(false)}
+                    position="sidebar"
+                  />
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Live Transcript Panel */}
         {showLiveTranscript && (
           <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm">
-            <CardHeader>
+            <CardHeader className="pb-4">
               <CardTitle className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <FileText className="w-5 h-5 text-blue-600" />
-                  <span className="text-blue-800">Live Transcript</span>
+                  <span className="text-blue-800 font-semibold">Live Transcript</span>
                   {isRecording && (
-                    <Badge variant="secondary" className="ml-2">
+                    <Badge variant="secondary" className="ml-2 bg-green-100 text-green-800 border-green-200">
                       <Activity className="w-3 h-3 mr-1" />
                       Live
                     </Badge>
@@ -2102,14 +2109,14 @@ export default function SimplifiedPracticePage() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowLiveTranscript(false)}
-                  className="text-gray-500 hover:text-gray-700"
+                  className="text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-all duration-200"
                 >
                   ×
                 </Button>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="bg-white border-2 border-gray-100 p-4 rounded-lg max-h-60 overflow-y-auto">
+              <div className="bg-white border-2 border-gray-100 p-6 rounded-lg max-h-60 overflow-y-auto shadow-inner">
                 {transcript || interimTranscript ? (
                   <div className="text-sm leading-relaxed">
                     {/* Enhanced filler word highlighting including UM/UH detection */}
@@ -2125,7 +2132,7 @@ export default function SimplifiedPracticePage() {
                     
                     {/* Show filler word count summary */}
                     {metrics.fillerWordCount > 0 && (
-                      <div className="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs">
+                      <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-xs">
                         <strong>Fillers detected:</strong> {metrics.fillerWordCount} words
                         {transcript.includes('[UM') && ' (including UM sounds)'}
                         {transcript.includes('[UH') && ' (including UH sounds)'}
@@ -2133,10 +2140,10 @@ export default function SimplifiedPracticePage() {
                     )}
                   </div>
                 ) : (
-                  <div className="text-center text-gray-500 py-8">
+                  <div className="text-center text-gray-500 py-12">
                     {isRecording ? (
                       <div className="flex items-center justify-center gap-2">
-                        <Activity className="w-4 h-4" />
+                        <Activity className="w-4 h-4 animate-pulse" />
                         <span>Listening for speech...</span>
                       </div>
                     ) : (
@@ -2150,7 +2157,7 @@ export default function SimplifiedPracticePage() {
               </div>
               
               {transcript && (
-                <div className="mt-4 flex justify-between items-center text-xs text-gray-600">
+                <div className="mt-4 flex justify-between items-center text-xs text-gray-600 bg-gray-50 px-3 py-2 rounded-lg">
                   <span>Words: {transcript.split(' ').filter(w => w.length > 0).length}</span>
                   <span>Characters: {transcript.length}</span>
                 </div>

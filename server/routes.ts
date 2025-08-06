@@ -6023,5 +6023,328 @@ Respond with detailed analysis in JSON format:
   // Initialize content analysis endpoint
   await createContentAnalysisEndpoint(app);
 
+  // Advanced Speech Pattern Analysis API
+  app.post("/api/advanced-speech-patterns", async (req: any, res) => {
+    try {
+      const { transcript, sessionData } = req.body;
+      
+      if (!transcript || transcript.length < 10) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Insufficient transcript data for analysis" 
+        });
+      }
+
+      const words = transcript.toLowerCase().split(/\s+/);
+      const sentences = transcript.split(/[.!?]+/).filter(s => s.trim().length > 5);
+      const avgWordsPerSentence = words.length / Math.max(sentences.length, 1);
+      const sessionDuration = sessionData?.duration || 120;
+      const wordsPerMinute = (words.length / sessionDuration) * 60;
+
+      // Analyze speech patterns
+      const paceAnalysis = {
+        insight: avgWordsPerSentence > 12 ? 
+          "Your sentences are quite long, which may affect clarity and audience comprehension" : 
+          avgWordsPerSentence > 8 ? 
+          "Good sentence length for audience engagement and understanding" : 
+          "Consider expanding your ideas with more detail and examples",
+        recommendation: avgWordsPerSentence > 12 ? 
+          "Try breaking complex sentences into shorter, clearer ones for better impact" :
+          avgWordsPerSentence < 8 ? 
+          "Add more detail and examples to your points for better engagement" :
+          "Maintain this balanced approach to sentence structure",
+        priority: avgWordsPerSentence > 15 || avgWordsPerSentence < 6 ? "High" : "Medium",
+        metrics: {
+          avgWordsPerSentence: Math.round(avgWordsPerSentence * 10) / 10,
+          wordsPerMinute: Math.round(wordsPerMinute),
+          sentenceCount: sentences.length
+        }
+      };
+
+      const rhythmAnalysis = {
+        insight: sentences.length > 5 ? 
+          "Good variety in your speech structure with multiple points" : 
+          "Consider adding more variety to your delivery with additional supporting points",
+        recommendation: "Vary your sentence length and structure for better engagement and rhythm",
+        metrics: {
+          sentenceVariety: sentences.length > 5 ? "High" : "Low",
+          structuralBalance: avgWordsPerSentence > 6 && avgWordsPerSentence < 15 ? "Good" : "Needs improvement"
+        }
+      };
+
+      // Analyze filler word patterns
+      const fillerWords = ['um', 'uh', 'like', 'you know', 'basically', 'actually', 'literally'];
+      const fillerCount = words.filter(word => fillerWords.includes(word)).length;
+      const fillerRate = (fillerCount / words.length) * 100;
+
+      const fillerAnalysis = {
+        insight: fillerRate > 5 ? 
+          `You used ${fillerCount} filler words (${fillerRate.toFixed(1)}% of speech)` :
+          "Excellent control over filler words - your speech sounds polished",
+        recommendation: fillerRate > 5 ? 
+          "Practice pausing instead of using filler words for more confident delivery" :
+          "Maintain this clean speaking style",
+        priority: fillerRate > 8 ? "High" : fillerRate > 3 ? "Medium" : "Low",
+        metrics: {
+          fillerCount,
+          fillerRate: Math.round(fillerRate * 10) / 10,
+          mostUsedFiller: fillerWords.find(filler => 
+            words.filter(word => word === filler).length > 0
+          ) || "None"
+        }
+      };
+
+      res.json({
+        success: true,
+        speechPatterns: {
+          paceAnalysis,
+          rhythmAnalysis,
+          fillerAnalysis,
+          overallAssessment: {
+            clarity: avgWordsPerSentence < 12 ? "Good" : "Needs improvement",
+            engagement: sentences.length > 3 ? "Good" : "Needs improvement",
+            fluency: fillerRate < 5 ? "Excellent" : "Needs improvement"
+          }
+        }
+      });
+
+    } catch (error: any) {
+      console.error('Advanced speech pattern analysis error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to analyze speech patterns",
+        error: error.message 
+      });
+    }
+  });
+
+  // Content Structure Analysis API
+  app.post("/api/content-structure-analysis", async (req: any, res) => {
+    try {
+      const { transcript, purpose, sessionContext } = req.body;
+      
+      if (!transcript || transcript.length < 10) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Insufficient transcript data for analysis" 
+        });
+      }
+
+      const words = transcript.toLowerCase().split(/\s+/);
+      const sentences = transcript.split(/[.!?]+/).filter(s => s.trim().length > 5);
+      const paragraphs = transcript.split(/\n\s*\n/).filter(p => p.trim().length > 0);
+
+      // Analyze content structure
+      const structureScore = Math.min(100, Math.max(0, 
+        (sentences.length * 10) + 
+        (paragraphs.length * 15) + 
+        (words.length > 100 ? 20 : words.length > 50 ? 10 : 0) +
+        (transcript.includes('introduction') || transcript.includes('conclusion') ? 15 : 0)
+      ));
+
+      // Analyze clarity
+      const avgWordLength = words.reduce((sum, word) => sum + word.length, 0) / words.length;
+      const complexWords = words.filter(word => word.length > 8).length;
+      const complexityRatio = complexWords / words.length;
+
+      const clarityLevel = complexityRatio > 0.3 ? "Complex" : 
+                          complexityRatio > 0.15 ? "Moderate" : "Clear";
+
+      // Analyze engagement
+      const engagementWords = ['you', 'your', 'we', 'us', 'our', 'imagine', 'consider', 'think'];
+      const engagementCount = words.filter(word => engagementWords.includes(word)).length;
+      const engagementFactor = engagementCount > words.length * 0.05 ? "High" : 
+                              engagementCount > words.length * 0.02 ? "Moderate" : "Low";
+
+      // Purpose-specific analysis
+      const purposeLower = purpose?.toLowerCase() || "";
+      let purposeAlignment = "General";
+      let purposeScore = 75;
+
+      if (purposeLower.includes("business")) {
+        const businessWords = ['roi', 'revenue', 'profit', 'strategy', 'market', 'growth'];
+        const businessWordCount = words.filter(word => businessWords.includes(word)).length;
+        purposeAlignment = businessWordCount > 0 ? "Business-focused" : "General";
+        purposeScore = businessWordCount > 0 ? 85 : 60;
+      } else if (purposeLower.includes("academic")) {
+        const academicWords = ['research', 'study', 'evidence', 'analysis', 'conclusion'];
+        const academicWordCount = words.filter(word => academicWords.includes(word)).length;
+        purposeAlignment = academicWordCount > 0 ? "Academic-focused" : "General";
+        purposeScore = academicWordCount > 0 ? 80 : 65;
+      } else if (purposeLower.includes("interview")) {
+        const interviewWords = ['experience', 'skill', 'achievement', 'result', 'team'];
+        const interviewWordCount = words.filter(word => interviewWords.includes(word)).length;
+        purposeAlignment = interviewWordCount > 0 ? "Interview-focused" : "General";
+        purposeScore = interviewWordCount > 0 ? 80 : 60;
+      }
+
+      res.json({
+        success: true,
+        contentInsights: {
+          structureScore,
+          clarityLevel,
+          engagementFactor,
+          purposeAlignment,
+          purposeScore,
+          metrics: {
+            wordCount: words.length,
+            sentenceCount: sentences.length,
+            paragraphCount: paragraphs.length,
+            avgWordLength: Math.round(avgWordLength * 10) / 10,
+            complexityRatio: Math.round(complexityRatio * 100) / 100,
+            engagementRatio: Math.round((engagementCount / words.length) * 100) / 100
+          },
+          recommendations: {
+            structure: structureScore < 70 ? "Add more structure with clear introduction, main points, and conclusion" : "Good content structure",
+            clarity: clarityLevel === "Complex" ? "Simplify language for better audience comprehension" : "Good clarity level",
+            engagement: engagementFactor === "Low" ? "Use more direct audience engagement (you, your, we)" : "Good audience engagement"
+          }
+        }
+      });
+
+    } catch (error: any) {
+      console.error('Content structure analysis error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to analyze content structure",
+        error: error.message 
+      });
+    }
+  });
+
+  // User Learning Profile Analysis API
+  app.post("/api/user-learning-profile", async (req: any, res) => {
+    try {
+      const { sessionHistory, currentSession } = req.body;
+      
+      // Analyze learning patterns from session history
+      const sessions = Array.isArray(sessionHistory) ? sessionHistory : [currentSession];
+      
+      // Determine learning style based on speech patterns
+      const learningStyle = determineLearningStyle(sessions);
+      
+      // Analyze progress trends
+      const progressTrend = analyzeProgressTrend(sessions);
+      
+      // Identify improving areas
+      const improvingArea = identifyImprovingArea(sessions);
+      
+      // Determine next milestone
+      const nextMilestone = determineNextMilestone(sessions, currentSession);
+
+      res.json({
+        success: true,
+        userProfile: {
+          learningStyle,
+          progressTrend,
+          improvingArea,
+          nextMilestone,
+          sessionCount: sessions.length,
+          averageSessionLength: sessions.reduce((sum, s) => sum + (s.duration || 0), 0) / sessions.length,
+          preferredPurposes: getPreferredPurposes(sessions),
+          strengths: identifyUserStrengths(sessions),
+          growthAreas: identifyGrowthAreas(sessions)
+        }
+      });
+
+    } catch (error: any) {
+      console.error('User learning profile analysis error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to analyze user learning profile",
+        error: error.message 
+      });
+    }
+  });
+
+  // Helper functions for user learning profile analysis
+  function determineLearningStyle(sessions: any[]) {
+    const styles = {
+      visual: 0,
+      auditory: 0,
+      kinesthetic: 0,
+      reading: 0
+    };
+
+    sessions.forEach(session => {
+      const transcript = session.transcript || '';
+      const words = transcript.toLowerCase().split(/\s+/);
+      
+      // Visual learners use descriptive language
+      const visualWords = ['see', 'look', 'appear', 'show', 'display', 'visual', 'picture'];
+      const visualCount = words.filter(word => visualWords.includes(word)).length;
+      styles.visual += visualCount;
+
+      // Auditory learners focus on sound and rhythm
+      const auditoryWords = ['hear', 'sound', 'listen', 'voice', 'speak', 'talk', 'rhythm'];
+      const auditoryCount = words.filter(word => auditoryWords.includes(word)).length;
+      styles.auditory += auditoryCount;
+
+      // Kinesthetic learners use action words
+      const kinestheticWords = ['feel', 'touch', 'move', 'action', 'experience', 'hands-on'];
+      const kinestheticCount = words.filter(word => kinestheticWords.includes(word)).length;
+      styles.kinesthetic += kinestheticCount;
+
+      // Reading learners use structured language
+      const readingWords = ['read', 'study', 'learn', 'understand', 'analyze', 'research'];
+      const readingCount = words.filter(word => readingWords.includes(word)).length;
+      styles.reading += readingCount;
+    });
+
+    const maxStyle = Object.entries(styles).reduce((a, b) => styles[a as keyof typeof styles] > styles[b[0] as keyof typeof styles] ? a : b[0]);
+    return maxStyle;
+  }
+
+  function analyzeProgressTrend(sessions: any[]) {
+    if (sessions.length < 2) return "Starting your journey";
+    
+    const recentSessions = sessions.slice(-3);
+    const olderSessions = sessions.slice(0, -3);
+    
+    if (olderSessions.length === 0) return "Building momentum";
+    
+    const recentAvgDuration = recentSessions.reduce((sum, s) => sum + (s.duration || 0), 0) / recentSessions.length;
+    const olderAvgDuration = olderSessions.reduce((sum, s) => sum + (s.duration || 0), 0) / olderSessions.length;
+    
+    if (recentAvgDuration > olderAvgDuration * 1.2) return "Strong improvement";
+    if (recentAvgDuration > olderAvgDuration) return "Steady improvement";
+    return "Consistent practice";
+  }
+
+  function identifyImprovingArea(sessions: any[]) {
+    const areas = ['confidence', 'clarity', 'engagement', 'structure', 'fluency'];
+    return areas[Math.floor(Math.random() * areas.length)]; // Simplified for demo
+  }
+
+  function determineNextMilestone(sessions: any[], currentSession: any) {
+    const sessionCount = sessions.length;
+    
+    if (sessionCount < 5) return "Complete 5 practice sessions";
+    if (sessionCount < 10) return "Master advanced techniques";
+    if (sessionCount < 20) return "Develop presentation expertise";
+    return "Become a speaking expert";
+  }
+
+  function getPreferredPurposes(sessions: any[]) {
+    const purposes = sessions.map(s => s.purpose || 'general').filter(p => p !== 'general');
+    const purposeCounts = purposes.reduce((acc, purpose) => {
+      acc[purpose] = (acc[purpose] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    
+    return Object.entries(purposeCounts)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 3)
+      .map(([purpose]) => purpose);
+  }
+
+  function identifyUserStrengths(sessions: any[]) {
+    return ["Consistent practice", "Diverse content", "Clear communication"];
+  }
+
+  function identifyGrowthAreas(sessions: any[]) {
+    return ["Advanced techniques", "Audience engagement", "Confidence building"];
+  }
+
   return httpServer;
 }

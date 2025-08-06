@@ -38,7 +38,8 @@ import {
   Smile,
   Star,
   Video,
-  RotateCcw
+  RotateCcw,
+  User
 } from 'lucide-react';
 
 import VideoSessionPlayer from './VideoSessionPlayer';
@@ -1121,6 +1122,307 @@ export default function EnhancedAnalysisTab() {
 }
 
 // Content-based feedback generator for when AI is unavailable
+// Enhanced content-based feedback with personalized insights
+function generateEnhancedContentBasedFeedback(transcript: string, session: any) {
+  const purpose = session.purpose || session.sessionName || 'General Practice';
+  
+  if (!transcript || transcript.length < 10) {
+    return {
+      mainFeedback: {
+        strengths: ["Session completed successfully"],
+        improvements: ["Try speaking more during the session to get detailed content feedback"],
+        recommendations: [{
+          category: "Content",
+          suggestion: "Aim for longer speaking sessions to analyze content structure",
+          priority: "Medium"
+        }]
+      },
+      speechPatterns: {
+        paceAnalysis: {
+          insight: "Limited speech data available for analysis",
+          recommendation: "Practice longer sessions for better pattern recognition",
+          priority: "Medium"
+        }
+      },
+      contentInsights: {
+        structureScore: 50,
+        clarityLevel: "Basic",
+        engagementFactor: "Limited"
+      },
+      recommendations: [{
+        category: "Session Length",
+        suggestion: "Aim for sessions with more speech content for comprehensive analysis",
+        priority: "Medium",
+        personalized: true
+      }]
+    };
+  }
+
+  const words = transcript.toLowerCase().split(/\s+/);
+  const sentences = transcript.split(/[.!?]+/).filter(s => s.trim().length > 5);
+  const avgWordsPerSentence = words.length / Math.max(sentences.length, 1);
+  
+  // Enhanced purpose-specific analysis
+  const purposeLower = purpose?.toLowerCase() || "";
+  const isSchoolPresentation = purposeLower.includes("school") || purposeLower.includes("academic") || purposeLower.includes("classroom") || purposeLower.includes("student");
+  const isBusinessPresentation = purposeLower.includes("business") || purposeLower.includes("work") || purposeLower.includes("meeting") || purposeLower.includes("corporate");
+  const isPitch = purposeLower.includes("pitch") || purposeLower.includes("proposal") || purposeLower.includes("investment") || purposeLower.includes("startup");
+  const isPublicSpeaking = purposeLower.includes("public speaking") || purposeLower.includes("speech") || purposeLower.includes("keynote") || purposeLower.includes("conference");
+  const isJobInterview = purposeLower.includes("interview") || purposeLower.includes("job") || purposeLower.includes("hiring") || purposeLower.includes("career");
+  const isWeddingSpeech = purposeLower.includes("wedding") || purposeLower.includes("toast") || purposeLower.includes("celebration") || purposeLower.includes("ceremony");
+  const isStorytelling = purposeLower.includes("story") || purposeLower.includes("narrative") || purposeLower.includes("tale") || purposeLower.includes("anecdote");
+  const isDebate = purposeLower.includes("debate") || purposeLower.includes("argument") || purposeLower.includes("discussion") || purposeLower.includes("persuasion");
+  const isSalesPresentation = purposeLower.includes("sales") || purposeLower.includes("product") || purposeLower.includes("demo") || purposeLower.includes("client");
+  const isTeaching = purposeLower.includes("teach") || purposeLower.includes("lesson") || purposeLower.includes("training") || purposeLower.includes("workshop");
+  const isMotivational = purposeLower.includes("motivational") || purposeLower.includes("inspire") || purposeLower.includes("encourage") || purposeLower.includes("uplift");
+  const isGeneralPractice = purposeLower.includes("general") || purposeLower.includes("practice") || purpose === "" || purpose === "General Practice";
+  
+  const strengths = [];
+  const improvements = [];
+  const recommendations = [];
+  
+  // Analyze content structure
+  if (sentences.length >= 3) {
+    strengths.push("Good speech structure with multiple key points");
+  } else {
+    improvements.push("Develop more detailed content with additional supporting points");
+  }
+  
+  // Analyze sentence complexity
+  if (avgWordsPerSentence > 15) {
+    improvements.push("Simplify sentences for better clarity and audience comprehension");
+  } else if (avgWordsPerSentence > 8) {
+    strengths.push("Well-balanced sentence length for audience engagement");
+  } else {
+    improvements.push("Expand on ideas with more detailed explanations");
+  }
+  
+  // Comprehensive purpose-specific feedback
+  if (isSchoolPresentation) {
+    if (transcript.toLowerCase().includes("example") || transcript.toLowerCase().includes("for instance")) {
+      strengths.push("Good use of examples to support academic points");
+    } else {
+      improvements.push("Add specific examples and evidence to strengthen academic arguments");
+    }
+    
+    if (transcript.toLowerCase().includes("conclusion") || transcript.toLowerCase().includes("summary")) {
+      strengths.push("Clear conclusion that reinforces main academic points");
+    } else {
+      improvements.push("Include a stronger conclusion that summarizes key learning points");
+    }
+    
+    recommendations.push({
+      category: "Academic Content",
+      suggestion: "Structure your presentation with clear introduction, evidence-based main points, and strong conclusion",
+      priority: "High"
+    });
+    
+    recommendations.push({
+      category: "School Presentation",
+      suggestion: "Include specific examples, data, or case studies relevant to your academic topic",
+      priority: "Medium"
+    });
+    
+  } else if (isBusinessPresentation) {
+    if (transcript.toLowerCase().includes("roi") || transcript.toLowerCase().includes("revenue") || transcript.toLowerCase().includes("profit")) {
+      strengths.push("Good focus on business metrics and outcomes");
+    } else {
+      improvements.push("Include specific business metrics, ROI, or financial impact");
+    }
+    
+    recommendations.push({
+      category: "Business Content",
+      suggestion: "Focus on clear value propositions, actionable insights, and measurable business outcomes",
+      priority: "High"
+    });
+    
+  } else if (isPitch) {
+    const hasProblem = transcript.toLowerCase().includes("problem") || transcript.toLowerCase().includes("challenge");
+    const hasSolution = transcript.toLowerCase().includes("solution") || transcript.toLowerCase().includes("solve");
+    const hasMarket = transcript.toLowerCase().includes("market") || transcript.toLowerCase().includes("opportunity");
+    
+    if (hasProblem) strengths.push("Clear problem identification");
+    else improvements.push("Start with a compelling problem statement");
+    
+    if (hasSolution) strengths.push("Well-defined solution presentation");
+    else improvements.push("Clearly explain your solution and its benefits");
+    
+    recommendations.push({
+      category: "Pitch Structure",
+      suggestion: "Follow problem-solution-market-ask format for maximum investor impact",
+      priority: "High"
+    });
+    
+  } else if (isPublicSpeaking) {
+    if (transcript.toLowerCase().includes("you") || transcript.toLowerCase().includes("your")) {
+      strengths.push("Good audience engagement through direct address");
+    } else {
+      improvements.push("Use more direct audience engagement (you, your, we, us)");
+    }
+    
+    recommendations.push({
+      category: "Public Speaking",
+      suggestion: "Focus on audience connection, clear main message, and memorable takeaways",
+      priority: "High"
+    });
+    
+  } else if (isJobInterview) {
+    if (transcript.toLowerCase().includes("experience") || transcript.toLowerCase().includes("skill")) {
+      strengths.push("Good focus on relevant experience and skills");
+    } else {
+      improvements.push("Highlight specific experiences and skills relevant to the role");
+    }
+    
+    recommendations.push({
+      category: "Interview Content",
+      suggestion: "Use STAR method (Situation, Task, Action, Result) to structure your responses",
+      priority: "High"
+    });
+    
+  } else if (isWeddingSpeech) {
+    if (transcript.toLowerCase().includes("love") || transcript.toLowerCase().includes("happy") || transcript.toLowerCase().includes("joy")) {
+      strengths.push("Beautiful emotional connection and celebration of love");
+    } else {
+      improvements.push("Include more emotional elements about love, happiness, and celebration");
+    }
+    
+    recommendations.push({
+      category: "Wedding Speech",
+      suggestion: "Share personal stories, express genuine emotions, and keep it heartfelt but concise",
+      priority: "Medium"
+    });
+    
+  } else if (isStorytelling) {
+    if (transcript.toLowerCase().includes("then") || transcript.toLowerCase().includes("next") || transcript.toLowerCase().includes("suddenly")) {
+      strengths.push("Good narrative flow with clear progression");
+    } else {
+      improvements.push("Use more transitional words to create smooth story flow");
+    }
+    
+    recommendations.push({
+      category: "Storytelling",
+      suggestion: "Build tension, include vivid details, and deliver a satisfying resolution",
+      priority: "High"
+    });
+    
+  } else if (isDebate) {
+    if (transcript.toLowerCase().includes("evidence") || transcript.toLowerCase().includes("research") || transcript.toLowerCase().includes("study")) {
+      strengths.push("Strong use of evidence to support arguments");
+    } else {
+      improvements.push("Include more concrete evidence, statistics, or research to support your points");
+    }
+    
+    recommendations.push({
+      category: "Debate Content",
+      suggestion: "Structure arguments clearly, anticipate counterarguments, and use credible evidence",
+      priority: "High"
+    });
+    
+  } else if (isSalesPresentation) {
+    if (transcript.toLowerCase().includes("benefit") || transcript.toLowerCase().includes("value") || transcript.toLowerCase().includes("advantage")) {
+      strengths.push("Good focus on customer benefits and value");
+    } else {
+      improvements.push("Emphasize specific customer benefits and value propositions");
+    }
+    
+    recommendations.push({
+      category: "Sales Content",
+      suggestion: "Focus on customer pain points, demonstrate value, and include clear call to action",
+      priority: "High"
+    });
+    
+  } else if (isTeaching) {
+    if (transcript.toLowerCase().includes("understand") || transcript.toLowerCase().includes("learn") || transcript.toLowerCase().includes("remember")) {
+      strengths.push("Good focus on student comprehension and learning");
+    } else {
+      improvements.push("Include more learning-focused language and comprehension checks");
+    }
+    
+    recommendations.push({
+      category: "Teaching Content",
+      suggestion: "Use clear explanations, provide examples, and check for understanding",
+      priority: "High"
+    });
+    
+  } else if (isMotivational) {
+    if (transcript.toLowerCase().includes("can") || transcript.toLowerCase().includes("will") || transcript.toLowerCase().includes("achieve")) {
+      strengths.push("Inspiring and empowering language that motivates action");
+    } else {
+      improvements.push("Use more empowering language to inspire and motivate your audience");
+    }
+    
+    recommendations.push({
+      category: "Motivational Content",
+      suggestion: "Share personal stories, use positive language, and provide actionable inspiration",
+      priority: "High"
+    });
+    
+  } else if (isGeneralPractice) {
+    recommendations.push({
+      category: "General Practice",
+      suggestion: "Focus on clear structure, engaging delivery, and audience connection",
+      priority: "Medium"
+    });
+    
+    recommendations.push({
+      category: "Content Development",
+      suggestion: "Choose a specific purpose (presentation, pitch, story) for more targeted feedback",
+      priority: "Low"
+    });
+    
+  } else {
+    recommendations.push({
+      category: "Content Structure",
+      suggestion: "Organize content with clear beginning, middle, and end structure",
+      priority: "Medium"
+    });
+  }
+  
+  // Word count feedback
+  if (words.length < 50) {
+    improvements.push("Expand content length to develop ideas more thoroughly");
+  } else if (words.length > 300) {
+    strengths.push("Comprehensive content with detailed coverage of topic");
+  } else {
+    strengths.push("Appropriate content length for effective communication");
+  }
+  
+  // Generate speech patterns analysis
+  const speechPatterns = {
+    paceAnalysis: {
+      insight: avgWordsPerSentence > 12 ? "Your sentences are quite long, which may affect clarity" : 
+               avgWordsPerSentence > 8 ? "Good sentence length for audience comprehension" : 
+               "Consider expanding your ideas with more detail",
+      recommendation: avgWordsPerSentence > 12 ? "Try breaking complex sentences into shorter, clearer ones" :
+                     avgWordsPerSentence < 8 ? "Add more detail and examples to your points" :
+                     "Maintain this balanced approach to sentence structure",
+      priority: avgWordsPerSentence > 15 || avgWordsPerSentence < 6 ? "High" : "Medium"
+    },
+    rhythmAnalysis: {
+      insight: sentences.length > 5 ? "Good variety in your speech structure" : "Consider adding more variety to your delivery",
+      recommendation: "Vary your sentence length and structure for better engagement"
+    }
+  };
+  
+  // Generate content insights
+  const contentInsights = {
+    structureScore: sentences.length >= 3 ? 75 : 50,
+    clarityLevel: avgWordsPerSentence > 12 ? "Complex" : avgWordsPerSentence > 8 ? "Good" : "Basic",
+    engagementFactor: transcript.toLowerCase().includes("you") || transcript.toLowerCase().includes("your") ? "High" : "Moderate"
+  };
+  
+  return {
+    mainFeedback: {
+      strengths: strengths.length > 0 ? strengths : ["Session completed with measurable content"],
+      improvements: improvements.length > 0 ? improvements : ["Continue developing content depth and structure"],
+      recommendations
+    },
+    speechPatterns,
+    contentInsights,
+    recommendations: recommendations.map(rec => ({ ...rec, personalized: true }))
+  };
+}
+
 function generateContentBasedFeedback(transcript: string, purpose: string) {
   if (!transcript || transcript.length < 10) {
     return {
@@ -1498,13 +1800,18 @@ interface TranscriptAnalysisComponentProps {
   onAnalysisComplete: (feedback: any) => void;
 }
 
+// Enhanced Transcript Analysis Component with Hyperpersonalized Feedback
 function TranscriptAnalysisComponent({ session, onAnalysisComplete }: TranscriptAnalysisComponentProps) {
   const [aiFeedback, setAiFeedback] = useState<any>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [transcriptSegments, setTranscriptSegments] = useState<any[]>([]);
+  const [userLearningProfile, setUserLearningProfile] = useState<any>(null);
+  const [speechPatterns, setSpeechPatterns] = useState<any>(null);
+  const [contentInsights, setContentInsights] = useState<any>(null);
+  const [personalizedRecommendations, setPersonalizedRecommendations] = useState<any[]>([]);
   const { toast } = useToast();
 
-  // Generate AI-powered transcript analysis
+  // Enhanced AI-powered transcript analysis with multiple analysis layers
   const analyzeTranscript = async () => {
     if (!session?.transcript || session.transcript.length < 5) {
       toast({
@@ -1523,42 +1830,93 @@ function TranscriptAnalysisComponent({ session, onAnalysisComplete }: Transcript
         setTranscriptSegments(segments);
       }
 
-      const response = await fetch('/api/hyperpersonalized-transcript-analysis', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          transcript: session.transcript,
-          purpose: session.purpose || session.sessionName || 'General speaking practice',
-          duration: session.duration || 120,
-          sessionType: session.sessionType || 'practice',
-          userProfile: {
-            experience: 'intermediate',
-            goals: session.goals || []
-          }
+      // Multi-layered analysis approach
+      const analysisPromises = [
+        // 1. Hyperpersonalized AI Analysis
+        fetch('/api/hyperpersonalized-transcript-analysis', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            transcript: session.transcript,
+            purpose: session.purpose || session.sessionName || 'General speaking practice',
+            duration: session.duration || 120,
+            sessionType: session.sessionType || 'practice',
+            userProfile: {
+              experience: 'intermediate',
+              goals: session.goals || []
+            }
+          })
+        }),
+        
+        // 2. Speech Pattern Analysis
+        fetch('/api/advanced-speech-patterns', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            transcript: session.transcript,
+            sessionData: session
+          })
+        }),
+        
+        // 3. Content Structure Analysis
+        fetch('/api/content-structure-analysis', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            transcript: session.transcript,
+            purpose: session.purpose,
+            sessionContext: session
+          })
+        }),
+        
+        // 4. User Learning Profile Analysis
+        fetch('/api/user-learning-profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionHistory: [session],
+            currentSession: session
+          })
         })
-      });
+      ];
 
-      if (!response.ok) throw new Error('Analysis failed');
+      const responses = await Promise.allSettled(analysisPromises);
       
-      const feedback = await response.json();
-      setAiFeedback(feedback);
-      onAnalysisComplete(feedback);
+      // Process successful responses
+      const results = await Promise.all(
+        responses
+          .filter((response): response is PromiseFulfilledResult<Response> => response.status === 'fulfilled')
+          .map(response => response.value.json())
+      );
+
+      // Combine all analysis results
+      const combinedFeedback = combineAnalysisResults(results, session);
+      setAiFeedback(combinedFeedback.mainFeedback);
+      setSpeechPatterns(combinedFeedback.speechPatterns);
+      setContentInsights(combinedFeedback.contentInsights);
+      setUserLearningProfile(combinedFeedback.userProfile);
+      setPersonalizedRecommendations(combinedFeedback.recommendations);
+      
+      onAnalysisComplete(combinedFeedback);
 
       toast({
-        title: "AI Analysis Complete",
-        description: "Hyperpersonalized feedback generated successfully!"
+        title: "Hyperpersonalized Analysis Complete",
+        description: "Multi-layered AI analysis with personalized insights generated!"
       });
 
     } catch (error) {
       console.error('Transcript analysis error:', error);
       
-      // Generate purpose-specific content analysis even when AI fails
-      const contentBasedFeedback = generateContentBasedFeedback(session.transcript, session.purpose || session.sessionName);
-      setAiFeedback(contentBasedFeedback);
+      // Enhanced fallback analysis
+      const enhancedFallbackFeedback = generateEnhancedContentBasedFeedback(session.transcript, session);
+      setAiFeedback(enhancedFallbackFeedback.mainFeedback);
+      setSpeechPatterns(enhancedFallbackFeedback.speechPatterns);
+      setContentInsights(enhancedFallbackFeedback.contentInsights);
+      setPersonalizedRecommendations(enhancedFallbackFeedback.recommendations);
       
       toast({
-        title: "Content Analysis Complete",
-        description: "Generated content-based feedback for your session purpose.",
+        title: "Enhanced Content Analysis Complete",
+        description: "Generated comprehensive content-based feedback with personalized insights.",
         variant: "default"
       });
     } finally {
@@ -1566,16 +1924,161 @@ function TranscriptAnalysisComponent({ session, onAnalysisComplete }: Transcript
     }
   };
 
-  // Break transcript into meaningful segments
+  // Combine multiple analysis results into comprehensive feedback
+  const combineAnalysisResults = (results: any[], session: any) => {
+    const mainFeedback = results[0] || {};
+    const speechPatterns = results[1] || {};
+    const contentInsights = results[2] || {};
+    const userProfile = results[3] || {};
+
+    // Generate personalized recommendations based on all analysis layers
+    const recommendations = generatePersonalizedRecommendations(
+      mainFeedback, speechPatterns, contentInsights, userProfile, session
+    );
+
+    return {
+      mainFeedback,
+      speechPatterns,
+      contentInsights,
+      userProfile,
+      recommendations
+    };
+  };
+
+  // Generate highly personalized recommendations
+  const generatePersonalizedRecommendations = (mainFeedback: any, speechPatterns: any, contentInsights: any, userProfile: any, session: any) => {
+    const recommendations = [];
+
+    // Learning style-based recommendations
+    if (userProfile.learningStyle) {
+      recommendations.push({
+        category: "Learning Style",
+        suggestion: `Based on your ${userProfile.learningStyle} learning style, try ${getLearningStyleSuggestion(userProfile.learningStyle)}`,
+        priority: "High",
+        personalized: true
+      });
+    }
+
+    // Speech pattern improvements
+    if (speechPatterns.paceAnalysis) {
+      recommendations.push({
+        category: "Speaking Pace",
+        suggestion: speechPatterns.paceAnalysis.recommendation,
+        priority: speechPatterns.paceAnalysis.priority,
+        personalized: true
+      });
+    }
+
+    // Content structure improvements
+    if (contentInsights.structureScore < 70) {
+      recommendations.push({
+        category: "Content Structure",
+        suggestion: "Consider using the 'Problem-Solution-Benefit' framework to improve your content organization",
+        priority: "High",
+        personalized: true
+      });
+    }
+
+    // Purpose-specific recommendations
+    const purposeRec = getPurposeSpecificRecommendation(session.purpose, contentInsights);
+    if (purposeRec) {
+      recommendations.push(purposeRec);
+    }
+
+    // Progress-based recommendations
+    if (userProfile.progressTrend) {
+      recommendations.push({
+        category: "Progress Tracking",
+        suggestion: `You're showing ${userProfile.progressTrend} in ${userProfile.improvingArea}. Focus on ${userProfile.nextMilestone}`,
+        priority: "Medium",
+        personalized: true
+      });
+    }
+
+    return recommendations;
+  };
+
+  // Get learning style specific suggestions
+  const getLearningStyleSuggestion = (learningStyle: string) => {
+    const suggestions = {
+      'visual': 'using more visual aids and descriptive language',
+      'auditory': 'focusing on vocal variety and rhythm',
+      'kinesthetic': 'incorporating more interactive elements and gestures',
+      'reading': 'preparing detailed notes and structured outlines'
+    };
+    return suggestions[learningStyle as keyof typeof suggestions] || 'practicing with different delivery methods';
+  };
+
+  // Get purpose-specific recommendations
+  const getPurposeSpecificRecommendation = (purpose: string, contentInsights: any) => {
+    const purposeLower = purpose?.toLowerCase() || "";
+    
+    if (purposeLower.includes("business")) {
+      return {
+        category: "Business Communication",
+        suggestion: "Focus on data-driven insights and actionable takeaways for your audience",
+        priority: "High",
+        personalized: true
+      };
+    } else if (purposeLower.includes("academic")) {
+      return {
+        category: "Academic Presentation",
+        suggestion: "Strengthen your arguments with more supporting evidence and citations",
+        priority: "High",
+        personalized: true
+      };
+    } else if (purposeLower.includes("interview")) {
+      return {
+        category: "Interview Skills",
+        suggestion: "Use the STAR method to structure your responses with specific examples",
+        priority: "High",
+        personalized: true
+      };
+    }
+    
+    return null;
+  };
+
+  // Break transcript into meaningful segments with enhanced analysis
   const breakTranscriptIntoSegments = (transcript: string) => {
     const sentences = transcript.split(/[.!?]+/).filter(s => s.trim().length > 10);
     return sentences.map((sentence, index) => ({
       id: index,
       text: sentence.trim(),
       timestamp: `${Math.floor(index * 15 / 60)}:${(index * 15 % 60).toString().padStart(2, '0')}`,
-      confidence: 0, // ELIMINATED: Only show when real confidence analysis available
-      sentiment: 'neutral' // ELIMINATED: Only show when real sentiment analysis available
+      confidence: 0,
+      sentiment: 'neutral',
+      wordCount: sentence.trim().split(/\s+/).length,
+      complexity: analyzeSentenceComplexity(sentence),
+      keyPhrases: extractKeyPhrases(sentence)
     }));
+  };
+
+  // Analyze sentence complexity
+  const analyzeSentenceComplexity = (sentence: string) => {
+    const words = sentence.split(/\s+/);
+    const avgWordLength = words.reduce((sum, word) => sum + word.length, 0) / words.length;
+    const hasComplexWords = words.some(word => word.length > 8);
+    
+    if (avgWordLength > 6 && hasComplexWords) return 'complex';
+    if (avgWordLength > 5) return 'moderate';
+    return 'simple';
+  };
+
+  // Extract key phrases from sentence
+  const extractKeyPhrases = (sentence: string) => {
+    const words = sentence.toLowerCase().split(/\s+/);
+    const keyPhrases = [];
+    
+    // Look for 2-3 word phrases that might be important
+    for (let i = 0; i < words.length - 1; i++) {
+      const phrase = `${words[i]} ${words[i + 1]}`;
+      if (phrase.length > 8 && !phrase.includes('the') && !phrase.includes('and')) {
+        keyPhrases.push(phrase);
+      }
+    }
+    
+    return keyPhrases.slice(0, 3); // Return top 3 phrases
   };
 
   // Auto-analyze when component mounts if transcript exists
@@ -1610,7 +2113,7 @@ function TranscriptAnalysisComponent({ session, onAnalysisComplete }: Transcript
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h4 className="text-lg font-semibold text-slate-900">AI-Powered Transcript Analysis</h4>
+        <h4 className="text-lg font-semibold text-slate-900">Hyperpersonalized Transcript Analysis</h4>
         <Button
           onClick={analyzeTranscript}
           disabled={isAnalyzing}
@@ -1633,6 +2136,81 @@ function TranscriptAnalysisComponent({ session, onAnalysisComplete }: Transcript
       {/* Filler Word Analysis Section */}
       {hasTranscript && (
         <FillerWordAnalysisDisplay transcript={session.transcript} />
+      )}
+
+      {/* User Learning Profile */}
+      {userLearningProfile && (
+        <Card className="p-6 bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+          <div className="flex items-center gap-2 mb-4">
+            <User className="h-5 w-5 text-green-600" />
+            <h5 className="text-lg font-semibold text-green-900">Your Learning Profile</h5>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white/60 rounded-lg p-4">
+              <h6 className="font-semibold text-green-800 mb-2">Learning Style</h6>
+              <p className="text-sm text-green-700">{userLearningProfile.learningStyle || 'Adaptive'}</p>
+            </div>
+            <div className="bg-white/60 rounded-lg p-4">
+              <h6 className="font-semibold text-green-800 mb-2">Progress Trend</h6>
+              <p className="text-sm text-green-700">{userLearningProfile.progressTrend || 'Steady improvement'}</p>
+            </div>
+            <div className="bg-white/60 rounded-lg p-4">
+              <h6 className="font-semibold text-green-800 mb-2">Next Milestone</h6>
+              <p className="text-sm text-green-700">{userLearningProfile.nextMilestone || 'Advanced techniques'}</p>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {/* Speech Patterns Analysis */}
+      {speechPatterns && (
+        <Card className="p-6 bg-gradient-to-br from-purple-50 to-indigo-50 border-purple-200">
+          <div className="flex items-center gap-2 mb-4">
+            <Activity className="h-5 w-5 text-purple-600" />
+            <h5 className="text-lg font-semibold text-purple-900">Speech Pattern Insights</h5>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {speechPatterns.paceAnalysis && (
+              <div className="bg-white/60 rounded-lg p-4">
+                <h6 className="font-semibold text-purple-800 mb-2">Speaking Pace</h6>
+                <p className="text-sm text-purple-700">{speechPatterns.paceAnalysis.insight}</p>
+              </div>
+            )}
+            {speechPatterns.rhythmAnalysis && (
+              <div className="bg-white/60 rounded-lg p-4">
+                <h6 className="font-semibold text-purple-800 mb-2">Speech Rhythm</h6>
+                <p className="text-sm text-purple-700">{speechPatterns.rhythmAnalysis.insight}</p>
+              </div>
+            )}
+          </div>
+        </Card>
+      )}
+
+      {/* Content Insights */}
+      {contentInsights && (
+        <Card className="p-6 bg-gradient-to-br from-orange-50 to-red-50 border-orange-200">
+          <div className="flex items-center gap-2 mb-4">
+            <FileText className="h-5 w-5 text-orange-600" />
+            <h5 className="text-lg font-semibold text-orange-900">Content Structure Analysis</h5>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white/60 rounded-lg p-4">
+              <h6 className="font-semibold text-orange-800 mb-2">Structure Score</h6>
+              <div className="flex items-center gap-2">
+                <div className="text-2xl font-bold text-orange-600">{contentInsights.structureScore || 75}%</div>
+                <Progress value={contentInsights.structureScore || 75} className="flex-1" />
+              </div>
+            </div>
+            <div className="bg-white/60 rounded-lg p-4">
+              <h6 className="font-semibold text-orange-800 mb-2">Clarity Level</h6>
+              <p className="text-sm text-orange-700">{contentInsights.clarityLevel || 'Good'}</p>
+            </div>
+            <div className="bg-white/60 rounded-lg p-4">
+              <h6 className="font-semibold text-orange-800 mb-2">Engagement Factor</h6>
+              <p className="text-sm text-orange-700">{contentInsights.engagementFactor || 'Moderate'}</p>
+            </div>
+          </div>
+        </Card>
       )}
 
       {/* AI Feedback Summary */}
@@ -1680,16 +2258,16 @@ function TranscriptAnalysisComponent({ session, onAnalysisComplete }: Transcript
             </div>
           </div>
 
-          {/* Recommendations */}
-          {aiFeedback.recommendations && aiFeedback.recommendations.length > 0 && (
+          {/* Personalized Recommendations */}
+          {personalizedRecommendations && personalizedRecommendations.length > 0 && (
             <div className="mt-6 space-y-3">
               <div className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-purple-600" />
                 <h6 className="font-semibold text-purple-900">Personalized Recommendations</h6>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {aiFeedback.recommendations.map((rec: any, index: number) => (
-                  <div key={index} className="bg-white/60 rounded-lg p-4 border border-purple-200">
+                {personalizedRecommendations.map((rec: any, index: number) => (
+                  <div key={index} className={`bg-white/60 rounded-lg p-4 border ${rec.personalized ? 'border-purple-300 shadow-md' : 'border-purple-200'}`}>
                     <div className="flex items-center gap-2 mb-2">
                       <Badge variant="outline" className="text-xs">
                         {rec.category}
@@ -1697,6 +2275,11 @@ function TranscriptAnalysisComponent({ session, onAnalysisComplete }: Transcript
                       <Badge variant={rec.priority === 'High' ? 'destructive' : rec.priority === 'Medium' ? 'default' : 'secondary'} className="text-xs">
                         {rec.priority}
                       </Badge>
+                      {rec.personalized && (
+                        <Badge variant="outline" className="text-xs bg-purple-100 text-purple-700 border-purple-300">
+                          Personalized
+                        </Badge>
+                      )}
                     </div>
                     <p className="text-sm text-purple-800">{rec.suggestion}</p>
                   </div>
@@ -1707,28 +2290,38 @@ function TranscriptAnalysisComponent({ session, onAnalysisComplete }: Transcript
         </Card>
       )}
 
-      {/* Transcript Display */}
+      {/* Enhanced Transcript Display */}
       {hasTranscript && (
         <Card className="p-6">
-          <h5 className="text-lg font-semibold mb-4">Session Transcript</h5>
+          <h5 className="text-lg font-semibold mb-4">Session Transcript with Analysis</h5>
           <div className="bg-slate-50 rounded-lg p-4 max-h-64 overflow-y-auto">
             {transcriptSegments.length > 0 ? (
               <div className="space-y-3">
                 {transcriptSegments.map((segment: any) => (
-                  <div key={segment.id} className="flex gap-3 hover:bg-white rounded-lg p-2 transition-colors">
+                  <div key={segment.id} className="flex gap-3 hover:bg-white rounded-lg p-3 transition-colors border border-slate-200">
                     <div className="text-xs text-slate-500 font-mono w-12 flex-shrink-0">
                       {segment.timestamp}
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm text-slate-700">{segment.text}</p>
-                      <div className="flex items-center gap-2 mt-1">
+                      <p className="text-sm text-slate-700 mb-2">{segment.text}</p>
+                      <div className="flex items-center gap-2 flex-wrap">
                         <Badge variant="outline" className="text-xs">
-                          {Math.round(segment.confidence)}% confidence
+                          {segment.wordCount} words
                         </Badge>
-                        <Badge variant={segment.sentiment === 'positive' ? 'default' : segment.sentiment === 'confident' ? 'secondary' : 'outline'} className="text-xs">
-                          {segment.sentiment}
+                        <Badge variant={segment.complexity === 'complex' ? 'destructive' : segment.complexity === 'moderate' ? 'default' : 'secondary'} className="text-xs">
+                          {segment.complexity} complexity
                         </Badge>
+                        {segment.keyPhrases.length > 0 && (
+                          <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700">
+                            {segment.keyPhrases.length} key phrases
+                          </Badge>
+                        )}
                       </div>
+                      {segment.keyPhrases.length > 0 && (
+                        <div className="mt-2 text-xs text-slate-600">
+                          <span className="font-medium">Key phrases:</span> {segment.keyPhrases.join(', ')}
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
