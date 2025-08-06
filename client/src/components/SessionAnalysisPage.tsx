@@ -6,6 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ImmediateFeedback from './ImmediateFeedback';
+import EnhancedContentAnalysisTab from './EnhancedContentAnalysisTab';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -25,7 +26,8 @@ import {
   Lightbulb,
   Brain,
   Zap,
-  AlertCircle
+  AlertCircle,
+  FileText
 } from 'lucide-react';
 
 interface SessionData {
@@ -390,8 +392,22 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
           </Card>
         </div>
 
-        {/* Detailed Metrics */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Analysis Tabs */}
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="overview" className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="content" className="flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Content Analysis
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="overview" className="space-y-6 mt-6">
+            {/* Detailed Metrics */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
           {/* Performance Breakdown */}
           <Card>
@@ -944,29 +960,36 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
           </Card>
         )}
 
-        {/* Action Buttons */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex flex-wrap gap-4 justify-center">
-              <Button 
-                variant="outline" 
-                className="flex items-center gap-2"
-                onClick={() => handleExportToPDF()}
-              >
-                <Download className="w-4 h-4" />
-                Export to PDF
-              </Button>
-              <Button variant="outline" className="flex items-center gap-2">
-                <Share2 className="w-4 h-4" />
-                Share Results
-              </Button>
-              <Button onClick={onNewSession} className="bg-gradient-to-r from-blue-600 to-cyan-600">
-                <Target className="w-4 h-4 mr-2" />
-                Start New Session
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+            {/* Action Buttons */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex flex-wrap gap-4 justify-center">
+                  <Button 
+                    variant="outline" 
+                    className="flex items-center gap-2"
+                    onClick={() => handleExportToPDF()}
+                  >
+                    <Download className="w-4 h-4" />
+                    Export to PDF
+                  </Button>
+                  <Button variant="outline" className="flex items-center gap-2">
+                    <Share2 className="w-4 h-4" />
+                    Share Results
+                  </Button>
+                  <Button onClick={onNewSession} className="bg-gradient-to-r from-blue-600 to-cyan-600">
+                    <Target className="w-4 h-4 mr-2" />
+                    Start New Session
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="content" className="space-y-6 mt-6">
+            <EnhancedContentAnalysisTab session={normalizedData} />
+          </TabsContent>
+          
+        </Tabs>
       </div>
     </div>
   );

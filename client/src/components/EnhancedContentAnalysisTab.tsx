@@ -120,20 +120,20 @@ export default function EnhancedContentAnalysisTab({ session }: EnhancedContentA
 
   const renderMetricCard = (metric: AnalysisMetric) => (
     <Card
-      className={\`cursor-pointer transition-all \${
+      className={`cursor-pointer transition-all ${
         activeMetric === metric.label
           ? 'ring-2 ring-blue-500 shadow-lg'
           : 'hover:shadow-md'
-      }\`}
+      }`}
       onClick={() => setActiveMetric(metric.label)}
     >
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-4">
-          <div className={\`p-2 rounded-lg \${metric.color.replace('text', 'bg')}/10\`}>
+          <div className={`p-2 rounded-lg ${metric.color.replace('text', 'bg')}/10`}>
             {metric.icon}
           </div>
           <Badge
-            variant={metric.score >= 80 ? "success" : metric.score >= 60 ? "warning" : "destructive"}
+            variant={metric.score >= 80 ? "default" : metric.score >= 60 ? "secondary" : "destructive"}
           >
             {metric.score}%
           </Badge>
@@ -160,7 +160,7 @@ export default function EnhancedContentAnalysisTab({ session }: EnhancedContentA
         </div>
         <Badge variant={
           feedback.impact === 'high' ? 'destructive' :
-          feedback.impact === 'medium' ? 'warning' : 'outline'
+          feedback.impact === 'medium' ? 'secondary' : 'outline'
         }>
           {feedback.impact} impact
         </Badge>
