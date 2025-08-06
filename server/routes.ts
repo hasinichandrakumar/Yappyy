@@ -2176,7 +2176,7 @@ Provide detailed feedback on content structure, voice modulation advice, and bod
   app.post("/api/ai-content-analysis",  analyzeContent);
 
   // Enhanced Content Analysis endpoint
-  app.post("/api/content-analysis",  processContentAnalysis);
+  // Note: Content analysis is available via /api/ai-content-analysis endpoint above
   
   // Hyperpersonalized AI Transcript Analysis endpoint
   app.post("/api/hyperpersonalized-transcript-analysis",  async (req: any, res) => {
