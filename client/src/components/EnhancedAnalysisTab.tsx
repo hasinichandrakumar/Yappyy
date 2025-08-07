@@ -1805,7 +1805,7 @@ function TranscriptAnalysisComponent({ session, onAnalysisComplete }: Transcript
   const [aiFeedback, setAiFeedback] = useState<any>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [transcriptSegments, setTranscriptSegments] = useState<any[]>([]);
-  const [userLearningProfile, setUserLearningProfile] = useState<any>(null);
+
   const [speechPatterns, setSpeechPatterns] = useState<any>(null);
   const [contentInsights, setContentInsights] = useState<any>(null);
   const [personalizedRecommendations, setPersonalizedRecommendations] = useState<any[]>([]);
@@ -1869,15 +1869,7 @@ function TranscriptAnalysisComponent({ session, onAnalysisComplete }: Transcript
           })
         }),
         
-        // 4. User Learning Profile Analysis
-        fetch('/api/user-learning-profile', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            sessionHistory: [session],
-            currentSession: session
-          })
-        })
+
       ];
 
       const responses = await Promise.allSettled(analysisPromises);
@@ -1894,7 +1886,7 @@ function TranscriptAnalysisComponent({ session, onAnalysisComplete }: Transcript
       setAiFeedback(combinedFeedback.mainFeedback);
       setSpeechPatterns(combinedFeedback.speechPatterns);
       setContentInsights(combinedFeedback.contentInsights);
-      setUserLearningProfile(combinedFeedback.userProfile);
+
       setPersonalizedRecommendations(combinedFeedback.recommendations);
       
       onAnalysisComplete(combinedFeedback);
@@ -2138,29 +2130,7 @@ function TranscriptAnalysisComponent({ session, onAnalysisComplete }: Transcript
         <FillerWordAnalysisDisplay transcript={session.transcript} />
       )}
 
-      {/* User Learning Profile */}
-      {userLearningProfile && (
-        <Card className="p-6 bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
-          <div className="flex items-center gap-2 mb-4">
-            <User className="h-5 w-5 text-green-600" />
-            <h5 className="text-lg font-semibold text-green-900">Your Learning Profile</h5>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white/60 rounded-lg p-4">
-              <h6 className="font-semibold text-green-800 mb-2">Learning Style</h6>
-              <p className="text-sm text-green-700">{userLearningProfile.learningStyle || 'Adaptive'}</p>
-            </div>
-            <div className="bg-white/60 rounded-lg p-4">
-              <h6 className="font-semibold text-green-800 mb-2">Progress Trend</h6>
-              <p className="text-sm text-green-700">{userLearningProfile.progressTrend || 'Steady improvement'}</p>
-            </div>
-            <div className="bg-white/60 rounded-lg p-4">
-              <h6 className="font-semibold text-green-800 mb-2">Next Milestone</h6>
-              <p className="text-sm text-green-700">{userLearningProfile.nextMilestone || 'Advanced techniques'}</p>
-            </div>
-          </div>
-        </Card>
-      )}
+
 
       {/* Speech Patterns Analysis */}
       {speechPatterns && (
