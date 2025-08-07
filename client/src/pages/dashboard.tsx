@@ -144,42 +144,42 @@ export default function Dashboard() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          {/* Horizontal Navigation Tabs - Yappyy gradient color scheme */}
+          {/* Horizontal Navigation Tabs - Yappyy blue gradient color scheme */}
           <TabsList className="flex items-center justify-center gap-8 mb-8 h-auto p-0 bg-transparent border-b border-gray-200 rounded-none w-full">
             <TabsTrigger 
               value="practice-alt" 
-              className="flex items-center gap-3 px-8 py-4 text-sm font-medium text-gray-600 rounded-none border-b-2 border-transparent hover:text-orange-500 hover:border-orange-300 data-[state=active]:text-orange-600 data-[state=active]:border-orange-500 data-[state=active]:bg-transparent data-[state=active]:shadow-sm transition-all duration-300 whitespace-nowrap relative group"
+              className="flex items-center gap-3 px-8 py-4 text-sm font-medium text-gray-600 rounded-none border-b-2 border-transparent hover:text-blue-600 hover:border-blue-300 data-[state=active]:text-blue-600 data-[state=active]:border-blue-500 data-[state=active]:bg-transparent data-[state=active]:shadow-sm transition-all duration-300 whitespace-nowrap relative group"
             >
-              <Mic className="w-4 h-4 group-data-[state=active]:text-orange-600 group-hover:text-orange-500" />
-              <span className="group-data-[state=active]:bg-gradient-to-r group-data-[state=active]:from-orange-500 group-data-[state=active]:to-red-500 group-data-[state=active]:bg-clip-text group-data-[state=active]:text-transparent group-hover:bg-gradient-to-r group-hover:from-orange-500 group-hover:to-red-500 group-hover:bg-clip-text group-hover:text-transparent">Practice</span>
+              <Mic className="w-4 h-4 group-data-[state=active]:text-blue-600 group-hover:text-blue-600" />
+              <span className="group-data-[state=active]:bg-gradient-to-r group-data-[state=active]:from-blue-600 group-data-[state=active]:via-cyan-500 group-data-[state=active]:to-blue-600 group-data-[state=active]:bg-clip-text group-data-[state=active]:text-transparent group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:via-cyan-500 group-hover:to-blue-600 group-hover:bg-clip-text group-hover:text-transparent">Practice</span>
             </TabsTrigger>
             <TabsTrigger 
               value="analysis" 
-              className="flex items-center gap-3 px-8 py-4 text-sm font-medium text-gray-600 rounded-none border-b-2 border-transparent hover:text-orange-500 hover:border-orange-300 data-[state=active]:text-orange-600 data-[state=active]:border-orange-500 data-[state=active]:bg-transparent data-[state=active]:shadow-sm transition-all duration-300 whitespace-nowrap relative group"
+              className="flex items-center gap-3 px-8 py-4 text-sm font-medium text-gray-600 rounded-none border-b-2 border-transparent hover:text-blue-600 hover:border-blue-300 data-[state=active]:text-blue-600 data-[state=active]:border-blue-500 data-[state=active]:bg-transparent data-[state=active]:shadow-sm transition-all duration-300 whitespace-nowrap relative group"
             >
-              <BarChart3 className="w-4 h-4 group-data-[state=active]:text-orange-600 group-hover:text-orange-500" />
-              <span className="group-data-[state=active]:bg-gradient-to-r group-data-[state=active]:from-orange-500 group-data-[state=active]:to-red-500 group-data-[state=active]:bg-clip-text group-data-[state=active]:text-transparent group-hover:bg-gradient-to-r group-hover:from-orange-500 group-hover:to-red-500 group-hover:bg-clip-text group-hover:text-transparent">Analytics</span>
+              <BarChart3 className="w-4 h-4 group-data-[state=active]:text-blue-600 group-hover:text-blue-600" />
+              <span className="group-data-[state=active]:bg-gradient-to-r group-data-[state=active]:from-blue-600 group-data-[state=active]:via-cyan-500 group-data-[state=active]:to-blue-600 group-data-[state=active]:bg-clip-text group-data-[state=active]:text-transparent group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:via-cyan-500 group-hover:to-blue-600 group-hover:bg-clip-text group-hover:text-transparent">Analytics</span>
             </TabsTrigger>
             <TabsTrigger 
               value="ai-coach" 
-              className="flex items-center gap-3 px-8 py-4 text-sm font-medium text-gray-600 rounded-none border-b-2 border-transparent hover:text-orange-500 hover:border-orange-300 data-[state=active]:text-orange-600 data-[state=active]:border-orange-500 data-[state=active]:bg-transparent data-[state=active]:shadow-sm transition-all duration-300 whitespace-nowrap relative group"
+              className="flex items-center gap-3 px-8 py-4 text-sm font-medium text-gray-600 rounded-none border-b-2 border-transparent hover:text-blue-600 hover:border-blue-300 data-[state=active]:text-blue-600 data-[state=active]:border-blue-500 data-[state=active]:bg-transparent data-[state=active]:shadow-sm transition-all duration-300 whitespace-nowrap relative group"
             >
-              <Brain className="w-4 h-4 group-data-[state=active]:text-orange-600 group-hover:text-orange-500" />
-              <span className="group-data-[state=active]:bg-gradient-to-r group-data-[state=active]:from-orange-500 group-data-[state=active]:to-red-500 group-data-[state=active]:bg-clip-text group-data-[state=active]:text-transparent group-hover:bg-gradient-to-r group-hover:from-orange-500 group-hover:to-red-500 group-hover:bg-clip-text group-hover:text-transparent">AI Coach</span>
+              <Brain className="w-4 h-4 group-data-[state=active]:text-blue-600 group-hover:text-blue-600" />
+              <span className="group-data-[state=active]:bg-gradient-to-r group-data-[state=active]:from-blue-600 group-data-[state=active]:via-cyan-500 group-data-[state=active]:to-blue-600 group-data-[state=active]:bg-clip-text group-data-[state=active]:text-transparent group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:via-cyan-500 group-hover:to-blue-600 group-hover:bg-clip-text group-hover:text-transparent">AI Coach</span>
             </TabsTrigger>
             <TabsTrigger 
               value="templates" 
-              className="flex items-center gap-3 px-8 py-4 text-sm font-medium text-gray-600 rounded-none border-b-2 border-transparent hover:text-orange-500 hover:border-orange-300 data-[state=active]:text-orange-600 data-[state=active]:border-orange-500 data-[state=active]:bg-transparent data-[state=active]:shadow-sm transition-all duration-300 whitespace-nowrap relative group"
+              className="flex items-center gap-3 px-8 py-4 text-sm font-medium text-gray-600 rounded-none border-b-2 border-transparent hover:text-blue-600 hover:border-blue-300 data-[state=active]:text-blue-600 data-[state=active]:border-blue-500 data-[state=active]:bg-transparent data-[state=active]:shadow-sm transition-all duration-300 whitespace-nowrap relative group"
             >
-              <FileText className="w-4 h-4 group-data-[state=active]:text-orange-600 group-hover:text-orange-500" />
-              <span className="group-data-[state=active]:bg-gradient-to-r group-data-[state=active]:from-orange-500 group-data-[state=active]:to-red-500 group-data-[state=active]:bg-clip-text group-data-[state=active]:text-transparent group-hover:bg-gradient-to-r group-hover:from-orange-500 group-hover:to-red-500 group-hover:bg-clip-text group-hover:text-transparent">Templates</span>
+              <FileText className="w-4 h-4 group-data-[state=active]:text-blue-600 group-hover:text-blue-600" />
+              <span className="group-data-[state=active]:bg-gradient-to-r group-data-[state=active]:from-blue-600 group-data-[state=active]:via-cyan-500 group-data-[state=active]:to-blue-600 group-data-[state=active]:bg-clip-text group-data-[state=active]:text-transparent group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:via-cyan-500 group-hover:to-blue-600 group-hover:bg-clip-text group-hover:text-transparent">Templates</span>
             </TabsTrigger>
             <TabsTrigger 
               value="achievements" 
-              className="flex items-center gap-3 px-8 py-4 text-sm font-medium text-gray-600 rounded-none border-b-2 border-transparent hover:text-orange-500 hover:border-orange-300 data-[state=active]:text-orange-600 data-[state=active]:border-orange-500 data-[state=active]:bg-transparent data-[state=active]:shadow-sm transition-all duration-300 whitespace-nowrap relative group"
+              className="flex items-center gap-3 px-8 py-4 text-sm font-medium text-gray-600 rounded-none border-b-2 border-transparent hover:text-blue-600 hover:border-blue-300 data-[state=active]:text-blue-600 data-[state=active]:border-blue-500 data-[state=active]:bg-transparent data-[state=active]:shadow-sm transition-all duration-300 whitespace-nowrap relative group"
             >
-              <Trophy className="w-4 h-4 group-data-[state=active]:text-orange-600 group-hover:text-orange-500" />
-              <span className="group-data-[state=active]:bg-gradient-to-r group-data-[state=active]:from-orange-500 group-data-[state=active]:to-red-500 group-data-[state=active]:bg-clip-text group-data-[state=active]:text-transparent group-hover:bg-gradient-to-r group-hover:from-orange-500 group-hover:to-red-500 group-hover:bg-clip-text group-hover:text-transparent">Performance</span>
+              <Trophy className="w-4 h-4 group-data-[state=active]:text-blue-600 group-hover:text-blue-600" />
+              <span className="group-data-[state=active]:bg-gradient-to-r group-data-[state=active]:from-blue-600 group-data-[state=active]:via-cyan-500 group-data-[state=active]:to-blue-600 group-data-[state=active]:bg-clip-text group-data-[state=active]:text-transparent group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:via-cyan-500 group-hover:to-blue-600 group-hover:bg-clip-text group-hover:text-transparent">Performance</span>
             </TabsTrigger>
           </TabsList>
 
