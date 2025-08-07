@@ -4,7 +4,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Mic, BarChart3, Brain, FileText, Trophy, Target, User, Home, Settings, Shield } from "lucide-react";
+import { Mic, BarChart3, Brain, FileText, Trophy, Target, User, Home, Settings, Shield, Star, BookOpen, PieChart } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import SimplifiedPracticePage from "@/components/SimplifiedPracticePage";
 import AICoachRedesigned from "@/components/AICoachRedesigned";
@@ -144,68 +144,81 @@ export default function Dashboard() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          {/* Central Navigation Tabs - This defines the width constraint */}
-          <TabsList className="grid grid-cols-2 lg:grid-cols-5 gap-2 mb-8 h-auto p-2 bg-white border border-gray-200 shadow-sm rounded-xl max-w-full">
+          {/* Horizontal Navigation Tabs - Clean, professional style */}
+          <TabsList className="flex items-center justify-start gap-0 mb-8 h-auto p-0 bg-transparent border-b border-gray-200 rounded-none max-w-full overflow-x-auto">
             <TabsTrigger 
               value="practice" 
-              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-semibold rounded-lg hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
+              className="flex items-center gap-2 px-6 py-4 text-sm font-medium rounded-none border-b-2 border-transparent hover:text-orange-600 hover:border-orange-200 data-[state=active]:text-orange-600 data-[state=active]:border-orange-500 data-[state=active]:bg-transparent transition-all duration-200 whitespace-nowrap"
             >
-              <Mic className="w-5 h-5" />
-              <span className="font-bold">Practice</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="analysis" 
-              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-semibold rounded-lg hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
-            >
-              <BarChart3 className="w-5 h-5" />
-              <span className="font-bold">Analysis</span>
+              <Home className="w-4 h-4" />
+              <span>Dashboard</span>
             </TabsTrigger>
             <TabsTrigger 
               value="ai-coach" 
-              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-semibold rounded-lg hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
+              className="flex items-center gap-2 px-6 py-4 text-sm font-medium rounded-none border-b-2 border-transparent hover:text-orange-600 hover:border-orange-200 data-[state=active]:text-orange-600 data-[state=active]:border-orange-500 data-[state=active]:bg-transparent transition-all duration-200 whitespace-nowrap"
             >
-              <Brain className="w-5 h-5" />
-              <span className="font-bold">AI Coach</span>
+              <Star className="w-4 h-4" />
+              <span>StarSpace</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="practice-alt" 
+              className="flex items-center gap-2 px-6 py-4 text-sm font-medium rounded-none border-b-2 border-transparent hover:text-orange-600 hover:border-orange-200 data-[state=active]:text-orange-600 data-[state=active]:border-orange-500 data-[state=active]:bg-transparent transition-all duration-200 whitespace-nowrap"
+            >
+              <Mic className="w-4 h-4" />
+              <span>Practice</span>
             </TabsTrigger>
             <TabsTrigger 
               value="templates" 
-              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-semibold rounded-lg hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
+              className="flex items-center gap-2 px-6 py-4 text-sm font-medium rounded-none border-b-2 border-transparent hover:text-orange-600 hover:border-orange-200 data-[state=active]:text-orange-600 data-[state=active]:border-orange-500 data-[state=active]:bg-transparent transition-all duration-200 whitespace-nowrap"
             >
-              <FileText className="w-5 h-5" />
-              <span className="font-bold">Templates</span>
+              <BookOpen className="w-4 h-4" />
+              <span>Mock Exams</span>
             </TabsTrigger>
-
+            <TabsTrigger 
+              value="analysis" 
+              className="flex items-center gap-2 px-6 py-4 text-sm font-medium rounded-none border-b-2 border-transparent hover:text-orange-600 hover:border-orange-200 data-[state=active]:text-orange-600 data-[state=active]:border-orange-500 data-[state=active]:bg-transparent transition-all duration-200 whitespace-nowrap"
+            >
+              <PieChart className="w-4 h-4" />
+              <span>Analytics</span>
+            </TabsTrigger>
             <TabsTrigger 
               value="achievements" 
-              className="flex flex-col items-center space-y-1.5 px-4 py-3 text-sm font-semibold rounded-lg hover:bg-gray-50 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-600 data-[state=active]:to-cyan-500 data-[state=active]:text-white data-[state=active]:shadow-md cursor-pointer"
+              className="flex items-center gap-2 px-6 py-4 text-sm font-medium rounded-none border-b-2 border-transparent hover:text-orange-600 hover:border-orange-200 data-[state=active]:text-orange-600 data-[state=active]:border-orange-500 data-[state=active]:bg-transparent transition-all duration-200 whitespace-nowrap"
             >
-              <Trophy className="w-5 h-5" />
-              <span className="font-bold">Progress</span>
+              <Target className="w-4 h-4" />
+              <span>AI Study Plan</span>
             </TabsTrigger>
           </TabsList>
 
           {/* All tab content constrained to same width as navigation tabs */}
           <div className="w-full max-w-full">
             <TabsContent value="practice" className="space-y-8 pb-16">
-              <SimplifiedPracticePage />
-            </TabsContent>
-
-            <TabsContent value="analysis" className="space-y-6">
-              <EnhancedAnalysisTab />
+              <div className="space-y-6">
+                <SessionDashboard />
+                <FunctionalProgressTracker />
+              </div>
             </TabsContent>
 
             <TabsContent value="ai-coach" className="space-y-6">
               <AICoachRedesigned />
             </TabsContent>
 
+            <TabsContent value="practice-alt" className="space-y-8 pb-16">
+              <SimplifiedPracticePage />
+            </TabsContent>
+
             <TabsContent value="templates" className="space-y-6">
               <EnhancedTemplateMarketplace />
             </TabsContent>
 
+            <TabsContent value="analysis" className="space-y-6">
+              <EnhancedAnalysisTab />
+            </TabsContent>
+
             <TabsContent value="achievements" className="space-y-6">
               <div className="space-y-6">
-                <SessionDashboard />
-                <FunctionalProgressTracker />
+                <ImprovedBadgeSystem />
+                <DailyGoalWidget />
               </div>
             </TabsContent>
           </div>
