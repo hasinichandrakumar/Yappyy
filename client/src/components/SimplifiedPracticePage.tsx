@@ -2067,22 +2067,55 @@ export default function SimplifiedPracticePage() {
             {/* Right Side - Live AI Coaching Tips (1/3 width) */}
             <div className="lg:col-span-1">
               {showLiveMetrics && (
-                <div className="sticky top-6">
-                  <LiveMetricsBox
-                    isRecording={isRecording}
-                    metrics={{
-                      wpm: metrics.wordsPerMinute > 0 ? metrics.wordsPerMinute : null,
-                      eyeContact: metrics.eyeContact > 0 ? metrics.eyeContact / 100 : null,
-                      confidence: metrics.confidence > 0 ? metrics.confidence / 100 : null,
-                      fillerWords: metrics.fillerWordCount,
-                      volume: null,
-                      clarity: metrics.clarity > 0 ? metrics.clarity / 100 : null,
-                      posture: metrics.bodyLanguage.overallPresence > 0 ? metrics.bodyLanguage.overallPresence / 100 : null
-                    }}
-                    onClose={() => setShowLiveMetrics(false)}
-                    position="sidebar"
-                  />
-                </div>
+                <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm rounded-xl sticky top-6">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Activity className="w-5 h-5 text-blue-600" />
+                        <span className="text-blue-800 font-semibold">Live AI Coach</span>
+                        {isRecording && (
+                          <Badge variant="secondary" className="ml-2 bg-green-100 text-green-800 border-green-200">
+                            <Activity className="w-3 h-3 mr-1" />
+                            Active
+                          </Badge>
+                        )}
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowLiveMetrics(false)}
+                        className="text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-all duration-200"
+                      >
+                        ×
+                      </Button>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4 max-h-96 overflow-y-auto">
+                      {liveFeedback.length > 0 ? (
+                        liveFeedback.slice(-6).map((feedback) => (
+                          <div
+                            key={feedback.id}
+                            className={`p-3 rounded-lg border-l-4 ${
+                              feedback.type === 'success' 
+                                ? 'bg-green-50 border-green-400 text-green-800' 
+                                : feedback.type === 'warning'
+                                ? 'bg-yellow-50 border-yellow-400 text-yellow-800'
+                                : 'bg-blue-50 border-blue-400 text-blue-800'
+                            }`}
+                          >
+                            <p className="text-sm font-medium">{feedback.message}</p>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-center text-gray-500 py-8">
+                          <Activity className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                          <p className="text-sm">Start recording to receive live coaching tips</p>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
               )}
             </div>
           </div>
