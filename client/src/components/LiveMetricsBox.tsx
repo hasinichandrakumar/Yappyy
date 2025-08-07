@@ -287,7 +287,7 @@ export function LiveMetricsBox({
 
       <CardContent className="p-6">
         {/* Live Feedback Messages */}
-        <div>
+        <div className="mt-2">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-gray-800 text-base">Coaching Tips</h3>
             {isRecording && (
