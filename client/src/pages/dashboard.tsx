@@ -25,7 +25,7 @@ import { DailyGoalsDialog } from "@/components/DailyGoalsDialog";
 import yappyyLogoPath from '@assets/Y-2-removebg-preview_1753384287580.png';
 
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState("practice");
+  const [activeTab, setActiveTab] = useState("practice-alt");
   const [showProfile, setShowProfile] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
@@ -144,57 +144,48 @@ export default function Dashboard() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          {/* Horizontal Navigation Tabs - Clean, professional style */}
+          {/* Horizontal Navigation Tabs - Clean, professional style matching the provided design */}
           <TabsList className="flex items-center justify-start gap-0 mb-8 h-auto p-0 bg-transparent border-b border-gray-200 rounded-none max-w-full overflow-x-auto">
             <TabsTrigger 
-              value="practice" 
-              className="flex items-center gap-2 px-6 py-4 text-sm font-medium rounded-none border-b-2 border-transparent hover:text-orange-600 hover:border-orange-200 data-[state=active]:text-orange-600 data-[state=active]:border-orange-500 data-[state=active]:bg-transparent transition-all duration-200 whitespace-nowrap"
-            >
-              <Home className="w-4 h-4" />
-              <span>Dashboard</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="ai-coach" 
-              className="flex items-center gap-2 px-6 py-4 text-sm font-medium rounded-none border-b-2 border-transparent hover:text-orange-600 hover:border-orange-200 data-[state=active]:text-orange-600 data-[state=active]:border-orange-500 data-[state=active]:bg-transparent transition-all duration-200 whitespace-nowrap"
-            >
-              <Star className="w-4 h-4" />
-              <span>StarSpace</span>
-            </TabsTrigger>
-            <TabsTrigger 
               value="practice-alt" 
-              className="flex items-center gap-2 px-6 py-4 text-sm font-medium rounded-none border-b-2 border-transparent hover:text-orange-600 hover:border-orange-200 data-[state=active]:text-orange-600 data-[state=active]:border-orange-500 data-[state=active]:bg-transparent transition-all duration-200 whitespace-nowrap"
+              className="flex items-center gap-3 px-6 py-4 text-sm font-medium text-gray-600 rounded-none border-b-2 border-transparent hover:text-gray-900 hover:border-gray-300 data-[state=active]:text-orange-600 data-[state=active]:border-orange-500 data-[state=active]:bg-transparent transition-all duration-200 whitespace-nowrap"
             >
               <Mic className="w-4 h-4" />
               <span>Practice</span>
             </TabsTrigger>
             <TabsTrigger 
-              value="templates" 
-              className="flex items-center gap-2 px-6 py-4 text-sm font-medium rounded-none border-b-2 border-transparent hover:text-orange-600 hover:border-orange-200 data-[state=active]:text-orange-600 data-[state=active]:border-orange-500 data-[state=active]:bg-transparent transition-all duration-200 whitespace-nowrap"
-            >
-              <BookOpen className="w-4 h-4" />
-              <span>Mock Exams</span>
-            </TabsTrigger>
-            <TabsTrigger 
               value="analysis" 
-              className="flex items-center gap-2 px-6 py-4 text-sm font-medium rounded-none border-b-2 border-transparent hover:text-orange-600 hover:border-orange-200 data-[state=active]:text-orange-600 data-[state=active]:border-orange-500 data-[state=active]:bg-transparent transition-all duration-200 whitespace-nowrap"
+              className="flex items-center gap-3 px-6 py-4 text-sm font-medium text-gray-600 rounded-none border-b-2 border-transparent hover:text-gray-900 hover:border-gray-300 data-[state=active]:text-orange-600 data-[state=active]:border-orange-500 data-[state=active]:bg-transparent transition-all duration-200 whitespace-nowrap"
             >
-              <PieChart className="w-4 h-4" />
+              <BarChart3 className="w-4 h-4" />
               <span>Analytics</span>
             </TabsTrigger>
             <TabsTrigger 
-              value="achievements" 
-              className="flex items-center gap-2 px-6 py-4 text-sm font-medium rounded-none border-b-2 border-transparent hover:text-orange-600 hover:border-orange-200 data-[state=active]:text-orange-600 data-[state=active]:border-orange-500 data-[state=active]:bg-transparent transition-all duration-200 whitespace-nowrap"
+              value="ai-coach" 
+              className="flex items-center gap-3 px-6 py-4 text-sm font-medium text-gray-600 rounded-none border-b-2 border-transparent hover:text-gray-900 hover:border-gray-300 data-[state=active]:text-orange-600 data-[state=active]:border-orange-500 data-[state=active]:bg-transparent transition-all duration-200 whitespace-nowrap"
             >
-              <Target className="w-4 h-4" />
-              <span>AI Study Plan</span>
+              <Brain className="w-4 h-4" />
+              <span>AI Coach</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="templates" 
+              className="flex items-center gap-3 px-6 py-4 text-sm font-medium text-gray-600 rounded-none border-b-2 border-transparent hover:text-gray-900 hover:border-gray-300 data-[state=active]:text-orange-600 data-[state=active]:border-orange-500 data-[state=active]:bg-transparent transition-all duration-200 whitespace-nowrap"
+            >
+              <FileText className="w-4 h-4" />
+              <span>Templates</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="achievements" 
+              className="flex items-center gap-3 px-6 py-4 text-sm font-medium text-gray-600 rounded-none border-b-2 border-transparent hover:text-gray-900 hover:border-gray-300 data-[state=active]:text-orange-600 data-[state=active]:border-orange-500 data-[state=active]:bg-transparent transition-all duration-200 whitespace-nowrap"
+            >
+              <Trophy className="w-4 h-4" />
+              <span>Performance</span>
             </TabsTrigger>
           </TabsList>
 
           {/* All tab content constrained to same width as navigation tabs */}
           <div className="w-full max-w-full">
-            <TabsContent value="practice" className="space-y-8 pb-16">
-              <StreamlinedProgressTab />
-            </TabsContent>
+
 
             <TabsContent value="ai-coach" className="space-y-6">
               <AICoachRedesigned />
