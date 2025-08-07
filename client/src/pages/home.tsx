@@ -211,7 +211,7 @@ export default function HomePage() {
             <p className="text-xl md:text-2xl lg:text-3xl font-body text-white/90 mb-16 max-w-5xl mx-auto leading-relaxed">
               AI-powered speech coaching that transforms your communication skills through real-time feedback and personalized training
             </p>
-            <div className="flex justify-center mb-20 space-x-4">
+            <div className="flex justify-center mb-20">
               <Button 
                 size="lg" 
                 className="bg-white hover:bg-gray-50 font-button shadow-lg hover:shadow-xl transition-all duration-300 px-12 py-6 text-xl border-0"
@@ -225,19 +225,6 @@ export default function HomePage() {
               >
                 <span className="bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 bg-clip-text text-transparent font-bold animate-gradient-x">
                   🎤 &nbsp;Start Practicing Now
-                </span>
-              </Button>
-              
-              <Button 
-                size="lg" 
-                variant="outline"
-                className="bg-transparent hover:bg-white/10 font-button shadow-lg hover:shadow-xl transition-all duration-300 px-8 py-6 text-lg border-2 border-white/30 hover:border-white/50 text-white"
-                onClick={() => {
-                  window.location.href = 'https://yappyy.com/dashboard';
-                }}
-              >
-                <span className="font-bold">
-                  🚀 &nbsp;Go to Yappyy Dashboard
                 </span>
               </Button>
             </div>
