@@ -144,39 +144,39 @@ export default function Dashboard() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          {/* Horizontal Navigation Tabs - Clean, professional style matching the provided design */}
-          <TabsList className="flex items-center justify-start gap-0 mb-8 h-auto p-0 bg-transparent border-b border-gray-200 rounded-none max-w-full overflow-x-auto">
+          {/* Horizontal Navigation Tabs - Center-aligned with improved spacing */}
+          <TabsList className="flex items-center justify-center gap-8 mb-8 h-auto p-0 bg-transparent border-b border-gray-200 rounded-none w-full">
             <TabsTrigger 
               value="practice-alt" 
-              className="flex items-center gap-3 px-6 py-4 text-sm font-medium text-gray-600 rounded-none border-b-2 border-transparent hover:text-gray-900 hover:border-gray-300 data-[state=active]:text-orange-600 data-[state=active]:border-orange-500 data-[state=active]:bg-transparent transition-all duration-200 whitespace-nowrap"
+              className="flex items-center gap-3 px-8 py-4 text-sm font-medium text-gray-600 rounded-none border-b-2 border-transparent hover:text-gray-900 hover:border-gray-300 data-[state=active]:text-orange-600 data-[state=active]:border-orange-500 data-[state=active]:bg-transparent transition-all duration-200 whitespace-nowrap"
             >
               <Mic className="w-4 h-4" />
               <span>Practice</span>
             </TabsTrigger>
             <TabsTrigger 
               value="analysis" 
-              className="flex items-center gap-3 px-6 py-4 text-sm font-medium text-gray-600 rounded-none border-b-2 border-transparent hover:text-gray-900 hover:border-gray-300 data-[state=active]:text-orange-600 data-[state=active]:border-orange-500 data-[state=active]:bg-transparent transition-all duration-200 whitespace-nowrap"
+              className="flex items-center gap-3 px-8 py-4 text-sm font-medium text-gray-600 rounded-none border-b-2 border-transparent hover:text-gray-900 hover:border-gray-300 data-[state=active]:text-orange-600 data-[state=active]:border-orange-500 data-[state=active]:bg-transparent transition-all duration-200 whitespace-nowrap"
             >
               <BarChart3 className="w-4 h-4" />
               <span>Analytics</span>
             </TabsTrigger>
             <TabsTrigger 
               value="ai-coach" 
-              className="flex items-center gap-3 px-6 py-4 text-sm font-medium text-gray-600 rounded-none border-b-2 border-transparent hover:text-gray-900 hover:border-gray-300 data-[state=active]:text-orange-600 data-[state=active]:border-orange-500 data-[state=active]:bg-transparent transition-all duration-200 whitespace-nowrap"
+              className="flex items-center gap-3 px-8 py-4 text-sm font-medium text-gray-600 rounded-none border-b-2 border-transparent hover:text-gray-900 hover:border-gray-300 data-[state=active]:text-orange-600 data-[state=active]:border-orange-500 data-[state=active]:bg-transparent transition-all duration-200 whitespace-nowrap"
             >
               <Brain className="w-4 h-4" />
               <span>AI Coach</span>
             </TabsTrigger>
             <TabsTrigger 
               value="templates" 
-              className="flex items-center gap-3 px-6 py-4 text-sm font-medium text-gray-600 rounded-none border-b-2 border-transparent hover:text-gray-900 hover:border-gray-300 data-[state=active]:text-orange-600 data-[state=active]:border-orange-500 data-[state=active]:bg-transparent transition-all duration-200 whitespace-nowrap"
+              className="flex items-center gap-3 px-8 py-4 text-sm font-medium text-gray-600 rounded-none border-b-2 border-transparent hover:text-gray-900 hover:border-gray-300 data-[state=active]:text-orange-600 data-[state=active]:border-orange-500 data-[state=active]:bg-transparent transition-all duration-200 whitespace-nowrap"
             >
               <FileText className="w-4 h-4" />
               <span>Templates</span>
             </TabsTrigger>
             <TabsTrigger 
               value="achievements" 
-              className="flex items-center gap-3 px-6 py-4 text-sm font-medium text-gray-600 rounded-none border-b-2 border-transparent hover:text-gray-900 hover:border-gray-300 data-[state=active]:text-orange-600 data-[state=active]:border-orange-500 data-[state=active]:bg-transparent transition-all duration-200 whitespace-nowrap"
+              className="flex items-center gap-3 px-8 py-4 text-sm font-medium text-gray-600 rounded-none border-b-2 border-transparent hover:text-gray-900 hover:border-gray-300 data-[state=active]:text-orange-600 data-[state=active]:border-orange-500 data-[state=active]:bg-transparent transition-all duration-200 whitespace-nowrap"
             >
               <Trophy className="w-4 h-4" />
               <span>Performance</span>
