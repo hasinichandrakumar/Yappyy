@@ -16,12 +16,12 @@ import DailyGoalWidget from "@/components/DailyGoalWidget";
 import SimpleProfileForm from "@/components/SimpleProfileForm";
 import AppSettings from "@/components/AppSettings";
 import PrivacySettings from "@/components/PrivacySettings";
-import FunctionalProgressTracker from "@/components/FunctionalProgressTracker";
+import StreamlinedProgressTab from "@/components/StreamlinedProgressTab";
 import WelcomeMessage from "@/components/WelcomeMessage";
 import ReturningUserWelcome from "@/components/ReturningUserWelcome";
 import { WelcomeDialog } from "@/components/WelcomeDialog";
 import { DailyGoalsDialog } from "@/components/DailyGoalsDialog";
-import { SessionDashboard } from "@/components/SessionDashboard";
+
 import yappyyLogoPath from '@assets/Y-2-removebg-preview_1753384287580.png';
 
 export default function Dashboard() {
@@ -193,10 +193,7 @@ export default function Dashboard() {
           {/* All tab content constrained to same width as navigation tabs */}
           <div className="w-full max-w-full">
             <TabsContent value="practice" className="space-y-8 pb-16">
-              <div className="space-y-6">
-                <SessionDashboard />
-                <FunctionalProgressTracker />
-              </div>
+              <StreamlinedProgressTab />
             </TabsContent>
 
             <TabsContent value="ai-coach" className="space-y-6">
