@@ -2043,29 +2043,11 @@ export default function SimplifiedPracticePage() {
                 </CardContent>
               </Card>
 
-              {/* Essential Live Metrics - Below Video */}
-              <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm rounded-xl">
-                <CardContent className="p-6">
-                  <div className="grid grid-cols-3 gap-6 text-center">
-                    <div className="space-y-2">
-                      <div className="text-4xl font-bold text-blue-600">{metrics.wordsPerMinute}</div>
-                      <div className="text-sm text-gray-600 font-semibold uppercase tracking-wide leading-tight">Words Per Minute</div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="text-4xl font-bold text-purple-600">{metrics.fillerWordCount}</div>
-                      <div className="text-sm text-gray-600 font-semibold uppercase tracking-wide leading-tight">Filler Words</div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="text-4xl font-bold text-green-600">{Math.round(metrics.eyeContact)}%</div>
-                      <div className="text-sm text-gray-600 font-semibold uppercase tracking-wide leading-tight">Eye Contact</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+
             </div>
 
             {/* Right Side - Live AI Coaching Tips (1/3 width) */}
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-1 space-y-6">
               {showLiveMetrics && (
                 <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm rounded-xl sticky top-6">
                   <CardHeader className="pb-4">
@@ -2091,7 +2073,7 @@ export default function SimplifiedPracticePage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4 max-h-96 overflow-y-auto">
+                    <div className="space-y-4 max-h-80 overflow-y-auto">
                       {liveFeedback.length > 0 ? (
                         liveFeedback.slice(-6).map((feedback) => (
                           <div
@@ -2117,6 +2099,26 @@ export default function SimplifiedPracticePage() {
                   </CardContent>
                 </Card>
               )}
+
+              {/* Essential Live Metrics - Next to Video */}
+              <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm rounded-xl">
+                <CardContent className="p-4">
+                  <div className="space-y-4">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-blue-600">{metrics.wordsPerMinute}</div>
+                      <div className="text-xs text-gray-600 font-semibold uppercase tracking-wide">Words Per Minute</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-purple-600">{metrics.fillerWordCount}</div>
+                      <div className="text-xs text-gray-600 font-semibold uppercase tracking-wide">Filler Words</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-green-600">{Math.round(metrics.eyeContact)}%</div>
+                      <div className="text-xs text-gray-600 font-semibold uppercase tracking-wide">Eye Contact</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </div>
