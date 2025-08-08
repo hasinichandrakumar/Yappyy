@@ -21,8 +21,19 @@ const getCurrentDomain = (req?: any) => {
 
 // Get appropriate callback URL based on environment
 const getCallbackURL = (req?: any) => {
-  // Always use yappyy.com for OAuth callbacks regardless of access domain
-  return 'https://yappyy.com/oauth2callback';
+  // Use the current request host to determine callback URL
+  if (req?.get('host')) {
+    const host = req.get('host');
+    const protocol = req.secure || req.get('x-forwarded-proto') === 'https' ? 'https' : 'http';
+    return `${protocol}://${host}/oauth2callback`;
+  }
+  
+  // Fallback based on environment
+  if (process.env.REPLIT_DEV_DOMAIN) {
+    return `https://${process.env.REPLIT_DEV_DOMAIN}/oauth2callback`;
+  }
+  
+  return 'http://localhost:5000/oauth2callback';
 };
 
 export function getSession() {
