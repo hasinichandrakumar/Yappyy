@@ -5,16 +5,17 @@ Google OAuth is failing because the Replit callback URL is not authorized in Goo
 
 ## Quick Fix
 
-### Step 1: Add Both Domains to Google Console
+### Step 1: Verify yappyy.com Domain in Google Console
 1. Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
-2. Find and click on OAuth 2.0 Client ID: `372720245891-dtpkbj63rl2hju5vo2uorldivgurg6fh`
-3. In the **Authorized redirect URIs** section, ensure BOTH URLs are added:
+2. Find and click on OAuth 2.0 Client ID: `865530799156-v77qutagl1q2q7i7gi1ul5bvabrfa0il`
+3. In the **Authorized redirect URIs** section, ensure this URL is added:
    ```
    https://yappyy.com/oauth2callback
-   https://0c7fe059-a7da-4a46-a7cc-18655fec2a24-00-1znejaw22ebqj.picard.replit.dev/oauth2callback
    ```
-4. If the Replit URL is missing, click **"Add URI"** and add it
+4. If missing, click **"Add URI"** and add it
 5. Click **Save**
+
+**Note:** OAuth will always redirect to `https://yappyy.com/oauth2callback` regardless of whether users access via Replit domain or yappyy.com domain.
 
 ### Step 2: Test Authentication
 1. After saving, wait 5-10 seconds for Google to propagate changes

@@ -21,26 +21,7 @@ const getCurrentDomain = (req?: any) => {
 
 // Get appropriate callback URL based on environment
 const getCallbackURL = (req?: any) => {
-  // Use the current request host to determine callback URL
-  if (req?.get('host')) {
-    const host = req.get('host');
-    const protocol = req.secure || req.get('x-forwarded-proto') === 'https' ? 'https' : 'http';
-    
-    // If accessing via yappyy.com, use yappyy.com callback
-    if (host.includes('yappyy.com')) {
-      return 'https://yappyy.com/oauth2callback';
-    }
-    
-    // If accessing via Replit domain, use Replit callback
-    if (host.includes('replit.dev')) {
-      return `${protocol}://${host}/oauth2callback`;
-    }
-    
-    // Default to current host
-    return `${protocol}://${host}/oauth2callback`;
-  }
-  
-  // Fallback to yappyy.com
+  // Always use yappyy.com for OAuth callbacks regardless of access domain
   return 'https://yappyy.com/oauth2callback';
 };
 
