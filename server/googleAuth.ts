@@ -66,10 +66,8 @@ export async function setupGoogleAuth(app: Express) {
 
   // Google OAuth Strategy - dynamic callback URL
   if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
-    // Use dynamic callback URL based on current domain
-    const callbackURL = process.env.NODE_ENV === 'production' 
-      ? "https://yappyy.com/oauth2callback"
-      : "https://0c7fe059-a7da-4a46-a7cc-18655fec2a24-00-1znejaw22ebqj.picard.replit.dev/oauth2callback";
+    // Use dynamic callback URL - always use production domain for yappyy.com
+    const callbackURL = "https://yappyy.com/oauth2callback";
       
     console.log('🔧 Google OAuth Strategy Configuration:');
     console.log('  - Client ID:', GOOGLE_CLIENT_ID?.substring(0, 20) + '...');
@@ -124,9 +122,7 @@ export async function setupGoogleAuth(app: Express) {
       // Special handling for redirect_uri_mismatch
       if (req.query.error === 'redirect_uri_mismatch') {
         console.error('❌ Redirect URI mismatch - callback URL not authorized in Google Cloud Console');
-        const currentCallbackURL = process.env.NODE_ENV === 'production' 
-          ? 'https://yappyy.com/oauth2callback'
-          : 'https://0c7fe059-a7da-4a46-a7cc-18655fec2a24-00-1znejaw22ebqj.picard.replit.dev/oauth2callback';
+        const currentCallbackURL = 'https://yappyy.com/oauth2callback';
         console.error('❌ Current callback URL:', currentCallbackURL);
         return res.redirect(`/?error=redirect_mismatch&callback_url=${encodeURIComponent(currentCallbackURL)}`);
       }
