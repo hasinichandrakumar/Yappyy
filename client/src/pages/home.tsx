@@ -76,7 +76,7 @@ export default function HomePage() {
                       window.location.href = '/oauth-loading';
                     }}
                     size="sm"
-                    className="bg-red-100 text-red-800 hover:bg-red-200"
+                    className="bg-red-100 text-red-800 hover:bg-red-200 hover:text-red-800 active:text-red-800 focus:text-red-800"
                   >
                     Try Again
                   </Button>
@@ -87,7 +87,7 @@ export default function HomePage() {
                     }}
                     variant="ghost"
                     size="sm"
-                    className="ml-3 text-red-800 hover:bg-red-200"
+                    className="ml-3 text-red-800 hover:bg-red-200 hover:text-red-800 active:text-red-800 focus:text-red-800"
                   >
                     Dismiss
                   </Button>
@@ -111,7 +111,7 @@ export default function HomePage() {
               {/* Demo Button */}
               <Button 
                 variant="outline"
-                className="border-[#3B82F6] text-[#3B82F6] hover:bg-gradient-to-r hover:from-[#3B82F6] hover:to-[#06B6D4] hover:text-white hover:border-[#06B6D4] font-medium transition-all duration-300 shadow-sm hover:shadow-md"
+                className="border-[#3B82F6] text-[#3B82F6] hover:bg-gradient-to-r hover:from-[#3B82F6] hover:to-[#06B6D4] hover:text-white hover:border-[#06B6D4] active:text-white focus:text-white font-medium transition-all duration-300 shadow-sm hover:shadow-md"
                 onClick={() => window.location.href = '/dashboard'}
               >
                 Demo Dashboard
@@ -120,7 +120,7 @@ export default function HomePage() {
                 <Button
                   onClick={() => window.location.href = '/oauth-loading'}
                   variant="outline" 
-                  className="border-gray-300 hover:border-gray-400 flex items-center space-x-2"
+                  className="border-gray-300 hover:border-gray-400 hover:text-foreground active:text-foreground focus:text-foreground flex items-center space-x-2"
                 >
                   <img src={yappyyLogoPath} alt="Yappyy" className="h-4 w-4" />
                   <svg className="h-4 w-4" viewBox="0 0 24 24">
@@ -171,7 +171,7 @@ export default function HomePage() {
               )}
               
               <Button 
-                className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white font-button shadow-lg hover:shadow-xl transition-all duration-300"
+                className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white hover:text-white active:text-white focus:text-white font-button shadow-lg hover:shadow-xl transition-all duration-300"
                 onClick={() => {
                   if (isAuthenticated) {
                     window.location.href = 'https://yappyy.com/dashboard';
@@ -214,7 +214,7 @@ export default function HomePage() {
             <div className="flex justify-center mb-20">
               <Button 
                 size="lg" 
-                className="bg-white hover:bg-gray-50 font-button shadow-lg hover:shadow-xl transition-all duration-300 px-12 py-6 text-xl border-0"
+                className="bg-white hover:bg-gray-50 text-slate-800 hover:text-slate-800 active:text-slate-800 focus:text-slate-800 font-button shadow-lg hover:shadow-xl transition-all duration-300 px-12 py-6 text-xl border-0"
                 onClick={() => {
                   if (isAuthenticated) {
                     window.location.href = '/dashboard';

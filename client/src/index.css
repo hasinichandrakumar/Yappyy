@@ -213,6 +213,122 @@
   }
 }
 
+/* Enhanced button states for better text readability */
+@layer components {
+  .button-enhanced {
+    @apply transition-all duration-200 ease-in-out;
+  }
+  
+  .button-enhanced:hover {
+    @apply transform scale-105;
+  }
+  
+  .button-enhanced:active {
+    @apply transform scale-95;
+  }
+  
+  /* Ensure white text on colored backgrounds */
+  .btn-primary {
+    @apply bg-primary text-white;
+  }
+  
+  .btn-primary:hover {
+    @apply bg-primary/90 text-white;
+  }
+  
+  .btn-primary:active {
+    @apply bg-primary/80 text-white;
+  }
+  
+  .btn-primary:focus {
+    @apply text-white;
+  }
+  
+  .btn-secondary {
+    @apply bg-secondary text-white;
+  }
+  
+  .btn-secondary:hover {
+    @apply bg-secondary/90 text-white;
+  }
+  
+  .btn-secondary:active {
+    @apply bg-secondary/80 text-white;
+  }
+  
+  .btn-secondary:focus {
+    @apply text-white;
+  }
+  
+  /* Ensure dark text on light backgrounds */
+  .btn-outline {
+    @apply border border-input bg-background text-foreground;
+  }
+  
+  .btn-outline:hover {
+    @apply bg-accent text-foreground;
+  }
+  
+  .btn-outline:active {
+    @apply bg-accent/90 text-foreground;
+  }
+  
+  .btn-outline:focus {
+    @apply text-foreground;
+  }
+
+  /* Global button text contrast fix */
+  button[class*="bg-primary"]:hover,
+  button[class*="bg-primary"]:active,
+  button[class*="bg-primary"]:focus {
+    @apply text-white !important;
+  }
+  
+  button[class*="bg-secondary"]:hover,
+  button[class*="bg-secondary"]:active,
+  button[class*="bg-secondary"]:focus {
+    @apply text-white !important;
+  }
+  
+  button[class*="bg-destructive"]:hover,
+  button[class*="bg-destructive"]:active,
+  button[class*="bg-destructive"]:focus {
+    @apply text-white !important;
+  }
+  
+  button[class*="bg-gradient"]:hover,
+  button[class*="bg-gradient"]:active,
+  button[class*="bg-gradient"]:focus {
+    @apply text-white !important;
+  }
+  
+  button[class*="bg-blue"]:hover,
+  button[class*="bg-blue"]:active,
+  button[class*="bg-blue"]:focus {
+    @apply text-white !important;
+  }
+  
+  button[class*="bg-red"]:hover,
+  button[class*="bg-red"]:active,
+  button[class*="bg-red"]:focus {
+    @apply text-red-800 !important;
+  }
+  
+  /* Ensure outline buttons maintain proper contrast */
+  button[class*="variant=\"outline\""]:hover,
+  button[class*="variant=\"outline\""]:active,
+  button[class*="variant=\"outline\""]:focus {
+    @apply text-foreground !important;
+  }
+  
+  /* Ensure ghost buttons maintain proper contrast */
+  button[class*="variant=\"ghost\""]:hover,
+  button[class*="variant=\"ghost\""]:active,
+  button[class*="variant=\"ghost\""]:focus {
+    @apply text-foreground !important;
+  }
+}
+
 @keyframes gradient-x {
   0%, 100% {
     background-position: 0% 50%;
