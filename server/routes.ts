@@ -7,6 +7,7 @@ import { advancedFillerDetectionEngine } from "./advanced-filler-detection";
 import { RealTimeSessionManager } from "./redis-realtime";
 import { insertPracticeSessionSchema, insertCoachingFeedbackSchema, insertCustomTemplateSchema, practiceSessions } from "@shared/schema";
 import { setupGoogleAuth, isAuthenticated } from "./googleAuth";
+import { setupUserProgressAPI } from "./user-progress-api";
 import { userOnboardingService } from "./user-onboarding";
 import { generateClubCoaching } from "./ai-coaching";
 import { 
