@@ -588,7 +588,7 @@ export default function AICoachRedesigned() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Main Interface */}
-      <div className="max-w-7xl mx-auto px-6 pb-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 lg:h-[700px]">
           {/* Main Coaching Area */}
           <div className="lg:col-span-3 flex">
@@ -618,7 +618,7 @@ export default function AICoachRedesigned() {
               
               <CardContent className="p-8 flex-1 flex flex-col">
                 {!currentGoal && (
-                  <div className="mb-8">
+                  <div className="mt-8 mb-8">
                     <h4 className="text-xl font-semibold text-gray-800 mb-4">What would you like to work on today?</h4>
                     <CoachingGoals onGoalSelect={handleGoalSelection} />
                   </div>

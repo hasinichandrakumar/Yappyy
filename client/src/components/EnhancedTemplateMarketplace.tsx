@@ -1358,7 +1358,8 @@ Tips:
   }
 
   return (
-    <div className="space-y-6 font-poppins">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="space-y-6 font-poppins">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -1519,6 +1520,7 @@ Tips:
           )}
         </TabsContent>
       </Tabs>
+      </div>
     </div>
   );
 }

@@ -157,65 +157,9 @@ export default function DailyGoalWidget() {
   const getTotalYapX = () => mappedGoals.filter(goal => goal.completed).reduce((sum, goal) => sum + goal.yapX, 0);
 
   return (
-    <div className="space-y-6">
-      {/* Enhanced Streak and Progress Header */}
-      <Card className="relative overflow-hidden bg-gradient-to-br from-orange-100 via-yellow-50 to-red-100 border-0 shadow-lg">
-        <div className="absolute inset-0 bg-gradient-to-r from-orange-400/10 to-red-400/10"></div>
-        <CardContent className="relative py-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Streak Section */}
-            <div className="flex items-center space-x-4 p-4 bg-white/60 backdrop-blur-sm rounded-xl border border-orange-200/50">
-              <div className="p-3 bg-gradient-to-br from-orange-500 to-red-500 rounded-full shadow-lg">
-                <Flame className={`w-6 h-6 text-white ${streak.current > 0 ? 'animate-pulse' : ''}`} />
-              </div>
-              <div>
-                <div className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
-                  {streak.current} days
-                </div>
-                <div className="text-sm font-medium text-orange-700">Current Streak</div>
-                {streak.best > 0 && (
-                  <div className="text-xs text-orange-600">Best: {streak.best} days</div>
-                )}
-              </div>
-            </div>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="space-y-6">
 
-            {/* YapX Section */}
-            <div className="flex items-center space-x-4 p-4 bg-white/60 backdrop-blur-sm rounded-xl border border-yellow-200/50">
-              <div className="p-3 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-full shadow-lg">
-                <Trophy className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">
-                  {getTotalYapX()}
-                </div>
-                <div className="text-sm font-medium text-yellow-700">YapX Today</div>
-                <div className="text-xs text-yellow-600">Keep earning!</div>
-              </div>
-            </div>
-
-            {/* Goals Progress Section */}
-            <div className="flex items-center space-x-4 p-4 bg-white/60 backdrop-blur-sm rounded-xl border border-purple-200/50">
-              <div className="p-3 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full shadow-lg">
-                <Target className="w-6 h-6 text-white" />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                    {getCompletedGoals()}/{mappedGoals.length}
-                  </div>
-                  <div className="text-sm font-medium text-purple-700">Goals Complete</div>
-                </div>
-                <div className="w-full bg-purple-200 rounded-full h-2">
-                  <div 
-                    className="bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full transition-all duration-500 ease-out"
-                    style={{ width: `${mappedGoals.length > 0 ? (getCompletedGoals() / mappedGoals.length) * 100 : 0}%` }}
-                  ></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Enhanced Daily Goals */}
       <div className="grid gap-6 md:grid-cols-2">
@@ -378,31 +322,14 @@ export default function DailyGoalWidget() {
             
             <div className="space-y-2">
               <h3 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                {getCompletedGoals() === mappedGoals.length 
-                  ? "Amazing! All goals completed!" 
-                  : getCompletedGoals() > 0 
-                    ? "Great progress! Keep it up!" 
-                    : "Ready to level up your speaking skills?"}
+                {getCompletedGoals() > 0 
+                  ? "Great progress! Keep it up!" 
+                  : "Ready to level up your speaking skills?"}
               </h3>
               <p className="text-blue-700 font-medium max-w-md mx-auto">
-                {getCompletedGoals() === mappedGoals.length 
-                  ? "You're building unstoppable speaking confidence! Your dedication is truly inspiring." 
-                  : "Each practice session brings you closer to mastery. Consistency creates champions."}
+                Each practice session brings you closer to mastery. Consistency creates champions.
               </p>
             </div>
-
-            {getCompletedGoals() === mappedGoals.length && (
-              <div className="flex items-center justify-center space-x-4 pt-2">
-                <div className="flex items-center space-x-2 px-4 py-2 bg-yellow-100 rounded-full">
-                  <Trophy className="w-4 h-4 text-yellow-600" />
-                  <span className="text-sm font-semibold text-yellow-800">Perfect Day!</span>
-                </div>
-                <div className="flex items-center space-x-2 px-4 py-2 bg-blue-100 rounded-full">
-                  <Flame className="w-4 h-4 text-blue-600" />
-                  <span className="text-sm font-semibold text-blue-800">Streak Active</span>
-                </div>
-              </div>
-            )}
           </div>
         </CardContent>
       </Card>
@@ -474,6 +401,7 @@ export default function DailyGoalWidget() {
           </CardContent>
         </Card>
       )}
+      </div>
     </div>
   );
 }

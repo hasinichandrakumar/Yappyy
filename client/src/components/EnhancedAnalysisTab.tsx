@@ -170,8 +170,9 @@ export default function EnhancedAnalysisTab() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Session Selector */}
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="space-y-6">
+        {/* Session Selector */}
       <Card className="p-6 bg-white/70 backdrop-blur-sm border border-white/30 shadow-xl">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
@@ -2332,6 +2333,7 @@ function TranscriptAnalysisComponent({ session, onAnalysisComplete }: Transcript
           </Button>
         </Card>
       )}
+      </div>
     </div>
   );
 }

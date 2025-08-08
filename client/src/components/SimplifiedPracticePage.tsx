@@ -159,6 +159,7 @@ export default function SimplifiedPracticePage() {
   const [showVideoPlayback, setShowVideoPlayback] = useState(false);
   const [showRecordingLibrary, setShowRecordingLibrary] = useState(false);
   const [videoRecordingEnabled, setVideoRecordingEnabled] = useState(true);
+  const [isVideoInitialized, setIsVideoInitialized] = useState(false);
 
   // AUTHENTIC METRICS ONLY - All start at 0 until real analysis data is available
   const [metrics, setMetrics] = useState<SimplifiedMetrics>({
@@ -897,6 +898,16 @@ export default function SimplifiedPracticePage() {
     };
   }, [isRecording, metrics, sessionDuration, liveFeedback, transcript]);
 
+  // Initialize video recording system on component mount
+  useEffect(() => {
+    const initVideo = async () => {
+      if (videoRecordingEnabled) {
+        await initializeVideoRecording();
+      }
+    };
+    initVideo();
+  }, []);
+
   // Initialize video recording
   const initializeVideoRecording = async (): Promise<boolean> => {
     if (!videoRecordingEnabled || !recordingVideoRef.current) return false;
@@ -905,6 +916,7 @@ export default function SimplifiedPracticePage() {
       const initialized = await videoRecordingManager.initializeRecording(recordingVideoRef.current);
       if (initialized) {
         console.log('✅ Video recording system initialized');
+        setIsVideoInitialized(true);
         toast({
           title: "Video Recording Ready",
           description: "High-quality video recording is active",
@@ -914,6 +926,7 @@ export default function SimplifiedPracticePage() {
       return initialized;
     } catch (error) {
       console.error('❌ Failed to initialize video recording:', error);
+      setIsVideoInitialized(false);
       toast({
         title: "Video Recording Unavailable",
         description: "Session will record audio only",
@@ -1377,6 +1390,7 @@ export default function SimplifiedPracticePage() {
     }
 
     setIsRecording(false);
+    setIsVideoInitialized(false);
 
     // Save session to database with comprehensive data
     try {
@@ -1783,8 +1797,8 @@ export default function SimplifiedPracticePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 overflow-x-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 pb-8">
         
         {/* Header */}
         <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm">
@@ -1975,19 +1989,26 @@ export default function SimplifiedPracticePage() {
 
 
         {/* Main Content - Side by Side Layout */}
-        <div className="w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="w-full relative">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
             {/* Left Side - Video Feed (2/3 width) */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className="lg:col-span-2 space-y-6 relative z-0">
               <Card className="border border-blue-200 shadow-xl bg-white/90 backdrop-blur-sm rounded-xl overflow-hidden">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Video className="w-5 h-5 text-blue-600" />
+                    Practice Recording
+                  </CardTitle>
+                </CardHeader>
                 <CardContent className="p-0">
-                  <div className="relative aspect-video bg-gray-900 rounded-xl overflow-hidden">
+                  <div className={`relative aspect-video bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl overflow-hidden flex items-center justify-center border border-gray-700 shadow-2xl transition-all duration-300 ${isRecording ? 'ring-2 ring-red-500 ring-opacity-50 animate-pulse' : ''}`}>
                     <video
                       ref={videoRef}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain rounded-xl shadow-lg"
                       muted
                       playsInline
+                      style={{ maxHeight: '100%', maxWidth: '100%' }}
                     />
                     
                     {/* Hidden video element for recording */}
@@ -2002,6 +2023,28 @@ export default function SimplifiedPracticePage() {
                       ref={canvasRef}
                       className="absolute inset-0 w-full h-full pointer-events-none opacity-50"
                     />
+                    
+                    {/* Placeholder when video is not active */}
+                    {!isRecording && (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
+                        <div className={`w-20 h-20 bg-gradient-to-br from-gray-700 to-gray-600 rounded-full flex items-center justify-center mb-6 shadow-lg border border-gray-600 ${!isVideoInitialized ? 'animate-pulse' : ''}`}>
+                          {!isVideoInitialized ? (
+                            <div className="w-10 h-10 border-2 border-gray-400 border-t-gray-200 rounded-full animate-spin"></div>
+                          ) : (
+                            <Camera className="w-10 h-10 text-gray-300" />
+                          )}
+                        </div>
+                        <p className="text-gray-200 text-xl font-semibold mb-2">
+                          {isVideoInitialized ? "Camera Ready" : "Initializing Camera..."}
+                        </p>
+                        <p className="text-gray-400 text-sm text-center max-w-xs">
+                          {isVideoInitialized 
+                            ? "Click \"Start Recording\" to begin your practice session"
+                            : "Setting up video recording system..."
+                          }
+                        </p>
+                      </div>
+                    )}
                     
                     {isRecording && (
                       <div className="absolute top-4 left-4 space-y-2">
@@ -2047,9 +2090,9 @@ export default function SimplifiedPracticePage() {
             </div>
 
             {/* Right Side - Live AI Coaching Tips (1/3 width) */}
-            <div className="lg:col-span-1 space-y-6">
+            <div className="lg:col-span-1 space-y-6 flex flex-col justify-center items-center relative">
               {showLiveMetrics && (
-                <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm rounded-xl sticky top-6">
+                <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm rounded-xl sticky top-24 w-full max-w-sm z-10">
                   <CardHeader className="pb-4">
                     <CardTitle className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -2078,7 +2121,7 @@ export default function SimplifiedPracticePage() {
                         liveFeedback.slice(-6).map((feedback) => (
                           <div
                             key={feedback.id}
-                            className={`p-3 rounded-lg border-l-4 ${
+                            className={`p-4 rounded-xl border-l-4 shadow-sm ${
                               feedback.type === 'success' 
                                 ? 'bg-green-50 border-green-400 text-green-800' 
                                 : feedback.type === 'warning'
@@ -2086,13 +2129,16 @@ export default function SimplifiedPracticePage() {
                                 : 'bg-blue-50 border-blue-400 text-blue-800'
                             }`}
                           >
-                            <p className="text-sm font-medium">{feedback.message}</p>
+                            <p className="text-sm font-medium leading-relaxed">{feedback.message}</p>
                           </div>
                         ))
                       ) : (
-                        <div className="text-center text-gray-500 py-8">
-                          <Activity className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                          <p className="text-sm">Start recording to receive live coaching tips</p>
+                        <div className="text-center text-gray-500 py-12">
+                          <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Activity className="w-8 h-8 text-gray-400" />
+                          </div>
+                          <p className="text-sm font-medium mb-1">Ready for Coaching</p>
+                          <p className="text-xs text-gray-400">Start recording to receive live coaching tips</p>
                         </div>
                       )}
                     </div>
@@ -2101,20 +2147,35 @@ export default function SimplifiedPracticePage() {
               )}
 
               {/* Essential Live Metrics - Next to Video */}
-              <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm rounded-xl">
-                <CardContent className="p-4">
-                  <div className="space-y-4">
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-blue-600">{metrics.wordsPerMinute}</div>
-                      <div className="text-xs text-gray-600 font-semibold uppercase tracking-wide">Words Per Minute</div>
+              <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm rounded-xl w-full max-w-sm">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center justify-center gap-2 text-lg">
+                    <BarChart3 className="w-5 h-5 text-blue-600" />
+                    Live Statistics
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="space-y-8">
+                    <div className={`text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200 transition-all duration-300 hover:shadow-lg hover:scale-105 ${metrics.wordsPerMinute > 0 ? 'shadow-md' : ''}`}>
+                      <div className="flex justify-center mb-2">
+                        <TrendingUp className="w-6 h-6 text-blue-500" />
+                      </div>
+                      <div className={`text-5xl font-bold text-blue-600 mb-2 ${metrics.wordsPerMinute > 0 ? 'animate-pulse' : ''}`}>{metrics.wordsPerMinute}</div>
+                      <div className="text-sm text-gray-700 font-semibold uppercase tracking-wide">Words Per Minute</div>
                     </div>
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-purple-600">{metrics.fillerWordCount}</div>
-                      <div className="text-xs text-gray-600 font-semibold uppercase tracking-wide">Filler Words</div>
+                    <div className={`text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200 transition-all duration-300 hover:shadow-lg hover:scale-105 ${metrics.fillerWordCount > 0 ? 'shadow-md' : ''}`}>
+                      <div className="flex justify-center mb-2">
+                        <AlertTriangle className="w-6 h-6 text-purple-500" />
+                      </div>
+                      <div className={`text-5xl font-bold text-purple-600 mb-2 ${metrics.fillerWordCount > 0 ? 'animate-pulse' : ''}`}>{metrics.fillerWordCount}</div>
+                      <div className="text-sm text-gray-700 font-semibold uppercase tracking-wide">Filler Words</div>
                     </div>
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-green-600">{Math.round(metrics.eyeContact)}%</div>
-                      <div className="text-xs text-gray-600 font-semibold uppercase tracking-wide">Eye Contact</div>
+                    <div className={`text-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200 transition-all duration-300 hover:shadow-lg hover:scale-105 ${metrics.eyeContact > 0 ? 'shadow-md' : ''}`}>
+                      <div className="flex justify-center mb-2">
+                        <Eye className="w-6 h-6 text-green-500" />
+                      </div>
+                      <div className={`text-5xl font-bold text-green-600 mb-2 ${metrics.eyeContact > 0 ? 'animate-pulse' : ''}`}>{Math.round(metrics.eyeContact)}%</div>
+                      <div className="text-sm text-gray-700 font-semibold uppercase tracking-wide">Eye Contact</div>
                     </div>
                   </div>
                 </CardContent>
@@ -2125,7 +2186,7 @@ export default function SimplifiedPracticePage() {
 
         {/* Live Transcript Panel */}
         {showLiveTranscript && (
-          <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm">
+          <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm mt-8 mb-8">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
