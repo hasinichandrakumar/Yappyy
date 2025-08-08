@@ -110,6 +110,9 @@ export async function setupGoogleAuth(app: Express) {
   // Handle the OAuth callback route - redirect to dashboard
   app.get('/oauth2callback', (req, res, next) => {
     console.log('🔄 OAuth callback received');
+    console.log('  - Request URL:', req.url);
+    console.log('  - Request host:', req.get('host'));
+    console.log('  - Request protocol:', req.protocol);
     console.log('  - Query params:', req.query);
     console.log('  - Has authorization code:', !!req.query.code);
     console.log('  - Has error:', !!req.query.error);
