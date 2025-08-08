@@ -133,9 +133,11 @@ export async function setupGoogleAuth(app: Express) {
     console.log('  - Request URL:', req.url);
     console.log('  - Request host:', req.get('host'));
     console.log('  - Request protocol:', req.protocol);
-    console.log('  - Query params:', req.query);
+    console.log('  - Query params:', JSON.stringify(req.query));
     console.log('  - Has authorization code:', !!req.query.code);
     console.log('  - Has error:', !!req.query.error);
+    console.log('  - Session ID:', req.sessionID);
+    console.log('  - Headers:', JSON.stringify(req.headers));
     
     // Handle OAuth errors from Google
     if (req.query.error) {
@@ -155,29 +157,42 @@ export async function setupGoogleAuth(app: Express) {
       return res.redirect(`/?error=oauth_failed&details=${encodeURIComponent(String(req.query.error_description || req.query.error))}`);
     }
     
-    // Process OAuth callback (must use the same callbackURL as initiation)
-    const requestCallbackURL = getCallbackURL(req);
-    passport.authenticate('google', { callbackURL: requestCallbackURL }, (err: any, user: any, info: any) => {
+    // Check if we have the required code parameter
+    if (!req.query.code) {
+      console.error('❌ No authorization code received from Google');
+      return res.redirect('/?error=no_code');
+    }
+    
+    console.log('✅ Authorization code received, processing...');
+    
+    // Process OAuth callback using standard passport authenticate
+    passport.authenticate('google', (err: any, user: any, info: any) => {
+      console.log('🔍 Passport authenticate callback:', { err: !!err, user: !!user, info });
+      
       if (err) {
         console.error('❌ OAuth authentication error:', err);
-        return res.redirect('/?error=auth_failed');
+        return res.redirect('/?error=auth_failed&details=' + encodeURIComponent(err.message));
       }
       
       if (!user) {
-        console.error('❌ OAuth authentication failed - no user:', info);
-        return res.redirect('/?error=no_user');
+        console.error('❌ OAuth authentication failed - no user returned');
+        console.error('❌ Info:', info);
+        return res.redirect('/?error=no_user&info=' + encodeURIComponent(JSON.stringify(info)));
       }
+      
+      console.log('✅ User authenticated:', user.email);
       
       req.logIn(user, (err) => {
         if (err) {
-          console.error('❌ Login error:', err);
-          return res.redirect('/?error=login_failed');
+          console.error('❌ Login session error:', err);
+          return res.redirect('/?error=login_failed&details=' + encodeURIComponent(err.message));
         }
         
-        console.log('✅ OAuth callback successful for user:', user.email);
+        console.log('✅ Session established for user:', user.email);
+        console.log('✅ Session ID after login:', req.sessionID);
         console.log('✅ Redirecting to dashboard...');
         
-        // Redirect to dashboard - session is already established
+        // Redirect to dashboard - session is established
         res.redirect('/dashboard');
       });
     })(req, res, next);

@@ -7,7 +7,7 @@ Google OAuth is failing because the Replit callback URL is not authorized in Goo
 
 ### Step 1: Add Replit Callback URL to Current Client ID
 1. Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
-2. Find and click on OAuth 2.0 Client ID: `865530799156-v77qutagl1q2q7i7gi1ul5bvabrfa0il`
+2. Find and click on OAuth 2.0 Client ID: `215357713474-hteht7fnp3bse1h7tmplv8jrtdb0i47h`
 3. In the **Authorized redirect URIs** section, add this URL:
    ```
    https://0c7fe059-a7da-4a46-a7cc-18655fec2a24-00-1znejaw22ebqj.picard.replit.dev/oauth2callback
