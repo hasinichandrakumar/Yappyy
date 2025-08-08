@@ -44,19 +44,19 @@ export default function HomePage() {
               <div className="mt-2 text-sm text-red-700">
                 {error === 'redirect_mismatch' ? (
                   <div>
-                    <p className="font-medium mb-2">The Replit callback URL needs to be added to Google Cloud Console:</p>
-                    <div className="bg-gray-100 p-2 rounded font-mono text-xs break-all">
+                    <p className="font-medium mb-3">Quick Fix - Add this URL to your Google Console:</p>
+                    <div className="bg-gray-100 p-3 rounded font-mono text-xs break-all mb-3 border">
                       {callbackUrl}
                     </div>
-                    <p className="mt-2">
-                      1. Go to Google Cloud Console → APIs & Credentials
-                      <br />
-                      2. Edit your OAuth 2.0 Client ID: 372720245891-dtpkbj63rl2hju5vo2uorldivgurg6fh
-                      <br />
-                      3. Add the URL above to "Authorized redirect URIs"
-                      <br />
-                      4. Save and try signing in again
-                    </p>
+                    <div className="bg-blue-50 border border-blue-200 rounded p-3 text-sm">
+                      <p className="font-semibold text-blue-800 mb-2">Steps to fix:</p>
+                      <ol className="list-decimal list-inside space-y-1 text-blue-700">
+                        <li>Go to <a href="https://console.cloud.google.com/apis/credentials" target="_blank" className="underline hover:no-underline">Google Cloud Console</a></li>
+                        <li>Find OAuth Client ID: <code className="bg-white px-1 rounded">372720245891-dtpkbj63rl2hju5vo2uorldivgurg6fh</code></li>
+                        <li>Click "Authorized redirect URIs" → "Add URI"</li>
+                        <li>Paste the URL above and Save</li>
+                      </ol>
+                    </div>
                   </div>
                 ) : (
                   <p>
