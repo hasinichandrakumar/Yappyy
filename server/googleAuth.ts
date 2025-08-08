@@ -124,35 +124,35 @@ export async function setupGoogleAuth(app: Express) {
         console.error('❌ Redirect URI mismatch - callback URL not authorized in Google Cloud Console');
         const currentCallbackURL = 'https://yappyy.com/oauth2callback';
         console.error('❌ Current callback URL:', currentCallbackURL);
-        return res.redirect(`/?error=redirect_mismatch&callback_url=${encodeURIComponent(currentCallbackURL)}`);
+        return res.redirect(`https://yappyy.com/?error=redirect_mismatch&callback_url=${encodeURIComponent(currentCallbackURL)}`);
       }
       
-      return res.redirect(`/?error=oauth_failed&details=${encodeURIComponent(String(req.query.error_description || req.query.error))}`);
+      return res.redirect(`https://yappyy.com/?error=oauth_failed&details=${encodeURIComponent(String(req.query.error_description || req.query.error))}`);
     }
     
     // Process OAuth callback
     passport.authenticate('google', (err: any, user: any, info: any) => {
       if (err) {
         console.error('❌ OAuth authentication error:', err);
-        return res.redirect('/?error=auth_failed');
+        return res.redirect('https://yappyy.com/?error=auth_failed');
       }
       
       if (!user) {
         console.error('❌ OAuth authentication failed - no user:', info);
-        return res.redirect('/?error=no_user');
+        return res.redirect('https://yappyy.com/?error=no_user');
       }
       
       req.logIn(user, (err) => {
         if (err) {
           console.error('❌ Login error:', err);
-          return res.redirect('/?error=login_failed');
+          return res.redirect('https://yappyy.com/?error=login_failed');
         }
         
         console.log('✅ OAuth callback successful for user:', user.email);
         console.log('✅ Redirecting to dashboard...');
         
         // Redirect to dashboard - session is already established
-        res.redirect('/dashboard');
+        res.redirect('https://yappyy.com/dashboard');
       });
     })(req, res, next);
   });
@@ -160,8 +160,8 @@ export async function setupGoogleAuth(app: Express) {
   // Also handle the original route for compatibility
   app.get('/api/auth/google/callback',
     passport.authenticate('google', { 
-      failureRedirect: '/',
-      successRedirect: '/dashboard'
+      failureRedirect: 'https://yappyy.com/',
+      successRedirect: 'https://yappyy.com/dashboard'
     })
   );
 
