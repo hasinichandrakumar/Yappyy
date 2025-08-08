@@ -582,7 +582,7 @@ export default function HomePage() {
                   Experience personalized AI coaching that adapts to your unique speaking style and helps you build confidence in every conversation.
                 </p>
                 <Link href="/dashboard">
-                  <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50 font-semibold shadow-lg hover:shadow-xl transition-all duration-200">
+                  <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50 hover:text-blue-600 active:text-blue-600 focus:text-blue-600 font-semibold shadow-lg hover:shadow-xl transition-all duration-200">
                     Start Your Journey
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
@@ -650,7 +650,7 @@ export default function HomePage() {
               <div className="mt-10">
                 {isAuthenticated ? (
                   <Link href="/dashboard">
-                    <Button size="lg" className="bg-gradient-to-br from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 px-8 py-4">
+                    <Button size="lg" className="bg-gradient-to-br from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white hover:text-white active:text-white focus:text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 px-8 py-4">
                       Find Your Voice
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
@@ -659,7 +659,7 @@ export default function HomePage() {
                   <Button
                     size="lg"
                     onClick={() => window.location.href = '/api/auth/google'}
-                    className="bg-gradient-to-br from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 px-8 py-4"
+                    className="bg-gradient-to-br from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white hover:text-white active:text-white focus:text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 px-8 py-4"
                   >
                     Start Building Confidence Today
                     <ArrowRight className="ml-2 h-5 w-5" />
