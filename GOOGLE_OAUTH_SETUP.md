@@ -9,9 +9,9 @@ Google OAuth is failing because the Replit callback URL is not authorized in Goo
 1. Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
 2. Find and click on OAuth 2.0 Client ID: `372720245891-dtpkbj63rl2hju5vo2uorldivgurg6fh`
 3. In the **Authorized redirect URIs** section, click **"Add URI"**
-4. Add this exact URL:
+4. Ensure this URL is already added (it should be from your screenshot):
    ```
-   https://0c7fe059-a7da-4a46-a7cc-18655fec2a24-00-1znejaw22ebqj.picard.replit.dev/oauth2callback
+   https://yappyy.com/oauth2callback
    ```
 5. Click **Save**
 
@@ -25,13 +25,13 @@ Google OAuth is failing because the Replit callback URL is not authorized in Goo
 - ✅ Google Client Secret: Configured  
 - ✅ OAuth Strategy: Properly configured
 - ✅ Callback Route: `/oauth2callback` → redirects to `/dashboard`
-- ❌ **Authorized Redirect URI: Missing Replit domain**
+- ✅ **Authorized Redirect URI: Using yappyy.com domain**
 
 ## Authorized URLs Already in Console
 Based on your screenshot:
 - ✅ `https://yappyy.com` (JavaScript origin)
 - ✅ `https://yappyy.com/oauth2callback` (Redirect URI)
-- ❌ **Missing: Replit domain redirect URI**
+- ✅ **yappyy.com redirect URI: Already configured**
 
 ## After Adding the URL
 The auth flow will work as follows:

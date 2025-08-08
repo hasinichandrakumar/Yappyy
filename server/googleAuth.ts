@@ -21,22 +21,8 @@ const getCurrentDomain = (req?: any) => {
 
 // Get appropriate callback URL based on environment
 const getCallbackURL = (req?: any) => {
-  // If we're on yappyy.com domain, use that
-  if (req?.get('host')?.includes('yappyy.com')) {
-    return `https://${req.get('host')}/oauth2callback`;
-  }
-  
-  // Check if YAPPYY_DOMAIN is set for production
-  if (process.env.YAPPYY_DOMAIN) {
-    return `https://${process.env.YAPPYY_DOMAIN}/oauth2callback`;
-  }
-  
-  // Fall back to Replit domain for development
-  if (process.env.REPLIT_DEV_DOMAIN) {
-    return `https://${process.env.REPLIT_DEV_DOMAIN}/oauth2callback`;
-  }
-  
-  return 'http://localhost:5000/oauth2callback';
+  // Always use yappyy.com for OAuth callbacks
+  return 'https://yappyy.com/oauth2callback';
 };
 
 export function getSession() {
