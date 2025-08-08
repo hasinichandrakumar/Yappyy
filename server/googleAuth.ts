@@ -5,13 +5,9 @@ import type { Express, RequestHandler } from "express";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 
-// Google OAuth configuration
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID === '865530799156-v77qutagl1q2q7i7gi1ul5bvabrfa0il.apps.googleusercontent.com' 
-  ? '372720245891-dtpkbj63rl2hju5vo2uorldivgurg6fh.apps.googleusercontent.com' 
-  : process.env.GOOGLE_CLIENT_ID;
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET === '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'
-  ? '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'
-  : process.env.GOOGLE_CLIENT_SECRET;
+// Google OAuth configuration - always use environment variables (no overrides)
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 // Get the current domain from the request or environment
 const getCurrentDomain = (req?: any) => {
   if (req?.get('host')) {
@@ -21,6 +17,26 @@ const getCurrentDomain = (req?: any) => {
     return `https://${process.env.REPLIT_DEV_DOMAIN}`;
   }
   return 'http://localhost:5000';
+};
+
+// Get appropriate callback URL based on environment
+const getCallbackURL = (req?: any) => {
+  // If we're on yappyy.com domain, use that
+  if (req?.get('host')?.includes('yappyy.com')) {
+    return `https://${req.get('host')}/oauth2callback`;
+  }
+  
+  // Check if YAPPYY_DOMAIN is set for production
+  if (process.env.YAPPYY_DOMAIN) {
+    return `https://${process.env.YAPPYY_DOMAIN}/oauth2callback`;
+  }
+  
+  // Fall back to Replit domain for development
+  if (process.env.REPLIT_DEV_DOMAIN) {
+    return `https://${process.env.REPLIT_DEV_DOMAIN}/oauth2callback`;
+  }
+  
+  return 'http://localhost:5000/oauth2callback';
 };
 
 export function getSession() {
@@ -39,7 +55,7 @@ export function getSession() {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: false, // Changed to false for development/HTTP
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax', // Allow cross-site requests for OAuth
       maxAge: sessionTtl,
       domain: undefined, // Remove domain restriction for better compatibility
@@ -66,8 +82,8 @@ export async function setupGoogleAuth(app: Express) {
 
   // Google OAuth Strategy - dynamic callback URL
   if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
-    // Use working Replit domain until yappyy.com routing is fixed
-    const callbackURL = `https://${process.env.REPLIT_DEV_DOMAIN}/oauth2callback`;
+    // Use dynamic callback URL based on the request domain
+    const callbackURL = getCallbackURL();
       
     console.log('🔧 Google OAuth Strategy Configuration:');
     console.log('  - Client ID:', GOOGLE_CLIENT_ID?.substring(0, 20) + '...');
@@ -101,10 +117,17 @@ export async function setupGoogleAuth(app: Express) {
     console.warn('⚠️ Google OAuth credentials not found in environment variables');
   }
 
-  // Google OAuth routes
+  // Google OAuth routes - with dynamic callback URL (consistent for both steps)
   app.get('/api/auth/google', (req, res, next) => {
     console.log('🚀 Starting Google OAuth flow...');
-    passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
+    console.log('  - Request host:', req.get('host'));
+    const requestCallbackURL = getCallbackURL(req);
+    console.log('  - Dynamic callback URL:', requestCallbackURL);
+
+    passport.authenticate('google', {
+      scope: ['profile', 'email'],
+      callbackURL: requestCallbackURL,
+    })(req, res, next);
   });
 
   // Handle the OAuth callback route - redirect to dashboard
@@ -125,16 +148,19 @@ export async function setupGoogleAuth(app: Express) {
       // Special handling for redirect_uri_mismatch
       if (req.query.error === 'redirect_uri_mismatch') {
         console.error('❌ Redirect URI mismatch - callback URL not authorized in Google Cloud Console');
-        const currentCallbackURL = `https://${process.env.REPLIT_DEV_DOMAIN}/oauth2callback`;
+        const currentCallbackURL = getCallbackURL(req);
         console.error('❌ Current callback URL:', currentCallbackURL);
+        console.error('❌ Request host:', req.get('host'));
+        console.error('❌ Please add this URL to your Google Cloud Console OAuth credentials');
         return res.redirect(`/?error=redirect_mismatch&callback_url=${encodeURIComponent(currentCallbackURL)}`);
       }
       
       return res.redirect(`/?error=oauth_failed&details=${encodeURIComponent(String(req.query.error_description || req.query.error))}`);
     }
     
-    // Process OAuth callback
-    passport.authenticate('google', (err: any, user: any, info: any) => {
+    // Process OAuth callback (must use the same callbackURL as initiation)
+    const requestCallbackURL = getCallbackURL(req);
+    passport.authenticate('google', { callbackURL: requestCallbackURL }, (err: any, user: any, info: any) => {
       if (err) {
         console.error('❌ OAuth authentication error:', err);
         return res.redirect('/?error=auth_failed');
