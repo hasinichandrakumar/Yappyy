@@ -449,9 +449,9 @@ export default function PeppyAICoach() {
                 {user.id === 'demo-user-123' && (
                   <Button
                     onClick={() => window.location.href = '/api/auth/google'}
-                    className="flex items-center gap-3 bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 shadow-md hover:shadow-lg transition-all duration-200"
+                    className="flex items-center gap-3 bg-gradient-to-r from-blue-600 via-cyan-500 to-sky-400 hover:from-blue-700 hover:via-cyan-600 hover:to-sky-500 text-white px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 font-semibold"
                   >
-                    <SiGoogle className="w-4 h-4" />
+                    <SiGoogle className="w-5 h-5" />
                     Try Google Sign-In
                   </Button>
                 )}
@@ -464,9 +464,9 @@ export default function PeppyAICoach() {
                 </div>
                 <Button
                   onClick={() => window.location.href = '/api/auth/google'}
-                  className="flex items-center gap-3 bg-white text-gray-700 border-2 border-blue-300 hover:bg-blue-50 hover:border-blue-400 px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-200 font-medium"
+                  className="flex items-center gap-3 bg-gradient-to-r from-blue-600 via-cyan-500 to-sky-400 hover:from-blue-700 hover:via-cyan-600 hover:to-sky-500 text-white px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 font-semibold"
                 >
-                  <SiGoogle className="w-5 h-5 text-red-500" />
+                  <SiGoogle className="w-5 h-5" />
                   Sign in with Google
                 </Button>
               </div>

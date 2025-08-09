@@ -7,7 +7,7 @@ Google OAuth is failing because the Replit callback URL is not authorized in Goo
 
 ### Step 1: Verify yappyy.com Callback URL is Configured
 1. Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
-2. Find and click on OAuth 2.0 Client ID: `215357713474-hteht7fnp3bse1h7tmplv8jrtdb0i47h`
+2. Find and click on OAuth 2.0 Client ID: `372720245891-dtpkbj63rl2hju5vo2uorldivgurg6fh.apps.googleusercontent.com`
 3. In the **Authorized redirect URIs** section, ensure this URL is present:
    ```
    https://yappyy.com/oauth2callback

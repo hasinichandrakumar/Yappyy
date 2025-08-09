@@ -61,16 +61,16 @@ export default function OAuthCallbackPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-lg border-2 border-blue-100 shadow-2xl">
+      <Card className="w-full max-w-lg border-0 shadow-2xl backdrop-blur-sm bg-white/95">
         <CardContent className="p-12 text-center space-y-8">
           {/* Large Yappyy Logo with Success Animation */}
-          <div className="flex justify-center">
-            <div className="relative">
-              <div className={`bg-gradient-to-br ${status === 'success' ? 'from-green-500 to-blue-600' : status === 'error' ? 'from-red-500 to-orange-600' : 'from-blue-500 to-purple-600'} p-8 rounded-3xl shadow-2xl ${status === 'processing' ? 'animate-pulse' : 'animate-bounce'}`}>
+          <div className="flex justify-center pt-4">
+            <div className="relative mx-8">
+              <div className={`bg-gradient-to-br ${status === 'success' ? 'from-green-500 to-blue-600' : status === 'error' ? 'from-red-500 to-orange-600' : 'from-blue-500 to-purple-600'} p-6 rounded-3xl shadow-2xl ${status === 'processing' ? 'animate-pulse' : 'animate-bounce'}`}>
                 <img 
                   src={yappyyLogo} 
                   alt="Yappyy - AI Speech Training" 
-                  className="h-20 w-auto filter brightness-0 invert"
+                  className="h-16 w-auto filter brightness-0 invert"
                 />
               </div>
               {status === 'success' && (
