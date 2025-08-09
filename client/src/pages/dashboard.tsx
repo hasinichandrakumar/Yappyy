@@ -8,7 +8,6 @@ import { Mic, BarChart3, Brain, FileText, Trophy, Target, User, Home, Settings, 
 import { useAuth } from "@/hooks/useAuth";
 import SimplifiedPracticePage from "@/components/SimplifiedPracticePage";
 import AICoachRedesigned from "@/components/AICoachRedesigned";
-import UnifiedPracticePage from "@/components/UnifiedPracticePage";
 import PersonalizedSpeechDNA from "@/components/PersonalizedSpeechDNA";
 import EnhancedTemplateMarketplace from "@/components/EnhancedTemplateMarketplace";
 import ImprovedBadgeSystem from "@/components/ImprovedBadgeSystem";
@@ -88,10 +87,10 @@ export default function Dashboard() {
       {/* Professional Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-14">
+          <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
               <button onClick={() => window.location.href = '/'} className="hover:opacity-80 transition-opacity">
-                <img src={yappyyLogoPath} alt="Yappyy" className="h-7" />
+                <img src={yappyyLogoPath} alt="Yappyy" className="h-8" />
               </button>
             </div>
             
@@ -154,38 +153,38 @@ export default function Dashboard() {
           <TabsList className="flex items-center justify-center gap-8 mb-8 h-auto p-0 bg-transparent border-b border-gray-200 rounded-none w-full">
             <TabsTrigger 
               value="practice-alt" 
-              className="flex items-center gap-3 px-8 py-4 text-sm font-medium text-gray-600 rounded-none border-b-2 border-transparent hover:text-blue-700 hover:border-blue-200 data-[state=active]:text-white data-[state=active]:border-blue-500 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:shadow-sm transition-all duration-300 whitespace-nowrap relative group"
+              className="flex items-center gap-3 px-8 py-4 text-sm font-medium text-gray-600 rounded-none border-b-2 border-transparent hover:text-sky-300 hover:border-sky-100 data-[state=active]:text-blue-600 data-[state=active]:border-blue-500 data-[state=active]:bg-transparent data-[state=active]:shadow-sm transition-all duration-300 whitespace-nowrap relative group"
             >
-              <Mic className="w-4 h-4 group-data-[state=active]:text-white group-hover:text-blue-700" />
-              <span className="group-data-[state=active]:text-white group-hover:text-blue-700 font-semibold">Practice</span>
+              <Mic className="w-4 h-4 group-data-[state=active]:text-blue-600 group-hover:text-sky-300" />
+              <span className="group-data-[state=active]:bg-gradient-to-r group-data-[state=active]:from-blue-600 group-data-[state=active]:via-cyan-500 group-data-[state=active]:to-blue-600 group-data-[state=active]:bg-clip-text group-data-[state=active]:text-transparent group-hover:text-sky-300">Practice</span>
             </TabsTrigger>
             <TabsTrigger 
               value="analysis" 
-              className="flex items-center gap-3 px-8 py-4 text-sm font-medium text-gray-600 rounded-none border-b-2 border-transparent hover:text-blue-700 hover:border-blue-200 data-[state=active]:text-white data-[state=active]:border-blue-500 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:shadow-sm transition-all duration-300 whitespace-nowrap relative group"
+              className="flex items-center gap-3 px-8 py-4 text-sm font-medium text-gray-600 rounded-none border-b-2 border-transparent hover:text-sky-300 hover:border-sky-100 data-[state=active]:text-blue-600 data-[state=active]:border-blue-500 data-[state=active]:bg-transparent data-[state=active]:shadow-sm transition-all duration-300 whitespace-nowrap relative group"
             >
-              <BarChart3 className="w-4 h-4 group-data-[state=active]:text-white group-hover:text-blue-700" />
-              <span className="group-data-[state=active]:text-white group-hover:text-blue-700 font-semibold">Analytics</span>
+              <BarChart3 className="w-4 h-4 group-data-[state=active]:text-blue-600 group-hover:text-sky-300" />
+              <span className="group-data-[state=active]:bg-gradient-to-r group-data-[state=active]:from-blue-600 group-data-[state=active]:via-cyan-500 group-data-[state=active]:to-blue-600 group-data-[state=active]:bg-clip-text group-data-[state=active]:text-transparent group-hover:text-sky-300">Analytics</span>
             </TabsTrigger>
             <TabsTrigger 
               value="ai-coach" 
-              className="flex items-center gap-3 px-8 py-4 text-sm font-medium text-gray-600 rounded-none border-b-2 border-transparent hover:text-blue-700 hover:border-blue-200 data-[state=active]:text-white data-[state=active]:border-blue-500 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:shadow-sm transition-all duration-300 whitespace-nowrap relative group"
+              className="flex items-center gap-3 px-8 py-4 text-sm font-medium text-gray-600 rounded-none border-b-2 border-transparent hover:text-sky-300 hover:border-sky-100 data-[state=active]:text-blue-600 data-[state=active]:border-blue-500 data-[state=active]:bg-transparent data-[state=active]:shadow-sm transition-all duration-300 whitespace-nowrap relative group"
             >
-              <Brain className="w-4 h-4 group-data-[state=active]:text-white group-hover:text-blue-700" />
-              <span className="group-data-[state=active]:text-white group-hover:text-blue-700 font-semibold">AI Coach</span>
+              <Brain className="w-4 h-4 group-data-[state=active]:text-blue-600 group-hover:text-sky-300" />
+              <span className="group-data-[state=active]:bg-gradient-to-r group-data-[state=active]:from-blue-600 group-data-[state=active]:via-cyan-500 group-data-[state=active]:to-blue-600 group-data-[state=active]:bg-clip-text group-data-[state=active]:text-transparent group-hover:text-sky-300">AI Coach</span>
             </TabsTrigger>
             <TabsTrigger 
               value="templates" 
-              className="flex items-center gap-3 px-8 py-4 text-sm font-medium text-gray-600 rounded-none border-b-2 border-transparent hover:text-blue-700 hover:border-blue-200 data-[state=active]:text-white data-[state=active]:border-blue-500 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:shadow-sm transition-all duration-300 whitespace-nowrap relative group"
+              className="flex items-center gap-3 px-8 py-4 text-sm font-medium text-gray-600 rounded-none border-b-2 border-transparent hover:text-sky-300 hover:border-sky-100 data-[state=active]:text-blue-600 data-[state=active]:border-blue-500 data-[state=active]:bg-transparent data-[state=active]:shadow-sm transition-all duration-300 whitespace-nowrap relative group"
             >
-              <FileText className="w-4 h-4 group-data-[state=active]:text-white group-hover:text-blue-700" />
-              <span className="group-data-[state=active]:text-white group-hover:text-blue-700 font-semibold">Templates</span>
+              <FileText className="w-4 h-4 group-data-[state=active]:text-blue-600 group-hover:text-sky-300" />
+              <span className="group-data-[state=active]:bg-gradient-to-r group-data-[state=active]:from-blue-600 group-data-[state=active]:via-cyan-500 group-data-[state=active]:to-blue-600 group-data-[state=active]:bg-clip-text group-data-[state=active]:text-transparent group-hover:text-sky-300">Templates</span>
             </TabsTrigger>
             <TabsTrigger 
               value="achievements" 
-              className="flex items-center gap-3 px-8 py-4 text-sm font-medium text-gray-600 rounded-none border-b-2 border-transparent hover:text-blue-700 hover:border-blue-200 data-[state=active]:text-white data-[state=active]:border-blue-500 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-700 data-[state=active]:shadow-sm transition-all duration-300 whitespace-nowrap relative group"
+              className="flex items-center gap-3 px-8 py-4 text-sm font-medium text-gray-600 rounded-none border-b-2 border-transparent hover:text-sky-300 hover:border-sky-100 data-[state=active]:text-blue-600 data-[state=active]:border-blue-500 data-[state=active]:bg-transparent data-[state=active]:shadow-sm transition-all duration-300 whitespace-nowrap relative group"
             >
-              <Trophy className="w-4 h-4 group-data-[state=active]:text-white group-hover:text-blue-700" />
-              <span className="group-data-[state=active]:text-white group-hover:text-blue-700 font-semibold">Performance</span>
+              <Trophy className="w-4 h-4 group-data-[state=active]:text-blue-600 group-hover:text-sky-300" />
+              <span className="group-data-[state=active]:bg-gradient-to-r group-data-[state=active]:from-blue-600 group-data-[state=active]:via-cyan-500 group-data-[state=active]:to-blue-600 group-data-[state=active]:bg-clip-text group-data-[state=active]:text-transparent group-hover:text-sky-300">Performance</span>
             </TabsTrigger>
           </TabsList>
 
@@ -198,7 +197,7 @@ export default function Dashboard() {
             </TabsContent>
 
             <TabsContent value="practice-alt" className="space-y-8 pb-16">
-              <UnifiedPracticePage />
+              <SimplifiedPracticePage />
             </TabsContent>
 
             <TabsContent value="templates" className="space-y-6">

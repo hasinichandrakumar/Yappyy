@@ -590,67 +590,37 @@ export default function FixedPracticePage() {
           </Card>
         </div>
 
-        {/* Sidebar - Made more compact */}
-        <div className="space-y-3 h-fit">
+        {/* Sidebar */}
+        <div className="space-y-4">
           {/* Session Goals */}
           <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm flex items-center gap-2">
-                <Target className="h-4 w-4 text-blue-600" />
-                Live AI Coach
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Target className="h-5 w-5 text-blue-600" />
+                Session Goals
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="space-y-1">
-                <div className="flex justify-between text-xs">
-                  <span>Reduce Fillers</span>
+            <CardContent className="space-y-3">
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Reduce Filler Words</span>
                   <span>{Math.max(0, 10 - liveMetrics.fillerWords)}/10</span>
                 </div>
-                <Progress value={Math.max(0, (10 - liveMetrics.fillerWords) * 10)} className="h-2" />
+                <Progress value={Math.max(0, (10 - liveMetrics.fillerWords) * 10)} />
               </div>
-              <div className="space-y-1">
-                <div className="flex justify-between text-xs">
-                  <span>Eye Contact</span>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Maintain Eye Contact</span>
                   <span>{Math.round(liveMetrics.eyeContact)}%</span>
                 </div>
-                <Progress value={liveMetrics.eyeContact} className="h-2" />
+                <Progress value={liveMetrics.eyeContact} />
               </div>
-              <div className="space-y-1">
-                <div className="flex justify-between text-xs">
-                  <span>Pace (140-160 WPM)</span>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Optimal Pace (140-160 WPM)</span>
                   <span>{liveMetrics.wpm >= 140 && liveMetrics.wpm <= 160 ? '✓' : liveMetrics.wpm}</span>
                 </div>
-                <Progress value={liveMetrics.wpm >= 140 && liveMetrics.wpm <= 160 ? 100 : Math.min(100, (liveMetrics.wpm / 160) * 100)} className="h-2" />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Live Statistics - Compact version */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm flex items-center gap-2">
-                <Activity className="h-4 w-4 text-blue-600" />
-                Live Statistics
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="grid grid-cols-2 gap-2">
-                <div className="text-center p-2 bg-blue-50 rounded">
-                  <div className="text-lg font-bold text-blue-600">{liveMetrics.wpm}</div>
-                  <div className="text-xs text-gray-600">WPM</div>
-                </div>
-                <div className="text-center p-2 bg-purple-50 rounded">
-                  <div className="text-lg font-bold text-purple-600">{liveMetrics.fillerWords}</div>
-                  <div className="text-xs text-gray-600">Fillers</div>
-                </div>
-                <div className="text-center p-2 bg-green-50 rounded">
-                  <div className="text-lg font-bold text-green-600">{Math.round(liveMetrics.eyeContact)}%</div>
-                  <div className="text-xs text-gray-600">Eye Contact</div>
-                </div>
-                <div className="text-center p-2 bg-orange-50 rounded">
-                  <div className="text-lg font-bold text-orange-600">{liveMetrics.wordCount}</div>
-                  <div className="text-xs text-gray-600">Words</div>
-                </div>
+                <Progress value={liveMetrics.wpm >= 140 && liveMetrics.wpm <= 160 ? 100 : Math.min(100, (liveMetrics.wpm / 160) * 100)} />
               </div>
             </CardContent>
           </Card>

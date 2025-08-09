@@ -2090,16 +2090,16 @@ export default function SimplifiedPracticePage() {
             </div>
 
             {/* Right Side - Live AI Coaching Tips (1/3 width) */}
-            <div className="lg:col-span-1 space-y-4 flex flex-col justify-start items-center relative h-fit">
+            <div className="lg:col-span-1 space-y-6 flex flex-col justify-center items-center relative">
               {showLiveMetrics && (
                 <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm rounded-xl sticky top-24 w-full max-w-sm z-10">
-                  <CardHeader className="pb-3">
+                  <CardHeader className="pb-4">
                     <CardTitle className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <Activity className="w-4 h-4 text-blue-600" />
-                        <span className="text-blue-800 font-medium text-sm">Live AI Coach</span>
+                        <Activity className="w-5 h-5 text-blue-600" />
+                        <span className="text-blue-800 font-semibold">Live AI Coach</span>
                         {isRecording && (
-                          <Badge variant="secondary" className="ml-2 bg-green-100 text-green-800 border-green-200 text-xs">
+                          <Badge variant="secondary" className="ml-2 bg-green-100 text-green-800 border-green-200">
                             <Activity className="w-3 h-3 mr-1" />
                             Active
                           </Badge>
@@ -2109,19 +2109,19 @@ export default function SimplifiedPracticePage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => setShowLiveMetrics(false)}
-                        className="text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-all duration-200 h-6 w-6 p-0"
+                        className="text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-all duration-200"
                       >
                         ×
                       </Button>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="space-y-3 max-h-60 overflow-y-auto">
+                  <CardContent>
+                    <div className="space-y-4 max-h-80 overflow-y-auto">
                       {liveFeedback.length > 0 ? (
-                        liveFeedback.slice(-4).map((feedback) => (
+                        liveFeedback.slice(-6).map((feedback) => (
                           <div
                             key={feedback.id}
-                            className={`p-3 rounded-lg border-l-4 shadow-sm text-xs ${
+                            className={`p-4 rounded-xl border-l-4 shadow-sm ${
                               feedback.type === 'success' 
                                 ? 'bg-green-50 border-green-400 text-green-800' 
                                 : feedback.type === 'warning'
@@ -2129,16 +2129,16 @@ export default function SimplifiedPracticePage() {
                                 : 'bg-blue-50 border-blue-400 text-blue-800'
                             }`}
                           >
-                            <p className="font-medium leading-relaxed">{feedback.message}</p>
+                            <p className="text-sm font-medium leading-relaxed">{feedback.message}</p>
                           </div>
                         ))
                       ) : (
-                        <div className="text-center text-gray-500 py-8">
-                          <div className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
-                            <Activity className="w-6 h-6 text-gray-400" />
+                        <div className="text-center text-gray-500 py-12">
+                          <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Activity className="w-8 h-8 text-gray-400" />
                           </div>
-                          <p className="text-xs font-medium mb-1">Ready for Coaching</p>
-                          <p className="text-xs text-gray-400">Start recording to receive tips</p>
+                          <p className="text-sm font-medium mb-1">Ready for Coaching</p>
+                          <p className="text-xs text-gray-400">Start recording to receive live coaching tips</p>
                         </div>
                       )}
                     </div>
@@ -2146,36 +2146,36 @@ export default function SimplifiedPracticePage() {
                 </Card>
               )}
 
-              {/* Essential Live Metrics - Smaller and positioned under AI Coach */}
+              {/* Essential Live Metrics - Next to Video */}
               <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm rounded-xl w-full max-w-sm">
-                <CardHeader className="pb-2">
-                  <CardTitle className="flex items-center justify-center gap-2 text-sm">
-                    <BarChart3 className="w-4 h-4 text-blue-600" />
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center justify-center gap-2 text-lg">
+                    <BarChart3 className="w-5 h-5 text-blue-600" />
                     Live Statistics
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-4">
-                  <div className="space-y-4">
-                    <div className={`text-center p-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200 transition-all duration-300 hover:shadow-md ${metrics.wordsPerMinute > 0 ? 'shadow-sm' : ''}`}>
-                      <div className="flex justify-center mb-1">
-                        <TrendingUp className="w-4 h-4 text-blue-500" />
+                <CardContent className="p-6">
+                  <div className="space-y-8">
+                    <div className={`text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200 transition-all duration-300 hover:shadow-lg hover:scale-105 ${metrics.wordsPerMinute > 0 ? 'shadow-md' : ''}`}>
+                      <div className="flex justify-center mb-2">
+                        <TrendingUp className="w-6 h-6 text-blue-500" />
                       </div>
-                      <div className={`text-2xl font-bold text-blue-600 mb-1 ${metrics.wordsPerMinute > 0 ? 'animate-pulse' : ''}`}>{metrics.wordsPerMinute}</div>
-                      <div className="text-xs text-gray-700 font-medium uppercase tracking-wide">WPM</div>
+                      <div className={`text-5xl font-bold text-blue-600 mb-2 ${metrics.wordsPerMinute > 0 ? 'animate-pulse' : ''}`}>{metrics.wordsPerMinute}</div>
+                      <div className="text-sm text-gray-700 font-semibold uppercase tracking-wide">Words Per Minute</div>
                     </div>
-                    <div className={`text-center p-3 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200 transition-all duration-300 hover:shadow-md ${metrics.fillerWordCount > 0 ? 'shadow-sm' : ''}`}>
-                      <div className="flex justify-center mb-1">
-                        <AlertTriangle className="w-4 h-4 text-purple-500" />
+                    <div className={`text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200 transition-all duration-300 hover:shadow-lg hover:scale-105 ${metrics.fillerWordCount > 0 ? 'shadow-md' : ''}`}>
+                      <div className="flex justify-center mb-2">
+                        <AlertTriangle className="w-6 h-6 text-purple-500" />
                       </div>
-                      <div className={`text-2xl font-bold text-purple-600 mb-1 ${metrics.fillerWordCount > 0 ? 'animate-pulse' : ''}`}>{metrics.fillerWordCount}</div>
-                      <div className="text-xs text-gray-700 font-medium uppercase tracking-wide">Fillers</div>
+                      <div className={`text-5xl font-bold text-purple-600 mb-2 ${metrics.fillerWordCount > 0 ? 'animate-pulse' : ''}`}>{metrics.fillerWordCount}</div>
+                      <div className="text-sm text-gray-700 font-semibold uppercase tracking-wide">Filler Words</div>
                     </div>
-                    <div className={`text-center p-3 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200 transition-all duration-300 hover:shadow-md ${metrics.eyeContact > 0 ? 'shadow-sm' : ''}`}>
-                      <div className="flex justify-center mb-1">
-                        <Eye className="w-4 h-4 text-green-500" />
+                    <div className={`text-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200 transition-all duration-300 hover:shadow-lg hover:scale-105 ${metrics.eyeContact > 0 ? 'shadow-md' : ''}`}>
+                      <div className="flex justify-center mb-2">
+                        <Eye className="w-6 h-6 text-green-500" />
                       </div>
-                      <div className={`text-2xl font-bold text-green-600 mb-1 ${metrics.eyeContact > 0 ? 'animate-pulse' : ''}`}>{Math.round(metrics.eyeContact)}%</div>
-                      <div className="text-xs text-gray-700 font-medium uppercase tracking-wide">Eye Contact</div>
+                      <div className={`text-5xl font-bold text-green-600 mb-2 ${metrics.eyeContact > 0 ? 'animate-pulse' : ''}`}>{Math.round(metrics.eyeContact)}%</div>
+                      <div className="text-sm text-gray-700 font-semibold uppercase tracking-wide">Eye Contact</div>
                     </div>
                   </div>
                 </CardContent>
