@@ -32,9 +32,10 @@ const getCurrentDomain = (req?: any) => {
 
 // Get appropriate callback URL based on environment
 const getCallbackURL = (req?: any) => {
-  // Use dynamic callback URL based on current domain
-  const currentDomain = getCurrentDomain(req);
-  return `${currentDomain}/oauth2callback`;
+  // Use fixed domain for OAuth callback (easier to manage in Google Cloud Console)
+  // You can change this to your preferred domain
+  const fixedDomain = 'https://yappyy.com';
+  return `${fixedDomain}/auth/google/callback`;
 };
 
 export function getSession() {
@@ -129,7 +130,7 @@ export async function setupGoogleAuth(app: Express) {
   });
 
   // Handle the OAuth callback route - redirect to dashboard
-  app.get('/oauth2callback', (req, res, next) => {
+  app.get('/auth/google/callback', (req, res, next) => {
     console.log('🔄 OAuth callback received');
     console.log('  - Request URL:', req.url);
     console.log('  - Request host:', req.get('host'));
