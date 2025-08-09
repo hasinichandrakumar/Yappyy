@@ -33,6 +33,11 @@ export default function Dashboard() {
   const [showReturningWelcome, setShowReturningWelcome] = useState(false);
   const { user } = useAuth();
 
+  // Set document title
+  useEffect(() => {
+    document.title = "Dashboard | yappyy.com";
+  }, []);
+
   const { logout } = useAuth();
 
   // Check if user needs onboarding dialogs based on new system
