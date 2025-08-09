@@ -1,5 +1,5 @@
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+// jspdf-autotable removed to avoid deployment issues
 
 // Add Poppins font support
 const poppinsFont = {
@@ -393,33 +393,8 @@ export class EnhancedPDFExport {
       this.currentY += spacing.gap;
     }
     
-    (this.pdf as any).autoTable({
-      head: [headers],
-      body: data,
-      startY: this.currentY,
-      margin: { left: spacing.margin, right: spacing.margin },
-      headStyles: {
-        fillColor: colors.primary,
-        textColor: [255, 255, 255],
-        fontStyle: 'bold',
-        fontSize: 11,
-      },
-      alternateRowStyles: {
-        fillColor: colors.background.secondary,
-      },
-      styles: {
-        font: this.theme.fonts.primary,
-        fontSize: 10,
-        cellPadding: 8,
-        lineColor: colors.border.light,
-        lineWidth: 0.5,
-      },
-      columnStyles: {
-        0: { fontStyle: 'bold' },
-      },
-    });
-    
-    this.currentY = (this.pdf as any).lastAutoTable.finalY + spacing.gap;
+    // Create native table using jsPDF drawing methods
+    this.addNativeTable(headers, data, colors, spacing);
   }
 
   protected addProgressBar(label: string, value: number, maxValue: number = 100, color: number[] = this.theme.colors.primary): void {
@@ -499,6 +474,52 @@ export class EnhancedPDFExport {
     this.pdf.line(spacing.margin, this.currentY, this.pageWidth - spacing.margin, this.currentY);
     
     this.currentY += spacing.gap;
+  }
+
+  protected addNativeTable(headers: string[], data: string[][], colors: any, spacing: any): void {
+    const colWidth = (this.pageWidth - (spacing.margin * 2)) / headers.length;
+    const rowHeight = 12;
+    let yPos = this.currentY;
+
+    // Draw header
+    this.pdf.setFillColor(colors.primary[0], colors.primary[1], colors.primary[2]);
+    this.pdf.rect(spacing.margin, yPos, this.pageWidth - (spacing.margin * 2), rowHeight, 'F');
+    
+    this.pdf.setTextColor(255, 255, 255);
+    this.pdf.setFont('helvetica', 'bold');
+    this.pdf.setFontSize(11);
+    
+    headers.forEach((header, i) => {
+      this.pdf.text(header, spacing.margin + (i * colWidth) + 4, yPos + 8);
+    });
+    
+    yPos += rowHeight;
+
+    // Draw data rows
+    this.pdf.setTextColor(colors.text.primary[0], colors.text.primary[1], colors.text.primary[2]);
+    this.pdf.setFont('helvetica', 'normal');
+    this.pdf.setFontSize(10);
+    
+    data.forEach((row, rowIndex) => {
+      // Alternate row colors
+      if (rowIndex % 2 === 1) {
+        this.pdf.setFillColor(colors.background.secondary[0], colors.background.secondary[1], colors.background.secondary[2]);
+        this.pdf.rect(spacing.margin, yPos, this.pageWidth - (spacing.margin * 2), rowHeight, 'F');
+      }
+      
+      row.forEach((cell, colIndex) => {
+        if (colIndex === 0) {
+          this.pdf.setFont('helvetica', 'bold');
+        } else {
+          this.pdf.setFont('helvetica', 'normal');
+        }
+        this.pdf.text(String(cell), spacing.margin + (colIndex * colWidth) + 4, yPos + 8);
+      });
+      
+      yPos += rowHeight;
+    });
+
+    this.currentY = yPos + spacing.gap;
   }
 
   public async downloadPDF(filename: string): Promise<void> {
