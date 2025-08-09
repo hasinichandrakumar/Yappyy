@@ -8,6 +8,7 @@ import { Mic, BarChart3, Brain, FileText, Trophy, Target, User, Home, Settings, 
 import { useAuth } from "@/hooks/useAuth";
 import SimplifiedPracticePage from "@/components/SimplifiedPracticePage";
 import AICoachRedesigned from "@/components/AICoachRedesigned";
+import UnifiedPracticePage from "@/components/UnifiedPracticePage";
 import PersonalizedSpeechDNA from "@/components/PersonalizedSpeechDNA";
 import EnhancedTemplateMarketplace from "@/components/EnhancedTemplateMarketplace";
 import ImprovedBadgeSystem from "@/components/ImprovedBadgeSystem";
@@ -87,10 +88,10 @@ export default function Dashboard() {
       {/* Professional Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-14">
             <div className="flex items-center space-x-3">
               <button onClick={() => window.location.href = '/'} className="hover:opacity-80 transition-opacity">
-                <img src={yappyyLogoPath} alt="Yappyy" className="h-8" />
+                <img src={yappyyLogoPath} alt="Yappyy" className="h-7" />
               </button>
             </div>
             
@@ -197,7 +198,7 @@ export default function Dashboard() {
             </TabsContent>
 
             <TabsContent value="practice-alt" className="space-y-8 pb-16">
-              <SimplifiedPracticePage />
+              <UnifiedPracticePage />
             </TabsContent>
 
             <TabsContent value="templates" className="space-y-6">

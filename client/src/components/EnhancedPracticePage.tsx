@@ -1930,44 +1930,44 @@ export default function EnhancedPracticePage() {
             </Card>
           </div>
 
-          {/* Live Feedback Box */}
-          <div className="fixed right-4 top-4 w-96 bg-white rounded-lg shadow-lg overflow-hidden">
+          {/* Live Feedback Box - Made smaller and more compact */}
+          <div className="fixed right-4 top-4 w-80 bg-white rounded-lg shadow-lg overflow-hidden max-h-[70vh]">
             {/* Header */}
-            <div className="bg-blue-600 text-white px-4 py-3">
-              <h2 className="text-lg font-semibold">Live AI Feedback</h2>
+            <div className="bg-blue-600 text-white px-3 py-2">
+              <h2 className="text-sm font-semibold">Live AI Coach</h2>
             </div>
 
             {/* Metrics Overview */}
-            <div className="p-4 border-b border-gray-200">
-              <div className="grid grid-cols-2 gap-4">
+            <div className="p-3 border-b border-gray-200">
+              <div className="grid grid-cols-2 gap-2">
                 {/* WPM */}
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <div className="text-sm text-gray-500">Speaking Rate</div>
-                  <div className="text-xl font-semibold">
-                    {metrics.content.wpmData.currentWPM} WPM
+                <div className="bg-gray-50 p-2 rounded text-center">
+                  <div className="text-xs text-gray-500">WPM</div>
+                  <div className="text-lg font-semibold">
+                    {metrics.content.wpmData.currentWPM}
                   </div>
                 </div>
 
                 {/* Eye Contact */}
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <div className="text-sm text-gray-500">Eye Contact</div>
-                  <div className="text-xl font-semibold">
+                <div className="bg-gray-50 p-2 rounded text-center">
+                  <div className="text-xs text-gray-500">Eye Contact</div>
+                  <div className="text-lg font-semibold">
                     {Math.round(metrics.bodyLanguage.eyeContactScore)}%
                   </div>
                 </div>
 
                 {/* Confidence */}
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <div className="text-sm text-gray-500">Confidence</div>
-                  <div className="text-xl font-semibold">
+                <div className="bg-gray-50 p-2 rounded text-center">
+                  <div className="text-xs text-gray-500">Confidence</div>
+                  <div className="text-lg font-semibold">
                     {Math.round(metrics.emotion.confidence)}%
                   </div>
                 </div>
 
                 {/* Filler Words */}
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <div className="text-sm text-gray-500">Filler Words</div>
-                  <div className="text-xl font-semibold">
+                <div className="bg-gray-50 p-2 rounded text-center">
+                  <div className="text-xs text-gray-500">Fillers</div>
+                  <div className="text-lg font-semibold">
                     {metrics.content.fillerWords.length}
                   </div>
                 </div>
@@ -1975,7 +1975,7 @@ export default function EnhancedPracticePage() {
             </div>
 
             {/* Live Feedback Messages */}
-            <div className="p-4 max-h-64 overflow-y-auto">
+            <div className="p-3 max-h-48 overflow-y-auto">
               {liveFeedback.length > 0 ? (
                 <ul className="space-y-3">
                   {liveFeedback.map((msg, index) => (
