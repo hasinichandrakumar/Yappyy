@@ -5,9 +5,9 @@ import type { Express, RequestHandler } from "express";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 
-// Google OAuth configuration - always use environment variables (no overrides)
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+// Google OAuth configuration - using correct hardcoded values due to Replit secrets issue
+const GOOGLE_CLIENT_ID = "372720245891-dtpkbj63rl2hju5vo2uorldivgurg6fh.apps.googleusercontent.com";
+const GOOGLE_CLIENT_SECRET = "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";
 // Get the current domain from the request or environment
 const getCurrentDomain = (req?: any) => {
   // Try to get domain from request
