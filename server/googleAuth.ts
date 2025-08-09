@@ -5,9 +5,9 @@ import type { Express, RequestHandler } from "express";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 
-// Google OAuth configuration - using correct hardcoded values due to Replit secrets issue
-const GOOGLE_CLIENT_ID = "372720245891-dtpkbj63rl2hju5vo2uorldivgurg6fh.apps.googleusercontent.com";
-const GOOGLE_CLIENT_SECRET = "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";
+// Google OAuth configuration - using environment variables
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 // Get the current domain from the request or environment
 const getCurrentDomain = (req?: any) => {
   // Try to get domain from request
@@ -32,9 +32,24 @@ const getCurrentDomain = (req?: any) => {
 
 // Get appropriate callback URL based on environment
 const getCallbackURL = (req?: any) => {
-  // Use fixed domain for OAuth callback
-  const fixedDomain = 'https://yappyy.com';
-  return `${fixedDomain}/auth/google/callback`;
+  // In production, use the production domain
+  if (process.env.NODE_ENV === 'production') {
+    return 'https://yappyy.com/auth/google/callback';
+  }
+  
+  // For development, use the current domain from the request
+  if (req?.get('host')) {
+    const protocol = req.get('x-forwarded-proto') || req.protocol || 'https';
+    return `${protocol}://${req.get('host')}/auth/google/callback`;
+  }
+  
+  // Fallback for Replit domains
+  if (process.env.REPLIT_DOMAINS) {
+    const domains = process.env.REPLIT_DOMAINS.split(',');
+    return `https://${domains[0]}/auth/google/callback`;
+  }
+  
+  return 'http://localhost:5000/auth/google/callback';
 };
 
 export function getSession() {
@@ -91,7 +106,7 @@ export async function setupGoogleAuth(app: Express) {
     passport.use(new GoogleStrategy({
       clientID: GOOGLE_CLIENT_ID,
       clientSecret: GOOGLE_CLIENT_SECRET,
-      callbackURL: defaultCallbackURL, // This will be dynamically overridden
+      callbackURL: '/auth/google/callback', // Use relative path for flexibility
       scope: ['profile', 'email']
     }, async (accessToken, refreshToken, profile, done) => {
       try {
