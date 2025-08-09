@@ -10,19 +10,31 @@ const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 // Get the current domain from the request or environment
 const getCurrentDomain = (req?: any) => {
+  // Try to get domain from request
   if (req?.get('host')) {
-    return req.protocol + '://' + req.get('host');
+    const protocol = req.get('x-forwarded-proto') || req.protocol || 'https';
+    return `${protocol}://${req.get('host')}`;
   }
+  
+  // Check for Replit deployment domain
+  if (process.env.REPLIT_DOMAINS) {
+    const domains = process.env.REPLIT_DOMAINS.split(',');
+    return `https://${domains[0]}`;
+  }
+  
+  // Fallback for development
   if (process.env.REPLIT_DEV_DOMAIN) {
     return `https://${process.env.REPLIT_DEV_DOMAIN}`;
   }
+  
   return 'http://localhost:5000';
 };
 
 // Get appropriate callback URL based on environment
 const getCallbackURL = (req?: any) => {
-  // Always use yappyy.com for OAuth callbacks regardless of access domain
-  return 'https://yappyy.com/oauth2callback';
+  // Use dynamic callback URL based on current domain
+  const currentDomain = getCurrentDomain(req);
+  return `${currentDomain}/oauth2callback`;
 };
 
 export function getSession() {
@@ -66,20 +78,20 @@ export async function setupGoogleAuth(app: Express) {
     done(null, user);
   });
 
-  // Google OAuth Strategy - dynamic callback URL
+  // Google OAuth Strategy - use a generic callback that will be overridden per request
   if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
-    // Use dynamic callback URL based on the request domain
-    const callbackURL = getCallbackURL();
+    // Use a default callback URL that will be dynamically overridden
+    const defaultCallbackURL = '/oauth2callback';
       
     console.log('🔧 Google OAuth Strategy Configuration:');
     console.log('  - Client ID:', GOOGLE_CLIENT_ID?.substring(0, 20) + '...');
-    console.log('  - Callback URL:', callbackURL);
+    console.log('  - Default Callback URL:', defaultCallbackURL);
     console.log('  - Scopes: profile, email');
     
     passport.use(new GoogleStrategy({
       clientID: GOOGLE_CLIENT_ID,
       clientSecret: GOOGLE_CLIENT_SECRET,
-      callbackURL: callbackURL,
+      callbackURL: defaultCallbackURL, // This will be dynamically overridden
       scope: ['profile', 'email']
     }, async (accessToken, refreshToken, profile, done) => {
       try {

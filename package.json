@@ -92,7 +92,7 @@
     "node-nlp": "^5.0.0-alpha.5",
     "openai": "^5.10.1",
     "opencv.js": "^1.2.1",
-    "openid-client": "^6.6.2",
+    "openid-client": "^6.6.3",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "passport-local": "^1.0.0",
