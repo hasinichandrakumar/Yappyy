@@ -1,6 +1,6 @@
 // PDF Export System for Analysis Reports
 import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import 'jspdf-autotable';
 
 // Enhanced PDF export with Poppins font support and modern styling
 export class PDFExport {

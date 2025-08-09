@@ -400,16 +400,6 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(aiInsights.createdAt));
   }
 
-  // User profile operations
-  async updateUserProfile(userId: string, updates: Partial<UpsertUser>): Promise<User> {
-    const [user] = await db
-      .update(users)
-      .set({ ...updates, updatedAt: new Date() })
-      .where(eq(users.id, userId))
-      .returning();
-    return user;
-  }
-
   // User preferences operations
   async getUserPreferences(userId: string): Promise<UserPreference[]> {
     const preferences = await db.select().from(userPreferences).where(eq(userPreferences.userId, userId));

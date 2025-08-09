@@ -300,21 +300,6 @@ class PersonalizedAICoach {
     };
   }
 
-  // Calculate improvement velocity from session progression
-  private calculateImprovementVelocity(sessions: PracticeSession[]): number {
-    if (sessions.length < 3) return 0.5;
-    
-    const recent = sessions.slice(-3);
-    const older = sessions.slice(-6, -3);
-    
-    if (older.length === 0) return 0.6;
-    
-    const recentAvg = recent.reduce((sum, s) => sum + (s.confidenceScore || 0.7), 0) / recent.length;
-    const olderAvg = older.reduce((sum, s) => sum + (s.confidenceScore || 0.7), 0) / older.length;
-    
-    return Math.min(Math.max((recentAvg - olderAvg) + 0.5, 0), 1);
-  }
-
   // Generate coaching strategy using neural network prediction
   private generateCoachingStrategy(features: UserFeatureVector, weights: NeuralWeights): {
     strategy: string;
