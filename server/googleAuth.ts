@@ -32,10 +32,9 @@ const getCurrentDomain = (req?: any) => {
 
 // Get appropriate callback URL based on environment
 const getCallbackURL = (req?: any) => {
-  // Use fixed domain for OAuth callback (easier to manage in Google Cloud Console)
-  // You can change this to your preferred domain
-  const fixedDomain = 'https://yappyy.com';
-  return `${fixedDomain}/auth/google/callback`;
+  // Use dynamic domain based on current request/environment
+  const currentDomain = getCurrentDomain(req);
+  return `${currentDomain}/auth/google/callback`;
 };
 
 export function getSession() {
