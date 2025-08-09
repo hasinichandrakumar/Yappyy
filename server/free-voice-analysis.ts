@@ -1,4 +1,5 @@
 // Free Voice Analysis Engine - Using Open Source Libraries
+// @ts-ignore - node-nlp doesn't have TypeScript types
 import { NlpManager } from 'node-nlp';
 
 interface FreeVoiceAnalysis {
@@ -111,7 +112,7 @@ export class FreeVoiceAnalysisEngine {
         sentiment: {
           score: emotions.joy > 0.5 ? emotions.joy : -emotions.sadness,
           label: this.getDominantEmotion(emotions),
-          confidence: Math.max(...Object.values(emotions))
+          confidence: Math.max(...Object.values(emotions) as number[])
         },
         emotions,
         confidence: this.calculateConfidenceFromEmotions(emotions),

@@ -87,35 +87,10 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // Use environment port or find available port
-  const preferredPort = parseInt(process.env.PORT || "5000");
+  // Use fixed port 5000 for consistent deployment
+  const port = parseInt(process.env.PORT || "5000");
   
-  // Function to find available port
-  const findAvailablePort = (startPort: number): Promise<number> => {
-    return new Promise((resolve, reject) => {
-      const testServer = server.listen(startPort, "0.0.0.0", () => {
-        const actualPort = (testServer.address() as any)?.port || startPort;
-        testServer.close(() => resolve(actualPort));
-      });
-      
-      testServer.on('error', (err: any) => {
-        if (err.code === 'EADDRINUSE') {
-          // Try next port
-          findAvailablePort(startPort + 1).then(resolve).catch(reject);
-        } else {
-          reject(err);
-        }
-      });
-    });
-  };
-
-  try {
-    const availablePort = await findAvailablePort(preferredPort);
-    server.listen(availablePort, "0.0.0.0", () => {
-      log(`serving on port ${availablePort}`);
-    });
-  } catch (error) {
-    log(`Failed to start server: ${error}`);
-    process.exit(1);
-  }
+  server.listen(port, "0.0.0.0", () => {
+    log(`serving on port ${port}`);
+  });
 })();
