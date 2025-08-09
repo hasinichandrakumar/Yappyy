@@ -1,15 +1,8 @@
 // PDF Export System for Analysis Reports  
 import { jsPDF } from 'jspdf';
 
-// Standard import - this should work with proper build configuration
-import 'jspdf-autotable';
-
-// Type declaration for autoTable method
-declare module 'jspdf' {
-  interface jsPDF {
-    autoTable: (options: any) => jsPDF;
-  }
-}
+// Note: jspdf-autotable removed to avoid deployment issues
+// Using native jsPDF features for table creation instead
 
 // Enhanced PDF export with Poppins font support and modern styling
 export class PDFExport {
