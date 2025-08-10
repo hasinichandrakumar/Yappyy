@@ -3,8 +3,8 @@ import AdvancedContentAnalysis from '@/components/AdvancedContentAnalysis';
 
 const ContentAnalysisPage: React.FC = () => {
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div>
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white mb-4">
             Advanced Content Analysis
@@ -16,7 +16,6 @@ const ContentAnalysisPage: React.FC = () => {
         </div>
         
         <AdvancedContentAnalysis />
-      </div>
     </div>
   );
 };

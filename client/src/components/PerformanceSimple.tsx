@@ -1,19 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Flame, Trophy, Crown, Award, CalendarDays, RefreshCw } from 'lucide-react';
-
-type Leader = {
-  id: string;
-  name: string;
-  points: number;
-  streak: number;
-};
+import { Progress } from '@/components/ui/progress';
+import { Flame, Target, CalendarDays, RefreshCw, CheckCircle, Clock } from 'lucide-react';
 
 const STORAGE_KEYS = {
   lastDate: 'practiceStreak.lastDate',
   current: 'practiceStreak.current',
   best: 'practiceStreak.best',
+  dailyGoal1: 'dailyGoals.goal1',
+  dailyGoal2: 'dailyGoals.goal2',
+  dailyGoal1Progress: 'dailyGoals.goal1Progress',
+  dailyGoal2Progress: 'dailyGoals.goal2Progress',
 };
 
 function getTodayISO(): string {
@@ -33,16 +31,58 @@ function getYesterdayISO(): string {
   return `${yyyy}-${mm}-${dd}`;
 }
 
+interface DailyGoal {
+  id: string;
+  title: string;
+  description: string;
+  target: number;
+  current: number;
+  unit: string;
+  icon: React.ReactNode;
+}
+
 export default function PerformanceSimple() {
   const [currentStreak, setCurrentStreak] = useState<number>(Number(localStorage.getItem(STORAGE_KEYS.current)) || 0);
   const [bestStreak, setBestStreak] = useState<number>(Number(localStorage.getItem(STORAGE_KEYS.best)) || 0);
   const [lastDate, setLastDate] = useState<string>(localStorage.getItem(STORAGE_KEYS.lastDate) || '');
   const [todayMarked, setTodayMarked] = useState<boolean>(false);
 
+  // Daily Goals State
+  const [dailyGoals, setDailyGoals] = useState<DailyGoal[]>([
+    {
+      id: 'practice-sessions',
+      title: 'Practice Sessions',
+      description: 'Complete practice sessions today',
+      target: 3,
+      current: Number(localStorage.getItem(STORAGE_KEYS.dailyGoal1Progress)) || 0,
+      unit: 'sessions',
+      icon: <Target className="w-5 h-5 text-blue-500" />
+    },
+    {
+      id: 'practice-minutes',
+      title: 'Practice Time',
+      description: 'Total minutes of practice today',
+      target: 15,
+      current: Number(localStorage.getItem(STORAGE_KEYS.dailyGoal2Progress)) || 0,
+      unit: 'minutes',
+      icon: <Clock className="w-5 h-5 text-green-500" />
+    }
+  ]);
+
   // Ensure today status derived from stored date
   useEffect(() => {
     const today = getTodayISO();
     setTodayMarked(lastDate === today);
+    
+    // Check if it's a new day and reset daily goals
+    const lastGoalDate = localStorage.getItem('dailyGoals.lastDate');
+    if (lastGoalDate !== today) {
+      // Reset daily goals for new day
+      setDailyGoals(prev => prev.map(goal => ({ ...goal, current: 0 })));
+      localStorage.setItem('dailyGoals.lastDate', today);
+      localStorage.setItem(STORAGE_KEYS.dailyGoal1Progress, '0');
+      localStorage.setItem(STORAGE_KEYS.dailyGoal2Progress, '0');
+    }
   }, [lastDate]);
 
   function markTodayPracticed(): void {
@@ -68,6 +108,9 @@ export default function PerformanceSimple() {
     localStorage.setItem(STORAGE_KEYS.current, String(nextStreak));
     localStorage.setItem(STORAGE_KEYS.best, String(nextBest));
     localStorage.setItem(STORAGE_KEYS.lastDate, today);
+
+    // Update practice sessions goal
+    updateGoalProgress('practice-sessions', 1);
   }
 
   function resetStreaks(): void {
@@ -80,20 +123,26 @@ export default function PerformanceSimple() {
     localStorage.removeItem(STORAGE_KEYS.lastDate);
   }
 
-  // Lightweight local leaderboard (mock). In a real app, fetch from backend
-  const leaderboard: Leader[] = useMemo(() => {
-    const me: Leader = { id: 'me', name: 'You', points: (bestStreak || 0) * 10 + (currentStreak || 0), streak: currentStreak || 0 };
-    const seeds: Leader[] = [
-      { id: 'l1', name: 'Alex', points: 140, streak: 7 },
-      { id: 'l2', name: 'Sam', points: 120, streak: 6 },
-      { id: 'l3', name: 'Jordan', points: 110, streak: 5 },
-      { id: 'l4', name: 'Taylor', points: 90, streak: 3 },
-    ];
-    const merged = [me, ...seeds];
-    return merged.sort((a, b) => b.points - a.points).slice(0, 10);
-  }, [bestStreak, currentStreak]);
+  function updateGoalProgress(goalId: string, increment: number): void {
+    setDailyGoals(prev => prev.map(goal => {
+      if (goal.id === goalId) {
+        const newCurrent = Math.min(goal.target, goal.current + increment);
+        // Save to localStorage
+        const storageKey = goalId === 'practice-sessions' ? STORAGE_KEYS.dailyGoal1Progress : STORAGE_KEYS.dailyGoal2Progress;
+        localStorage.setItem(storageKey, String(newCurrent));
+        return { ...goal, current: newCurrent };
+      }
+      return goal;
+    }));
+  }
 
-  const myRank = leaderboard.findIndex(l => l.id === 'me') + 1;
+  function getGoalProgress(goal: DailyGoal): number {
+    return Math.min(100, (goal.current / goal.target) * 100);
+  }
+
+  function isGoalCompleted(goal: DailyGoal): boolean {
+    return goal.current >= goal.target;
+  }
 
   return (
     <div className="space-y-6">
@@ -128,7 +177,7 @@ export default function PerformanceSimple() {
         <Card className="border border-yellow-200 bg-white/90 backdrop-blur-sm">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-lg">
-              <Award className="w-5 h-5 text-yellow-500" />
+              <Target className="w-5 h-5 text-yellow-500" />
               Quick Rewards
             </CardTitle>
           </CardHeader>
@@ -142,35 +191,84 @@ export default function PerformanceSimple() {
         </Card>
       </div>
 
-      {/* Leaderboard */}
-      <Card className="border border-purple-200 bg-white/90 backdrop-blur-sm">
+      {/* Daily Goals - Replacing Leaderboard */}
+      <Card className="border border-green-200 bg-white/90 backdrop-blur-sm">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-lg">
-            <Trophy className="w-5 h-5 text-purple-600" />
-            Leaderboard
-            <span className="ml-auto text-sm text-gray-500">Your rank: {myRank > 0 ? `#${myRank}` : '—'}</span>
+            <Target className="w-5 h-5 text-green-600" />
+            Daily Goals
+            <span className="ml-auto text-sm text-gray-500">
+              {dailyGoals.filter(isGoalCompleted).length} of {dailyGoals.length} completed
+            </span>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="divide-y">
-            {leaderboard.map((u, idx) => (
-              <div key={u.id} className={`flex items-center py-3 ${u.id === 'me' ? 'bg-blue-50/60 rounded-lg px-3 -mx-3' : ''}`}>
-                <div className="w-10 text-center mr-3">
-                  {idx < 3 ? (
-                    <Crown className={`w-5 h-5 ${idx === 0 ? 'text-yellow-500' : idx === 1 ? 'text-gray-400' : 'text-amber-700'}`} />
-                  ) : (
-                    <span className="text-sm text-gray-500">{idx + 1}</span>
-                  )}
+          <div className="space-y-4">
+            {dailyGoals.map((goal) => (
+              <div
+                key={goal.id}
+                className={`p-4 rounded-lg border transition-all duration-200 ${
+                  isGoalCompleted(goal) 
+                    ? 'border-green-300 bg-green-50' 
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    {goal.icon}
+                    <div>
+                      <h4 className="font-medium text-gray-900">{goal.title}</h4>
+                      <p className="text-sm text-gray-600">{goal.description}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {isGoalCompleted(goal) && (
+                      <CheckCircle className="w-5 h-5 text-green-600" />
+                    )}
+                    <span className="text-sm font-medium text-gray-700">
+                      {goal.current} / {goal.target} {goal.unit}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex-1 font-medium text-gray-800">{u.name}</div>
-                <div className="w-28 text-right">
-                  <span className="text-sm text-gray-600">Streak</span>
-                  <div className="text-base font-semibold">{u.streak}d</div>
+                
+                <div className="space-y-2">
+                  <Progress 
+                    value={getGoalProgress(goal)} 
+                    className={`h-2 ${isGoalCompleted(goal) ? 'bg-green-100' : ''}`}
+                  />
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>{Math.round(getGoalProgress(goal))}% complete</span>
+                    <span>
+                      {goal.target - goal.current > 0 
+                        ? `${goal.target - goal.current} ${goal.unit} remaining`
+                        : 'Goal achieved! 🎉'
+                      }
+                    </span>
+                  </div>
                 </div>
-                <div className="w-28 text-right">
-                  <span className="text-sm text-gray-600">Points</span>
-                  <div className="text-base font-semibold">{u.points}</div>
-                </div>
+
+                {!isGoalCompleted(goal) && (
+                  <div className="mt-3 flex gap-2">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => updateGoalProgress(goal.id, 1)}
+                      className="text-xs"
+                    >
+                      +1 {goal.unit}
+                    </Button>
+                    {goal.id === 'practice-minutes' && (
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => updateGoalProgress(goal.id, 5)}
+                        className="text-xs"
+                      >
+                        +5 minutes
+                      </Button>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -179,6 +277,3 @@ export default function PerformanceSimple() {
     </div>
   );
 }
-
-
-

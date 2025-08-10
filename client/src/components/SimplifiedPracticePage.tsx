@@ -1824,7 +1824,7 @@ export default function SimplifiedPracticePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 overflow-x-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 pb-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         
         {/* Header */}
         <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm">

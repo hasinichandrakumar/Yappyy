@@ -247,19 +247,19 @@ export default function Dashboard() {
             {/* Center navigation - revert to text-only with gradient on active via group styles */}
             <div className="flex-1 flex items-center justify-center">
               <TabsList className="bg-transparent border-0 shadow-none p-0 h-auto flex items-center gap-16">
-                <TabsTrigger value="practice-alt" className="px-5 py-3 rounded-full h-auto text-base font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-100/80 hover:shadow-sm transition-colors data-[state=active]:bg-transparent data-[state=active]:hover:bg-gray-100/90 data-[state=active]:bg-clip-text data-[state=active]:text-transparent data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-cyan-500 data-[state=active]:to-sky-400">
+                <TabsTrigger value="practice-alt" className="px-5 py-3 rounded-full h-auto text-base font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-100/80 hover:shadow-sm transition-colors data-[state=active]:bg-transparent data-[state=active]:hover:bg-gray-100/90 data-[state=active]:yappyy-gradient">
                   Practice
                 </TabsTrigger>
-                <TabsTrigger value="analysis" className="px-5 py-3 rounded-full h-auto text-base font-semibold tracking-wide text-gray-600 hover:text-gray-900 hover:bg-gray-100/80 hover:shadow-sm transition-colors data-[state=active]:bg-transparent data-[state=active]:hover:bg-gray-100/90 data-[state=active]:bg-clip-text data-[state=active]:text-transparent data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-cyan-500 data-[state=active]:to-sky-400">
+                <TabsTrigger value="analysis" className="px-5 py-3 rounded-full h-auto text-base font-semibold tracking-wide text-gray-600 hover:text-gray-900 hover:bg-gray-100/80 hover:shadow-sm transition-colors data-[state=active]:bg-transparent data-[state=active]:hover:bg-gray-100/90 data-[state=active]:yappyy-gradient">
                   Analytics
                 </TabsTrigger>
-                <TabsTrigger value="ai-coach" className="px-5 py-3 rounded-full h-auto text-base font-semibold tracking-wide text-gray-600 hover:text-gray-900 hover:bg-gray-100/80 hover:shadow-sm transition-colors data-[state=active]:bg-transparent data-[state=active]:hover:bg-gray-100/90 data-[state=active]:bg-clip-text data-[state=active]:text-transparent data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-cyan-500 data-[state=active]:to-sky-400">
+                <TabsTrigger value="ai-coach" className="px-5 py-3 rounded-full h-auto text-base font-semibold tracking-wide text-gray-600 hover:text-gray-900 hover:bg-gray-100/80 hover:shadow-sm transition-colors data-[state=active]:bg-transparent data-[state=active]:hover:bg-gray-100/90 data-[state=active]:yappyy-gradient">
                   AI Coach
                 </TabsTrigger>
-                <TabsTrigger value="templates" className="px-5 py-3 rounded-full h-auto text-base font-semibold tracking-wide text-gray-600 hover:text-gray-900 hover:bg-gray-100/80 hover:shadow-sm transition-colors data-[state=active]:bg-transparent data-[state=active]:hover:bg-gray-100/90 data-[state=active]:bg-clip-text data-[state=active]:text-transparent data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-cyan-500 data-[state=active]:to-sky-400">
+                <TabsTrigger value="templates" className="px-5 py-3 rounded-full h-auto text-base font-semibold tracking-wide text-gray-600 hover:text-gray-900 hover:bg-gray-100/80 hover:shadow-sm transition-colors data-[state=active]:bg-transparent data-[state=active]:hover:bg-gray-100/90 data-[state=active]:yappyy-gradient">
                   Templates
                 </TabsTrigger>
-                <TabsTrigger value="achievements" className="px-5 py-3 rounded-full h-auto text-base font-semibold tracking-wide text-gray-600 hover:text-gray-900 hover:bg-gray-100/80 hover:shadow-sm transition-colors data-[state=active]:bg-transparent data-[state=active]:hover:bg-gray-100/90 data-[state=active]:bg-clip-text data-[state=active]:text-transparent data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:via-cyan-500 data-[state=active]:to-sky-400">
+                <TabsTrigger value="achievements" className="px-5 py-3 rounded-full h-auto text-base font-semibold tracking-wide text-gray-600 hover:text-gray-900 hover:bg-gray-100/80 hover:shadow-sm transition-colors data-[state=active]:bg-transparent data-[state=active]:hover:bg-gray-100/90 data-[state=active]:yappyy-gradient">
                   Dashboard
                 </TabsTrigger>
               </TabsList>
@@ -344,18 +344,18 @@ export default function Dashboard() {
             <TabsContent value="achievements" className="space-y-6">
               {/* Dashboard Sub-Navigation */}
               <Tabs value={activeDashboardTab} onValueChange={setActiveDashboardTab} className="w-full">
-                <div className="border-b border-gray-200 mb-6">
-                  <TabsList className="bg-transparent border-0 shadow-none p-0 h-auto flex items-center gap-8">
+                <div className="mb-6">
+                  <TabsList className="bg-transparent border-0 shadow-none p-0 h-auto flex items-center gap-4">
                     <TabsTrigger 
                       value="performance" 
-                      className="px-4 py-3 rounded-none h-auto text-base font-medium text-gray-600 hover:text-gray-900 border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 data-[state=active]:bg-transparent"
+                      className="px-6 py-3 rounded-full h-auto text-base font-semibold border-2 transition-all duration-200 focus:outline-none text-gray-700 border-gray-300 hover:border-gray-400 hover:text-gray-900 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:border-blue-600 data-[state=active]:shadow-lg"
                     >
                       <TrendingUp className="w-4 h-4 mr-2" />
                       Performance
                     </TabsTrigger>
                     <TabsTrigger 
                       value="classroom" 
-                      className="px-4 py-3 rounded-none h-auto text-base font-medium text-gray-600 hover:text-gray-900 border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 data-[state=active]:bg-transparent"
+                      className="px-6 py-3 rounded-full h-auto text-base font-semibold border-2 transition-all duration-200 focus:outline-none text-gray-700 border-gray-300 hover:border-gray-400 hover:text-gray-900 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:border-blue-600 data-[state=active]:shadow-lg"
                     >
                       <School className="w-4 h-4 mr-2" />
                       Classroom
