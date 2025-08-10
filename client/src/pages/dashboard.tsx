@@ -4,7 +4,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Mic, BarChart3, Brain, FileText, Trophy, Target, User, Home, Settings, Shield, Star, BookOpen, PieChart } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Mic, BarChart3, Brain, FileText, Trophy, Target, User, Home, Settings, Shield, Star, BookOpen, PieChart, Users, School, TrendingUp, Calendar, Flame } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import SimplifiedPracticePage from "@/components/SimplifiedPracticePage";
 import AICoachRedesigned from "@/components/AICoachRedesigned";
@@ -25,8 +27,153 @@ import { DailyGoalsDialog } from "@/components/DailyGoalsDialog";
 
 import yappyyLogoPath from '@assets/Y-2-removebg-preview_1753384287580.png';
 
+// Dashboard Performance Tab Component
+function DashboardPerformanceTab() {
+  const [currentStreak, setCurrentStreak] = useState(0);
+  const [weeklyPractices, setWeeklyPractices] = useState(0);
+  const [dailyPractices, setDailyPractices] = useState(0);
+
+  useEffect(() => {
+    // Load streak data from localStorage
+    const storedStreak = localStorage.getItem('practiceStreak.current');
+    if (storedStreak) {
+      setCurrentStreak(parseInt(storedStreak));
+    }
+
+    // Calculate weekly and daily practices
+    const today = new Date();
+    const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
+    const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+
+    // Mock data for now - in real app, fetch from API
+    setWeeklyPractices(5);
+    setDailyPractices(2);
+  }, []);
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Current Streak */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Current Streak</CardTitle>
+            <Flame className="h-4 w-4 text-orange-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{currentStreak} days</div>
+            <p className="text-xs text-muted-foreground">
+              Keep practicing daily to maintain your streak!
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Weekly Practices */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Weekly Practices</CardTitle>
+            <Calendar className="h-4 w-4 text-blue-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{weeklyPractices}</div>
+            <p className="text-xs text-muted-foreground">
+              This week's practice sessions
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Daily Practices */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Daily Practices</CardTitle>
+            <Target className="h-4 w-4 text-green-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{dailyPractices}</div>
+            <p className="text-xs text-muted-foreground">
+              Today's practice sessions
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Enhanced Performance Analytics */}
+      <PerformanceSimple />
+    </div>
+  );
+}
+
+// Dashboard Classroom Tab Component
+function DashboardClassroomTab({ classroomCode, setClassroomCode }: { 
+  classroomCode: string; 
+  setClassroomCode: (code: string) => void; 
+}) {
+  const [joinedClassrooms, setJoinedClassrooms] = useState<string[]>([]);
+
+  const handleJoinClassroom = () => {
+    if (classroomCode.trim()) {
+      setJoinedClassrooms(prev => [...prev, classroomCode.trim()]);
+      setClassroomCode("");
+      // Here you would typically make an API call to join the classroom
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Join a Classroom
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex gap-3">
+            <Input
+              placeholder="Enter classroom code"
+              value={classroomCode}
+              onChange={(e) => setClassroomCode(e.target.value)}
+              className="flex-1"
+            />
+            <Button onClick={handleJoinClassroom} disabled={!classroomCode.trim()}>
+              Join
+            </Button>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Ask your teacher for the classroom code to join and track your progress together.
+          </p>
+        </CardContent>
+      </Card>
+
+      {joinedClassrooms.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>My Classrooms</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {joinedClassrooms.map((code, index) => (
+                <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">Classroom {code}</p>
+                    <p className="text-sm text-muted-foreground">Active</p>
+                  </div>
+                  <Button variant="outline" size="sm">
+                    View Details
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("practice-alt");
+  const [activeDashboardTab, setActiveDashboardTab] = useState("performance");
+  const [classroomCode, setClassroomCode] = useState("");
   const [showProfile, setShowProfile] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
@@ -195,7 +342,38 @@ export default function Dashboard() {
             </TabsContent>
 
             <TabsContent value="achievements" className="space-y-6">
-              <PerformanceSimple />
+              {/* Dashboard Sub-Navigation */}
+              <Tabs value={activeDashboardTab} onValueChange={setActiveDashboardTab} className="w-full">
+                <div className="border-b border-gray-200 mb-6">
+                  <TabsList className="bg-transparent border-0 shadow-none p-0 h-auto flex items-center gap-8">
+                    <TabsTrigger 
+                      value="performance" 
+                      className="px-4 py-3 rounded-none h-auto text-base font-medium text-gray-600 hover:text-gray-900 border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 data-[state=active]:bg-transparent"
+                    >
+                      <TrendingUp className="w-4 h-4 mr-2" />
+                      Performance
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="classroom" 
+                      className="px-4 py-3 rounded-none h-auto text-base font-medium text-gray-600 hover:text-gray-900 border-b-2 border-transparent data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 data-[state=active]:bg-transparent"
+                    >
+                      <School className="w-4 h-4 mr-2" />
+                      Classroom
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
+
+                <TabsContent value="performance" className="space-y-6">
+                  <DashboardPerformanceTab />
+                </TabsContent>
+
+                <TabsContent value="classroom" className="space-y-6">
+                  <DashboardClassroomTab 
+                    classroomCode={classroomCode}
+                    setClassroomCode={setClassroomCode}
+                  />
+                </TabsContent>
+              </Tabs>
             </TabsContent>
           </div>
 
