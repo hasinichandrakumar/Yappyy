@@ -949,22 +949,34 @@ Make the content more engaging, natural, and personalized while keeping the same
       - Scaffolding: Building complexity appropriately from foundational concepts
       `,
       'Job Interview': `
-      JOB INTERVIEW ANALYSIS FOCUS:
-      - Professional Presence: Did they project confidence and competence?
-      - Experience Articulation: How clearly did they explain their background?
-      - Company Knowledge: Did they demonstrate research and genuine interest?
-      - Question Responses: Were answers specific, relevant, and well-structured?
-      - Cultural Fit: Did they convey alignment with company values?
-      - Questions Asked: Did they ask thoughtful, engaging questions?
+      COMPREHENSIVE JOB INTERVIEW EFFECTIVENESS ANALYSIS:
+      - STAR Method Mastery: Systematic use of Situation, Task, Action, Result framework with quantified outcomes
+      - Cultural Alignment: Demonstration of company values understanding and personal fit assessment
+      - Professional Presence: Confidence level, enthusiasm authenticity, executive communication skills
+      - Achievement Storytelling: Quality of specific examples with measurable impact and relevance
+      - Strategic Questioning: Thoughtfulness of questions about role, team dynamics, and company trajectory
+      - Value Proposition Clarity: Articulation of unique skills, experiences, and potential contributions
+      - Industry Knowledge: Understanding of company challenges, market position, and competitive landscape
+      - Growth Mindset: Evidence of continuous learning, adaptability, and future development plans
+      - Problem-Solving Approach: Methodology for tackling challenges and decision-making processes
+      - Communication Clarity: Ability to explain complex concepts simply and persuasively
+      - Passion and Motivation: Genuine enthusiasm for the role and long-term career alignment
+      - Closing Strength: Professional follow-up approach and next steps articulation
       `,
       'Presentation': `
-      PRESENTATION ANALYSIS FOCUS:
-      - Structure & Flow: Was the presentation logically organized?
-      - Audience Engagement: Did they maintain interest and attention?
-      - Key Messages: Were main points clear and memorable?
-      - Supporting Evidence: Were facts, data, and examples effectively used?
-      - Visual Communication: How well did they complement any visual aids?
-      - Conclusion Impact: Did they end with a strong, memorable closing?
+      COMPREHENSIVE BUSINESS PRESENTATION ANALYSIS:
+      - Executive Structure: Clear introduction, logical flow, and powerful conclusion with action items
+      - Stakeholder Engagement: Audience-specific content addressing decision-maker concerns and priorities
+      - Data-Driven Arguments: Strategic use of metrics, analytics, and evidence to support recommendations
+      - Business Impact: Clear articulation of ROI, cost-benefit analysis, and measurable outcomes
+      - Risk Assessment: Acknowledgment of challenges with mitigation strategies and contingency planning
+      - Professional Delivery: Executive presence, confidence, and authority in communication style
+      - Visual Integration: Effective use of charts, graphs, and slides to enhance message clarity
+      - Competitive Analysis: Positioning relative to alternatives and market opportunities
+      - Implementation Roadmap: Specific next steps, timelines, and resource requirements
+      - Stakeholder Buy-in: Addressing concerns and building consensus among decision-makers
+      - Strategic Vision: Connection to broader business objectives and long-term goals
+      - Call-to-Action: Clear, specific requests for approval, resources, or next steps
       `,
       'Wedding Speech': `
       WEDDING SPEECH ANALYSIS FOCUS:
@@ -976,13 +988,19 @@ Make the content more engaging, natural, and personalized while keeping the same
       - Memorable Moments: Did they create lasting, heartwarming memories?
       `,
       'Public Speaking': `
-      PUBLIC SPEAKING ANALYSIS FOCUS:
-      - Message Clarity: Was the core message easy to understand and remember?
-      - Audience Connection: Did they engage and resonate with listeners?
-      - Credibility Establishment: Did they position themselves as knowledgeable?
-      - Persuasive Elements: Were arguments logical and compelling?
-      - Stage Presence: Did they command attention and respect?
-      - Impact & Inspiration: Did they motivate or influence the audience?
+      COMPREHENSIVE PUBLIC SPEAKING EXCELLENCE ANALYSIS:
+      - Thought Leadership: Establishment of expertise and unique perspective on industry challenges
+      - Message Architecture: Clear thesis, supporting points, and memorable takeaways for diverse audiences
+      - Audience Psychology: Understanding of listener motivations, concerns, and decision-making factors
+      - Persuasive Mastery: Logical argumentation, emotional appeals, and credibility-building techniques
+      - Stage Command: Physical presence, vocal variety, and confident delivery across large venues
+      - Content Innovation: Fresh insights, original thinking, and valuable perspectives for professionals
+      - Engagement Strategies: Interactive elements, rhetorical techniques, and audience participation
+      - Memorable Moments: Creation of quotable content and lasting impressions for attendees
+      - Professional Impact: Potential for career advancement, reputation building, and business development
+      - Industry Relevance: Connection to current trends, challenges, and opportunities in the field
+      - Inspirational Power: Ability to motivate action, change thinking, and influence behavior
+      - Executive Communication: C-level language, strategic thinking, and leadership messaging
       `
     };
     
@@ -1020,13 +1038,16 @@ Make the content more engaging, natural, and personalized while keeping the same
               CRITICAL: Provide EXTREMELY DETAILED, PURPOSE-SPECIFIC analysis that meets the highest professional standards for each speaking context. Your feedback must be comprehensive, actionable, and directly relevant to the speaker's goals.
 
               ANALYSIS DEPTH REQUIREMENTS:
-              - SALES PITCHES: Revenue impact, deal psychology, B2B effectiveness, stakeholder influence
-              - BUSINESS PITCHES: Investor standards, market analysis, financial credibility, funding readiness  
+              - SALES PITCHES: Revenue impact, deal psychology, B2B effectiveness, stakeholder influence, competitive differentiation
+              - BUSINESS PITCHES: Investor standards, market analysis, financial credibility, funding readiness, executive presence  
               - TED TALKS: Storytelling mastery, emotional resonance, humor effectiveness, inspirational impact, viral potential
-              - ACADEMIC PRESENTATIONS: Research rigor, scholarly communication, evidence quality, peer review standards
-              - CONFERENCE TALKS: Expert credibility, technical depth, industry relevance, knowledge transfer
-              - TEACHING: Pedagogical effectiveness, learning outcomes, engagement, concept clarity
-              - ALL PURPOSES: Detailed content analysis, delivery excellence, audience connection, goal achievement
+              - ACADEMIC PRESENTATIONS: Research rigor, scholarly communication, evidence quality, peer review standards, methodology clarity
+              - CONFERENCE TALKS: Expert credibility, technical depth, industry relevance, knowledge transfer, professional networking
+              - TEACHING: Pedagogical effectiveness, learning outcomes, engagement, concept clarity, assessment integration
+              - JOB INTERVIEWS: STAR method usage, cultural fit, professional presence, value proposition, strategic questioning
+              - PRESENTATIONS: Executive structure, stakeholder engagement, data-driven arguments, business impact, implementation roadmaps
+              - PUBLIC SPEAKING: Thought leadership, message architecture, audience psychology, persuasive mastery, stage command
+              - ALL PURPOSES: Extremely detailed content analysis, delivery excellence, audience connection, goal achievement
 
               Always respond with valid JSON in this exact format:
               

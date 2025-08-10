@@ -96,10 +96,11 @@ function getPurposeDescription(purpose: string): string {
     'Business Pitch': 'AI evaluates market analysis, business model clarity, competitive advantage, and executive presence',
     'TED Talk': 'AI assesses storytelling power, emotional connection, humor effectiveness, viral potential, and inspirational impact',
     'Academic Presentation': 'AI assesses research methodology, evidence quality, logical argumentation, and scholarly communication',
-    'Job Interview': 'AI evaluates professional presence, STAR method usage, and cultural fit demonstration',
+    'Job Interview': 'AI evaluates STAR method usage, cultural alignment, professional presence, and value proposition clarity',
     'Conference Talk': 'AI analyzes technical depth, expert credibility, audience engagement, and knowledge transfer',
-    'Public Speaking': 'AI examines thought leadership, audience connection, and inspirational impact',
-    'Teaching': 'AI reviews pedagogical effectiveness, concept clarity, engagement techniques, and learning outcomes'
+    'Public Speaking': 'AI examines thought leadership, persuasive mastery, stage command, and professional impact',
+    'Teaching': 'AI reviews pedagogical effectiveness, concept clarity, engagement techniques, and learning outcomes',
+    'Presentation': 'AI evaluates executive structure, stakeholder engagement, data-driven arguments, and business impact'
   };
   return descriptions[purpose] || 'AI will provide comprehensive, detailed feedback tailored to your specific speaking goal';
 }
@@ -111,10 +112,11 @@ function getPurposeCoachingTips(purpose: string): string {
     'Business Pitch': 'Quantify market size, demonstrate competitive moats, show realistic financials, address risks proactively, and articulate clear investor returns.',
     'TED Talk': 'Start with a powerful hook, weave compelling stories throughout, use humor strategically, create emotional moments, and end with an unforgettable call-to-action.',
     'Academic Presentation': 'Begin with clear research question, present methodology rigorously, cite authoritative sources, acknowledge limitations, and connect to broader implications.',
-    'Job Interview': 'Use the STAR method with quantified results, demonstrate cultural alignment, show growth mindset, and ask strategic questions.',
+    'Job Interview': 'Use the STAR method with quantified results, demonstrate cultural alignment, show growth mindset, ask strategic questions, and articulate unique value proposition.',
     'Conference Talk': 'Establish expert credentials early, balance technical depth with accessibility, use visual aids effectively, and provide actionable takeaways.',
-    'Public Speaking': 'Establish thought leadership early, use powerful stories with business relevance, connect to audience goals, and inspire specific actions.',
-    'Teaching': 'Structure with clear learning objectives, use multiple modalities, check for understanding frequently, and provide concrete examples.'
+    'Public Speaking': 'Establish thought leadership early, use powerful stories with business relevance, connect to audience goals, command the stage, and inspire specific actions.',
+    'Teaching': 'Structure with clear learning objectives, use multiple modalities, check for understanding frequently, and provide concrete examples.',
+    'Presentation': 'Start with executive summary, use data-driven arguments, address stakeholder concerns, show business impact, and end with clear action items.'
   };
   return tips[purpose] || 'Structure content strategically, use evidence-based arguments, and communicate with clarity and authority.';
 }
@@ -160,6 +162,18 @@ function getPurposeSpecificLiveFeedback(purpose: string, transcript: string, met
       { condition: () => !transcript.toLowerCase().includes('feel') && !transcript.toLowerCase().includes('emotion'), feedback: 'Create emotional moments', actionable: 'Connect to universal feelings: "We\'ve all felt..." or "Remember when..."' },
       { condition: () => !transcript.toLowerCase().includes('change') && !transcript.toLowerCase().includes('different'), feedback: 'Inspire transformation', actionable: 'End with: "What if we could change..." or "Imagine a world where..."' },
       { condition: () => wordCount > 100 && !transcript.toLowerCase().includes('you can'), feedback: 'Include actionable inspiration', actionable: 'Give audience something to do: "Here\'s what you can do starting today..."' }
+    ],
+    'Job Interview': [
+      { condition: () => !transcript.toLowerCase().includes('situation') && !transcript.toLowerCase().includes('example'), feedback: 'Use the STAR method for examples', actionable: 'Structure answers: "In my role at X (Situation), I was tasked with Y (Task), so I Z (Action), resulting in W (Result)"' },
+      { condition: () => !transcript.toLowerCase().includes('company') && !transcript.toLowerCase().includes('organization'), feedback: 'Show company knowledge', actionable: 'Demonstrate research: "I noticed your company recently..." or "Your mission to X aligns with..."' },
+      { condition: () => !transcript.toLowerCase().includes('question') && wordCount > 80, feedback: 'Ask strategic questions', actionable: 'Inquire: "What does success look like in this role?" or "What challenges is the team facing?"' },
+      { condition: () => !transcript.toLowerCase().includes('value') && !transcript.toLowerCase().includes('contribute'), feedback: 'Articulate your value proposition', actionable: 'State: "I can contribute X to help achieve Y" or "My experience in Z would help with..."' }
+    ],
+    'Presentation': [
+      { condition: () => !transcript.toLowerCase().includes('data') && !transcript.toLowerCase().includes('metrics'), feedback: 'Include data-driven arguments', actionable: 'Support with: "The data shows..." or "Metrics indicate that..."' },
+      { condition: () => !transcript.toLowerCase().includes('recommend') && !transcript.toLowerCase().includes('propose'), feedback: 'Make clear recommendations', actionable: 'State: "I recommend we..." or "My proposal is to..."' },
+      { condition: () => !transcript.toLowerCase().includes('stakeholder') && wordCount > 100, feedback: 'Address stakeholder concerns', actionable: 'Consider: "From finance perspective..." or "Operations will benefit because..."' },
+      { condition: () => !transcript.toLowerCase().includes('next steps') && wordCount > 80, feedback: 'Provide clear action items', actionable: 'Conclude: "Next steps are..." or "We need to..."' }
     ],
     'Teaching': [
       { condition: () => !transcript.toLowerCase().includes('learn') && !transcript.toLowerCase().includes('understand'), feedback: 'State clear learning objectives', actionable: 'Begin: "By the end of this lesson, you will be able to..." or "Today we\'ll learn..."' },
@@ -1378,7 +1392,8 @@ export default function EnhancedPracticePage() {
                           { label: "Job Interview", desc: "Professional presentation" },
                           { label: "Conference Talk", desc: "Technical & expert" },
                           { label: "Public Speaking", desc: "Leadership & keynote" },
-                          { label: "Teaching", desc: "Educational & instructional" }
+                          { label: "Teaching", desc: "Educational & instructional" },
+                          { label: "Presentation", desc: "Corporate & executive" }
                         ].map((preset) => (
                           <Button
                             key={preset.label}
