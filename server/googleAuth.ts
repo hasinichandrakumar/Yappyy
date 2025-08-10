@@ -149,8 +149,7 @@ export async function setupGoogleAuth(app: Express) {
     console.log('  - Dynamic callback URL:', requestCallbackURL);
 
     passport.authenticate('google', {
-      scope: ['profile', 'email'],
-      callbackURL: requestCallbackURL // Use dynamic callback URL
+      scope: ['profile', 'email']
     })(req, res, next);
   });
 
