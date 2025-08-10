@@ -21,9 +21,26 @@ export class PDFExport {
     this.pdf.setFillColor(this.colors.background.secondary[0], this.colors.background.secondary[1], this.colors.background.secondary[2]);
     this.pdf.rect(0, 0, this.pageWidth, this.pageHeight, 'F');
     
-    // Set Poppins font to match Yappyy branding (fallback to Helvetica)
+    // Ensure Poppins is the active font; embed if available in window (added at runtime)
     try {
-      this.pdf.setFont('Poppins', 'normal');
+      const fontName = 'Poppins';
+      // @ts-ignore
+      if (typeof window !== 'undefined' && (window as any).__POPPINS_TTF__) {
+        // Register and use embedded regular
+        // @ts-ignore
+        this.pdf.addFileToVFS('Poppins-Regular.ttf', (window as any).__POPPINS_TTF__);
+        // @ts-ignore
+        this.pdf.addFont('Poppins-Regular.ttf', fontName, 'normal');
+      }
+      // @ts-ignore
+      if (typeof window !== 'undefined' && (window as any).__POPPINS_BOLD_TTF__) {
+        // Register bold if available
+        // @ts-ignore
+        this.pdf.addFileToVFS('Poppins-Bold.ttf', (window as any).__POPPINS_BOLD_TTF__);
+        // @ts-ignore
+        this.pdf.addFont('Poppins-Bold.ttf', fontName, 'bold');
+      }
+      this.pdf.setFont(fontName, 'normal');
     } catch {
       this.pdf.setFont('helvetica', 'normal');
     }
@@ -118,47 +135,42 @@ export class PDFExport {
     }
   }
 
-  private addHeader(title: string, subtitle?: string): void {
-    // Create Yappyy branded gradient header background
-    this.createGradientBackground(0, 0, this.pageWidth, 55);
-    
-    // Yappyy logo area with rounded background
-    this.pdf.setFillColor(this.colors.text.white[0], this.colors.text.white[1], this.colors.text.white[2], 0.15);
-    this.pdf.roundedRect(this.spacing.margin - 5, 8, 85, 35, 8, 8, 'F');
-    
-    // Yappyy logo text with shadow effect
+  private addTemplateHeader(title: string, subtitle?: string): void {
+    // Header gradient bar (matches Yappyy brand like the screenshot)
+    const headerHeight = 45;
+    this.createGradientBackground(0, 0, this.pageWidth, headerHeight);
+
+    // Left: Yappyy wordmark
     this.pdf.setTextColor(255, 255, 255);
-    this.setTextStyle('h1');
-    
-    // Add text shadow effect for depth
-    this.pdf.setTextColor(0, 0, 0, 0.2);
-    this.pdf.text('Yappyy', this.spacing.margin + 1, 31);
-    this.pdf.setTextColor(255, 255, 255);
-    this.pdf.text('Yappyy', this.spacing.margin, 30);
-    
-    // AI Coach tagline
-    this.pdf.setFontSize(10);
-    this.pdf.setTextColor(255, 255, 255, 0.8);
-    this.pdf.text('AI Speech Coach', this.spacing.margin, 40);
-    
-    // Document Title below header
-    this.setTextStyle('h2');
-    this.pdf.setTextColor(this.colors.text.primary[0], this.colors.text.primary[1], this.colors.text.primary[2]);
-    this.pdf.text(title, this.spacing.margin, 70);
-    
-    // Subtitle
+    try { this.pdf.setFont('Poppins', 'bold'); } catch { this.pdf.setFont('helvetica', 'bold'); }
+    this.pdf.setFontSize(28);
+    this.pdf.text('Yappyy', this.spacing.margin, 18);
+
+    // Center: Title and subtitle inside the header
+    const centerX = this.pageWidth / 2;
+    try { this.pdf.setFont('Poppins', 'normal'); } catch { this.pdf.setFont('helvetica', 'normal'); }
+    this.pdf.setFontSize(16);
+    const titleText = title || 'Title of Template';
+    const titleWidth = this.pdf.getTextWidth(titleText);
+    this.pdf.text(titleText, centerX - titleWidth / 2, 16);
     if (subtitle) {
-      this.setTextStyle('body');
-      this.pdf.setTextColor(this.colors.text.secondary[0], this.colors.text.secondary[1], this.colors.text.secondary[2]);
-      this.pdf.text(subtitle, this.spacing.margin, 80);
+      this.pdf.setFontSize(10);
+      const subWidth = this.pdf.getTextWidth(subtitle);
+      this.pdf.text(subtitle, centerX - subWidth / 2, 24);
     }
-    
-    // Add Yappyy brand accent line
-    this.pdf.setDrawColor(this.colors.yappyy.cyan[0], this.colors.yappyy.cyan[1], this.colors.yappyy.cyan[2]);
-    this.pdf.setLineWidth(3);
-    this.pdf.line(this.spacing.margin, subtitle ? 85 : 75, this.spacing.margin + 80, subtitle ? 85 : 75);
-    
-    this.currentY = subtitle ? 95 : 85;
+
+    // Right: circular badge with "Y"
+    const badgeCenterX = this.pageWidth - 18;
+    const badgeCenterY = 16;
+    this.pdf.setFillColor(255, 255, 255);
+    this.pdf.circle(badgeCenterX, badgeCenterY, 9, 'F');
+    this.pdf.setTextColor(255, 255, 255);
+    try { this.pdf.setFont('Poppins', 'bold'); } catch { this.pdf.setFont('helvetica', 'bold'); }
+    this.pdf.setFontSize(12);
+    this.pdf.text('Y', badgeCenterX, badgeCenterY + 4, { align: 'center' });
+
+    // Set body start below header
+    this.currentY = headerHeight + 15;
   }
 
   private createGradientBackground(x: number, y: number, width: number, height: number): void {
@@ -227,16 +239,22 @@ export class PDFExport {
   }
 
   private createModernCard(x: number, y: number, width: number, height: number, color: number[]): void {
-    // Card shadow effect
-    this.pdf.setFillColor(0, 0, 0, 0.05);
-    this.pdf.roundedRect(x + 2, y + 2, width, height, 8, 8, 'F');
-    
-    // Card background with gradient
-    this.pdf.setFillColor(color[0], color[1], color[2], 0.05);
+    // Card shadow effect (approximate)
+    this.pdf.setFillColor(240, 240, 240);
+    this.pdf.roundedRect(x + 1.5, y + 1.5, width, height, 8, 8, 'F');
+
+    // Card background (light tint of color)
+    const lightR = Math.min(255, Math.round(color[0] * 0.1 + 245));
+    const lightG = Math.min(255, Math.round(color[1] * 0.1 + 245));
+    const lightB = Math.min(255, Math.round(color[2] * 0.1 + 245));
+    this.pdf.setFillColor(lightR, lightG, lightB);
     this.pdf.roundedRect(x, y, width, height, 8, 8, 'F');
-    
+
     // Card border
-    this.pdf.setDrawColor(color[0], color[1], color[2], 0.2);
+    const borderR = Math.round(color[0] * 0.6 + 102);
+    const borderG = Math.round(color[1] * 0.6 + 102);
+    const borderB = Math.round(color[2] * 0.6 + 102);
+    this.pdf.setDrawColor(borderR, borderG, borderB);
     this.pdf.setLineWidth(0.5);
     this.pdf.roundedRect(x, y, width, height, 8, 8, 'D');
   }
@@ -299,7 +317,10 @@ export class PDFExport {
     this.pdf.text(date, this.pageWidth - this.spacing.margin - dateWidth, footerY + 5);
     
     // Page number with accent
-    const pageText = `Page ${this.pdf.getCurrentPageInfo().pageNumber}`;
+    // Determine page number safely across jsPDF versions
+    const getPages = (this.pdf as any).getNumberOfPages || (this.pdf as any).internal?.getNumberOfPages;
+    const pageNum = typeof getPages === 'function' ? getPages.call(this.pdf) : 1;
+    const pageText = `Page ${pageNum}`;
     const pageWidth = this.pdf.getTextWidth(pageText);
     this.pdf.setTextColor(this.colors.yappyy.cyan[0], this.colors.yappyy.cyan[1], this.colors.yappyy.cyan[2]);
     this.pdf.text(pageText, (this.pageWidth - pageWidth) / 2, footerY + 5);
@@ -315,8 +336,8 @@ export class PDFExport {
   // Public methods for generating different types of PDFs
   public async generateSessionReport(sessionData: any): Promise<void> {
     try {
-      // Add header
-      this.addHeader(
+      // Add header (session report style retained)
+      this.addTemplateHeader(
         sessionData.title || 'Practice Session Analysis',
         `Session Report - ${new Date(sessionData.date).toLocaleDateString('en-US', { 
           year: 'numeric', 
@@ -393,65 +414,19 @@ export class PDFExport {
 
   public async generateTemplateReport(templateData: any): Promise<void> {
     try {
-      // Add header
-      this.addHeader(
-        templateData.title,
-        'Professional Speech Template Guide'
+      // Branded header inside like screenshot
+      this.addTemplateHeader(
+        templateData.title || 'Title of Template',
+        templateData.description || 'Description of Template'
       );
 
-      // Add template info
-      this.addSectionHeader('Template Information');
-      
-      const infoData = [
-        {
-          title: 'Category',
-          value: templateData.category,
-          color: this.colors.primary
-        },
-        {
-          title: 'Difficulty',
-          value: templateData.difficulty,
-          color: this.colors.accent
-        },
-        {
-          title: 'Duration',
-          value: templateData.duration,
-          color: this.colors.success
-        },
-        {
-          title: 'Type',
-          value: 'Professional Template',
-          color: this.colors.info
-        }
-      ];
-
-      // Create 2x2 grid layout
-      this.addMetricCard(infoData[0].title, infoData[0].value, undefined, infoData[0].color);
-      this.addMetricCard(infoData[1].title, infoData[1].value, undefined, infoData[1].color);
-      
-      this.currentY += this.spacing.gap;
-      
-      this.addMetricCard(infoData[2].title, infoData[2].value, undefined, infoData[2].color);
-      this.addMetricCard(infoData[3].title, infoData[3].value, undefined, infoData[3].color);
-
-      this.currentY += 30;
-
-      // Add content section
-      this.addSectionHeader('Template Content');
-      
+      // Body content starts with generous whitespace under header
       if (templateData.content) {
         this.setTextStyle('body');
         const contentWidth = this.pageWidth - (this.spacing.margin * 2);
-        const lines = this.pdf.splitTextToSize(templateData.content, contentWidth - (this.spacing.padding * 2));
-        const contentHeight = (lines.length * 8) + (this.spacing.padding * 2);
-        
-        // Create content card
-        this.createModernCard(this.spacing.margin, this.currentY, contentWidth, contentHeight, this.colors.background.accent);
-        
-        // Add content text
-        this.pdf.text(lines, this.spacing.margin + this.spacing.padding, this.currentY + this.spacing.padding);
-        
-        this.currentY += contentHeight + 30;
+        const lines = this.pdf.splitTextToSize(templateData.content, contentWidth);
+        this.pdf.text(lines, this.spacing.margin, this.currentY);
+        this.currentY += lines.length * 6 + 10;
       }
 
       // Add footer

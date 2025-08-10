@@ -6,6 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Search,
   Download,
@@ -697,6 +700,18 @@ export default function EnhancedTemplateMarketplace() {
     content: ''
   });
   const [showCreateTemplate, setShowCreateTemplate] = useState(false);
+  
+  // Personalization dialog state
+  const [showPersonalizationDialog, setShowPersonalizationDialog] = useState(false);
+  const [personalizationData, setPersonalizationData] = useState({
+    purpose: '',
+    audience: '',
+    context: '',
+    tone: '',
+    personalStory: '',
+    specificGoals: ''
+  });
+  
   const queryClient = useQueryClient();
 
   // Fetch user's custom templates
@@ -833,40 +848,62 @@ export default function EnhancedTemplateMarketplace() {
     }
   });
 
-  // AI-powered template personalization
+  // AI-powered template personalization with detailed user input
   const personalizeTemplateMutation = useMutation({
-    mutationFn: async (personalizationData: any) => {
-      const { template, userPreferences } = personalizationData || {};
-      const userRequest = (userPreferences || 'Make it more engaging and personal').trim();
+    mutationFn: async (data: any) => {
+      const { template, personalizationInfo } = data;
+      
+      // Create a detailed personalization request from the collected data
+      const userRequest = `Please personalize this template with the following information:
+      
+Purpose: ${personalizationInfo.purpose}
+Target Audience: ${personalizationInfo.audience}
+Context/Setting: ${personalizationInfo.context}
+Desired Tone: ${personalizationInfo.tone}
+Personal Story/Example: ${personalizationInfo.personalStory}
+Specific Goals: ${personalizationInfo.specificGoals}
 
-      // Try enhanced endpoint first
-      try {
-        const enhancedRes = await fetch('/api/ai-personalize-enhanced', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ template, userRequest, personalizationData: {} })
-        });
-        if (enhancedRes.ok) {
-          return await enhancedRes.json();
-        }
-      } catch {}
+Make it highly personal, engaging, and tailored to these specific requirements. Replace placeholders with relevant examples, adjust the tone and language to match the audience, and incorporate the personal elements naturally into the speech structure.`;
 
-      // Fallback to basic personalization endpoint
       const response = await fetch('/api/personalize-template', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ template, userPreferences: userRequest })
       });
-      if (!response.ok) throw new Error('Failed to personalize template');
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to personalize template');
+      }
+      
       return await response.json();
     },
     onSuccess: (data) => {
       setEditedContent(data.personalizedContent || editedContent);
       setEditMode(true);
-      toast({ title: 'Template Personalized', description: 'We tailored your template to be more engaging.' });
+      setShowPersonalizationDialog(false);
+      
+      // Reset personalization data for next use
+      setPersonalizationData({
+        purpose: '',
+        audience: '',
+        context: '',
+        tone: '',
+        personalStory: '',
+        specificGoals: ''
+      });
+      
+      toast({ 
+        title: 'Template Personalized Successfully! ✨', 
+        description: 'Your template has been customized with your specific details and is ready to use.' 
+      });
     },
     onError: (error: any) => {
-      toast({ title: 'Personalization failed', description: error?.message || 'Please try again later.', variant: 'destructive' });
+      toast({ 
+        title: 'Personalization failed', 
+        description: error?.message || 'Please check your internet connection and try again.', 
+        variant: 'destructive' 
+      });
     }
   });
 
@@ -898,9 +935,15 @@ export default function EnhancedTemplateMarketplace() {
 
   const handlePersonalize = () => {
     if (selectedTemplate) {
+      setShowPersonalizationDialog(true);
+    }
+  };
+
+  const handlePersonalizationSubmit = () => {
+    if (selectedTemplate) {
       personalizeTemplateMutation.mutate({
         template: selectedTemplate,
-        userPreferences: 'Make it more engaging and personal'
+        personalizationInfo: personalizationData
       });
     }
   };
@@ -1002,10 +1045,7 @@ export default function EnhancedTemplateMarketplace() {
     if (!selectedTemplate) return;
     
     try {
-      // Import the new enhanced PDF export
-      const { generateTemplatePDF } = await import('@/lib/pdf-export');
-      
-      // Create template data object
+      // Template data
       const templateData = {
         title: selectedTemplate.title,
         category: selectedTemplate.category || 'Custom',
@@ -1018,23 +1058,23 @@ export default function EnhancedTemplateMarketplace() {
         tags: selectedTemplate.tags || [],
         description: selectedTemplate.description || ''
       };
-      
-      // Generate and download PDF with enhanced styling
+
       const filename = `${selectedTemplate.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_template.pdf`;
-      await generateTemplatePDF(templateData, filename);
-      
-      toast({
-        title: "PDF Downloaded Successfully! 📄",
-        description: "Your beautifully formatted template guide has been saved with Poppins font and modern styling.",
-      });
-      
+
+      // Minimal, plain-text PDF with Poppins
+      try {
+        const { generatePlainTemplatePDF } = await import('@/lib/simple-pdf');
+        await generatePlainTemplatePDF({ content: templateData.content }, filename);
+      } catch (primaryError) {
+        console.warn('Simple PDF export failed, trying enhanced exporter:', primaryError);
+        const { generateTemplatePDF } = await import('@/lib/pdf-export');
+        await generateTemplatePDF(templateData, filename);
+      }
+
+      toast({ title: 'PDF Downloaded Successfully! 📄', description: 'Your template guide has been saved.' });
     } catch (error) {
-      console.error('PDF Export error:', error);
-      toast({
-        title: "PDF Export Failed",
-        description: "Unable to generate PDF. Please try again.",
-        variant: "destructive"
-      });
+      console.error('PDF Export error (both exporters failed):', error);
+      toast({ title: 'PDF Export Failed', description: 'Please refresh and try again.', variant: 'destructive' });
     }
   };
 
@@ -1570,6 +1610,121 @@ Tips:
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Personalization Dialog */}
+      <Dialog open={showPersonalizationDialog} onOpenChange={setShowPersonalizationDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-blue-600" />
+              Personalize Your Template
+            </DialogTitle>
+            <p className="text-gray-600">
+              Help us tailor "{selectedTemplate?.title}" to your specific needs and make it uniquely yours.
+            </p>
+          </DialogHeader>
+
+          <div className="space-y-6 mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="purpose">What's the main purpose of your speech?</Label>
+                <Input
+                  id="purpose"
+                  placeholder="e.g., Convince investors to fund my startup"
+                  value={personalizationData.purpose}
+                  onChange={(e) => setPersonalizationData(prev => ({ ...prev, purpose: e.target.value }))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="audience">Who is your target audience?</Label>
+                <Input
+                  id="audience"
+                  placeholder="e.g., Angel investors, VCs, business executives"
+                  value={personalizationData.audience}
+                  onChange={(e) => setPersonalizationData(prev => ({ ...prev, audience: e.target.value }))}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="context">Where will you deliver this speech?</Label>
+                <Input
+                  id="context"
+                  placeholder="e.g., Pitch competition, board meeting, conference"
+                  value={personalizationData.context}
+                  onChange={(e) => setPersonalizationData(prev => ({ ...prev, context: e.target.value }))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="tone">What tone do you want?</Label>
+                <Select value={personalizationData.tone} onValueChange={(value) => setPersonalizationData(prev => ({ ...prev, tone: value }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose a tone" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="professional">Professional & Formal</SelectItem>
+                    <SelectItem value="conversational">Conversational & Friendly</SelectItem>
+                    <SelectItem value="motivational">Motivational & Inspiring</SelectItem>
+                    <SelectItem value="authoritative">Authoritative & Confident</SelectItem>
+                    <SelectItem value="passionate">Passionate & Energetic</SelectItem>
+                    <SelectItem value="humble">Humble & Approachable</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="specificGoals">What specific outcome do you want from this speech?</Label>
+              <Input
+                id="specificGoals"
+                placeholder="e.g., Secure $500K funding, Get 10 new clients, Win the competition"
+                value={personalizationData.specificGoals}
+                onChange={(e) => setPersonalizationData(prev => ({ ...prev, specificGoals: e.target.value }))}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="personalStory">Share a personal story or example to include</Label>
+              <Textarea
+                id="personalStory"
+                placeholder="Describe a relevant personal experience, achievement, or story that would make your speech more compelling and authentic..."
+                value={personalizationData.personalStory}
+                onChange={(e) => setPersonalizationData(prev => ({ ...prev, personalStory: e.target.value }))}
+                rows={3}
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button
+                variant="outline"
+                onClick={() => setShowPersonalizationDialog(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handlePersonalizationSubmit}
+                disabled={personalizeTemplateMutation.isPending || !personalizationData.purpose.trim()}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                {personalizeTemplateMutation.isPending ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Personalizing...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Personalize Template
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

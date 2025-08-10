@@ -631,9 +631,6 @@ export default function Enhanced50PlusTemplates() {
     if (!selectedTemplate) return;
     
     try {
-      // Import the new PDF export service
-      const { TemplatePDFExportService } = await import('@/lib/template-pdf-export');
-      
       // Create template data object
       const templateData = {
         title: selectedTemplate.title,
@@ -648,12 +645,18 @@ export default function Enhanced50PlusTemplates() {
         description: selectedTemplate.description
       };
       
-      // Generate and download PDF
-      const pdfService = new TemplatePDFExportService();
-      await pdfService.generateTemplateReport(templateData);
-      
       const filename = `${selectedTemplate.title.replace(/\s+/g, '_')}_Template.pdf`;
-      await pdfService.downloadPDF(filename);
+      // Minimal, plain-text PDF first
+      try {
+        const { generatePlainTemplatePDF } = await import('@/lib/simple-pdf');
+        await generatePlainTemplatePDF({ content: templateData.content }, filename);
+      } catch (primaryError) {
+        console.warn('Simple PDF export failed on 50+ templates, using fallback:', primaryError);
+        const { TemplatePDFExportService } = await import('@/lib/template-pdf-export');
+        const pdfService = new TemplatePDFExportService();
+        await pdfService.generateTemplateReport(templateData);
+        await pdfService.downloadPDF(filename);
+      }
       
       toast({
         title: "PDF Downloaded Successfully! 📄",
