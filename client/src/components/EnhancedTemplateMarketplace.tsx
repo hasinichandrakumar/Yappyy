@@ -921,6 +921,7 @@ Make it highly personal, engaging, and tailored to these specific requirements. 
   });
 
   const handleTemplateSelect = (template: Template) => {
+    console.log('Template selected:', template);
     setSelectedTemplate(template);
     setEditedContent(template.content);
     setEditMode(false);
@@ -934,8 +935,12 @@ Make it highly personal, engaging, and tailored to these specific requirements. 
   };
 
   const handlePersonalize = () => {
+    console.log('Personalize button clicked!', { selectedTemplate });
     if (selectedTemplate) {
+      console.log('Opening personalization dialog...');
       setShowPersonalizationDialog(true);
+    } else {
+      console.log('No template selected!');
     }
   };
 
@@ -1620,7 +1625,7 @@ Tips:
               Personalize Your Template
             </DialogTitle>
             <p className="text-gray-600">
-              Help us tailor "{selectedTemplate?.title}" to your specific needs and make it uniquely yours.
+              Help us tailor "{selectedTemplate?.title || 'this template'}" to your specific needs and make it uniquely yours.
             </p>
           </DialogHeader>
 

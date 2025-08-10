@@ -2070,25 +2070,77 @@ Evaluate how well this speech achieved its stated PURPOSE with the depth and det
         voiceMetrics: voiceMetrics ? JSON.stringify(voiceMetrics) : null
       };
 
-      // Calculate overall score with helper function
-      const calculateOverallScoreForSession = (metrics: any, facialAnalysis: any, voiceMetrics: any): number => {
-        const scores = [];
-        
-        // Voice metrics
-        if (voiceMetrics?.clarity) scores.push(voiceMetrics.clarity);
-        if (metrics?.confidence) scores.push(metrics.confidence);
-        
-        // Computer vision metrics
-        if (facialAnalysis?.emotionalExpression?.confidence) scores.push(facialAnalysis.emotionalExpression.confidence);
-        if (facialAnalysis?.emotionalExpression?.engagement) scores.push(facialAnalysis.emotionalExpression.engagement);
-        if (facialAnalysis?.communicationSignals?.eyeContactQuality) scores.push(facialAnalysis.communicationSignals.eyeContactQuality);
-        
-        // Return average of available scores or 0 if none
-        return scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
+      // Calculate overall score with weighted, normalized components
+      const calculateOverallScoreForSession = (
+        metrics: any, 
+        facialAnalysis: any, 
+        voiceMetrics: any,
+        transcriptText?: string
+      ): number => {
+        const clamp = (v: number, min = 0, max = 100) => Math.max(min, Math.min(max, v));
+
+        // Components (0-100)
+        const clarity = Number(voiceMetrics?.clarity ?? metrics?.clarity ?? 0);
+        const confidence = Number(metrics?.confidence ?? facialAnalysis?.emotionalExpression?.confidence ?? 0);
+        const engagement = Number(facialAnalysis?.emotionalExpression?.engagement ?? metrics?.engagement ?? 0);
+        const eyeContact = Number(facialAnalysis?.communicationSignals?.eyeContactQuality ?? metrics?.eyeContact ?? 0);
+
+        // Pace (WPM) → score: ideal 120–160 wpm
+        const wpm = Number(voiceMetrics?.pace ?? metrics?.wordsPerMinute ?? 0);
+        let paceScore = 0;
+        if (wpm > 0) {
+          const minIdeal = 120;
+          const maxIdeal = 160;
+          if (wpm >= minIdeal && wpm <= maxIdeal) {
+            paceScore = 100;
+          } else {
+            const diff = wpm < minIdeal ? (minIdeal - wpm) : (wpm - maxIdeal);
+            // 80 wpm away from ideal → score ~0
+            paceScore = clamp(100 - (diff / 80) * 100);
+          }
+        }
+
+        // Filler words rate → score
+        const fillerCount = Number(metrics?.fillerWordCount ?? 0);
+        let wordCount = 0;
+        try {
+          if (typeof transcriptText === 'string') {
+            wordCount = transcriptText.trim().split(/\s+/).filter(Boolean).length;
+          }
+        } catch {}
+        let fillerScore = 100;
+        if (fillerCount > 0 && wordCount > 0) {
+          const rate = fillerCount / wordCount; // fraction of words that are fillers
+          if (rate <= 0.02) fillerScore = 100;         // <=2%
+          else if (rate <= 0.05) fillerScore = 85;     // <=5%
+          else if (rate <= 0.10) fillerScore = 65;     // <=10%
+          else fillerScore = 40;                        // >10%
+        }
+
+        // Weights must sum to 1
+        const weights = {
+          clarity: 0.25,
+          confidence: 0.20,
+          engagement: 0.20,
+          eyeContact: 0.15,
+          pace: 0.10,
+          fillers: 0.10
+        } as const;
+
+        const weighted = (
+          clamp(clarity) * weights.clarity +
+          clamp(confidence) * weights.confidence +
+          clamp(engagement) * weights.engagement +
+          clamp(eyeContact) * weights.eyeContact +
+          clamp(paceScore) * weights.pace +
+          clamp(fillerScore) * weights.fillers
+        );
+
+        return Math.round(weighted);
       };
 
       // Update overall score in session data
-      sessionData.overallScore = calculateOverallScoreForSession(metrics, facialAnalysis, voiceMetrics);
+      sessionData.overallScore = calculateOverallScoreForSession(metrics, facialAnalysis, voiceMetrics, transcript || "");
 
       const session = await storage.createPracticeSession(sessionData);
       

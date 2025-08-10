@@ -859,7 +859,7 @@ export default function SimplifiedPracticePage() {
       const timeSinceLastFeedback = lastMessage ? (Date.now() - lastMessage.timestamp) / 1000 : 999;
 
       // Only generate feedback if enough time has passed (avoid spam)
-      if (timeSinceLastFeedback < 4) return;
+      if (timeSinceLastFeedback < 15) return;
 
       // Starting feedback to get users engaged
       if (sessionDuration >= 3 && sessionDuration < 10 && (!lastMessage || !lastMessage.message.includes('Welcome'))) {
@@ -988,9 +988,9 @@ export default function SimplifiedPracticePage() {
       }
     };
 
-    // Start feedback sooner, then check more frequently for more active coaching
+    // Start feedback after 1.5s, then update every 15s
     const initialTimeout = setTimeout(generateLiveInsights, 1500);
-    const interval = setInterval(generateLiveInsights, 4000);
+    const interval = setInterval(generateLiveInsights, 15000);
     
     return () => {
       clearTimeout(initialTimeout);
