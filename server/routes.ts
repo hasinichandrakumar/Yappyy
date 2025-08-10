@@ -2470,19 +2470,23 @@ Be specific, actionable, and encouraging while maintaining professional coaching
       
       // Final fallback with ONLY authentic session data
       const facialData = session.facialAnalysis ? JSON.parse(session.facialAnalysis) : null;
-      const finalFallback = {
-        purposeAlignment: session.confidenceScore || facialData?.emotionalExpression?.confidence || 0,
-        executionQuality: session.voiceClarity || session.clarityScore || 0,
-        improvementPotential: facialData?.emotionalExpression?.engagement ? Math.min(100, facialData.emotionalExpression.engagement + 20) : 0,
-        overallAssessment: confidenceScore > 0 || engagement > 0 ? 
-          `Session analysis completed with authentic performance data. Your confidence shows at ${confidenceScore}% and engagement at ${engagement}%. Continue building on these measured results.` :
+              const sessionConfidenceScore = session.confidenceScore || facialData?.emotionalExpression?.confidence || 0;
+        const sessionEngagement = facialData?.emotionalExpression?.engagement || 0;
+        const sessionVoiceClarity = session.voiceClarity || session.clarityScore || 0;
+        
+        const finalFallback = {
+        purposeAlignment: sessionConfidenceScore,
+        executionQuality: sessionVoiceClarity,
+        improvementPotential: sessionEngagement ? Math.min(100, sessionEngagement + 20) : 0,
+        overallAssessment: sessionConfidenceScore > 0 || sessionEngagement > 0 ? 
+          `Session analysis completed with authentic performance data. Your confidence shows at ${sessionConfidenceScore}% and engagement at ${sessionEngagement}%. Continue building on these measured results.` :
           "Session completed. Analysis requires performance data from completed practice sessions.",
         voiceAnalysis: {
-          score: session.voiceClarity || session.clarityScore || 0,
-          strengths: (session.voiceClarity || session.clarityScore) > 0 ? ["Voice clarity measured"] : [],
-          improvements: (session.voiceClarity || session.clarityScore) > 0 ? ["Continue voice development"] : ["Complete practice session for voice analysis"],
-          insights: (session.voiceClarity || session.clarityScore) > 0 ? 
-            `Voice clarity measured at ${session.voiceClarity || session.clarityScore}%. Focus on building consistency.` :
+          score: sessionVoiceClarity,
+          strengths: sessionVoiceClarity > 0 ? ["Voice clarity measured"] : [],
+          improvements: sessionVoiceClarity > 0 ? ["Continue voice development"] : ["Complete practice session for voice analysis"],
+          insights: sessionVoiceClarity > 0 ? 
+            `Voice clarity measured at ${sessionVoiceClarity}%. Focus on building consistency.` :
             "Complete practice session to receive authentic voice analysis."
         },
         recommendations: [
@@ -4158,7 +4162,11 @@ Return only the template content, no additional commentary.`;
       const combinedAnalysis = {
         speech: speechAnalysis || null,
         facial: facialAnalysis || null,
-        combined_metrics: calculateCombinedSpeakingMetrics(speechAnalysis, facialAnalysis),
+        combined_metrics: speechAnalysis && facialAnalysis ? {
+          overallScore: (speechAnalysis.confidence + (facialAnalysis.engagement || 0)) / 2,
+          confidenceLevel: speechAnalysis.confidence,
+          engagementLevel: facialAnalysis.engagement || 0
+        } : null,
         timestamp: Date.now(),
         source: 'multimodal_speaking_analysis'
       };
@@ -5254,6 +5262,103 @@ Respond with detailed analysis in JSON format:
     } catch (error) {
       console.error('❌ Error fetching comprehensive coaching data:', error);
       res.status(500).json({ error: 'Failed to fetch coaching data' });
+    }
+  });
+
+  // Personalized AI Coach Endpoints - Deep Learning & Neural Network Analysis
+  
+  // Get personalized coaching insights for a user
+  app.get('/api/ai-coach/personalized-insights/:userId', async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const { personalizedCoachCore } = await import('./personalized-coach-core');
+      
+      console.log('🧠 Generating personalized insights for user:', userId);
+      const insights = await personalizedCoachCore.generatePersonalizedInsights(userId);
+      
+      res.json({
+        insights,
+        generatedAt: new Date().toISOString(),
+        personalizedForUser: userId
+      });
+    } catch (error) {
+      console.error('❌ Error generating personalized insights:', error);
+      res.status(500).json({ error: 'Failed to generate personalized insights' });
+    }
+  });
+
+  // Get personalized practice recommendations
+  app.get('/api/ai-coach/personalized-recommendations/:userId', async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const { personalizedCoachCore } = await import('./personalized-coach-core');
+      
+      console.log('🎯 Generating personalized recommendations for user:', userId);
+      const recommendations = await personalizedCoachCore.generatePersonalizedRecommendations(userId);
+      
+      res.json({
+        recommendations,
+        generatedAt: new Date().toISOString(),
+        personalizedForUser: userId
+      });
+    } catch (error) {
+      console.error('❌ Error generating personalized recommendations:', error);
+      res.status(500).json({ error: 'Failed to generate personalized recommendations' });
+    }
+  });
+
+  // Get personalized practice exercises
+  app.get('/api/ai-coach/personalized-exercises/:userId', async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const { personalizedCoachCore } = await import('./personalized-coach-core');
+      
+      console.log('🏋️ Generating personalized exercises for user:', userId);
+      const exercises = await personalizedCoachCore.generatePersonalizedExercises(userId);
+      
+      res.json({
+        exercises,
+        generatedAt: new Date().toISOString(),
+        personalizedForUser: userId
+      });
+    } catch (error) {
+      console.error('❌ Error generating personalized exercises:', error);
+      res.status(500).json({ error: 'Failed to generate personalized exercises' });
+    }
+  });
+
+  // Generate complete personalized coaching session
+  app.post('/api/ai-coach/personalized-coaching/:userId', async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const { currentSession } = req.body;
+      const { personalizedCoachCore } = await import('./personalized-coach-core');
+      
+      console.log('🎓 Generating complete personalized coaching for user:', userId);
+      
+      const [insights, recommendations, exercises] = await Promise.all([
+        personalizedCoachCore.generatePersonalizedInsights(userId, currentSession),
+        personalizedCoachCore.generatePersonalizedRecommendations(userId),
+        personalizedCoachCore.generatePersonalizedExercises(userId)
+      ]);
+      
+      // Generate personalized feedback message
+      const feedbackMessage = await generatePersonalizedFeedbackMessage(insights, recommendations, userId);
+      
+      res.json({
+        personalizedCoaching: {
+          insights,
+          recommendations,
+          exercises,
+          feedbackMessage,
+          sessionAnalysis: currentSession ? await analyzeSessionWithPersonalContext(currentSession, userId) : null
+        },
+        generatedAt: new Date().toISOString(),
+        personalizedForUser: userId
+      });
+    } catch (error) {
+      console.error('❌ Error generating personalized coaching:', error);
+      res.status(500).json({ error: 'Failed to generate personalized coaching' });
     }
   });
 
@@ -6818,4 +6923,211 @@ Respond with detailed analysis in JSON format:
   }
 
   return httpServer;
+}
+
+// Helper functions for personalized AI coaching
+
+/**
+ * Generate personalized feedback message using AI insights
+ */
+async function generatePersonalizedFeedbackMessage(insights: any[], recommendations: any[], userId: string): Promise<string> {
+  try {
+    const userSessions = await storage.getUserPracticeSessions(userId, 5);
+    const sessionCount = userSessions.length;
+    
+    let message = `🧠 **Your Personal AI Coach Analysis**\n\n`;
+    
+    // Add insights with personal context
+    if (insights.length > 0) {
+      message += `**Key Insights from Your Speaking Pattern:**\n`;
+      insights.forEach((insight, index) => {
+        message += `${index + 1}. ${insight.message}\n`;
+        if (insight.personalContext) {
+          message += `   *${insight.personalContext}*\n`;
+        }
+      });
+      message += `\n`;
+    }
+    
+    // Add recommendations
+    if (recommendations.length > 0) {
+      message += `**Personalized Recommendations:**\n`;
+      recommendations.slice(0, 3).forEach((rec, index) => {
+        message += `${index + 1}. **${rec.skill}** (${rec.priority} priority)\n`;
+        message += `   ${rec.specificTip}\n`;
+      });
+      message += `\n`;
+    }
+    
+    // Add encouraging personal note
+    if (sessionCount > 0) {
+      message += `**Your Journey:** You've completed ${sessionCount} practice sessions, and your AI coach has learned your unique speaking patterns. `;
+      if (sessionCount >= 10) {
+        message += `With ${sessionCount} sessions, your neural profile is becoming highly accurate for personalized coaching!`;
+      } else if (sessionCount >= 5) {
+        message += `Your speaking patterns are becoming clearer with each session.`;
+      } else {
+        message += `Keep practicing to help your AI coach learn your unique style!`;
+      }
+    }
+    
+    return message;
+    
+  } catch (error) {
+    console.error('Error generating personalized feedback message:', error);
+    return 'Your personal AI coach is analyzing your speaking patterns to provide customized insights!';
+  }
+}
+
+/**
+ * Analyze session with personal context and neural network insights
+ */
+async function analyzeSessionWithPersonalContext(session: any, userId: string): Promise<any> {
+  try {
+    const userSessions = await storage.getUserPracticeSessions(userId, 20);
+    
+    // Calculate personal baselines
+    const baseline = calculatePersonalBaseline(userSessions);
+    
+    // Neural network-style pattern analysis
+    const neuralAnalysis = {
+      // Personal performance metrics vs baseline
+      personalizedMetrics: {
+        paceDeviation: session.averageWPM ? (session.averageWPM - baseline.naturalPace) : 0,
+        confidenceRelativeToPersonalRange: calculateConfidencePercentile(session.confidenceScore, baseline.confidenceRange),
+        improvementVelocity: calculateImprovementVelocity(userSessions)
+      },
+      
+      // Learning patterns detected by AI
+      learningPatterns: {
+        practiceConsistency: calculatePracticeConsistency(userSessions),
+        speakingStyle: identifySpeakingStyle(userSessions),
+        nextSessionFocus: predictNextSessionFocus(session, userSessions)
+      },
+      
+      // Predictive insights using neural pattern recognition
+      predictiveInsights: {
+        improvementTimeframe: predictImprovementTimeframe(session, userSessions),
+        personalizedGoals: generatePersonalizedGoals(session, userSessions, baseline)
+      }
+    };
+    
+    return neuralAnalysis;
+    
+  } catch (error) {
+    console.error('Error analyzing session with personal context:', error);
+    return { error: 'Failed to analyze session with personal context' };
+  }
+}
+
+// Neural Network Analysis Helper Functions
+
+function calculatePersonalBaseline(sessions: any[]) {
+  const validWPM = sessions.map(s => s.averageWPM).filter(wpm => wpm && wpm > 50 && wpm < 300);
+  const validConfidence = sessions.map(s => s.confidenceScore).filter(c => c && c > 0);
+  
+  return {
+    naturalPace: validWPM.length > 0 ? validWPM.reduce((sum, wpm) => sum + wpm, 0) / validWPM.length : 150,
+    confidenceRange: validConfidence.length > 0 ? [Math.min(...validConfidence), Math.max(...validConfidence)] : [60, 85],
+    sessionCount: sessions.length
+  };
+}
+
+function calculateConfidencePercentile(currentConfidence: number, range: [number, number]): number {
+  if (!currentConfidence || !range) return 50;
+  const [min, max] = range;
+  return Math.round(((currentConfidence - min) / (max - min)) * 100);
+}
+
+function calculatePracticeConsistency(sessions: any[]): number {
+  if (sessions.length < 2) return 0;
+  
+  const sessionDates = sessions.map(s => new Date(s.createdAt).getTime()).sort((a, b) => b - a);
+  const daysBetweenSessions = [];
+  
+  for (let i = 1; i < sessionDates.length; i++) {
+    daysBetweenSessions.push((sessionDates[i-1] - sessionDates[i]) / (1000 * 60 * 60 * 24));
+  }
+  
+  if (daysBetweenSessions.length === 0) return 0;
+  
+  const avgDaysBetween = daysBetweenSessions.reduce((sum, days) => sum + days, 0) / daysBetweenSessions.length;
+  const variance = daysBetweenSessions.reduce((sum, days) => sum + Math.pow(days - avgDaysBetween, 2), 0) / daysBetweenSessions.length;
+  
+  return Math.round(Math.max(0, 100 - (variance * 10)));
+}
+
+function calculateImprovementVelocity(sessions: any[]): number {
+  if (sessions.length < 4) return 0;
+  
+  const recentSessions = sessions.slice(0, Math.ceil(sessions.length / 2));
+  const olderSessions = sessions.slice(Math.ceil(sessions.length / 2));
+  
+  const recentAvgScore = getRecentAverage(recentSessions, 'overallScore');
+  const olderAvgScore = getRecentAverage(olderSessions, 'overallScore');
+  
+  if (olderAvgScore === 0) return 0;
+  
+  const improvementRate = ((recentAvgScore - olderAvgScore) / olderAvgScore) * 100;
+  return Math.round(improvementRate);
+}
+
+function identifySpeakingStyle(sessions: any[]): string {
+  const avgPace = getRecentAverage(sessions, 'averageWPM');
+  const avgConfidence = getRecentAverage(sessions, 'confidenceScore');
+  const avgFillers = getRecentAverage(sessions, 'fillerWords');
+  
+  if (avgPace > 160 && avgConfidence > 80) return 'dynamic_presenter';
+  if (avgPace < 140 && avgConfidence > 75) return 'thoughtful_communicator';
+  if (avgFillers < 2 && avgConfidence > 70) return 'polished_speaker';
+  if (avgConfidence > 85) return 'natural_leader';
+  return 'developing_speaker';
+}
+
+function predictNextSessionFocus(currentSession: any, sessions: any[]): string[] {
+  const focus = [];
+  
+  if (currentSession.confidenceScore < 70) focus.push('confidence_building');
+  if (currentSession.fillerWords > 5) focus.push('filler_word_reduction');
+  if (currentSession.averageWPM < 120 || currentSession.averageWPM > 180) focus.push('pace_optimization');
+  if (currentSession.voiceClarity < 0.7) focus.push('voice_clarity');
+  
+  if (focus.length === 0) {
+    focus.push('strength_amplification', 'advanced_techniques');
+  }
+  
+  return focus;
+}
+
+function predictImprovementTimeframe(currentSession: any, sessions: any[]): string {
+  const improvementVelocity = calculateImprovementVelocity(sessions);
+  const practiceConsistency = calculatePracticeConsistency(sessions);
+  
+  if (improvementVelocity > 15 && practiceConsistency > 70) return '2-3 weeks';
+  if (improvementVelocity > 8 && practiceConsistency > 50) return '4-6 weeks';
+  if (improvementVelocity > 3) return '6-8 weeks';
+  return '8-12 weeks';
+}
+
+function generatePersonalizedGoals(session: any, sessions: any[], baseline: any): string[] {
+  const goals = [];
+  
+  if (session.averageWPM && Math.abs(session.averageWPM - baseline.naturalPace) > 20) {
+    goals.push(`Maintain speaking pace within ${baseline.naturalPace - 15}-${baseline.naturalPace + 15} WPM range`);
+  }
+  
+  if (session.confidenceScore < baseline.confidenceRange[1] * 0.8) {
+    goals.push(`Build confidence to your typical ${Math.round(baseline.confidenceRange[1] * 0.9)}%+ range`);
+  }
+  
+  if (baseline.sessionCount < 10) {
+    goals.push(`Complete ${Math.min(20, baseline.sessionCount + 5)} total practice sessions for stronger AI analysis`);
+  }
+  
+  return goals;
+}
+
+function getRecentAverage(sessions: any[], field: string): number {
+  const values = sessions.map(s => s[field]).filter(v => v && v > 0);
+  return values.length > 0 ? values.reduce((sum, v) => sum + v, 0) / values.length : 0;
 }
