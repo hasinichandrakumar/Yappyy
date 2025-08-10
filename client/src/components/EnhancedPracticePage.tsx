@@ -92,12 +92,12 @@ interface ComprehensiveMetrics {
 // Helper function to get purpose description
 function getPurposeDescription(purpose: string): string {
   const descriptions = {
-    'Sales Pitch': 'AI will analyze your value proposition, objection handling, and call-to-action effectiveness',
-    'Job Interview': 'AI will evaluate your professional presence, answer structure, and cultural fit demonstration',
-    'Presentation': 'AI will assess your message clarity, audience engagement, and supporting evidence use',
-    'Wedding Speech': 'AI will review your emotional connection, personal stories, and celebratory tone',
-    'Public Speaking': 'AI will examine your credibility, persuasive elements, and audience impact',
-    'Podcast/Interview': 'AI will analyze your conversational flow, engagement, and storytelling ability'
+    'Sales Pitch': 'AI analyzes ROI articulation, pain point targeting, objection handling, and closing strength for B2B sales',
+    'Business Pitch': 'AI evaluates market analysis, business model clarity, competitive advantage, and executive presence',
+    'Job Interview': 'AI assesses professional presence, STAR method usage, and cultural fit demonstration',
+    'Presentation': 'AI reviews executive communication, data usage, stakeholder engagement, and corporate messaging',
+    'Public Speaking': 'AI examines thought leadership, audience connection, and inspirational impact',
+    'Negotiation': 'AI analyzes persuasion tactics, concession strategy, and deal-closing effectiveness'
   };
   return descriptions[purpose] || 'AI will provide tailored feedback based on your specific speaking goal';
 }
@@ -105,14 +105,14 @@ function getPurposeDescription(purpose: string): string {
 // Helper function to get purpose-specific coaching tips
 function getPurposeCoachingTips(purpose: string): string {
   const tips = {
-    'Sales Pitch': 'Focus on clearly stating the problem, presenting your solution, and creating urgency. End with a specific call-to-action.',
-    'Job Interview': 'Use the STAR method (Situation, Task, Action, Result) for examples. Show enthusiasm and ask thoughtful questions.',
-    'Presentation': 'Start with a hook, maintain clear structure, use supporting data, and summarize key takeaways at the end.',
-    'Wedding Speech': 'Share personal stories, keep it heartfelt but brief, and focus on celebrating the couple.',
-    'Public Speaking': 'Establish credibility early, connect emotionally with your audience, and leave them with an inspiring message.',
-    'Podcast/Interview': 'Be conversational, share authentic stories, and engage actively with questions and comments.'
+    'Sales Pitch': 'Lead with specific ROI metrics, identify precise pain points, use case studies with numbers, create time-based urgency, and end with clear next steps.',
+    'Business Pitch': 'Quantify market size, demonstrate competitive moats, show realistic financials, address risks proactively, and articulate clear investor returns.',
+    'Job Interview': 'Use the STAR method with quantified results, demonstrate cultural alignment, show growth mindset, and ask strategic questions.',
+    'Presentation': 'Start with business impact, structure with executive summary, support with data, anticipate questions, and provide actionable recommendations.',
+    'Public Speaking': 'Establish thought leadership early, use powerful stories with business relevance, connect to audience goals, and inspire specific actions.',
+    'Negotiation': 'Identify mutual value creation, use anchoring strategies, prepare multiple scenarios, understand their constraints, and close with win-win outcomes.'
   };
-  return tips[purpose] || 'Speak clearly, maintain good eye contact, and structure your content with a clear beginning, middle, and end.';
+  return tips[purpose] || 'Structure content strategically, use data-driven arguments, and communicate with executive presence.';
 }
 
 // Helper function for purpose-specific live feedback during recording
@@ -125,9 +125,17 @@ function getPurposeSpecificLiveFeedback(purpose: string, transcript: string, met
   
   const feedbackTemplates = {
     'Sales Pitch': [
-      { condition: () => !transcript.toLowerCase().includes('problem'), feedback: 'Start by clearly identifying the customer\'s problem', actionable: 'Begin with "The problem is..." or "Many companies struggle with..."' },
-      { condition: () => !transcript.toLowerCase().includes('solution'), feedback: 'Present your solution early', actionable: 'Clearly state how your product/service solves the problem' },
-      { condition: () => wordCount > 100 && !transcript.toLowerCase().includes('call'), feedback: 'Include a clear call-to-action', actionable: 'End with specific next steps like "Let\'s schedule a demo"' }
+      { condition: () => !transcript.toLowerCase().includes('roi') && !transcript.toLowerCase().includes('save') && !transcript.toLowerCase().includes('revenue'), feedback: 'Quantify the financial impact for prospects', actionable: 'State specific ROI: "This saves companies $X annually" or "Increases revenue by Y%"' },
+      { condition: () => !transcript.toLowerCase().includes('problem') && !transcript.toLowerCase().includes('challenge'), feedback: 'Identify specific business pain points', actionable: 'Be precise: "CFOs struggle with manual reporting taking 40 hours monthly"' },
+      { condition: () => !transcript.toLowerCase().includes('because') && !transcript.toLowerCase().includes('proven'), feedback: 'Add credibility with proof points', actionable: 'Use: "We\'ve helped 500+ companies reduce costs by 30%" or cite specific case studies' },
+      { condition: () => wordCount > 100 && !transcript.toLowerCase().includes('next step') && !transcript.toLowerCase().includes('schedule'), feedback: 'Include urgent, specific call-to-action', actionable: 'End with: "Let\'s schedule a 15-minute demo this week to show you the $X impact"' },
+      { condition: () => !transcript.toLowerCase().includes('competitor') && wordCount > 80, feedback: 'Differentiate from alternatives', actionable: 'Explain why your solution beats status quo and competitors specifically' }
+    ],
+    'Business Pitch': [
+      { condition: () => !transcript.toLowerCase().includes('market') && !transcript.toLowerCase().includes('billion'), feedback: 'Quantify the market opportunity size', actionable: 'State: "This is a $X billion market growing at Y% annually"' },
+      { condition: () => !transcript.toLowerCase().includes('revenue') && !transcript.toLowerCase().includes('model'), feedback: 'Explain your business model clearly', actionable: 'Detail: "We charge $X per user monthly with 85% gross margins"' },
+      { condition: () => !transcript.toLowerCase().includes('team') && !transcript.toLowerCase().includes('experience'), feedback: 'Establish team credibility', actionable: 'Highlight: "Our team has 20+ years at Google, McKinsey building similar solutions"' },
+      { condition: () => wordCount > 120 && !transcript.toLowerCase().includes('funding') && !transcript.toLowerCase().includes('investment'), feedback: 'Specify investment ask and use', actionable: 'State: "Seeking $X to achieve Y milestones and reach Z revenue in 18 months"' }
     ],
     'Job Interview': [
       { condition: () => metrics.emotion?.confidence < 70, feedback: 'Project more confidence in your delivery', actionable: 'Speak with conviction and maintain steady eye contact' },
@@ -1333,12 +1341,12 @@ export default function EnhancedPracticePage() {
                       {/* Quick Purpose Presets */}
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                         {[
-                          { label: "Sales Pitch", desc: "Persuade and convert" },
+                          { label: "Sales Pitch", desc: "B2B sales & conversion" },
+                          { label: "Business Pitch", desc: "Investor & stakeholder" },
                           { label: "Job Interview", desc: "Professional presentation" },
-                          { label: "Presentation", desc: "Inform and educate" },
-                          { label: "Wedding Speech", desc: "Celebrate and honor" },
-                          { label: "Public Speaking", desc: "Inspire and motivate" },
-                          { label: "Podcast/Interview", desc: "Engage and discuss" }
+                          { label: "Presentation", desc: "Corporate & executive" },
+                          { label: "Public Speaking", desc: "Leadership & keynote" },
+                          { label: "Negotiation", desc: "Deal closing & persuasion" }
                         ].map((preset) => (
                           <Button
                             key={preset.label}

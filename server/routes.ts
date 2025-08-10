@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { db } from "./db";
 import { eq, desc, asc, sql, max, not, and } from "drizzle-orm";
 import { storage } from "./storage";
+import { salesBusinessAnalysisEngine } from "./sales-business-analysis-engine";
 import { advancedFillerDetectionEngine } from "./advanced-filler-detection";
 import { RealTimeSessionManager } from "./redis-realtime";
 import { insertPracticeSessionSchema, insertCoachingFeedbackSchema, insertCustomTemplateSchema, practiceSessions } from "@shared/schema";
@@ -867,13 +868,30 @@ Make the content more engaging, natural, and personalized while keeping the same
   function getPurposeSpecificInstructions(purpose) {
     const purposeInstructions = {
       'Sales Pitch': `
-      SALES PITCH ANALYSIS FOCUS:
-      - Value Proposition: Did they clearly articulate the value and benefits?
-      - Problem-Solution Fit: How well did they identify customer pain points?
-      - Credibility Building: Were testimonials, data, or proof points effectively used?
-      - Call to Action: Was the closing compelling and clear about next steps?
-      - Objection Handling: Did they anticipate and address potential concerns?
-      - Persuasion Techniques: Evaluate use of urgency, scarcity, social proof
+      EXPERT SALES PITCH ANALYSIS - ADULT BUSINESS COHORT FOCUS:
+      - Value Proposition Clarity: Rate 1-10 how clearly they articulated ROI, cost savings, revenue impact
+      - Pain Point Identification: Analyze specificity of customer problems mentioned (generic vs specific industry challenges)
+      - Solution Positioning: Evaluate how well they positioned their offering as THE solution vs A solution
+      - Credibility Establishment: Assess use of specific metrics, case studies, testimonials, industry expertise
+      - Objection Prevention: Did they proactively address common objections (budget, timing, competition)?
+      - Urgency Creation: Evaluate scarcity tactics, limited-time offers, competitive threats mentioned
+      - Call-to-Action Strength: Rate the specificity and urgency of next steps (vague "let's talk" vs "sign by Friday")
+      - Business Language Sophistication: Assess use of industry terminology, executive-level communication
+      - Stakeholder Awareness: Did they acknowledge decision-making processes, multiple stakeholders?
+      - Competitive Differentiation: How clearly did they separate from alternatives and competition?
+      `,
+      'Business Pitch': `
+      EXPERT BUSINESS PITCH ANALYSIS - EXECUTIVE COHORT FOCUS:
+      - Market Opportunity Size: Did they quantify the addressable market with specific data?
+      - Business Model Clarity: How clearly did they explain revenue streams and unit economics?
+      - Competitive Advantage: Assess uniqueness and defensibility of their proposition
+      - Financial Projections: Evaluate realism and specificity of revenue/growth forecasts
+      - Go-to-Market Strategy: Rate the clarity and feasibility of their customer acquisition plan
+      - Team Credibility: Did they establish relevant experience and domain expertise?
+      - Risk Mitigation: How well did they address potential challenges and mitigation strategies?
+      - Investment Ask: Was the funding request specific with clear use of funds?
+      - Exit Strategy: Did they articulate potential outcomes for investors/stakeholders?
+      - Executive Presence: Assess confidence, authority, and C-level communication style
       `,
       'Job Interview': `
       JOB INTERVIEW ANALYSIS FOCUS:
@@ -942,27 +960,34 @@ Make the content more engaging, natural, and personalized while keeping the same
           messages: [
             {
               role: "system",
-              content: `You are an expert AI speech coach with deep expertise in public speaking, communication psychology, and performance analysis. Provide comprehensive, actionable insights based on session data. Always respond with valid JSON in this exact format:
+              content: `You are an elite executive communication consultant with 20+ years of experience coaching Fortune 500 CEOs, venture capital partners, and top sales professionals. Your expertise spans McKinsey-level business communication, Harvard Business School case methodology, and enterprise sales psychology. You have trained speakers who have closed $100M+ deals and secured $500M+ in funding.
+
+              CRITICAL: You are analyzing adult professional cohorts where excellence in sales pitches and business presentations directly impacts career advancement and revenue generation. Your analysis must meet C-level executive standards.
+
+              For SALES PITCHES: Focus on revenue impact, deal-closing psychology, enterprise B2B effectiveness, and executive buyer engagement.
+              For BUSINESS PITCHES: Evaluate investor-grade presentations, market analysis rigor, financial model credibility, and funding readiness.
+
+              Always respond with valid JSON in this exact format:
               
               {
-                "overallAssessment": "2-3 sentence summary of performance",
+                "overallAssessment": "Executive-level assessment focusing on business impact and professional advancement potential",
                 "voiceAnalysis": {
                   "score": number (0-100),
                   "strengths": ["strength1", "strength2"],
                   "improvements": ["improvement1", "improvement2"],
-                  "insights": "detailed paragraph about voice quality"
+                  "insights": "comprehensive analysis of vocal impact on business outcomes and stakeholder influence"
                 },
                 "contentAnalysis": {
                   "score": number (0-100),
                   "strengths": ["strength1", "strength2"],
                   "improvements": ["improvement1", "improvement2"],
-                  "insights": "detailed paragraph about content effectiveness"
+                  "insights": "thorough evaluation of business logic, persuasion strategy, and revenue-generating potential"
                 },
                 "deliveryAnalysis": {
                   "score": number (0-100),
                   "strengths": ["strength1", "strength2"],
                   "improvements": ["improvement1", "improvement2"],
-                  "insights": "detailed paragraph about delivery and presence"
+                  "insights": "comprehensive assessment of executive presence and leadership communication impact"
                 },
                 "keyInsights": [
                   {
@@ -980,7 +1005,7 @@ Make the content more engaging, natural, and personalized while keeping the same
                     "description": "Specific actionable recommendation"
                   }
                 ],
-                "progressSummary": "Encouraging summary with next steps"
+                "progressSummary": "Strategic development roadmap with measurable business communication milestones"
               }`
             },
             {
