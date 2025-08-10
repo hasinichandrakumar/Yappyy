@@ -94,7 +94,6 @@ export function useMediaPipeBodyLanguage() {
         smoothLandmarks: true,
         enableSegmentation: true, // Enable for better isolation of the subject
         smoothSegmentation: true,
-        refineFaceLandmarks: true, // Enable detailed face landmark detection
         minDetectionConfidence: 0.7, // Increased from 0.5 for higher confidence
         minTrackingConfidence: 0.7  // Increased from 0.5 for more stable tracking
       });
@@ -109,7 +108,6 @@ export function useMediaPipeBodyLanguage() {
         modelComplexity: 1,
         minDetectionConfidence: 0.7, // Increased for higher confidence
         minTrackingConfidence: 0.7,  // Increased for more stable tracking
-        staticImageMode: false,      // Enable dynamic tracking
         selfieMode: true            // Mirror mode for front-facing camera
       });
 
@@ -216,7 +214,93 @@ export function useMediaPipeBodyLanguage() {
     }
   }, []);
 
+  // Calculate gesture metrics from hand landmarks with enhanced accuracy
+  const calculateGestureMetrics = useCallback((multiHandLandmarks: any[]) => {
+    if (!multiHandLandmarks || multiHandLandmarks.length === 0) {
+      return { handMovements: 0, naturalness: 0, effectiveness: 0, timing: 0 };
+    }
 
+    try {
+      // Initialize base scores
+      let handMovements = 0;
+      let naturalness = 0;
+      let effectiveness = 0;
+      let timing = 0;
+
+      for (const handLandmarks of multiHandLandmarks) {
+        if (!handLandmarks || handLandmarks.length < 21) continue;
+
+        // Key hand landmarks (MediaPipe 21-point model)
+        const wrist = handLandmarks[0];
+        const thumb_tip = handLandmarks[4];
+        const thumb_mcp = handLandmarks[2];
+        const index_tip = handLandmarks[8];
+        const index_mcp = handLandmarks[5];
+        const middle_tip = handLandmarks[12];
+        const middle_mcp = handLandmarks[9];
+        const ring_tip = handLandmarks[16];
+        const ring_mcp = handLandmarks[13];
+        const pinky_tip = handLandmarks[20];
+        const pinky_mcp = handLandmarks[17];
+
+        // Calculate hand openness (finger extension)
+        const fingerExtensions = [
+          Math.abs(thumb_tip.y - thumb_mcp.y),
+          Math.abs(index_tip.y - index_mcp.y),
+          Math.abs(middle_tip.y - middle_mcp.y),
+          Math.abs(ring_tip.y - ring_mcp.y),
+          Math.abs(pinky_tip.y - pinky_mcp.y)
+        ];
+        
+        const averageExtension = fingerExtensions.reduce((sum, ext) => sum + ext, 0) / fingerExtensions.length;
+        const handOpenness = Math.min(1, averageExtension * 5); // Normalize to [0,1]
+
+        // Calculate hand movement range
+        const handSpread = Math.sqrt(
+          Math.pow(index_tip.x - pinky_tip.x, 2) + 
+          Math.pow(index_tip.y - pinky_tip.y, 2)
+        );
+        const movementRange = Math.min(1, handSpread * 3); // Normalize to [0,1]
+
+        // Calculate gesture naturalness based on hand position relative to body
+        const handHeight = 1 - wrist.y; // Higher hands are more natural for gesturing
+        const handCenteredness = 1 - Math.abs(0.5 - wrist.x); // Centered hands are more natural
+        const gestureNaturalness = (handHeight * 0.6 + handCenteredness * 0.4);
+
+        // Calculate gesture effectiveness based on hand visibility and positioning
+        const visibilityScore = handLandmarks.reduce((sum: number, landmark: any) => {
+          return sum + (landmark?.visibility || 0.5);
+        }, 0) / handLandmarks.length;
+
+        const gestureEffectiveness = (visibilityScore * 0.5 + handOpenness * 0.3 + movementRange * 0.2);
+
+        // Calculate timing score based on gesture stability
+        const stabilityScore = handLandmarks.reduce((sum: number, landmark: any) => {
+          // Higher z values indicate more stable tracking
+          return sum + (1 - Math.abs(landmark.z || 0));
+        }, 0) / handLandmarks.length;
+
+        // Accumulate scores (will average if multiple hands detected)
+        handMovements += movementRange;
+        naturalness += gestureNaturalness;
+        effectiveness += gestureEffectiveness;
+        timing += stabilityScore;
+      }
+
+      // Average scores across detected hands
+      const numHands = multiHandLandmarks.length;
+      return {
+        handMovements: Math.round((handMovements / numHands) * 100),
+        naturalness: Math.round((naturalness / numHands) * 100),
+        effectiveness: Math.round((effectiveness / numHands) * 100),
+        timing: Math.round((timing / numHands) * 100)
+      };
+
+    } catch (error) {
+      console.warn('⚠️ Error calculating gesture metrics:', error);
+      return { handMovements: 0, naturalness: 0, effectiveness: 0, timing: 0 };
+    }
+  }, []);
 
   // Calculate eye contact metrics with enhanced accuracy
   const calculateEyeContactMetrics = useCallback((poseLandmarks: any[]) => {
