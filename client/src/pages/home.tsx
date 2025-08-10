@@ -111,7 +111,7 @@ export default function HomePage() {
               {/* Demo Button */}
               <Button 
                 variant="outline"
-                className="border-[#3B82F6] text-[#3B82F6] hover:bg-gradient-to-r hover:from-[#3B82F6] hover:to-[#06B6D4] hover:text-white hover:border-[#06B6D4] active:text-white focus:text-white font-medium transition-all duration-300 shadow-sm hover:shadow-md"
+                className="border-[#38b6ff] text-[#38b6ff] hover:bg-gradient-to-r hover:from-[#38b6ff] hover:to-[#06B6D4] hover:text-white hover:border-[#06B6D4] active:text-white focus:text-white font-medium transition-all duration-300 shadow-sm hover:shadow-md"
                 onClick={() => window.location.href = '/dashboard'}
               >
                 Demo Dashboard

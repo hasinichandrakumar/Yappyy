@@ -85,6 +85,79 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
   const [fillerAnalysis, setFillerAnalysis] = useState<any>(null);
   const [isGeneratingInsights, setIsGeneratingInsights] = useState(true);
   const [aiInsights, setAIInsights] = useState<any>(null);
+  const [isSendingToCoach, setIsSendingToCoach] = useState(false);
+
+  // Send session data to AI coach for neural analysis
+  const handleSendToAICoach = async () => {
+    setIsSendingToCoach(true);
+    
+    try {
+      // Prepare comprehensive session data for AI coach neural analysis
+      const sessionForCoach = {
+        // Core session metrics
+        sessionId: Date.now().toString(),
+        timestamp: sessionData.createdAt,
+        duration: sessionData.duration,
+        purpose: sessionData.purpose,
+        
+        // Performance metrics
+        overallScore: normalizedData.overallPerformance,
+        confidenceScore: normalizedData.confidenceLevel,
+        voiceClarity: normalizedData.clarityScore,
+        averageWPM: sessionData.wordsPerMinute,
+        wordCount: sessionData.transcript.split(' ').length,
+        fillerWords: Array(sessionData.fillerWordCount).fill('filler'),
+        
+        // Engagement and presence metrics
+        engagementLevel: normalizedData.engagementLevel,
+        eyeContactScore: normalizedData.eyeContactScore,
+        volumeConsistency: normalizedData.volumeConsistency,
+        intonationScore: normalizedData.intonationScore,
+        paceConsistency: normalizedData.paceConsistency,
+        
+        // Advanced facial analysis
+        facialAnalysis: sessionData.facialAnalysis,
+        
+        // Content analysis
+        transcript: sessionData.transcript,
+        contentQuality: normalizedData.engagementLevel, // Using as proxy for content quality
+        
+        // Session context for neural analysis
+        analysisContext: {
+          hasComputerVision: !!sessionData.facialAnalysis,
+          hasVoiceMetrics: !!(sessionData.clarityScore || sessionData.volumeConsistency),
+          sessionCompleted: true,
+          analysisType: 'comprehensive'
+        }
+      };
+
+      // Send to AI coach for integration with neural network
+      const response = await fetch('/api/ai-coach/integrate-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionData: sessionForCoach,
+          requestAnalysis: true,
+          updateNeuralProfile: true
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send data to AI coach');
+      }
+
+      const result = await response.json();
+      
+      // Show success message with coaching insights
+      alert(`✅ Session data sent to AI Coach successfully!\n\n🧠 Neural Analysis Preview:\n${result.neuralInsights || 'Your session has been integrated into the AI coaching system for personalized analysis.'}\n\n💡 Visit the AI Coach tab to see detailed insights and recommendations based on this session.`);
+      
+    } catch (error) {
+      console.error('Failed to send to AI coach:', error);
+      alert('❌ Failed to send session data to AI coach. Please try again or visit the AI Coach tab manually.');
+    } finally {
+      setIsSendingToCoach(false);
+    }
+  };
 
   // AUTHENTIC DATA PROCESSING - Extract computer vision metrics for performance display
   const normalizedData = {
@@ -975,6 +1048,14 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
                   <Button variant="outline" className="flex items-center gap-2">
                     <Share2 className="w-4 h-4" />
                     Share Results
+                  </Button>
+                  <Button 
+                    onClick={handleSendToAICoach}
+                    disabled={isSendingToCoach}
+                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white flex items-center gap-2"
+                  >
+                    <Brain className="w-4 h-4" />
+                    {isSendingToCoach ? 'Sending to AI Coach...' : 'Send to AI Coach'}
                   </Button>
                   <Button onClick={onNewSession} className="bg-gradient-to-r from-blue-600 to-cyan-600">
                     <Target className="w-4 h-4 mr-2" />
