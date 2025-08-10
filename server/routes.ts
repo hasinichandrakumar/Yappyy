@@ -305,10 +305,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Save practice session with all data
   app.post('/api/sessions/save', async (req: any, res) => {
     try {
-      // For development: Allow saving without authentication
-      // In production, authentication should be required
-      const userId = req.user?.claims?.sub || req.user?.id || 'demo-user';
-      console.log('💾 Saving session for user:', userId);
+      // Ensure user is authenticated before saving session data
+      if (!req.isAuthenticated() || !req.user) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Authentication required to save session data" 
+        });
+      }
+      
+      const userId = getUserId(req);
+      console.log('💾 Saving session for authenticated Google user:', userId);
       
       const sessionData = req.body;
       console.log('📊 Session data received:', {
@@ -356,14 +362,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Add additional fields to complete session data
-      completeSessionData.aiAnalysis = sessionData.aiAnalysis || null;
-      completeSessionData.speechPatterns = sessionData.speechPatterns || null;
-      completeSessionData.emotionalIntelligence = sessionData.emotionalIntelligence || null;
-      completeSessionData.rhetoricAnalysis = sessionData.rhetoricAnalysis || null;
-      completeSessionData.improvementPlan = sessionData.improvementPlan || null;
+      const extendedSessionData = {
+        ...completeSessionData,
+        aiAnalysis: sessionData.aiAnalysis || null,
+        speechPatterns: sessionData.speechPatterns || null,
+        emotionalIntelligence: sessionData.emotionalIntelligence || null,
+        rhetoricAnalysis: sessionData.rhetoricAnalysis || null,
+        improvementPlan: sessionData.improvementPlan || null
+      };
       
       // Create the session with all provided data
-      const session = await storage.createPracticeSession(completeSessionData);
+      const session = await storage.createPracticeSession(extendedSessionData);
       
       console.log('✅ Session created successfully:', {
         id: session.id,
@@ -371,13 +380,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId: session.userId
       });
 
-      // Update daily goals progress (skip for demo users)
-      if (userId !== 'demo-user') {
-        try {
-          await userOnboardingService.updateGoalProgress(userId, 'sessions', 1);
-        } catch (error) {
-          console.warn('⚠️ Could not update goal progress:', error.message);
-        }
+      // Update daily goals progress for authenticated users
+      try {
+        await userOnboardingService.updateGoalProgress(userId, 'sessions', 1);
+      } catch (error: any) {
+        console.warn('⚠️ Could not update goal progress:', error.message);
       }
       
       res.json({ 
@@ -385,7 +392,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         session,
         message: `Session ${sessionNumber} saved successfully` 
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving practice session:", error);
       res.status(500).json({ 
         success: false, 
@@ -617,9 +624,16 @@ Make the content more engaging, natural, and personalized while keeping the same
   });
 
   // Deep Learning Profile endpoint
-  app.post('/api/deep-learning-profile',  async (req: any, res) => {
+  app.post('/api/deep-learning-profile', async (req: any, res) => {
     try {
-      const userId = req.user?.id || req.user?.claims?.sub;
+      if (!req.isAuthenticated() || !req.user) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Authentication required" 
+        });
+      }
+      
+      const userId = getUserId(req);
       const profileData = req.body;
       
       console.log('Training deep learning coach for user:', userId);
@@ -644,9 +658,16 @@ Make the content more engaging, natural, and personalized while keeping the same
   });
 
   // Get Neural Coach Profile endpoint
-  app.get('/api/neural-coach-profile',  async (req: any, res) => {
+  app.get('/api/neural-coach-profile', async (req: any, res) => {
     try {
-      const userId = req.user?.id || req.user?.claims?.sub;
+      if (!req.isAuthenticated() || !req.user) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Authentication required" 
+        });
+      }
+      
+      const userId = getUserId(req);
       
       const { getUserNeuralProfile } = await import('./peppy-deep-learning-coach');
       const neuralProfile = getUserNeuralProfile(userId);
@@ -675,9 +696,16 @@ Make the content more engaging, natural, and personalized while keeping the same
   });
 
   // Update user profile
-  app.patch('/api/user/profile',  async (req: any, res) => {
+  app.patch('/api/user/profile', async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      if (!req.isAuthenticated() || !req.user) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Authentication required" 
+        });
+      }
+      
+      const userId = getUserId(req);
       const updates = req.body;
       const updatedUser = await storage.updateUserProfile(userId, updates);
       res.json(updatedUser);
@@ -688,9 +716,16 @@ Make the content more engaging, natural, and personalized while keeping the same
   });
 
   // Get user preferences
-  app.get('/api/user/preferences',  async (req: any, res) => {
+  app.get('/api/user/preferences', async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      if (!req.isAuthenticated() || !req.user) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Authentication required" 
+        });
+      }
+      
+      const userId = getUserId(req);
       const preferences = await storage.getUserPreferences(userId);
       res.json(preferences);
     } catch (error) {
@@ -700,9 +735,16 @@ Make the content more engaging, natural, and personalized while keeping the same
   });
 
   // Update user preference
-  app.put('/api/user/preferences',  async (req: any, res) => {
+  app.put('/api/user/preferences', async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      if (!req.isAuthenticated() || !req.user) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Authentication required" 
+        });
+      }
+      
+      const userId = getUserId(req);
       const { category, setting, value } = req.body;
       const preference = await storage.upsertUserPreference({
         userId,
@@ -718,9 +760,16 @@ Make the content more engaging, natural, and personalized while keeping the same
   });
 
   // Get user achievements
-  app.get('/api/user/achievements',  async (req: any, res) => {
+  app.get('/api/user/achievements', async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      if (!req.isAuthenticated() || !req.user) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Authentication required" 
+        });
+      }
+      
+      const userId = getUserId(req);
       const achievements = await storage.getUserAchievements(userId);
       res.json(achievements);
     } catch (error) {
@@ -730,9 +779,16 @@ Make the content more engaging, natural, and personalized while keeping the same
   });
 
   // Get user streaks
-  app.get('/api/user/streaks',  async (req: any, res) => {
+  app.get('/api/user/streaks', async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      if (!req.isAuthenticated() || !req.user) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Authentication required" 
+        });
+      }
+      
+      const userId = getUserId(req);
       const streaks = await storage.getUserStreaks(userId);
       res.json(streaks);
     } catch (error) {
@@ -742,9 +798,16 @@ Make the content more engaging, natural, and personalized while keeping the same
   });
 
   // Mark onboarding as complete
-  app.post('/api/user/complete-onboarding',  async (req: any, res) => {
+  app.post('/api/user/complete-onboarding', async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      if (!req.isAuthenticated() || !req.user) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Authentication required" 
+        });
+      }
+      
+      const userId = getUserId(req);
       const updatedUser = await storage.updateUserProfile(userId, {
         hasCompletedOnboarding: true,
         onboardingCompletedAt: new Date()
@@ -757,9 +820,16 @@ Make the content more engaging, natural, and personalized while keeping the same
   });
 
   // Get user's daily goals
-  app.get('/api/user/daily-goals',  async (req: any, res) => {
+  app.get('/api/user/daily-goals', async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      if (!req.isAuthenticated() || !req.user) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Authentication required" 
+        });
+      }
+      
+      const userId = getUserId(req);
       const goals = await storage.generateDailyGoalsForUser(userId);
       res.json(goals);
     } catch (error) {
@@ -769,8 +839,15 @@ Make the content more engaging, natural, and personalized while keeping the same
   });
 
   // Update daily goal progress
-  app.post('/api/user/daily-goals/:goalId/complete',  async (req: any, res) => {
+  app.post('/api/user/daily-goals/:goalId/complete', async (req: any, res) => {
     try {
+      if (!req.isAuthenticated() || !req.user) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Authentication required" 
+        });
+      }
+      
       const { goalId } = req.params;
       const updatedGoal = await storage.updateDailyGoal(parseInt(goalId), {
         isCompleted: true,
