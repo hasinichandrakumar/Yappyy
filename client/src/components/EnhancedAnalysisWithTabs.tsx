@@ -182,22 +182,93 @@ export default function EnhancedAnalysisWithTabs() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Prepare data for charts with actual session metrics
+  // Prepare data for charts with actual session metrics - ensuring accurate data mapping
   const bodyLanguageData = currentSession ? [
-    { metric: 'Posture', score: Math.round((currentSession.postureScore || 0) * 100), fullMark: 100 },
-    { metric: 'Gestures', score: Math.round((currentSession.gestureScore || 0) * 100), fullMark: 100 },
-    { metric: 'Eye Contact', score: parseFloat(currentSession.eyeContactScore || '0'), fullMark: 100 },
-    { metric: 'Facial Expression', score: currentSession.facialAnalysis?.expressiveness || 0, fullMark: 100 },
-    { metric: 'Confidence', score: Math.round((currentSession.confidenceScore || 0) * 100), fullMark: 100 },
-    { metric: 'Overall', score: Math.round((currentSession.overallScore || 0) * 100), fullMark: 100 }
+    { 
+      metric: 'Posture', 
+      score: currentSession.postureScore !== undefined && currentSession.postureScore !== null 
+        ? Math.round(currentSession.postureScore * (currentSession.postureScore <= 1 ? 100 : 1)) 
+        : 0, 
+      fullMark: 100 
+    },
+    { 
+      metric: 'Gestures', 
+      score: currentSession.gestureScore !== undefined && currentSession.gestureScore !== null
+        ? Math.round(currentSession.gestureScore * (currentSession.gestureScore <= 1 ? 100 : 1))
+        : 0, 
+      fullMark: 100 
+    },
+    { 
+      metric: 'Eye Contact', 
+      score: currentSession.eyeContactScore !== undefined && currentSession.eyeContactScore !== null
+        ? (typeof currentSession.eyeContactScore === 'string' 
+            ? parseFloat(currentSession.eyeContactScore) 
+            : currentSession.eyeContactScore * (currentSession.eyeContactScore <= 1 ? 100 : 1))
+        : 0, 
+      fullMark: 100 
+    },
+    { 
+      metric: 'Facial Expression', 
+      score: currentSession.facialAnalysis?.expressiveness || 
+             (currentSession.facialAnalysis?.emotions?.confidence ? currentSession.facialAnalysis.emotions.confidence * 100 : 0), 
+      fullMark: 100 
+    },
+    { 
+      metric: 'Confidence', 
+      score: currentSession.confidenceScore !== undefined && currentSession.confidenceScore !== null
+        ? Math.round(currentSession.confidenceScore * (currentSession.confidenceScore <= 1 ? 100 : 1))
+        : 0, 
+      fullMark: 100 
+    },
+    { 
+      metric: 'Overall', 
+      score: currentSession.overallScore !== undefined && currentSession.overallScore !== null
+        ? Math.round(currentSession.overallScore * (currentSession.overallScore <= 1 ? 100 : 1))
+        : Math.round((currentSession.confidenceScore || 0) * (currentSession.confidenceScore <= 1 ? 100 : 1)), 
+      fullMark: 100 
+    }
   ] : [];
 
   const voiceMetricsData = currentSession ? [
-    { name: 'Clarity', value: Math.round((currentSession.voiceClarity || currentSession.clarityScore || 0) * 100), color: '#8B5CF6' },
-    { name: 'Pace', value: currentSession.averageWPM ? Math.min(100, Math.round((currentSession.averageWPM / 180) * 100)) : 0, color: '#3B82F6' },
-    { name: 'Volume', value: Math.round((currentSession.volumeConsistency || 0) * 100), color: '#10B981' },
-    { name: 'Intonation', value: Math.round((currentSession.intonationScore || 0) * 100), color: '#F59E0B' },
-    { name: 'Pace Score', value: Math.round((currentSession.paceScore || 0) * 100), color: '#EF4444' }
+    { 
+      name: 'Clarity', 
+      value: currentSession.voiceClarity !== undefined && currentSession.voiceClarity !== null
+        ? Math.round(currentSession.voiceClarity * (currentSession.voiceClarity <= 1 ? 100 : 1))
+        : (currentSession.clarityScore !== undefined && currentSession.clarityScore !== null
+            ? Math.round(currentSession.clarityScore * (currentSession.clarityScore <= 1 ? 100 : 1))
+            : 0),
+      color: '#8B5CF6' 
+    },
+    { 
+      name: 'Pace', 
+      value: currentSession.averageWPM || currentSession.wordsPerMinute 
+        ? Math.min(100, Math.round(((currentSession.averageWPM || currentSession.wordsPerMinute) / 180) * 100)) 
+        : (currentSession.paceScore !== undefined && currentSession.paceScore !== null
+            ? Math.round(currentSession.paceScore * (currentSession.paceScore <= 1 ? 100 : 1))
+            : 0), 
+      color: '#3B82F6' 
+    },
+    { 
+      name: 'Volume', 
+      value: currentSession.volumeConsistency !== undefined && currentSession.volumeConsistency !== null
+        ? Math.round(currentSession.volumeConsistency * (currentSession.volumeConsistency <= 1 ? 100 : 1))
+        : 0, 
+      color: '#10B981' 
+    },
+    { 
+      name: 'Intonation', 
+      value: currentSession.intonationScore !== undefined && currentSession.intonationScore !== null
+        ? Math.round(currentSession.intonationScore * (currentSession.intonationScore <= 1 ? 100 : 1))
+        : 0, 
+      color: '#F59E0B' 
+    },
+    { 
+      name: 'Pace Score', 
+      value: currentSession.paceScore !== undefined && currentSession.paceScore !== null
+        ? Math.round(currentSession.paceScore * (currentSession.paceScore <= 1 ? 100 : 1))
+        : 0, 
+      color: '#EF4444' 
+    }
   ] : [];
 
   // Extract additional metrics from JSON fields
@@ -352,7 +423,9 @@ export default function EnhancedAnalysisWithTabs() {
                             </svg>
                             <div className="absolute inset-0 flex items-center justify-center">
                               <span className="text-3xl font-bold">
-                                {Math.round((currentSession.overallScore || currentSession.confidenceScore || 0) * 100)}%
+                                {currentSession.overallScore !== undefined && currentSession.overallScore !== null
+                                  ? Math.round(currentSession.overallScore * (currentSession.overallScore <= 1 ? 100 : 1))
+                                  : Math.round((currentSession.confidenceScore || 0) * (currentSession.confidenceScore <= 1 ? 100 : 1))}%
                               </span>
                             </div>
                           </div>
@@ -361,23 +434,39 @@ export default function EnhancedAnalysisWithTabs() {
                           <div>
                             <div className="flex justify-between text-sm mb-1">
                               <span>Posture</span>
-                              <span>{Math.round((currentSession.postureScore || 0) * 100)}%</span>
+                              <span>{currentSession.postureScore !== undefined && currentSession.postureScore !== null
+                                ? Math.round(currentSession.postureScore * (currentSession.postureScore <= 1 ? 100 : 1))
+                                : 0}%</span>
                             </div>
-                            <Progress value={Math.round((currentSession.postureScore || 0) * 100)} className="h-2" />
+                            <Progress value={currentSession.postureScore !== undefined && currentSession.postureScore !== null
+                              ? Math.round(currentSession.postureScore * (currentSession.postureScore <= 1 ? 100 : 1))
+                              : 0} className="h-2" />
                           </div>
                           <div>
                             <div className="flex justify-between text-sm mb-1">
                               <span>Gestures</span>
-                              <span>{Math.round((currentSession.gestureScore || 0) * 100)}%</span>
+                              <span>{currentSession.gestureScore !== undefined && currentSession.gestureScore !== null
+                                ? Math.round(currentSession.gestureScore * (currentSession.gestureScore <= 1 ? 100 : 1))
+                                : 0}%</span>
                             </div>
-                            <Progress value={Math.round((currentSession.gestureScore || 0) * 100)} className="h-2" />
+                            <Progress value={currentSession.gestureScore !== undefined && currentSession.gestureScore !== null
+                              ? Math.round(currentSession.gestureScore * (currentSession.gestureScore <= 1 ? 100 : 1))
+                              : 0} className="h-2" />
                           </div>
                           <div>
                             <div className="flex justify-between text-sm mb-1">
                               <span>Eye Contact</span>
-                              <span>{parseFloat(currentSession.eyeContactScore || '0')}%</span>
+                              <span>{currentSession.eyeContactScore !== undefined && currentSession.eyeContactScore !== null
+                                ? (typeof currentSession.eyeContactScore === 'string' 
+                                    ? parseFloat(currentSession.eyeContactScore)
+                                    : Math.round(currentSession.eyeContactScore * (currentSession.eyeContactScore <= 1 ? 100 : 1)))
+                                : 0}%</span>
                             </div>
-                            <Progress value={parseFloat(currentSession.eyeContactScore || '0')} className="h-2" />
+                            <Progress value={currentSession.eyeContactScore !== undefined && currentSession.eyeContactScore !== null
+                              ? (typeof currentSession.eyeContactScore === 'string' 
+                                  ? parseFloat(currentSession.eyeContactScore)
+                                  : Math.round(currentSession.eyeContactScore * (currentSession.eyeContactScore <= 1 ? 100 : 1)))
+                              : 0} className="h-2" />
                           </div>
                         </div>
                       </div>
@@ -498,30 +587,66 @@ export default function EnhancedAnalysisWithTabs() {
                           <div>
                             <div className="flex justify-between mb-1">
                               <span className="text-sm">Clarity</span>
-                              <span className="text-sm font-medium">{Math.round((currentSession.voiceClarity || currentSession.clarityScore || 0) * 100)}%</span>
+                              <span className="text-sm font-medium">{
+                                currentSession.voiceClarity !== undefined && currentSession.voiceClarity !== null
+                                  ? Math.round(currentSession.voiceClarity * (currentSession.voiceClarity <= 1 ? 100 : 1))
+                                  : (currentSession.clarityScore !== undefined && currentSession.clarityScore !== null
+                                      ? Math.round(currentSession.clarityScore * (currentSession.clarityScore <= 1 ? 100 : 1))
+                                      : 0)
+                              }%</span>
                             </div>
-                            <Progress value={Math.round((currentSession.voiceClarity || currentSession.clarityScore || 0) * 100)} className="h-2" />
+                            <Progress value={
+                              currentSession.voiceClarity !== undefined && currentSession.voiceClarity !== null
+                                ? Math.round(currentSession.voiceClarity * (currentSession.voiceClarity <= 1 ? 100 : 1))
+                                : (currentSession.clarityScore !== undefined && currentSession.clarityScore !== null
+                                    ? Math.round(currentSession.clarityScore * (currentSession.clarityScore <= 1 ? 100 : 1))
+                                    : 0)
+                            } className="h-2" />
                           </div>
                           <div>
                             <div className="flex justify-between mb-1">
                               <span className="text-sm">Volume Consistency</span>
-                              <span className="text-sm font-medium">{Math.round((currentSession.volumeConsistency || 0) * 100)}%</span>
+                              <span className="text-sm font-medium">{
+                                currentSession.volumeConsistency !== undefined && currentSession.volumeConsistency !== null
+                                  ? Math.round(currentSession.volumeConsistency * (currentSession.volumeConsistency <= 1 ? 100 : 1))
+                                  : 0
+                              }%</span>
                             </div>
-                            <Progress value={Math.round((currentSession.volumeConsistency || 0) * 100)} className="h-2" />
+                            <Progress value={
+                              currentSession.volumeConsistency !== undefined && currentSession.volumeConsistency !== null
+                                ? Math.round(currentSession.volumeConsistency * (currentSession.volumeConsistency <= 1 ? 100 : 1))
+                                : 0
+                            } className="h-2" />
                           </div>
                           <div>
                             <div className="flex justify-between mb-1">
                               <span className="text-sm">Intonation</span>
-                              <span className="text-sm font-medium">{Math.round((currentSession.intonationScore || 0) * 100)}%</span>
+                              <span className="text-sm font-medium">{
+                                currentSession.intonationScore !== undefined && currentSession.intonationScore !== null
+                                  ? Math.round(currentSession.intonationScore * (currentSession.intonationScore <= 1 ? 100 : 1))
+                                  : 0
+                              }%</span>
                             </div>
-                            <Progress value={Math.round((currentSession.intonationScore || 0) * 100)} className="h-2" />
+                            <Progress value={
+                              currentSession.intonationScore !== undefined && currentSession.intonationScore !== null
+                                ? Math.round(currentSession.intonationScore * (currentSession.intonationScore <= 1 ? 100 : 1))
+                                : 0
+                            } className="h-2" />
                           </div>
                           <div>
                             <div className="flex justify-between mb-1">
                               <span className="text-sm">Pace Score</span>
-                              <span className="text-sm font-medium">{Math.round((currentSession.paceScore || 0) * 100)}%</span>
+                              <span className="text-sm font-medium">{
+                                currentSession.paceScore !== undefined && currentSession.paceScore !== null
+                                  ? Math.round(currentSession.paceScore * (currentSession.paceScore <= 1 ? 100 : 1))
+                                  : 0
+                              }%</span>
                             </div>
-                            <Progress value={Math.round((currentSession.paceScore || 0) * 100)} className="h-2" />
+                            <Progress value={
+                              currentSession.paceScore !== undefined && currentSession.paceScore !== null
+                                ? Math.round(currentSession.paceScore * (currentSession.paceScore <= 1 ? 100 : 1))
+                                : 0
+                            } className="h-2" />
                           </div>
                         </div>
                       </div>
@@ -622,20 +747,33 @@ export default function EnhancedAnalysisWithTabs() {
                               cx="64" cy="64" r="56"
                               stroke="#EF4444" strokeWidth="12" fill="none"
                               strokeDasharray={`${2 * Math.PI * 56}`}
-                              strokeDashoffset={`${2 * Math.PI * 56 * (1 - (currentSession.persuasivenessScore || aiInsights?.emotionalScore || 0) / 100)}`}
+                              strokeDashoffset={`${2 * Math.PI * 56 * (1 - (
+                                currentSession.persuasivenessScore !== undefined && currentSession.persuasivenessScore !== null
+                                  ? (currentSession.persuasivenessScore <= 1 ? currentSession.persuasivenessScore : currentSession.persuasivenessScore / 100)
+                                  : (aiInsights?.emotionalScore || 0) / 100
+                              ))}`}
                               className="transition-all duration-1000"
                             />
                           </svg>
                           <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-3xl font-bold">{Math.round((currentSession.persuasivenessScore || aiInsights?.emotionalScore || 0) * 100)}%</span>
+                            <span className="text-3xl font-bold">{
+                              currentSession.persuasivenessScore !== undefined && currentSession.persuasivenessScore !== null
+                                ? Math.round(currentSession.persuasivenessScore * (currentSession.persuasivenessScore <= 1 ? 100 : 1))
+                                : Math.round((aiInsights?.emotionalScore || 0))
+                            }%</span>
                           </div>
                         </div>
                       </div>
                       <p className="text-center mt-4 text-gray-600">
-                        {(currentSession.persuasivenessScore || aiInsights?.emotionalScore || 0) >= 0.8 ? "Highly Engaging" :
-                         (currentSession.persuasivenessScore || aiInsights?.emotionalScore || 0) >= 0.6 ? "Good Connection" :
-                         (currentSession.persuasivenessScore || aiInsights?.emotionalScore || 0) >= 0.4 ? "Moderate Impact" :
-                         "Needs Improvement"}
+                        {(() => {
+                          const score = currentSession.persuasivenessScore !== undefined && currentSession.persuasivenessScore !== null
+                            ? (currentSession.persuasivenessScore <= 1 ? currentSession.persuasivenessScore : currentSession.persuasivenessScore / 100)
+                            : (aiInsights?.emotionalScore || 0) / 100;
+                          return score >= 0.8 ? "Highly Engaging" :
+                                 score >= 0.6 ? "Good Connection" :
+                                 score >= 0.4 ? "Moderate Impact" :
+                                 "Needs Improvement";
+                        })()}
                       </p>
                     </CardContent>
                   </Card>
