@@ -3870,6 +3870,154 @@ Provide neural integration insights.`
     }
   });
 
+  // Speaking Style Analysis endpoint
+  app.post("/api/ai-coach/speaking-analysis", async (req, res) => {
+    try {
+      const { userId, currentGoal, sessions } = req.body;
+      
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
+      }
+
+      const sessionData = sessions && sessions.length > 0 ? sessions : [];
+      const sessionCount = sessionData.length;
+      
+      // Calculate speaking metrics for analysis
+      const speakingMetrics = sessionData.reduce((acc: any, session: any) => {
+        acc.totalConfidence += session.confidenceScore || 0;
+        acc.totalClarity += session.voiceClarity || session.clarityScore || 0;
+        acc.totalPace += session.averageWPM || 0;
+        acc.totalFillerWords += session.fillerWords?.length || 0;
+        return acc;
+      }, {
+        totalConfidence: 0,
+        totalClarity: 0,
+        totalPace: 0,
+        totalFillerWords: 0
+      });
+
+      const { openai } = await import('./ai-config');
+      const response = await openai.chat.completions.create({
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'system',
+            content: `You are an expert speech analyst and communication coach. Analyze the user's speaking style and provide detailed insights about their communication patterns, speaking personality, and unique characteristics.
+
+Focus on:
+1. Speaking personality type (confident, thoughtful, energetic, etc.)
+2. Communication style patterns
+3. Voice characteristics and tendencies
+4. Natural strengths in their speaking approach
+5. Areas for enhancement and growth
+
+Provide a comprehensive but personalized analysis that feels like it's specifically about this speaker.`
+          },
+          {
+            role: 'user',
+            content: `Analyze my speaking style based on this data:
+
+SPEAKING SESSIONS: ${sessionCount}
+CURRENT GOAL: ${currentGoal || 'General improvement'}
+AVERAGE CONFIDENCE: ${sessionCount > 0 ? Math.round(speakingMetrics.totalConfidence / sessionCount) : 'No data'}%
+AVERAGE CLARITY: ${sessionCount > 0 ? Math.round(speakingMetrics.totalClarity / sessionCount) : 'No data'}%
+AVERAGE PACE: ${sessionCount > 0 ? Math.round(speakingMetrics.totalPace / sessionCount) : 'No data'} WPM
+FILLER WORD FREQUENCY: ${sessionCount > 0 ? Math.round(speakingMetrics.totalFillerWords / sessionCount) : 'No data'} per session
+
+Provide a detailed speaking style analysis with my speaking personality type, strengths, and improvement areas.`
+          }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.7,
+        max_tokens: 800
+      });
+
+      const analysisResult = JSON.parse(response.choices[0].message.content);
+      
+      res.json({
+        analysis: analysisResult.analysis || 'Your speaking style shows natural confidence and clear communication patterns.',
+        speakingPersonality: analysisResult.speakingPersonality || 'Confident Communicator',
+        strengths: analysisResult.strengths || ['Clear articulation', 'Good pacing', 'Natural confidence'],
+        improvements: analysisResult.improvements || ['Vary vocal tonality', 'Reduce filler words', 'Add more pauses']
+      });
+
+    } catch (error: any) {
+      console.error("Speaking analysis error:", error);
+      res.status(500).json({ 
+        message: "Failed to generate speaking analysis", 
+        error: error.message 
+      });
+    }
+  });
+
+  // Practice Techniques endpoint
+  app.post("/api/ai-coach/practice-techniques", async (req, res) => {
+    try {
+      const { userId, currentGoal, focusArea } = req.body;
+      
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
+      }
+
+      const { openai } = await import('./ai-config');
+      const response = await openai.chat.completions.create({
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'system',
+            content: `You are a professional speech coach and vocal trainer. Provide advanced, practical speaking techniques and exercises that speakers can use to improve their skills.
+
+Focus on:
+1. Breathing and vocal techniques
+2. Body language and posture
+3. Articulation and clarity exercises
+4. Confidence building methods
+5. Daily practice routines
+
+Provide specific, actionable techniques that can be practiced immediately.`
+          },
+          {
+            role: 'user',
+            content: `Provide advanced practice techniques for someone with these goals:
+
+CURRENT GOAL: ${currentGoal || 'General improvement'}
+FOCUS AREA: ${focusArea || 'comprehensive'}
+
+Give me specific techniques, daily exercises, and professional tips for improving speaking skills.`
+          }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.6,
+        max_tokens: 800
+      });
+
+      const techniquesResult = JSON.parse(response.choices[0].message.content);
+      
+      res.json({
+        techniques: techniquesResult.techniques || 'Advanced speaking techniques tailored for your goals.',
+        exercises: techniquesResult.exercises || [
+          'Diaphragmatic breathing practice (5 minutes daily)',
+          'Vocal warm-ups with lip trills and humming',
+          'Mirror practice for body language awareness',
+          'Recording and playback analysis'
+        ],
+        tips: techniquesResult.tips || [
+          'Practice consistently for 10-15 minutes daily',
+          'Focus on one technique at a time',
+          'Record yourself to track progress',
+          'Seek feedback from others'
+        ]
+      });
+
+    } catch (error: any) {
+      console.error("Practice techniques error:", error);
+      res.status(500).json({ 
+        message: "Failed to generate practice techniques", 
+        error: error.message 
+      });
+    }
+  });
+
   // Real-time transcription endpoint
   app.post("/api/transcribe", async (req, res) => {
     try {
