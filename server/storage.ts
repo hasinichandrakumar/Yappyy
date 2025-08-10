@@ -219,10 +219,13 @@ export class DatabaseStorage implements IStorage {
             userId: userId,
             personalityVector: JSON.stringify(Array(16).fill(0.5)), // Fresh neutral personality
             learningPatterns: JSON.stringify({}),
-            adaptiveStrategies: JSON.stringify([]),
-            confidenceLevel: 0.6, // Starting confidence
-            trainingIterations: 0,
-            lastUpdated: new Date()
+            communicationPreferences: JSON.stringify({}),
+            performanceMetrics: JSON.stringify({}),
+            adaptiveStrategy: 'balanced', // Starting strategy
+            coachingStyle: 'supportive', // Starting coaching style
+            focusAreas: [], // Empty focus areas initially
+            neuralConfidence: 0.6, // Starting confidence
+            trainingIterations: 0
           })
           .onConflictDoNothing()
       );
