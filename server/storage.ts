@@ -56,7 +56,7 @@ import {
   type InsertUserProgressSnapshot
 } from "@shared/schema";
 import { db, resilientQuery } from "./db";
-import { eq, desc, and, gte, lte } from "drizzle-orm";
+import { eq, desc, and, gte, lte, asc } from "drizzle-orm";
 
 // Database operation wrapper with retry logic
 async function withRetry<T>(operation: () => Promise<T>, maxRetries = 3): Promise<T> {
@@ -363,8 +363,37 @@ export class DatabaseStorage implements IStorage {
           ))
       );
 
-      console.log(`✅ Session ${sessionId} deleted for user ${userId}`);
+      // Renumber all sessions to maintain sequential 1-infinity numbering
+      await this.renumberUserSessions(userId);
+
+      console.log(`✅ Session ${sessionId} deleted and sessions renumbered for user ${userId}`);
       return true;
+    });
+  }
+
+  async renumberUserSessions(userId: string): Promise<void> {
+    return await withRetry(async () => {
+      // Get all remaining sessions for the user ordered by creation date
+      const sessions = await resilientQuery(() =>
+        db.select()
+          .from(practiceSessions)
+          .where(eq(practiceSessions.userId, userId))
+          .orderBy(asc(practiceSessions.createdAt))
+      );
+
+      // Update each session with sequential numbering from 1
+      for (let i = 0; i < sessions.length; i++) {
+        const newSessionNumber = i + 1;
+        if (sessions[i].sessionNumber !== newSessionNumber) {
+          await resilientQuery(() =>
+            db.update(practiceSessions)
+              .set({ sessionNumber: newSessionNumber })
+              .where(eq(practiceSessions.id, sessions[i].id))
+          );
+        }
+      }
+
+      console.log(`✅ Renumbered ${sessions.length} sessions for user ${userId} (1 to ${sessions.length})`);
     });
   }
 
