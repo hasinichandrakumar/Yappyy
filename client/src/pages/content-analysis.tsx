@@ -16,6 +16,7 @@ const ContentAnalysisPage: React.FC = () => {
         </div>
         
         <AdvancedContentAnalysis />
+      </div>
     </div>
   );
 };
