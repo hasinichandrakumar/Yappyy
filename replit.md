@@ -22,7 +22,7 @@ Preferred communication style: Simple, everyday language.
 - **Language**: TypeScript with ES modules
 - **Database**: PostgreSQL with Drizzle ORM, hosted on Neon serverless, fully migrated and operational with comprehensive schema
 - **Session Management**: Express sessions with PostgreSQL store
-- **Authentication**: Google OAuth (primary authentication system) with comprehensive user data protection. All user sessions, progress, and AI insights are securely tied to Google accounts. Anyone with a Google account can sign in.
+- **Authentication**: Google OAuth (primary authentication system) with comprehensive user data protection. All user sessions, progress, and AI insights are securely tied to Google accounts. Anyone with a Google account can sign in. After successful OAuth authentication, users are redirected to `/dashboard` on the same domain.
 - **Payload Limits**: Increased Express.js payload limit to 50mb for session saving and PDF export.
 
 ## Key Technical Implementations & Features

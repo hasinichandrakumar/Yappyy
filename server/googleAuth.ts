@@ -207,8 +207,8 @@ export async function setupGoogleAuth(app: Express) {
         console.log('✅ Session ID after login:', req.sessionID);
         console.log('✅ Redirecting to dashboard...');
         
-        // Redirect to dashboard on primary domain to ensure a consistent post-auth experience
-        res.redirect('https://yappyy.com/dashboard');
+        // Redirect to dashboard - use relative path to stay on the same domain
+        res.redirect('/dashboard');
       });
     })(req, res, next);
   });
@@ -217,7 +217,7 @@ export async function setupGoogleAuth(app: Express) {
   app.get('/api/auth/google/callback',
     passport.authenticate('google', { 
       failureRedirect: '/',
-      successRedirect: 'https://yappyy.com/dashboard'
+      successRedirect: '/dashboard'
     })
   );
 
