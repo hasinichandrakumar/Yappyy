@@ -31,7 +31,6 @@ import {
   CheckCircle,
   Info,
   Trash2,
-  Loader2,
   BarChart3,
   Clock,
   Award
@@ -57,7 +56,6 @@ import {
 export default function EnhancedAnalysisWithTabs() {
   const [selectedSession, setSelectedSession] = useState('all');
   const [aiInsights, setAiInsights] = useState<any>(null);
-  const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -112,37 +110,36 @@ export default function EnhancedAnalysisWithTabs() {
     },
   });
 
-  // Generate AI insights for selected session
-  const generateInsights = async () => {
-    if (selectedSession === 'all' || !currentSession) return;
-    
-    setIsGeneratingInsights(true);
-    
-    try {
-      const response = await fetch('/api/sessions/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId: currentSession.id }),
-      });
-      
-      if (response.ok) {
-        const insights = await response.json();
-        setAiInsights(insights);
-        toast({
-          title: "Analysis Complete",
-          description: "AI insights generated successfully.",
-        });
-      }
-    } catch (error) {
-      console.error('Error generating insights:', error);
-      toast({
-        title: "Analysis Error",
-        description: "Could not analyze session. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsGeneratingInsights(false);
-    }
+  // Concise summary helper (auto-generated when a session is selected)
+  const generateLocalSummary = () => {
+    if (!currentSession) return;
+    const toPercent = (v: any) => {
+      if (v === undefined || v === null || Number.isNaN(Number(v))) return 0;
+      const n = Number(v);
+      return n <= 1 ? Math.round(n * 100) : Math.round(n);
+    };
+    const toNumber = (v: any, fallback = 0) => (v === undefined || v === null ? fallback : Number(v));
+
+    const parts: string[] = [];
+    const clarity = toPercent(currentSession.voiceClarity ?? currentSession.articulationScore);
+    const pace = toNumber(currentSession.averageWPM ?? currentSession.wordsPerMinute, 0);
+    const fillers = Array.isArray(currentSession.fillerWords) ? currentSession.fillerWords.length : toNumber(currentSession.fillerWordCount, 0);
+    if (clarity || pace || fillers) parts.push(`Speech was ${clarity}% clear at ${pace || '—'} WPM with ${fillers} filler${fillers === 1 ? '' : 's'}`);
+    const confidence = toPercent(currentSession.confidenceScore);
+    const engagement = toPercent(currentSession.engagementScore);
+    const persuasiveness = toPercent(currentSession.persuasivenessScore);
+    const overall = toPercent(currentSession.overallScore ?? currentSession.performanceScore);
+    if (confidence || engagement || persuasiveness || overall) parts.push(`Confidence ${confidence}%, Engagement ${engagement}%, Persuasiveness ${persuasiveness}%, Overall ${overall}%`);
+    const posture = toPercent(currentSession.postureScore);
+    const eye = toPercent(currentSession.eyeContactScore);
+    const gestures = toPercent(currentSession.gesturesScore);
+    if (posture || eye || gestures) parts.push(`Body language: ${eye}% eye contact, ${posture}% posture, ${gestures}% gestures`);
+    const coherence = toPercent(currentSession.contentCoherence ?? currentSession.clarityScore);
+    const structure = toPercent(currentSession.structureScore);
+    if (coherence || structure) parts.push(`Content coherence ${coherence}% and structure ${structure}%`);
+
+    const text = parts.filter(Boolean).join('. ') + (parts.length ? '.' : '');
+    setAiInsights((prev: any) => ({ ...(prev || {}), summary: text }));
   };
 
   // Video playback controls
@@ -183,6 +180,13 @@ export default function EnhancedAnalysisWithTabs() {
   };
 
   // Prepare data for charts with actual session metrics - ensuring accurate data mapping
+  useEffect(() => {
+    // Auto-generate a concise summary when a specific session is selected
+    if (selectedSession !== 'all') {
+      generateLocalSummary();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedSession, JSON.stringify(currentSession)]);
   const bodyLanguageData = currentSession ? [
     { 
       metric: 'Posture', 
@@ -337,32 +341,13 @@ export default function EnhancedAnalysisWithTabs() {
               </SelectContent>
             </Select>
             {selectedSession !== 'all' && (
-              <>
-                <Button
-                  onClick={generateInsights}
-                  disabled={isGeneratingInsights}
-                  className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
-                >
-                  {isGeneratingInsights ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Analyzing...
-                    </>
-                  ) : (
-                    <>
-                      <Brain className="mr-2 h-4 w-4" />
-                      Generate AI Insights
-                    </>
-                  )}
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  onClick={() => deleteSessionMutation.mutate(parseInt(selectedSession))}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </>
+              <Button
+                variant="destructive"
+                size="icon"
+                onClick={() => deleteSessionMutation.mutate(parseInt(selectedSession))}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
             )}
           </div>
         </div>
@@ -370,31 +355,46 @@ export default function EnhancedAnalysisWithTabs() {
 
       {/* Analysis Tabs - Only show when a specific session is selected */}
       {selectedSession !== 'all' && currentSession && (
-        <Card className="bg-white/70 backdrop-blur-sm border border-white/30 shadow-xl">
-          <CardContent className="p-6">
+        <Card className="bg-white/70 backdrop-blur-sm border border-white/30 shadow-xl mt-3">
+          <CardContent className="p-6 flex flex-col items-center">
             <Tabs defaultValue="body" className="w-full">
-              <TabsList className="grid w-full grid-cols-5 mb-6">
-                <TabsTrigger value="body" className="flex items-center gap-2">
+            <TabsList className="grid w-full grid-cols-5 mb-6 mt-3 p-1 rounded-2xl place-items-center h-12">
+              <TabsTrigger value="body" className="h-10 px-6 flex items-center justify-center gap-2">
                   <Activity className="w-4 h-4" />
                   Body
                 </TabsTrigger>
-                <TabsTrigger value="voice" className="flex items-center gap-2">
+              <TabsTrigger value="voice" className="h-10 px-6 flex items-center justify-center gap-2">
                   <Mic className="w-4 h-4" />
                   Voice
                 </TabsTrigger>
-                <TabsTrigger value="transcript" className="flex items-center gap-2">
+              <TabsTrigger value="transcript" className="h-10 px-6 flex items-center justify-center gap-2">
                   <FileText className="w-4 h-4" />
                   Transcript
                 </TabsTrigger>
-                <TabsTrigger value="emotional" className="flex items-center gap-2">
+              <TabsTrigger value="emotional" className="h-10 px-6 flex items-center justify-center gap-2">
                   <Heart className="w-4 h-4" />
                   Emotional
                 </TabsTrigger>
-                <TabsTrigger value="video" className="flex items-center gap-2">
+              <TabsTrigger value="video" className="h-10 px-6 flex items-center justify-center gap-2">
                   <PlayCircle className="w-4 h-4" />
                   Video
                 </TabsTrigger>
               </TabsList>
+
+              {/* Concise AI Summary */}
+              {aiInsights?.summary && (
+                <Card className="mb-6 border-blue-100 bg-gradient-to-r from-blue-50 to-cyan-50">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-blue-800">
+                      <Brain className="w-5 h-5" />
+                      AI Summary
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-blue-900 leading-relaxed">{aiInsights.summary}</p>
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Body Analysis Tab */}
               <TabsContent value="body" className="space-y-6">

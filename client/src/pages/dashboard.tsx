@@ -54,50 +54,52 @@ function DashboardPerformanceTab() {
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Current Streak */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Current Streak</CardTitle>
-            <Flame className="h-4 w-4 text-orange-500" />
+        <Card className="rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+          <CardHeader className="flex items-center justify-between pb-0">
+            <CardTitle className="text-base font-semibold tracking-tight text-gray-900">Current Streak</CardTitle>
+            <div className="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center">
+              <Flame className="h-4 w-4 text-orange-500" />
+            </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{currentStreak} days</div>
-            <p className="text-xs text-muted-foreground">
-              Keep practicing daily to maintain your streak!
-            </p>
+          <CardContent className="pt-4">
+            <div className="text-4xl font-extrabold text-gray-900 leading-none">{currentStreak} days</div>
+            <p className="mt-2 text-sm text-gray-500">Keep practicing daily to maintain your streak</p>
           </CardContent>
         </Card>
 
         {/* Weekly Practices */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Weekly Practices</CardTitle>
-            <Calendar className="h-4 w-4 text-blue-500" />
+        <Card className="rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+          <CardHeader className="flex items-center justify-between pb-0">
+            <CardTitle className="text-base font-semibold tracking-tight text-gray-900">Weekly Practices</CardTitle>
+            <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center">
+              <Calendar className="h-4 w-4 text-blue-600" />
+            </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{weeklyPractices}</div>
-            <p className="text-xs text-muted-foreground">
-              This week's practice sessions
-            </p>
+          <CardContent className="pt-4">
+            <div className="text-4xl font-extrabold text-gray-900 leading-none">{weeklyPractices}</div>
+            <p className="mt-2 text-sm text-gray-500">This week's practice sessions</p>
           </CardContent>
         </Card>
 
         {/* Daily Practices */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Daily Practices</CardTitle>
-            <Target className="h-4 w-4 text-green-500" />
+        <Card className="rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+          <CardHeader className="flex items-center justify-between pb-0">
+            <CardTitle className="text-base font-semibold tracking-tight text-gray-900">Daily Practices</CardTitle>
+            <div className="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center">
+              <Target className="h-4 w-4 text-green-600" />
+            </div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{dailyPractices}</div>
-            <p className="text-xs text-muted-foreground">
-              Today's practice sessions
-            </p>
+          <CardContent className="pt-4">
+            <div className="text-4xl font-extrabold text-gray-900 leading-none">{dailyPractices}</div>
+            <p className="mt-2 text-sm text-gray-500">Today's practice sessions</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Enhanced Performance Analytics */}
-      <PerformanceSimple />
+      <div className="rounded-2xl border border-gray-100 shadow-sm">
+        <PerformanceSimple />
+      </div>
     </div>
   );
 }
@@ -345,17 +347,17 @@ export default function Dashboard() {
               {/* Dashboard Sub-Navigation */}
               <Tabs value={activeDashboardTab} onValueChange={setActiveDashboardTab} className="w-full">
                 <div className="mb-6">
-                  <TabsList className="bg-transparent border-0 shadow-none p-0 h-auto flex items-center gap-4">
+                  <TabsList className="bg-transparent border-0 shadow-none p-0 h-auto flex items-center gap-3">
                     <TabsTrigger 
                       value="performance" 
-                      className="px-6 py-3 rounded-full h-auto text-base font-semibold border-2 transition-all duration-200 focus:outline-none text-gray-700 border-gray-300 hover:border-gray-400 hover:text-gray-900 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:border-blue-600 data-[state=active]:shadow-lg"
+                      className="px-8 py-4 rounded-2xl h-auto text-base font-semibold border-0 transition-all duration-200 focus:outline-none bg-gray-100 text-gray-700 hover:bg-gray-200 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-lg"
                     >
                       <TrendingUp className="w-4 h-4 mr-2" />
                       Performance
                     </TabsTrigger>
                     <TabsTrigger 
                       value="classroom" 
-                      className="px-6 py-3 rounded-full h-auto text-base font-semibold border-2 transition-all duration-200 focus:outline-none text-gray-700 border-gray-300 hover:border-gray-400 hover:text-gray-900 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:border-blue-600 data-[state=active]:shadow-lg"
+                      className="px-8 py-4 rounded-2xl h-auto text-base font-semibold border-0 transition-all duration-200 focus:outline-none bg-gray-100 text-gray-700 hover:bg-gray-200 data-[state=active]:bg-white data-[state=active]:text-gray-900 data-[state=active]:shadow-lg"
                     >
                       <School className="w-4 h-4 mr-2" />
                       Classroom

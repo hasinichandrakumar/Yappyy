@@ -84,7 +84,7 @@ const EnhancedAIInsightsAnalytics = ({ userId }: { userId?: string }) => {
 
   const { data: neuralAnalysisData, isLoading: neuralLoading } = useNeuralAnalysis(userId || '');
   const { data: userProgressData, isLoading: progressLoading } = useUserProgress(userId || '');
-  
+
   const sessions = Array.isArray(practiceData) ? practiceData : [];
   
   // Generate connection-based insights rather than statistics
@@ -575,11 +575,11 @@ const EnhancedAIInsightsAnalytics = ({ userId }: { userId?: string }) => {
                     <div className="text-center">
                       <div className="text-2xl font-bold text-blue-600">{(insight as any).metrics.clarity}%</div>
                       <div className="text-xs text-gray-600">Voice Clarity</div>
-                    </div>
+            </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-green-600">{(insight as any).metrics.pace}</div>
                       <div className="text-xs text-gray-600">WPM</div>
-                    </div>
+          </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-purple-600">{(insight as any).metrics.confidence}%</div>
                       <div className="text-xs text-gray-600">Confidence</div>
@@ -633,7 +633,7 @@ const EnhancedAIInsightsAnalytics = ({ userId }: { userId?: string }) => {
                         </li>
                       ))}
                     </ul>
-                  </div>
+      </div>
                 )}
 
                 {/* Details list for strengths/improvements */}
@@ -1074,7 +1074,7 @@ const AdvancedCoachingModes = ({
     {
       id: 'speaking_analysis',
       title: 'Speaking Style Analysis',
-      description: 'Deep analysis of your unique speaking patterns and style',
+      description: 'Analyze your voice patterns and speaking personality',
       icon: Brain,
       color: 'from-blue-500 to-cyan-500',
       features: ['Voice pattern analysis', 'Speaking style profiling', 'Personality insights']
@@ -1082,7 +1082,7 @@ const AdvancedCoachingModes = ({
     {
       id: 'practice_techniques',
       title: 'Practice Techniques Lab',
-      description: 'Learn advanced techniques to improve your speaking skills',
+      description: 'Learn breathing exercises and vocal improvement methods',
       icon: BookOpen,
       color: 'from-green-500 to-emerald-500',
       features: ['Breathing exercises', 'Vocal techniques', 'Body language training']
@@ -1090,7 +1090,7 @@ const AdvancedCoachingModes = ({
     {
       id: 'presentation_coach',
       title: 'Presentation Coach',
-      description: 'Master presentation skills with structured guidance',
+      description: 'Master slide timing and audience engagement skills',
       icon: Trophy,
       color: 'from-purple-500 to-violet-500',
       features: ['Slide timing analysis', 'Audience engagement tips', 'Q&A preparation']
@@ -1098,7 +1098,7 @@ const AdvancedCoachingModes = ({
     {
       id: 'storytelling_lab',
       title: 'Storytelling Lab',
-      description: 'Craft compelling narratives with AI guidance',
+      description: 'Build compelling narratives with emotional impact',
       icon: FileText,
       color: 'from-orange-500 to-red-500',
       features: ['Narrative arc analysis', 'Emotional impact scoring', 'Character development tips']
@@ -1106,9 +1106,9 @@ const AdvancedCoachingModes = ({
   ];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <h3 className="text-lg font-semibold text-gray-800">Choose Your Coaching Mode</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {modes.map((mode) => (
           <Card 
             key={mode.id}
@@ -1117,32 +1117,23 @@ const AdvancedCoachingModes = ({
             }`}
             onClick={() => onModeSelect(mode.id)}
           >
-            <CardContent className="p-4">
-              <div className="flex items-start gap-3">
-                <div className={`p-2 rounded-lg bg-gradient-to-r ${mode.color}`}>
-                  <mode.icon className="w-6 h-6 text-white" />
+            <CardContent className="p-4 pt-6">
+              <div className="flex flex-col items-center text-center gap-3">
+                <div className={`p-3 rounded-xl bg-gradient-to-r ${mode.color} shadow-md`}>
+                  <mode.icon className="w-5 h-5 text-white" />
                 </div>
-                <div className="flex-1">
-                  <h4 className="font-semibold text-gray-800 mb-1">{mode.title}</h4>
-                  <p className="text-sm text-gray-600 mb-3">{mode.description}</p>
-                  <div className="space-y-1">
-                    {mode.features.map((feature, index) => (
-                      <div key={index} className="flex items-center gap-2 text-xs text-gray-500">
-                        <CheckCircle className="w-3 h-3 text-green-500" />
-                        {feature}
-                      </div>
-                    ))}
-                  </div>
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-gray-800 text-sm leading-tight">{mode.title}</h4>
                   {currentMode === mode.id && (
                     <Button 
                       onClick={(e) => {
                         e.stopPropagation();
                         onStartSession(mode.id);
                       }}
-                      className="mt-3 w-full bg-gradient-to-r from-blue-500 to-purple-500"
+                      className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-xs py-2 mt-3 rounded-lg"
                       size="sm"
                     >
-                      Start {mode.title}
+                      Start Session
                     </Button>
                   )}
                 </div>
@@ -2107,14 +2098,14 @@ export default function AICoachRedesigned() {
         {/* Sidebar with Insights */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden h-full flex flex-col">
-            <div className="bg-gradient-to-r from-purple-500 to-pink-500 px-6 py-4 flex-shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                  <BarChart3 className="w-5 h-5 text-white" />
+            <div className="bg-gradient-to-r from-purple-500 to-pink-500 px-8 py-6 flex-shrink-0">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                  <BarChart3 className="w-6 h-6 text-white" />
                 </div>
-                <div>
-                  <h3 className="font-bold text-white">Your Progress</h3>
-                  <p className="text-purple-100 text-sm">AI insights</p>
+                <div className="flex-1">
+                  <h2 className="text-2xl font-bold text-white">Your Progress</h2>
+                  <p className="text-purple-100">AI insights</p>
                 </div>
               </div>
             </div>

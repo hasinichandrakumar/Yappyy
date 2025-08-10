@@ -1,6 +1,6 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Brain, Sparkles, Target } from 'lucide-react';
+import { Brain, Sparkles, Target, Lightbulb } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useNeuralAnalysis, useUserProgress } from '@/hooks/useGraphQLQuery';
 
@@ -178,6 +178,104 @@ const AIInsightsAnalytics = ({ userId }: { userId?: string }) => {
 
   const connectionInsights = generateConnectionInsights();
 
+  // Calculate additional metrics for enhanced content
+  const generateExtendedMetrics = () => {
+    if (sessions.length === 0) return null;
+
+    const recentSessions = sessions.slice(-5);
+    const totalWords = sessions.reduce((sum, s) => sum + (s.wordCount || 0), 0);
+    const totalDuration = sessions.reduce((sum, s) => sum + (s.duration || 0), 0);
+    const avgSessionLength = totalDuration / sessions.length / 60; // in minutes
+    
+    const speakingStreaks = calculateSpeakingStreaks();
+    const improvementAreas = identifyImprovementAreas();
+    const strengthsAnalysis = analyzeStrengths();
+    
+    return {
+      totalWords,
+      avgSessionLength: Math.round(avgSessionLength),
+      speakingStreaks,
+      improvementAreas,
+      strengthsAnalysis,
+      practiceConsistency: calculatePracticeConsistency()
+    };
+  };
+
+  const calculateSpeakingStreaks = () => {
+    if (sessions.length < 2) return { current: 1, longest: 1 };
+    
+    let currentStreak = 1;
+    let longestStreak = 1;
+    let tempStreak = 1;
+    
+    for (let i = 1; i < sessions.length; i++) {
+      const prevDate = new Date(sessions[i-1].timestamp || Date.now());
+      const currDate = new Date(sessions[i].timestamp || Date.now());
+      const daysDiff = Math.abs((currDate.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      if (daysDiff <= 2) { // Within 2 days
+        tempStreak++;
+      } else {
+        longestStreak = Math.max(longestStreak, tempStreak);
+        tempStreak = 1;
+      }
+    }
+    
+    longestStreak = Math.max(longestStreak, tempStreak);
+    currentStreak = tempStreak;
+    
+    return { current: currentStreak, longest: longestStreak };
+  };
+
+  const identifyImprovementAreas = () => {
+    if (sessions.length === 0) return [];
+    
+    const areas = [];
+    const avgClarity = sessions.reduce((sum, s) => sum + (s.voiceClarity || 0), 0) / sessions.length;
+    const avgPace = sessions.reduce((sum, s) => sum + (s.averageWPM || 0), 0) / sessions.length;
+    const avgFillers = sessions.reduce((sum, s) => sum + (s.fillerWords?.length || 0), 0) / sessions.length;
+    
+    if (avgClarity < 0.7) areas.push({ area: 'Voice Clarity', score: Math.round(avgClarity * 100), potential: 25 });
+    if (avgPace < 120 || avgPace > 200) areas.push({ area: 'Speaking Pace', score: Math.round(avgPace), potential: 20 });
+    if (avgFillers > 3) areas.push({ area: 'Filler Words', score: Math.round(avgFillers), potential: 30 });
+    
+    return areas;
+  };
+
+  const analyzeStrengths = () => {
+    if (sessions.length === 0) return [];
+    
+    const strengths = [];
+    const avgConfidence = sessions.reduce((sum, s) => sum + (s.confidenceScore || 0), 0) / sessions.length;
+    const avgEngagement = sessions.reduce((sum, s) => sum + (s.engagementScore || 0), 0) / sessions.length;
+    const avgClarity = sessions.reduce((sum, s) => sum + (s.voiceClarity || 0), 0) / sessions.length;
+    
+    if (avgConfidence > 0.7) strengths.push({ strength: 'Natural Confidence', score: Math.round(avgConfidence * 100) });
+    if (avgEngagement > 0.6) strengths.push({ strength: 'Audience Engagement', score: Math.round(avgEngagement * 100) });
+    if (avgClarity > 0.75) strengths.push({ strength: 'Clear Articulation', score: Math.round(avgClarity * 100) });
+    
+    return strengths;
+  };
+
+  const calculatePracticeConsistency = () => {
+    if (sessions.length < 3) return 0;
+    
+    const sessionDates = sessions.map(s => new Date(s.timestamp || Date.now()));
+    const intervals = [];
+    
+    for (let i = 1; i < sessionDates.length; i++) {
+      const daysDiff = Math.abs((sessionDates[i].getTime() - sessionDates[i-1].getTime()) / (1000 * 60 * 60 * 24));
+      intervals.push(daysDiff);
+    }
+    
+    const avgInterval = intervals.reduce((sum, interval) => sum + interval, 0) / intervals.length;
+    const consistency = Math.max(0, 100 - (avgInterval * 10)); // Lower interval = higher consistency
+    
+    return Math.round(Math.min(100, consistency));
+  };
+
+  const extendedMetrics = generateExtendedMetrics();
+
   return (
     <div className="space-y-4">
       {/* AI Status */}
@@ -191,8 +289,31 @@ const AIInsightsAnalytics = ({ userId }: { userId?: string }) => {
         </Badge>
       </div>
 
+
+
+      {/* Strengths Analysis */}
+      {extendedMetrics?.strengthsAnalysis.length > 0 && (
+        <div className="p-4 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl border border-emerald-200">
+          <div className="flex items-center gap-2 mb-3">
+            <Sparkles className="w-5 h-5 text-emerald-600" />
+            <h4 className="font-bold text-gray-800">Your Speaking Strengths</h4>
+          </div>
+          <div className="space-y-2">
+            {extendedMetrics.strengthsAnalysis.map((strength, index) => (
+              <div key={index} className="flex items-center p-2 bg-white/60 rounded-lg">
+                <span className="text-sm font-medium text-gray-700">{strength.strength}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Connection-based Insights */}
       <div className="space-y-3">
+        <div className="flex items-center gap-2 mb-2">
+          <Brain className="w-5 h-5 text-purple-600" />
+          <h4 className="font-bold text-gray-800">AI-Driven Insights</h4>
+        </div>
         {connectionInsights.map((insight, index) => (
           <div
             key={index}
@@ -226,15 +347,70 @@ const AIInsightsAnalytics = ({ userId }: { userId?: string }) => {
         ))}
       </div>
 
+      {/* Growth Opportunities */}
+      {extendedMetrics?.improvementAreas.length > 0 && (
+        <div className="p-4 bg-gradient-to-r from-orange-50 to-yellow-50 rounded-xl border border-orange-200">
+          <div className="flex items-center gap-2 mb-3">
+            <Target className="w-5 h-5 text-orange-600" />
+            <h4 className="font-bold text-gray-800">Growth Opportunities</h4>
+          </div>
+          <div className="space-y-3">
+            {extendedMetrics.improvementAreas.map((area, index) => (
+              <div key={index} className="p-3 bg-white/60 rounded-lg">
+                <span className="text-sm font-medium text-gray-700">{area.area}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Practice Recommendations */}
+      {sessions.length > 0 && (
+        <div className="p-4 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl border border-indigo-200">
+          <div className="flex items-center gap-2 mb-3">
+            <Lightbulb className="w-5 h-5 text-indigo-600" />
+            <h4 className="font-bold text-gray-800">Personalized Recommendations</h4>
+          </div>
+          <div className="space-y-2">
+            {extendedMetrics?.practiceConsistency < 50 && (
+              <div className="flex items-start gap-2 p-2 bg-white/60 rounded-lg">
+                <div className="text-sm">📅</div>
+                <div>
+                  <p className="text-sm font-medium text-gray-700">Establish Regular Practice</p>
+                  <p className="text-xs text-gray-600">Aim for practice sessions every 2-3 days to build momentum</p>
+                </div>
+              </div>
+            )}
+            {extendedMetrics?.speakingStreaks.current >= 3 && (
+              <div className="flex items-start gap-2 p-2 bg-white/60 rounded-lg">
+                <div className="text-sm">🔥</div>
+                <div>
+                  <p className="text-sm font-medium text-gray-700">Keep Your Streak Going!</p>
+                  <p className="text-xs text-gray-600">You're on a {extendedMetrics.speakingStreaks.current}-session streak. Consistency breeds excellence!</p>
+                </div>
+              </div>
+            )}
+            <div className="flex items-start gap-2 p-2 bg-white/60 rounded-lg">
+              <div className="text-sm">🎯</div>
+              <div>
+                <p className="text-sm font-medium text-gray-700">Focus Session</p>
+                <p className="text-xs text-gray-600">Try a 5-minute focused practice on your biggest improvement area</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* AI Learning Status */}
       {sessions.length > 0 && (
-        <div className="mt-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-200">
+        <div className="mt-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200">
           <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="w-5 h-5 text-indigo-600" />
+            <Brain className="w-5 h-5 text-purple-600" />
             <h4 className="font-bold text-gray-800">AI Learning Progress</h4>
           </div>
           <p className="text-sm text-gray-600">
             The AI has analyzed {sessions.length} of your sessions and identified {connectionInsights.length} meaningful patterns in your speaking development.
+            {extendedMetrics?.speakingStreaks.longest > 1 && ` Your longest practice streak was ${extendedMetrics.speakingStreaks.longest} sessions!`}
           </p>
         </div>
       )}

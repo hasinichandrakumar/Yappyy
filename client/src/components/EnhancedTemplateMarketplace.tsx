@@ -30,6 +30,7 @@ import {
   Music,
   BookOpen,
   Target,
+  TrendingUp,
   Lightbulb,
   MessageSquare,
   Globe,
@@ -62,6 +63,7 @@ const templateCategories = [
   { id: 'all', label: 'All', icon: FileText },
   { id: 'custom', label: 'My Templates', icon: User, color: 'text-purple-600' },
   { id: 'business', label: 'Work & Business', icon: Briefcase },
+  { id: 'sales', label: 'Sales & Marketing', icon: TrendingUp },
   { id: 'academic', label: 'School & Education', icon: GraduationCap },
   { id: 'personal', label: 'Wedding & Events', icon: Heart },
   { id: 'leadership', label: 'TED Talks & Leadership', icon: Target },
@@ -706,32 +708,56 @@ export default function EnhancedTemplateMarketplace() {
 
   console.log('Custom templates state:', { customTemplates, customTemplatesError, customTemplatesLoading });
 
+  // Canonical categories used across the library
+  const canonicalCategories = ['business', 'sales', 'academic', 'personal', 'leadership', 'creative'] as const;
+  type CanonicalCategory = typeof canonicalCategories[number];
+
+  const normalizeCategory = (category: string): CanonicalCategory => {
+    const c = (category || '').toLowerCase().trim();
+    if (c === 'sales' || c === 'marketing' || c === 'sales_marketing' || c === 'sales-marketing') return 'sales';
+    if (c === 'biz' || c === 'work' || c === 'professional' || c === 'business') return 'business';
+    if (c === 'academics' || c === 'education' || c === 'academic') return 'academic';
+    if (c === 'personal' || c === 'lifestyle' || c === 'events') return 'personal';
+    if (c === 'leader' || c === 'leadership' || c === 'ted' || c === 'tedx') return 'leadership';
+    if (c === 'creative' || c === 'entertainment' || c === 'fun') return 'creative';
+    return 'business';
+  };
+
+  // Use normalized categories everywhere to avoid mismatches
+  const normalizedStaticTemplates = staticTemplates.map((t) => ({
+    ...t,
+    category: normalizeCategory((t as any).category),
+  }));
+
   // Combine static and custom templates with error handling
   const allTemplates = [
-    ...staticTemplates,
-    ...(Array.isArray(customTemplates) ? customTemplates.map((template: any) => ({
-      ...template,
-      icon: templateCategories.find(cat => cat.id === template.category)?.icon || FileText,
-      color: templateCategories.find(cat => cat.id === template.category)?.color || 'text-gray-600',
-      tags: template.tags || [template.category, 'custom'],
-      contentAdvice: 'Custom template created by you. Feel free to edit and personalize as needed.',
-      voiceAdvice: 'Practice with confidence and adapt your delivery style to match your personal speaking preference.',
-      bodyLanguageAdvice: 'Use natural gestures and maintain good posture throughout your speech.'
-    })) : [])
+    ...normalizedStaticTemplates,
+    ...(Array.isArray(customTemplates) ? customTemplates.map((template: any) => {
+      const normalizedCategory = normalizeCategory(template.category);
+      return ({
+        ...template,
+        category: normalizedCategory,
+        icon: templateCategories.find(cat => cat.id === normalizedCategory)?.icon || FileText,
+        color: templateCategories.find(cat => cat.id === normalizedCategory)?.color || 'text-gray-600',
+        tags: template.tags || [normalizedCategory, 'custom'],
+        contentAdvice: 'Custom template created by you. Feel free to edit and personalize as needed.',
+        voiceAdvice: 'Practice with confidence and adapt your delivery style to match your personal speaking preference.',
+        bodyLanguageAdvice: 'Use natural gestures and maintain good posture throughout your speech.'
+      });
+    }) : [])
   ];
 
   const getFilteredTemplates = (tabType: string) => {
-    let templates = allTemplates;
+    let templates = [];
     
     // Filter by tab first
     if (tabType === 'custom') {
       templates = allTemplates.filter(template => template.tags?.includes('custom') || false);
     } else {
-      templates = staticTemplates; // Only show built-in templates for "All Templates" tab
+      templates = normalizedStaticTemplates; // Only show built-in templates for "All Templates" tab
     }
     
     // Then filter by category
-    let matchesCategory = true;
     if (selectedCategory !== 'all' && selectedCategory !== 'custom') {
       templates = templates.filter(template => template.category === selectedCategory);
     }
