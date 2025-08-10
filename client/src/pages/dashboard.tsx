@@ -13,7 +13,7 @@ import AICoachRedesigned from "@/components/AICoachRedesigned";
 import PersonalizedSpeechDNA from "@/components/PersonalizedSpeechDNA";
 import EnhancedTemplateMarketplace from "@/components/EnhancedTemplateMarketplace";
 import ImprovedBadgeSystem from "@/components/ImprovedBadgeSystem";
-import EnhancedAnalysisTab from "@/components/EnhancedAnalysisTab";
+import EnhancedAnalysisWithTabs from "@/components/EnhancedAnalysisWithTabs";
 import PerformanceSimple from "@/components/PerformanceSimple";
 import DailyGoalWidget from "@/components/DailyGoalWidget";
 import SimpleProfileForm from "@/components/SimpleProfileForm";
@@ -338,7 +338,7 @@ export default function Dashboard() {
             </TabsContent>
 
             <TabsContent value="analysis" className="space-y-6">
-              <EnhancedAnalysisTab />
+              <EnhancedAnalysisWithTabs />
             </TabsContent>
 
             <TabsContent value="achievements" className="space-y-6">
