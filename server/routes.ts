@@ -3888,7 +3888,7 @@ Provide a detailed speaking style analysis with my speaking personality type, st
         max_tokens: 800
       });
 
-      const analysisResult = JSON.parse(response.choices[0].message.content);
+      const analysisResult = JSON.parse(response.choices[0].message.content || '{}');
       
       res.json({
         analysis: analysisResult.analysis || 'Your speaking style shows natural confidence and clear communication patterns.',
@@ -3947,7 +3947,7 @@ Give me specific techniques, daily exercises, and professional tips for improvin
         max_tokens: 800
       });
 
-      const techniquesResult = JSON.parse(response.choices[0].message.content);
+      const techniquesResult = JSON.parse(response.choices[0].message.content || '{}');
       
       res.json({
         techniques: techniquesResult.techniques || 'Advanced speaking techniques tailored for your goals.',
@@ -6303,7 +6303,7 @@ Respond with detailed analysis in JSON format:
       ]);
 
       // Helper function for overall score calculation
-      function calculateOverallPerformanceScore(speechMetrics: any, cvMetrics: any): number {
+      const calculateOverallPerformanceScore = (speechMetrics: any, cvMetrics: any): number => {
         let score = 0;
         let components = 0;
 
@@ -6322,10 +6322,10 @@ Respond with detailed analysis in JSON format:
         }
 
         return components > 0 ? Math.round(score / components) : 0;
-      }
+      };
 
       // Helper function for recommendations
-      function generateRealTimeRecommendations(speechMetrics: any, cvMetrics: any): string[] {
+      const generateRealTimeRecommendations = (speechMetrics: any, cvMetrics: any): string[] => {
         const recommendations: string[] = [];
 
         if (speechMetrics) {
@@ -6357,7 +6357,7 @@ Respond with detailed analysis in JSON format:
         }
 
         return recommendations;
-      }
+      };
 
       // Combined comprehensive analysis
       const multiModalMetrics = {
@@ -6873,7 +6873,7 @@ Respond with detailed analysis in JSON format:
       if (audioBuffer) {
         // Process audio buffer for UM/UH detection
         const buffer = Buffer.from(audioBuffer, 'base64');
-        result = await detector.processAudioBuffer(buffer);
+        result = await detector.processAudioBuffer(buffer.buffer);
       } else {
         // Analyze transcript for all filler types
         result = detector.analyzeTranscriptFillers(transcript);
@@ -7264,7 +7264,7 @@ Respond with detailed analysis in JSON format:
       styles.reading += readingCount;
     });
 
-    const maxStyle = Object.entries(styles).reduce((a, b) => styles[a as keyof typeof styles] > styles[b[0] as keyof typeof styles] ? a : b[0]) as keyof typeof styles;
+    const maxStyle = Object.entries(styles).reduce((a, b) => styles[a[0] as keyof typeof styles] > styles[b[0] as keyof typeof styles] ? a : b)[0] as keyof typeof styles;
     return maxStyle;
   }
 
