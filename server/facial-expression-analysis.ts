@@ -162,8 +162,8 @@ export class FacialExpressionAnalysis {
             console.log(`🎯 ${model} facial analysis completed`);
             return this.processHuggingFaceResults(result, model);
           }
-        } catch (modelError) {
-          console.log(`⏭️ Trying next HuggingFace model: ${modelError.message}`);
+        } catch (modelError: any) {
+          console.log(`⏭️ Trying next HuggingFace model: ${modelError?.message || 'Unknown error'}`);
           continue;
         }
       }
@@ -189,10 +189,10 @@ export class FacialExpressionAnalysis {
       ]);
 
       const results = {
-        primary_emotions: {},
-        confidence_scores: {},
-        speaking_feedback: {},
-        service_results: {},
+        primary_emotions: {} as any,
+        confidence_scores: {} as any,
+        speaking_feedback: {} as any,
+        service_results: {} as any,
         timestamp: Date.now(),
         source: 'multi_service_facial_analysis'
       };
@@ -276,8 +276,8 @@ export class FacialExpressionAnalysis {
       return { provider: 'hugging_face', model, emotions: {}, confidence: 0 };
     }
 
-    const emotions = {};
-    result.forEach(item => {
+    const emotions: any = {};
+    result.forEach((item: any) => {
       emotions[item.label.toLowerCase()] = Math.floor(item.score * 100);
     });
 
@@ -292,7 +292,7 @@ export class FacialExpressionAnalysis {
 
   // Convert Google Vision likelihood to percentage
   private convertLikelihoodToScore(likelihood: string): number {
-    const scores = {
+    const scores: any = {
       'VERY_UNLIKELY': 5,
       'UNLIKELY': 20,
       'POSSIBLE': 50,
@@ -339,7 +339,7 @@ export class FacialExpressionAnalysis {
     }
 
     // Average emotions across services
-    const combinedEmotions = {};
+    const combinedEmotions: any = {};
     const emotionTypes = ['happiness', 'sadness', 'anger', 'fear', 'surprise', 'joy', 'neutral'];
     
     emotionTypes.forEach(emotion => {
@@ -349,7 +349,7 @@ export class FacialExpressionAnalysis {
       }).filter(score => score > 0);
       
       if (scores.length > 0) {
-        combinedEmotions[emotion] = Math.floor(scores.reduce((a, b) => a + b, 0) / scores.length);
+        combinedEmotions[emotion] = Math.floor(scores.reduce((a: number, b: number) => a + b, 0) / scores.length);
       }
     });
 
