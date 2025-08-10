@@ -51,6 +51,7 @@ Preferred communication style: Simple, everyday language.
     - **Session Recording**: Audio/video capture with synchronized AI analytics and emotion tracking.
     - **Video Recording & Playback**: High-quality video recording system with MediaRecorder API and a professional playback interface.
     - **Automatic Session Saving**: Sessions save to the database when recording stops, with comprehensive analysis available.
+    - **Session Management**: Sequential session numbering (1 to infinity) with secure user-controlled deletion while preserving session order.
 - **Content Management**:
     - **Template System**: Expanded library of 50+ pre-built templates for various speaking scenarios with AI personalization.
     - **PDF Export System**: Enhanced session analysis and template PDFs with Yappyy-branded styling, Poppins font, and blue color scheme matching the website theme.

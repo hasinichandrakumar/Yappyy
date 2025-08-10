@@ -337,6 +337,37 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async deletePracticeSessionSecure(sessionId: number, userId: string): Promise<boolean> {
+    return await withRetry(async () => {
+      // First verify the session belongs to the user for security
+      const session = await resilientQuery(() =>
+        db.select()
+          .from(practiceSessions)
+          .where(and(
+            eq(practiceSessions.id, sessionId),
+            eq(practiceSessions.userId, userId)
+          ))
+          .limit(1)
+      );
+
+      if (session.length === 0) {
+        throw new Error('Session not found or access denied');
+      }
+
+      // Delete the session
+      await resilientQuery(() =>
+        db.delete(practiceSessions)
+          .where(and(
+            eq(practiceSessions.id, sessionId),
+            eq(practiceSessions.userId, userId)
+          ))
+      );
+
+      console.log(`✅ Session ${sessionId} deleted for user ${userId}`);
+      return true;
+    });
+  }
+
   async deletePracticeSession(id: number): Promise<void> {
     await db
       .delete(practiceSessions)

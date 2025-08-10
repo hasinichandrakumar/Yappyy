@@ -1483,6 +1483,50 @@ CRITICAL: Evaluate how well this speech achieved its stated PURPOSE. Analyze the
     }
   });
 
+  // Delete a specific practice session
+  app.delete('/api/sessions/:sessionId', async (req: any, res) => {
+    try {
+      if (!req.isAuthenticated() || !req.user) {
+        return res.status(401).json({ 
+          success: false, 
+          message: "Authentication required to delete sessions" 
+        });
+      }
+      
+      const userId = getUserId(req);
+      const sessionId = parseInt(req.params.sessionId);
+      
+      if (!sessionId || isNaN(sessionId)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Valid session ID required" 
+        });
+      }
+
+      console.log(`🗑️ Deleting session ${sessionId} for user ${userId}`);
+      
+      const success = await storage.deletePracticeSessionSecure(sessionId, userId);
+      
+      if (success) {
+        res.json({ 
+          success: true, 
+          message: `Session ${sessionId} deleted successfully` 
+        });
+      } else {
+        res.status(404).json({ 
+          success: false, 
+          message: "Session not found or access denied" 
+        });
+      }
+    } catch (error: any) {
+      console.error("Error deleting session:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to delete session" 
+      });
+    }
+  });
+
   // Get specific practice session with enhanced computer vision integration
   app.get("/api/practice-sessions/:id", async (req, res) => {
     try {
