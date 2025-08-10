@@ -1943,7 +1943,7 @@ export default function AICoachRedesigned() {
       )}
 
       {/* Main Interface */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 min-h-[800px]">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 min-h-[900px]">
         {/* Main Coaching Area */}
         <div className="lg:col-span-2">
           <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden h-full flex flex-col">
@@ -1971,7 +1971,7 @@ export default function AICoachRedesigned() {
             </div>
               
             {/* Content Area */}
-            <div className="p-8 flex-1 flex flex-col max-h-[630px] overflow-y-auto">
+            <div className="px-8 pt-8 pb-0 flex-1 flex flex-col max-h-[780px] overflow-y-auto">
               {/* Advanced Coaching Modes */}
               {!currentGoal && !activeCoachingMode && (
                 <div className="mb-8">
@@ -2040,7 +2040,7 @@ export default function AICoachRedesigned() {
               )}
                 
                 {/* Chat Messages Area */}
-                <div className="bg-gray-50 rounded-2xl p-6 flex-1 overflow-y-auto space-y-4 mb-6 max-h-[530px]">
+                <div className="bg-gray-50 rounded-2xl p-6 flex-1 overflow-y-auto space-y-4 mb-16 max-h-[720px]">
                   {messages.map((message) => (
                     <ChatMessage
                       key={message.id}
@@ -2070,31 +2070,31 @@ export default function AICoachRedesigned() {
                 </div>
                 
                 {/* Simplified Input Area */}
-                <div className="flex gap-3">
+                <div className="flex gap-4 mt-16">
                   <div className="flex-1 relative">
                     <Input
                       value={inputMessage}
                       onChange={(e) => setInputMessage(e.target.value)}
                       placeholder="Ask your AI coach anything about speaking..."
-                      className="h-14 text-base rounded-2xl border-2 border-gray-200 focus:border-purple-400 px-6 pr-14"
+                      className="h-16 text-lg rounded-3xl border-2 border-gray-200 focus:border-purple-400 px-8 pr-16"
                       onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                     />
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-600"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-600"
                       onClick={() => setIsRecording(!isRecording)}
                     >
-                      <Mic className={`w-5 h-5 ${isRecording ? 'text-red-500' : ''}`} />
+                      <Mic className={`w-6 h-6 ${isRecording ? 'text-red-500' : ''}`} />
                     </Button>
                   </div>
                   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                     <Button
                       onClick={handleSendMessage}
-                      className="h-14 w-14 bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 rounded-2xl border-0"
+                      className="h-16 w-16 bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 rounded-3xl border-0"
                       disabled={!inputMessage.trim()}
                     >
-                      <Send className="w-5 h-5" />
+                      <Send className="w-6 h-6" />
                     </Button>
                   </motion.div>
                 </div>
@@ -2116,7 +2116,7 @@ export default function AICoachRedesigned() {
                 </div>
               </div>
             </div>
-            <div className="p-6 flex-1 overflow-y-auto max-h-[630px]">
+            <div className="p-6 flex-1 overflow-y-auto max-h-[780px]">
               <AIInsightsAnalytics userId={(user as any)?.id || 'demo'} />
             </div>
           </div>

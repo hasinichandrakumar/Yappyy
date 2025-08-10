@@ -35,7 +35,6 @@ import {
   Clock,
   Award
 } from 'lucide-react';
-import { Loader2 } from 'lucide-react';
 import {
   LineChart,
   Line,
