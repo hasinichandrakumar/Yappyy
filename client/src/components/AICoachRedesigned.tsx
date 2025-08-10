@@ -823,7 +823,7 @@ const RealTimeVoiceSession = ({ onSessionComplete, currentGoal }: {
               
               // Analyze speech in real-time
               const words = transcript.trim().split(/\s+/);
-              const fillers = words.filter(word => 
+              const fillers = words.filter((word: string) => 
                 ['um', 'uh', 'like', 'you know', 'actually', 'basically'].includes(word.toLowerCase())
               ).length;
               
@@ -1468,10 +1468,10 @@ export default function AICoachRedesigned() {
         ],
         neuralContext: {
           persistentData: persistentData,
-          progressTrajectory: calculateProgressTrajectory(sessions),
-          speakingProfile: extractSpeakingProfile(sessions),
-          sessionTypes: Array.from(new Set(sessions.map((s: any) => s.purpose || 'General Practice'))),
-          timePatterns: analyzeTimePatterns(sessions)
+          progressTrajectory: calculateProgressTrajectory(sessions as any[]),
+          speakingProfile: extractSpeakingProfile(sessions as any[]),
+          sessionTypes: Array.from(new Set((sessions as any[]).map((s: any) => s.purpose || 'General Practice'))),
+          timePatterns: analyzeTimePatterns(sessions as any[])
         }
       };
 
@@ -1508,7 +1508,8 @@ export default function AICoachRedesigned() {
       
       // Generate fallback analysis based on available data
       const fallbackAnalysis = {
-        overallAssessment: `Based on your ${sessions?.length || 0} practice sessions, I can see you're committed to improvement. Your speaking journey shows dedication, and I'm here to provide deeper insights to accelerate your progress.`,
+        totalSessions: (persistentData as any)?.totalSessions || 0,
+        overallAssessment: `Based on your ${(sessions as any)?.length || 0} practice sessions, I can see you're committed to improvement. Your speaking journey shows dedication, and I'm here to provide deeper insights to accelerate your progress.`,
         performanceConnections: [
           "Your practice consistency correlates with confidence levels",
           "Session timing affects your vocal energy and clarity",
@@ -1628,12 +1629,15 @@ export default function AICoachRedesigned() {
       return acc;
     }, {} as Record<number, any[]>);
     
-    const timeEffectiveness = Object.entries(sessionsByHour).map(([hour, sessions]: [string, any[]]) => ({
-      hour: parseInt(hour),
-      avgPerformance: sessions.reduce((sum: number, s: any) => sum + (s.overallScore || s.confidenceScore || 0), 0) / sessions.length,
-      sessionCount: sessions.length,
-      energyLevel: calculateEnergyLevel(sessions)
-    }));
+    const timeEffectiveness = Object.entries(sessionsByHour).map(([hour, sessions]) => {
+      const sessionList = sessions as any[];
+      return {
+        hour: parseInt(hour),
+        avgPerformance: sessionList.reduce((sum: number, s: any) => sum + (s.overallScore || s.confidenceScore || 0), 0) / sessionList.length,
+        sessionCount: sessionList.length,
+        energyLevel: calculateEnergyLevel(sessionList)
+      };
+    });
     
     return {
       optimalHours: timeEffectiveness.filter(t => t.avgPerformance > 75).map(t => t.hour),
@@ -1723,11 +1727,14 @@ export default function AICoachRedesigned() {
       return acc;
     }, {} as Record<string, number[]>);
     
-    const avgPerformance = Object.entries(lengthGroups).map(([length, scores]: [string, number[]]) => ({
-      length,
-      avgScore: scores.reduce((sum: number, score: number) => sum + score, 0) / scores.length,
-      sampleSize: scores.length
-    }));
+    const avgPerformance = Object.entries(lengthGroups).map(([length, scores]) => {
+      const scoreList = scores as number[];
+      return {
+        length,
+        avgScore: scoreList.reduce((sum: number, score: number) => sum + score, 0) / scoreList.length,
+        sampleSize: scoreList.length
+      };
+    });
     
     return avgPerformance.reduce((best, current) => 
       current.avgScore > best.avgScore ? current : best, 
@@ -1784,7 +1791,7 @@ export default function AICoachRedesigned() {
       // Use persistent coaching data or fallback to practice sessions
       let coachingResponse;
       
-      if (persistentData && persistentData.totalSessions > 0) {
+      if (persistentData && (persistentData as any).totalSessions > 0) {
         // Use persistent coaching analytics that survive session deletion
         coachingResponse = await fetch('/api/ai-coach/persistent-coaching', {
           method: 'POST',
@@ -1830,11 +1837,11 @@ export default function AICoachRedesigned() {
         let aiResponseText = response.coaching;
         
         // Add persistent analytics data if available
-        if (persistentData && persistentData.totalSessions > 0) {
-          aiResponseText += `\n\n💾 **Persistent Analytics**: Based on ${persistentData.totalSessions} sessions`;
+        if (persistentData && (persistentData as any).totalSessions > 0) {
+          aiResponseText += `\n\n💾 **Persistent Analytics**: Based on ${(persistentData as any).totalSessions} sessions`;
           
-          if (persistentData.trends && Object.keys(persistentData.trends).length > 0) {
-            aiResponseText += `\n📈 **Trends**: ${Object.entries(persistentData.trends).slice(0, 2).map(([key, value]) => `${key}: ${value}%`).join(', ')}`;
+          if ((persistentData as any).trends && Object.keys((persistentData as any).trends).length > 0) {
+            aiResponseText += `\n📈 **Trends**: ${Object.entries((persistentData as any).trends).slice(0, 2).map(([key, value]) => `${key}: ${value}%`).join(', ')}`;
           }
         }
         
@@ -1891,8 +1898,8 @@ export default function AICoachRedesigned() {
       ];
       
       // ELIMINATED: Random response selection - use persistent data-driven response instead
-      const dataBasedResponse = persistentData && persistentData.totalSessions > 0 
-        ? `🧠 **Persistent Analytics**: Based on your ${persistentData.totalSessions} sessions of coaching data, I can provide truly personalized feedback. Your neural profile shows continuous learning patterns that improve with each session.`
+      const dataBasedResponse = persistentData && (persistentData as any).totalSessions > 0 
+        ? `🧠 **Persistent Analytics**: Based on your ${(persistentData as any).totalSessions} sessions of coaching data, I can provide truly personalized feedback. Your neural profile shows continuous learning patterns that improve with each session.`
         : neuralResponses[0]; // Use first response as fallback
       
       const aiResponse = {
@@ -1949,8 +1956,8 @@ export default function AICoachRedesigned() {
                 <div className="flex-1">
                   <h2 className="text-2xl font-bold text-white">AI Speech Coach</h2>
                   <p className="text-purple-100">
-                    {persistentData && persistentData.totalSessions > 0
-                      ? `${persistentData.totalSessions} sessions analyzed`
+                    {persistentData && (persistentData as any).totalSessions > 0
+                      ? `${(persistentData as any).totalSessions} sessions analyzed`
                       : "Personalized AI coaching"
                     }
                   </p>

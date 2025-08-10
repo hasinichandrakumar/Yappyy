@@ -7306,7 +7306,7 @@ Respond with detailed analysis in JSON format:
     }, {} as Record<string, number>);
     
     return Object.entries(purposeCounts)
-      .sort(([,a], [,b]) => b - a)
+      .sort(([,a], [,b]) => (b as number) - (a as number))
       .slice(0, 3)
       .map(([purpose]) => purpose);
   }
@@ -7329,7 +7329,7 @@ Respond with detailed analysis in JSON format:
  */
 async function generatePersonalizedFeedbackMessage(insights: any[], recommendations: any[], userId: string): Promise<string> {
   try {
-    const userSessions = await storage.getUserPracticeSessions(userId, 5);
+    const userSessions = await storage.getUserPracticeSessions(userId);
     const sessionCount = userSessions.length;
     
     let message = `🧠 **Your Personal AI Coach Analysis**\n\n`;
@@ -7381,7 +7381,7 @@ async function generatePersonalizedFeedbackMessage(insights: any[], recommendati
  */
 async function analyzeSessionWithPersonalContext(session: any, userId: string): Promise<any> {
   try {
-    const userSessions = await storage.getUserPracticeSessions(userId, 20);
+    const userSessions = await storage.getUserPracticeSessions(userId);
     
     // Calculate personal baselines
     const baseline = calculatePersonalBaseline(userSessions);
@@ -7391,7 +7391,7 @@ async function analyzeSessionWithPersonalContext(session: any, userId: string): 
       // Personal performance metrics vs baseline
       personalizedMetrics: {
         paceDeviation: session.averageWPM ? (session.averageWPM - baseline.naturalPace) : 0,
-        confidenceRelativeToPersonalRange: calculateConfidencePercentile(session.confidenceScore, baseline.confidenceRange),
+        confidenceRelativeToPersonalRange: calculateConfidencePercentile(session.confidenceScore, baseline.confidenceRange as [number, number]),
         improvementVelocity: calculateImprovementVelocity(userSessions)
       },
       
