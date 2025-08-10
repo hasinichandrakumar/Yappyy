@@ -1533,12 +1533,25 @@ export default function SimplifiedPracticePage() {
           clarity: metrics.voice.clarity || 0,
           pace: metrics.voice.pace || 0,
           volume: metrics.voice.volume || 0,
-          fillerCount: metrics.fillerWordCount || 0
+          intonation: metrics.voice.intonation || 0,
+          fillerCount: metrics.voice.fillerCount || 0,
+          pauseEffectiveness: metrics.voice.pauseEffectiveness || 0,
+          pitchVariation: metrics.voice.pitchVariation || 0,
+          vocalFryDetection: metrics.voice.vocalFryDetection || false,
+          uptalkPatterns: metrics.voice.uptalkPatterns || 0
         }),
         bodyLanguageMetrics: JSON.stringify({
-          eyeContactScore: metrics.bodyLanguage?.eyeContactScore || 0,
-          facialExpressions: metrics.bodyLanguage?.facialExpressions || 0,
-          overallPresence: metrics.bodyLanguage?.overallPresence || 0
+          eyeContact: metrics.bodyLanguage?.eyeContactScore || 0,
+          postureConfidence: bodyMetrics?.posture?.confidence || 0,
+          spineAlignment: bodyMetrics?.posture?.spineAlignment || 0,
+          shoulderPosition: bodyMetrics?.posture?.shoulderPosition || 0,
+          stability: bodyMetrics?.posture?.stability || 0,
+          gesturesNaturalness: bodyMetrics?.gestures?.naturalness || 0,
+          gesturesEffectiveness: bodyMetrics?.gestures?.effectiveness || 0,
+          gesturesTiming: bodyMetrics?.gestures?.timing || 0,
+          presence: bodyMetrics?.overall?.presence || 0,
+          professionalism: bodyMetrics?.overall?.professionalism || 0,
+          confidence: bodyMetrics?.overall?.confidence || 0
         }),
         aiAnalysis: JSON.stringify({
           overallScore: Math.round((metrics.confidence + metrics.clarity + metrics.engagement) / 3) || 0,
@@ -1684,12 +1697,17 @@ export default function SimplifiedPracticePage() {
           fillerCount: realFillerWords,
           clarity: realVoiceClarity
         },
-        bodyLanguageMetrics: {
-          eyeContact: realEyeContact,
-          confidence: hasRealSpeech ? metrics.confidence : 0,
-          posture: 0, // Posture analysis removed
-          gestures: 0 // Gesture analysis removed
-        },
+          bodyLanguageMetrics: {
+            eyeContact: realEyeContact,
+            confidence: hasRealSpeech ? (bodyMetrics?.overall?.confidence || metrics.confidence) : 0,
+            postureConfidence: bodyMetrics?.posture?.confidence || 0,
+            spineAlignment: bodyMetrics?.posture?.spineAlignment || 0,
+            shoulderPosition: bodyMetrics?.posture?.shoulderPosition || 0,
+            stability: bodyMetrics?.posture?.stability || 0,
+            gesturesNaturalness: bodyMetrics?.gestures?.naturalness || 0,
+            gesturesEffectiveness: bodyMetrics?.gestures?.effectiveness || 0,
+            gesturesTiming: bodyMetrics?.gestures?.timing || 0,
+          },
         persuasivenessScore: realConfidenceScore / 100,
         emotionalIntelligence: {
           engagement: hasRealSpeech ? metrics.engagement : 0,
@@ -1785,7 +1803,13 @@ export default function SimplifiedPracticePage() {
               voiceMetrics: {
                 clarity: realVoiceClarity,
                 pace: metrics.voice?.pace || 0,
-                // Volume and intonation metrics removed
+                volume: metrics.voice?.volume || 0,
+                intonation: metrics.voice?.intonation || 0,
+                fillerCount: realFillerWords,
+                pauseEffectiveness: metrics.voice?.pauseEffectiveness || 0,
+                pitchVariation: metrics.voice?.pitchVariation || 0,
+                vocalFryDetection: metrics.voice?.vocalFryDetection || false,
+                uptalkPatterns: metrics.voice?.uptalkPatterns || 0
               }
             })
           });

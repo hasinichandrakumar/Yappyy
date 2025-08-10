@@ -42,6 +42,9 @@ export class DeepgramSpeechService {
   private audioChunks: Blob[] = [];
   private isRecording = false;
   private onTranscriptCallback?: (analytics: SpeechAnalytics) => void;
+  // Fallback (Web Speech) tracking for authentic metrics
+  private fallbackStartMs: number | null = null;
+  private fallbackTotalWords: number = 0;
 
   constructor(onTranscript?: (analytics: SpeechAnalytics) => void) {
     this.onTranscriptCallback = onTranscript;
@@ -221,33 +224,53 @@ export class DeepgramSpeechService {
       recognition.lang = 'en-US';
       
       recognition.onresult = (event: any) => {
-        let transcript = '';
+        // Initialize fallback timers and counters
+        if (this.fallbackStartMs === null) {
+          this.fallbackStartMs = Date.now();
+          this.fallbackTotalWords = 0;
+        }
+
+        let finalChunk = '';
+        const confidences: number[] = [];
         for (let i = event.resultIndex; i < event.results.length; i++) {
-          if (event.results[i].isFinal) {
-            transcript += event.results[i][0].transcript;
+          const result = event.results[i];
+          const alt = result[0];
+          if (typeof alt?.confidence === 'number') confidences.push(alt.confidence);
+          if (result.isFinal) {
+            finalChunk += alt?.transcript || '';
           }
         }
-        
-        if (transcript.trim()) {
-          // Create basic analytics for fallback
-          const words = transcript.split(' ').filter(w => w.trim());
+
+        if (finalChunk.trim()) {
+          const words = finalChunk.split(/\s+/).filter((w: string) => w.trim().length > 0);
+          this.fallbackTotalWords += words.length;
+
+          const elapsedMinutes = Math.max(0.001, (Date.now() - (this.fallbackStartMs || Date.now())) / 60000);
+          const speakingRate = Math.round(this.fallbackTotalWords / elapsedMinutes);
+
+          const avgConfidence = confidences.length > 0
+            ? Math.round((confidences.reduce((a, b) => a + b, 0) / confidences.length) * 100)
+            : 0;
+
+          const fillerList = ['um', 'uh', 'er', 'ah', 'like', 'so', 'you', 'know'].join('|');
+          const fillerRegex = new RegExp(`\\b(${fillerList})\\b`, 'i');
+          const detectedFillers = words.filter(w => fillerRegex.test(w.toLowerCase()));
+
           const analytics: SpeechAnalytics = {
-            transcript,
-            confidence: Math.round(event.results[event.resultIndex][0].confidence * 100) || 85,
+            transcript: finalChunk,
+            confidence: avgConfidence,
             sentiment: { score: 0, label: 'neutral' },
-            wordDetails: words.map(word => ({
+            wordDetails: words.map((word: string) => ({
               word,
-              confidence: 85,
-              duration: 0.5
+              confidence: avgConfidence,
+              duration: 0 // unknown in Web Speech fallback
             })),
-            speakingRate: 150,
-            fillerWords: words.filter(w => 
-              ['um', 'uh', 'er', 'ah', 'like', 'so'].includes(w.toLowerCase())
-            ),
+            speakingRate,
+            fillerWords: detectedFillers,
             topics: [],
-            overallQuality: 80
+            overallQuality: Math.min(100, Math.max(0, Math.round((avgConfidence / 100) * (1 - detectedFillers.length / Math.max(1, words.length)) * 100)))
           };
-          
+
           this.onTranscriptCallback?.(analytics);
         }
       };

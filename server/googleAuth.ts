@@ -187,8 +187,10 @@ export async function setupGoogleAuth(app: Express) {
     const requestCallbackURL = getCallbackURL(req);
     console.log('  - Dynamic callback URL:', requestCallbackURL);
 
+    // Override callbackURL per request to ensure exact domain/protocol is used in redirect_uri
     passport.authenticate('google', {
-      scope: ['profile', 'email']
+      scope: ['profile', 'email'],
+      callbackURL: requestCallbackURL
     })(req, res, next);
   });
 
