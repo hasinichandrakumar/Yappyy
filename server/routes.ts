@@ -94,11 +94,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   try {
     roboflowEngine = new RoboflowVisionEngine();
     console.log('✅ Roboflow engine initialization attempted');
-  } catch (error) {
-    console.log('⚠️ Roboflow engine initialization failed:', error.message);
+  } catch (error: any) {
+    console.log('⚠️ Roboflow engine initialization failed:', error?.message || 'Unknown error');
     roboflowEngine = { 
       analyzeBodyLanguage: () => Promise.resolve(null),
-      getStatus: () => ({ available: false, initialized: false, engine: 'Roboflow', error: error.message })
+      getStatus: () => ({ available: false, initialized: false, engine: 'Roboflow', error: error?.message || 'Unknown error' })
     };
   }
   
@@ -867,7 +867,7 @@ Make the content more engaging, natural, and personalized while keeping the same
 
 
   // Purpose-specific analysis instructions
-  function getPurposeSpecificInstructions(purpose) {
+  function getPurposeSpecificInstructions(purpose: string) {
     const purposeInstructions = {
       'Sales Pitch': `
       EXPERT SALES PITCH ANALYSIS - ADULT BUSINESS COHORT FOCUS:
@@ -1898,10 +1898,10 @@ Evaluate how well this speech achieved its stated PURPOSE with the depth and det
             ...session,
             facialAnalysis: facialData,
             // Only use computer vision data if it has authentic values (> 0)
-            confidenceLevel: session.confidenceLevel || (facialData?.emotionalExpression?.confidence > 0 ? facialData.emotionalExpression.confidence : 0),
-            engagementLevel: session.engagementLevel || (facialData?.emotionalExpression?.engagement > 0 ? facialData.emotionalExpression.engagement : 0),
+            confidenceLevel: (session as any).confidenceLevel || (facialData?.emotionalExpression?.confidence > 0 ? facialData.emotionalExpression.confidence : 0),
+            engagementLevel: (session as any).engagementLevel || (facialData?.emotionalExpression?.engagement > 0 ? facialData.emotionalExpression.engagement : 0),
             eyeContactScore: session.eyeContactScore || (facialData?.communicationSignals?.eyeContactQuality > 0 ? facialData.communicationSignals.eyeContactQuality : 0),
-            overallPerformance: session.overallScore || calculateSessionOverallScore(session, facialData),
+            overallPerformance: session.overallScore || calculateSessionOverallScore(session as any, facialData),
             // Only use additional metrics if they contain real data
             clarityScore: session.clarityScore || (facialData?.communicationSignals?.gazeFocus > 0 ? facialData.communicationSignals.gazeFocus : 0),
             volumeConsistency: session.volumeConsistency || 0 // Only show real data, no defaults
@@ -2469,10 +2469,10 @@ Be specific, actionable, and encouraging while maintaining professional coaching
       console.error("❌ Error generating comprehensive coaching analysis:", error);
       
       // Final fallback with ONLY authentic session data
-      const facialData = session.facialAnalysis ? JSON.parse(session.facialAnalysis) : null;
-              const sessionConfidenceScore = session.confidenceScore || facialData?.emotionalExpression?.confidence || 0;
-        const sessionEngagement = facialData?.emotionalExpression?.engagement || 0;
-        const sessionVoiceClarity = session.voiceClarity || session.clarityScore || 0;
+      const facialData = session.facialAnalysis ? JSON.parse(session.facialAnalysis as string) : null;
+      const sessionConfidenceScore = session.confidenceScore || facialData?.emotionalExpression?.confidence || 0;
+      const sessionEngagement = facialData?.emotionalExpression?.engagement || 0;
+      const sessionVoiceClarity = session.voiceClarity || session.clarityScore || 0;
         
         const finalFallback = {
         purposeAlignment: sessionConfidenceScore,
@@ -2498,7 +2498,7 @@ Be specific, actionable, and encouraging while maintaining professional coaching
           }
         ],
         sessionMetadata: {
-          sessionName: session.sessionName || 'Practice Session',
+          sessionName: session.sessionName || session.name || 'Practice Session',
           duration: session.duration || 0,
           timestamp: new Date().toISOString(),
           analysisVersion: '3.0-final-fallback',
@@ -3802,7 +3802,8 @@ IMPORTANT: Base your analysis ONLY on the actual data provided. If insufficient 
       
       if (requestAnalysis) {
         try {
-          const { openai } = await import('./ai-config');
+          const { OpenAI } = await import('openai');
+          const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
           const response = await openai.chat.completions.create({
             model: 'gpt-4o',
             messages: [
@@ -6689,11 +6690,11 @@ Respond with detailed analysis in JSON format:
           testedEngines: ['Roboflow', 'MediaPipe', 'OpenCV', 'Enhanced-Local', 'TensorFlow.js']
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Maximum authentic analysis error:', error);
       res.status(500).json({ 
         success: false, 
-        error: error.message
+        error: error?.message || 'Unknown error'
       });
     }
   });
@@ -6730,11 +6731,11 @@ Respond with detailed analysis in JSON format:
           'No computer vision engines available - check API keys and connections',
         timestamp: Date.now()
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Computer vision status check failed:', error);
       res.status(500).json({ 
         success: false, 
-        error: error.message,
+        error: error?.message || 'Unknown error',
         workingEngines: 0
       });
     }
@@ -6899,7 +6900,7 @@ Respond with detailed analysis in JSON format:
       }
 
       const words = transcript.toLowerCase().split(/\s+/);
-      const sentences = transcript.split(/[.!?]+/).filter(s => s.trim().length > 5);
+      const sentences = transcript.split(/[.!?]+/).filter((s: string) => s.trim().length > 5);
       const avgWordsPerSentence = words.length / Math.max(sentences.length, 1);
       const sessionDuration = sessionData?.duration || 120;
       const wordsPerMinute = (words.length / sessionDuration) * 60;
@@ -6937,7 +6938,7 @@ Respond with detailed analysis in JSON format:
 
       // Analyze filler word patterns
       const fillerWords = ['um', 'uh', 'like', 'you know', 'basically', 'actually', 'literally'];
-      const fillerCount = words.filter(word => fillerWords.includes(word)).length;
+      const fillerCount = words.filter((word: string) => fillerWords.includes(word)).length;
       const fillerRate = (fillerCount / words.length) * 100;
 
       const fillerAnalysis = {
@@ -6951,8 +6952,8 @@ Respond with detailed analysis in JSON format:
         metrics: {
           fillerCount,
           fillerRate: Math.round(fillerRate * 10) / 10,
-          mostUsedFiller: fillerWords.find(filler => 
-            words.filter(word => word === filler).length > 0
+          mostUsedFiller: fillerWords.find((filler: string) => 
+            words.filter((word: string) => word === filler).length > 0
           ) || "None"
         }
       };
@@ -6994,8 +6995,8 @@ Respond with detailed analysis in JSON format:
       }
 
       const words = transcript.toLowerCase().split(/\s+/);
-      const sentences = transcript.split(/[.!?]+/).filter(s => s.trim().length > 5);
-      const paragraphs = transcript.split(/\n\s*\n/).filter(p => p.trim().length > 0);
+      const sentences = transcript.split(/[.!?]+/).filter((s: string) => s.trim().length > 5);
+      const paragraphs = transcript.split(/\n\s*\n/).filter((p: string) => p.trim().length > 0);
 
       // Analyze content structure
       const structureScore = Math.min(100, Math.max(0, 
@@ -7006,8 +7007,8 @@ Respond with detailed analysis in JSON format:
       ));
 
       // Analyze clarity
-      const avgWordLength = words.reduce((sum, word) => sum + word.length, 0) / words.length;
-      const complexWords = words.filter(word => word.length > 8).length;
+      const avgWordLength = words.reduce((sum: number, word: string) => sum + word.length, 0) / words.length;
+      const complexWords = words.filter((word: string) => word.length > 8).length;
       const complexityRatio = complexWords / words.length;
 
       const clarityLevel = complexityRatio > 0.3 ? "Complex" : 
@@ -7015,7 +7016,7 @@ Respond with detailed analysis in JSON format:
 
       // Analyze engagement
       const engagementWords = ['you', 'your', 'we', 'us', 'our', 'imagine', 'consider', 'think'];
-      const engagementCount = words.filter(word => engagementWords.includes(word)).length;
+      const engagementCount = words.filter((word: string) => engagementWords.includes(word)).length;
       const engagementFactor = engagementCount > words.length * 0.05 ? "High" : 
                               engagementCount > words.length * 0.02 ? "Moderate" : "Low";
 
@@ -7026,17 +7027,17 @@ Respond with detailed analysis in JSON format:
 
       if (purposeLower.includes("business")) {
         const businessWords = ['roi', 'revenue', 'profit', 'strategy', 'market', 'growth'];
-        const businessWordCount = words.filter(word => businessWords.includes(word)).length;
+        const businessWordCount = words.filter((word: string) => businessWords.includes(word)).length;
         purposeAlignment = businessWordCount > 0 ? "Business-focused" : "General";
         purposeScore = businessWordCount > 0 ? 85 : 60;
       } else if (purposeLower.includes("academic")) {
         const academicWords = ['research', 'study', 'evidence', 'analysis', 'conclusion'];
-        const academicWordCount = words.filter(word => academicWords.includes(word)).length;
+        const academicWordCount = words.filter((word: string) => academicWords.includes(word)).length;
         purposeAlignment = academicWordCount > 0 ? "Academic-focused" : "General";
         purposeScore = academicWordCount > 0 ? 80 : 65;
       } else if (purposeLower.includes("interview")) {
         const interviewWords = ['experience', 'skill', 'achievement', 'result', 'team'];
-        const interviewWordCount = words.filter(word => interviewWords.includes(word)).length;
+        const interviewWordCount = words.filter((word: string) => interviewWords.includes(word)).length;
         purposeAlignment = interviewWordCount > 0 ? "Interview-focused" : "General";
         purposeScore = interviewWordCount > 0 ? 80 : 60;
       }
