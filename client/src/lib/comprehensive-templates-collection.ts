@@ -4,13 +4,12 @@ import {
   Building2, Handshake, DollarSign, Zap, Globe, Shield, Lightbulb, Crown, Phone, MessageSquare, 
   UserPlus, Layers, FileText, GraduationCap, Heart, Camera, Presentation, BookOpen, 
   BarChart3, Mic, Video, Music, Palette, Coffee, Laptop, Calendar, Map, Star, Brain,
-  Megaphone, Trophy, Clock, Car, Plane, Home, Gift, CheckSquare, Settings, Tool,
+  Megaphone, Trophy, Clock, Car, Plane, Home, Gift, CheckSquare, Settings, Wrench,
   Mail, CreditCard, Database, Cloud, Lock, Unlock, Eye, Ear, Smile, Frown, Meh,
   ThumbsUp, ThumbsDown, AlertCircle, CheckCircle, XCircle, Info, HelpCircle, Search,
   Filter, SortAsc, SortDesc, Download, Upload, Share, Link, ExternalLink, Copy,
   Edit, Trash, Archive, Inbox, Send, Reply, Forward, Tag, Hash, AtSign, Percent,
-  Plus, Minus, Divide, Equal, Infinity, Pi, Sigma, Omega, Alpha, Beta, Gamma,
-  Delta, Epsilon, Zeta, Eta, Theta, Iota, Kappa, Lambda, Mu, Nu, Xi, Omicron,
+  Plus, Minus, Divide, Equal, Infinity, Pi, Sigma, Omega,
   Scale, Leaf
 } from 'lucide-react';
 
