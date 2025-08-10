@@ -7506,6 +7506,7 @@ function predictImprovementTimeframe(currentSession: any, sessions: any[]): stri
   return '8-12 weeks';
 }
 
+// Helper functions moved outside registerRoutes for proper scope
 function generatePersonalizedGoals(session: any, sessions: any[], baseline: any): string[] {
   const goals = [];
   
