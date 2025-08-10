@@ -578,6 +578,23 @@ Transform this template to be highly personalized and engaging based on the spec
     }
   });
 
+  // AI service health check for personalization
+  app.get('/api/ai/health', async (req: any, res) => {
+    try {
+      const hasOpenAIKey = Boolean(process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY.length > 10);
+      res.json({
+        hasOpenAIKey,
+        providers: {
+          openai: {
+            configured: hasOpenAIKey
+          }
+        }
+      });
+    } catch (error: any) {
+      res.json({ hasOpenAIKey: false, error: error?.message || 'unknown' });
+    }
+  });
+
   // Legacy template personalization route (keeping for compatibility)
   app.post('/api/openai/personalize-template', async (req: any, res) => {
     try {

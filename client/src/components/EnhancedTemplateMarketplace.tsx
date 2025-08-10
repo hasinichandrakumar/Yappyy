@@ -836,16 +836,37 @@ export default function EnhancedTemplateMarketplace() {
   // AI-powered template personalization
   const personalizeTemplateMutation = useMutation({
     mutationFn: async (personalizationData: any) => {
+      const { template, userPreferences } = personalizationData || {};
+      const userRequest = (userPreferences || 'Make it more engaging and personal').trim();
+
+      // Try enhanced endpoint first
+      try {
+        const enhancedRes = await fetch('/api/ai-personalize-enhanced', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ template, userRequest, personalizationData: {} })
+        });
+        if (enhancedRes.ok) {
+          return await enhancedRes.json();
+        }
+      } catch {}
+
+      // Fallback to basic personalization endpoint
       const response = await fetch('/api/personalize-template', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(personalizationData)
+        body: JSON.stringify({ template, userPreferences: userRequest })
       });
       if (!response.ok) throw new Error('Failed to personalize template');
-      return response.json();
+      return await response.json();
     },
     onSuccess: (data) => {
-      setEditedContent(data.personalizedContent);
+      setEditedContent(data.personalizedContent || editedContent);
+      setEditMode(true);
+      toast({ title: 'Template Personalized', description: 'We tailored your template to be more engaging.' });
+    },
+    onError: (error: any) => {
+      toast({ title: 'Personalization failed', description: error?.message || 'Please try again later.', variant: 'destructive' });
     }
   });
 
@@ -1096,7 +1117,7 @@ export default function EnhancedTemplateMarketplace() {
               onClick={handlePersonalize} 
               disabled={personalizeTemplateMutation.isPending}
               size="lg"
-              className="text-base font-medium bg-purple-600 hover:bg-purple-700"
+              className="text-base font-medium bg-blue-600 hover:bg-blue-700 text-white"
             >
               <Sparkles className="h-5 w-5 mr-2" />
               {personalizeTemplateMutation.isPending ? 'Personalizing...' : 'Make it Personal'}
@@ -1104,7 +1125,7 @@ export default function EnhancedTemplateMarketplace() {
             <Button 
               onClick={handleDownloadPDF}
               size="lg"
-              className="text-base font-medium bg-green-600 hover:bg-green-700"
+              className="text-base font-medium bg-blue-600 hover:bg-blue-700 text-white"
             >
               <Download className="h-5 w-5 mr-2" />
               Save as PDF

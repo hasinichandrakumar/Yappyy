@@ -33,7 +33,8 @@ import {
   Trash2,
   BarChart3,
   Clock,
-  Award
+  Award,
+  Loader2
 } from 'lucide-react';
 import {
   LineChart,

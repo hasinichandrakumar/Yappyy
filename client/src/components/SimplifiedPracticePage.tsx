@@ -329,24 +329,42 @@ export default function SimplifiedPracticePage() {
     return () => clearInterval(interval);
   }, [isRecording]);
 
-  // Fetch session number on component load
+  // Robustly determine next session number on load
   useEffect(() => {
-    const fetchSessionNumber = async () => {
+    const determineNextSessionNumber = async () => {
+      // 1) Try server-provided next number
       try {
-        const response = await fetch('/api/sessions/next-number');
-        const data = await response.json();
-        const nextSessionNumber = data.sessionNumber;
-        
-        setSessionNumber(nextSessionNumber);
-        setSessionName(`Session ${nextSessionNumber}`);
-      } catch (error) {
-        console.log('Using default session number');
-        setSessionNumber(1);
-        setSessionName("Session 1");
-      }
+        const res = await fetch('/api/sessions/next-number');
+        if (res.ok) {
+          const data = await res.json();
+          const n = Number(data?.sessionNumber);
+          if (Number.isFinite(n) && n > 0) {
+            setSessionNumber(n);
+            setSessionName(`Session ${n}`);
+            return;
+          }
+        }
+      } catch {}
+
+      // 2) Fallback: count existing practice sessions
+      try {
+        const res2 = await fetch('/api/practice-sessions');
+        if (res2.ok) {
+          const sessions = await res2.json();
+          const count = Array.isArray(sessions) ? sessions.length : 0;
+          const n = Math.max(1, count + 1);
+          setSessionNumber(n);
+          setSessionName(`Session ${n}`);
+          return;
+        }
+      } catch {}
+
+      // 3) Final default
+      setSessionNumber(1);
+      setSessionName('Session 1');
     };
 
-    fetchSessionNumber();
+    determineNextSessionNumber();
   }, []);
 
   // Refs
