@@ -8,6 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { Mic, Video, Square, Play, Pause, Edit3, Save, X, Trophy, FileText, Eye, Target } from 'lucide-react';
 import AICoachIcon from './AICoachIcon';
 import { useToast } from '@/hooks/use-toast';
+import { useMediaPipeBodyLanguage } from '@/hooks/useMediaPipeBodyLanguage';
 
 interface LiveFeedbackItem {
   id: string;
@@ -27,6 +28,12 @@ interface SessionMetrics {
 }
 
 export default function ImprovedPracticePage() {
+  const {
+    startAnalysis: startBodyAnalysis,
+    stopAnalysis: stopBodyAnalysis,
+    currentMetrics: bodyMetrics,
+    isActive: isBodyAnalysisActive
+  } = useMediaPipeBodyLanguage();
   const [isRecording, setIsRecording] = useState(false);
   const [sessionName, setSessionName] = useState("");
   const [sessionPurpose, setSessionPurpose] = useState("");
@@ -1176,29 +1183,14 @@ export default function ImprovedPracticePage() {
       const currentWPM = elapsed > 0 ? Math.round((wordCount / elapsed) * 60) : 0;
       
       // Update all metrics in one atomic operation
-      setSessionMetrics(prev => {
-        const newMetrics = {
-          ...prev,
-          volume: currentVolume,
-          clarity: Math.min(100, Math.max(70, 85 + (currentVolume - 50) * 0.3)),
-          pace: currentWPM,
-          wordsSpoken: wordCount,
-          bodyLanguageScore: Math.round(eyeContactScore * 0.6 + postureScore * 0.4)
-        };
-        
-        console.log('📊 Live Metrics Update:', {
-          volume: Math.round(currentVolume),
-          WPM: currentWPM,
-          wordCount: wordCount,
-          sessionDuration: sessionDuration,
-          eyeContactScore: Math.round(eyeContactScore),
-          postureScore: Math.round(postureScore),
-          fillerWords: prev.fillerWords.length,
-          bodyLanguageScore: newMetrics.bodyLanguageScore
-        });
-        
-        return newMetrics;
-      });
+      setSessionMetrics(prev => ({
+        ...prev,
+        volume: currentVolume,
+        clarity: Math.min(100, Math.max(70, 85 + (currentVolume - 50) * 0.3)),
+        pace: currentWPM,
+        wordsSpoken: wordCount,
+        bodyLanguageScore: Math.round(((bodyMetrics?.eyeContact?.engagement ?? eyeContactScore) * 0.6) + ((bodyMetrics?.posture?.confidence ?? postureScore) * 0.4))
+      }));
 
       // Update session goals with current metrics
       setCurrentGoals(prev => prev.map(goal => {
@@ -1218,7 +1210,7 @@ export default function ImprovedPracticePage() {
     }, 500); // Update every 500ms for smoother metrics
 
     return () => clearInterval(interval);
-  }, [isRecording, eyeContactScore, postureScore, generatePersonalizedLiveFeedback, detectVolume, wordCount, sessionDuration, sessionMetrics.fillerWords.length]);
+  }, [isRecording, eyeContactScore, postureScore, generatePersonalizedLiveFeedback, detectVolume, wordCount, sessionDuration, sessionMetrics.fillerWords.length, bodyMetrics]);
 
   // Consolidated session timer - removed duplicate to fix WPM calculation
 
@@ -1245,6 +1237,13 @@ export default function ImprovedPracticePage() {
 
       // Setup audio analysis for real-time volume detection
       setupAudioAnalysis(stream);
+
+      // Start MediaPipe body language analysis for accurate posture/gestures/eye contact
+      if (videoRef.current) {
+        try {
+          await startBodyAnalysis(videoRef.current);
+        } catch {}
+      }
 
       const mediaRecorder = new MediaRecorder(stream, {
         mimeType: 'video/webm;codecs=vp9'
@@ -1550,6 +1549,8 @@ export default function ImprovedPracticePage() {
         stream.getTracks().forEach(track => track.stop());
         videoRef.current.srcObject = null;
       }
+
+      try { stopBodyAnalysis(); } catch {}
 
       setIsRecording(false);
       
