@@ -1897,24 +1897,9 @@ Evaluate how well this speech achieved its stated PURPOSE with the depth and det
           enhancedSession = {
             ...session,
             facialAnalysis: facialData,
-            // Only use computer vision data if it has authentic values (> 0)
-            // Add computed fields that extend the session object for UI compatibility
-            ...session,
-            confidenceLevel: session.confidenceScore || (facialData?.emotionalExpression?.confidence > 0 ? facialData.emotionalExpression.confidence : 0),
-            engagementLevel: session.overallScore || (facialData?.emotionalExpression?.engagement > 0 ? facialData.emotionalExpression.engagement : 0),
-            eyeContactScore: session.eyeContactScore || (facialData?.communicationSignals?.eyeContactQuality > 0 ? facialData.communicationSignals.eyeContactQuality : 0),
-            overallPerformance: session.overallScore || calculateSessionOverallScore(session, facialData),
-            // Only use additional metrics if they contain real data
-            clarityScore: session.clarityScore || (facialData?.communicationSignals?.gazeFocus > 0 ? facialData.communicationSignals.gazeFocus : 0),
-            volumeConsistency: session.volumeConsistency || 0 // Only show real data, no defaults
           };
           
-          console.log(`✅ Enhanced performance metrics for session ${id}:`, {
-            confidence: enhancedSession.confidenceLevel,
-            engagement: enhancedSession.engagementLevel,
-            eyeContact: enhancedSession.eyeContactScore,
-            overall: enhancedSession.overallPerformance
-          });
+          console.log(`✅ Enhanced session with facial analysis for session ${id}`);
         } catch (parseError) {
           console.error('Failed to parse facial analysis data:', parseError);
         }

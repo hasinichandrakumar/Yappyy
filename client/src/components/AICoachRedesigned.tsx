@@ -75,9 +75,8 @@ const AICoachAvatar = ({
   );
 };
 
-// Personalized Insights Component
-// Enhanced Deep Learning Analytics Component with Comprehensive Insights
-const AIInsightsAnalytics = ({ userId }: { userId?: string }) => {
+// Personalized Insights Component - Enhanced Analytics Component with Comprehensive Insights
+const EnhancedAIInsightsAnalytics = ({ userId }: { userId?: string }) => {
   const { data: practiceData } = useQuery({
     queryKey: ['/api/practice-sessions'],
     enabled: !!userId
@@ -315,40 +314,40 @@ const AIInsightsAnalytics = ({ userId }: { userId?: string }) => {
   };
 
   // Enhanced neural metrics using GraphQL data - only show authentic metrics
-  const neuralMetrics = neuralAnalysis ? [
+  const neuralMetrics = neuralAnalysisData ? [
     { 
       metric: 'Voice Modulation', 
-      value: Math.round(neuralAnalysis.voiceModulation?.clarity || 0),
-      trend: neuralAnalysis.voiceModulation?.clarity > 0 ? 'stable' : 'stable',
+      value: Math.round(neuralAnalysisData.voiceModulation?.clarity || 0),
+      trend: neuralAnalysisData.voiceModulation?.clarity > 0 ? 'stable' : 'stable',
       change: '0%', // Only show change when we have historical data
-      confidence: neuralAnalysis.voiceModulation?.confidence || 0,
+      confidence: neuralAnalysisData.voiceModulation?.confidence || 0,
       neural: 'Enhanced Prosody Analysis',
       description: 'Advanced pitch variation, prosody, and vocal clarity analysis'
     },
     { 
       metric: 'Body Language', 
-      value: Math.round(neuralAnalysis.bodyLanguage?.gestureEffectiveness || 0),
-      trend: neuralAnalysis.bodyLanguage?.gestureEffectiveness > 0 ? 'stable' : 'stable',
+      value: Math.round(neuralAnalysisData.bodyLanguage?.gestureEffectiveness || 0),
+      trend: neuralAnalysisData.bodyLanguage?.gestureEffectiveness > 0 ? 'stable' : 'stable',
       change: '0%', // Only show change when we have historical data
-      confidence: neuralAnalysis.bodyLanguage?.confidence || 0,
+      confidence: neuralAnalysisData.bodyLanguage?.confidence || 0,
       neural: 'Vision Transformer CNN',
       description: 'Advanced gesture recognition and posture confidence analysis'
     },
     { 
       metric: 'Content Structure', 
-      value: Math.round(neuralAnalysis.contentStructure?.coherenceScore || 0),
-      trend: neuralAnalysis.contentStructure?.coherenceScore > 0 ? 'stable' : 'stable',
+      value: Math.round(neuralAnalysisData.contentStructure?.coherenceScore || 0),
+      trend: neuralAnalysisData.contentStructure?.coherenceScore > 0 ? 'stable' : 'stable',
       change: '0%', // Only show change when we have historical data
-      confidence: neuralAnalysis.contentStructure?.confidence || 0,
+      confidence: neuralAnalysisData.contentStructure?.confidence || 0,
       neural: 'Advanced NLP Transformer',
       description: 'Enhanced content flow and audience impact assessment'
     },
     { 
       metric: 'Neural Confidence', 
-      value: Math.round(neuralAnalysis.confidenceScore || 0),
-      trend: neuralAnalysis.confidenceScore > 0 ? 'stable' : 'stable',
+      value: Math.round(neuralAnalysisData.confidenceScore || 0),
+      trend: neuralAnalysisData.confidenceScore > 0 ? 'stable' : 'stable',
       change: '0%', // Only show change when we have historical data
-      confidence: neuralAnalysis.confidenceScore || 0,
+      confidence: neuralAnalysisData.confidenceScore || 0,
       neural: 'Bayesian Confidence Engine',
       description: 'Multi-modal confidence scoring with uncertainty bounds'
     }
@@ -378,6 +377,18 @@ const AIInsightsAnalytics = ({ userId }: { userId?: string }) => {
       description: 'Goal achievement and audience engagement'
     }
   ].filter(metric => metric.value > 0); // Only show metrics with actual data
+
+  // Generate basic session analysis from available data
+  const sessionAnalysis = sessions.length > 0 ? {
+    totalSessions: sessions.length,
+    avgSessionLength: Math.round(sessions.reduce((sum, s) => sum + (s.duration || 0), 0) / sessions.length / 60) || 0,
+    avgClarity: Math.round(sessions.reduce((sum, s) => sum + (s.voiceClarity || 0), 0) / sessions.length) || 0,
+    avgPace: Math.round(sessions.reduce((sum, s) => sum + (s.averageWPM || 0), 0) / sessions.length) || 0,
+    avgConfidence: Math.round(sessions.reduce((sum, s) => sum + (s.confidenceScore || 0), 0) / sessions.length) || 0,
+    consistencyScore: 75, // Default consistency score
+    strengths: ['Voice clarity', 'Steady pace'],
+    improvements: ['Reduce filler words', 'Increase confidence']
+  } : null;
 
   // Generate comprehensive AI insights based on session analysis
   const generateDetailedInsights = () => {
@@ -1466,10 +1477,10 @@ export default function AICoachRedesigned() {
         ],
         neuralContext: {
           persistentData: persistentData,
-          progressTrajectory: calculateProgressTrajectory(userSessions),
-          speakingProfile: extractSpeakingProfile(userSessions),
-          sessionTypes: [...new Set(userSessions.map((s: any) => s.purpose))],
-          timePatterns: analyzeTimePatterns(userSessions)
+          progressTrajectory: calculateProgressTrajectory(sessions),
+          speakingProfile: extractSpeakingProfile(sessions),
+          sessionTypes: Array.from(new Set(sessions.map((s: any) => s.purpose || 'General Practice'))),
+          timePatterns: analyzeTimePatterns(sessions)
         }
       };
 
@@ -1506,7 +1517,7 @@ export default function AICoachRedesigned() {
       
       // Generate fallback analysis based on available data
       const fallbackAnalysis = {
-        overallAssessment: `Based on your ${userSessions?.length || 0} practice sessions, I can see you're committed to improvement. Your speaking journey shows dedication, and I'm here to provide deeper insights to accelerate your progress.`,
+        overallAssessment: `Based on your ${sessions?.length || 0} practice sessions, I can see you're committed to improvement. Your speaking journey shows dedication, and I'm here to provide deeper insights to accelerate your progress.`,
         performanceConnections: [
           "Your practice consistency correlates with confidence levels",
           "Session timing affects your vocal energy and clarity",
