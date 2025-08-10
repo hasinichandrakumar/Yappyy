@@ -1531,7 +1531,7 @@ export default function EnhancedPracticePage() {
                   {/* Simplified Live Status */}
                   {isRecording && (
                     <div className="absolute top-4 left-4 space-y-2">
-                      <Badge variant="destructive" className="animate-pulse">
+                      <Badge variant="destructive">
                         <Activity className="w-3 h-3 mr-1" />
                         RECORDING {Math.floor(sessionDuration / 60)}:{(sessionDuration % 60).toString().padStart(2, '0')}
                       </Badge>

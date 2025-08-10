@@ -61,19 +61,33 @@ export function getSession() {
     createTableIfMissing: true,
     ttl: sessionTtl,
     tableName: "sessions",
+    pruneSessionInterval: 60 * 60, // Prune expired sessions every hour
+    errorLog: (error: any) => {
+      console.error('Session store error:', error);
+    }
   });
+  
+  // Test the session store connection
+  sessionStore.on('error', (error: any) => {
+    console.error('Session store connection error:', error);
+  });
+  
   return session({
-    secret: process.env.SESSION_SECRET || 'dev-secret-key',
+    secret: process.env.SESSION_SECRET || 'dev-secret-key-change-in-production',
     store: sessionStore,
-    resave: true, // Changed to true for better session persistence
-    saveUninitialized: false,
+    resave: true, // Save session on every request to ensure persistence
+    saveUninitialized: true, // Create session immediately
+    rolling: true, // Reset expiry on activity
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: false, // Set to false for development to ensure cookies work
       sameSite: 'lax', // Allow cross-site requests for OAuth
       maxAge: sessionTtl,
       domain: undefined, // Remove domain restriction for better compatibility
+      path: '/' // Ensure cookie is available for all paths
     },
+    name: 'yappyy.sid', // Custom session name to avoid conflicts
+    proxy: true // Trust proxy for secure cookies in production
   });
 }
 
@@ -85,13 +99,38 @@ export async function setupGoogleAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  // Serialize user for session
+  // Serialize user for session - store only the user ID
   passport.serializeUser((user: any, done) => {
+    console.log('🔐 Serializing user for session:', user.id, user.email);
+    // Store the entire user object in session for simplicity
     done(null, user);
   });
 
-  passport.deserializeUser((user: any, done) => {
-    done(null, user);
+  // Deserialize user from session
+  passport.deserializeUser(async (sessionUser: any, done) => {
+    try {
+      console.log('🔓 Deserializing user from session:', sessionUser?.id);
+      
+      // If we have a user object stored, use it directly
+      if (sessionUser && sessionUser.id) {
+        // Optionally fetch fresh user data from database
+        const freshUser = await storage.getUser(sessionUser.id);
+        if (freshUser) {
+          console.log('✅ User deserialized successfully:', freshUser.email);
+          done(null, freshUser);
+        } else {
+          // User was deleted from DB, use session data
+          console.log('⚠️ Using session user data (not in DB):', sessionUser.email);
+          done(null, sessionUser);
+        }
+      } else {
+        console.log('❌ No user data in session');
+        done(null, false);
+      }
+    } catch (error) {
+      console.error('❌ Error deserializing user:', error);
+      done(error, false);
+    }
   });
 
   // Google OAuth Strategy - use a generic callback that will be overridden per request
@@ -247,6 +286,14 @@ export async function setupGoogleAuth(app: Express) {
     console.log('  - Redirecting to primary callback handler...');
     // Redirect to the main callback handler
     req.url = req.url.replace('/api/auth/google/callback', '/auth/google/callback');
+    app._router.handle(req, res, next);
+  });
+
+  // Backward-compat route: support older Google Console configs pointing to /oauth2callback
+  app.get('/oauth2callback', (req, res, next) => {
+    console.log('🔄 OAuth callback received at /oauth2callback');
+    console.log('  - Redirecting to primary callback handler...');
+    req.url = req.url.replace('/oauth2callback', '/auth/google/callback');
     app._router.handle(req, res, next);
   });
 

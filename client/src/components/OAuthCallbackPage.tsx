@@ -66,7 +66,7 @@ export default function OAuthCallbackPage() {
           {/* Large Yappyy Logo with Success Animation */}
           <div className="flex justify-center pt-4">
             <div className="relative mx-8">
-              <div className={`bg-gradient-to-br ${status === 'success' ? 'from-green-500 to-blue-600' : status === 'error' ? 'from-red-500 to-orange-600' : 'from-blue-500 to-purple-600'} p-6 rounded-3xl shadow-2xl ${status === 'processing' ? 'animate-pulse' : 'animate-bounce'}`}>
+              <div className={`bg-gradient-to-br ${status === 'success' ? 'from-green-500 to-blue-600' : status === 'error' ? 'from-red-500 to-orange-600' : 'from-blue-500 to-purple-600'} p-6 rounded-3xl shadow-2xl`}>
                 <img 
                   src={yappyyLogo} 
                   alt="Yappyy - AI Speech Training" 
@@ -107,7 +107,7 @@ export default function OAuthCallbackPage() {
           {/* Progress Bar */}
           {status === 'processing' && (
             <div className="w-full bg-gray-200 rounded-full h-2">
-              <div className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full animate-pulse" style={{ width: '90%' }}></div>
+              <div className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full" style={{ width: '90%' }}></div>
             </div>
           )}
           

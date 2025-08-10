@@ -184,8 +184,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes for React Query with onboarding support
   app.get('/api/auth/user', async (req: any, res) => {
     try {
+      // Log session state for debugging
+      console.log('📊 Auth check - Session ID:', req.sessionID);
+      console.log('📊 Auth check - Passport user:', !!req.user);
+      console.log('📊 Auth check - Is authenticated:', req.isAuthenticated());
+      console.log('📊 Auth check - Session data:', req.session);
+      
       // Check if user is authenticated
       if (!req.isAuthenticated() || !req.user) {
+        console.log('❌ User not authenticated');
         return res.json({ 
           isAuthenticated: false,
           isNewUser: true,
@@ -194,13 +201,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const userId = getUserId(req);
+      console.log('✅ User authenticated with ID:', userId);
+      
       const user = await storage.getUser(userId);
+      
+      if (!user) {
+        console.log('⚠️ User found in session but not in database:', userId);
+        return res.json({ 
+          isAuthenticated: false,
+          isNewUser: true,
+          welcomeMessageShown: false 
+        });
+      }
       
       // Get onboarding status using the new service
       const onboardingStatus = await userOnboardingService.checkUserOnboardingStatus(userId);
       
       // Return user data with complete onboarding information
-      res.json({
+      const responseData = {
         ...user,
         isAuthenticated: true,
         isNewUser: onboardingStatus.isNewUser,
@@ -208,9 +226,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         shouldShowDailyGoals: onboardingStatus.shouldShowDailyGoals,
         sessionCount: onboardingStatus.sessionCount,
         dailyGoals: onboardingStatus.dailyGoals || []
-      });
+      };
+      
+      console.log('✅ Returning authenticated user data for:', user.email);
+      res.json(responseData);
     } catch (error) {
-      console.error("Error fetching user:", error);
+      console.error("❌ Error fetching user:", error);
       // Return non-authenticated state instead of error
       res.json({ 
         isAuthenticated: false,

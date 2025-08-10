@@ -32,6 +32,8 @@ import {
   sessionRecordingStorage, 
   VideoRecordingData 
 } from '@/lib/video-recording';
+import { DeepgramSpeechService } from '@/lib/deepgramSpeech';
+import { useMediaPipeBodyLanguage } from '@/hooks/useMediaPipeBodyLanguage';
 
 import { FillerWordHighlighter } from './FillerWordHighlighter';
 import { LiveMetricsBox } from './LiveMetricsBox';
@@ -198,7 +200,13 @@ export default function SimplifiedPracticePage() {
     voice: {
       clarity: 0,
       pace: 0,
-      fillerCount: 0
+      volume: 0,
+      intonation: 0,
+      fillerCount: 0,
+      pauseEffectiveness: 0,
+      pitchVariation: 0,
+      vocalFryDetection: false,
+      uptalkPatterns: 0
     },
     bodyLanguage: {
       eyeContactScore: 0,
@@ -355,6 +363,15 @@ export default function SimplifiedPracticePage() {
 
   // Video recording refs
   const recordingVideoRef = useRef<HTMLVideoElement>(null);
+  const deepgramServiceRef = useRef<DeepgramSpeechService | null>(null);
+  const [isSpeechFallbackActive, setIsSpeechFallbackActive] = useState<boolean>(false);
+  // MediaPipe body language analysis
+  const {
+    startAnalysis: startBodyAnalysis,
+    stopAnalysis: stopBodyAnalysis,
+    currentMetrics: bodyMetrics,
+    isActive: isBodyAnalysisActive
+  } = useMediaPipeBodyLanguage();
 
   // Comprehensive filler word highlighting with 60+ patterns + custom fillers
   const highlightFillerWords = (text: string) => {
@@ -442,10 +459,47 @@ export default function SimplifiedPracticePage() {
     initializeSessionName();
   }, [sessionName]);
 
+  // Deepgram fallback starter
+  const startDeepgramFallback = useCallback(async () => {
+    try {
+      if (deepgramServiceRef.current) return; // already active
+      deepgramServiceRef.current = new DeepgramSpeechService((analytics) => {
+        // Append transcript incrementally
+        const chunkText = analytics.transcript?.trim();
+        if (chunkText) {
+          setTranscript(prev => {
+            const combined = (prev + ' ' + chunkText).trim();
+            transcriptRef.current = combined;
+            return combined;
+          });
+        }
+
+        // Update live metrics
+        setMetrics(prev => ({
+          ...prev,
+          wordsPerMinute: analytics.speakingRate || prev.wordsPerMinute,
+          fillerWordCount: (prev.fillerWordCount || 0) + (analytics.fillerWords?.length || 0),
+          voice: {
+            ...prev.voice,
+            pace: analytics.speakingRate || prev.voice.pace,
+            fillerCount: (prev.voice.fillerCount || 0) + (analytics.fillerWords?.length || 0)
+          }
+        }));
+      });
+      await deepgramServiceRef.current.startRecording();
+      setIsSpeechFallbackActive(true);
+      console.log('✅ Deepgram/Whisper fallback activated');
+    } catch (e) {
+      console.error('❌ Failed to start Deepgram/Whisper fallback:', e);
+    }
+  }, []);
+
   // Setup speech recognition
   const setupSpeechRecognition = useCallback(() => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
       console.warn('Speech recognition not supported');
+      // Start fallback immediately
+      startDeepgramFallback();
       return;
     }
 
@@ -719,30 +773,28 @@ export default function SimplifiedPracticePage() {
             }
           } catch (error) {
             console.log('Fallback to local filler detection');
-            // Fallback to local detection if backend fails
-            if (detectedFillers.length > 0) {
-              console.log('🎯 Local filler words detected:', detectedFillers);
-              
-              // Count fillers in the full transcript
-              const fullFillerCount = fullTranscript.toLowerCase().split(/\s+/).filter(word => {
-                const cleanWord = word.replace(/[.,!?;:'"()]/g, '');
-                return singleFillerWords.includes(cleanWord);
-              }).length;
-              
+            // Fallback to simple local detection if backend fails
+            const localFillers = (finalTranscript.toLowerCase().match(/\b(um+|uh+|er+|ah+|like|so|you know|i mean)\b/g) || []);
+            if (localFillers.length > 0) {
+              const fullFillerCount = localFillers.length;
               setMetrics(prev => ({
                 ...prev,
                 fillerWordCount: fullFillerCount,
                 voice: {
                   ...prev.voice,
-                  fillerCount: fullFillerCount
+                  fillerCount: fullFillerCount,
+                  volume: prev.voice.volume ?? 0,
+                  intonation: prev.voice.intonation ?? 0,
+                  pauseEffectiveness: prev.voice.pauseEffectiveness ?? 0,
+                  pitchVariation: prev.voice.pitchVariation ?? 0,
+                  vocalFryDetection: prev.voice.vocalFryDetection ?? false,
+                  uptalkPatterns: prev.voice.uptalkPatterns ?? 0
                 }
               }));
-              
-              const uniqueFillers = Array.from(new Set(detectedFillers));
+              const uniqueFillers = Array.from(new Set(localFillers));
               const feedbackMessage = uniqueFillers.length === 1 
                 ? `Reduce filler word: "${uniqueFillers[0]}"` 
                 : `Reduce filler words: ${uniqueFillers.slice(0, 2).join(', ')}`;
-              
               setLiveFeedback(prev => [...prev.slice(-4), {
                 id: Date.now().toString(),
                 message: feedbackMessage,
@@ -765,10 +817,14 @@ export default function SimplifiedPracticePage() {
 
     recognition.onerror = (event: any) => {
       console.error('Speech recognition error:', event.error);
+      // On errors like not-allowed/no-speech, ensure fallback is active
+      if (!isSpeechFallbackActive) {
+        startDeepgramFallback();
+      }
     };
 
     (recognitionRef as any).current = recognition;
-  }, [sessionDuration, transcript]);
+  }, [sessionDuration, transcript, isSpeechFallbackActive, startDeepgramFallback]);
 
   // Enhanced comprehensive live insights system with improved effectiveness
   useEffect(() => {
@@ -785,7 +841,7 @@ export default function SimplifiedPracticePage() {
       const timeSinceLastFeedback = lastMessage ? (Date.now() - lastMessage.timestamp) / 1000 : 999;
 
       // Only generate feedback if enough time has passed (avoid spam)
-      if (timeSinceLastFeedback < 8) return;
+      if (timeSinceLastFeedback < 4) return;
 
       // Starting feedback to get users engaged
       if (sessionDuration >= 3 && sessionDuration < 10 && (!lastMessage || !lastMessage.message.includes('Welcome'))) {
@@ -914,9 +970,9 @@ export default function SimplifiedPracticePage() {
       }
     };
 
-    // Start feedback after 3 seconds, then check every 8 seconds for better pacing
-    const initialTimeout = setTimeout(generateLiveInsights, 3000);
-    const interval = setInterval(generateLiveInsights, 8000);
+    // Start feedback sooner, then check more frequently for more active coaching
+    const initialTimeout = setTimeout(generateLiveInsights, 1500);
+    const interval = setInterval(generateLiveInsights, 4000);
     
     return () => {
       clearTimeout(initialTimeout);
@@ -1048,6 +1104,16 @@ export default function SimplifiedPracticePage() {
         } catch (error) {
           console.warn('⚠️ Robust computer vision initialization failed:', error);
         }
+
+        // Start high-accuracy body language (posture/gestures/eye contact) analysis
+        try {
+          if (videoRef.current) {
+            await startBodyAnalysis(videoRef.current);
+            console.log('✅ MediaPipe body language analysis started');
+          }
+        } catch (error) {
+          console.warn('⚠️ Body language analysis failed to start:', error);
+        }
       }
 
       // Setup Web Audio API for direct vocal filler detection
@@ -1147,7 +1213,12 @@ export default function SimplifiedPracticePage() {
               // Send audio to backend for vocal filler analysis
               // Convert audio blob to base64 for enhanced filler detection
               const arrayBuffer = await audioBlob.arrayBuffer();
-              const base64Audio = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+              const bytes = new Uint8Array(arrayBuffer);
+              let binary = '';
+              for (let i = 0; i < bytes.length; i++) {
+                binary += String.fromCharCode(bytes[i]);
+              }
+              const base64Audio = btoa(binary);
               
               const response = await fetch('/api/detect-enhanced-fillers', {
                 method: 'POST',
@@ -1206,10 +1277,18 @@ export default function SimplifiedPracticePage() {
         console.warn('⚠️ Vocal filler recorder unavailable:', recorderError);
       }
 
-      // Start speech recognition
+      // Start speech recognition with fallback
       setupSpeechRecognition();
-      if (recognitionRef.current) {
-        recognitionRef.current.start();
+      try {
+        if (recognitionRef.current) {
+          recognitionRef.current.start();
+        } else {
+          // No recognition available, start fallback
+          await startDeepgramFallback();
+        }
+      } catch (e) {
+        console.warn('⚠️ Web Speech start failed, using fallback', e);
+        await startDeepgramFallback();
       }
 
       setIsRecording(true);
@@ -1236,7 +1315,13 @@ export default function SimplifiedPracticePage() {
               wordsPerMinute: wpm,
               voice: {
                 ...prev.voice,
-                pace: wpm
+                pace: wpm,
+                volume: prev.voice.volume ?? 0,
+                intonation: prev.voice.intonation ?? 0,
+                pauseEffectiveness: prev.voice.pauseEffectiveness ?? 0,
+                pitchVariation: prev.voice.pitchVariation ?? 0,
+                vocalFryDetection: prev.voice.vocalFryDetection ?? false,
+                uptalkPatterns: prev.voice.uptalkPatterns ?? 0
               }
             }));
           } else {
@@ -1246,7 +1331,13 @@ export default function SimplifiedPracticePage() {
               wordsPerMinute: 0,
               voice: {
                 ...prev.voice,
-                pace: 0
+                pace: 0,
+                volume: prev.voice.volume ?? 0,
+                intonation: prev.voice.intonation ?? 0,
+                pauseEffectiveness: prev.voice.pauseEffectiveness ?? 0,
+                pitchVariation: prev.voice.pitchVariation ?? 0,
+                vocalFryDetection: prev.voice.vocalFryDetection ?? false,
+                uptalkPatterns: prev.voice.uptalkPatterns ?? 0
               }
             }));
           }
@@ -1285,40 +1376,26 @@ export default function SimplifiedPracticePage() {
       setTranscript('');
       setInterimTranscript('');
 
-      // Update metrics only with real data from facial analysis or Roboflow when available
+      // Update metrics with real MediaPipe/facial data when available
       metricsTimerRef.current = setInterval(() => {
         setMetrics(prev => ({
           ...prev,
-          // Only update if we have real facial analysis or Roboflow data
-          eyeContact: facialAnalysis?.facialMetrics?.communicationSignals?.eyeContactQuality || 
-            roboflowAnalysis?.facial?.eyeContact || prev.eyeContact,
-          confidence: facialAnalysis?.facialMetrics?.emotionalExpression?.confidence || 
-            roboflowAnalysis?.overall?.confidence || prev.confidence,
-          engagement: facialAnalysis?.facialMetrics?.emotionalExpression?.engagement || 
-            roboflowAnalysis?.facial?.engagement || prev.engagement,
-          clarity: facialAnalysis?.facialMetrics?.emotionalExpression?.authenticity || 
-            roboflowAnalysis?.facial?.engagement || prev.clarity,
+          eyeContact: bodyMetrics?.eyeContact?.engagement ?? facialAnalysis?.facialMetrics?.communicationSignals?.eyeContactQuality ?? roboflowAnalysis?.facial?.eyeContact ?? prev.eyeContact,
+          confidence: facialAnalysis?.facialMetrics?.emotionalExpression?.confidence ?? computerVisionMetrics?.confidence ?? prev.confidence,
+          engagement: facialAnalysis?.facialMetrics?.emotionalExpression?.engagement ?? computerVisionMetrics?.engagement ?? prev.engagement,
+          clarity: facialAnalysis?.facialMetrics?.emotionalExpression?.authenticity ?? prev.clarity,
           voice: {
             ...prev.voice,
-            clarity: facialAnalysis?.facialMetrics?.emotionalExpression?.authenticity || 
-              roboflowAnalysis?.facial?.engagement || prev.voice.clarity
+            clarity: facialAnalysis?.facialMetrics?.emotionalExpression?.authenticity ?? prev.voice.clarity
           },
           bodyLanguage: {
             ...prev.bodyLanguage,
-            // Use computer vision data as primary source
-            eyeContactScore: computerVisionMetrics?.eyeContact || 
-              facialAnalysis?.facialMetrics?.communicationSignals?.eyeContactQuality || 
-              roboflowAnalysis?.facial?.eyeContact || prev.bodyLanguage.eyeContactScore,
-
-            facialExpressions: computerVisionMetrics?.engagement || 
-              facialAnalysis?.facialMetrics?.emotionalExpression?.authenticity || 
-              roboflowAnalysis?.facial?.engagement || prev.bodyLanguage.facialExpressions,
-            overallPresence: computerVisionMetrics?.confidence || 
-              facialAnalysis?.facialMetrics?.overallPresence?.charisma || 
-              roboflowAnalysis?.overall?.presence || prev.bodyLanguage.overallPresence
+            eyeContactScore: bodyMetrics?.eyeContact?.engagement ?? computerVisionMetrics?.eyeContact ?? prev.bodyLanguage.eyeContactScore,
+            facialExpressions: bodyMetrics?.gestures?.naturalness ?? prev.bodyLanguage.facialExpressions,
+            overallPresence: bodyMetrics?.overall?.presence ?? prev.bodyLanguage.overallPresence
           }
         }));
-      }, 3000);
+      }, 1000);
 
       // All computer vision systems already started above in the stream initialization
       console.log('✅ All computer vision systems initialized during stream setup');
@@ -1359,6 +1436,15 @@ export default function SimplifiedPracticePage() {
 
     if (recognitionRef.current) {
       recognitionRef.current.stop();
+    }
+
+    // Stop Deepgram/Whisper fallback if active
+    if (deepgramServiceRef.current) {
+      try {
+        await deepgramServiceRef.current.stopRecording();
+      } catch {}
+      deepgramServiceRef.current = null;
+      setIsSpeechFallbackActive(false);
     }
 
     // Clean up Web Audio API
@@ -1434,7 +1520,7 @@ export default function SimplifiedPracticePage() {
         pauseCount: 0,
         eyeContactScore: String(metrics.eyeContact || 0),
         coachingTips: [],
-        videoBlob: recordingData?.blob ? await recordingData.blob.arrayBuffer().then(buffer => 
+        videoBlob: recordingData?.videoBlob ? await recordingData.videoBlob.arrayBuffer().then((buffer: ArrayBuffer) => 
           Buffer.from(buffer).toString('base64')
         ) : null,
         facialAnalysis: JSON.stringify({
@@ -1668,7 +1754,10 @@ export default function SimplifiedPracticePage() {
           if (recordingData) {
             const videoData = await recordingData.videoBlob.arrayBuffer();
             const uint8Array = new Uint8Array(videoData);
-            const binaryString = Array.from(uint8Array, byte => String.fromCharCode(byte)).join('');
+            let binaryString = '';
+            for (let i = 0; i < uint8Array.length; i++) {
+              binaryString += String.fromCharCode(uint8Array[i]);
+            }
             base64Video = btoa(binaryString);
           }
           
@@ -1808,7 +1897,13 @@ export default function SimplifiedPracticePage() {
             voice: {
               clarity: 0,
               pace: 0,
-              fillerCount: 0
+              volume: 0,
+              intonation: 0,
+              fillerCount: 0,
+              pauseEffectiveness: 0,
+              pitchVariation: 0,
+              vocalFryDetection: false,
+              uptalkPatterns: 0
             },
             bodyLanguage: {
               eyeContactScore: 0,
@@ -2029,7 +2124,7 @@ export default function SimplifiedPracticePage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
-                  <div className={`relative aspect-video bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl overflow-hidden flex items-center justify-center border border-gray-700 shadow-2xl transition-all duration-300 ${isRecording ? 'ring-2 ring-red-500 ring-opacity-50 animate-pulse' : ''}`}>
+                  <div className={`relative aspect-video bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl overflow-hidden flex items-center justify-center border border-gray-700 shadow-2xl transition-all duration-300 ${isRecording ? 'ring-2 ring-red-500 ring-opacity-50' : ''}`}>
                     <video
                       ref={videoRef}
                       className="w-full h-full object-contain rounded-xl shadow-lg"
@@ -2225,7 +2320,6 @@ export default function SimplifiedPracticePage() {
               <div className="bg-white border-2 border-gray-100 p-6 rounded-lg max-h-60 overflow-y-auto shadow-inner">
                 {transcript || interimTranscript ? (
                   <div className="text-sm leading-relaxed">
-                    {/* Enhanced filler word highlighting including UM/UH detection */}
                     <FillerWordHighlighter 
                       text={transcript}
                       className="text-gray-900"

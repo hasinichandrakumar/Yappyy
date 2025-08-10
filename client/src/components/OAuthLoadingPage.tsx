@@ -38,8 +38,8 @@ export default function OAuthLoadingPage() {
                   className="h-16 w-auto filter brightness-0 invert"
                 />
               </div>
-              <div className="absolute -inset-2 bg-gradient-to-r from-cyan-400 via-sky-400 to-blue-500 rounded-3xl opacity-40 animate-ping"></div>
-              <div className="absolute -inset-1 bg-gradient-to-r from-cyan-300 via-sky-300 to-blue-400 rounded-3xl opacity-30 animate-pulse"></div>
+              <div className="absolute -inset-2 bg-gradient-to-r from-cyan-400 via-sky-400 to-blue-500 rounded-3xl opacity-40"></div>
+              <div className="absolute -inset-1 bg-gradient-to-r from-cyan-300 via-sky-300 to-blue-400 rounded-3xl opacity-30"></div>
             </div>
           </div>
           
@@ -67,7 +67,7 @@ export default function OAuthLoadingPage() {
           {/* Enhanced Progress Bar with Yappy Gradient */}
           <div className="w-full bg-gray-200 rounded-full h-3 shadow-inner">
             <div 
-              className="bg-gradient-to-r from-blue-600 via-cyan-500 to-sky-400 h-3 rounded-full animate-pulse shadow-lg" 
+              className="bg-gradient-to-r from-blue-600 via-cyan-500 to-sky-400 h-3 rounded-full shadow-lg" 
               style={{ width: '75%' }}
             ></div>
           </div>
