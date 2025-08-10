@@ -1049,7 +1049,8 @@ export default function EnhancedTemplateMarketplace() {
     if (!selectedTemplate) return null;
 
     return (
-      <div className="space-y-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold">{selectedTemplate.title}</h2>
@@ -1217,11 +1218,13 @@ export default function EnhancedTemplateMarketplace() {
           </TabsContent>
         </Tabs>
       </div>
+      </div>
     );
   };
 
   const renderCreateTemplate = () => (
-    <div className="space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold">Create Your Own Template</h2>
@@ -1347,6 +1350,7 @@ Tips:
         </div>
       </div>
     </div>
+    </div>
   );
 
   if (showCreateTemplate) {
@@ -1358,8 +1362,7 @@ Tips:
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="space-y-6 font-poppins">
+    <div className="space-y-6 font-poppins">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -1520,7 +1523,6 @@ Tips:
           )}
         </TabsContent>
       </Tabs>
-      </div>
     </div>
   );
 }
