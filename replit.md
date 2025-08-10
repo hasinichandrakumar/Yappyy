@@ -53,7 +53,7 @@ Preferred communication style: Simple, everyday language.
     - **Automatic Session Saving**: Sessions save to the database when recording stops, with comprehensive analysis available.
 - **Content Management**:
     - **Template System**: Expanded library of 50+ pre-built templates for various speaking scenarios with AI personalization.
-    - **PDF Export System**: Enhanced session analysis and template PDFs with modern styling and accurate data.
+    - **PDF Export System**: Enhanced session analysis and template PDFs with Yappyy-branded styling, Poppins font, and blue color scheme matching the website theme.
 - **User Experience**:
     - **Daily Goals Tracker**: Integrated into the Progress tab for interactive goal management.
     - **Welcome Back Experience**: Enhanced detection for new vs. returning users, providing personalized welcome and daily goals.

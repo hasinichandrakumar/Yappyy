@@ -17,37 +17,51 @@ export class PDFExport {
   }
 
   private setupDocument(): void {
-    // Set default font (Poppins if available, fallback to Helvetica)
+    // Set page background to match Yappyy theme first
+    this.pdf.setFillColor(this.colors.background.secondary[0], this.colors.background.secondary[1], this.colors.background.secondary[2]);
+    this.pdf.rect(0, 0, this.pageWidth, this.pageHeight, 'F');
+    
+    // Set Poppins font to match Yappyy branding (fallback to Helvetica)
     try {
-      this.pdf.setFont('Poppins');
+      this.pdf.setFont('Poppins', 'normal');
     } catch {
-      this.pdf.setFont('helvetica');
+      this.pdf.setFont('helvetica', 'normal');
     }
     this.pdf.setFontSize(11);
   }
 
-  // Enhanced color scheme matching the website
+  // Yappyy Brand Color Scheme - Matching exact website theme
   private colors = {
-    primary: [59, 130, 246],     // Blue-500
-    secondary: [99, 102, 241],   // Indigo-500
-    accent: [139, 92, 246],      // Violet-500
-    success: [34, 197, 94],      // Green-500
-    warning: [251, 146, 60],     // Orange-400
-    error: [239, 68, 68],        // Red-500
-    info: [6, 182, 212],         // Cyan-500
+    primary: [59, 130, 246],     // #3B82F6 - Yappyy Logo Blue
+    secondary: [6, 182, 212],    // #06B6D4 - Yappyy Logo Cyan
+    accent: [14, 165, 233],      // #0EA5E9 - Yappyy Logo Sky
+    success: [34, 197, 94],      // Green for positive metrics
+    warning: [245, 158, 11],     // Orange for warnings
+    error: [239, 68, 68],        // Red for errors
+    info: [6, 182, 212],         // Cyan for info
+    yappyy: {
+      blue: [59, 130, 246],      // Primary logo blue
+      cyan: [6, 182, 212],       // Logo cyan accent
+      sky: [14, 165, 233],       // Logo sky accent
+      gradient: [59, 130, 246],  // Start of gradient
+      gradientEnd: [14, 165, 233], // End of gradient
+    },
     text: {
-      primary: [15, 23, 42],     // Slate-900
+      primary: [15, 23, 42],     // Deep navy - matching website
       secondary: [51, 65, 85],   // Slate-700
       muted: [100, 116, 139],    // Slate-500
+      white: [255, 255, 255],    // White text
     },
     background: {
-      primary: [255, 255, 255],  // White
-      secondary: [248, 250, 252], // Slate-50
-      accent: [241, 245, 249],   // Slate-100
+      primary: [255, 255, 255],  // Pure white
+      secondary: [248, 250, 252], // Light blue tint
+      accent: [239, 246, 255],   // Very light blue
+      card: [254, 254, 255],     // Card background with blue tint
     },
     border: {
-      light: [226, 232, 240],    // Slate-200
-      medium: [203, 213, 225],   // Slate-300
+      light: [226, 232, 240],    // Light border
+      medium: [203, 213, 225],   // Medium border
+      accent: [147, 197, 253],   // Blue accent border
     },
   };
 
@@ -58,6 +72,7 @@ export class PDFExport {
   };
 
   private setTextStyle(style: 'h1' | 'h2' | 'h3' | 'h4' | 'body' | 'caption' | 'small'): void {
+    // Always use Poppins font for consistent Yappyy branding
     try {
       this.pdf.setFont('Poppins');
     } catch {
@@ -66,22 +81,22 @@ export class PDFExport {
 
     switch (style) {
       case 'h1':
-        this.pdf.setFontSize(28);
+        this.pdf.setFontSize(32);
         this.pdf.setFont(this.pdf.getFont().fontName, 'bold');
-        this.pdf.setTextColor(this.colors.text.primary[0], this.colors.text.primary[1], this.colors.text.primary[2]);
+        this.pdf.setTextColor(this.colors.yappyy.blue[0], this.colors.yappyy.blue[1], this.colors.yappyy.blue[2]);
         break;
       case 'h2':
-        this.pdf.setFontSize(22);
+        this.pdf.setFontSize(24);
         this.pdf.setFont(this.pdf.getFont().fontName, 'bold');
         this.pdf.setTextColor(this.colors.text.primary[0], this.colors.text.primary[1], this.colors.text.primary[2]);
         break;
       case 'h3':
         this.pdf.setFontSize(18);
         this.pdf.setFont(this.pdf.getFont().fontName, 'bold');
-        this.pdf.setTextColor(this.colors.text.primary[0], this.colors.text.primary[1], this.colors.text.primary[2]);
+        this.pdf.setTextColor(this.colors.yappyy.blue[0], this.colors.yappyy.blue[1], this.colors.yappyy.blue[2]);
         break;
       case 'h4':
-        this.pdf.setFontSize(14);
+        this.pdf.setFontSize(16);
         this.pdf.setFont(this.pdf.getFont().fontName, 'bold');
         this.pdf.setTextColor(this.colors.text.secondary[0], this.colors.text.secondary[1], this.colors.text.secondary[2]);
         break;
@@ -104,42 +119,51 @@ export class PDFExport {
   }
 
   private addHeader(title: string, subtitle?: string): void {
-    // Create gradient header background
-    this.createGradientBackground(0, 0, this.pageWidth, 50);
+    // Create Yappyy branded gradient header background
+    this.createGradientBackground(0, 0, this.pageWidth, 55);
     
-    // Logo/Title with shadow effect
+    // Yappyy logo area with rounded background
+    this.pdf.setFillColor(this.colors.text.white[0], this.colors.text.white[1], this.colors.text.white[2], 0.15);
+    this.pdf.roundedRect(this.spacing.margin - 5, 8, 85, 35, 8, 8, 'F');
+    
+    // Yappyy logo text with shadow effect
     this.pdf.setTextColor(255, 255, 255);
     this.setTextStyle('h1');
     
-    // Add text shadow effect
-    this.pdf.setTextColor(0, 0, 0, 0.1);
-    this.pdf.text('Yappyy', this.spacing.margin + 1, 16);
+    // Add text shadow effect for depth
+    this.pdf.setTextColor(0, 0, 0, 0.2);
+    this.pdf.text('Yappyy', this.spacing.margin + 1, 31);
     this.pdf.setTextColor(255, 255, 255);
-    this.pdf.text('Yappyy', this.spacing.margin, 15);
+    this.pdf.text('Yappyy', this.spacing.margin, 30);
+    
+    // AI Coach tagline
+    this.pdf.setFontSize(10);
+    this.pdf.setTextColor(255, 255, 255, 0.8);
+    this.pdf.text('AI Speech Coach', this.spacing.margin, 40);
+    
+    // Document Title below header
+    this.setTextStyle('h2');
+    this.pdf.setTextColor(this.colors.text.primary[0], this.colors.text.primary[1], this.colors.text.primary[2]);
+    this.pdf.text(title, this.spacing.margin, 70);
     
     // Subtitle
     if (subtitle) {
-      this.setTextStyle('h4');
-      this.pdf.setTextColor(255, 255, 255, 0.9);
-      this.pdf.text(subtitle, this.spacing.margin, 28);
+      this.setTextStyle('body');
+      this.pdf.setTextColor(this.colors.text.secondary[0], this.colors.text.secondary[1], this.colors.text.secondary[2]);
+      this.pdf.text(subtitle, this.spacing.margin, 80);
     }
     
-    // Document Title
-    this.setTextStyle('h2');
-    this.pdf.setTextColor(this.colors.text.primary[0], this.colors.text.primary[1], this.colors.text.primary[2]);
-    this.pdf.text(title, this.spacing.margin, 65);
+    // Add Yappyy brand accent line
+    this.pdf.setDrawColor(this.colors.yappyy.cyan[0], this.colors.yappyy.cyan[1], this.colors.yappyy.cyan[2]);
+    this.pdf.setLineWidth(3);
+    this.pdf.line(this.spacing.margin, subtitle ? 85 : 75, this.spacing.margin + 80, subtitle ? 85 : 75);
     
-    // Add decorative line
-    this.pdf.setDrawColor(this.colors.primary[0], this.colors.primary[1], this.colors.primary[2]);
-    this.pdf.setLineWidth(2);
-    this.pdf.line(this.spacing.margin, 70, this.spacing.margin + 60, 70);
-    
-    this.currentY = 85;
+    this.currentY = subtitle ? 95 : 85;
   }
 
   private createGradientBackground(x: number, y: number, width: number, height: number): void {
-    const fromColor = this.colors.primary;
-    const toColor = this.colors.secondary;
+    const fromColor = this.colors.yappyy.blue;
+    const toColor = this.colors.yappyy.cyan;
     const steps = 20;
     
     for (let i = 0; i < steps; i++) {
@@ -154,19 +178,23 @@ export class PDFExport {
   }
 
   private addSectionHeader(title: string): void {
-    // Section background card
-    const headerHeight = 25;
-    this.pdf.setFillColor(this.colors.background.secondary[0], this.colors.background.secondary[1], this.colors.background.secondary[2]);
-    this.pdf.roundedRect(this.spacing.margin, this.currentY, this.pageWidth - (this.spacing.margin * 2), headerHeight, 8, 8, 'F');
+    // Yappyy branded section background card
+    const headerHeight = 28;
+    this.pdf.setFillColor(this.colors.background.card[0], this.colors.background.card[1], this.colors.background.card[2]);
+    this.pdf.roundedRect(this.spacing.margin, this.currentY, this.pageWidth - (this.spacing.margin * 2), headerHeight, 10, 10, 'F');
     
-    // Left accent border
-    this.pdf.setFillColor(this.colors.primary[0], this.colors.primary[1], this.colors.primary[2]);
-    this.pdf.roundedRect(this.spacing.margin, this.currentY, 4, headerHeight, 4, 4, 'F');
+    // Yappyy blue accent border on left
+    this.pdf.setFillColor(this.colors.yappyy.blue[0], this.colors.yappyy.blue[1], this.colors.yappyy.blue[2]);
+    this.pdf.roundedRect(this.spacing.margin, this.currentY, 5, headerHeight, 5, 5, 'F');
     
-    // Title
+    // Yappyy cyan accent dot on right
+    this.pdf.setFillColor(this.colors.yappyy.cyan[0], this.colors.yappyy.cyan[1], this.colors.yappyy.cyan[2]);
+    this.pdf.circle(this.pageWidth - this.spacing.margin - 15, this.currentY + headerHeight/2, 3, 'F');
+    
+    // Title with Yappyy styling
     this.setTextStyle('h3');
     this.pdf.setTextColor(this.colors.text.primary[0], this.colors.text.primary[1], this.colors.text.primary[2]);
-    this.pdf.text(title, this.spacing.margin + 15, this.currentY + 17);
+    this.pdf.text(title, this.spacing.margin + 18, this.currentY + 19);
     
     this.currentY += headerHeight + this.spacing.gap;
   }
@@ -242,32 +270,38 @@ export class PDFExport {
   private addFooter(text: string = 'Generated by Yappyy AI Speech Coach'): void {
     const footerY = this.pageHeight - 25;
     
-    // Footer background
-    this.pdf.setFillColor(this.colors.background.secondary[0], this.colors.background.secondary[1], this.colors.background.secondary[2]);
-    this.pdf.rect(0, footerY - 5, this.pageWidth, 30, 'F');
+    // Yappyy branded footer background with subtle gradient
+    this.pdf.setFillColor(this.colors.background.accent[0], this.colors.background.accent[1], this.colors.background.accent[2]);
+    this.pdf.rect(0, footerY - 8, this.pageWidth, 35, 'F');
     
-    // Footer line
-    this.pdf.setDrawColor(this.colors.border.medium[0], this.colors.border.medium[1], this.colors.border.medium[2]);
-    this.pdf.setLineWidth(0.5);
-    this.pdf.line(this.spacing.margin, footerY - 5, this.pageWidth - this.spacing.margin, footerY - 5);
+    // Yappyy brand accent line
+    this.pdf.setDrawColor(this.colors.yappyy.blue[0], this.colors.yappyy.blue[1], this.colors.yappyy.blue[2]);
+    this.pdf.setLineWidth(2);
+    this.pdf.line(this.spacing.margin, footerY - 8, this.pageWidth - this.spacing.margin, footerY - 8);
     
-    // Footer text
+    // Footer text with Yappyy branding
     this.setTextStyle('small');
-    this.pdf.setTextColor(this.colors.text.muted[0], this.colors.text.muted[1], this.colors.text.muted[2]);
-    this.pdf.text(text, this.spacing.margin, footerY + 5);
+    this.pdf.setTextColor(this.colors.yappyy.blue[0], this.colors.yappyy.blue[1], this.colors.yappyy.blue[2]);
+    this.pdf.text('Powered by Yappyy AI Speech Coach', this.spacing.margin, footerY + 5);
     
-    // Date
+    // Professional website reference
+    this.pdf.setTextColor(this.colors.text.muted[0], this.colors.text.muted[1], this.colors.text.muted[2]);
+    this.pdf.text('yappyy.com', this.spacing.margin, footerY + 12);
+    
+    // Date with Yappyy styling
     const date = new Date().toLocaleDateString('en-US', { 
       year: 'numeric', 
       month: 'long', 
       day: 'numeric' 
     });
     const dateWidth = this.pdf.getTextWidth(date);
+    this.pdf.setTextColor(this.colors.text.secondary[0], this.colors.text.secondary[1], this.colors.text.secondary[2]);
     this.pdf.text(date, this.pageWidth - this.spacing.margin - dateWidth, footerY + 5);
     
-    // Page number
+    // Page number with accent
     const pageText = `Page ${this.pdf.getCurrentPageInfo().pageNumber}`;
     const pageWidth = this.pdf.getTextWidth(pageText);
+    this.pdf.setTextColor(this.colors.yappyy.cyan[0], this.colors.yappyy.cyan[1], this.colors.yappyy.cyan[2]);
     this.pdf.text(pageText, (this.pageWidth - pageWidth) / 2, footerY + 5);
   }
 
