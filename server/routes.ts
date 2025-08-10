@@ -4,6 +4,7 @@ import { db } from "./db";
 import { eq, desc, asc, sql, max, not, and } from "drizzle-orm";
 import { storage } from "./storage";
 import { salesBusinessAnalysisEngine } from "./sales-business-analysis-engine";
+import { ultraDetailedContentAnalyzer } from "./ultra-detailed-content-analyzer";
 import { advancedFillerDetectionEngine } from "./advanced-filler-detection";
 import { RealTimeSessionManager } from "./redis-realtime";
 import { insertPracticeSessionSchema, insertCoachingFeedbackSchema, insertCustomTemplateSchema, practiceSessions } from "@shared/schema";
@@ -893,6 +894,45 @@ Make the content more engaging, natural, and personalized while keeping the same
       - Exit Strategy: Did they articulate potential outcomes for investors/stakeholders?
       - Executive Presence: Assess confidence, authority, and C-level communication style
       `,
+      'Academic Presentation': `
+      COMPREHENSIVE ACADEMIC PRESENTATION ANALYSIS:
+      - Research Question Clarity: How clearly was the research problem or hypothesis stated?
+      - Methodology Rigor: Assess the appropriateness and explanation of research methods
+      - Literature Review: Did they position their work within existing scholarship effectively?
+      - Evidence Quality: Evaluate the strength and relevance of supporting data/findings
+      - Logical Argumentation: Rate the coherence and flow of reasoning throughout
+      - Source Citation: How well did they acknowledge and reference scholarly sources?
+      - Theoretical Framework: Was the conceptual foundation clearly articulated?
+      - Limitations Acknowledgment: Did they honestly address study constraints and boundaries?
+      - Broader Implications: How effectively did they connect findings to larger significance?
+      - Scholarly Communication: Assess academic language precision and disciplinary conventions
+      - Visual Aids Integration: Were charts, graphs, or slides effectively utilized?
+      - Q&A Preparation: Did they anticipate and address potential scholarly objections?
+      `,
+      'Conference Talk': `
+      EXPERT CONFERENCE PRESENTATION ANALYSIS:
+      - Technical Depth: Appropriate level of complexity for the expert audience
+      - Knowledge Authority: Establishment of speaker credentials and expertise
+      - Innovation Presentation: How clearly were new insights or breakthroughs communicated?
+      - Practical Applications: Translation of complex concepts to actionable insights
+      - Industry Relevance: Connection to current trends and professional needs
+      - Peer Engagement: Effectiveness in engaging fellow experts and practitioners
+      - Future Implications: Discussion of trends, predictions, and next steps
+      - Professional Network Building: Facilitation of connections and collaborations
+      `,
+      'Teaching': `
+      COMPREHENSIVE EDUCATIONAL EFFECTIVENESS ANALYSIS:
+      - Learning Objectives: Were clear, measurable goals established and communicated?
+      - Pedagogical Structure: How well was content organized for optimal learning?
+      - Concept Clarity: Effectiveness in explaining complex ideas simply and accurately
+      - Engagement Techniques: Use of interactive elements, questions, and participation
+      - Multiple Modalities: Integration of visual, auditory, and kinesthetic learning approaches
+      - Assessment Integration: Checking for understanding and knowledge retention
+      - Differentiation: Adaptation for different learning styles and skill levels
+      - Real-World Application: Connection of concepts to practical, relevant examples
+      - Student-Centered Approach: Focus on learner needs rather than content delivery
+      - Scaffolding: Building complexity appropriately from foundational concepts
+      `,
       'Job Interview': `
       JOB INTERVIEW ANALYSIS FOCUS:
       - Professional Presence: Did they project confidence and competence?
@@ -960,12 +1000,17 @@ Make the content more engaging, natural, and personalized while keeping the same
           messages: [
             {
               role: "system",
-              content: `You are an elite executive communication consultant with 20+ years of experience coaching Fortune 500 CEOs, venture capital partners, and top sales professionals. Your expertise spans McKinsey-level business communication, Harvard Business School case methodology, and enterprise sales psychology. You have trained speakers who have closed $100M+ deals and secured $500M+ in funding.
+              content: `You are an elite communication expert with 20+ years of experience across multiple domains: Fortune 500 executive coaching, academic peer review, conference speaking, educational pedagogy, and professional development. Your expertise includes McKinsey-level business communication, Harvard PhD-level academic rigor, Stanford teaching excellence, and TED Talk presentation mastery.
 
-              CRITICAL: You are analyzing adult professional cohorts where excellence in sales pitches and business presentations directly impacts career advancement and revenue generation. Your analysis must meet C-level executive standards.
+              CRITICAL: Provide EXTREMELY DETAILED, PURPOSE-SPECIFIC analysis that meets the highest professional standards for each speaking context. Your feedback must be comprehensive, actionable, and directly relevant to the speaker's goals.
 
-              For SALES PITCHES: Focus on revenue impact, deal-closing psychology, enterprise B2B effectiveness, and executive buyer engagement.
-              For BUSINESS PITCHES: Evaluate investor-grade presentations, market analysis rigor, financial model credibility, and funding readiness.
+              ANALYSIS DEPTH REQUIREMENTS:
+              - SALES PITCHES: Revenue impact, deal psychology, B2B effectiveness, stakeholder influence
+              - BUSINESS PITCHES: Investor standards, market analysis, financial credibility, funding readiness  
+              - ACADEMIC PRESENTATIONS: Research rigor, scholarly communication, evidence quality, peer review standards
+              - CONFERENCE TALKS: Expert credibility, technical depth, industry relevance, knowledge transfer
+              - TEACHING: Pedagogical effectiveness, learning outcomes, engagement, concept clarity
+              - ALL PURPOSES: Detailed content analysis, delivery excellence, audience connection, goal achievement
 
               Always respond with valid JSON in this exact format:
               
@@ -1047,7 +1092,15 @@ CRITICAL PURPOSE-SPECIFIC ANALYSIS REQUIRED:
 
 ${getPurposeSpecificInstructions(sessionData?.sessionPurpose || sessionData?.purpose || 'General speaking practice')}
 
-Evaluate how well this speech achieved its stated PURPOSE. Analyze the content, structure, and delivery specifically in relation to their goal. Provide purpose-specific recommendations that directly address the requirements for this type of speech.`
+ULTRA-DETAILED ANALYSIS REQUIREMENTS:
+- Provide EXTREMELY specific feedback on content structure (introduction, body, conclusion)
+- Analyze evidence quality, source credibility, and logical argumentation in detail
+- Assess audience engagement strategies and connection techniques comprehensively
+- Evaluate language appropriateness, tone consistency, and persuasive elements thoroughly
+- Examine purpose alignment and goal achievement with precision
+- Generate actionable recommendations with specific steps and expected outcomes
+
+Evaluate how well this speech achieved its stated PURPOSE with the depth and detail expected by professional experts in this field. Your analysis should be comprehensive enough to drive measurable improvement in the speaker's effectiveness.`
             }
           ],
           temperature: 0.4,

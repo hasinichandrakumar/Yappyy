@@ -94,12 +94,14 @@ function getPurposeDescription(purpose: string): string {
   const descriptions = {
     'Sales Pitch': 'AI analyzes ROI articulation, pain point targeting, objection handling, and closing strength for B2B sales',
     'Business Pitch': 'AI evaluates market analysis, business model clarity, competitive advantage, and executive presence',
-    'Job Interview': 'AI assesses professional presence, STAR method usage, and cultural fit demonstration',
-    'Presentation': 'AI reviews executive communication, data usage, stakeholder engagement, and corporate messaging',
+    'Academic Presentation': 'AI assesses research methodology, evidence quality, logical argumentation, and scholarly communication',
+    'Job Interview': 'AI evaluates professional presence, STAR method usage, and cultural fit demonstration',
+    'Conference Talk': 'AI analyzes technical depth, expert credibility, audience engagement, and knowledge transfer',
     'Public Speaking': 'AI examines thought leadership, audience connection, and inspirational impact',
+    'Teaching': 'AI reviews pedagogical effectiveness, concept clarity, engagement techniques, and learning outcomes',
     'Negotiation': 'AI analyzes persuasion tactics, concession strategy, and deal-closing effectiveness'
   };
-  return descriptions[purpose] || 'AI will provide tailored feedback based on your specific speaking goal';
+  return descriptions[purpose] || 'AI will provide comprehensive, detailed feedback tailored to your specific speaking goal';
 }
 
 // Helper function to get purpose-specific coaching tips
@@ -107,12 +109,14 @@ function getPurposeCoachingTips(purpose: string): string {
   const tips = {
     'Sales Pitch': 'Lead with specific ROI metrics, identify precise pain points, use case studies with numbers, create time-based urgency, and end with clear next steps.',
     'Business Pitch': 'Quantify market size, demonstrate competitive moats, show realistic financials, address risks proactively, and articulate clear investor returns.',
+    'Academic Presentation': 'Begin with clear research question, present methodology rigorously, cite authoritative sources, acknowledge limitations, and connect to broader implications.',
     'Job Interview': 'Use the STAR method with quantified results, demonstrate cultural alignment, show growth mindset, and ask strategic questions.',
-    'Presentation': 'Start with business impact, structure with executive summary, support with data, anticipate questions, and provide actionable recommendations.',
+    'Conference Talk': 'Establish expert credentials early, balance technical depth with accessibility, use visual aids effectively, and provide actionable takeaways.',
     'Public Speaking': 'Establish thought leadership early, use powerful stories with business relevance, connect to audience goals, and inspire specific actions.',
+    'Teaching': 'Structure with clear learning objectives, use multiple modalities, check for understanding frequently, and provide concrete examples.',
     'Negotiation': 'Identify mutual value creation, use anchoring strategies, prepare multiple scenarios, understand their constraints, and close with win-win outcomes.'
   };
-  return tips[purpose] || 'Structure content strategically, use data-driven arguments, and communicate with executive presence.';
+  return tips[purpose] || 'Structure content strategically, use evidence-based arguments, and communicate with clarity and authority.';
 }
 
 // Helper function for purpose-specific live feedback during recording
@@ -136,6 +140,25 @@ function getPurposeSpecificLiveFeedback(purpose: string, transcript: string, met
       { condition: () => !transcript.toLowerCase().includes('revenue') && !transcript.toLowerCase().includes('model'), feedback: 'Explain your business model clearly', actionable: 'Detail: "We charge $X per user monthly with 85% gross margins"' },
       { condition: () => !transcript.toLowerCase().includes('team') && !transcript.toLowerCase().includes('experience'), feedback: 'Establish team credibility', actionable: 'Highlight: "Our team has 20+ years at Google, McKinsey building similar solutions"' },
       { condition: () => wordCount > 120 && !transcript.toLowerCase().includes('funding') && !transcript.toLowerCase().includes('investment'), feedback: 'Specify investment ask and use', actionable: 'State: "Seeking $X to achieve Y milestones and reach Z revenue in 18 months"' }
+    ],
+    'Academic Presentation': [
+      { condition: () => !transcript.toLowerCase().includes('research') && !transcript.toLowerCase().includes('study'), feedback: 'Clearly state your research question or hypothesis', actionable: 'Begin with: "This study investigates..." or "Our research question is..."' },
+      { condition: () => !transcript.toLowerCase().includes('method') && !transcript.toLowerCase().includes('approach'), feedback: 'Explain your research methodology', actionable: 'Detail your data collection and analysis methods clearly' },
+      { condition: () => !transcript.toLowerCase().includes('literature') && !transcript.toLowerCase().includes('previous'), feedback: 'Position within existing scholarship', actionable: 'Reference: "Building on Smith\'s 2020 findings..." or "Previous research shows..."' },
+      { condition: () => !transcript.toLowerCase().includes('significant') && !transcript.toLowerCase().includes('implications'), feedback: 'Discuss broader significance', actionable: 'Explain: "These findings contribute to..." or "The implications for the field are..."' },
+      { condition: () => !transcript.toLowerCase().includes('limitation') && wordCount > 100, feedback: 'Acknowledge study limitations', actionable: 'State: "While this study has limitations in..." to show scholarly rigor' }
+    ],
+    'Conference Talk': [
+      { condition: () => !transcript.toLowerCase().includes('experience') && !transcript.toLowerCase().includes('expertise'), feedback: 'Establish your professional credibility', actionable: 'Share: "In my 15 years working on X..." or "Having led Y projects..."' },
+      { condition: () => !transcript.toLowerCase().includes('trend') && !transcript.toLowerCase().includes('future'), feedback: 'Connect to industry trends', actionable: 'Discuss: "This aligns with the industry trend toward..." or "Looking ahead..."' },
+      { condition: () => !transcript.toLowerCase().includes('practical') && !transcript.toLowerCase().includes('application'), feedback: 'Provide actionable takeaways', actionable: 'Offer: "You can implement this by..." or "Three practical steps are..."' },
+      { condition: () => wordCount > 80 && !transcript.toLowerCase().includes('question'), feedback: 'Engage the expert audience', actionable: 'Ask: "How many of you have encountered..." or invite discussion' }
+    ],
+    'Teaching': [
+      { condition: () => !transcript.toLowerCase().includes('learn') && !transcript.toLowerCase().includes('understand'), feedback: 'State clear learning objectives', actionable: 'Begin: "By the end of this lesson, you will be able to..." or "Today we\'ll learn..."' },
+      { condition: () => !transcript.toLowerCase().includes('example') && !transcript.toLowerCase().includes('instance'), feedback: 'Use concrete examples', actionable: 'Illustrate concepts with: "For example..." or "Consider this real-world case..."' },
+      { condition: () => !transcript.toLowerCase().includes('question') && wordCount > 60, feedback: 'Check for understanding', actionable: 'Ask: "Does this make sense?" or "Can you think of another example?"' },
+      { condition: () => !transcript.toLowerCase().includes('practice') && !transcript.toLowerCase().includes('apply'), feedback: 'Encourage application', actionable: 'Suggest: "Now try this yourself..." or "Practice by..."' }
     ],
     'Job Interview': [
       { condition: () => metrics.emotion?.confidence < 70, feedback: 'Project more confidence in your delivery', actionable: 'Speak with conviction and maintain steady eye contact' },
@@ -1343,9 +1366,11 @@ export default function EnhancedPracticePage() {
                         {[
                           { label: "Sales Pitch", desc: "B2B sales & conversion" },
                           { label: "Business Pitch", desc: "Investor & stakeholder" },
+                          { label: "Academic Presentation", desc: "Research & scholarly" },
                           { label: "Job Interview", desc: "Professional presentation" },
-                          { label: "Presentation", desc: "Corporate & executive" },
+                          { label: "Conference Talk", desc: "Technical & expert" },
                           { label: "Public Speaking", desc: "Leadership & keynote" },
+                          { label: "Teaching", desc: "Educational & instructional" },
                           { label: "Negotiation", desc: "Deal closing & persuasion" }
                         ].map((preset) => (
                           <Button
