@@ -1005,7 +1005,7 @@ Make the content more engaging, natural, and personalized while keeping the same
       `
     };
     
-    return purposeInstructions[purpose] || `
+    return purposeInstructions[purpose as keyof typeof purposeInstructions] || `
     GENERAL SPEAKING ANALYSIS FOCUS:
     - Communication Effectiveness: How clearly did they convey their message?
     - Audience Engagement: Did they maintain listener interest and attention?
@@ -1890,7 +1890,7 @@ Evaluate how well this speech achieved its stated PURPOSE with the depth and det
       
       if (session.facialAnalysis) {
         try {
-          const facialData = JSON.parse(session.facialAnalysis);
+          const facialData = JSON.parse(session.facialAnalysis as string);
           console.log(`🎭 Integrating saved facial analysis for session ${id}:`, facialData);
           
           // Enhance session with computer vision performance metrics for the performance breakdown
@@ -1898,10 +1898,12 @@ Evaluate how well this speech achieved its stated PURPOSE with the depth and det
             ...session,
             facialAnalysis: facialData,
             // Only use computer vision data if it has authentic values (> 0)
-            confidenceLevel: (session as any).confidenceLevel || (facialData?.emotionalExpression?.confidence > 0 ? facialData.emotionalExpression.confidence : 0),
-            engagementLevel: (session as any).engagementLevel || (facialData?.emotionalExpression?.engagement > 0 ? facialData.emotionalExpression.engagement : 0),
+            // Add computed fields that extend the session object for UI compatibility
+            ...session,
+            confidenceLevel: session.confidenceScore || (facialData?.emotionalExpression?.confidence > 0 ? facialData.emotionalExpression.confidence : 0),
+            engagementLevel: session.overallScore || (facialData?.emotionalExpression?.engagement > 0 ? facialData.emotionalExpression.engagement : 0),
             eyeContactScore: session.eyeContactScore || (facialData?.communicationSignals?.eyeContactQuality > 0 ? facialData.communicationSignals.eyeContactQuality : 0),
-            overallPerformance: session.overallScore || calculateSessionOverallScore(session as any, facialData),
+            overallPerformance: session.overallScore || calculateSessionOverallScore(session, facialData),
             // Only use additional metrics if they contain real data
             clarityScore: session.clarityScore || (facialData?.communicationSignals?.gazeFocus > 0 ? facialData.communicationSignals.gazeFocus : 0),
             volumeConsistency: session.volumeConsistency || 0 // Only show real data, no defaults
@@ -2031,7 +2033,7 @@ Evaluate how well this speech achieved its stated PURPOSE with the depth and det
         paceScore: metrics?.pace || voiceMetrics?.pace || 0,
         eyeContactScore: (metrics?.eyeContact || facialAnalysis?.communicationSignals?.eyeContactQuality || 0).toString(),
         gestureScore: metrics?.gesture || facialAnalysis?.bodyLanguage?.gestureNaturalness || 0,
-        overallScore: calculateOverallScore(metrics, facialAnalysis, voiceMetrics),
+        overallScore: 0, // Will be calculated after the helper function is defined
         fillerWordCount: metrics?.fillerWordCount || 0,
         wordsPerMinute: metrics?.wordsPerMinute || 0,
         // Legacy required fields with defaults  
@@ -2045,18 +2047,8 @@ Evaluate how well this speech achieved its stated PURPOSE with the depth and det
         voiceMetrics: voiceMetrics ? JSON.stringify(voiceMetrics) : null
       };
 
-      const session = await storage.createPracticeSession(sessionData);
-      
-      // Save persistent coaching analytics for this comprehensive session
-      try {
-        await persistentAIAnalytics.saveSessionAnalytics(session);
-        console.log('💾 Persistent analytics saved for comprehensive session:', session.id);
-      } catch (analyticsError) {
-        console.error('⚠️ Failed to save persistent analytics (session still saved):', analyticsError);
-      }
-      
-      // Enhanced helper function for comprehensive metric extraction including computer vision
-      function calculateOverallScore(metrics: any, facialAnalysis: any, voiceMetrics: any): number {
+      // Calculate overall score with helper function
+      const calculateOverallScoreForSession = (metrics: any, facialAnalysis: any, voiceMetrics: any): number => {
         const scores = [];
         
         // Voice metrics
@@ -2070,41 +2062,19 @@ Evaluate how well this speech achieved its stated PURPOSE with the depth and det
         
         // Return average of available scores or 0 if none
         return scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
-      }
+      };
 
-      function extractMetric(metrics: any, key: string, defaultValue: number): number {
-        if (!metrics) return defaultValue;
-        
-        const possiblePaths = [
-          metrics[key],
-          metrics.voice?.[key],
-          metrics.bodyLanguage?.[key],
-          metrics[key + 'Score'],
-          metrics[key + 'Percentage']
-        ];
-        
-        for (const value of possiblePaths) {
-          if (typeof value === 'number' && !isNaN(value)) {
-            return Math.max(0, Math.min(100, value));
-          }
-        }
-        return defaultValue;
-      }
+      // Update overall score in session data
+      sessionData.overallScore = calculateOverallScoreForSession(metrics, facialAnalysis, voiceMetrics);
 
-      function calculateOverallScoreOld(metrics: any): number {
-        if (!metrics) return 0;
-        
-        const scores = [
-          extractMetric(metrics, 'confidence', 0),
-          extractMetric(metrics, 'clarity', 0),
-          extractMetric(metrics, 'eyeContact', 0),
-          extractMetric(metrics, 'engagement', 0)
-        ];
-        
-        const validScores = scores.filter(score => score > 0);
-        return validScores.length > 0 
-          ? Math.round(validScores.reduce((sum, score) => sum + score, 0) / validScores.length)
-          : 0;
+      const session = await storage.createPracticeSession(sessionData);
+      
+      // Save persistent coaching analytics for this comprehensive session
+      try {
+        await persistentAIAnalytics.saveSessionAnalytics(session);
+        console.log('💾 Persistent analytics saved for comprehensive session:', session.id);
+      } catch (analyticsError) {
+        console.error('⚠️ Failed to save persistent analytics (session still saved):', analyticsError);
       }
       
       console.log('✅ Session saved with video and transcript:', session.id);
@@ -2251,12 +2221,13 @@ Evaluate how well this speech achieved its stated PURPOSE with the depth and det
 
   // Comprehensive AI coaching analysis
   app.post("/api/ai-coaching-comprehensive",  async (req: any, res) => {
-    try {
-      const { session, purpose, userProgress, previousSessions } = req.body;
+    const { session, purpose, userProgress, previousSessions } = req.body;
 
-      if (!session) {
-        return res.status(400).json({ message: "Session data is required" });
-      }
+    if (!session) {
+      return res.status(400).json({ message: "Session data is required" });
+    }
+
+    try {
 
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -2330,7 +2301,7 @@ Be specific, actionable, and encouraging while maintaining professional coaching
           console.log('🔄 Rate limit hit, providing comprehensive fallback analysis based on session data...');
           
           // Extract ONLY authentic metrics from session data - NO DEFAULTS
-          const facialData = session.facialAnalysis ? JSON.parse(session.facialAnalysis) : null;
+          const facialData = session.facialAnalysis ? JSON.parse(session.facialAnalysis as string) : null;
           
           const confidenceScore = session.confidenceScore || facialData?.emotionalExpression?.confidence || 0;
           const voiceClarity = session.voiceClarity || session.clarityScore || 0;
@@ -3619,7 +3590,7 @@ SPEAKER PROFILE:
 - Total Sessions: ${sessionCount}
 - Total Practice Time: ${Math.round(performanceMetrics.totalDuration / 60)} minutes
 - Average Session Length: ${sessionCount > 0 ? Math.round(performanceMetrics.totalDuration / sessionCount / 60) : 0} minutes
-- Session Types: ${[...new Set(performanceMetrics.sessionTypes)].join(', ')}
+- Session Types: ${Array.from(new Set(performanceMetrics.sessionTypes)).join(', ')}
 
 NEURAL NETWORK CONTEXT:
 ${neuralContext ? `
@@ -7284,26 +7255,26 @@ Respond with detailed analysis in JSON format:
       
       // Visual learners use descriptive language
       const visualWords = ['see', 'look', 'appear', 'show', 'display', 'visual', 'picture'];
-      const visualCount = words.filter(word => visualWords.includes(word)).length;
+      const visualCount = words.filter((word: string) => visualWords.includes(word)).length;
       styles.visual += visualCount;
 
       // Auditory learners focus on sound and rhythm
       const auditoryWords = ['hear', 'sound', 'listen', 'voice', 'speak', 'talk', 'rhythm'];
-      const auditoryCount = words.filter(word => auditoryWords.includes(word)).length;
+      const auditoryCount = words.filter((word: string) => auditoryWords.includes(word)).length;
       styles.auditory += auditoryCount;
 
       // Kinesthetic learners use action words
       const kinestheticWords = ['feel', 'touch', 'move', 'action', 'experience', 'hands-on'];
-      const kinestheticCount = words.filter(word => kinestheticWords.includes(word)).length;
+      const kinestheticCount = words.filter((word: string) => kinestheticWords.includes(word)).length;
       styles.kinesthetic += kinestheticCount;
 
       // Reading learners use structured language
       const readingWords = ['read', 'study', 'learn', 'understand', 'analyze', 'research'];
-      const readingCount = words.filter(word => readingWords.includes(word)).length;
+      const readingCount = words.filter((word: string) => readingWords.includes(word)).length;
       styles.reading += readingCount;
     });
 
-    const maxStyle = Object.entries(styles).reduce((a, b) => styles[a as keyof typeof styles] > styles[b[0] as keyof typeof styles] ? a : b[0]);
+    const maxStyle = Object.entries(styles).reduce((a, b) => styles[a as keyof typeof styles] > styles[b[0] as keyof typeof styles] ? a : b[0]) as keyof typeof styles;
     return maxStyle;
   }
 

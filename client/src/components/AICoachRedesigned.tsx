@@ -248,7 +248,7 @@ const AIInsightsAnalytics = ({ userId }: { userId?: string }) => {
   };
   const connectionInsights = generateConnectionInsights();
   
-  // Calculate neural network-driven trends from actual session data
+
   const calculateNeuralTrend = (metric: string) => {
     if (sessions.length === 0) return { value: 0, trend: 'stable', change: '0%', confidence: 0 };
     
@@ -2107,7 +2107,7 @@ export default function AICoachRedesigned() {
               </div>
             </div>
             <div className="p-6 flex-1 overflow-y-auto max-h-[630px]">
-              <DeepLearningAnalytics userId={(user as any)?.id || 'demo'} />
+              <AIInsightsAnalytics userId={(user as any)?.id || 'demo'} />
             </div>
           </div>
         </div>
