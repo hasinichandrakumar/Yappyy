@@ -9,6 +9,7 @@ import { storage } from "./storage";
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 // Get the current domain from the request or environment
+const DEFAULT_PORT = process.env.PORT || '3000';
 const getCurrentDomain = (req?: any) => {
   // Try to get domain from request
   if (req?.get('host')) {
@@ -27,7 +28,7 @@ const getCurrentDomain = (req?: any) => {
     return `https://${process.env.REPLIT_DEV_DOMAIN}`;
   }
   
-  return 'http://localhost:5000';
+  return `http://localhost:${DEFAULT_PORT}`;
 };
 
 // Get appropriate callback URL based on environment
@@ -49,7 +50,7 @@ const getCallbackURL = (req?: any) => {
     return `https://${domains[0]}/auth/google/callback`;
   }
   
-  return 'http://localhost:5000/auth/google/callback';
+  return `http://localhost:${DEFAULT_PORT}/auth/google/callback`;
 };
 
 export function getSession() {

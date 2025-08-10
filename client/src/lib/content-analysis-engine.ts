@@ -102,11 +102,6 @@ export class ContentAnalysisEngine {
       const coherenceAnalysis = this.analyzeCoherence(transcript);
       const audienceAlignmentAnalysis = this.analyzeAudienceAlignment(transcript, purpose);
       const purposeAlignmentAnalysis = this.analyzePurposeAlignment(transcript, purpose);
-      this.analyzePersuasiveness(transcript, purpose),
-      this.analyzeCoherence(transcript),
-      this.analyzeAudienceAlignment(transcript, purpose),
-      this.analyzePurposeAlignment(transcript, purpose)
-    ]);
     
     // Calculate overall score
     const overallScore = Math.round(

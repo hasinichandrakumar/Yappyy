@@ -114,17 +114,17 @@ export class EnhancedContentAnalyzer {
     template: any,
     duration: number
   ): string {
-    return \`
-Analyze this speech transcript in the context of a \${purpose} presentation:
+    return `
+Analyze this speech transcript in the context of a ${purpose} presentation:
 
 TRANSCRIPT:
-\${transcript}
+${transcript}
 
 CONTEXT:
-- Purpose: \${purpose}
-- Duration: \${duration} seconds
-- Key Elements Expected: \${template.keyElements.join(', ')}
-- Main Objectives: \${template.objectives.join(', ')}
+- Purpose: ${purpose}
+- Duration: ${duration} seconds
+- Key Elements Expected: ${template.keyElements.join(', ')}
+- Main Objectives: ${template.objectives.join(', ')}
 
 Please provide a comprehensive analysis including:
 
@@ -161,11 +161,11 @@ Please provide a comprehensive analysis including:
 - Specific suggestions for improvement
 
 8. Purpose-Specific Analysis
-- Analysis based on the specific purpose (\${purpose})
+- Analysis based on the specific purpose (${purpose})
 - How well does it meet the objectives?
 
 Format the response as a structured JSON object with scores and detailed feedback.
-\`;
+`;
   }
 
   private async getAIAnalysis(prompt: string) {

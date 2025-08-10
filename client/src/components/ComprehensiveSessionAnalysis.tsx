@@ -36,7 +36,7 @@ export default function ComprehensiveSessionAnalysis({ selectedSessionId }: Sess
 
   const fetchSessionData = async () => {
     try {
-      const response = await fetch(\`/api/sessions/\${selectedSessionId}\`);
+      const response = await fetch(`/api/sessions/${selectedSessionId}`);
       if (response.ok) {
         const data = await response.json();
         setSelectedSession(data);

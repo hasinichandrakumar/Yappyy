@@ -288,8 +288,15 @@ export default function BodyLanguageAnalyzer() {
           </CardContent>
         </Card>
 
-
-
+        {/* Head & Body Movement */}
+        <Card className="bg-surface rounded-xl shadow-sm border border-gray-200">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Activity className="w-5 h-5 text-purple-600" />
+              <span>Head & Body Movement</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium">Head Movement</span>
