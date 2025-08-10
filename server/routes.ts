@@ -863,6 +863,66 @@ Make the content more engaging, natural, and personalized while keeping the same
 
 
 
+  // Purpose-specific analysis instructions
+  function getPurposeSpecificInstructions(purpose) {
+    const purposeInstructions = {
+      'Sales Pitch': `
+      SALES PITCH ANALYSIS FOCUS:
+      - Value Proposition: Did they clearly articulate the value and benefits?
+      - Problem-Solution Fit: How well did they identify customer pain points?
+      - Credibility Building: Were testimonials, data, or proof points effectively used?
+      - Call to Action: Was the closing compelling and clear about next steps?
+      - Objection Handling: Did they anticipate and address potential concerns?
+      - Persuasion Techniques: Evaluate use of urgency, scarcity, social proof
+      `,
+      'Job Interview': `
+      JOB INTERVIEW ANALYSIS FOCUS:
+      - Professional Presence: Did they project confidence and competence?
+      - Experience Articulation: How clearly did they explain their background?
+      - Company Knowledge: Did they demonstrate research and genuine interest?
+      - Question Responses: Were answers specific, relevant, and well-structured?
+      - Cultural Fit: Did they convey alignment with company values?
+      - Questions Asked: Did they ask thoughtful, engaging questions?
+      `,
+      'Presentation': `
+      PRESENTATION ANALYSIS FOCUS:
+      - Structure & Flow: Was the presentation logically organized?
+      - Audience Engagement: Did they maintain interest and attention?
+      - Key Messages: Were main points clear and memorable?
+      - Supporting Evidence: Were facts, data, and examples effectively used?
+      - Visual Communication: How well did they complement any visual aids?
+      - Conclusion Impact: Did they end with a strong, memorable closing?
+      `,
+      'Wedding Speech': `
+      WEDDING SPEECH ANALYSIS FOCUS:
+      - Emotional Connection: Did they create genuine moments of joy and emotion?
+      - Personal Stories: Were anecdotes meaningful and appropriate?
+      - Audience Awareness: Did they consider all attendees (family, friends)?
+      - Celebratory Tone: Was the speech uplifting and positive?
+      - Length & Pacing: Was it appropriately timed for the occasion?
+      - Memorable Moments: Did they create lasting, heartwarming memories?
+      `,
+      'Public Speaking': `
+      PUBLIC SPEAKING ANALYSIS FOCUS:
+      - Message Clarity: Was the core message easy to understand and remember?
+      - Audience Connection: Did they engage and resonate with listeners?
+      - Credibility Establishment: Did they position themselves as knowledgeable?
+      - Persuasive Elements: Were arguments logical and compelling?
+      - Stage Presence: Did they command attention and respect?
+      - Impact & Inspiration: Did they motivate or influence the audience?
+      `
+    };
+    
+    return purposeInstructions[purpose] || `
+    GENERAL SPEAKING ANALYSIS FOCUS:
+    - Communication Effectiveness: How clearly did they convey their message?
+    - Audience Engagement: Did they maintain listener interest and attention?
+    - Content Organization: Was the speech well-structured and logical?
+    - Delivery Quality: Were voice, pace, and presence appropriate?
+    - Goal Achievement: Did they accomplish their speaking objectives?
+    `;
+  }
+
   // Generate AI insights for session analysis
   app.post('/api/generate-session-insights', async (req, res) => {
     try {
@@ -925,7 +985,7 @@ Make the content more engaging, natural, and personalized while keeping the same
             },
             {
               role: "user",
-              content: `Analyze this speaking session with FOCUS ON THE SESSION PURPOSE and provide comprehensive purpose-tailored insights:
+              content: `Analyze this speaking session with EXPERT FOCUS ON THE SPECIFIC PURPOSE and provide comprehensive purpose-tailored insights:
 
 SESSION PURPOSE: "${sessionData?.sessionPurpose || sessionData?.purpose || 'General speaking practice'}"
 
@@ -958,7 +1018,11 @@ FACIAL ANALYSIS DATA:
 - Professionalism: ${sessionData.facialAnalysis.overallPresence?.professionalism || 0}%
 ` : ''}
 
-CRITICAL: Evaluate how well this speech achieved its stated PURPOSE. Analyze the content, structure, and delivery specifically in relation to their goal. Provide purpose-specific recommendations and assess whether the content was appropriate for this objective.`
+CRITICAL PURPOSE-SPECIFIC ANALYSIS REQUIRED:
+
+${getPurposeSpecificInstructions(sessionData?.sessionPurpose || sessionData?.purpose || 'General speaking practice')}
+
+Evaluate how well this speech achieved its stated PURPOSE. Analyze the content, structure, and delivery specifically in relation to their goal. Provide purpose-specific recommendations that directly address the requirements for this type of speech.`
             }
           ],
           temperature: 0.4,

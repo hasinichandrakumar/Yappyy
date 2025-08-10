@@ -26,6 +26,7 @@ import { GamificationEngine, Achievement, UserProgress, AIPersonality } from '@/
 import { fastWPMCalculator, WPMData } from '@/lib/fast-wpm-calculator';
 import { enhancedEyeTracking } from '@/lib/enhanced-eye-tracking';
 import { contentAnalysisEngine, ContentAnalysisResult, SpeechPurpose } from '@/lib/content-analysis-engine-fixed';
+
 import { useDeepLearningCoach } from '@/hooks/useDeepLearningCoach';
 import { SessionDataViewer } from '@/components/SessionDataViewer';
 import { createVocalFillerDetector, VocalFillerResult } from '@/lib/vocal-filler-detector';
@@ -86,6 +87,86 @@ interface ComprehensiveMetrics {
     strengths: string[];
     nextSteps: string[];
   };
+}
+
+// Helper function to get purpose description
+function getPurposeDescription(purpose: string): string {
+  const descriptions = {
+    'Sales Pitch': 'AI will analyze your value proposition, objection handling, and call-to-action effectiveness',
+    'Job Interview': 'AI will evaluate your professional presence, answer structure, and cultural fit demonstration',
+    'Presentation': 'AI will assess your message clarity, audience engagement, and supporting evidence use',
+    'Wedding Speech': 'AI will review your emotional connection, personal stories, and celebratory tone',
+    'Public Speaking': 'AI will examine your credibility, persuasive elements, and audience impact',
+    'Podcast/Interview': 'AI will analyze your conversational flow, engagement, and storytelling ability'
+  };
+  return descriptions[purpose] || 'AI will provide tailored feedback based on your specific speaking goal';
+}
+
+// Helper function to get purpose-specific coaching tips
+function getPurposeCoachingTips(purpose: string): string {
+  const tips = {
+    'Sales Pitch': 'Focus on clearly stating the problem, presenting your solution, and creating urgency. End with a specific call-to-action.',
+    'Job Interview': 'Use the STAR method (Situation, Task, Action, Result) for examples. Show enthusiasm and ask thoughtful questions.',
+    'Presentation': 'Start with a hook, maintain clear structure, use supporting data, and summarize key takeaways at the end.',
+    'Wedding Speech': 'Share personal stories, keep it heartfelt but brief, and focus on celebrating the couple.',
+    'Public Speaking': 'Establish credibility early, connect emotionally with your audience, and leave them with an inspiring message.',
+    'Podcast/Interview': 'Be conversational, share authentic stories, and engage actively with questions and comments.'
+  };
+  return tips[purpose] || 'Speak clearly, maintain good eye contact, and structure your content with a clear beginning, middle, and end.';
+}
+
+// Helper function for purpose-specific live feedback during recording
+function getPurposeSpecificLiveFeedback(purpose: string, transcript: string, metrics: any): EnhancedLiveFeedback | null {
+  const wordCount = transcript.split(' ').filter(word => word.length > 0).length;
+  const now = Date.now();
+  
+  // Only provide feedback every 30 seconds and after sufficient content
+  if (wordCount < 20) return null;
+  
+  const feedbackTemplates = {
+    'Sales Pitch': [
+      { condition: () => !transcript.toLowerCase().includes('problem'), feedback: 'Start by clearly identifying the customer\'s problem', actionable: 'Begin with "The problem is..." or "Many companies struggle with..."' },
+      { condition: () => !transcript.toLowerCase().includes('solution'), feedback: 'Present your solution early', actionable: 'Clearly state how your product/service solves the problem' },
+      { condition: () => wordCount > 100 && !transcript.toLowerCase().includes('call'), feedback: 'Include a clear call-to-action', actionable: 'End with specific next steps like "Let\'s schedule a demo"' }
+    ],
+    'Job Interview': [
+      { condition: () => metrics.emotion?.confidence < 70, feedback: 'Project more confidence in your delivery', actionable: 'Speak with conviction and maintain steady eye contact' },
+      { condition: () => !transcript.toLowerCase().includes('experience'), feedback: 'Share specific examples from your experience', actionable: 'Use the STAR method: Situation, Task, Action, Result' },
+      { condition: () => metrics.voice?.pace > 180, feedback: 'Speaking too quickly - slow down', actionable: 'Take brief pauses between key points to emphasize them' }
+    ],
+    'Presentation': [
+      { condition: () => wordCount > 50 && !transcript.toLowerCase().includes('today'), feedback: 'Provide a clear agenda or outline', actionable: 'Tell your audience what you\'ll cover: "Today I\'ll discuss..."' },
+      { condition: () => metrics.bodyLanguage?.eyeContactScore < 60, feedback: 'Improve eye contact with your audience', actionable: 'Look directly at different sections of your audience regularly' },
+      { condition: () => !transcript.toLowerCase().includes('because'), feedback: 'Support your points with evidence', actionable: 'Use "because", "for example", or "studies show" to back up claims' }
+    ],
+    'Wedding Speech': [
+      { condition: () => !transcript.toLowerCase().includes('first'), feedback: 'Share a personal story or memory', actionable: 'Tell the audience how you first met the couple' },
+      { condition: () => metrics.emotion?.enthusiasm < 70, feedback: 'Show more joy and celebration', actionable: 'Smile more and let your happiness for the couple shine through' },
+      { condition: () => wordCount > 150, feedback: 'Keep it concise and heartfelt', actionable: 'Wedding speeches work best when they\'re 2-3 minutes maximum' }
+    ],
+    'Public Speaking': [
+      { condition: () => !transcript.toLowerCase().includes('you'), feedback: 'Connect directly with your audience', actionable: 'Use "you" to make your message personal and engaging' },
+      { condition: () => metrics.voice?.volume < 70, feedback: 'Project your voice with more energy', actionable: 'Speak from your diaphragm to reach the back of the room' },
+      { condition: () => !transcript.toLowerCase().includes('imagine'), feedback: 'Help your audience visualize your message', actionable: 'Use phrases like "imagine if" or "picture this" to create mental images' }
+    ]
+  };
+  
+  const templates = feedbackTemplates[purpose] || [];
+  const applicableFeedback = templates.find(template => template.condition());
+  
+  if (applicableFeedback) {
+    return {
+      id: `purpose-feedback-${now}`,
+      timestamp: now,
+      category: 'content',
+      feedback: `${purpose} Tip: ${applicableFeedback.feedback}`,
+      severity: 'good',
+      confidence: 0.9,
+      actionable: applicableFeedback.actionable
+    };
+  }
+  
+  return null;
 }
 
 export default function EnhancedPracticePage() {
@@ -1240,32 +1321,76 @@ export default function EnhancedPracticePage() {
                   </div>
                 )}
                 
-                {isEditingPurpose ? (
-                  <div className="flex items-center gap-2 mt-2">
-                    <Textarea
-                      value={sessionPurpose}
-                      onChange={(e) => setSessionPurpose(e.target.value)}
-                      placeholder="What's your goal for this session?"
-                      className="min-h-[60px]"
-                    />
-                    <Button size="sm" onClick={() => setIsEditingPurpose(false)}>
-                      <Save className="w-4 h-4" />
-                    </Button>
+                {/* Enhanced Purpose Selection */}
+                <div className="mt-3 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Target className="w-5 h-5 text-blue-600" />
+                    <h3 className="font-semibold text-blue-900">Speech Purpose & Goal</h3>
                   </div>
-                ) : (
-                  <div className="flex items-center gap-2 mt-2">
-                    <p className="text-lg text-gray-600">
-                      {sessionPurpose || "Click to set your session goal"}
-                    </p>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => setIsEditingPurpose(true)}
-                    >
-                      <Edit3 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                )}
+                  
+                  {isEditingPurpose ? (
+                    <div className="space-y-3">
+                      {/* Quick Purpose Presets */}
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                        {[
+                          { label: "Sales Pitch", desc: "Persuade and convert" },
+                          { label: "Job Interview", desc: "Professional presentation" },
+                          { label: "Presentation", desc: "Inform and educate" },
+                          { label: "Wedding Speech", desc: "Celebrate and honor" },
+                          { label: "Public Speaking", desc: "Inspire and motivate" },
+                          { label: "Podcast/Interview", desc: "Engage and discuss" }
+                        ].map((preset) => (
+                          <Button
+                            key={preset.label}
+                            variant={sessionPurpose === preset.label ? "default" : "outline"}
+                            size="sm"
+                            className="h-auto p-2 text-left"
+                            onClick={() => setSessionPurpose(preset.label)}
+                          >
+                            <div>
+                              <div className="font-medium text-xs">{preset.label}</div>
+                              <div className="text-xs opacity-70">{preset.desc}</div>
+                            </div>
+                          </Button>
+                        ))}
+                      </div>
+                      
+                      {/* Custom Purpose Input */}
+                      <div className="flex items-center gap-2">
+                        <Textarea
+                          value={sessionPurpose}
+                          onChange={(e) => setSessionPurpose(e.target.value)}
+                          placeholder="Or describe your specific goal..."
+                          className="min-h-[60px] text-sm"
+                        />
+                        <Button size="sm" onClick={() => setIsEditingPurpose(false)} className="shrink-0">
+                          <Save className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-blue-900">
+                          {sessionPurpose || "Click to set your session goal"}
+                        </p>
+                        {sessionPurpose && (
+                          <p className="text-xs text-blue-700 mt-1">
+                            {getPurposeDescription(sessionPurpose)}
+                          </p>
+                        )}
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => setIsEditingPurpose(true)}
+                        className="shrink-0"
+                      >
+                        <Edit3 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* AI Coach Selection */}
@@ -1783,10 +1908,13 @@ export default function EnhancedPracticePage() {
 
                   <TabsContent value="content" className="space-y-4">
                     <div className="space-y-4">
-                      {/* Speech Purpose Selection */}
-                      <Card className="p-4">
+                      {/* Enhanced Speech Purpose Analysis */}
+                      <Card className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
                         <div className="flex items-center justify-between mb-4">
-                          <h3 className="font-semibold">Speech Purpose</h3>
+                          <h3 className="font-semibold flex items-center gap-2">
+                            <Target className="w-5 h-5 text-blue-600" />
+                            Content Analysis for: {sessionPurpose || 'General Speech'}
+                          </h3>
                           <Button 
                             variant="outline" 
                             size="sm"
@@ -1796,13 +1924,31 @@ export default function EnhancedPracticePage() {
                           </Button>
                         </div>
                         
+                        {/* Purpose-Specific Coaching Tips */}
+                        {sessionPurpose && (
+                          <div className="mb-4 p-3 bg-white rounded-lg border">
+                            <p className="text-sm font-medium text-blue-900 mb-2">
+                              Purpose-Specific Coaching for {sessionPurpose}:
+                            </p>
+                            <p className="text-xs text-blue-700">
+                              {getPurposeCoachingTips(sessionPurpose)}
+                            </p>
+                          </div>
+                        )}
+                        
                         <div className="grid grid-cols-3 gap-2">
                           {contentAnalysisEngine.getAllPurposeTemplates().map((purpose) => (
                             <Button
                               key={purpose.type}
                               variant={speechPurpose?.type === purpose.type ? "default" : "outline"}
                               size="sm"
-                              onClick={() => setSpeechPurpose(purpose)}
+                              onClick={() => {
+                                setSpeechPurpose(purpose);
+                                // Sync with session purpose if not set
+                                if (!sessionPurpose) {
+                                  setSessionPurpose(purpose.type);
+                                }
+                              }}
                             >
                               {purpose.type.charAt(0).toUpperCase() + purpose.type.slice(1)}
                             </Button>
