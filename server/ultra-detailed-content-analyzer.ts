@@ -333,6 +333,16 @@ export class UltraDetailedContentAnalyzer {
           knowledgeTransfer: this.calculateKnowledgeTransfer(words)
         };
         
+      case 'TED Talk':
+        return {
+          storytellingPower: this.calculateStorytellingPower(words),
+          emotionalConnection: this.calculateEmotionalConnection(words),
+          humorEffectiveness: this.calculateHumorEffectiveness(words),
+          inspirationalImpact: this.calculateInspirationalImpact(words),
+          memorability: this.calculateMemorability(words),
+          viralPotential: this.calculateViralPotential(words)
+        };
+        
       case 'Teaching':
         return {
           learningObjectives: this.calculateLearningObjectives(words),
@@ -497,6 +507,54 @@ export class UltraDetailedContentAnalyzer {
   private calculateEngagementTechniques(words: string): number { return 73; }
   private calculateAssessmentIntegration(words: string): number { return 69; }
   private calculateScaffolding(words: string): number { return 81; }
+  private calculateStorytellingPower(words: string): number {
+    const storyKeywords = ['story', 'once', 'remember', 'years ago', 'happened', 'experience', 'journey'];
+    const emotiveKeywords = ['felt', 'realized', 'discovered', 'moment', 'suddenly'];
+    let score = 30;
+    storyKeywords.forEach(keyword => { if (words.includes(keyword)) score += 12; });
+    emotiveKeywords.forEach(keyword => { if (words.includes(keyword)) score += 8; });
+    return Math.min(score, 100);
+  }
+  private calculateEmotionalConnection(words: string): number {
+    const emotionKeywords = ['feel', 'heart', 'passion', 'love', 'fear', 'hope', 'dream', 'believe'];
+    const connectionKeywords = ['we all', 'everyone', 'human', 'together', 'share', 'common'];
+    let score = 35;
+    emotionKeywords.forEach(keyword => { if (words.includes(keyword)) score += 10; });
+    connectionKeywords.forEach(keyword => { if (words.includes(keyword)) score += 8; });
+    return Math.min(score, 100);
+  }
+  private calculateHumorEffectiveness(words: string): number {
+    const humorKeywords = ['funny', 'laugh', 'joke', 'amusing', 'ridiculous', 'ironic', 'smile'];
+    const lightKeywords = ['oops', 'awkward', 'weird', 'strange', 'silly'];
+    let score = 25;
+    humorKeywords.forEach(keyword => { if (words.includes(keyword)) score += 15; });
+    lightKeywords.forEach(keyword => { if (words.includes(keyword)) score += 10; });
+    return Math.min(score, 100);
+  }
+  private calculateInspirationalImpact(words: string): number {
+    const inspirationKeywords = ['inspire', 'change', 'transform', 'possible', 'achieve', 'dream', 'believe'];
+    const actionKeywords = ['can do', 'will', 'start', 'begin', 'take action', 'make a difference'];
+    let score = 40;
+    inspirationKeywords.forEach(keyword => { if (words.includes(keyword)) score += 10; });
+    actionKeywords.forEach(keyword => { if (words.includes(keyword)) score += 8; });
+    return Math.min(score, 100);
+  }
+  private calculateMemorability(words: string): number {
+    const memorableKeywords = ['remember', 'never forget', 'always', 'forever', 'imagine', 'picture'];
+    const impactKeywords = ['powerful', 'incredible', 'amazing', 'extraordinary', 'remarkable'];
+    let score = 45;
+    memorableKeywords.forEach(keyword => { if (words.includes(keyword)) score += 9; });
+    impactKeywords.forEach(keyword => { if (words.includes(keyword)) score += 7; });
+    return Math.min(score, 100);
+  }
+  private calculateViralPotential(words: string): number {
+    const shareableKeywords = ['share', 'tell others', 'spread', 'everyone should know'];
+    const quotableKeywords = ['quote', 'saying', 'phrase', 'words to live by'];
+    let score = 50;
+    shareableKeywords.forEach(keyword => { if (words.includes(keyword)) score += 12; });
+    quotableKeywords.forEach(keyword => { if (words.includes(keyword)) score += 10; });
+    return Math.min(score, 100);
+  }
   private calculateContentOrganization(words: string): number { return 79; }
   private calculateAudienceConnection(words: string): number { return 77; }
   private calculateMessageClarity(words: string): number { return 83; }
@@ -648,6 +706,22 @@ export class UltraDetailedContentAnalyzer {
           ],
           expectedImpact: 'Enhanced professional reputation and network building',
           timeframe: 'Immediate - leverage existing expertise more effectively'
+        }];
+        
+      case 'TED Talk':
+        return [{
+          category: 'TED Talk Excellence',
+          priority: 'high' as const,
+          title: 'Maximize Audience Engagement and Viral Potential',
+          description: 'Enhance storytelling, emotional connection, and memorable impact',
+          specificActions: [
+            'Craft compelling personal stories with universal themes',
+            'Use strategic humor and authentic vulnerability',
+            'Create quotable moments and memorable phrases',
+            'End with a powerful, actionable call-to-inspiration'
+          ],
+          expectedImpact: 'Increased audience connection, shareability, and lasting impact',
+          timeframe: 'Medium-term - develop signature stories and refined delivery'
         }];
         
       case 'Teaching':

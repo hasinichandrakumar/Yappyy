@@ -920,6 +920,21 @@ Make the content more engaging, natural, and personalized while keeping the same
       - Future Implications: Discussion of trends, predictions, and next steps
       - Professional Network Building: Facilitation of connections and collaborations
       `,
+      'TED Talk': `
+      COMPREHENSIVE TED TALK EFFECTIVENESS ANALYSIS:
+      - Opening Hook Power: Did they capture attention within the first 30 seconds with a compelling start?
+      - Storytelling Mastery: How effectively did they weave personal or universal stories throughout?
+      - Emotional Connection: Rate the depth of emotional resonance and audience connection created
+      - Humor Integration: Assess strategic use of humor, timing, and audience response appropriateness
+      - Clarity of Core Message: How clearly was the central "idea worth spreading" communicated?
+      - Inspirational Impact: Evaluate the speech's power to motivate and inspire action
+      - Authenticity and Vulnerability: Did they share genuine, relatable human experiences?
+      - Visual Communication: Effectiveness of gestures, stage presence, and non-verbal communication
+      - Memorable Moments: Creation of quotable, shareable, and unforgettable content
+      - Call-to-Action Strength: How compelling and specific was the audience empowerment?
+      - Viral Potential: Assessment of content's shareability and lasting impact
+      - Universal Relevance: Connection to broader human experiences and societal issues
+      `,
       'Teaching': `
       COMPREHENSIVE EDUCATIONAL EFFECTIVENESS ANALYSIS:
       - Learning Objectives: Were clear, measurable goals established and communicated?
@@ -1007,6 +1022,7 @@ Make the content more engaging, natural, and personalized while keeping the same
               ANALYSIS DEPTH REQUIREMENTS:
               - SALES PITCHES: Revenue impact, deal psychology, B2B effectiveness, stakeholder influence
               - BUSINESS PITCHES: Investor standards, market analysis, financial credibility, funding readiness  
+              - TED TALKS: Storytelling mastery, emotional resonance, humor effectiveness, inspirational impact, viral potential
               - ACADEMIC PRESENTATIONS: Research rigor, scholarly communication, evidence quality, peer review standards
               - CONFERENCE TALKS: Expert credibility, technical depth, industry relevance, knowledge transfer
               - TEACHING: Pedagogical effectiveness, learning outcomes, engagement, concept clarity

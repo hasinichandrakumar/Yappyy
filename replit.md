@@ -1,6 +1,6 @@
 # Overview
 
-Yappyy is a world-class AI-powered public speaking improvement platform built with React, TypeScript, and Express.js. Its core purpose is to provide advanced, real-time feedback on speaking performance, body language, and content quality. Key capabilities include multi-modal AI analytics, real-time computer vision, precise eye tracking, and comprehensive gamification. Yappyy aims to deliver professional-grade feedback and personalized coaching for various speaking scenarios, from business presentations to competitive events. The platform now features breakthrough authentic data availability, eliminating fake metrics and relying on robust computer vision and audio analysis.
+Yappyy is a world-class AI-powered public speaking improvement platform built with React, TypeScript, and Express.js. Its core purpose is to provide advanced, real-time feedback on speaking performance, body language, and content quality. Key capabilities include multi-modal AI analytics, real-time computer vision, precise eye tracking, and comprehensive gamification. Yappyy aims to deliver professional-grade feedback and personalized coaching for various speaking scenarios, from business presentations to TED Talks to academic conferences. The platform now features breakthrough authentic data availability, eliminating fake metrics and relying on robust computer vision and audio analysis with EXTREMELY detailed, purpose-specific content analysis for all speaking contexts including adult professional cohorts.
 
 # User Preferences
 
@@ -29,8 +29,9 @@ Preferred communication style: Simple, everyday language.
 - **AI Integration**:
     - **Multi-Modal AI**: OpenAI GPT-4o and Anthropic Claude 3.5 Sonnet for diverse coaching.
     - **Personalized AI Coach**: True neural network architecture with multi-layer perceptron, self-learning feedback system, and individual user neural profiles. Continuously learns user preferences and adapts coaching style.
-    - **Purpose-Driven Content Analysis**: Context-aware analysis providing purpose-specific feedback (e.g., sales, job interviews).
-    - **Advanced Content Analysis Engine**: Uses NLP libraries (Compromise.js, Natural.js, Sentiment.js, Franc) for persuasiveness, clarity, structure, and engagement analysis.
+    - **Ultra-Detailed Content Analysis**: Comprehensive purpose-specific analysis for all speaking contexts including sales pitches, business presentations, TED Talks, academic presentations, conference talks, and educational content.
+    - **Elite Expert-Level AI**: Multi-domain expertise spanning Fortune 500 executive coaching, Harvard PhD-level academic rigor, Stanford teaching excellence, and TED Talk presentation mastery.
+    - **Advanced Content Analysis Engine**: Uses NLP libraries (Compromise.js, Natural.js, Sentiment.js, Franc) plus specialized engines for sales effectiveness, academic rigor, and inspirational impact analysis.
 - **Computer Vision**:
     - **Comprehensive Multi-Engine CV Stack**: Integrated Google Cloud Vision API, MediaPipe Holistic, and OpenPose framework for advanced gesture and body language analysis.
     - **Enhanced Computer Vision Integration**: ComprehensiveVisionDashboard with real-time multi-system analysis combining Google Cloud Vision, MediaPipe, and OpenPose engines.
@@ -53,8 +54,10 @@ Preferred communication style: Simple, everyday language.
     - **Automatic Session Saving**: Sessions save to the database when recording stops, with comprehensive analysis available.
     - **Session Management**: Sequential session numbering (1 to infinity) with secure user-controlled deletion while preserving session order.
 - **Content Management**:
+    - **Comprehensive Purpose Selection**: Enhanced options including Sales Pitch, Business Pitch, TED Talk, Academic Presentation, Conference Talk, Teaching, and Job Interview with purpose-specific AI analysis.
     - **Template System**: Expanded library of 50+ pre-built templates for various speaking scenarios with AI personalization.
     - **PDF Export System**: Enhanced session analysis and template PDFs with Yappyy-branded styling, Poppins font, and blue color scheme matching the website theme.
+    - **TED Talk Excellence**: Specialized analysis for storytelling mastery, emotional connection, humor effectiveness, viral potential, and inspirational impact.
 - **User Experience**:
     - **Daily Goals Tracker**: Integrated into the Progress tab for interactive goal management.
     - **Welcome Back Experience**: Enhanced detection for new vs. returning users, providing personalized welcome and daily goals.

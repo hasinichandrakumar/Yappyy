@@ -94,12 +94,12 @@ function getPurposeDescription(purpose: string): string {
   const descriptions = {
     'Sales Pitch': 'AI analyzes ROI articulation, pain point targeting, objection handling, and closing strength for B2B sales',
     'Business Pitch': 'AI evaluates market analysis, business model clarity, competitive advantage, and executive presence',
+    'TED Talk': 'AI assesses storytelling power, emotional connection, humor effectiveness, viral potential, and inspirational impact',
     'Academic Presentation': 'AI assesses research methodology, evidence quality, logical argumentation, and scholarly communication',
     'Job Interview': 'AI evaluates professional presence, STAR method usage, and cultural fit demonstration',
     'Conference Talk': 'AI analyzes technical depth, expert credibility, audience engagement, and knowledge transfer',
     'Public Speaking': 'AI examines thought leadership, audience connection, and inspirational impact',
-    'Teaching': 'AI reviews pedagogical effectiveness, concept clarity, engagement techniques, and learning outcomes',
-    'Negotiation': 'AI analyzes persuasion tactics, concession strategy, and deal-closing effectiveness'
+    'Teaching': 'AI reviews pedagogical effectiveness, concept clarity, engagement techniques, and learning outcomes'
   };
   return descriptions[purpose] || 'AI will provide comprehensive, detailed feedback tailored to your specific speaking goal';
 }
@@ -109,12 +109,12 @@ function getPurposeCoachingTips(purpose: string): string {
   const tips = {
     'Sales Pitch': 'Lead with specific ROI metrics, identify precise pain points, use case studies with numbers, create time-based urgency, and end with clear next steps.',
     'Business Pitch': 'Quantify market size, demonstrate competitive moats, show realistic financials, address risks proactively, and articulate clear investor returns.',
+    'TED Talk': 'Start with a powerful hook, weave compelling stories throughout, use humor strategically, create emotional moments, and end with an unforgettable call-to-action.',
     'Academic Presentation': 'Begin with clear research question, present methodology rigorously, cite authoritative sources, acknowledge limitations, and connect to broader implications.',
     'Job Interview': 'Use the STAR method with quantified results, demonstrate cultural alignment, show growth mindset, and ask strategic questions.',
     'Conference Talk': 'Establish expert credentials early, balance technical depth with accessibility, use visual aids effectively, and provide actionable takeaways.',
     'Public Speaking': 'Establish thought leadership early, use powerful stories with business relevance, connect to audience goals, and inspire specific actions.',
-    'Teaching': 'Structure with clear learning objectives, use multiple modalities, check for understanding frequently, and provide concrete examples.',
-    'Negotiation': 'Identify mutual value creation, use anchoring strategies, prepare multiple scenarios, understand their constraints, and close with win-win outcomes.'
+    'Teaching': 'Structure with clear learning objectives, use multiple modalities, check for understanding frequently, and provide concrete examples.'
   };
   return tips[purpose] || 'Structure content strategically, use evidence-based arguments, and communicate with clarity and authority.';
 }
@@ -153,6 +153,13 @@ function getPurposeSpecificLiveFeedback(purpose: string, transcript: string, met
       { condition: () => !transcript.toLowerCase().includes('trend') && !transcript.toLowerCase().includes('future'), feedback: 'Connect to industry trends', actionable: 'Discuss: "This aligns with the industry trend toward..." or "Looking ahead..."' },
       { condition: () => !transcript.toLowerCase().includes('practical') && !transcript.toLowerCase().includes('application'), feedback: 'Provide actionable takeaways', actionable: 'Offer: "You can implement this by..." or "Three practical steps are..."' },
       { condition: () => wordCount > 80 && !transcript.toLowerCase().includes('question'), feedback: 'Engage the expert audience', actionable: 'Ask: "How many of you have encountered..." or invite discussion' }
+    ],
+    'TED Talk': [
+      { condition: () => !transcript.toLowerCase().includes('story') && !transcript.toLowerCase().includes('imagine'), feedback: 'Incorporate compelling storytelling', actionable: 'Share: "Let me tell you a story..." or "Imagine if..." to create emotional connection' },
+      { condition: () => !transcript.toLowerCase().includes('funny') && !transcript.toLowerCase().includes('laugh') && wordCount > 50, feedback: 'Add strategic humor', actionable: 'Include light humor or amusing observations to keep audience engaged' },
+      { condition: () => !transcript.toLowerCase().includes('feel') && !transcript.toLowerCase().includes('emotion'), feedback: 'Create emotional moments', actionable: 'Connect to universal feelings: "We\'ve all felt..." or "Remember when..."' },
+      { condition: () => !transcript.toLowerCase().includes('change') && !transcript.toLowerCase().includes('different'), feedback: 'Inspire transformation', actionable: 'End with: "What if we could change..." or "Imagine a world where..."' },
+      { condition: () => wordCount > 100 && !transcript.toLowerCase().includes('you can'), feedback: 'Include actionable inspiration', actionable: 'Give audience something to do: "Here\'s what you can do starting today..."' }
     ],
     'Teaching': [
       { condition: () => !transcript.toLowerCase().includes('learn') && !transcript.toLowerCase().includes('understand'), feedback: 'State clear learning objectives', actionable: 'Begin: "By the end of this lesson, you will be able to..." or "Today we\'ll learn..."' },
@@ -1366,12 +1373,12 @@ export default function EnhancedPracticePage() {
                         {[
                           { label: "Sales Pitch", desc: "B2B sales & conversion" },
                           { label: "Business Pitch", desc: "Investor & stakeholder" },
+                          { label: "TED Talk", desc: "Inspirational & viral" },
                           { label: "Academic Presentation", desc: "Research & scholarly" },
                           { label: "Job Interview", desc: "Professional presentation" },
                           { label: "Conference Talk", desc: "Technical & expert" },
                           { label: "Public Speaking", desc: "Leadership & keynote" },
-                          { label: "Teaching", desc: "Educational & instructional" },
-                          { label: "Negotiation", desc: "Deal closing & persuasion" }
+                          { label: "Teaching", desc: "Educational & instructional" }
                         ].map((preset) => (
                           <Button
                             key={preset.label}
