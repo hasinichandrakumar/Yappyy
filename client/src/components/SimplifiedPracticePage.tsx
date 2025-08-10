@@ -154,6 +154,32 @@ export default function SimplifiedPracticePage() {
   const [showLiveTranscript, setShowLiveTranscript] = useState(true);
   const [showLiveMetrics, setShowLiveMetrics] = useState(true);
 
+  // Height sync between left recording area and right AI coach card
+  const recordingSectionRef = useRef<HTMLDivElement | null>(null);
+  const [coachHeight, setCoachHeight] = useState<number>(0);
+
+  useEffect(() => {
+    const updateCoachHeight = () => {
+      const left = recordingSectionRef.current;
+      if (!left) return;
+      const height = left.offsetHeight;
+      if (height && height !== coachHeight) {
+        setCoachHeight(height);
+      }
+    };
+
+    updateCoachHeight();
+    const ro = new ResizeObserver(() => updateCoachHeight());
+    if (recordingSectionRef.current) {
+      ro.observe(recordingSectionRef.current);
+    }
+    window.addEventListener('resize', updateCoachHeight);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', updateCoachHeight);
+    };
+  }, [coachHeight]);
+
   // Video recording state
   const [currentRecording, setCurrentRecording] = useState<VideoRecordingData | null>(null);
   const [showVideoPlayback, setShowVideoPlayback] = useState(false);
@@ -1990,11 +2016,12 @@ export default function SimplifiedPracticePage() {
 
         {/* Main Content - Side by Side Layout */}
         <div className="w-full relative">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
             
             {/* Left Side - Video Feed (2/3 width) */}
             <div className="lg:col-span-2 space-y-6 relative z-0">
-              <Card className="border border-blue-200 shadow-xl bg-white/90 backdrop-blur-sm rounded-xl overflow-hidden">
+              <div ref={recordingSectionRef}>
+                <Card className="border border-blue-200 shadow-xl bg-white/90 backdrop-blur-sm rounded-xl overflow-hidden box-border">
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <Video className="w-5 h-5 text-blue-600" />
@@ -2085,97 +2112,82 @@ export default function SimplifiedPracticePage() {
                   </div>
                 </CardContent>
               </Card>
+              </div>
 
 
             </div>
 
             {/* Right Side - Live AI Coaching Tips (1/3 width) */}
-            <div className="lg:col-span-1 space-y-6 flex flex-col justify-center items-center relative">
-              {showLiveMetrics && (
-                <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm rounded-xl sticky top-24 w-full max-w-sm z-10">
-                  <CardHeader className="pb-4">
-                    <CardTitle className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Activity className="w-5 h-5 text-blue-600" />
-                        <span className="text-blue-800 font-semibold">Live AI Coach</span>
-                        {isRecording && (
-                          <Badge variant="secondary" className="ml-2 bg-green-100 text-green-800 border-green-200">
-                            <Activity className="w-3 h-3 mr-1" />
-                            Active
-                          </Badge>
-                        )}
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setShowLiveMetrics(false)}
-                        className="text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-all duration-200"
-                      >
-                        ×
-                      </Button>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4 max-h-80 overflow-y-auto">
-                      {liveFeedback.length > 0 ? (
-                        liveFeedback.slice(-6).map((feedback) => (
-                          <div
-                            key={feedback.id}
-                            className={`p-4 rounded-xl border-l-4 shadow-sm ${
-                              feedback.type === 'success' 
-                                ? 'bg-green-50 border-green-400 text-green-800' 
-                                : feedback.type === 'warning'
-                                ? 'bg-yellow-50 border-yellow-400 text-yellow-800'
-                                : 'bg-blue-50 border-blue-400 text-blue-800'
-                            }`}
-                          >
-                            <p className="text-sm font-medium leading-relaxed">{feedback.message}</p>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="text-center text-gray-500 py-12">
-                          <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Activity className="w-8 h-8 text-gray-400" />
-                          </div>
-                          <p className="text-sm font-medium mb-1">Ready for Coaching</p>
-                          <p className="text-xs text-gray-400">Start recording to receive live coaching tips</p>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Essential Live Metrics - Next to Video */}
-              <Card className="border border-blue-200 shadow-lg bg-white/90 backdrop-blur-sm rounded-xl w-full max-w-sm">
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center justify-center gap-2 text-lg">
-                    <BarChart3 className="w-5 h-5 text-blue-600" />
-                    Live Statistics
+            <div className="lg:col-span-1 flex flex-col relative h-full">
+              {/* Combined AI Coach and Statistics - Match recording box height */}
+              <Card className="border border-blue-200 shadow-xl bg-white/90 backdrop-blur-sm rounded-xl overflow-hidden w-full h-full flex flex-col box-border" style={{ height: coachHeight ? `${coachHeight}px` : undefined }}>
+                <CardHeader className="pb-3 shrink-0">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Activity className="w-5 h-5 text-blue-600" />
+                    Live AI Coach
+                    {isRecording && (
+                      <Badge variant="secondary" className="ml-2 bg-green-100 text-green-800 border-green-200">
+                        <Activity className="w-3 h-3 mr-1" />
+                        Active
+                      </Badge>
+                    )}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6">
-                  <div className="space-y-8">
-                    <div className={`text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200 transition-all duration-300 hover:shadow-lg hover:scale-105 ${metrics.wordsPerMinute > 0 ? 'shadow-md' : ''}`}>
-                      <div className="flex justify-center mb-2">
-                        <TrendingUp className="w-6 h-6 text-blue-500" />
+                <CardContent className="flex-1 flex flex-col overflow-hidden">
+                  {/* Live Feedback Section */}
+                  {showLiveMetrics && (
+                    <div className="flex-1 min-h-0 mb-4">
+                      <div className="h-full overflow-y-auto">
+                        {liveFeedback.length > 0 ? (
+                          <div className="space-y-3">
+                            {liveFeedback.slice(-4).map((feedback) => (
+                              <div
+                                key={feedback.id}
+                                className={`p-3 rounded-lg border-l-4 shadow-sm text-sm ${
+                                  feedback.type === 'success' 
+                                    ? 'bg-green-50 border-green-400 text-green-800' 
+                                    : feedback.type === 'warning'
+                                    ? 'bg-yellow-50 border-yellow-400 text-yellow-800'
+                                    : 'bg-blue-50 border-blue-400 text-blue-800'
+                                }`}
+                              >
+                                <p className="font-medium leading-relaxed">{feedback.message}</p>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center text-gray-500 py-8 h-full flex flex-col items-center justify-center">
+                            <div className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
+                              <Activity className="w-6 h-6 text-gray-400" />
+                            </div>
+                            <p className="text-sm font-medium mb-1">Ready for Coaching</p>
+                            <p className="text-xs text-gray-400">Start recording to receive tips</p>
+                          </div>
+                        )}
                       </div>
-                      <div className={`text-5xl font-bold text-blue-600 mb-2 ${metrics.wordsPerMinute > 0 ? 'animate-pulse' : ''}`}>{metrics.wordsPerMinute}</div>
-                      <div className="text-sm text-gray-700 font-semibold uppercase tracking-wide">Words Per Minute</div>
                     </div>
-                    <div className={`text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200 transition-all duration-300 hover:shadow-lg hover:scale-105 ${metrics.fillerWordCount > 0 ? 'shadow-md' : ''}`}>
-                      <div className="flex justify-center mb-2">
-                        <AlertTriangle className="w-6 h-6 text-purple-500" />
+                  )}
+
+                  {/* Live Statistics Section - collapsed strip */}
+                  <div className="shrink-0">
+                    <div className="border-t border-gray-200 pt-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-blue-50 border border-blue-200">
+                          <TrendingUp className="w-3 h-3 text-blue-600" />
+                          <span className="text-xs font-semibold text-blue-700">{metrics.wordsPerMinute}</span>
+                          <span className="text-[10px] text-gray-600 uppercase">WPM</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-purple-50 border border-purple-200">
+                          <AlertTriangle className="w-3 h-3 text-purple-600" />
+                          <span className="text-xs font-semibold text-purple-700">{metrics.fillerWordCount}</span>
+                          <span className="text-[10px] text-gray-600 uppercase">Fillers</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-green-50 border border-green-200">
+                          <Eye className="w-3 h-3 text-green-600" />
+                          <span className="text-xs font-semibold text-green-700">{Math.round(metrics.eyeContact)}%</span>
+                          <span className="text-[10px] text-gray-600 uppercase">Eye</span>
+                        </div>
                       </div>
-                      <div className={`text-5xl font-bold text-purple-600 mb-2 ${metrics.fillerWordCount > 0 ? 'animate-pulse' : ''}`}>{metrics.fillerWordCount}</div>
-                      <div className="text-sm text-gray-700 font-semibold uppercase tracking-wide">Filler Words</div>
-                    </div>
-                    <div className={`text-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200 transition-all duration-300 hover:shadow-lg hover:scale-105 ${metrics.eyeContact > 0 ? 'shadow-md' : ''}`}>
-                      <div className="flex justify-center mb-2">
-                        <Eye className="w-6 h-6 text-green-500" />
-                      </div>
-                      <div className={`text-5xl font-bold text-green-600 mb-2 ${metrics.eyeContact > 0 ? 'animate-pulse' : ''}`}>{Math.round(metrics.eyeContact)}%</div>
-                      <div className="text-sm text-gray-700 font-semibold uppercase tracking-wide">Eye Contact</div>
                     </div>
                   </div>
                 </CardContent>
