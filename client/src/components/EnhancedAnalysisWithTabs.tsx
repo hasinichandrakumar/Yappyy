@@ -182,23 +182,30 @@ export default function EnhancedAnalysisWithTabs() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Prepare data for charts
+  // Prepare data for charts with actual session metrics
   const bodyLanguageData = currentSession ? [
-    { metric: 'Posture', score: currentSession.postureScore || 0, fullMark: 100 },
-    { metric: 'Gestures', score: currentSession.gestureNaturalness || 0, fullMark: 100 },
-    { metric: 'Eye Contact', score: currentSession.eyeContactScore || 0, fullMark: 100 },
-    { metric: 'Movement', score: currentSession.movementScore || 0, fullMark: 100 },
-    { metric: 'Expression', score: currentSession.facialExpression || 0, fullMark: 100 },
-    { metric: 'Confidence', score: currentSession.confidenceScore || 0, fullMark: 100 }
+    { metric: 'Posture', score: Math.round((currentSession.postureScore || 0) * 100), fullMark: 100 },
+    { metric: 'Gestures', score: Math.round((currentSession.gestureScore || 0) * 100), fullMark: 100 },
+    { metric: 'Eye Contact', score: parseFloat(currentSession.eyeContactScore || '0'), fullMark: 100 },
+    { metric: 'Facial Expression', score: currentSession.facialAnalysis?.expressiveness || 0, fullMark: 100 },
+    { metric: 'Confidence', score: Math.round((currentSession.confidenceScore || 0) * 100), fullMark: 100 },
+    { metric: 'Overall', score: Math.round((currentSession.overallScore || 0) * 100), fullMark: 100 }
   ] : [];
 
   const voiceMetricsData = currentSession ? [
-    { name: 'Clarity', value: currentSession.voiceClarity || 0, color: '#8B5CF6' },
-    { name: 'Pace', value: currentSession.averageWPM ? Math.min(100, (currentSession.averageWPM / 200) * 100) : 0, color: '#3B82F6' },
-    { name: 'Volume', value: currentSession.volumeConsistency || 0, color: '#10B981' },
-    { name: 'Pitch', value: currentSession.pitchVariation || 0, color: '#F59E0B' },
-    { name: 'Tone', value: currentSession.intonationScore || 0, color: '#EF4444' }
+    { name: 'Clarity', value: Math.round((currentSession.voiceClarity || currentSession.clarityScore || 0) * 100), color: '#8B5CF6' },
+    { name: 'Pace', value: currentSession.averageWPM ? Math.min(100, Math.round((currentSession.averageWPM / 180) * 100)) : 0, color: '#3B82F6' },
+    { name: 'Volume', value: Math.round((currentSession.volumeConsistency || 0) * 100), color: '#10B981' },
+    { name: 'Intonation', value: Math.round((currentSession.intonationScore || 0) * 100), color: '#F59E0B' },
+    { name: 'Pace Score', value: Math.round((currentSession.paceScore || 0) * 100), color: '#EF4444' }
   ] : [];
+
+  // Extract additional metrics from JSON fields
+  const speechPatterns = currentSession?.speechPatterns || {};
+  const bodyLanguageMetrics = currentSession?.bodyLanguageMetrics || {};
+  const voiceAnalysisMetrics = currentSession?.voiceMetrics || {};
+  const aiAnalysisData = currentSession?.aiAnalysis || {};
+  const emotionalIntelligence = currentSession?.emotionalIntelligence || {};
 
   if (isLoading) {
     return (
@@ -339,13 +346,13 @@ export default function EnhancedAnalysisWithTabs() {
                                 cx="64" cy="64" r="56"
                                 stroke="#3B82F6" strokeWidth="12" fill="none"
                                 strokeDasharray={`${2 * Math.PI * 56}`}
-                                strokeDashoffset={`${2 * Math.PI * 56 * (1 - (currentSession.confidenceScore || 0) / 100)}`}
+                                strokeDashoffset={`${2 * Math.PI * 56 * (1 - (currentSession.overallScore || currentSession.confidenceScore || 0))}`}
                                 className="transition-all duration-1000"
                               />
                             </svg>
                             <div className="absolute inset-0 flex items-center justify-center">
                               <span className="text-3xl font-bold">
-                                {Math.round((currentSession.confidenceScore || 0) * 100)}%
+                                {Math.round((currentSession.overallScore || currentSession.confidenceScore || 0) * 100)}%
                               </span>
                             </div>
                           </div>
@@ -354,23 +361,23 @@ export default function EnhancedAnalysisWithTabs() {
                           <div>
                             <div className="flex justify-between text-sm mb-1">
                               <span>Posture</span>
-                              <span>{currentSession.postureScore || 0}%</span>
+                              <span>{Math.round((currentSession.postureScore || 0) * 100)}%</span>
                             </div>
-                            <Progress value={currentSession.postureScore || 0} className="h-2" />
+                            <Progress value={Math.round((currentSession.postureScore || 0) * 100)} className="h-2" />
                           </div>
                           <div>
                             <div className="flex justify-between text-sm mb-1">
                               <span>Gestures</span>
-                              <span>{currentSession.gestureNaturalness || 0}%</span>
+                              <span>{Math.round((currentSession.gestureScore || 0) * 100)}%</span>
                             </div>
-                            <Progress value={currentSession.gestureNaturalness || 0} className="h-2" />
+                            <Progress value={Math.round((currentSession.gestureScore || 0) * 100)} className="h-2" />
                           </div>
                           <div>
                             <div className="flex justify-between text-sm mb-1">
                               <span>Eye Contact</span>
-                              <span>{currentSession.eyeContactScore || 0}%</span>
+                              <span>{parseFloat(currentSession.eyeContactScore || '0')}%</span>
                             </div>
-                            <Progress value={currentSession.eyeContactScore || 0} className="h-2" />
+                            <Progress value={parseFloat(currentSession.eyeContactScore || '0')} className="h-2" />
                           </div>
                         </div>
                       </div>
@@ -467,21 +474,22 @@ export default function EnhancedAnalysisWithTabs() {
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <p className="text-sm text-gray-600">Words Per Minute</p>
-                            <p className="text-2xl font-bold">{currentSession.averageWPM || 0}</p>
+                            <p className="text-2xl font-bold">{currentSession.averageWPM || currentSession.wordsPerMinute || 0}</p>
                             <Badge variant={
-                              currentSession.averageWPM > 140 && currentSession.averageWPM < 180 
+                              (currentSession.averageWPM || currentSession.wordsPerMinute || 0) > 140 && 
+                              (currentSession.averageWPM || currentSession.wordsPerMinute || 0) < 180 
                                 ? "default" 
                                 : "secondary"
                             }>
-                              {currentSession.averageWPM > 180 ? "Too Fast" : 
-                               currentSession.averageWPM < 140 ? "Too Slow" : "Optimal"}
+                              {(currentSession.averageWPM || currentSession.wordsPerMinute || 0) > 180 ? "Too Fast" : 
+                               (currentSession.averageWPM || currentSession.wordsPerMinute || 0) < 140 ? "Too Slow" : "Optimal"}
                             </Badge>
                           </div>
                           <div className="space-y-2">
                             <p className="text-sm text-gray-600">Filler Words</p>
-                            <p className="text-2xl font-bold">{currentSession.fillerWords || 0}</p>
-                            <Badge variant={currentSession.fillerWords < 5 ? "default" : "destructive"}>
-                              {currentSession.fillerWords < 5 ? "Excellent" : "Needs Work"}
+                            <p className="text-2xl font-bold">{currentSession.fillerWords || currentSession.fillerWordCount || 0}</p>
+                            <Badge variant={(currentSession.fillerWords || currentSession.fillerWordCount || 0) < 5 ? "default" : "destructive"}>
+                              {(currentSession.fillerWords || currentSession.fillerWordCount || 0) < 5 ? "Excellent" : "Needs Work"}
                             </Badge>
                           </div>
                         </div>
@@ -490,16 +498,30 @@ export default function EnhancedAnalysisWithTabs() {
                           <div>
                             <div className="flex justify-between mb-1">
                               <span className="text-sm">Clarity</span>
-                              <span className="text-sm font-medium">{currentSession.voiceClarity || 0}%</span>
+                              <span className="text-sm font-medium">{Math.round((currentSession.voiceClarity || currentSession.clarityScore || 0) * 100)}%</span>
                             </div>
-                            <Progress value={currentSession.voiceClarity || 0} className="h-2" />
+                            <Progress value={Math.round((currentSession.voiceClarity || currentSession.clarityScore || 0) * 100)} className="h-2" />
                           </div>
                           <div>
                             <div className="flex justify-between mb-1">
                               <span className="text-sm">Volume Consistency</span>
-                              <span className="text-sm font-medium">{currentSession.volumeConsistency || 0}%</span>
+                              <span className="text-sm font-medium">{Math.round((currentSession.volumeConsistency || 0) * 100)}%</span>
                             </div>
-                            <Progress value={currentSession.volumeConsistency || 0} className="h-2" />
+                            <Progress value={Math.round((currentSession.volumeConsistency || 0) * 100)} className="h-2" />
+                          </div>
+                          <div>
+                            <div className="flex justify-between mb-1">
+                              <span className="text-sm">Intonation</span>
+                              <span className="text-sm font-medium">{Math.round((currentSession.intonationScore || 0) * 100)}%</span>
+                            </div>
+                            <Progress value={Math.round((currentSession.intonationScore || 0) * 100)} className="h-2" />
+                          </div>
+                          <div>
+                            <div className="flex justify-between mb-1">
+                              <span className="text-sm">Pace Score</span>
+                              <span className="text-sm font-medium">{Math.round((currentSession.paceScore || 0) * 100)}%</span>
+                            </div>
+                            <Progress value={Math.round((currentSession.paceScore || 0) * 100)} className="h-2" />
                           </div>
                         </div>
                       </div>
@@ -522,13 +544,31 @@ export default function EnhancedAnalysisWithTabs() {
                       {/* Transcript Stats */}
                       <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
                         <Badge variant="secondary">
-                          {currentSession.fillerWords || 0} Filler Words
+                          {currentSession.fillerWords || currentSession.fillerWordCount || 0} Total Filler Words
                         </Badge>
+                        {currentSession.fillerWordsUh !== undefined && (
+                          <Badge variant="outline">
+                            {currentSession.fillerWordsUh} "Uh"
+                          </Badge>
+                        )}
+                        {currentSession.fillerWordsLike !== undefined && (
+                          <Badge variant="outline">
+                            {currentSession.fillerWordsLike} "Like"
+                          </Badge>
+                        )}
+                        {currentSession.fillerWordsSo !== undefined && (
+                          <Badge variant="outline">
+                            {currentSession.fillerWordsSo} "So"
+                          </Badge>
+                        )}
                         <Badge variant="secondary">
-                          {currentSession.averageWPM || 0} WPM
+                          {currentSession.averageWPM || currentSession.wordsPerMinute || 0} WPM
                         </Badge>
                         <Badge variant="secondary">
                           {formatTime(currentSession.duration || 0)} Duration
+                        </Badge>
+                        <Badge variant="secondary">
+                          {currentSession.pauseCount || 0} Pauses
                         </Badge>
                       </div>
 
@@ -582,19 +622,19 @@ export default function EnhancedAnalysisWithTabs() {
                               cx="64" cy="64" r="56"
                               stroke="#EF4444" strokeWidth="12" fill="none"
                               strokeDasharray={`${2 * Math.PI * 56}`}
-                              strokeDashoffset={`${2 * Math.PI * 56 * (1 - (aiInsights?.emotionalScore || 0) / 100)}`}
+                              strokeDashoffset={`${2 * Math.PI * 56 * (1 - (currentSession.persuasivenessScore || aiInsights?.emotionalScore || 0) / 100)}`}
                               className="transition-all duration-1000"
                             />
                           </svg>
                           <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-3xl font-bold">{aiInsights?.emotionalScore || 0}%</span>
+                            <span className="text-3xl font-bold">{Math.round((currentSession.persuasivenessScore || aiInsights?.emotionalScore || 0) * 100)}%</span>
                           </div>
                         </div>
                       </div>
                       <p className="text-center mt-4 text-gray-600">
-                        {aiInsights?.emotionalScore >= 80 ? "Highly Engaging" :
-                         aiInsights?.emotionalScore >= 60 ? "Good Connection" :
-                         aiInsights?.emotionalScore >= 40 ? "Moderate Impact" :
+                        {(currentSession.persuasivenessScore || aiInsights?.emotionalScore || 0) >= 0.8 ? "Highly Engaging" :
+                         (currentSession.persuasivenessScore || aiInsights?.emotionalScore || 0) >= 0.6 ? "Good Connection" :
+                         (currentSession.persuasivenessScore || aiInsights?.emotionalScore || 0) >= 0.4 ? "Moderate Impact" :
                          "Needs Improvement"}
                       </p>
                     </CardContent>
@@ -605,22 +645,67 @@ export default function EnhancedAnalysisWithTabs() {
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <Zap className="w-5 h-5 text-yellow-500" />
-                        Emotional Insights
+                        Emotional Insights & Analysis
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      {aiInsights?.emotionalInsights ? (
-                        <div className="space-y-3">
-                          {aiInsights.emotionalInsights.map((insight: string, index: number) => (
-                            <Alert key={index}>
-                              <Info className="h-4 w-4" />
-                              <AlertDescription>{insight}</AlertDescription>
-                            </Alert>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="text-gray-500">Generate AI insights to see emotional analysis.</p>
-                      )}
+                      <div className="space-y-4">
+                        {/* Show emotional intelligence metrics if available */}
+                        {emotionalIntelligence && Object.keys(emotionalIntelligence).length > 0 && (
+                          <div className="grid grid-cols-2 gap-3 pb-3 border-b">
+                            {emotionalIntelligence.audienceConnection && (
+                              <div>
+                                <p className="text-sm text-gray-600">Audience Connection</p>
+                                <p className="text-lg font-semibold">{Math.round(emotionalIntelligence.audienceConnection * 100)}%</p>
+                              </div>
+                            )}
+                            {emotionalIntelligence.emotionalRange && (
+                              <div>
+                                <p className="text-sm text-gray-600">Emotional Range</p>
+                                <p className="text-lg font-semibold">{Math.round(emotionalIntelligence.emotionalRange * 100)}%</p>
+                              </div>
+                            )}
+                            {emotionalIntelligence.authenticity && (
+                              <div>
+                                <p className="text-sm text-gray-600">Authenticity</p>
+                                <p className="text-lg font-semibold">{Math.round(emotionalIntelligence.authenticity * 100)}%</p>
+                              </div>
+                            )}
+                            {emotionalIntelligence.impact && (
+                              <div>
+                                <p className="text-sm text-gray-600">Impact</p>
+                                <p className="text-lg font-semibold">{Math.round(emotionalIntelligence.impact * 100)}%</p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        
+                        {/* Show coaching tips if available */}
+                        {currentSession.coachingTips && currentSession.coachingTips.length > 0 ? (
+                          <div className="space-y-2">
+                            <p className="text-sm font-medium text-gray-700">Coaching Tips:</p>
+                            {currentSession.coachingTips.slice(0, 3).map((tip: string, index: number) => (
+                              <Alert key={index} className="border-blue-200 bg-blue-50">
+                                <CheckCircle className="h-4 w-4 text-blue-600" />
+                                <AlertDescription className="text-blue-800">{tip}</AlertDescription>
+                              </Alert>
+                            ))}
+                          </div>
+                        ) : (
+                          aiInsights?.emotionalInsights ? (
+                            <div className="space-y-3">
+                              {aiInsights.emotionalInsights.map((insight: string, index: number) => (
+                                <Alert key={index}>
+                                  <Info className="h-4 w-4" />
+                                  <AlertDescription>{insight}</AlertDescription>
+                                </Alert>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-gray-500">Click "Generate AI Insights" to see detailed emotional analysis.</p>
+                          )
+                        )}
+                      </div>
                     </CardContent>
                   </Card>
                 </div>
@@ -732,16 +817,16 @@ export default function EnhancedAnalysisWithTabs() {
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t">
                         <div className="text-center">
                           <p className="text-2xl font-bold">
-                            {Math.round((currentSession.confidenceScore || 0) * 100)}%
+                            {Math.round((currentSession.overallScore || currentSession.confidenceScore || 0) * 100)}%
                           </p>
                           <p className="text-sm text-gray-600">Overall Score</p>
                         </div>
                         <div className="text-center">
-                          <p className="text-2xl font-bold">{currentSession.averageWPM || 0}</p>
+                          <p className="text-2xl font-bold">{currentSession.averageWPM || currentSession.wordsPerMinute || 0}</p>
                           <p className="text-sm text-gray-600">Words/Min</p>
                         </div>
                         <div className="text-center">
-                          <p className="text-2xl font-bold">{currentSession.fillerWords || 0}</p>
+                          <p className="text-2xl font-bold">{currentSession.fillerWords || currentSession.fillerWordCount || 0}</p>
                           <p className="text-sm text-gray-600">Filler Words</p>
                         </div>
                         <div className="text-center">
@@ -749,6 +834,22 @@ export default function EnhancedAnalysisWithTabs() {
                           <p className="text-sm text-gray-600">Duration</p>
                         </div>
                       </div>
+                      
+                      {/* Additional session details */}
+                      {(currentSession.purpose || currentSession.name) && (
+                        <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                          {currentSession.name && (
+                            <p className="text-sm">
+                              <span className="font-medium">Session Name:</span> {currentSession.name}
+                            </p>
+                          )}
+                          {currentSession.purpose && (
+                            <p className="text-sm mt-1">
+                              <span className="font-medium">Purpose:</span> {currentSession.purpose}
+                            </p>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -766,27 +867,59 @@ export default function EnhancedAnalysisWithTabs() {
                   onClick={() => setSelectedSession(session.id.toString())}>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
-                  <span>Session {session.id}</span>
+                  <span>Session {session.sessionNumber || session.id}</span>
                   <Badge>{new Date(session.createdAt).toLocaleDateString()}</Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Duration</span>
-                    <span className="font-medium">{formatTime(session.duration || 0)}</span>
+                <div className="space-y-3">
+                  {/* Session name/purpose if available */}
+                  {(session.name || session.purpose) && (
+                    <div className="pb-2 border-b">
+                      {session.name && (
+                        <p className="text-sm font-medium text-gray-900 truncate">{session.name}</p>
+                      )}
+                      {session.purpose && (
+                        <p className="text-xs text-gray-600 truncate">{session.purpose}</p>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Key metrics */}
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <p className="text-gray-600">Duration</p>
+                      <p className="font-semibold">{formatTime(session.duration || 0)}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">WPM</p>
+                      <p className="font-semibold">{session.averageWPM || session.wordsPerMinute || 0}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Overall</p>
+                      <p className="font-semibold">{Math.round((session.overallScore || session.confidenceScore || 0) * 100)}%</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Filler Words</p>
+                      <p className="font-semibold">{session.fillerWords || session.fillerWordCount || 0}</p>
+                    </div>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span>WPM</span>
-                    <span className="font-medium">{session.averageWPM || 0}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Confidence</span>
-                    <span className="font-medium">{Math.round((session.confidenceScore || 0) * 100)}%</span>
+                  
+                  {/* Performance indicators */}
+                  <div className="flex gap-2 flex-wrap">
+                    {session.voiceClarity && session.voiceClarity > 0.8 && (
+                      <Badge variant="default" className="text-xs">Clear Voice</Badge>
+                    )}
+                    {(session.fillerWords || session.fillerWordCount || 0) < 5 && (
+                      <Badge variant="default" className="text-xs">Minimal Fillers</Badge>
+                    )}
+                    {session.eyeContactScore && parseFloat(session.eyeContactScore) > 80 && (
+                      <Badge variant="default" className="text-xs">Good Eye Contact</Badge>
+                    )}
                   </div>
                 </div>
                 <Button className="w-full mt-4" variant="outline">
-                  View Details
+                  View Analysis
                 </Button>
               </CardContent>
             </Card>
