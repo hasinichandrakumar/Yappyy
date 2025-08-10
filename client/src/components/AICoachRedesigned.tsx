@@ -20,6 +20,7 @@ import {
   Briefcase, FileText
 } from 'lucide-react';
 import AICoachIcon from './AICoachIcon';
+import AIInsightsAnalytics from './AIInsightsComponent';
 import { useAuth } from '@/hooks/useAuth';
 import { apiRequest } from '@/lib/queryClient';
 import { useQuery, useMutation } from '@tanstack/react-query';
