@@ -5,6 +5,7 @@ import { eq, desc, asc, sql, max, not, and } from "drizzle-orm";
 import { storage } from "./storage";
 import { salesBusinessAnalysisEngine } from "./sales-business-analysis-engine";
 import { ultraDetailedContentAnalyzer } from "./ultra-detailed-content-analyzer";
+import { emotionalImpactAnalyzer } from "./emotional-impact-analyzer";
 import { advancedFillerDetectionEngine } from "./advanced-filler-detection";
 import { RealTimeSessionManager } from "./redis-realtime";
 import { insertPracticeSessionSchema, insertCoachingFeedbackSchema, insertCustomTemplateSchema, practiceSessions } from "@shared/schema";
@@ -1021,6 +1022,29 @@ Make the content more engaging, natural, and personalized while keeping the same
       
       console.log('🧠 Generating comprehensive AI insights for session analysis...');
       
+      // Generate comprehensive emotional impact analysis
+      const emotionalAnalysis = emotionalImpactAnalyzer.analyzeEmotionalImpact(
+        sessionData.transcript || '',
+        {
+          pitchRange: sessionData.voiceAnalysis?.pitchVariation || 50,
+          volumeRange: sessionData.voiceAnalysis?.volumeVariation || 50,
+          wordsPerMinute: wpm || 150,
+          clarity: sessionData.voiceAnalysis?.clarity || 70,
+          confidence: sessionData.voiceAnalysis?.confidence || 70
+        },
+        {
+          gestureCount: sessionData.bodyLanguage?.gestureCount || 5,
+          facialExpressions: sessionData.facialAnalysis || {},
+          eyeContactPercentage: sessionData.bodyLanguage?.eyeContactScore || 60,
+          postureScore: sessionData.bodyLanguage?.postureScore || 70,
+          movementEnergy: sessionData.bodyLanguage?.movementEnergy || 50
+        },
+        sessionData.sessionPurpose || sessionData.purpose || 'General speaking practice',
+        duration || 300
+      );
+      
+      console.log('🎭 Generated comprehensive emotional impact analysis');
+      
       // Enhanced AI analysis with OpenAI GPT-4o
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -1087,6 +1111,47 @@ Make the content more engaging, natural, and personalized while keeping the same
                     "description": "Specific actionable recommendation"
                   }
                 ],
+                "emotionalImpact": {
+                  "overallScore": number (0-100),
+                  "acousticEmotions": {
+                    "pitchVariation": number (0-100),
+                    "volumeDynamics": number (0-100),
+                    "speechRateEmotions": number (0-100),
+                    "voiceQualityMarkers": number (0-100),
+                    "insights": "detailed acoustic emotion analysis"
+                  },
+                  "bodyLanguageEmotions": {
+                    "gestureExpressiveness": number (0-100),
+                    "facialExpressionRange": number (0-100),
+                    "eyeContactEmotions": number (0-100),
+                    "postureEmotionalState": number (0-100),
+                    "insights": "comprehensive body language emotional assessment"
+                  },
+                  "contextualEmotions": {
+                    "topicEmotionalAlignment": number (0-100),
+                    "audienceEmotionalResonance": number (0-100),
+                    "settingAppropriateEmotions": number (0-100),
+                    "insights": "contextual emotional appropriateness analysis"
+                  },
+                  "emotionalJourney": {
+                    "openingEmotionalHook": number (0-100),
+                    "emotionalProgression": number (0-100),
+                    "peakEmotionalMoments": number (0-100),
+                    "emotionalClosing": number (0-100),
+                    "insights": "emotional arc and progression analysis"
+                  },
+                  "primaryEmotions": ["emotion1", "emotion2"],
+                  "authenticityMarkers": ["marker1", "marker2"],
+                  "emotionalRecommendations": [
+                    {
+                      "category": "acoustic/body_language/contextual/journey",
+                      "priority": "critical/high/medium",
+                      "title": "Recommendation Title",
+                      "description": "Specific emotional enhancement strategy",
+                      "expectedImpact": "Emotional connection and engagement improvement"
+                    }
+                  ]
+                },
                 "progressSummary": "Strategic development roadmap with measurable business communication milestones"
               }`
             },
@@ -1209,6 +1274,70 @@ Evaluate how well this speech achieved its stated PURPOSE with the depth and det
       
       try {
         analysis = JSON.parse(data.choices[0].message.content);
+        
+        // Add comprehensive emotional impact analysis to the response
+        analysis.emotionalImpact = {
+          overallScore: emotionalAnalysis.overallEmotionalScore,
+          acousticEmotions: {
+            pitchVariation: emotionalAnalysis.acousticAnalysis.pitchVariation,
+            volumeDynamics: emotionalAnalysis.acousticAnalysis.volumeDynamics,
+            speechRateEmotions: emotionalAnalysis.acousticAnalysis.speechRateEmotions,
+            voiceQualityMarkers: emotionalAnalysis.acousticAnalysis.voiceQualityMarkers,
+            insights: `Acoustic analysis reveals ${emotionalAnalysis.acousticAnalysis.pitchVariation > 70 ? 'excellent' : emotionalAnalysis.acousticAnalysis.pitchVariation > 50 ? 'good' : 'developing'} emotional expressiveness through vocal variety and pitch modulation.`
+          },
+          bodyLanguageEmotions: {
+            gestureExpressiveness: emotionalAnalysis.bodyLanguageImpact.gestureExpressiveness,
+            facialExpressionRange: emotionalAnalysis.bodyLanguageImpact.facialExpressionRange,
+            eyeContactEmotions: emotionalAnalysis.bodyLanguageImpact.eyeContactEmotions,
+            postureEmotionalState: emotionalAnalysis.bodyLanguageImpact.postureEmotionalState,
+            insights: `Body language assessment shows ${emotionalAnalysis.bodyLanguageImpact.gestureExpressiveness > 70 ? 'strong' : emotionalAnalysis.bodyLanguageImpact.gestureExpressiveness > 50 ? 'moderate' : 'emerging'} emotional communication through gestures and facial expressions.`
+          },
+          contextualEmotions: {
+            topicEmotionalAlignment: emotionalAnalysis.contextualEmotionalFit.topicEmotionalAlignment,
+            audienceEmotionalResonance: emotionalAnalysis.contextualEmotionalFit.audienceEmotionalResonance,
+            settingAppropriateEmotions: emotionalAnalysis.contextualEmotionalFit.settingAppropriateEmotions,
+            insights: `Contextual emotional analysis indicates ${emotionalAnalysis.contextualEmotionalFit.topicEmotionalAlignment > 70 ? 'excellent' : emotionalAnalysis.contextualEmotionalFit.topicEmotionalAlignment > 50 ? 'good' : 'developing'} alignment between emotional expression and speech purpose.`
+          },
+          emotionalJourney: {
+            openingEmotionalHook: emotionalAnalysis.emotionalJourney.openingEmotionalHook,
+            emotionalProgression: emotionalAnalysis.emotionalJourney.emotionalProgression,
+            peakEmotionalMoments: emotionalAnalysis.emotionalJourney.peakEmotionalMoments,
+            emotionalClosing: emotionalAnalysis.emotionalJourney.emotionalClosing,
+            insights: `Emotional journey analysis shows ${emotionalAnalysis.emotionalJourney.emotionalProgression > 70 ? 'compelling' : emotionalAnalysis.emotionalJourney.emotionalProgression > 50 ? 'solid' : 'developing'} emotional arc with ${emotionalAnalysis.emotionalJourney.peakEmotionalMoments > 60 ? 'strong peak moments' : 'opportunities for more emotional climaxes'}.`
+          },
+          primaryEmotions: emotionalAnalysis.detailedEmotionalInsights.primaryEmotions,
+          authenticityMarkers: emotionalAnalysis.detailedEmotionalInsights.authenticityMarkers,
+          emotionalRecommendations: [
+            {
+              category: "acoustic",
+              priority: emotionalAnalysis.acousticAnalysis.pitchVariation < 60 ? "high" : "medium",
+              title: "Vocal Emotional Expression",
+              description: emotionalAnalysis.acousticAnalysis.pitchVariation < 60 ? 
+                "Increase vocal variety and pitch modulation to convey emotions more effectively. Practice speaking with different emotional tones." :
+                "Continue developing vocal expressiveness with focus on matching emotions to content.",
+              expectedImpact: "Enhanced emotional connection and audience engagement through vocal variety"
+            },
+            {
+              category: "body_language",
+              priority: emotionalAnalysis.bodyLanguageImpact.gestureExpressiveness < 65 ? "high" : "medium",
+              title: "Physical Emotional Expression",
+              description: emotionalAnalysis.bodyLanguageImpact.gestureExpressiveness < 65 ?
+                "Use more expressive gestures and facial expressions to convey emotions authentically. Practice emotional storytelling with full-body engagement." :
+                "Refine gesture timing and facial expression coordination for maximum emotional impact.",
+              expectedImpact: "Stronger emotional communication through body language and physical presence"
+            },
+            {
+              category: "contextual",
+              priority: emotionalAnalysis.contextualEmotionalFit.topicEmotionalAlignment < 70 ? "high" : "medium", 
+              title: "Contextual Emotional Alignment",
+              description: emotionalAnalysis.contextualEmotionalFit.topicEmotionalAlignment < 70 ?
+                "Better align emotional expression with speech purpose and audience expectations. Research emotional strategies for your specific speaking context." :
+                "Continue fine-tuning emotional appropriateness for different audiences and settings.",
+              expectedImpact: "More effective emotional resonance tailored to specific speaking contexts"
+            }
+          ]
+        };
+        
       } catch (parseError) {
         console.warn('⚠️ JSON parsing failed, providing structured fallback...');
         analysis = {
@@ -1219,7 +1348,48 @@ Evaluate how well this speech achieved its stated PURPOSE with the depth and det
             improvements: sessionData.clarityScore > 0 ? ["Pace variation", "Vocal emphasis"] : ["Complete practice session for voice analysis"],
             insights: sessionData.clarityScore > 0 ? "Voice performance shows consistent quality with opportunities for dynamic expression enhancement." : "Complete practice session to receive voice analysis."
           },
-          progressSummary: "Continue practicing to build on these speaking fundamentals."
+          progressSummary: "Continue practicing to build on these speaking fundamentals.",
+          emotionalImpact: {
+            overallScore: emotionalAnalysis.overallEmotionalScore,
+            acousticEmotions: {
+              pitchVariation: emotionalAnalysis.acousticAnalysis.pitchVariation,
+              volumeDynamics: emotionalAnalysis.acousticAnalysis.volumeDynamics,
+              speechRateEmotions: emotionalAnalysis.acousticAnalysis.speechRateEmotions,
+              voiceQualityMarkers: emotionalAnalysis.acousticAnalysis.voiceQualityMarkers,
+              insights: "Acoustic emotional analysis shows development opportunities in vocal variety and emotional expressiveness."
+            },
+            bodyLanguageEmotions: {
+              gestureExpressiveness: emotionalAnalysis.bodyLanguageImpact.gestureExpressiveness,
+              facialExpressionRange: emotionalAnalysis.bodyLanguageImpact.facialExpressionRange,
+              eyeContactEmotions: emotionalAnalysis.bodyLanguageImpact.eyeContactEmotions,
+              postureEmotionalState: emotionalAnalysis.bodyLanguageImpact.postureEmotionalState,
+              insights: "Body language emotional assessment indicates potential for enhanced emotional communication through physical expression."
+            },
+            contextualEmotions: {
+              topicEmotionalAlignment: emotionalAnalysis.contextualEmotionalFit.topicEmotionalAlignment,
+              audienceEmotionalResonance: emotionalAnalysis.contextualEmotionalFit.audienceEmotionalResonance,
+              settingAppropriateEmotions: emotionalAnalysis.contextualEmotionalFit.settingAppropriateEmotions,
+              insights: "Contextual emotional analysis suggests opportunities to better align emotional expression with speech purpose."
+            },
+            emotionalJourney: {
+              openingEmotionalHook: emotionalAnalysis.emotionalJourney.openingEmotionalHook,
+              emotionalProgression: emotionalAnalysis.emotionalJourney.emotionalProgression,
+              peakEmotionalMoments: emotionalAnalysis.emotionalJourney.peakEmotionalMoments,
+              emotionalClosing: emotionalAnalysis.emotionalJourney.emotionalClosing,
+              insights: "Emotional journey analysis shows opportunities to create stronger emotional arc and memorable moments."
+            },
+            primaryEmotions: emotionalAnalysis.detailedEmotionalInsights.primaryEmotions,
+            authenticityMarkers: emotionalAnalysis.detailedEmotionalInsights.authenticityMarkers,
+            emotionalRecommendations: [
+              {
+                category: "acoustic",
+                priority: "medium",
+                title: "Vocal Emotional Development",
+                description: "Focus on developing vocal variety and emotional expressiveness through pitch and tone modulation.",
+                expectedImpact: "Enhanced emotional connection and audience engagement"
+              }
+            ]
+          }
         };
       }
       
