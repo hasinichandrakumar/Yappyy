@@ -1156,7 +1156,7 @@ Make the content more engaging, natural, and personalized while keeping the same
         {
           gestureCount: sessionData.bodyLanguage?.gestureCount || 5,
           facialExpressions: sessionData.facialAnalysis || {},
-          eyeContactPercentage: sessionData.bodyLanguage?.eyeContactScore || sessionData.eyeContactScore || 60,
+          eyeContactPercentage: Number(sessionData.bodyLanguage?.eyeContactScore ?? sessionData.eyeContactScore ?? 0),
           postureScore: sessionData.bodyLanguage?.postureScore || sessionData.bodyLanguage?.overallPresence || 70,
           movementEnergy: sessionData.bodyLanguage?.movementEnergy || 50
         },

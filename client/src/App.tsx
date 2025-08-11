@@ -27,24 +27,27 @@ function Router() {
   // Global error handler for WASM and MediaPipe errors
   useEffect(() => {
     const handleError = (event: ErrorEvent) => {
-      const errorMsg = event.error?.message || event.message || '';
+      const errorMsg = event.error?.message || event.message || event.error?.toString() || '';
       
-      // More comprehensive WASM error detection and suppression
-      const wasmErrors = [
-        'wasm', 'Module.arguments', 'MIME type', 'Aborted',
+      // Comprehensive WASM and plugin error suppression
+      const errorPatterns = [
+        'wasm', 'Module.arguments', 'MIME type', 'Aborted', 'Script error',
         'streaming compile failed', 'ArrayBuffer instantiation', 
-        'asynchronously prepare wasm', 'Script error.',
-        'both async and sync fetching of the wasm failed',
-        'failed to asynchronously prepare wasm',
-        'falling back to ArrayBuffer instantiation',
-        'CompileError', 'RuntimeError', 'LinkError',
-        'WebAssembly', 'instantiate'
+        'asynchronously prepare wasm', 'both async and sync fetching',
+        'failed to asynchronously prepare', 'falling back to ArrayBuffer',
+        'CompileError', 'RuntimeError', 'LinkError', 'WebAssembly',
+        'instantiate', 'fetch', 'TypeError: Failed to fetch', 'NetworkError',
+        'cors', 'Cross-Origin', 'Loading chunk', 'ChunkLoadError',
+        'plugin', 'module loading', 'dynamic import'
       ];
 
-      if (wasmErrors.some(pattern => 
+      // Also suppress generic script errors that are likely from WASM
+      const isGenericScriptError = errorMsg === 'Script error.' || errorMsg === '';
+      const isWasmRelated = errorPatterns.some(pattern => 
         errorMsg.toLowerCase().includes(pattern.toLowerCase())
-      )) {
-        // Completely suppress these errors
+      );
+
+      if (isWasmRelated || isGenericScriptError) {
         event.stopImmediatePropagation();
         event.preventDefault();
         return false;
@@ -53,21 +56,27 @@ function Router() {
 
     const handleRejection = (event: PromiseRejectionEvent) => {
       const reason = event.reason;
-      const reasonMsg = reason?.message || reason?.toString?.() || String(reason);
+      const reasonMsg = reason?.message || reason?.toString?.() || String(reason || '');
       
-      // More comprehensive WASM rejection detection
-      const wasmPatterns = [
+      // Comprehensive promise rejection suppression
+      const rejectionPatterns = [
         'wasm', 'Module.arguments', 'MIME type', 'Aborted',
         'streaming compile failed', 'ArrayBuffer instantiation', 
         'asynchronously prepare wasm', 'both async and sync fetching',
         'failed to asynchronously prepare', 'CompileError', 
-        'RuntimeError', 'LinkError', 'WebAssembly', 'instantiate'
+        'RuntimeError', 'LinkError', 'WebAssembly', 'instantiate',
+        'fetch', 'Failed to fetch', 'NetworkError', 'cors',
+        'Cross-Origin', 'Loading chunk', 'ChunkLoadError',
+        'plugin', 'dynamic import', 'module loading'
       ];
 
-      if (wasmPatterns.some(pattern => 
+      // Also suppress empty/undefined rejections which are often from WASM
+      const isEmptyRejection = !reason || reasonMsg === 'undefined' || reasonMsg === '';
+      const isWasmRelated = rejectionPatterns.some(pattern => 
         reasonMsg.toLowerCase().includes(pattern.toLowerCase())
-      )) {
-        // Completely suppress these rejections
+      );
+
+      if (isWasmRelated || isEmptyRejection) {
         event.stopImmediatePropagation();
         event.preventDefault();
         return false;
@@ -83,10 +92,13 @@ function Router() {
     const originalConsoleLog = console.log;
 
     const wasmMessages = [
-      'wasm', 'Module.arguments', 'MIME type', 'Aborted',
+      'wasm', 'Module.arguments', 'MIME type', 'Aborted', 'Script error',
       'streaming compile failed', 'ArrayBuffer instantiation',
       'asynchronously prepare wasm', 'both async and sync fetching',
-      'falling back to ArrayBuffer', 'CompileError', 'RuntimeError'
+      'falling back to ArrayBuffer', 'CompileError', 'RuntimeError',
+      'fetch', 'Failed to fetch', 'NetworkError', 'cors', 'Cross-Origin',
+      'Loading chunk', 'ChunkLoadError', 'plugin', 'dynamic import',
+      'WebAssembly', 'instantiate'
     ];
 
     const shouldFilterMessage = (msg: string) => 

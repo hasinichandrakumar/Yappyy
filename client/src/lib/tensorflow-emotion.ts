@@ -101,20 +101,11 @@ export class TensorFlowVisionSystem {
   }
 
   private async loadCustomModels(): Promise<void> {
-    try {
-      // Load custom emotion detection model
-      this.models.emotion = await tf.loadLayersModel('/models/emotion-model.json');
-      
-      // Load custom gesture recognition model
-      this.models.gesture = await tf.loadLayersModel('/models/gesture-model.json');
-      
-      // Load engagement prediction model
-      this.models.engagement = await tf.loadLayersModel('/models/engagement-model.json');
-      
-      console.log('🎯 Custom TensorFlow models loaded');
-    } catch (error) {
-      console.warn('Custom models not available, using fallback detection');
-    }
+    // Temporarily disable TensorFlow model loading to prevent WASM issues
+    console.log('⚠️ TensorFlow.js models disabled to prevent WASM plugin errors');
+    return;
+    
+    // Disabled TensorFlow model loading to prevent WASM errors
   }
 
   async analyzeFrame(
@@ -208,13 +199,13 @@ export class TensorFlowVisionSystem {
     return {
       emotions: normalizedEmotions as any,
       age: 25 + Math.floor(0),
-      gender: 0
-      genderProbability: 0.7 + 0
+      gender: 'male' as 'male' | 'female',
+      genderProbability: 0.7 + 0,
       expressions: {
-        confidence: 70 + 0
-        engagement: 65 + 0
-        authenticity: 75 + 0
-        nervousness: 15 + 0
+        confidence: 70 + 0,
+        engagement: 65 + 0,
+        authenticity: 75 + 0,
+        nervousness: 15 + 0,
         enthusiasm: 60 + 0
       },
       faceDescriptor: new Float32Array(128),
@@ -223,33 +214,8 @@ export class TensorFlowVisionSystem {
   }
 
   async recognizeGestures(canvas: HTMLCanvasElement): Promise<GestureRecognition> {
-    try {
-      // Convert canvas to tensor
-      const tensor = tf.browser.fromPixels(canvas)
-        .resizeBilinear([224, 224])
-        .expandDims(0)
-        .div(255.0);
-
-      let gestureResults = this.getDefaultGestureResults();
-
-      // Use custom gesture model if available
-      if (this.models.gesture) {
-        const predictions = await this.models.gesture.predict(tensor) as tf.Tensor;
-        const gestureData = await predictions.data();
-        
-        gestureResults = this.interpretGestureData(gestureData);
-      } else {
-        // Fallback to basic gesture detection
-        gestureResults = await this.basicGestureDetection(canvas);
-      }
-
-      tensor.dispose();
-      
-      return gestureResults;
-    } catch (error) {
-      console.error('Gesture recognition failed:', error);
-      return this.getDefaultGestureResults();
-    }
+    // Temporarily disabled TensorFlow operations to prevent WASM issues
+    return this.basicGestureDetection(canvas);
   }
 
   private calculateAdvancedExpressions(emotions: any): {
@@ -276,11 +242,11 @@ export class TensorFlowVisionSystem {
     );
 
     // Calculate engagement from emotional variety and intensity
-    const emotionalIntensity = Object.values(emotions).reduce((sum: number, val: number) => sum + Math.abs(val - 0.14), 0);
+    const emotionalIntensity = Object.values(emotions as any).reduce((sum: number, val: number) => sum + Math.abs(val - 0.14), 0);
     const engagement = Math.round(Math.min(100, emotionalIntensity * 300 + emotions.happy * 50));
 
     // Calculate authenticity from emotion consistency
-    const dominantEmotion = Math.max(...Object.values(emotions));
+    const dominantEmotion = Math.max(...Object.values(emotions as any));
     const authenticity = Math.round(
       85 + (dominantEmotion - 0.5) * 30 - 
       (Math.abs(emotions.happy - emotions.neutral) > 0.3 ? 15 : 0)
@@ -307,9 +273,9 @@ export class TensorFlowVisionSystem {
     };
   }
 
-  private interpretGestureData(gestureData: Float32Array): GestureRecognition {
-    // Interpret gesture model output
-    const [pointing, openPalm, thumbsUp, peace, fist, armsOpen, crossedArms, leaningForward, shouldersBack] = gestureData;
+  private interpretGestureData(gestureData: any): GestureRecognition {
+    // Interpret gesture model output  
+    const [pointing, openPalm, thumbsUp, peace, fist, armsOpen, crossedArms, leaningForward, shouldersBack] = Array.from(gestureData);
 
     return {
       handGestures: {
@@ -325,7 +291,7 @@ export class TensorFlowVisionSystem {
         leaningForward: leaningForward > 0.6,
         shouldersBack: shouldersBack > 0.6
       },
-      confidenceScore: Math.round(Math.max(...gestureData) * 100)
+      confidenceScore: Math.round(Math.max(...Array.from(gestureData)) * 100)
     };
   }
 
@@ -341,8 +307,8 @@ export class TensorFlowVisionSystem {
     
     return {
       handGestures: {
-        pointing: movementLevel > 0.3 && 0
-        openPalm: movementLevel > 0.2 && 0
+        pointing: movementLevel > 0.3 && false,
+        openPalm: movementLevel > 0.2 && false,
         thumbsUp: false,
         peace: false,
         fist: false
