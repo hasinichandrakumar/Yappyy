@@ -183,19 +183,21 @@ export class EmotionalImpactAnalyzer {
   private analyzePitchEmotions(audioMetrics: any): number {
     // High-activity emotions (happiness, excitement) = higher pitch variation
     // Low-activity emotions (sadness, calm) = lower pitch variation
-    const pitchRange = audioMetrics?.pitchRange || 50;
-    const pitchVariability = audioMetrics?.pitchVariability || 50;
+    const pitchRange = audioMetrics?.pitchRange || audioMetrics?.intonation || 50;
+    const pitchVariability = audioMetrics?.pitchVariability || audioMetrics?.pitchVariation || 50;
     
     // More variation indicates stronger emotional expression
-    return Math.min((pitchRange + pitchVariability) / 2, 100);
+    const score = Math.min((pitchRange + pitchVariability) / 2, 100);
+    return Math.max(0, score); // Ensure non-negative
   }
   
   private analyzeVolumeEmotions(audioMetrics: any): number {
     // Dynamic volume changes indicate emotional engagement
-    const volumeRange = audioMetrics?.volumeRange || 50;
+    const volumeRange = audioMetrics?.volumeRange || audioMetrics?.volume || 50;
     const volumeVariability = audioMetrics?.volumeVariability || 50;
     
-    return Math.min((volumeRange + volumeVariability) / 2, 100);
+    const score = Math.min((volumeRange + volumeVariability) / 2, 100);
+    return Math.max(0, score); // Ensure non-negative
   }
   
   private analyzeSpeechRateEmotions(audioMetrics: any, transcript: string): number {
@@ -212,11 +214,15 @@ export class EmotionalImpactAnalyzer {
   
   private analyzeVoiceQualityEmotions(audioMetrics: any): number {
     // Voice clarity and warmth indicate emotional authenticity
-    const clarity = audioMetrics?.clarity || 70;
-    const warmth = audioMetrics?.warmth || 70;
-    const confidence = audioMetrics?.confidence || 70;
+    const clarity = audioMetrics?.clarity || 0;
+    const warmth = audioMetrics?.warmth || audioMetrics?.intonation || 0;
+    const confidence = audioMetrics?.confidence || 0;
     
-    return (clarity + warmth + confidence) / 3;
+    // Only calculate if we have real data
+    if (clarity > 0 || confidence > 0) {
+      return (clarity + warmth + confidence) / 3;
+    }
+    return 0; // Return 0 if no real data
   }
   
   private calculateEmotionalRange(audioMetrics: any, transcript: string): number {
@@ -230,14 +236,18 @@ export class EmotionalImpactAnalyzer {
   // Body language analysis methods
   private analyzeGestureEmotions(bodyLanguageData: any): number {
     const gestureCount = bodyLanguageData?.gestureCount || 0;
-    const gestureVariety = bodyLanguageData?.gestureVariety || 50;
-    const gestureExpressiveness = bodyLanguageData?.expressiveness || 50;
+    const gestureVariety = bodyLanguageData?.gestureVariety || 0;
+    const gestureExpressiveness = bodyLanguageData?.expressiveness || 0;
     
-    // Optimal: 8-15 gestures per minute with good variety
-    const gestureRate = gestureCount / 5; // Assume 5-minute speech
-    let gestureScore = gestureRate >= 8 && gestureRate <= 15 ? 80 : 60;
-    
-    return Math.min((gestureScore + gestureVariety + gestureExpressiveness) / 3, 100);
+    // Only calculate if we have real gesture data
+    if (gestureCount > 0) {
+      // Optimal: 8-15 gestures per minute with good variety
+      const gestureRate = gestureCount / 5; // Assume 5-minute speech
+      let gestureScore = gestureRate >= 8 && gestureRate <= 15 ? 80 : 60;
+      
+      return Math.min((gestureScore + gestureVariety + gestureExpressiveness) / 3, 100);
+    }
+    return 0; // Return 0 if no real data
   }
   
   private analyzeFacialEmotions(bodyLanguageData: any): number {
@@ -245,31 +255,43 @@ export class EmotionalImpactAnalyzer {
     const expressionVariety = Object.keys(facialExpressions).length;
     const dominantEmotion = bodyLanguageData?.dominantEmotion || 'neutral';
     
-    // More variety in facial expressions indicates emotional range
-    let varietyScore = Math.min(expressionVariety * 15, 80);
-    let authenticityScore = dominantEmotion !== 'neutral' ? 80 : 60;
-    
-    return (varietyScore + authenticityScore) / 2;
+    // Only calculate if we have real facial expression data
+    if (expressionVariety > 0 || (facialExpressions && Object.values(facialExpressions).some((v: any) => v > 0))) {
+      // More variety in facial expressions indicates emotional range
+      let varietyScore = Math.min(expressionVariety * 15, 80);
+      let authenticityScore = dominantEmotion !== 'neutral' ? 80 : 60;
+      
+      return (varietyScore + authenticityScore) / 2;
+    }
+    return 0; // Return 0 if no real data
   }
   
   private analyzeEyeContactEmotions(bodyLanguageData: any): number {
-    const eyeContactPercentage = bodyLanguageData?.eyeContactPercentage || 60;
-    const eyeContactVariability = bodyLanguageData?.eyeContactVariability || 50;
+    const eyeContactPercentage = bodyLanguageData?.eyeContactPercentage || 0;
+    const eyeContactVariability = bodyLanguageData?.eyeContactVariability || 0;
     
-    // Optimal eye contact: 60-80% with natural variation
-    let eyeScore = eyeContactPercentage >= 60 && eyeContactPercentage <= 80 ? 85 : 70;
-    
-    return Math.min((eyeScore + eyeContactVariability) / 2, 100);
+    // Only calculate if we have real eye contact data
+    if (eyeContactPercentage > 0) {
+      // Optimal eye contact: 60-80% with natural variation
+      let eyeScore = eyeContactPercentage >= 60 && eyeContactPercentage <= 80 ? 85 : 70;
+      
+      return Math.min((eyeScore + eyeContactVariability) / 2, 100);
+    }
+    return 0; // Return 0 if no real data
   }
   
   private analyzePostureEmotions(bodyLanguageData: any): number {
-    const postureScore = bodyLanguageData?.postureScore || 70;
-    const postureChanges = bodyLanguageData?.postureChanges || 3;
+    const postureScore = bodyLanguageData?.postureScore || 0;
+    const postureChanges = bodyLanguageData?.postureChanges || 0;
     
-    // Good posture with natural movement indicates confidence and engagement
-    let movementScore = postureChanges >= 2 && postureChanges <= 6 ? 80 : 60;
-    
-    return (postureScore + movementScore) / 2;
+    // Only calculate if we have real posture data
+    if (postureScore > 0) {
+      // Good posture with natural movement indicates confidence and engagement
+      let movementScore = postureChanges >= 2 && postureChanges <= 6 ? 80 : 60;
+      
+      return (postureScore + movementScore) / 2;
+    }
+    return 0; // Return 0 if no real data
   }
   
   private analyzeMovementEmotions(bodyLanguageData: any): number {

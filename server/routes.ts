@@ -1129,25 +1129,25 @@ Make the content more engaging, natural, and personalized while keeping the same
       
       console.log('🧠 Generating comprehensive AI insights for session analysis...');
       
-      // Generate comprehensive emotional impact analysis
+      // Generate comprehensive emotional impact analysis with real data
       const emotionalAnalysis = emotionalImpactAnalyzer.analyzeEmotionalImpact(
         sessionData.transcript || '',
         {
-          pitchRange: sessionData.voiceAnalysis?.pitchVariation || 50,
-          volumeRange: sessionData.voiceAnalysis?.volumeVariation || 50,
-          wordsPerMinute: wpm || 150,
-          clarity: sessionData.voiceAnalysis?.clarity || 70,
-          confidence: sessionData.voiceAnalysis?.confidence || 70
+          pitchRange: sessionData.voiceAnalysis?.pitchVariation || sessionData.voice?.intonation || 50,
+          volumeRange: sessionData.voiceAnalysis?.volumeVariation || sessionData.voice?.volume || 50,
+          wordsPerMinute: wpm || sessionData.wordsPerMinute || 150,
+          clarity: sessionData.voiceAnalysis?.clarity || sessionData.voiceClarity || sessionData.voice?.clarity || 70,
+          confidence: sessionData.voiceAnalysis?.confidence || sessionData.confidenceScore || 70
         },
         {
           gestureCount: sessionData.bodyLanguage?.gestureCount || 5,
           facialExpressions: sessionData.facialAnalysis || {},
-          eyeContactPercentage: sessionData.bodyLanguage?.eyeContactScore || 60,
-          postureScore: sessionData.bodyLanguage?.postureScore || 70,
+          eyeContactPercentage: sessionData.bodyLanguage?.eyeContactScore || sessionData.eyeContactScore || 60,
+          postureScore: sessionData.bodyLanguage?.postureScore || sessionData.bodyLanguage?.overallPresence || 70,
           movementEnergy: sessionData.bodyLanguage?.movementEnergy || 50
         },
         sessionData.sessionPurpose || sessionData.purpose || 'General speaking practice',
-        duration || 300
+        duration || sessionData.duration || 300
       );
       
       console.log('🎭 Generated comprehensive emotional impact analysis');
