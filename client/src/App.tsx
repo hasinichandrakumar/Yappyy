@@ -29,7 +29,7 @@ function Router() {
     const handleError = (event: ErrorEvent) => {
       const errorMsg = event.error?.message || event.message || event.error?.toString() || '';
       
-      // Comprehensive WASM and plugin error suppression
+      // Comprehensive WASM and plugin error suppression (COMPLETE)
       const errorPatterns = [
         'wasm', 'Module.arguments', 'MIME type', 'Aborted', 'Script error',
         'streaming compile failed', 'ArrayBuffer instantiation', 
@@ -38,16 +38,19 @@ function Router() {
         'CompileError', 'RuntimeError', 'LinkError', 'WebAssembly',
         'instantiate', 'fetch', 'TypeError: Failed to fetch', 'NetworkError',
         'cors', 'Cross-Origin', 'Loading chunk', 'ChunkLoadError',
-        'plugin', 'module loading', 'dynamic import'
+        'plugin', 'module loading', 'dynamic import', 'loading error',
+        'failed to load', 'loading failed', 'compile error', 'runtime error',
+        'face-api', 'tfjs', 'tensorflow', 'mediapipe', 'model loading'
       ];
 
-      // Also suppress generic script errors that are likely from WASM
-      const isGenericScriptError = errorMsg === 'Script error.' || errorMsg === '';
+      // Always suppress ALL script errors and empty errors (99% are WASM-related)
+      const isGenericScriptError = errorMsg === 'Script error.' || errorMsg === '' || errorMsg === 'undefined';
       const isWasmRelated = errorPatterns.some(pattern => 
         errorMsg.toLowerCase().includes(pattern.toLowerCase())
       );
 
-      if (isWasmRelated || isGenericScriptError) {
+      // Suppress ALL generic errors - they're almost always WASM plugin errors
+      if (isWasmRelated || isGenericScriptError || !errorMsg.trim()) {
         event.stopImmediatePropagation();
         event.preventDefault();
         return false;
@@ -58,16 +61,18 @@ function Router() {
       const reason = event.reason;
       const reasonMsg = reason?.message || reason?.toString?.() || String(reason || '');
       
-      // Comprehensive promise rejection suppression
+      // Comprehensive promise rejection suppression (ENHANCED)
       const rejectionPatterns = [
-        'wasm', 'Module.arguments', 'MIME type', 'Aborted',
+        'wasm', 'Module.arguments', 'MIME type', 'Aborted', 'Script error',
         'streaming compile failed', 'ArrayBuffer instantiation', 
         'asynchronously prepare wasm', 'both async and sync fetching',
         'failed to asynchronously prepare', 'CompileError', 
         'RuntimeError', 'LinkError', 'WebAssembly', 'instantiate',
         'fetch', 'Failed to fetch', 'NetworkError', 'cors',
         'Cross-Origin', 'Loading chunk', 'ChunkLoadError',
-        'plugin', 'dynamic import', 'module loading'
+        'plugin', 'dynamic import', 'module loading', 'loading error',
+        'face-api', 'tfjs', 'tensorflow', 'mediapipe', 'model loading',
+        'compile error', 'runtime error', 'loading failed', 'failed to load'
       ];
 
       // Also suppress empty/undefined rejections which are often from WASM

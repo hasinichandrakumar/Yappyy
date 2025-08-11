@@ -647,7 +647,7 @@ export default function ImprovedPracticePage() {
             if (newFillers.length > 0) {
               setSessionMetrics(prev => ({
                 ...prev,
-                fillerWords: [...prev.fillerWords, ...newFillers]
+                fillerWords: [] // Reset instead of accumulating to prevent fake data buildup
               }));
               
               // Generate intelligent, non-repetitive feedback for filler words

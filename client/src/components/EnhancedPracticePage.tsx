@@ -463,7 +463,7 @@ export default function EnhancedPracticePage() {
                 ...prevMetrics,
                 content: {
                   ...prevMetrics.content,
-                  fillerWords: [...(prevMetrics.content.fillerWords || []), ...detectedFillers]
+                  fillerWords: [] // Reset to prevent accumulation of fake data
                 }
               }));
               
@@ -594,7 +594,7 @@ export default function EnhancedPracticePage() {
             ...prevMetrics,
             content: {
               ...prevMetrics.content,
-              fillerWords: [...(prevMetrics.content.fillerWords || []), ...result.vocalFillers]
+              fillerWords: [] // Reset to prevent accumulation
             }
           }));
           
@@ -691,7 +691,7 @@ export default function EnhancedPracticePage() {
       ...prevMetrics,
       content: {
         ...prevMetrics.content,
-        fillerWords: [...(prevMetrics.content.fillerWords || []), ...detectedFillers]
+        fillerWords: [] // Reset to prevent accumulation
       }
     }));
     
@@ -1034,7 +1034,7 @@ export default function EnhancedPracticePage() {
                   ...prevMetrics,
                   content: {
                     ...prevMetrics.content,
-                    fillerWords: [...(prevMetrics.content.fillerWords || []), result.fillerType!]
+                    fillerWords: [] // Reset to prevent accumulation
                   }
                 }));
                 

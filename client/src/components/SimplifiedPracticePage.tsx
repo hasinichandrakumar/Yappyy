@@ -1133,16 +1133,15 @@ export default function SimplifiedPracticePage() {
                 if (detection && detection.totalFillers > 0) {
                   console.log('🎯 AUDIO UM/UH DETECTION:', detection);
                   
-                  // Add detected fillers to transcript
-                  detection.fillerWords.forEach((filler: string) => {
-                    // Track fillers without mutating the transcript (prevents WPM inflation)
-                    setVocalFillerBuffer(prev => [...prev, `${filler}_${Date.now()}`]);
-                    setMetrics(prev => ({
-                      ...prev,
-                      fillerWordCount: (prev.fillerWordCount || 0) + 1,
-                      voice: { ...prev.voice, fillerCount: (prev.voice.fillerCount || 0) + 1 }
-                    }));
-                  });
+                  // Reset filler buffer to prevent accumulation of fake data
+                  setVocalFillerBuffer([]); // Reset to prevent 422+ accumulation
+                  
+                  // Track actual filler count without accumulating arrays
+                  setMetrics(prev => ({
+                    ...prev,
+                    fillerWordCount: detection.totalFillers || 0, // Use real count, not accumulated
+                    voice: { ...prev.voice, fillerCount: detection.totalFillers || 0 }
+                  }));
                 }
               }
             } catch (error) {
