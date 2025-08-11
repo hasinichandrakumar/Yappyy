@@ -33,24 +33,14 @@ const getCurrentDomain = (req?: any) => {
 
 // Get appropriate callback URL based on environment
 const getCallbackURL = (req?: any) => {
-  // In production, use the production domain
-  if (process.env.NODE_ENV === 'production') {
-    return 'https://yappyy.com/auth/google/callback';
-  }
-  
-  // For development, use the current domain from the request
-  if (req?.get('host')) {
+  // For development on Replit, use the current domain
+  if (req?.get('host') && req.get('host')?.includes('replit.dev')) {
     const protocol = req.get('x-forwarded-proto') || req.protocol || 'https';
     return `${protocol}://${req.get('host')}/auth/google/callback`;
   }
   
-  // Fallback for Replit domains
-  if (process.env.REPLIT_DOMAINS) {
-    const domains = process.env.REPLIT_DOMAINS.split(',');
-    return `https://${domains[0]}/auth/google/callback`;
-  }
-  
-  return `http://localhost:${DEFAULT_PORT}/auth/google/callback`;
+  // For production or when no request context, use yappyy.com
+  return 'https://yappyy.com/auth/google/callback';
 };
 
 export function getSession() {
@@ -151,7 +141,7 @@ export async function setupGoogleAuth(app: Express) {
     passport.use(new GoogleStrategy({
       clientID: GOOGLE_CLIENT_ID,
       clientSecret: GOOGLE_CLIENT_SECRET,
-      callbackURL: '/auth/google/callback', // Use relative path for flexibility
+      callbackURL: '/auth/google/callback', // Use relative path - will be determined per request
       scope: ['profile', 'email'],
       passReqToCallback: false // Don't pass req to match the function signature
     }, async (accessToken, refreshToken, profile, done) => {
