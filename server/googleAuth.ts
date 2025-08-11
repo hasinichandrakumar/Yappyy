@@ -31,15 +31,20 @@ const getCurrentDomain = (req?: any) => {
   return `http://localhost:${DEFAULT_PORT}`;
 };
 
-// Get appropriate callback URL based on environment
+// Get appropriate callback URL based on the incoming request host
+// Always derive from request to avoid redirect_uri mismatches across environments
 const getCallbackURL = (req?: any) => {
-  // For development on Replit, use the current domain
-  if (req?.get('host') && req.get('host')?.includes('replit.dev')) {
-    const protocol = req.get('x-forwarded-proto') || req.protocol || 'https';
-    return `${protocol}://${req.get('host')}/auth/google/callback`;
+  if (req?.get) {
+    const host = req.get('host');
+    if (host) {
+      const protocol = req.get('x-forwarded-proto') || req.protocol || 'https';
+      return `${protocol}://${host}/auth/google/callback`;
+    }
   }
-  
-  // For production or when no request context, use yappyy.com
+  // Fallbacks when no request is available
+  if (process.env.PUBLIC_URL) {
+    return `${process.env.PUBLIC_URL.replace(/\/$/, '')}/auth/google/callback`;
+  }
   return 'https://yappyy.com/auth/google/callback';
 };
 
@@ -187,7 +192,10 @@ export async function setupGoogleAuth(app: Express) {
     // Override callbackURL per request to ensure exact domain/protocol is used in redirect_uri
     passport.authenticate('google', {
       scope: ['profile', 'email'],
-      callbackURL: requestCallbackURL
+      callbackURL: requestCallbackURL,
+      // force prompt to avoid cached account conflicts during testing
+      state: 'yappyy',
+      // hd can be added if restricting to a domain in future
     })(req, res, next);
   });
 
@@ -228,10 +236,11 @@ export async function setupGoogleAuth(app: Express) {
     
     console.log('✅ Authorization code received, processing...');
     
-    // Process OAuth callback using standard passport authenticate with failureRedirect
+    // Process OAuth callback using standard passport authenticate with explicit callback URL
     passport.authenticate('google', {
       failureRedirect: '/?error=auth_failed',
-      failureMessage: true
+      failureMessage: true,
+      callbackURL: getCallbackURL(req)
     }, (err: any, user: any, info: any) => {
       console.log('🔍 Passport authenticate callback:', { 
         hasError: !!err, 
@@ -272,8 +281,12 @@ export async function setupGoogleAuth(app: Express) {
           if (saveErr) {
             console.error('⚠️ Session save warning:', saveErr);
           }
-          // Redirect to dashboard - use relative path to stay on the same domain
-          res.redirect('/dashboard');
+          // Redirect to dashboard with an absolute URL based on current host
+          const proto = (req.get('x-forwarded-proto') || req.protocol || 'https');
+          const host = req.get('host');
+          const target = host ? `${proto}://${host}/dashboard` : '/dashboard';
+          console.log('➡️ Redirecting to:', target);
+          res.redirect(target);
         });
       });
     })(req, res, next);
@@ -353,12 +366,53 @@ export async function setupGoogleAuth(app: Express) {
           return res.redirect('/');
         }
         console.log('✅ Demo user logged in');
-        res.redirect('/dashboard');
+        const proto = (req.get('x-forwarded-proto') || req.protocol || 'https');
+        const host = req.get('host');
+        const target = host ? `${proto}://${host}/dashboard` : '/dashboard';
+        res.redirect(target);
       });
     } catch (error) {
       console.error('Demo user creation error:', error);
       res.redirect('/');
     }
+  });
+
+  // Connectivity diagnostics to debug TLS/DNS issues to Google
+  app.get('/api/auth/diagnostics', async (req, res) => {
+    const results: any = { now: new Date().toISOString() };
+    try {
+      const dns = await import('node:dns');
+      const https = await import('node:https');
+      const { lookup } = dns.promises as any;
+
+      const hosts = ['accounts.google.com', 'oauth2.googleapis.com'];
+      results.dns = {};
+      for (const host of hosts) {
+        try {
+          const v4 = await lookup(host, { family: 4 });
+          results.dns[host] = { ipv4: v4?.address };
+        } catch (e: any) {
+          results.dns[host] = { ipv4Error: e?.message };
+        }
+      }
+
+      // Try simple HTTPS GET to a lightweight endpoint
+      const get204 = (url: string) => new Promise((resolve) => {
+        const request = https.request(url, { method: 'GET' }, (r: any) => {
+          resolve({ statusCode: r.statusCode, headers: r.headers });
+        });
+        request.on('error', (err: any) => resolve({ error: String(err?.message || err) }));
+        request.end();
+      });
+
+      results.connectivity = {
+        google204: await get204('https://www.google.com/generate_204'),
+        openid: await get204('https://accounts.google.com/.well-known/openid-configuration')
+      };
+    } catch (err: any) {
+      results.error = String(err?.message || err);
+    }
+    res.json(results);
   });
 }
 

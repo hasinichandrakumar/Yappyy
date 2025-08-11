@@ -1,9 +1,15 @@
 import express, { type Request, Response, NextFunction } from "express";
+import { setDefaultResultOrder } from "node:dns";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { huggingFaceCV } from "./huggingface-computer-vision";
 import { speechEmotionRecognition } from "./speech-emotion-recognition";
 import { facialExpressionAnalysis } from "./facial-expression-analysis";
+
+// Prefer IPv4 to avoid TLS handshake failures on hosts with broken IPv6
+try {
+  setDefaultResultOrder('ipv4first');
+} catch {}
 
 const app = express();
 app.use(express.json({ limit: '50mb' }));
@@ -89,8 +95,9 @@ app.use((req, res, next) => {
 
   // Use environment port or default to 5000 for Replit workflow compatibility
   const port = parseInt(process.env.PORT || "5000");
-  
-  server.listen(port, "0.0.0.0", () => {
+  const host = process.env.HOST || "0.0.0.0"; // bind IPv4
+
+  server.listen(port, host, () => {
     log(`serving on port ${port}`);
   });
 })();
