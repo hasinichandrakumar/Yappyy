@@ -191,6 +191,7 @@ export async function setupGoogleAuth(app: Express) {
     console.log('  - Full URL:', `${req.protocol}://${req.get('host')}${req.originalUrl}`);
     const requestCallbackURL = getCallbackURL(req);
     console.log('  - Dynamic callback URL:', requestCallbackURL);
+    console.log('🔧 IMPORTANT: Make sure this callback URL is added to your Google Cloud Console OAuth credentials!');
 
     // Override callbackURL per request to ensure exact domain/protocol is used in redirect_uri
     passport.authenticate('google', {
