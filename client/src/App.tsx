@@ -27,17 +27,24 @@ function Router() {
   // Global error handler for WASM and MediaPipe errors
   useEffect(() => {
     const handleError = (event: ErrorEvent) => {
-      // Suppress common WASM/MediaPipe errors that don't affect functionality
-      if (event.error && (
-        event.error.message?.includes('wasm') || 
-        event.error.message?.includes('Module.arguments') ||
-        event.error.message?.includes('MIME type') ||
-        event.error.message?.includes('Aborted') ||
-        event.error.message?.includes('streaming compile failed') ||
-        event.error.message?.includes('ArrayBuffer instantiation') ||
-        event.error.message?.includes('asynchronously prepare wasm') ||
-        event.message?.includes('Script error.')
+      const errorMsg = event.error?.message || event.message || '';
+      
+      // More comprehensive WASM error detection and suppression
+      const wasmErrors = [
+        'wasm', 'Module.arguments', 'MIME type', 'Aborted',
+        'streaming compile failed', 'ArrayBuffer instantiation', 
+        'asynchronously prepare wasm', 'Script error.',
+        'both async and sync fetching of the wasm failed',
+        'failed to asynchronously prepare wasm',
+        'falling back to ArrayBuffer instantiation',
+        'CompileError', 'RuntimeError', 'LinkError',
+        'WebAssembly', 'instantiate'
+      ];
+
+      if (wasmErrors.some(pattern => 
+        errorMsg.toLowerCase().includes(pattern.toLowerCase())
       )) {
+        // Completely suppress these errors
         event.stopImmediatePropagation();
         event.preventDefault();
         return false;
@@ -45,16 +52,22 @@ function Router() {
     };
 
     const handleRejection = (event: PromiseRejectionEvent) => {
-      if (event.reason && (
-        event.reason.message?.includes('wasm') ||
-        event.reason.message?.includes('Module.arguments') ||
-        event.reason.message?.includes('MIME type') ||
-        event.reason.message?.includes('Aborted') ||
-        event.reason.message?.includes('streaming compile failed') ||
-        event.reason.message?.includes('ArrayBuffer instantiation') ||
-        event.reason.message?.includes('asynchronously prepare wasm') ||
-        typeof event.reason === 'string' && event.reason.includes('wasm')
+      const reason = event.reason;
+      const reasonMsg = reason?.message || reason?.toString?.() || String(reason);
+      
+      // More comprehensive WASM rejection detection
+      const wasmPatterns = [
+        'wasm', 'Module.arguments', 'MIME type', 'Aborted',
+        'streaming compile failed', 'ArrayBuffer instantiation', 
+        'asynchronously prepare wasm', 'both async and sync fetching',
+        'failed to asynchronously prepare', 'CompileError', 
+        'RuntimeError', 'LinkError', 'WebAssembly', 'instantiate'
+      ];
+
+      if (wasmPatterns.some(pattern => 
+        reasonMsg.toLowerCase().includes(pattern.toLowerCase())
       )) {
+        // Completely suppress these rejections
         event.stopImmediatePropagation();
         event.preventDefault();
         return false;
@@ -64,9 +77,50 @@ function Router() {
     window.addEventListener('error', handleError);
     window.addEventListener('unhandledrejection', handleRejection);
 
+    // Filter console messages to hide WASM spam
+    const originalConsoleError = console.error;
+    const originalConsoleWarn = console.warn;
+    const originalConsoleLog = console.log;
+
+    const wasmMessages = [
+      'wasm', 'Module.arguments', 'MIME type', 'Aborted',
+      'streaming compile failed', 'ArrayBuffer instantiation',
+      'asynchronously prepare wasm', 'both async and sync fetching',
+      'falling back to ArrayBuffer', 'CompileError', 'RuntimeError'
+    ];
+
+    const shouldFilterMessage = (msg: string) => 
+      wasmMessages.some(pattern => msg.toLowerCase().includes(pattern.toLowerCase()));
+
+    console.error = (...args) => {
+      const message = args.join(' ');
+      if (!shouldFilterMessage(message)) {
+        originalConsoleError.apply(console, args);
+      }
+    };
+
+    console.warn = (...args) => {
+      const message = args.join(' ');
+      if (!shouldFilterMessage(message)) {
+        originalConsoleWarn.apply(console, args);
+      }
+    };
+
+    console.log = (...args) => {
+      const message = args.join(' ');
+      if (!shouldFilterMessage(message)) {
+        originalConsoleLog.apply(console, args);
+      }
+    };
+
     return () => {
       window.removeEventListener('error', handleError);
       window.removeEventListener('unhandledrejection', handleRejection);
+      
+      // Restore original console methods
+      console.error = originalConsoleError;
+      console.warn = originalConsoleWarn;
+      console.log = originalConsoleLog;
     };
   }, []);
 

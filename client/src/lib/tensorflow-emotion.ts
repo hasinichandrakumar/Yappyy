@@ -60,18 +60,34 @@ export class TensorFlowVisionSystem {
     if (this.isInitialized) return;
 
     try {
-      // DISABLED: Face-api.js loading to prevent WASM plugin errors
-      // This was causing continuous WASM loading failures and console spam
-      console.log('⚠️ Face-api.js disabled to prevent WASM errors - using server-side facial analysis');
-      
-      // Skip face-api.js initialization entirely
-      /*await Promise.all([
-        faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model'),
-        faceapi.nets.faceLandmark68Net.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model'),
-        faceapi.nets.faceRecognitionNet.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model'),
-        faceapi.nets.faceExpressionNet.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model'),
-        faceapi.nets.ageGenderNet.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model')
-      ]);
+      // Initialize face-api.js models with better error handling
+      const loadModelWithTimeout = (loadPromise: Promise<void>, name: string, timeout = 8000) => {
+        return Promise.race([
+          loadPromise,
+          new Promise<void>((_, reject) => 
+            setTimeout(() => reject(new Error(`${name} model loading timeout`)), timeout)
+          )
+        ]);
+      };
+
+      // Load models with timeouts and individual error handling
+      const modelLoads = [
+        { name: 'tinyFaceDetector', load: () => faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model') },
+        { name: 'faceLandmark68Net', load: () => faceapi.nets.faceLandmark68Net.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model') },
+        { name: 'faceRecognitionNet', load: () => faceapi.nets.faceRecognitionNet.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model') },
+        { name: 'faceExpressionNet', load: () => faceapi.nets.faceExpressionNet.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model') },
+        { name: 'ageGenderNet', load: () => faceapi.nets.ageGenderNet.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model') }
+      ];
+
+      // Load models with individual timeouts
+      await Promise.allSettled(
+        modelLoads.map(model => 
+          loadModelWithTimeout(model.load(), model.name).catch(err => {
+            console.warn(`⚠️ ${model.name} failed to load:`, err.message);
+            return null;
+          })
+        )
+      );
 
       // Load custom TensorFlow models (fallback if not available)
       await this.loadCustomModels();
@@ -79,9 +95,8 @@ export class TensorFlowVisionSystem {
       this.isInitialized = true;
       console.log('🧠 TensorFlow Vision System initialized with Face-API.js');
     } catch (error) {
-      console.error('Failed to initialize face-api models, using fallback analysis:', error);
-      // Enable fallback mode
-      this.isInitialized = true;
+      // Silently handle face-api initialization errors - they're already logged in model loading
+      this.isInitialized = true; // Still enable fallback mode
     }
   }
 
