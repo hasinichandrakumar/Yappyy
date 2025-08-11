@@ -33,72 +33,110 @@ export function useMediaPipe() {
   useEffect(() => {
     const loadMediaPipe = async () => {
       try {
-        // Load MediaPipe Holistic
-        const script1 = document.createElement('script');
-        script1.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js';
-        script1.crossOrigin = 'anonymous';
-        document.head.appendChild(script1);
+        console.log('🎯 Attempting to load MediaPipe libraries...');
+        
+        // Check if MediaPipe is already loaded
+        if ((window as any).Holistic) {
+          console.log('✅ MediaPipe already loaded');
+          setMediapipeLoaded(true);
+          return;
+        }
 
-        const script2 = document.createElement('script');
-        script2.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js';
-        script2.crossOrigin = 'anonymous';
-        document.head.appendChild(script2);
+        // Load MediaPipe with timeout and error handling
+        const loadScript = (src: string, timeout = 10000): Promise<void> => {
+          return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = src;
+            script.crossOrigin = 'anonymous';
+            
+            const timeoutId = setTimeout(() => {
+              reject(new Error(`Script loading timeout: ${src}`));
+            }, timeout);
 
-        const script3 = document.createElement('script');
-        script3.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/holistic/holistic.js';
-        script3.crossOrigin = 'anonymous';
-        document.head.appendChild(script3);
+            script.onload = () => {
+              clearTimeout(timeoutId);
+              resolve();
+            };
 
-        // Wait for scripts to load
-        await new Promise((resolve) => {
-          script3.onload = resolve;
-        });
+            script.onerror = (error) => {
+              clearTimeout(timeoutId);
+              reject(new Error(`Script loading failed: ${src}`));
+            };
 
+            document.head.appendChild(script);
+          });
+        };
+
+        // Load scripts sequentially with error handling
+        await loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js');
+        await loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js');
+        await loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/holistic/holistic.js');
+
+        console.log('✅ MediaPipe libraries loaded successfully');
         setMediapipeLoaded(true);
-        console.log('MediaPipe libraries loaded successfully');
       } catch (error) {
-        console.error('Failed to load MediaPipe libraries:', error);
+        console.warn('⚠️ MediaPipe loading failed, computer vision will use fallback:', error);
+        setMediapipeLoaded(false);
+        // Don't throw error, just continue without MediaPipe
       }
     };
 
-    loadMediaPipe();
+    // Only load if we're in browser environment
+    if (typeof window !== 'undefined') {
+      loadMediaPipe();
+    }
   }, []);
 
   const initializeMediaPipe = useCallback(async () => {
     if (!mediapiipeLoaded) {
-      console.log('MediaPipe libraries not loaded yet');
+      console.log('⚠️ MediaPipe libraries not loaded, using fallback computer vision');
       return;
     }
 
     try {
-      // Initialize MediaPipe Holistic
+      // Check if Holistic is available
+      if (!(window as any).Holistic) {
+        console.warn('⚠️ Holistic not available, using fallback');
+        return;
+      }
+
+      // Initialize MediaPipe Holistic with error handling
       const holisticModel = new (window as any).Holistic({
         locateFile: (file: string) => {
           return `https://cdn.jsdelivr.net/npm/@mediapipe/holistic/${file}`;
         }
       });
 
-      holisticModel.setOptions({
-        modelComplexity: 2, // Higher accuracy with more complex model
-        smoothLandmarks: true,
-        enableSegmentation: true, // Enable for better isolation
-        smoothSegmentation: true,
-        refineFaceLandmarks: true,
-        minDetectionConfidence: 0.7, // Higher confidence threshold
-        minTrackingConfidence: 0.7, // Higher tracking confidence
-        selfieMode: true // Mirror mode for front-facing camera
-      });
+      // Set options with try-catch
+      try {
+        holisticModel.setOptions({
+          modelComplexity: 1, // Reduced complexity to prevent WASM issues
+          smoothLandmarks: true,
+          enableSegmentation: false, // Disabled to prevent WASM overload
+          smoothSegmentation: false,
+          refineFaceLandmarks: false, // Disabled to prevent WASM issues
+          minDetectionConfidence: 0.5, // Lower threshold for stability
+          minTrackingConfidence: 0.5,
+          selfieMode: true
+        });
+      } catch (optError) {
+        console.warn('⚠️ MediaPipe options setting failed, using defaults:', optError);
+      }
 
       holisticModel.onResults((results: any) => {
-        processHolisticResults(results);
+        try {
+          processHolisticResults(results);
+        } catch (resultError) {
+          console.warn('⚠️ MediaPipe result processing failed:', resultError);
+        }
       });
 
       holistic.current = holisticModel;
       setIsInitialized(true);
-      console.log('MediaPipe Holistic initialized successfully');
+      console.log('✅ MediaPipe Holistic initialized successfully');
       
     } catch (error) {
-      console.error("Failed to initialize MediaPipe:", error);
+      console.warn('⚠️ MediaPipe initialization failed, continuing with fallback:', error);
       setIsInitialized(false);
     }
   }, [mediapiipeLoaded]);
@@ -291,9 +329,17 @@ export function useMediaPipe() {
     if (!isInitialized || !holistic.current || !videoElement) return;
     
     try {
-      await holistic.current.send({ image: videoElement });
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('MediaPipe processing timeout')), 5000)
+      );
+      
+      const processPromise = holistic.current.send({ image: videoElement });
+      
+      await Promise.race([processPromise, timeoutPromise]);
     } catch (error) {
-      console.error('Error processing frame:', error);
+      console.warn('⚠️ MediaPipe frame processing failed:', error);
+      // Don't throw, just continue with fallback
     }
   }, [isInitialized]);
 

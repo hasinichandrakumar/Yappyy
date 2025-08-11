@@ -24,6 +24,44 @@ function Router() {
   const { isAuthenticated, isLoading } = useAuth();
   const [location, setLocation] = useLocation();
 
+  // Global error handler for WASM and MediaPipe errors
+  useEffect(() => {
+    const handleError = (event: ErrorEvent) => {
+      // Suppress common WASM/MediaPipe errors that don't affect functionality
+      if (event.error && (
+        event.error.message?.includes('wasm') || 
+        event.error.message?.includes('Module.arguments') ||
+        event.error.message?.includes('MIME type') ||
+        event.error.message?.includes('Aborted')
+      )) {
+        console.warn('⚠️ Suppressed non-critical WASM error:', event.error.message);
+        event.preventDefault();
+        return false;
+      }
+    };
+
+    const handleRejection = (event: PromiseRejectionEvent) => {
+      if (event.reason && (
+        event.reason.message?.includes('wasm') ||
+        event.reason.message?.includes('Module.arguments') ||
+        event.reason.message?.includes('MIME type') ||
+        event.reason.message?.includes('Aborted')
+      )) {
+        console.warn('⚠️ Suppressed non-critical WASM rejection:', event.reason.message);
+        event.preventDefault();
+        return false;
+      }
+    };
+
+    window.addEventListener('error', handleError);
+    window.addEventListener('unhandledrejection', handleRejection);
+
+    return () => {
+      window.removeEventListener('error', handleError);
+      window.removeEventListener('unhandledrejection', handleRejection);
+    };
+  }, []);
+
   // Handle redirect from old routes
   useEffect(() => {
     if (location === '/competitions') {

@@ -329,15 +329,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Save practice session with all data
   app.post('/api/sessions/save', async (req: any, res) => {
     try {
-      // Ensure user is authenticated before saving session data
-      if (!req.isAuthenticated() || !req.user) {
-        return res.status(401).json({ 
-          success: false, 
-          message: "Authentication required to save session data" 
-        });
-      }
-      
-      const userId = getUserId(req);
+      // Allow saving for unauthenticated users by falling back to a demo user
+      const userId = (req.isAuthenticated() && req.user) ? getUserId(req) : 'demo-user';
       console.log('💾 Saving session for authenticated Google user:', userId);
       
       const sessionData = req.body;
@@ -437,6 +430,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         rhetoricAnalysis: sessionData.rhetoricAnalysis || null,
         improvementPlan: sessionData.improvementPlan || null
       };
+
+      // Server-side sanity: recompute WPM and filler count from transcript
+      try {
+        const text = (extendedSessionData as any).transcript || '';
+        const durationSecs = Number((extendedSessionData as any).duration || 0);
+        const words = text.trim().split(/\s+/).filter(Boolean);
+        if (durationSecs > 0 && words.length >= 4) {
+          (extendedSessionData as any).averageWPM = Math.round((words.length / durationSecs) * 60);
+        }
+        const lower = text.toLowerCase();
+        const fillerList = ['um','uh','uhm','umm','er','ah','eh','like','you know','so','basically','actually'];
+        let serverFiller = 0;
+        fillerList.forEach(f => {
+          const rx = new RegExp(`\\b${f.replace(/\s+/g,'\\s+')}\\b`,'gi');
+          const m = lower.match(rx);
+          if (m) serverFiller += m.length;
+        });
+        if (serverFiller > (extendedSessionData as any).fillerWords) {
+          (extendedSessionData as any).fillerWords = serverFiller;
+        }
+      } catch {}
 
       // Compute an overall score similar to the video save path
       try {
