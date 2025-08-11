@@ -356,6 +356,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('🔢 Next session number:', sessionNumber);
       
+      // Parse metrics JSON strings if needed
+      let parsedVoiceMetrics: any = null;
+      let parsedBodyMetrics: any = null;
+      try {
+        parsedVoiceMetrics = typeof sessionData.voiceMetrics === 'string' ? JSON.parse(sessionData.voiceMetrics) : sessionData.voiceMetrics;
+      } catch {}
+      try {
+        parsedBodyMetrics = typeof sessionData.bodyLanguageMetrics === 'string' ? JSON.parse(sessionData.bodyLanguageMetrics) : sessionData.bodyLanguageMetrics;
+      } catch {}
+
+      // Helper to clamp 0-100
+      const clampPercent = (v: any) => {
+        const n = Number(v || 0);
+        if (Number.isNaN(n)) return 0;
+        return Math.max(0, Math.min(100, Math.round(n)));
+      };
+
+      // Derive additional voice metrics for analysis page
+      const wordsPerMinute = Number(sessionData.averageWPM || sessionData.wordsPerMinute || 0);
+      const clarityPct = clampPercent(sessionData.voiceClarity ?? parsedVoiceMetrics?.clarity);
+      const volumePct = clampPercent(parsedVoiceMetrics?.volume);
+      const intonationPct = clampPercent(parsedVoiceMetrics?.intonation);
+
+      // Compute pace score from WPM (ideal 120–160)
+      const computePaceScore = (wpm: number) => {
+        if (!wpm || wpm <= 0) return 0;
+        const minIdeal = 120;
+        const maxIdeal = 160;
+        if (wpm >= minIdeal && wpm <= maxIdeal) return 100;
+        const diff = wpm < minIdeal ? (minIdeal - wpm) : (wpm - maxIdeal);
+        return Math.max(0, Math.min(100, Math.round(100 - (diff / 80) * 100)));
+      };
+
+      const derivedPaceScore = computePaceScore(wordsPerMinute);
+
+      // If a base64 video payload is included on the standard save path, persist it too
+      const inlineVideo = sessionData.videoData || sessionData.videoBlob;
+
       // Create comprehensive session data
       const completeSessionData = {
         userId,
@@ -364,17 +402,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         purpose: sessionData.purpose || 'general-presentation',
         duration: sessionData.duration || 0,
         transcript: sessionData.transcript || '',
-        averageWPM: sessionData.averageWPM || 0,
+        averageWPM: wordsPerMinute || 0,
         confidenceScore: sessionData.confidenceScore || 0,
-        voiceClarity: sessionData.voiceClarity || 0,
+        voiceClarity: clarityPct,
         fillerWords: sessionData.fillerWords || 0,
         pauseCount: sessionData.pauseCount || 0,
         eyeContactScore: sessionData.eyeContactScore || '0',
+        postureScore: clampPercent(parsedBodyMetrics?.postureConfidence ?? sessionData.postureScore),
+        // Voice analysis fields used by Analysis page (0-100)
+        volumeConsistency: volumePct,
+        intonationScore: intonationPct,
+        paceScore: derivedPaceScore,
         coachingTips: sessionData.coachingTips || [],
-        videoBlob: sessionData.videoBlob || null,
+        videoBlob: inlineVideo ? String(inlineVideo).replace(/^data:video\/(?:webm|mp4);base64,/, '') : (sessionData.videoBlob || null),
         facialAnalysis: sessionData.facialAnalysis || null,
-        voiceMetrics: sessionData.voiceMetrics || null,
-        bodyLanguageMetrics: sessionData.bodyLanguageMetrics || null,
+        voiceMetrics: parsedVoiceMetrics || null,
+        bodyLanguageMetrics: parsedBodyMetrics || null,
         persuasivenessScore: sessionData.persuasivenessScore || 0
       };
       
@@ -394,6 +437,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         rhetoricAnalysis: sessionData.rhetoricAnalysis || null,
         improvementPlan: sessionData.improvementPlan || null
       };
+
+      // Compute an overall score similar to the video save path
+      try {
+        const clamp = (v: number, min = 0, max = 100) => Math.max(min, Math.min(max, v));
+        const clarity = clamp(clarityPct);
+        const confidence = clamp(Number(sessionData.confidenceScore || 0));
+        const engagement = clamp(Number(sessionData.engagement || 0));
+        const eyeContact = clamp(Number((parsedBodyMetrics?.eyeContact || 0)));
+        const fillerCount = Number(sessionData.fillerWords || 0);
+        const wordCount = (completeSessionData.transcript || '').trim().split(/\s+/).filter(Boolean).length;
+        let fillerScore = 100;
+        if (fillerCount > 0 && wordCount > 0) {
+          const rate = fillerCount / wordCount;
+          if (rate <= 0.02) fillerScore = 100; else if (rate <= 0.05) fillerScore = 85; else if (rate <= 0.10) fillerScore = 65; else fillerScore = 40;
+        }
+        const weights = { clarity: 0.25, confidence: 0.20, engagement: 0.20, eyeContact: 0.15, pace: 0.10, fillers: 0.10 } as const;
+        const overall = Math.round(
+          clarity * weights.clarity +
+          confidence * weights.confidence +
+          engagement * weights.engagement +
+          eyeContact * weights.eyeContact +
+          clamp(derivedPaceScore) * weights.pace +
+          clamp(fillerScore) * weights.fillers
+        );
+        (extendedSessionData as any).overallScore = overall;
+      } catch {}
       
       // Create the session with all provided data
       const session = await storage.createPracticeSession(extendedSessionData);

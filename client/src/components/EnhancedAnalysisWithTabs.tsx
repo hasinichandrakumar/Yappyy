@@ -189,20 +189,7 @@ export default function EnhancedAnalysisWithTabs() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSession, JSON.stringify(currentSession)]);
   const bodyLanguageData = currentSession ? [
-    { 
-      metric: 'Posture', 
-      score: currentSession.postureScore !== undefined && currentSession.postureScore !== null 
-        ? Math.round(currentSession.postureScore * (currentSession.postureScore <= 1 ? 100 : 1)) 
-        : 0, 
-      fullMark: 100 
-    },
-    { 
-      metric: 'Gestures', 
-      score: currentSession.gestureScore !== undefined && currentSession.gestureScore !== null
-        ? Math.round(currentSession.gestureScore * (currentSession.gestureScore <= 1 ? 100 : 1))
-        : 0, 
-      fullMark: 100 
-    },
+    // Gestures temporarily removed per request
     { 
       metric: 'Eye Contact', 
       score: currentSession.eyeContactScore !== undefined && currentSession.eyeContactScore !== null
@@ -447,17 +434,7 @@ export default function EnhancedAnalysisWithTabs() {
                               ? Math.round(currentSession.postureScore * (currentSession.postureScore <= 1 ? 100 : 1))
                               : 0} className="h-2" />
                           </div>
-                          <div>
-                            <div className="flex justify-between text-sm mb-1">
-                              <span>Gestures</span>
-                              <span>{currentSession.gestureScore !== undefined && currentSession.gestureScore !== null
-                                ? Math.round(currentSession.gestureScore * (currentSession.gestureScore <= 1 ? 100 : 1))
-                                : 0}%</span>
-                            </div>
-                            <Progress value={currentSession.gestureScore !== undefined && currentSession.gestureScore !== null
-                              ? Math.round(currentSession.gestureScore * (currentSession.gestureScore <= 1 ? 100 : 1))
-                              : 0} className="h-2" />
-                          </div>
+                          {/* Gestures removed */}
                           <div>
                             <div className="flex justify-between text-sm mb-1">
                               <span>Eye Contact</span>

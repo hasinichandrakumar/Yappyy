@@ -225,6 +225,8 @@ export default function SimplifiedPracticePage() {
   const [vocalFillerBuffer, setVocalFillerBuffer] = useState<string[]>([]);
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const [analyzer, setAnalyzer] = useState<AnalyserNode | null>(null);
+  const volumeWindowRef = useRef<number[]>([]);
+  const pitchWindowRef = useRef<number[]>([]);
   const [vocalFillerRecorder, setVocalFillerRecorder] = useState<MediaRecorder | null>(null);
   const [isListeningForFillers, setIsListeningForFillers] = useState(false);
 
@@ -615,22 +617,11 @@ export default function SimplifiedPracticePage() {
         const interimLower = interimText.toLowerCase().trim();
         const vocalFillerPatterns = ['um', 'uh', 'uhm', 'umm', 'uhhh', 'ummm', 'er', 'err', 'ah', 'eh'];
         
-        // Check exact match first
+        // Check exact match first (do not mutate transcript)
         for (const pattern of vocalFillerPatterns) {
           if (interimLower === pattern || interimLower.startsWith(pattern + ' ') || interimLower.endsWith(' ' + pattern)) {
             console.log('🎯 EXACT VOCAL FILLER detected in interim:', pattern);
             setVocalFillerBuffer(prev => [...prev, pattern]);
-            
-            // Add to transcript immediately with visual notation
-            setTimeout(() => {
-              setTranscript(prev => {
-                const fillerNotation = `[${pattern.toUpperCase()}]`;
-                const enhanced = prev + ` ${fillerNotation} `;
-                transcriptRef.current = enhanced;
-                console.log('✅ Added vocal filler notation to transcript:', fillerNotation);
-                return enhanced;
-              });
-            }, 100);
             break;
           }
         }
@@ -1044,16 +1035,17 @@ export default function SimplifiedPracticePage() {
       
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
-          echoCancellation: false,  // CRITICAL: Disable to preserve vocal fillers
-          noiseSuppression: false,  // CRITICAL: Disable to preserve vocal fillers  
-          autoGainControl: false,   // CRITICAL: Disable to preserve vocal fillers
-          sampleRate: 44100,       // High quality for pattern analysis
-          channelCount: 1          // Mono for better vocal analysis
+          echoCancellation: false,
+          noiseSuppression: false,
+          autoGainControl: false,
+          sampleRate: 44100,
+          channelCount: 1
         },
-        video: { 
-          width: { ideal: 1280, min: 640 }, 
-          height: { ideal: 720, min: 480 },
-          frameRate: { ideal: 30, min: 24 },
+        // Start with lightweight video constraints for fastest device start, upgrade after playback
+        video: {
+          width: { ideal: 640, min: 480 },
+          height: { ideal: 360, min: 270 },
+          frameRate: { ideal: 24, min: 20 },
           facingMode: 'user'
         }
       });
@@ -1069,69 +1061,41 @@ export default function SimplifiedPracticePage() {
       streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-        
-        // Initialize ALL computer vision systems for gesture and posture monitoring
-        try {
-          // Start Roboflow computer vision for gesture/posture analysis
-          console.log('🤖 Starting Roboflow computer vision for gestures and postures...');
-          
-          // Pass the existing video element and stream to Roboflow
-          if (roboflowVideoRef.current) {
-            roboflowVideoRef.current.srcObject = stream;
-            // Set canvas reference safely
-            if (canvasRef.current && roboflowCanvasRef) {
-              (roboflowCanvasRef as any).current = canvasRef.current;
-            }
-          }
-          
-          // Wait for video to be ready before starting analysis
-          await new Promise<void>(resolve => {
-            const checkReady = () => {
-              if (videoRef.current && videoRef.current.readyState >= 3) {
-                resolve();
-              } else {
-                setTimeout(checkReady, 100);
-              }
-            };
-            checkReady();
-          });
-          
-          await startRealTimeAnalysis(1500); // Analyze every 1.5 seconds for performance
-          console.log('✅ Roboflow computer vision started successfully');
-        } catch (error) {
-          console.warn('⚠️ Roboflow computer vision failed:', error);
+        videoRef.current.muted = true;
+        (videoRef.current as any).playsInline = true;
+        await videoRef.current.play().catch(() => undefined);
+
+        // Upgrade to HD once playback is flowing (keeps startup snappy, restores quality)
+        const vTrack = stream.getVideoTracks()[0];
+        if (vTrack && vTrack.applyConstraints) {
+          setTimeout(() => {
+            vTrack.applyConstraints({
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+              frameRate: { ideal: 30 }
+            }).catch(() => undefined);
+          }, 1200);
         }
 
-        try {
-          // Start facial analysis system
-          console.log('🎭 Starting facial analysis system...');
-          await startFacialAnalysis(videoRef.current);
-          console.log('✅ Facial analysis started successfully');
-        } catch (error) {
-          console.warn('⚠️ Facial analysis failed:', error);
+        // Prepare Roboflow video binding and canvas immediately
+        if (roboflowVideoRef.current) {
+          roboflowVideoRef.current.srcObject = stream;
+          if (canvasRef.current && roboflowCanvasRef) {
+            (roboflowCanvasRef as any).current = canvasRef.current;
+          }
         }
 
-        try {
-          // Start robust computer vision system
-          console.log('🛡️ Starting robust computer vision system...');
-          const started = await startComputerVisionAnalysis(videoRef.current);
-          if (started) {
-            console.log('✅ Robust computer vision started successfully');
-          }
-        } catch (error) {
-          console.warn('⚠️ Robust computer vision initialization failed:', error);
-        }
-
-        // Start high-accuracy body language (posture/gestures/eye contact) analysis
-        try {
-          if (videoRef.current) {
-            await startBodyAnalysis(videoRef.current);
-            console.log('✅ MediaPipe body language analysis started');
-          }
-        } catch (error) {
-          console.warn('⚠️ Body language analysis failed to start:', error);
-        }
+        // Kick off all heavy pipelines in parallel once frames flow
+        await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+        const startupTasks = [
+          startRealTimeAnalysis(1500),
+          videoRef.current ? startFacialAnalysis(videoRef.current) : Promise.resolve(),
+          videoRef.current ? startComputerVisionAnalysis(videoRef.current).catch(() => false) : Promise.resolve(false),
+          videoRef.current ? startBodyAnalysis(videoRef.current) : Promise.resolve(false)
+        ];
+        Promise.allSettled(startupTasks).then(() => {
+          console.log('✅ Vision pipelines initialized');
+        });
       }
 
       // Setup Web Audio API for direct vocal filler detection
@@ -1150,58 +1114,59 @@ export default function SimplifiedPracticePage() {
         
         console.log('🎵 Web Audio API initialized for vocal filler detection');
         
-        // Start audio pattern analysis
+        // Start audio analysis for volume/intonation (and legacy filler hints)
         let analyzeInterval: NodeJS.Timeout;
         const startAnalysis = () => {
           analyzeInterval = setInterval(() => {
             if (audioAnalyzerRef.current) {
-              const bufferLength = audioAnalyzerRef.current.frequencyBinCount;
-              const dataArray = new Uint8Array(bufferLength);
-              audioAnalyzerRef.current.getByteFrequencyData(dataArray);
-              
-              // Analyze frequency patterns for vocal fillers (um/uh typically 100-300Hz)
-              let lowFreqEnergy = 0;
-              let midFreqEnergy = 0;
-              
-              // Calculate energy in frequency ranges
-              for (let i = 0; i < bufferLength; i++) {
-                const freq = (i * 22050) / bufferLength; // Convert to Hz
-                if (freq >= 80 && freq <= 300) {
-                  lowFreqEnergy += dataArray[i];
-                } else if (freq >= 300 && freq <= 1000) {
-                  midFreqEnergy += dataArray[i];
+              const analyser = audioAnalyzerRef.current;
+              const timeSize = analyser.fftSize;
+              // Time-domain data for RMS volume and autocorrelation pitch
+              const timeData = new Uint8Array(timeSize);
+              analyser.getByteTimeDomainData(timeData);
+              let sumSquares = 0;
+              for (let i = 0; i < timeSize; i++) {
+                const v = (timeData[i] - 128) / 128;
+                sumSquares += v * v;
+              }
+              const rms = Math.sqrt(sumSquares / timeSize);
+              volumeWindowRef.current.push(rms);
+              if (volumeWindowRef.current.length > 18) volumeWindowRef.current.shift();
+              const avgRms = volumeWindowRef.current.reduce((a, b) => a + b, 0) / volumeWindowRef.current.length;
+              const volumePercent = Math.min(100, Math.max(0, Math.round(avgRms * 140)));
+
+              // Autocorrelation pitch estimation
+              const buf = new Float32Array(timeSize);
+              for (let i = 0; i < timeSize; i++) buf[i] = (timeData[i] - 128) / 128;
+              let bestOffset = -1;
+              let bestCorr = 0;
+              const maxLag = Math.min(1024, timeSize - 1);
+              for (let lag = 32; lag < maxLag; lag++) {
+                let corr = 0;
+                for (let i = 0; i < timeSize - lag; i++) corr += buf[i] * buf[i + lag];
+                if (corr > bestCorr) { bestCorr = corr; bestOffset = lag; }
+              }
+              let pitchHz = 0;
+              const sr = (audioContext || (window as any).webkitAudioContext) ? (audioContext?.sampleRate || 44100) : 44100;
+              if (bestOffset > 0 && bestCorr > 0.01) pitchHz = Math.round(sr / bestOffset);
+              if (pitchHz > 50 && pitchHz < 500) {
+                pitchWindowRef.current.push(pitchHz);
+                if (pitchWindowRef.current.length > 18) pitchWindowRef.current.shift();
+              }
+              const mean = pitchWindowRef.current.reduce((a, b) => a + b, 0) / Math.max(1, pitchWindowRef.current.length);
+              const variance = pitchWindowRef.current.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / Math.max(1, pitchWindowRef.current.length);
+              const std = Math.sqrt(variance);
+              const intonationPercent = Math.min(100, Math.max(0, Math.round((std / 60) * 100)));
+
+              setMetrics(prev => ({
+                ...prev,
+                voice: {
+                  ...prev.voice,
+                  volume: volumePercent,
+                  intonation: intonationPercent,
+                  pitchVariation: Math.min(100, Math.max(0, Math.round((std / 40) * 100)))
                 }
-              }
-              
-              // Detect vocal filler pattern (strong low freq, weak mid freq)
-              const ratio = lowFreqEnergy / (midFreqEnergy + 1);
-              const totalEnergy = lowFreqEnergy + midFreqEnergy;
-              
-              if (ratio > 2.5 && totalEnergy > 1000) {
-                console.log('🎯 AUDIO PATTERN: Possible vocal filler detected!', { ratio, totalEnergy });
-                
-                // Add to vocal filler buffer with timestamp
-                const timestamp = Date.now();
-                setVocalFillerBuffer(prev => {
-                  const recent = prev.filter(item => timestamp - parseInt(item.split('_')[1] || '0') < 2000);
-                  if (recent.length === 0) {
-                    const newFiller = `um_${timestamp}`;
-                    console.log('✅ VOCAL FILLER DETECTED via audio analysis:', newFiller);
-                    
-                    // Add to transcript immediately
-                    setTimeout(() => {
-                      setTranscript(prev => {
-                        const enhanced = prev + ` [um] `;
-                        transcriptRef.current = enhanced;
-                        return enhanced;
-                      });
-                    }, 50);
-                    
-                    return [...recent, newFiller];
-                  }
-                  return recent;
-                });
-              }
+              }));
             }
           }, 100); // Check every 100ms for vocal patterns
         };
@@ -1323,7 +1288,11 @@ export default function SimplifiedPracticePage() {
           const hasActualSpeech = currentTranscript.trim().length > 5; // Minimum text threshold
           
           if (hasActualSpeech) {
-            const wordCount = currentTranscript.trim().split(/\s+/).filter(word => word.length > 0).length;
+            // Sanitize transcript to avoid counting filler markers or punctuation
+            const sanitized = currentTranscript
+              .replace(/\[[^\]]*\]/g, ' ') // drop any bracketed annotations
+              .replace(/[^A-Za-z0-9'\s]/g, ' ');
+            const wordCount = sanitized.trim().split(/\s+/).filter(Boolean).length;
             const timeInMinutes = elapsedSeconds / 60;
             const wpm = timeInMinutes > 0 && wordCount > 0 ? Math.round(wordCount / timeInMinutes) : 0;
             
@@ -1564,13 +1533,12 @@ export default function SimplifiedPracticePage() {
           spineAlignment: bodyMetrics?.posture?.spineAlignment || 0,
           shoulderPosition: bodyMetrics?.posture?.shoulderPosition || 0,
           stability: bodyMetrics?.posture?.stability || 0,
-          gesturesNaturalness: bodyMetrics?.gestures?.naturalness || 0,
-          gesturesEffectiveness: bodyMetrics?.gestures?.effectiveness || 0,
-          gesturesTiming: bodyMetrics?.gestures?.timing || 0,
           presence: bodyMetrics?.overall?.presence || 0,
           professionalism: bodyMetrics?.overall?.professionalism || 0,
           confidence: bodyMetrics?.overall?.confidence || 0
         }),
+        // Top-level posture score for Analysis tab
+        postureScore: bodyMetrics?.posture?.confidence || 0,
         aiAnalysis: JSON.stringify({
           overallScore: Math.round((metrics.confidence + metrics.clarity + metrics.engagement) / 3) || 0,
           strengths: [],
