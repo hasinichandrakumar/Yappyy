@@ -626,32 +626,8 @@ export default function SimplifiedPracticePage() {
           }
         }
         
-        // Enhanced regex detection for variations like "uhhh", "ummm"
-        const words = interimLower.split(/\s+/).filter(word => word.length > 0);
-        words.forEach((word) => {
-          const cleanWord = word.replace(/[.,!?;:'"()[\]]/g, '');
-          
-          // Regex patterns for vocal filler variations (same as backend)
-          if (/^u+h+$/i.test(cleanWord) || /^u+m+$/i.test(cleanWord) || /^u+h+m+$/i.test(cleanWord)) {
-            let normalizedWord = cleanWord;
-            if (/^u+h+$/i.test(cleanWord)) normalizedWord = 'uh';
-            else if (/^u+m+$/i.test(cleanWord)) normalizedWord = 'um';
-            else if (/^u+h+m+$/i.test(cleanWord)) normalizedWord = 'uhm';
-            
-            console.log('🎯 REGEX VOCAL FILLER detected in interim:', normalizedWord, 'from', cleanWord);
-            setVocalFillerBuffer(prev => [...prev, normalizedWord]);
-            
-            setTimeout(() => {
-              setTranscript(prev => {
-                const fillerNotation = `[${normalizedWord.toUpperCase()}]`;
-                const enhanced = prev + ` ${fillerNotation} `;
-                transcriptRef.current = enhanced;
-                console.log('✅ Added regex vocal filler notation to transcript:', fillerNotation);
-                return enhanced;
-              });
-            }, 100);
-          }
-        });
+        // Note: Removed duplicate filler detection here to prevent spam
+        // Filler detection will be handled once in the final transcript processing
       }
 
       if (finalTranscript.trim()) {
@@ -666,56 +642,7 @@ export default function SimplifiedPracticePage() {
         setInterimTranscript(''); // Clear interim when we get final
         interimTranscriptRef.current = ''; // Clear ref too
         
-        // Use advanced filler detection system for comprehensive analysis
-        const fillerDetectionResult = performHybridDetection(finalTranscript, Date.now());
-        console.log('🎯 Advanced filler detection result:', fillerDetectionResult);
-        
-        // Update metrics with advanced filler detection results and add fillers to transcript
-        if (fillerDetectionResult.totalFillers > 0) {
-          setMetrics(prev => ({
-            ...prev,
-            fillerWordCount: prev.fillerWordCount + fillerDetectionResult.totalFillers,
-            voice: {
-              ...prev.voice,
-              fillerCount: prev.voice.fillerCount + fillerDetectionResult.totalFillers
-            }
-          }));
-          
-          // Add detected fillers to the transcript visually
-          const detectedFillersList = fillerDetectionResult.fillerTimestamps || [];
-          if (detectedFillersList.length > 0) {
-            const fillersToAdd = detectedFillersList
-              .filter(f => ['um', 'uh', 'uhm'].includes(f.word.toLowerCase()))
-              .map(f => `[${f.word.toUpperCase()}]`)
-              .join(' ');
-            
-            if (fillersToAdd) {
-              setTranscript(prev => {
-                const enhanced = prev + ' ' + fillersToAdd + ' ';
-                transcriptRef.current = enhanced;
-                console.log('✅ Added visual fillers to transcript:', fillersToAdd);
-                return enhanced;
-              });
-            }
-          }
-          
-          // Create live feedback for detected fillers
-          const topFiller = Object.entries(fillerDetectionResult.fillerTypes)
-            .sort(([,a], [,b]) => b - a)[0]?.[0] || 'filler';
-          
-          const fillerMessage = fillerDetectionResult.totalFillers === 1 
-            ? `Detected filler: "${topFiller}"`
-            : `Detected ${fillerDetectionResult.totalFillers} fillers (most common: "${topFiller}")`;
-          
-          const feedback: LiveFeedback = {
-            id: Date.now().toString() + Math.random(),
-            message: fillerMessage,
-            type: 'warning',
-            timestamp: Date.now()
-          };
-          
-          setLiveFeedback(prev => [feedback, ...prev.slice(0, 4)]);
-        }
+        // Note: Consolidated filler detection - only use backend analysis to prevent duplicate detection
         
         // Enhanced backend filler word analysis with UM/UH detection
         const fullTranscript = transcript + ' ' + finalTranscript;
@@ -742,19 +669,8 @@ export default function SimplifiedPracticePage() {
               const detection = result.detection;
               console.log('🎯 Enhanced filler detection with UM/UH:', detection);
               
-              // Update transcript with detected UM and UH words
-              let enhancedTranscript = fullTranscript;
-              if (detection.umCount > 0 || detection.uhCount > 0) {
-                // Add detected UM/UH to transcript for visibility
-                const fillerInserts = [];
-                if (detection.umCount > 0) fillerInserts.push(`[${detection.umCount} UM detected]`);
-                if (detection.uhCount > 0) fillerInserts.push(`[${detection.uhCount} UH detected]`);
-                enhancedTranscript += ' ' + fillerInserts.join(' ');
-                
-                // Update transcript to show detected fillers
-                setTranscript(enhancedTranscript);
-                transcriptRef.current = enhancedTranscript;
-              }
+              // Note: Removed automatic transcript modification to prevent spam
+              // Fillers will be highlighted in the UI without modifying the transcript text
               
               // Update the total filler count for the entire session
               console.log(`📊 Updating filler count to: ${detection.totalFillers} (UM: ${detection.umCount}, UH: ${detection.uhCount})`);
