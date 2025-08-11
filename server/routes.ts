@@ -7010,6 +7010,91 @@ Respond with detailed analysis in JSON format:
 
   // Enhanced Analytics Integration Route
   app.post('/api/process-enhanced-analytics', processEnhancedAnalytics);
+  
+  // Voice Metrics Calculation Route
+  app.post('/api/calculate-voice-metrics', async (req, res) => {
+    try {
+      const { transcript, duration, audioBuffer } = req.body;
+      
+      if (!transcript || !duration) {
+        return res.status(400).json({ 
+          error: 'Missing transcript or duration',
+          metrics: {
+            clarity: 0,
+            pace: 0,
+            volume: 0,
+            intonation: 0
+          }
+        });
+      }
+      
+      // Calculate speaking pace (words per minute)
+      const words = transcript.trim().split(/\s+/).filter((w: string) => w.length > 0);
+      const wordsPerMinute = Math.round((words.length / duration) * 60);
+      const pace = Math.min(100, Math.max(0, Math.round((wordsPerMinute / 160) * 100))); // 160 WPM is ideal
+      
+      // Calculate clarity based on transcript quality
+      const sentences = transcript.split(/[.!?]+/).filter((s: string) => s.trim().length > 0);
+      const avgWordsPerSentence = sentences.length > 0 ? words.length / sentences.length : 0;
+      const hasProperPunctuation = /[.!?]/.test(transcript);
+      const hasCapitalization = /[A-Z]/.test(transcript);
+      
+      // Clarity score based on sentence structure and punctuation
+      let clarityScore = 70; // Base score
+      if (avgWordsPerSentence >= 8 && avgWordsPerSentence <= 20) clarityScore += 10;
+      if (hasProperPunctuation) clarityScore += 10;
+      if (hasCapitalization) clarityScore += 10;
+      
+      // Analyze for filler words
+      const fillerWords = ['um', 'uh', 'like', 'you know', 'so', 'basically', 'actually'];
+      const lowerTranscript = transcript.toLowerCase();
+      let fillerCount = 0;
+      fillerWords.forEach(filler => {
+        const regex = new RegExp(`\\b${filler}\\b`, 'gi');
+        const matches = lowerTranscript.match(regex);
+        if (matches) fillerCount += matches.length;
+      });
+      
+      // Reduce clarity for excessive filler words
+      const fillerRatio = fillerCount / Math.max(1, words.length);
+      if (fillerRatio > 0.05) clarityScore -= 10;
+      if (fillerRatio > 0.1) clarityScore -= 10;
+      
+      clarityScore = Math.min(100, Math.max(0, clarityScore));
+      
+      console.log('🎤 Voice metrics calculated:', {
+        wordsPerMinute,
+        pace,
+        clarity: clarityScore,
+        fillerCount,
+        sentenceCount: sentences.length
+      });
+      
+      res.json({
+        success: true,
+        metrics: {
+          clarity: clarityScore,
+          pace: pace,
+          wordsPerMinute: wordsPerMinute,
+          fillerCount: fillerCount,
+          sentenceCount: sentences.length,
+          avgWordsPerSentence: Math.round(avgWordsPerSentence)
+        }
+      });
+      
+    } catch (error) {
+      console.error('❌ Voice metrics calculation error:', error);
+      res.status(500).json({ 
+        error: 'Failed to calculate voice metrics',
+        metrics: {
+          clarity: 0,
+          pace: 0,
+          volume: 0,
+          intonation: 0
+        }
+      });
+    }
+  });
 
   // Enhanced Filler Word Detection Route - Captures UM and UH
   app.post('/api/detect-enhanced-fillers', async (req, res) => {

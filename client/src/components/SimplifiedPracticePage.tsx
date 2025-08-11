@@ -1277,17 +1277,45 @@ export default function SimplifiedPracticePage() {
       setInterimTranscript('');
 
       // Update metrics with real MediaPipe/facial data when available
-      metricsTimerRef.current = setInterval(() => {
+      metricsTimerRef.current = setInterval(async () => {
+        // Calculate voice metrics from transcript
+        if (transcriptRef.current && sessionDuration > 0) {
+          try {
+            const voiceResponse = await fetch('/api/calculate-voice-metrics', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                transcript: transcriptRef.current,
+                duration: sessionDuration
+              })
+            });
+            
+            if (voiceResponse.ok) {
+              const voiceData = await voiceResponse.json();
+              if (voiceData.success && voiceData.metrics) {
+                setMetrics(prev => ({
+                  ...prev,
+                  wordsPerMinute: voiceData.metrics.wordsPerMinute || prev.wordsPerMinute,
+                  voice: {
+                    ...prev.voice,
+                    clarity: voiceData.metrics.clarity || prev.voice.clarity,
+                    pace: voiceData.metrics.pace || prev.voice.pace
+                  }
+                }));
+                console.log('✅ Voice metrics updated:', voiceData.metrics);
+              }
+            }
+          } catch (error) {
+            console.log('⚠️ Voice metrics calculation failed');
+          }
+        }
+        
         setMetrics(prev => ({
           ...prev,
           eyeContact: bodyMetrics?.eyeContact?.engagement ?? facialAnalysis?.facialMetrics?.communicationSignals?.eyeContactQuality ?? roboflowAnalysis?.facial?.eyeContact ?? prev.eyeContact,
           confidence: facialAnalysis?.facialMetrics?.emotionalExpression?.confidence ?? computerVisionMetrics?.confidence ?? prev.confidence,
           engagement: facialAnalysis?.facialMetrics?.emotionalExpression?.engagement ?? computerVisionMetrics?.engagement ?? prev.engagement,
           clarity: facialAnalysis?.facialMetrics?.emotionalExpression?.authenticity ?? prev.clarity,
-          voice: {
-            ...prev.voice,
-            clarity: facialAnalysis?.facialMetrics?.emotionalExpression?.authenticity ?? prev.voice.clarity
-          },
           bodyLanguage: {
             ...prev.bodyLanguage,
             eyeContactScore: bodyMetrics?.eyeContact?.engagement ?? computerVisionMetrics?.eyeContact ?? prev.bodyLanguage.eyeContactScore,
