@@ -191,11 +191,9 @@ export async function setupGoogleAuth(app: Express) {
 
     // Override callbackURL per request to ensure exact domain/protocol is used in redirect_uri
     passport.authenticate('google', {
-      scope: ['profile', 'email'],
+      scope: ['openid', 'profile', 'email'],
       callbackURL: requestCallbackURL,
-      // force prompt to avoid cached account conflicts during testing
-      state: 'yappyy',
-      // hd can be added if restricting to a domain in future
+      prompt: 'select_account'
     })(req, res, next);
   });
 
@@ -225,6 +223,11 @@ export async function setupGoogleAuth(app: Express) {
         return res.redirect(`/?error=redirect_mismatch&callback_url=${encodeURIComponent(currentCallbackURL)}`);
       }
       
+      // Treat user cancellations gracefully
+      if (req.query.error === 'access_denied') {
+        console.warn('⚠️ User cancelled Google sign-in');
+        return res.redirect('/?error=cancelled');
+      }
       return res.redirect(`/?error=oauth_failed&details=${encodeURIComponent(String(req.query.error_description || req.query.error))}`);
     }
     
@@ -258,6 +261,10 @@ export async function setupGoogleAuth(app: Express) {
       if (!user) {
         console.error('❌ OAuth authentication failed - no user returned');
         console.error('❌ Info:', info);
+        // When user cancels at account picker, Google can redirect with no user
+        if (info && (info as any).message && String((info as any).message).toLowerCase().includes('access denied')) {
+          return res.redirect('/?error=cancelled');
+        }
         return res.redirect('/?error=no_user&info=' + encodeURIComponent(JSON.stringify(info || {})));
       }
       
