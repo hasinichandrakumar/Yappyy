@@ -227,9 +227,11 @@ export default function EnhancedAnalysisWithTabs() {
     },
     { 
       metric: 'Overall', 
-      score: currentSession.overallScore !== undefined && currentSession.overallScore !== null
-        ? Math.round(currentSession.overallScore * (currentSession.overallScore <= 1 ? 100 : 1))
-        : Math.round((currentSession.confidenceScore || 0) * (currentSession.confidenceScore <= 1 ? 100 : 1)), 
+      score: (() => {
+        const raw = currentSession.overallScore ?? currentSession.confidenceScore ?? 0;
+        const percent = raw <= 1 ? raw * 100 : raw;
+        return Math.max(0, Math.min(100, Math.round(percent)));
+      })(),
       fullMark: 100 
     }
   ] : [];
@@ -418,15 +420,17 @@ export default function EnhancedAnalysisWithTabs() {
                                 cx="64" cy="64" r="56"
                                 stroke="#3B82F6" strokeWidth="12" fill="none"
                                 strokeDasharray={`${2 * Math.PI * 56}`}
-                                strokeDashoffset={`${2 * Math.PI * 56 * (1 - (currentSession.overallScore || currentSession.confidenceScore || 0))}`}
+                                strokeDashoffset={`${2 * Math.PI * 56 * (1 - (Math.min(100, (currentSession.overallScore ?? currentSession.confidenceScore ?? 0)) / (currentSession.overallScore && currentSession.overallScore <= 1 ? 0.01 : 100)))}`}
                                 className="transition-all duration-1000"
                               />
                             </svg>
                             <div className="absolute inset-0 flex items-center justify-center">
                               <span className="text-3xl font-bold">
-                                {currentSession.overallScore !== undefined && currentSession.overallScore !== null
-                                  ? Math.round(currentSession.overallScore * (currentSession.overallScore <= 1 ? 100 : 1))
-                                  : Math.round((currentSession.confidenceScore || 0) * (currentSession.confidenceScore <= 1 ? 100 : 1))}%
+                                {(() => {
+                                  const raw = currentSession.overallScore ?? currentSession.confidenceScore ?? 0;
+                                  const percent = raw <= 1 ? raw * 100 : raw;
+                                  return Math.max(0, Math.min(100, Math.round(percent)));
+                                })()}%
                               </span>
                             </div>
                           </div>
@@ -956,7 +960,11 @@ export default function EnhancedAnalysisWithTabs() {
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t">
                         <div className="text-center">
                           <p className="text-2xl font-bold">
-                            {Math.round((currentSession.overallScore || currentSession.confidenceScore || 0) * 100)}%
+                            {(() => {
+                              const raw = currentSession.overallScore || currentSession.confidenceScore || 0;
+                              const percent = raw <= 1 ? raw * 100 : raw;
+                              return Math.max(0, Math.min(100, Math.round(percent)));
+                            })()}%
                           </p>
                           <p className="text-sm text-gray-600">Overall Score</p>
                         </div>
@@ -1036,7 +1044,11 @@ export default function EnhancedAnalysisWithTabs() {
                     </div>
                     <div>
                       <p className="text-gray-600">Overall</p>
-                      <p className="font-semibold">{Math.round((session.overallScore || session.confidenceScore || 0) * 100)}%</p>
+                      <p className="font-semibold">{(() => {
+                        const raw = session.overallScore || session.confidenceScore || 0;
+                        const percent = raw <= 1 ? raw * 100 : raw;
+                        return Math.max(0, Math.min(100, Math.round(percent)));
+                      })()}%</p>
                     </div>
                     <div>
                       <p className="text-gray-600">Filler Words</p>

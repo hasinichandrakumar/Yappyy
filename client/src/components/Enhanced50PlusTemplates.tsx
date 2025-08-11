@@ -645,7 +645,8 @@ export default function Enhanced50PlusTemplates() {
         description: selectedTemplate.description
       };
       
-      const filename = `${selectedTemplate.title.replace(/\s+/g, '_')}_Template.pdf`;
+      const safeTitle = (selectedTemplate?.title || 'template').toString();
+      const filename = `${safeTitle.replace(/\s+/g, '_')}_Template.pdf`;
       // Minimal, plain-text PDF first
       try {
         const { generatePlainTemplatePDF } = await import('@/lib/simple-pdf');

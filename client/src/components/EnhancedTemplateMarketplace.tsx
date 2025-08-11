@@ -1064,7 +1064,8 @@ Make it highly personal, engaging, and tailored to these specific requirements. 
         description: selectedTemplate.description || ''
       };
 
-      const filename = `${selectedTemplate.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_template.pdf`;
+      const safeTitle = (selectedTemplate?.title || 'template').toString();
+      const filename = `${safeTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_template.pdf`;
 
       // Minimal, plain-text PDF with Poppins
       try {
@@ -1077,9 +1078,9 @@ Make it highly personal, engaging, and tailored to these specific requirements. 
       }
 
       toast({ title: 'PDF Downloaded Successfully! 📄', description: 'Your template guide has been saved.' });
-    } catch (error) {
+    } catch (error: any) {
       console.error('PDF Export error (both exporters failed):', error);
-      toast({ title: 'PDF Export Failed', description: 'Please refresh and try again.', variant: 'destructive' });
+      toast({ title: 'PDF Export Failed', description: error?.message || 'Please refresh and try again.', variant: 'destructive' });
     }
   };
 
@@ -1625,7 +1626,7 @@ Tips:
               Personalize Your Template
             </DialogTitle>
             <p className="text-gray-600">
-              Help us tailor "{selectedTemplate?.title || 'this template'}" to your specific needs and make it uniquely yours.
+              {`Help us tailor "${(selectedTemplate as any)?.title ?? 'this template'}" to your specific needs and make it uniquely yours.`}
             </p>
           </DialogHeader>
 

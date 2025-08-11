@@ -2153,10 +2153,10 @@ export default function SimplifiedPracticePage() {
 
         {/* Main Content - Side by Side Layout */}
         <div className="w-full relative">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+          <div className={`grid grid-cols-1 ${showLiveMetrics ? 'lg:grid-cols-3' : 'lg:grid-cols-1'} gap-8 items-stretch`}>
             
-            {/* Left Side - Video Feed (2/3 width) */}
-            <div className="lg:col-span-2 space-y-6 relative z-0">
+            {/* Left Side - Video Feed (expand to full width when coach hidden) */}
+            <div className={`${showLiveMetrics ? 'lg:col-span-2' : 'lg:col-span-1'} space-y-6 relative z-0`}>
               <div ref={recordingSectionRef}>
                 <Card className="border border-blue-200 shadow-xl bg-white/90 backdrop-blur-sm rounded-xl overflow-hidden box-border">
                 <CardHeader className="pb-3">
@@ -2254,7 +2254,8 @@ export default function SimplifiedPracticePage() {
 
             </div>
 
-            {/* Right Side - Live AI Coaching Tips (1/3 width) */}
+            {/* Right Side - Live AI Coaching Tips (hidden when coach hidden) */}
+            {showLiveMetrics && (
             <div className="lg:col-span-1 flex flex-col relative h-full">
               {/* Combined AI Coach and Statistics - Match recording box height */}
               <Card className="border border-blue-200 shadow-xl bg-white/90 backdrop-blur-sm rounded-xl overflow-hidden w-full h-full flex flex-col box-border" style={{ height: coachHeight ? `${coachHeight}px` : undefined }}>
@@ -2330,6 +2331,7 @@ export default function SimplifiedPracticePage() {
                 </CardContent>
               </Card>
             </div>
+            )}
           </div>
         </div>
 

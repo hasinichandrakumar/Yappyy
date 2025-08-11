@@ -56,22 +56,27 @@ const getCallbackURL = (req?: any) => {
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
   const pgStore = connectPg(session);
-  const sessionStore = new pgStore({
-    conString: process.env.DATABASE_URL,
-    createTableIfMissing: true,
-    ttl: sessionTtl,
-    tableName: "sessions",
-    pruneSessionInterval: 60 * 60, // Prune expired sessions every hour
-    errorLog: (error: any) => {
-      console.error('Session store error:', error);
-    }
-  });
+  const hasDatabase = Boolean(process.env.DATABASE_URL);
+  const sessionStore = hasDatabase
+    ? new pgStore({
+        conString: process.env.DATABASE_URL,
+        createTableIfMissing: true,
+        ttl: sessionTtl,
+        tableName: "sessions",
+        pruneSessionInterval: 60 * 60, // Prune expired sessions every hour
+        errorLog: (error: any) => {
+          console.error('Session store error:', error);
+        }
+      })
+    // Fallback to in-memory store if DATABASE_URL is not configured
+    : new session.MemoryStore();
   
   // Test the session store connection
   sessionStore.on('error', (error: any) => {
     console.error('Session store connection error:', error);
   });
   
+  const isProd = process.env.NODE_ENV === 'production';
   return session({
     secret: process.env.SESSION_SECRET || 'dev-secret-key-change-in-production',
     store: sessionStore,
@@ -80,8 +85,8 @@ export function getSession() {
     rolling: true, // Reset expiry on activity
     cookie: {
       httpOnly: true,
-      secure: false, // Set to false for development to ensure cookies work
-      sameSite: 'lax', // Allow cross-site requests for OAuth
+      secure: isProd, // secure cookies in production (trust proxy is enabled)
+      sameSite: 'lax', // OAuth-friendly while protecting CSRF
       maxAge: sessionTtl,
       domain: undefined, // Remove domain restriction for better compatibility
       path: '/' // Ensure cookie is available for all paths

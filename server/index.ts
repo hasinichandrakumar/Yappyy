@@ -9,8 +9,8 @@ const app = express();
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: false, limit: '50mb' }));
 
-// Canonical host redirect to avoid cross-subdomain session issues
-app.set('trust proxy', true);
+// Trust proxy so secure cookies and HTTPS detection work behind load balancers/CDNs
+app.set('trust proxy', 1);
 app.use((req, res, next) => {
   const host = req.get('host') || '';
   const isProd = process.env.NODE_ENV === 'production';
