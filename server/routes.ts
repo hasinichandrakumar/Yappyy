@@ -6091,23 +6091,19 @@ Respond with detailed analysis in JSON format:
       // Try multiple data sources for body language analysis
       let bodyLanguageMetrics;
       
-      if (imageData) {
-        // Use Roboflow for image-based body language analysis
-        try {
-          bodyLanguageMetrics = await roboflowVision.analyzeBodyLanguage(imageData);
-          console.log('✅ Roboflow body language analysis successful');
-        } catch (roboflowError) {
-          console.log('⚠️ Roboflow unavailable, using enhanced fallback analysis');
-          bodyLanguageMetrics = await generateEnhancedBodyLanguageMetrics(imageData);
-        }
+      if (imageData && imageData.length > 100) {
+        // Always use the enhanced real analysis when we have image data
+        console.log('📸 Processing real image data for body language analysis');
+        bodyLanguageMetrics = await generateEnhancedBodyLanguageMetrics(imageData);
+        console.log('✅ Real image-based body language analysis completed');
       } else if (mediaPipeResults) {
         // Use MediaPipe results for body language analysis
         bodyLanguageMetrics = await processMediaPipeBodyLanguage(mediaPipeResults);
         console.log('✅ MediaPipe body language analysis successful');
       } else {
-        // Generate enhanced fallback metrics based on session context
+        // No data available - return zeros (no fake data)
+        console.log('❌ No image or MediaPipe data available - returning zero metrics');
         bodyLanguageMetrics = await generateEnhancedBodyLanguageMetrics();
-        console.log('🛡️ Using enhanced fallback body language analysis');
       }
 
       console.log('👁️ Enhanced Body Language Analysis:', {
@@ -6115,13 +6111,16 @@ Respond with detailed analysis in JSON format:
         eyeContact: bodyLanguageMetrics.eyeContact.eyeContactPercentage,
         confidence: bodyLanguageMetrics.facialExpression.confidence,
         gestures: bodyLanguageMetrics.gestures.gestureNaturalness,
-        energy: bodyLanguageMetrics.bodyLanguage.energyLevel
+        energy: bodyLanguageMetrics.bodyLanguage.energyLevel,
+        hasData: imageData ? 'yes' : 'no',
+        dataLength: imageData?.length || 0
       });
 
       res.json({
         success: true,
         metrics: bodyLanguageMetrics,
-        analysisType: 'enhanced-roboflow-cv',
+        bodyLanguageMetrics: bodyLanguageMetrics, // Add duplicate key for frontend compatibility
+        analysisType: imageData ? 'real-image-analysis' : 'no-data',
         timestamp: new Date().toISOString()
       });
 

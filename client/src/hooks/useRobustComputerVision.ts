@@ -69,7 +69,10 @@ export function useRobustComputerVision() {
   // Enhanced body language analysis with proper data extraction for posture and gestures
   const analyzeFacialData = useCallback(async (imageData: string): Promise<ComputerVisionMetrics | null> => {
     try {
-      console.log('🔬 Sending image data for real posture and gesture analysis...');
+      console.log('🔬 Sending image data for real posture and gesture analysis...', {
+        imageDataLength: imageData.length,
+        hasPrefix: imageData.startsWith('data:')
+      });
       
       // Send to enhanced computer vision endpoint for authentic analysis
       const response = await fetch('/api/enhanced-computer-vision', {
@@ -77,6 +80,7 @@ export function useRobustComputerVision() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           imageData: imageData,
+          sessionId: Date.now().toString(),
           options: { comprehensive: true, timeout: 8000 }
         })
       });
@@ -164,8 +168,8 @@ export function useRobustComputerVision() {
       // Draw video frame to canvas
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      // Convert to base64
-      return canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+      // Convert to base64 - return full data URL for backend
+      return canvas.toDataURL('image/jpeg', 0.8);
     } catch (error: any) {
       handleError('Frame capture failed', error);
       return null;

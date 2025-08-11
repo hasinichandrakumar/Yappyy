@@ -1135,17 +1135,13 @@ export default function SimplifiedPracticePage() {
                   
                   // Add detected fillers to transcript
                   detection.fillerWords.forEach((filler: string) => {
+                    // Track fillers without mutating the transcript (prevents WPM inflation)
                     setVocalFillerBuffer(prev => [...prev, `${filler}_${Date.now()}`]);
-                    
-                    // Add to transcript with brackets for visibility
-                    setTimeout(() => {
-                      setTranscript(prev => {
-                        const enhanced = prev + ` [${filler.toUpperCase()}] `;
-                        transcriptRef.current = enhanced;
-                        console.log('🎯 Added to transcript:', filler.toUpperCase());
-                        return enhanced;
-                      });
-                    }, 50);
+                    setMetrics(prev => ({
+                      ...prev,
+                      fillerWordCount: (prev.fillerWordCount || 0) + 1,
+                      voice: { ...prev.voice, fillerCount: (prev.voice.fillerCount || 0) + 1 }
+                    }));
                   });
                 }
               }
@@ -1204,13 +1200,14 @@ export default function SimplifiedPracticePage() {
           const hasActualSpeech = currentTranscript.trim().length > 5; // Minimum text threshold
           
           if (hasActualSpeech) {
-            // Sanitize transcript to avoid counting filler markers or punctuation
+            // Sanitize transcript to avoid counting filler markers or punctuation; collapse whitespace
             const sanitized = currentTranscript
-              .replace(/\[[^\]]*\]/g, ' ') // drop any bracketed annotations
-              .replace(/[^A-Za-z0-9'\s]/g, ' ');
-            const wordCount = sanitized.trim().split(/\s+/).filter(Boolean).length;
+              .replace(/\[[^\]]*\]/g, ' ')
+              .replace(/\s+/g, ' ')
+              .trim();
+            const wordCount = sanitized.length > 0 ? sanitized.split(/\s+/).length : 0;
             const timeInMinutes = elapsedSeconds / 60;
-            const wpm = timeInMinutes > 0 && wordCount > 0 ? Math.round(wordCount / timeInMinutes) : 0;
+            const wpm = timeInMinutes > 0 && wordCount >= 4 ? Math.round(wordCount / timeInMinutes) : 0;
             
             console.log(`🔄 Live WPM update: ${wordCount} words in ${elapsedSeconds}s = ${wpm} WPM`);
             setMetrics(prev => ({ 
