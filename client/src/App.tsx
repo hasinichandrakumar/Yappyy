@@ -32,9 +32,13 @@ function Router() {
         event.error.message?.includes('wasm') || 
         event.error.message?.includes('Module.arguments') ||
         event.error.message?.includes('MIME type') ||
-        event.error.message?.includes('Aborted')
+        event.error.message?.includes('Aborted') ||
+        event.error.message?.includes('streaming compile failed') ||
+        event.error.message?.includes('ArrayBuffer instantiation') ||
+        event.error.message?.includes('asynchronously prepare wasm') ||
+        event.message?.includes('Script error.')
       )) {
-        console.warn('⚠️ Suppressed non-critical WASM error:', event.error.message);
+        event.stopImmediatePropagation();
         event.preventDefault();
         return false;
       }
@@ -45,9 +49,13 @@ function Router() {
         event.reason.message?.includes('wasm') ||
         event.reason.message?.includes('Module.arguments') ||
         event.reason.message?.includes('MIME type') ||
-        event.reason.message?.includes('Aborted')
+        event.reason.message?.includes('Aborted') ||
+        event.reason.message?.includes('streaming compile failed') ||
+        event.reason.message?.includes('ArrayBuffer instantiation') ||
+        event.reason.message?.includes('asynchronously prepare wasm') ||
+        typeof event.reason === 'string' && event.reason.includes('wasm')
       )) {
-        console.warn('⚠️ Suppressed non-critical WASM rejection:', event.reason.message);
+        event.stopImmediatePropagation();
         event.preventDefault();
         return false;
       }

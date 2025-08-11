@@ -29,62 +29,11 @@ export function useMediaPipe() {
   const holistic = useRef<any>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
-  // Load MediaPipe libraries
+  // Disable MediaPipe loading to prevent WASM errors
   useEffect(() => {
-    const loadMediaPipe = async () => {
-      try {
-        console.log('🎯 Attempting to load MediaPipe libraries...');
-        
-        // Check if MediaPipe is already loaded
-        if ((window as any).Holistic) {
-          console.log('✅ MediaPipe already loaded');
-          setMediapipeLoaded(true);
-          return;
-        }
-
-        // Load MediaPipe with timeout and error handling
-        const loadScript = (src: string, timeout = 10000): Promise<void> => {
-          return new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = src;
-            script.crossOrigin = 'anonymous';
-            
-            const timeoutId = setTimeout(() => {
-              reject(new Error(`Script loading timeout: ${src}`));
-            }, timeout);
-
-            script.onload = () => {
-              clearTimeout(timeoutId);
-              resolve();
-            };
-
-            script.onerror = (error) => {
-              clearTimeout(timeoutId);
-              reject(new Error(`Script loading failed: ${src}`));
-            };
-
-            document.head.appendChild(script);
-          });
-        };
-
-        // Load scripts sequentially with error handling
-        await loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js');
-        await loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js');
-        await loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/holistic/holistic.js');
-
-        console.log('✅ MediaPipe libraries loaded successfully');
-        setMediapipeLoaded(true);
-      } catch (error) {
-        console.warn('⚠️ MediaPipe loading failed, computer vision will use fallback:', error);
-        setMediapipeLoaded(false);
-        // Don't throw error, just continue without MediaPipe
-      }
-    };
-
-    // Only load if we're in browser environment
-    if (typeof window !== 'undefined') {
-      loadMediaPipe();
-    }
+    // Skip MediaPipe loading entirely to prevent WASM plugin errors
+    console.log('⚠️ MediaPipe disabled to prevent WASM errors - using server-side computer vision');
+    setMediapipeLoaded(false);
   }, []);
 
   const initializeMediaPipe = useCallback(async () => {

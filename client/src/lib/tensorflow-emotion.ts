@@ -60,8 +60,12 @@ export class TensorFlowVisionSystem {
     if (this.isInitialized) return;
 
     try {
-      // Initialize face-api.js models from CDN
-      await Promise.all([
+      // DISABLED: Face-api.js loading to prevent WASM plugin errors
+      // This was causing continuous WASM loading failures and console spam
+      console.log('⚠️ Face-api.js disabled to prevent WASM errors - using server-side facial analysis');
+      
+      // Skip face-api.js initialization entirely
+      /*await Promise.all([
         faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model'),
         faceapi.nets.faceLandmark68Net.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model'),
         faceapi.nets.faceRecognitionNet.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model'),
