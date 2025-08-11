@@ -128,22 +128,23 @@ export async function setupGoogleAuth(app: Express) {
     }
   });
 
-  // Google OAuth Strategy - use a generic callback that will be overridden per request
+  // Google OAuth Strategy - use dynamic callback URL
   if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
-    // Use a default callback URL that will be dynamically overridden
-    const defaultCallbackURL = '/oauth2callback';
+    // Note: actual callback URL will be determined dynamically per request
+    const defaultCallbackURL = '/auth/google/callback';
       
     console.log('🔧 Google OAuth Strategy Configuration:');
     console.log('  - Client ID:', GOOGLE_CLIENT_ID?.substring(0, 20) + '...');
     console.log('  - Default Callback URL:', defaultCallbackURL);
+    console.log('  - Dynamic callback URL will be determined per request');
     console.log('  - Scopes: profile, email');
     
     passport.use(new GoogleStrategy({
       clientID: GOOGLE_CLIENT_ID,
       clientSecret: GOOGLE_CLIENT_SECRET,
-      callbackURL: '/auth/google/callback', // Use relative path - will be determined per request
+      callbackURL: '/auth/google/callback', // Default - overridden dynamically per request
       scope: ['profile', 'email'],
-      passReqToCallback: false // Don't pass req to match the function signature
+      passReqToCallback: false
     }, async (accessToken, refreshToken, profile, done) => {
       try {
         console.log('📊 Google OAuth Profile received:', {
@@ -302,9 +303,9 @@ export async function setupGoogleAuth(app: Express) {
 
   // OAuth test/debug endpoint
   app.get('/api/auth/test', (req, res) => {
+    const dynamicCallbackURL = getCallbackURL(req);
     const host = req.get('host');
     const protocol = req.get('x-forwarded-proto') || req.protocol || 'https';
-    const fullUrl = `${protocol}://${host}`;
     
     res.json({
       status: 'OAuth Configuration',
@@ -312,8 +313,9 @@ export async function setupGoogleAuth(app: Express) {
       hasSecret: !!GOOGLE_CLIENT_SECRET,
       currentHost: host,
       protocol: protocol,
-      expectedCallbackUrl: `${fullUrl}/auth/google/callback`,
-      alternateCallbackUrl: `${fullUrl}/api/auth/google/callback`,
+      dynamicCallbackUrl: dynamicCallbackURL,
+      expectedCallbackUrl: `${protocol}://${host}/auth/google/callback`,
+      alternateCallbackUrl: `${protocol}://${host}/api/auth/google/callback`,
       sessionStatus: {
         hasSession: !!req.session,
         sessionId: req.sessionID,
