@@ -981,8 +981,14 @@ export default function SimplifiedPracticePage() {
   // Start recording
   const startRecording = useCallback(async () => {
     try {
-      // Initialize video recording first
+      console.log('🎬 Starting practice session...');
+      
+      // Set recording state immediately to show UI feedback
+      setIsRecording(true);
+      
+      // Initialize video recording first and wait for it to be ready
       const videoInitialized = await initializeVideoRecording();
+      console.log('📹 Video initialization result:', videoInitialized);
 
       // Initialize speech recognition
       setupSpeechRecognition();
@@ -1048,32 +1054,41 @@ export default function SimplifiedPracticePage() {
         }
       }, 1000);
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: false,
-          noiseSuppression: false,
-          autoGainControl: false,
-          sampleRate: 44100,
-          channelCount: 1
-        },
-        // Start with lightweight video constraints for fastest device start, upgrade after playback
-        video: {
-          width: { ideal: 640, min: 480 },
-          height: { ideal: 360, min: 270 },
-          frameRate: { ideal: 24, min: 20 },
-          facingMode: 'user'
-        }
-      });
+      // Get media stream for the entire session (don't duplicate getUserMedia calls)
+      let stream = streamRef.current;
+      if (!stream) {
+        stream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: false,
+            noiseSuppression: false,
+            autoGainControl: false,
+            sampleRate: 44100,
+            channelCount: 1
+          },
+          // Start with lightweight video constraints for fastest device start, upgrade after playback
+          video: {
+            width: { ideal: 640, min: 480 },
+            height: { ideal: 360, min: 270 },
+            frameRate: { ideal: 24, min: 20 },
+            facingMode: 'user'
+          }
+        });
+        streamRef.current = stream;
+      }
       
-      // Start video recording if initialized
+      // Start video recording if initialized - give it a small delay to ensure MediaRecorder is ready
       if (videoInitialized && recordingVideoRef.current) {
-        const recordingStarted = videoRecordingManager.startRecording();
-        if (recordingStarted) {
-          console.log('🎬 Video recording started');
-        }
+        setTimeout(() => {
+          const recordingStarted = videoRecordingManager.startRecording();
+          if (recordingStarted) {
+            console.log('🎬 Video recording started successfully');
+          } else {
+            console.warn('⚠️ Video recording failed to start');
+          }
+        }, 100);
       }
 
-      streamRef.current = stream;
+      // Set up video display
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         videoRef.current.muted = true;
@@ -1416,6 +1431,8 @@ export default function SimplifiedPracticePage() {
       });
     } catch (error) {
       console.error('Failed to start recording:', error);
+      // Reset recording state on failure
+      setIsRecording(false);
       toast({
         title: "Recording Failed",
         description: "Please allow camera and microphone access",
