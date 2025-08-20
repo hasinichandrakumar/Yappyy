@@ -1,429 +1,171 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import session from "express-session";
-import type { Express, RequestHandler } from "express";
+import type { Express } from "express";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
+import crypto from "crypto";
 
-// Google OAuth configuration - using environment variables
+// Simple OAuth configuration
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-// Get the current domain from the request or environment
-const DEFAULT_PORT = process.env.PORT || '3000';
-const getCurrentDomain = (req?: any) => {
-  // Try to get domain from request
-  if (req?.get('host')) {
-    const protocol = req.get('x-forwarded-proto') || req.protocol || 'https';
-    return `${protocol}://${req.get('host')}`;
-  }
-  
-  // Check for Replit deployment domain
-  if (process.env.REPLIT_DOMAINS) {
-    const domains = process.env.REPLIT_DOMAINS.split(',');
-    return `https://${domains[0]}`;
-  }
-  
-  // Fallback for development
-  if (process.env.REPLIT_DEV_DOMAIN) {
-    return `https://${process.env.REPLIT_DEV_DOMAIN}`;
-  }
-  
-  return `http://localhost:${DEFAULT_PORT}`;
-};
 
-// Get appropriate callback URL based on the incoming request host
-// Always derive from request to avoid redirect_uri mismatches across environments
-const getCallbackURL = (req?: any) => {
-  if (req?.get) {
-    const host = req.get('host');
-    if (host) {
-      const protocol = req.get('x-forwarded-proto') || req.protocol || 'https';
-      return `${protocol}://${host}/auth/google/callback`;
-    }
-  }
-  // Fallbacks when no request is available
-  if (process.env.PUBLIC_URL) {
-    return `${process.env.PUBLIC_URL.replace(/\/$/, '')}/auth/google/callback`;
-  }
-  return 'https://yappyy.com/auth/google/callback';
-};
+// Validate credentials
+if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
+  console.error('❌ Missing Google OAuth credentials');
+  throw new Error('GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are required');
+}
+
+console.log('✅ Google OAuth credentials loaded');
+console.log('   Client ID:', GOOGLE_CLIENT_ID.substring(0, 30) + '...');
 
 export function getSession() {
-  const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
-  const pgStore = connectPg(session);
-  const hasDatabase = Boolean(process.env.DATABASE_URL);
-  const sessionStore = hasDatabase
-    ? new pgStore({
+  const sessionSecret = process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex');
+  
+  let sessionStore;
+  
+  if (process.env.DATABASE_URL) {
+    try {
+      const pgStore = connectPg(session);
+      sessionStore = new pgStore({
         conString: process.env.DATABASE_URL,
         createTableIfMissing: true,
-        ttl: sessionTtl,
-        tableName: "sessions",
-        pruneSessionInterval: 60 * 60, // Prune expired sessions every hour
-        errorLog: (error: any) => {
-          console.error('Session store error:', error);
-        }
-      })
-    // Fallback to in-memory store if DATABASE_URL is not configured
-    : new session.MemoryStore();
+        tableName: "sessions"
+      });
+    } catch (error) {
+      console.warn('⚠️ Database session store failed, using memory store');
+      sessionStore = new session.MemoryStore();
+    }
+  } else {
+    sessionStore = new session.MemoryStore();
+  }
   
-  // Test the session store connection
-  sessionStore.on('error', (error: any) => {
-    console.error('Session store connection error:', error);
-  });
-  
-  const isProd = process.env.NODE_ENV === 'production';
   return session({
-    secret: process.env.SESSION_SECRET || 'dev-secret-key-change-in-production',
+    secret: sessionSecret,
     store: sessionStore,
-    resave: true, // Save session on every request to ensure persistence
-    saveUninitialized: true, // Create session immediately
-    rolling: true, // Reset expiry on activity
+    resave: false,
+    saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: isProd, // secure cookies in production (trust proxy is enabled)
-      sameSite: 'lax', // OAuth-friendly while protecting CSRF
-      maxAge: sessionTtl,
-      domain: undefined, // Remove domain restriction for better compatibility
-      path: '/' // Ensure cookie is available for all paths
-    },
-    name: 'yappyy.sid', // Custom session name to avoid conflicts
-    proxy: true // Trust proxy for secure cookies in production
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 1 week
+    }
   });
 }
 
-export async function setupGoogleAuth(app: Express) {
-  console.log('🔧 Google OAuth Setup - Client ID:', GOOGLE_CLIENT_ID ? `${GOOGLE_CLIENT_ID.substring(0, 30)}...` : 'Missing');
-  
-  app.set("trust proxy", 1);
+export function setupGoogleAuth(app: Express) {
+  // Session setup
   app.use(getSession());
   app.use(passport.initialize());
   app.use(passport.session());
 
-  // Serialize user for session - store only the user ID
+  // Serialize user
   passport.serializeUser((user: any, done) => {
-    console.log('🔐 Serializing user for session:', user.id, user.email);
-    // Store the entire user object in session for simplicity
-    done(null, user);
+    done(null, user.id);
   });
 
-  // Deserialize user from session
-  passport.deserializeUser(async (sessionUser: any, done) => {
+  // Deserialize user
+  passport.deserializeUser(async (id: string, done) => {
     try {
-      console.log('🔓 Deserializing user from session:', sessionUser?.id);
-      
-      // If we have a user object stored, use it directly
-      if (sessionUser && sessionUser.id) {
-        // Optionally fetch fresh user data from database
-        const freshUser = await storage.getUser(sessionUser.id);
-        if (freshUser) {
-          console.log('✅ User deserialized successfully:', freshUser.email);
-          done(null, freshUser);
-        } else {
-          // User was deleted from DB, use session data
-          console.log('⚠️ Using session user data (not in DB):', sessionUser.email);
-          done(null, sessionUser);
-        }
-      } else {
-        console.log('❌ No user data in session');
-        done(null, false);
-      }
+      const user = await storage.getUser(id);
+      done(null, user);
     } catch (error) {
-      console.error('❌ Error deserializing user:', error);
-      done(error, false);
+      done(error, null);
     }
   });
 
-  // Google OAuth Strategy - use dynamic callback URL
-  if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
-    // Note: actual callback URL will be determined dynamically per request
-    const defaultCallbackURL = '/auth/google/callback';
+  // Get callback URL for current environment
+  const callbackURL = process.env.REPLIT_URL 
+    ? `${process.env.REPLIT_URL}/oauth2callback`
+    : "https://0c7fe059-a7da-4a46-a7cc-18655fec2a24-00-1znejaw22ebqj.picard.replit.dev/oauth2callback";
+
+  // Simple Google Strategy
+  passport.use(new GoogleStrategy({
+    clientID: GOOGLE_CLIENT_ID!,
+    clientSecret: GOOGLE_CLIENT_SECRET!,
+    callbackURL: callbackURL,
+    passReqToCallback: false
+  }, async (accessToken: any, refreshToken: any, profile: any, done: any) => {
+    try {
+      console.log('🔐 Google OAuth: Processing user profile');
       
-    console.log('🔧 Google OAuth Strategy Configuration:');
-    console.log('  - Client ID:', GOOGLE_CLIENT_ID?.substring(0, 20) + '...');
-    console.log('  - Default Callback URL:', defaultCallbackURL);
-    console.log('  - Dynamic callback URL will be determined per request');
-    console.log('  - Scopes: profile, email');
-    
-    passport.use(new GoogleStrategy({
-      clientID: GOOGLE_CLIENT_ID,
-      clientSecret: GOOGLE_CLIENT_SECRET,
-      callbackURL: '/auth/google/callback', // Default - overridden dynamically per request
-      scope: ['profile', 'email'],
-      passReqToCallback: false
-    }, async (accessToken, refreshToken, profile, done) => {
-      try {
-        console.log('📊 Google OAuth Profile received:', {
-          id: profile.id,
-          displayName: profile.displayName,
-          email: profile.emails?.[0]?.value,
-          provider: profile.provider
-        });
-        
-        // Create or update user with Google data
-        const user = await storage.upsertUser({
-          id: profile.id,
-          email: profile.emails?.[0]?.value || `${profile.id}@gmail.com`,
-          firstName: profile.name?.givenName || profile.displayName?.split(' ')[0] || 'User',
-          lastName: profile.name?.familyName || profile.displayName?.split(' ').slice(1).join(' ') || '',
-          profileImageUrl: profile.photos?.[0]?.value || 'https://via.placeholder.com/150'
-        });
-
-        console.log('✅ Google OAuth: User authenticated:', user.email);
-        console.log('✅ User data stored in database');
-        return done(null, user);
-      } catch (error) {
-        console.error('❌ Google OAuth error:', error);
-        return done(error, false);
+      if (!profile.id || !profile.emails?.[0]?.value) {
+        return done(new Error('Invalid profile data from Google'), null);
       }
-    }));
-  } else {
-    console.warn('⚠️ Google OAuth credentials not found in environment variables');
-  }
 
-  // Google OAuth routes - with dynamic callback URL (consistent for both steps)
+      const user = await storage.upsertUser({
+        id: profile.id,
+        email: profile.emails[0].value,
+        firstName: profile.name?.givenName || 'User',
+        lastName: profile.name?.familyName || '',
+        profileImageUrl: profile.photos?.[0]?.value || ''
+      });
+
+      console.log('✅ Google OAuth: User authenticated successfully');
+      return done(null, user);
+    } catch (error) {
+      console.error('❌ Google OAuth: Error processing user:', error);
+      return done(error, null);
+    }
+  }));
+
+  // OAuth routes
   app.get('/api/auth/google', (req, res, next) => {
-    console.log('🚀 Starting Google OAuth flow...');
-    console.log('  - Request host:', req.get('host'));
-    console.log('  - Full URL:', `${req.protocol}://${req.get('host')}${req.originalUrl}`);
-    const requestCallbackURL = getCallbackURL(req);
-    console.log('  - Dynamic callback URL:', requestCallbackURL);
-    console.log('🔧 IMPORTANT: Make sure this callback URL is added to your Google Cloud Console OAuth credentials!');
-
-    // Override callbackURL per request to ensure exact domain/protocol is used in redirect_uri
+    console.log('🔐 Starting Google OAuth flow');
+    console.log('   Callback URL:', callbackURL);
+    console.log('   Client ID:', GOOGLE_CLIENT_ID!.substring(0, 30) + '...');
     passport.authenticate('google', {
-      scope: ['openid', 'profile', 'email'],
-      callbackURL: requestCallbackURL,
-      prompt: 'select_account'
+      scope: ['profile', 'email']
     })(req, res, next);
   });
 
-  // Handle the OAuth callback route - redirect to dashboard
-  app.get('/auth/google/callback', (req, res, next) => {
-    console.log('🔄 OAuth callback received');
-    console.log('  - Request URL:', req.url);
-    console.log('  - Request host:', req.get('host'));
-    console.log('  - Request protocol:', req.protocol);
-    console.log('  - Query params:', JSON.stringify(req.query));
-    console.log('  - Has authorization code:', !!req.query.code);
-    console.log('  - Has error:', !!req.query.error);
-    console.log('  - Session ID:', req.sessionID);
-    
-    // Handle OAuth errors from Google
-    if (req.query.error) {
-      console.error('❌ OAuth error from Google:', req.query.error);
-      console.error('❌ OAuth error description:', req.query.error_description);
-      
-      // Special handling for redirect_uri_mismatch
-      if (req.query.error === 'redirect_uri_mismatch') {
-        console.error('❌ Redirect URI mismatch - callback URL not authorized in Google Cloud Console');
-        const currentCallbackURL = getCallbackURL(req);
-        console.error('❌ Current callback URL:', currentCallbackURL);
-        console.error('❌ Request host:', req.get('host'));
-        console.error('❌ Please add this URL to your Google Cloud Console OAuth credentials');
-        return res.redirect(`/?error=redirect_mismatch&callback_url=${encodeURIComponent(currentCallbackURL)}`);
-      }
-      
-      // Treat user cancellations gracefully
-      if (req.query.error === 'access_denied') {
-        console.warn('⚠️ User cancelled Google sign-in');
-        return res.redirect('/?error=cancelled');
-      }
-      return res.redirect(`/?error=oauth_failed&details=${encodeURIComponent(String(req.query.error_description || req.query.error))}`);
-    }
-    
-    // Check if we have the required code parameter
-    if (!req.query.code) {
-      console.error('❌ No authorization code received from Google');
-      return res.redirect('/?error=no_code');
-    }
-    
-    console.log('✅ Authorization code received, processing...');
-    
-    // Process OAuth callback using standard passport authenticate with explicit callback URL
-    passport.authenticate('google', {
-      failureRedirect: '/?error=auth_failed',
-      failureMessage: true,
-      callbackURL: getCallbackURL(req)
-    }, (err: any, user: any, info: any) => {
-      console.log('🔍 Passport authenticate callback:', { 
-        hasError: !!err, 
-        hasUser: !!user, 
-        info: info,
-        errorMessage: err?.message
-      });
-      
-      if (err) {
-        console.error('❌ OAuth authentication error:', err);
-        console.error('❌ Error stack:', err.stack);
-        return res.redirect('/?error=auth_failed&details=' + encodeURIComponent(err.message || 'Authentication failed'));
-      }
-      
-      if (!user) {
-        console.error('❌ OAuth authentication failed - no user returned');
-        console.error('❌ Info:', info);
-        // When user cancels at account picker, Google can redirect with no user
-        if (info && (info as any).message && String((info as any).message).toLowerCase().includes('access denied')) {
-          return res.redirect('/?error=cancelled');
-        }
-        return res.redirect('/?error=no_user&info=' + encodeURIComponent(JSON.stringify(info || {})));
-      }
-      
-      console.log('✅ User authenticated:', user.email);
-      console.log('✅ User data:', { id: user.id, firstName: user.firstName, lastName: user.lastName });
-      
-      req.logIn(user, (loginErr) => {
-        if (loginErr) {
-          console.error('❌ Login session error:', loginErr);
-          console.error('❌ Login error stack:', loginErr.stack);
-          return res.redirect('/?error=login_failed&details=' + encodeURIComponent(loginErr.message || 'Session creation failed'));
-        }
-        
-        console.log('✅ Session established for user:', user.email);
-        console.log('✅ Session ID after login:', req.sessionID);
-        console.log('✅ User is authenticated:', req.isAuthenticated());
-        console.log('✅ Redirecting to dashboard...');
-        
-        // Save session before redirect
-        req.session.save((saveErr) => {
-          if (saveErr) {
-            console.error('⚠️ Session save warning:', saveErr);
-          }
-          // Redirect to dashboard with an absolute URL based on current host
-          const proto = (req.get('x-forwarded-proto') || req.protocol || 'https');
-          const host = req.get('host');
-          const target = host ? `${proto}://${host}/dashboard` : '/dashboard';
-          console.log('➡️ Redirecting to:', target);
-          res.redirect(target);
-        });
-      });
-    })(req, res, next);
-  });
-
-  // Also handle the API route for compatibility (same handler as above)
-  app.get('/api/auth/google/callback', (req, res, next) => {
-    console.log('🔄 OAuth callback received at /api/auth/google/callback');
-    console.log('  - Redirecting to primary callback handler...');
-    // Redirect to the main callback handler
-    req.url = req.url.replace('/api/auth/google/callback', '/auth/google/callback');
-    app._router.handle(req, res, next);
-  });
-
-  // Backward-compat route: support older Google Console configs pointing to /oauth2callback
   app.get('/oauth2callback', (req, res, next) => {
-    console.log('🔄 OAuth callback received at /oauth2callback');
-    console.log('  - Redirecting to primary callback handler...');
-    req.url = req.url.replace('/oauth2callback', '/auth/google/callback');
-    app._router.handle(req, res, next);
+    console.log('🔄 Google OAuth callback received');
+    console.log('   Query params:', req.query);
+    passport.authenticate('google', { 
+      failureRedirect: '/?error=auth_failed',
+      failureMessage: true
+    })(req, res, next);
+  }, (req, res) => {
+    console.log('✅ OAuth callback successful, redirecting to dashboard');
+    res.redirect('/dashboard');
   });
 
-  // Login route (redirects to Google OAuth)
-  app.get('/api/login', (req, res) => {
-    res.redirect('/api/auth/google');
-  });
-
-  // OAuth test/debug endpoint
-  app.get('/api/auth/test', (req, res) => {
-    const dynamicCallbackURL = getCallbackURL(req);
-    const host = req.get('host');
-    const protocol = req.get('x-forwarded-proto') || req.protocol || 'https';
-    
+  // Auth status endpoint
+  app.get('/api/auth/user', (req, res) => {
     res.json({
-      status: 'OAuth Configuration',
-      clientId: GOOGLE_CLIENT_ID ? `${GOOGLE_CLIENT_ID.substring(0, 30)}...` : 'Missing',
-      hasSecret: !!GOOGLE_CLIENT_SECRET,
-      currentHost: host,
-      protocol: protocol,
-      dynamicCallbackUrl: dynamicCallbackURL,
-      expectedCallbackUrl: `${protocol}://${host}/auth/google/callback`,
-      alternateCallbackUrl: `${protocol}://${host}/api/auth/google/callback`,
-      sessionStatus: {
-        hasSession: !!req.session,
-        sessionId: req.sessionID,
-        isAuthenticated: req.isAuthenticated()
-      }
+      isAuthenticated: req.isAuthenticated(),
+      user: req.user || null
     });
   });
-  
-  // Logout route
-  app.get('/api/logout', (req, res) => {
+
+  // Logout endpoint
+  app.get('/api/auth/logout', (req, res) => {
     req.logout((err) => {
       if (err) {
-        console.error('Logout error:', err);
+        console.error('❌ Logout error:', err);
+        return res.status(500).json({ error: 'Logout failed' });
       }
-      req.session.destroy(() => {
-        res.redirect('/');
-      });
+      res.json({ success: true });
     });
   });
 
-  // Demo user fallback when Google OAuth is not configured
-  app.get('/api/demo-login', async (req: any, res) => {
-    try {
-      const demoUser = await storage.upsertUser({
-        id: 'demo-user',
-        email: 'demo@example.com',
-        firstName: 'Demo',
-        lastName: 'User',
-        profileImageUrl: 'https://via.placeholder.com/150'
-      });
-
-      req.login(demoUser, (err: any) => {
-        if (err) {
-          console.error('Demo login error:', err);
-          return res.redirect('/');
-        }
-        console.log('✅ Demo user logged in');
-        const proto = (req.get('x-forwarded-proto') || req.protocol || 'https');
-        const host = req.get('host');
-        const target = host ? `${proto}://${host}/dashboard` : '/dashboard';
-        res.redirect(target);
-      });
-    } catch (error) {
-      console.error('Demo user creation error:', error);
-      res.redirect('/');
-    }
+    // Test endpoint
+  app.get('/api/auth/test', (req, res) => {
+    res.json({
+      status: 'OAuth Configuration',
+      clientId: GOOGLE_CLIENT_ID!.substring(0, 30) + '...',
+      hasSecret: !!GOOGLE_CLIENT_SECRET,
+      callbackUrl: callbackURL,
+      isAuthenticated: req.isAuthenticated()
+    });
   });
 
-  // Connectivity diagnostics to debug TLS/DNS issues to Google
-  app.get('/api/auth/diagnostics', async (req, res) => {
-    const results: any = { now: new Date().toISOString() };
-    try {
-      const dns = await import('node:dns');
-      const https = await import('node:https');
-      const { lookup } = dns.promises as any;
-
-      const hosts = ['accounts.google.com', 'oauth2.googleapis.com'];
-      results.dns = {};
-      for (const host of hosts) {
-        try {
-          const v4 = await lookup(host, { family: 4 });
-          results.dns[host] = { ipv4: v4?.address };
-        } catch (e: any) {
-          results.dns[host] = { ipv4Error: e?.message };
-        }
-      }
-
-      // Try simple HTTPS GET to a lightweight endpoint
-      const get204 = (url: string) => new Promise((resolve) => {
-        const request = https.request(url, { method: 'GET' }, (r: any) => {
-          resolve({ statusCode: r.statusCode, headers: r.headers });
-        });
-        request.on('error', (err: any) => resolve({ error: String(err?.message || err) }));
-        request.end();
-      });
-
-      results.connectivity = {
-        google204: await get204('https://www.google.com/generate_204'),
-        openid: await get204('https://accounts.google.com/.well-known/openid-configuration')
-      };
-    } catch (err: any) {
-      results.error = String(err?.message || err);
-    }
-    res.json(results);
-  });
+  console.log('✅ Google OAuth setup complete');
 }
 
-export const isAuthenticated: RequestHandler = (req, res, next) => {
+// Simple authentication middleware
+export const isAuthenticated = (req: any, res: any, next: any) => {
   if (req.isAuthenticated()) {
     return next();
   }

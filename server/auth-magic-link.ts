@@ -80,7 +80,7 @@ class MagicLinkAuthService implements MagicLinkService {
 
       if (!user) {
         // Create new user
-        const newUserId = `user_${Date.now()}_${0).substring(2, 9)}`;
+        const newUserId = `user_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
         [user] = await db
           .insert(users)
           .values({
@@ -158,7 +158,6 @@ export async function sendMagicLinkEmail(email: string, token: string): Promise<
               <h1 style="color: #2563eb; font-size: 32px; margin: 0; background: linear-gradient(135deg, #2563eb 0%, #22d3ee 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
                 Yappyy
               </h1>
-              {/* Platform subtitle removed per user request */}
             </div>
             
             <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">

@@ -336,9 +336,9 @@ export class RealTimeSessionManager {
     // Video frame analysis would integrate with MediaPipe or TensorFlow.js
     return {
       faceDetected: true,
-      eyeContactScore: 0
-      postureScore: 0
-      gestureActivity: 0
+      eyeContactScore: 0,
+      postureScore: 0,
+      gestureActivity: 0,
       emotionalState: 'confident'
     };
   }

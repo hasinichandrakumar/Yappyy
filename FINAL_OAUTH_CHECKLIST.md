@@ -2,7 +2,7 @@
 
 ## ✅ **Server Configuration (COMPLETED)**
 - **Client ID**: `372720245891-dtpkbj63rl2hju5vo2uorldivgurg6fh.apps.googleusercontent.com` ✅
-- **Client Secret**: `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` ✅
+- **Client Secret**: `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` ✅
 - **Server Status**: ✅ Running on port 5000
 - **OAuth Flow Started**: ✅ (logs show OAuth initiation at 9:45:23 PM)
 

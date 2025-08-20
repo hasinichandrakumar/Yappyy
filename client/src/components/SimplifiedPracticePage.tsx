@@ -34,6 +34,9 @@ import {
 } from '@/lib/video-recording';
 import { DeepgramSpeechService } from '@/lib/deepgramSpeech';
 import { useMediaPipeBodyLanguage } from '@/hooks/useMediaPipeBodyLanguage';
+import useRealTimeEyeContact from '@/hooks/useRealTimeEyeContact';
+import AccurateWPMCalculator from '../utils/accurate-wpm-calculator';
+import IncrementalFillerDetector from '../utils/incremental-filler-detector';
 
 import { FillerWordHighlighter } from './FillerWordHighlighter';
 import { LiveMetricsBox } from './LiveMetricsBox';
@@ -151,6 +154,8 @@ export default function SimplifiedPracticePage() {
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingPurpose, setIsEditingPurpose] = useState(false);
   const [sessionDuration, setSessionDuration] = useState(0);
+  const [wordCount, setWordCount] = useState(0);
+  const [currentWPM, setCurrentWPM] = useState(0);
   const [transcript, setTranscript] = useState<string>('');
   const [interimTranscript, setInterimTranscript] = useState<string>('');
   const [showLiveTranscript, setShowLiveTranscript] = useState(true);
@@ -231,7 +236,7 @@ export default function SimplifiedPracticePage() {
   const [isListeningForFillers, setIsListeningForFillers] = useState(false);
 
   // Eye contact tracking state
-  const [isLookingAtCamera, setIsLookingAtCamera] = useState(false);
+  // Removed old eye contact state - now using real-time eye contact system
   const [eyeContactScore, setEyeContactScore] = useState(0);
 
   // Roboflow computer vision integration
@@ -345,104 +350,8 @@ export default function SimplifiedPracticePage() {
     return detectedFillers;
   }, []);
 
-  // FIXED: Improved eye contact measurement using camera analysis
-  const measureEyeContact = useCallback(() => {
-    if (!videoRef.current || !canvasRef.current) return;
-    
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    
-    if (!ctx || video.videoWidth === 0) return;
-    
-    // Set canvas size to match video
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    
-    // Draw video frame to canvas
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    
-    // FIXED: Enhanced eye contact detection using face positioning
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const data = imageData.data;
-    
-    // Calculate face region (assuming face is in center area)
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 3; // Face typically in upper third
-    const faceRegionSize = Math.min(canvas.width, canvas.height) * 0.3;
-    
-    // FIXED: Improved skin tone detection for face presence
-    let skinPixels = 0;
-    let totalPixels = 0;
-    
-    for (let y = centerY - faceRegionSize/2; y < centerY + faceRegionSize/2; y += 5) {
-      for (let x = centerX - faceRegionSize/2; x < centerX + faceRegionSize/2; x += 5) {
-        if (x >= 0 && x < canvas.width && y >= 0 && y < canvas.height) {
-          const index = (Math.floor(y) * canvas.width + Math.floor(x)) * 4;
-          const r = data[index];
-          const g = data[index + 1];
-          const b = data[index + 2];
-          
-          // Enhanced skin tone detection
-          const isSkinTone = (
-            r > 95 && g > 40 && b > 20 && // Darker skin
-            Math.abs(r - g) > 15 && Math.abs(r - b) > 15 && Math.abs(g - b) > 15 && // Color variation
-            r > g && r > b // Red component dominant
-          ) || (
-            r > 200 && g > 150 && b > 120 && // Lighter skin
-            Math.abs(r - g) < 30 && Math.abs(r - b) < 30 && Math.abs(g - b) < 30 // Similar RGB values
-          );
-          
-          if (isSkinTone) skinPixels++;
-          totalPixels++;
-        }
-      }
-    }
-    
-    const skinRatio = totalPixels > 0 ? skinPixels / totalPixels : 0;
-    const faceDetected = skinRatio > 0.1;
-    
-    if (faceDetected) {
-      // FIXED: Calculate eye contact based on face centering and stability
-      const horizontalCenter = 1 - Math.abs(centerX - canvas.width/2) / (canvas.width/3);
-      const verticalCenter = 1 - Math.abs(centerY - canvas.height/3) / (canvas.height/3);
-      
-      // FIXED: More accurate eye contact calculation
-      const baseEyeContact = (horizontalCenter + verticalCenter) * 50;
-      const stabilityBonus = skinRatio * 20; // More stable face = better eye contact
-      const currentEyeContactScore = Math.max(0, Math.min(100, baseEyeContact + stabilityBonus));
-      
-      const lookingAtCamera = currentEyeContactScore > 50;
-      setIsLookingAtCamera(lookingAtCamera);
-      setEyeContactScore(Math.round(currentEyeContactScore));
-      
-      // Update metrics
-      setMetrics(prev => ({
-        ...prev,
-        eyeContact: Math.round(currentEyeContactScore),
-        bodyLanguage: {
-          ...prev.bodyLanguage,
-          eyeContactScore: Math.round(currentEyeContactScore),
-          facialExpressions: prev.bodyLanguage.facialExpressions,
-          overallPresence: Math.round((currentEyeContactScore + prev.bodyLanguage.facialExpressions) / 2)
-        }
-      }));
-    } else {
-      // No face detected
-      setIsLookingAtCamera(false);
-      setEyeContactScore(0);
-      setMetrics(prev => ({
-        ...prev,
-        eyeContact: 0,
-        bodyLanguage: {
-          ...prev.bodyLanguage,
-          eyeContactScore: 0,
-          facialExpressions: prev.bodyLanguage.facialExpressions,
-          overallPresence: prev.bodyLanguage.facialExpressions
-        }
-      }));
-    }
-  }, []);
+  // Real-time eye contact detection using MediaPipe Face Mesh (Primary system)
+  // The old measureEyeContact function has been replaced with the new real-time system
 
   // Fetch authentic eye contact and expression data from maximum authentic analysis
   useEffect(() => {
@@ -547,6 +456,8 @@ export default function SimplifiedPracticePage() {
   const transcriptRef = useRef<string>('');
   const interimTranscriptRef = useRef<string>('');
   const audioAnalyzerRef = useRef<AnalyserNode | null>(null);
+  const wpmCalculatorRef = useRef<AccurateWPMCalculator | null>(null);
+  const fillerDetectorRef = useRef<IncrementalFillerDetector | null>(null);
   const { toast } = useToast();
 
   // Video recording refs
@@ -560,6 +471,24 @@ export default function SimplifiedPracticePage() {
     currentMetrics: bodyMetrics,
     isActive: isBodyAnalysisActive
   } = useMediaPipeBodyLanguage();
+
+  // Real-time eye contact detection (Primary system)
+  const {
+    eyeContactPercentage,
+    gazeDirection,
+    gazeStability,
+    blinkRate,
+    confidence: eyeContactConfidence,
+    isLookingAtCamera,
+    calibrationStatus,
+    startDetection: startEyeContactDetection,
+    stopDetection: stopEyeContactDetection,
+    startCalibration: startEyeContactCalibration,
+    completeCalibration: completeEyeContactCalibration,
+    isActive: isEyeContactActive,
+    isInitialized: isEyeContactInitialized,
+    error: eyeContactError
+  } = useRealTimeEyeContact();
 
   // Comprehensive filler word highlighting with 60+ patterns + custom fillers
   const highlightFillerWords = (text: string) => {
@@ -693,6 +622,9 @@ export default function SimplifiedPracticePage() {
 
     const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
     const recognition = new SpeechRecognition();
+    
+    // Store recognition in ref for access outside this function
+    (recognitionRef as any).current = recognition;
 
     recognition.continuous = true;
     recognition.interimResults = true;
@@ -707,8 +639,15 @@ export default function SimplifiedPracticePage() {
       recognition.serviceURI = undefined;
       
       // Remove grammar restrictions that might filter filler words
+      // Note: grammars property expects SpeechGrammarList, not null
       if (recognition.grammars !== undefined) {
-        recognition.grammars = null;
+        try {
+          // Create an empty SpeechGrammarList instead of setting to null
+          const emptyGrammarList = new (window as any).SpeechGrammarList();
+          recognition.grammars = emptyGrammarList;
+        } catch (grammarError) {
+          console.log('🎤 Grammar list not supported, continuing without restrictions');
+        }
       }
       
       // Chrome-specific optimizations for maximum filler word capture
@@ -767,8 +706,6 @@ export default function SimplifiedPracticePage() {
           rawResult: result
         });
         
-
-        
         if (result.isFinal) {
           finalTranscript += bestTranscript + ' ';
         } else {
@@ -780,134 +717,53 @@ export default function SimplifiedPracticePage() {
       setInterimTranscript(interimText);
       interimTranscriptRef.current = interimText;
       
-      // Enhanced vocal filler detection in interim results with regex patterns
-      if (interimText.trim()) {
-        const interimLower = interimText.toLowerCase().trim();
-        const vocalFillerPatterns = ['um', 'uh', 'uhm', 'umm', 'uhhh', 'ummm', 'er', 'err', 'ah', 'eh'];
-        
-        // Check exact match first (do not mutate transcript)
-        for (const pattern of vocalFillerPatterns) {
-          if (interimLower === pattern || interimLower.startsWith(pattern + ' ') || interimLower.endsWith(' ' + pattern)) {
-            console.log('🎯 EXACT VOCAL FILLER detected in interim:', pattern);
-            setVocalFillerBuffer(prev => [...prev, pattern]);
-            break;
-          }
-        }
-        
-        // Note: Removed duplicate filler detection here to prevent spam
-        // Filler detection will be handled once in the final transcript processing
-      }
-
+      // Update full transcript
       if (finalTranscript.trim()) {
-        console.log('📝 Final transcript received:', finalTranscript.trim());
+        const fullTranscript = transcriptRef.current + finalTranscript;
+        transcriptRef.current = fullTranscript;
+        setTranscript(fullTranscript);
         
-        setTranscript(prev => {
-          const newTranscript = prev + finalTranscript;
-          transcriptRef.current = newTranscript;
-          console.log('📋 Complete session transcript:', newTranscript.substring(0, 100) + '...');
-          return newTranscript;
-        });
-        setInterimTranscript(''); // Clear interim when we get final
-        interimTranscriptRef.current = ''; // Clear ref too
+        // Add words to WPM calculator for accurate calculation
+        if (wpmCalculatorRef.current && finalTranscript.trim().length > 0) {
+          const words = finalTranscript.trim().split(/\s+/).filter(word => word.length > 0);
+          wpmCalculatorRef.current.addWords(words);
+          console.log(`📊 Added ${words.length} words to WPM calculator`);
+        }
         
-        // Note: Consolidated filler detection - only use backend analysis to prevent duplicate detection
-        
-        // Enhanced backend filler word analysis with UM/UH detection
-        const fullTranscript = transcript + ' ' + finalTranscript;
-        console.log('🔍 Sending for enhanced filler detection:', { 
-          transcript: fullTranscript.substring(0, 100) + '...', 
-          length: fullTranscript.length,
-          duration: sessionDuration 
-        });
-        
-        if (fullTranscript.trim().length > 10) {
-          try {
-            // Use enhanced filler detection API that captures UM and UH
-            const response = await fetch('/api/analyze-filler-words', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                transcript: fullTranscript,
-                duration: sessionDuration
-              })
-            });
+        // Use incremental filler detection for accurate one-by-one counting
+        if (fillerDetectorRef.current && fullTranscript.trim().length > 0) {
+          const fillerCounts = fillerDetectorRef.current.analyzeNewTranscript(fullTranscript);
+          
+          console.log(`🎯 Incremental filler detection: ${fillerCounts.totalFillers} total fillers (UM: ${fillerCounts.umCount}, UH: ${fillerCounts.uhCount})`);
+          
+          // Update metrics with accurate filler count
+          setMetrics(prev => ({
+            ...prev,
+            fillerWordCount: fillerCounts.totalFillers,
+            voice: {
+              ...prev.voice,
+              fillerCount: fillerCounts.totalFillers
+            }
+          }));
+          
+          // Only show feedback if new fillers were detected
+          if (fillerCounts.totalFillers > 0) {
+            const umUhInfo = fillerCounts.umCount + fillerCounts.uhCount > 0 ? 
+              ` (UM: ${fillerCounts.umCount}, UH: ${fillerCounts.uhCount})` : '';
+            const feedbackMessage = `${fillerCounts.totalFillers} filler words detected${umUhInfo}`;
             
-            if (response.ok) {
-              const result = await response.json();
-              const detection = result.detection;
-              console.log('🎯 Enhanced filler detection with UM/UH:', detection);
-              
-              // Note: Removed automatic transcript modification to prevent spam
-              // Fillers will be highlighted in the UI without modifying the transcript text
-              
-              // Update the total filler count for the entire session
-              console.log(`📊 Updating filler count to: ${detection.totalFillers} (UM: ${detection.umCount}, UH: ${detection.uhCount})`);
-              setMetrics(prev => ({
-                ...prev,
-                fillerWordCount: detection.totalFillers,
-                voice: {
-                  ...prev.voice,
-                  fillerCount: detection.totalFillers
-                }
-              }));
-              
-              if (detection.totalFillers > 0) {
-                const umUhInfo = detection.umCount + detection.uhCount > 0 ? 
-                  ` (UM: ${detection.umCount}, UH: ${detection.uhCount})` : '';
-                const feedbackMessage = `${detection.totalFillers} filler words detected${umUhInfo}`;
-                
-                setLiveFeedback(prev => [...prev.slice(-4), {
-                  id: Date.now().toString(),
-                  message: feedbackMessage,
-                  type: detection.totalFillers > 5 ? 'warning' : 'info',
-                  timestamp: Date.now()
-                }]);
-              }
-            }
-          } catch (error) {
-            console.log('Fallback to local filler detection');
-            // Fallback to simple local detection if backend fails
-            const localFillers = (finalTranscript.toLowerCase().match(/\b(um+|uh+|er+|ah+|like|so|you know|i mean)\b/g) || []);
-            if (localFillers.length > 0) {
-              const fullFillerCount = localFillers.length;
-              setMetrics(prev => ({
-                ...prev,
-                fillerWordCount: fullFillerCount,
-                voice: {
-                  ...prev.voice,
-                  fillerCount: fullFillerCount,
-                  volume: prev.voice.volume ?? 0,
-                  intonation: prev.voice.intonation ?? 0,
-                  pauseEffectiveness: prev.voice.pauseEffectiveness ?? 0,
-                  pitchVariation: prev.voice.pitchVariation ?? 0,
-                  vocalFryDetection: prev.voice.vocalFryDetection ?? false,
-                  uptalkPatterns: prev.voice.uptalkPatterns ?? 0
-                }
-              }));
-              const uniqueFillers = Array.from(new Set(localFillers));
-              const feedbackMessage = uniqueFillers.length === 1 
-                ? `Reduce filler word: "${uniqueFillers[0]}"` 
-                : `Reduce filler words: ${uniqueFillers.slice(0, 2).join(', ')}`;
-              setLiveFeedback(prev => [...prev.slice(-4), {
-                id: Date.now().toString(),
-                message: feedbackMessage,
-                type: 'warning',
-                timestamp: Date.now()
-              }]);
-            }
+            setLiveFeedback(prev => [...prev.slice(-4), {
+              id: Date.now().toString(),
+              message: feedbackMessage,
+              type: fillerCounts.totalFillers > 5 ? 'warning' : 'info',
+              timestamp: Date.now()
+            }]);
           }
         }
-
-        // Calculate WPM using the complete transcript (after updating it)
-        // Note: We'll update WPM in the interval timer for real-time updates
-
-        // Enhanced live feedback will be generated separately in a useEffect
-
-        // REMOVED: Random tip generation - replaced with real data-driven feedback only
-        // Tips will only be shown when actual body language or voice analysis data is available
       }
     };
 
+    // Add error handler
     recognition.onerror = (event: any) => {
       console.error('Speech recognition error:', event.error);
       // On errors like not-allowed/no-speech, ensure fallback is active
@@ -916,8 +772,19 @@ export default function SimplifiedPracticePage() {
       }
     };
 
-    (recognitionRef as any).current = recognition;
-  }, [sessionDuration, transcript, isSpeechFallbackActive, startDeepgramFallback]);
+    // Add end handler to restart if needed
+    recognition.onend = () => {
+      if (isRecording && !isSpeechFallbackActive) {
+        try {
+          recognition.start();
+        } catch (e) {
+          console.warn('Failed to restart speech recognition, using fallback');
+          startDeepgramFallback();
+        }
+      }
+    };
+
+  }, [sessionDuration, transcript, isSpeechFallbackActive, startDeepgramFallback, toast]);
 
   // Enhanced comprehensive live insights system with improved effectiveness
   useEffect(() => {
@@ -1144,7 +1011,7 @@ export default function SimplifiedPracticePage() {
             
             // FIXED: Proper WPM calculation with minimum time threshold
             const timeInMinutes = elapsedSeconds / 60;
-            const wpm = timeInMinutes > 0.1 && wordCount >= 3 ? Math.round(wordCount / timeInMinutes) : 0;
+            const wpm = timeInMinutes > 0.1 && wordCount >= 3 && timeInMinutes > 0 ? Math.round(wordCount / timeInMinutes) : 0;
             
             console.log(`🔄 Live WPM update: ${wordCount} words in ${elapsedSeconds}s = ${wpm} WPM`);
             setMetrics(prev => ({ 
@@ -1199,7 +1066,7 @@ export default function SimplifiedPracticePage() {
       });
       
       // Start video recording if initialized
-      if (videoInitialized) {
+      if (videoInitialized && recordingVideoRef.current) {
         const recordingStarted = videoRecordingManager.startRecording();
         if (recordingStarted) {
           console.log('🎬 Video recording started');
@@ -1228,7 +1095,7 @@ export default function SimplifiedPracticePage() {
         // Prepare Roboflow video binding and canvas immediately
         if (roboflowVideoRef.current) {
           roboflowVideoRef.current.srcObject = stream;
-          if (canvasRef.current && roboflowCanvasRef) {
+          if (canvasRef.current && roboflowCanvasRef && (roboflowCanvasRef as any).current !== undefined) {
             (roboflowCanvasRef as any).current = canvasRef.current;
           }
         }
@@ -1295,7 +1162,7 @@ export default function SimplifiedPracticePage() {
                 if (corr > bestCorr) { bestCorr = corr; bestOffset = lag; }
               }
               let pitchHz = 0;
-              const sr = (audioContext || (window as any).webkitAudioContext) ? (audioContext?.sampleRate || 44100) : 44100;
+              const sr = audioContext?.sampleRate || 44100;
               if (bestOffset > 0 && bestCorr > 0.01) pitchHz = Math.round(sr / bestOffset);
               if (pitchHz > 50 && pitchHz < 500) {
                 pitchWindowRef.current.push(pitchHz);
@@ -1320,6 +1187,13 @@ export default function SimplifiedPracticePage() {
         };
         
         startAnalysis();
+        
+        // Store interval for cleanup
+        return () => {
+          if (analyzeInterval) {
+            clearInterval(analyzeInterval);
+          }
+        };
       } catch (audioError) {
         console.warn('⚠️ Web Audio API unavailable:', audioError);
       }
@@ -1387,7 +1261,7 @@ export default function SimplifiedPracticePage() {
         
         // Start recording in 2-second chunks for vocal filler detection
         vocalRecorder.start();
-        setInterval(() => {
+        const vocalRecorderInterval = setInterval(() => {
           if (vocalRecorder.state === 'recording') {
             vocalRecorder.stop();
             setTimeout(() => {
@@ -1397,6 +1271,11 @@ export default function SimplifiedPracticePage() {
             }, 100);
           }
         }, 2000);
+        
+        // Store interval for cleanup
+        return () => {
+          clearInterval(vocalRecorderInterval);
+        };
         
         console.log('🎵 Dedicated vocal filler recorder initialized');
       } catch (recorderError) {
@@ -1418,6 +1297,36 @@ export default function SimplifiedPracticePage() {
       }
 
       setIsRecording(true);
+
+      // Initialize accurate WPM calculator
+      if (!wpmCalculatorRef.current) {
+        wpmCalculatorRef.current = new AccurateWPMCalculator();
+        console.log('📊 WPM calculator initialized');
+      }
+      wpmCalculatorRef.current.startSession();
+      console.log('📊 WPM calculator session started');
+
+      // Initialize incremental filler detector
+      if (!fillerDetectorRef.current) {
+        fillerDetectorRef.current = new IncrementalFillerDetector();
+        console.log('🎯 Filler detector initialized');
+      }
+      fillerDetectorRef.current.reset();
+      console.log('🎯 Filler detector reset');
+
+      // Start real-time eye contact detection
+      if (videoRef.current && isEyeContactInitialized) {
+        try {
+          await startEyeContactDetection(videoRef.current);
+          console.log('👁️ Real-time eye contact detection started');
+        } catch (error) {
+          console.warn('⚠️ Failed to start eye contact detection:', error);
+          // Fallback: use simple face detection
+          console.log('🔄 Using fallback eye contact detection');
+        }
+      } else {
+        console.log('⚠️ Eye contact detection not available - video or initialization issue');
+      }
 
       // Initialize metrics and refs with starting values when recording begins
       setMetrics({
@@ -1453,47 +1362,43 @@ export default function SimplifiedPracticePage() {
 
       // Update metrics with real MediaPipe/facial data when available
       metricsTimerRef.current = setInterval(async () => {
-        // Calculate voice metrics from transcript
-        if (transcriptRef.current && sessionDuration > 0) {
+        // Calculate WPM using accurate calculator
+        if (wpmCalculatorRef.current && sessionDuration > 0) {
           try {
-            const voiceResponse = await fetch('/api/calculate-voice-metrics', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                transcript: transcriptRef.current,
-                duration: sessionDuration
-              })
-            });
+            const wpmData = wpmCalculatorRef.current.calculateWPM();
+            const currentWPM = wpmData.currentWPM;
+            const wordCount = wpmData.totalWords;
             
-            if (voiceResponse.ok) {
-              const voiceData = await voiceResponse.json();
-              if (voiceData.success && voiceData.metrics) {
-                setMetrics(prev => ({
-                  ...prev,
-                  wordsPerMinute: voiceData.metrics.wordsPerMinute || prev.wordsPerMinute,
-                  voice: {
-                    ...prev.voice,
-                    clarity: voiceData.metrics.clarity || prev.voice.clarity,
-                    pace: voiceData.metrics.pace || prev.voice.pace
-                  }
-                }));
-                console.log('✅ Voice metrics updated:', voiceData.metrics);
+            setMetrics(prev => ({
+              ...prev,
+              wordsPerMinute: currentWPM,
+              voice: {
+                ...prev.voice,
+                pace: currentWPM
               }
-            }
+            }));
+            
+            // Update state for display
+            setCurrentWPM(currentWPM);
+            setWordCount(wordCount);
+            
+            console.log('✅ WPM updated:', { wpm: currentWPM, wordCount, confidence: wpmData.confidence });
           } catch (error) {
-            console.log('⚠️ Voice metrics calculation failed');
+            console.log('⚠️ WPM calculation failed:', error);
           }
         }
         
         setMetrics(prev => ({
           ...prev,
-          eyeContact: bodyMetrics?.eyeContact?.engagement ?? facialAnalysis?.facialMetrics?.communicationSignals?.eyeContactQuality ?? roboflowAnalysis?.facial?.eyeContact ?? prev.eyeContact,
+          // Use real-time eye contact as primary system, with fallback
+          eyeContact: eyeContactPercentage > 0 ? eyeContactPercentage : prev.eyeContact,
           confidence: facialAnalysis?.facialMetrics?.emotionalExpression?.confidence ?? computerVisionMetrics?.confidence ?? prev.confidence,
           engagement: facialAnalysis?.facialMetrics?.emotionalExpression?.engagement ?? computerVisionMetrics?.engagement ?? prev.engagement,
           clarity: facialAnalysis?.facialMetrics?.emotionalExpression?.authenticity ?? prev.clarity,
           bodyLanguage: {
             ...prev.bodyLanguage,
-            eyeContactScore: bodyMetrics?.eyeContact?.engagement ?? computerVisionMetrics?.eyeContact ?? prev.bodyLanguage.eyeContactScore,
+            // Use real-time eye contact as primary system, with fallback
+            eyeContactScore: eyeContactPercentage > 0 ? eyeContactPercentage : prev.bodyLanguage.eyeContactScore,
             facialExpressions: bodyMetrics?.gestures?.naturalness ?? prev.bodyLanguage.facialExpressions,
             overallPresence: bodyMetrics?.overall?.presence ?? prev.bodyLanguage.overallPresence
           }
@@ -1579,6 +1484,18 @@ export default function SimplifiedPracticePage() {
       setVocalFillerRecorder(null);
     }
     setIsListeningForFillers(false);
+    
+    // Clear any remaining intervals
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+
+    // End WPM calculator session
+    if (wpmCalculatorRef.current) {
+      wpmCalculatorRef.current.endSession();
+      console.log('📊 WPM calculator session ended');
+    }
 
     // Stop Roboflow computer vision analysis
     try {
@@ -1596,13 +1513,29 @@ export default function SimplifiedPracticePage() {
       console.warn('⚠️ Error stopping facial analysis');
     }
 
-    // Stop computer vision analysis
-    try {
-      stopComputerVisionAnalysis();
-      console.log('🛡️ Computer vision analysis stopped');
-    } catch (error) {
-      console.warn('⚠️ Error stopping computer vision analysis');
-    }
+      // Stop computer vision analysis
+  try {
+    stopComputerVisionAnalysis();
+    console.log('🛡️ Computer vision analysis stopped');
+  } catch (error) {
+    console.warn('⚠️ Error stopping computer vision analysis');
+  }
+
+  // Stop body analysis
+  try {
+    stopBodyAnalysis();
+    console.log('🏃 Body analysis stopped');
+  } catch (error) {
+    console.warn('⚠️ Error stopping body analysis');
+  }
+
+  // Stop eye contact detection
+  try {
+    stopEyeContactDetection();
+    console.log('👁️ Eye contact detection stopped');
+  } catch (error) {
+    console.warn('⚠️ Error stopping eye contact detection');
+  }
 
     setIsRecording(false);
     setIsVideoInitialized(false);
@@ -1611,12 +1544,12 @@ export default function SimplifiedPracticePage() {
     try {
       console.log('💾 Preparing to save session data...');
       
-      const sessionData = {
-        sessionName: sessionName || `Session ${sessionNumber}`,
-        purpose: sessionPurpose || 'general-presentation',
+              const sessionData = {
+          sessionName: sessionName || `Session ${sessionNumber || 1}`,
+          purpose: sessionPurpose || 'general-presentation',
         duration: sessionDuration,
         transcript: transcript || '',
-        averageWPM: metrics.wordsPerMinute || 0,
+        averageWPM: wpmCalculatorRef.current ? wpmCalculatorRef.current.calculateWPM().averageWPM : metrics.wordsPerMinute || 0,
         confidenceScore: metrics.confidence || 0,
         voiceClarity: metrics.voice.clarity || 0,
         fillerWords: metrics.fillerWordCount || 0,
@@ -1681,7 +1614,8 @@ export default function SimplifiedPracticePage() {
 
       if (!response.ok) {
         console.error('❌ Session save failed with status:', response.status);
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        const errorText = await response.text().catch(() => 'Unknown error');
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
 
       const result = await response.json();
@@ -1838,32 +1772,32 @@ export default function SimplifiedPracticePage() {
         // Prepare analysis data that matches AuthenticAnalysisPage interface exactly
         const analysisData = {
           id: Date.now(),
-          sessionNumber: 1, // This will be updated when database integration is complete
-          sessionName: sessionData.name || 'Practice Session',
-          purpose: sessionData.purpose || 'General Practice',
+          sessionNumber: sessionNumber || 1,
+          sessionName: sessionName || 'Practice Session',
+          purpose: sessionPurpose || 'General Practice',
           duration: sessionDuration,
           transcript: transcript || 'No transcript available',
-          averageWPM: averageWPM,
-          confidenceScore: Math.round(sessionData.confidenceScore),
-          voiceClarity: Math.round(sessionData.clarityScore),
-          fillerWords: realFillerWords,
-          pauseCount: sessionData.pauseCount || 0,
-          eyeContactScore: `${realEyeContact}%`,
-          coachingTips: sessionData.coachingTips || [],
+          averageWPM: metrics.wordsPerMinute || 0,
+          confidenceScore: Math.round(metrics.confidence || 0),
+          voiceClarity: Math.round(metrics.voice?.clarity || 0),
+          fillerWords: metrics.fillerWordCount || 0,
+          pauseCount: 0,
+          eyeContactScore: `${Math.round(metrics.eyeContact || 0)}%`,
+          coachingTips: [],
           facialAnalysis: facialAnalysis?.facialMetrics,
           voiceMetrics: {
-            clarity: Math.round(sessionData.clarityScore),
-            pace: averageWPM,
-            fillerCount: realFillerWords
+            clarity: Math.round(metrics.voice?.clarity || 0),
+            pace: metrics.wordsPerMinute || 0,
+            fillerCount: metrics.fillerWordCount || 0
           },
           bodyLanguageMetrics: {
-            eyeContact: realEyeContact,
-            confidence: hasRealSpeech ? metrics.confidence : 0,
+            eyeContact: metrics.eyeContact || 0,
+            confidence: metrics.confidence || 0,
             posture: 0
           },
-          persuasivenessScore: hasRealSpeech ? Math.round((realConfidenceScore + realEyeContact) / 2) : 0,
+          persuasivenessScore: Math.round((metrics.confidence + metrics.eyeContact) / 2) || 0,
           createdAt: new Date().toISOString(),
-          hasRealSpeech: hasRealSpeech
+          hasRealSpeech: transcript && transcript.trim().length > 10
         };
         
         console.log('📊 Analysis data prepared for AuthenticAnalysisPage:', analysisData);
@@ -1871,14 +1805,19 @@ export default function SimplifiedPracticePage() {
         // Save session with video and transcript to database
         try {
           let base64Video = null;
-          if (recordingData) {
-            const videoData = await recordingData.videoBlob.arrayBuffer();
-            const uint8Array = new Uint8Array(videoData);
-            let binaryString = '';
-            for (let i = 0; i < uint8Array.length; i++) {
-              binaryString += String.fromCharCode(uint8Array[i]);
+          if (recordingData && recordingData.videoBlob) {
+            try {
+              const videoData = await recordingData.videoBlob.arrayBuffer();
+              const uint8Array = new Uint8Array(videoData);
+              let binaryString = '';
+              for (let i = 0; i < uint8Array.length; i++) {
+                binaryString += String.fromCharCode(uint8Array[i]);
+              }
+              base64Video = btoa(binaryString);
+            } catch (error) {
+              console.warn('⚠️ Failed to convert video to base64:', error);
+              base64Video = null;
             }
-            base64Video = btoa(binaryString);
           }
           
           const saveVideoResponse = await fetch('/api/sessions/save-with-video', {
@@ -1893,21 +1832,21 @@ export default function SimplifiedPracticePage() {
               videoData: base64Video,
               duration: sessionDuration,
               metrics: {
-                confidence: realConfidenceScore,
-                clarity: realVoiceClarity,
+                confidence: metrics.confidence || 0,
+                clarity: metrics.voice?.clarity || 0,
                 pace: metrics.voice?.pace || 0,
-                eyeContact: realEyeContact,
+                eyeContact: metrics.eyeContact || 0,
                 gesture: 0, // Gesture analysis removed
-                fillerWordCount: realFillerWords,
-                wordsPerMinute: averageWPM
+                fillerWordCount: metrics.fillerWordCount || 0,
+                wordsPerMinute: metrics.wordsPerMinute || 0
               },
               facialAnalysis: facialAnalysis?.facialMetrics,
               voiceMetrics: {
-                clarity: realVoiceClarity,
+                clarity: metrics.voice?.clarity || 0,
                 pace: metrics.voice?.pace || 0,
                 volume: metrics.voice?.volume || 0,
                 intonation: metrics.voice?.intonation || 0,
-                fillerCount: realFillerWords,
+                fillerCount: metrics.fillerWordCount || 0,
                 pauseEffectiveness: metrics.voice?.pauseEffectiveness || 0,
                 pitchVariation: metrics.voice?.pitchVariation || 0,
                 vocalFryDetection: metrics.voice?.vocalFryDetection || false,
@@ -1916,7 +1855,7 @@ export default function SimplifiedPracticePage() {
             })
           });
 
-          if (saveVideoResponse.ok) {
+                    if (saveVideoResponse.ok) {
             const savedVideoSession = await saveVideoResponse.json();
             console.log('✅ Session with video/transcript saved to database:', savedVideoSession.sessionId);
             
@@ -1938,7 +1877,8 @@ export default function SimplifiedPracticePage() {
               duration: 4000
             });
           } else {
-            throw new Error('Failed to save video session to database');
+            const errorText = await saveVideoResponse.text().catch(() => 'Unknown error');
+            throw new Error(`Video save failed: ${errorText}`);
           }
           
         } catch (videoSaveError) {

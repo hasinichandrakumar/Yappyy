@@ -19,7 +19,7 @@ Find and update these environment variables:
 
 **GOOGLE_CLIENT_SECRET**  
 ```
-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
+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
 ```
 
 ### Step 3: Remove Old Secrets (if they exist)

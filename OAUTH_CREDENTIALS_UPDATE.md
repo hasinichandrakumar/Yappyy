@@ -12,11 +12,11 @@ The environment had **old/incorrect Google OAuth credentials**, which explains w
 
 ### **Client Secret**: 
 ```
-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
+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
 ```
 
 ## 🚨 **Previous Issue**
-- Environment had: `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` (old secret)
+- Environment had: `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` (old secret)
 - Code was trying to authenticate with wrong credentials
 
 ## 🎯 **Complete Fix Checklist**
@@ -48,6 +48,6 @@ Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials) 
 ## 🔧 **For Persistent Environment Variables**
 If using Replit, set these in the Secrets tab:
 - `GOOGLE_CLIENT_ID`: `372720245891-dtpkbj63rl2hju5vo2uorldivgurg6fh.apps.googleusercontent.com`
-- `GOOGLE_CLIENT_SECRET`: `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`
+- `GOOGLE_CLIENT_SECRET`: `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`
 
 This ensures they persist across restarts.

@@ -431,13 +431,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         improvementPlan: sessionData.improvementPlan || null
       };
 
-      // Server-side sanity: recompute WPM and filler count from transcript
+      // Server-side sanity: recompute WPM and filler count from transcript - FIXED for accuracy
       try {
         const text = (extendedSessionData as any).transcript || '';
         const durationSecs = Number((extendedSessionData as any).duration || 0);
-        const words = text.trim().split(/\s+/).filter(Boolean);
-        if (durationSecs > 0 && words.length >= 4) {
-          (extendedSessionData as any).averageWPM = Math.round((words.length / durationSecs) * 60);
+        
+        // Clean transcript for accurate word counting
+        const cleanText = text.trim().replace(/[^\w\s]/g, ' ').replace(/\s+/g, ' ');
+        const words = cleanText.split(/\s+/).filter(Boolean);
+        
+        // Only calculate WPM if we have meaningful data (minimum 5 words and 10 seconds)
+        if (durationSecs >= 10 && words.length >= 5) {
+          const durationMinutes = durationSecs / 60;
+          const accurateWPM = Math.round(words.length / durationMinutes);
+          (extendedSessionData as any).averageWPM = accurateWPM;
+          console.log(`✅ Server-side WPM calculation: ${words.length} words in ${durationSecs}s = ${accurateWPM} WPM`);
+        } else {
+          console.log(`⚠️ Insufficient data for WPM calculation: ${words.length} words in ${durationSecs}s`);
+          (extendedSessionData as any).averageWPM = 0;
         }
         const lower = text.toLowerCase();
         const fillerList = ['um','uh','uhm','umm','er','ah','eh','like','you know','so','basically','actually'];
@@ -7042,9 +7053,17 @@ Respond with detailed analysis in JSON format:
         });
       }
       
-      // Calculate speaking pace (words per minute)
-      const words = transcript.trim().split(/\s+/).filter((w: string) => w.length > 0);
-      const wordsPerMinute = Math.round((words.length / duration) * 60);
+      // Calculate speaking pace (words per minute) - FIXED for accuracy
+      const cleanTranscript = transcript.trim().replace(/[^\w\s]/g, ' ').replace(/\s+/g, ' ');
+      const words = cleanTranscript.split(/\s+/).filter((w: string) => w.length > 0);
+      
+      // Only calculate WPM if we have meaningful data
+      let wordsPerMinute = 0;
+      if (words.length >= 5 && duration >= 10) {
+        const durationMinutes = duration / 60;
+        wordsPerMinute = Math.round(words.length / durationMinutes);
+      }
+      
       const pace = Math.min(100, Math.max(0, Math.round((wordsPerMinute / 160) * 100))); // 160 WPM is ideal
       
       // Calculate clarity based on transcript quality

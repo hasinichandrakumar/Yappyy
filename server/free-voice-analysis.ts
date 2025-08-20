@@ -1,7 +1,4 @@
 // Free Voice Analysis Engine - Using Open Source Libraries
-// @ts-ignore - node-nlp doesn't have TypeScript types
-import { NlpManager } from 'node-nlp';
-
 interface FreeVoiceAnalysis {
   sentiment: {
     score: number;
@@ -22,13 +19,10 @@ interface FreeVoiceAnalysis {
 }
 
 export class FreeVoiceAnalysisEngine {
-  private nlpManager: NlpManager;
   private emotionPipeline: any;
   private isInitialized = false;
 
   constructor() {
-    // Initialize NLP.js synchronously (always available)
-    this.nlpManager = new NlpManager({ languages: ['en'], forceNER: true });
     this.isInitialized = true;
     
     // Initialize HuggingFace models asynchronously (may fail gracefully)
@@ -61,9 +55,6 @@ export class FreeVoiceAnalysisEngine {
     }
 
     try {
-      // Advanced sentiment analysis using NLP.js
-      const sentimentResult = await this.nlpManager.process('en', transcript);
-      
       // Calculate confidence based on transcript characteristics
       const confidence = this.calculateConfidenceFromText(transcript);
       const clarity = this.calculateClarityFromText(transcript);
@@ -71,13 +62,12 @@ export class FreeVoiceAnalysisEngine {
       
       // Emotion analysis from text patterns
       const emotions = this.analyzeEmotionsFromText(transcript);
+      
+      // Simple sentiment analysis based on text characteristics
+      const sentiment = this.analyzeSentimentFromText(transcript);
 
       return {
-        sentiment: {
-          score: sentimentResult.sentiment?.score || 0,
-          label: sentimentResult.sentiment?.type || 'neutral',
-          confidence: sentimentResult.sentiment?.score || 0
-        },
+        sentiment,
         emotions,
         confidence,
         clarity,
@@ -312,6 +302,139 @@ export class FreeVoiceAnalysisEngine {
     });
     
     return maxEmotion;
+  }
+
+  private calculateConfidenceFromText(text: string): number {
+    // Simple confidence scoring based on text characteristics
+    const words = text.toLowerCase().split(/\s+/);
+    const totalWords = words.length;
+    
+    if (totalWords === 0) return 0;
+    
+    // Confidence indicators
+    const confidentWords = [
+      'definitely', 'certainly', 'absolutely', 'clearly', 'obviously',
+      'undoubtedly', 'surely', 'indeed', 'truly', 'genuinely'
+    ];
+    
+    const confidentWordCount = words.filter(word => 
+      confidentWords.includes(word)
+    ).length;
+    
+    // Hesitation indicators (penalty)
+    const hesitationWords = ['um', 'uh', 'maybe', 'perhaps', 'possibly', 'might'];
+    const hesitationCount = words.filter(word => 
+      hesitationWords.includes(word)
+    ).length;
+    
+    // Calculate confidence score
+    const confidentRatio = confidentWordCount / totalWords;
+    const hesitationPenalty = hesitationCount / totalWords;
+    
+    return Math.min(100, Math.max(0, (confidentRatio * 100) - (hesitationPenalty * 50) + 50));
+  }
+
+  private calculateClarityFromText(text: string): number {
+    // Simple clarity scoring based on text characteristics
+    const words = text.toLowerCase().split(/\s+/);
+    const totalWords = words.length;
+    
+    if (totalWords === 0) return 0;
+    
+    // Clarity indicators
+    const clearWords = [
+      'specifically', 'precisely', 'exactly', 'clearly', 'simply',
+      'directly', 'straightforward', 'concrete', 'definite', 'explicit'
+    ];
+    
+    const clearWordCount = words.filter(word => 
+      clearWords.includes(word)
+    ).length;
+    
+    // Vagueness indicators (penalty)
+    const vagueWords = ['thing', 'stuff', 'something', 'somehow', 'sort of', 'kind of'];
+    const vagueCount = words.filter(word => 
+      vagueWords.includes(word)
+    ).length;
+    
+    // Calculate clarity score
+    const clearRatio = clearWordCount / totalWords;
+    const vaguePenalty = vagueCount / totalWords;
+    
+    return Math.min(100, Math.max(0, (clearRatio * 100) - (vaguePenalty * 60) + 60));
+  }
+
+  private calculateProfessionalismFromText(text: string): number {
+    // Simple professionalism scoring based on text characteristics
+    const words = text.toLowerCase().split(/\s+/);
+    const totalWords = words.length;
+    
+    if (totalWords === 0) return 0;
+    
+    // Professional vocabulary indicators
+    const professionalWords = [
+      'therefore', 'consequently', 'furthermore', 'moreover', 'additionally',
+      'specifically', 'particularly', 'notably', 'significantly', 'evidently',
+      'consequently', 'accordingly', 'subsequently', 'previously', 'initially'
+    ];
+    
+    const professionalWordCount = words.filter(word => 
+      professionalWords.includes(word)
+    ).length;
+    
+    // Filler word penalty
+    const fillerWords = ['um', 'uh', 'like', 'you know', 'basically', 'actually'];
+    const fillerWordCount = words.filter(word => 
+      fillerWords.includes(word)
+    ).length;
+    
+    // Calculate professionalism score
+    const professionalRatio = professionalWordCount / totalWords;
+    const fillerPenalty = Math.min(0.3, fillerWordCount / totalWords);
+    
+    return Math.min(100, Math.max(0, (professionalRatio * 100) - (fillerPenalty * 100)));
+  }
+
+  private analyzeSentimentFromText(text: string): { score: number; label: string; confidence: number } {
+    // Simple sentiment analysis based on text characteristics
+    const words = text.toLowerCase().split(/\s+/);
+    const totalWords = words.length;
+    
+    if (totalWords === 0) {
+      return { score: 0, label: 'neutral', confidence: 0 };
+    }
+    
+    // Positive words
+    const positiveWords = [
+      'great', 'excellent', 'amazing', 'wonderful', 'fantastic', 'brilliant',
+      'outstanding', 'superb', 'terrific', 'awesome', 'perfect', 'ideal',
+      'successful', 'effective', 'powerful', 'strong', 'confident', 'clear'
+    ];
+    
+    // Negative words
+    const negativeWords = [
+      'terrible', 'awful', 'horrible', 'bad', 'poor', 'weak', 'confusing',
+      'difficult', 'problem', 'issue', 'fail', 'failure', 'wrong', 'incorrect',
+      'unclear', 'vague', 'uncertain', 'doubtful', 'worried', 'concerned'
+    ];
+    
+    const positiveCount = words.filter(word => positiveWords.includes(word)).length;
+    const negativeCount = words.filter(word => negativeWords.includes(word)).length;
+    
+    // Calculate sentiment score (-1 to 1)
+    const positiveRatio = positiveCount / totalWords;
+    const negativeRatio = negativeCount / totalWords;
+    const score = positiveRatio - negativeRatio;
+    
+    // Determine label
+    let label = 'neutral';
+    if (score > 0.1) label = 'positive';
+    else if (score < -0.1) label = 'negative';
+    
+    // Calculate confidence based on word count and sentiment strength
+    const confidence = Math.min(1, Math.abs(score) * 2 + (totalWords / 100));
+    
+    return { score, label, confidence };
   }
 
   private getFallbackAnalysis(): FreeVoiceAnalysis {

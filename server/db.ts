@@ -2,25 +2,24 @@ import { Pool, neonConfig } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-serverless';
 import ws from "ws";
 import * as schema from "@shared/schema";
+import { validateDatabaseUrl } from './security-enhancements';
 
 // Configure WebSocket for Neon serverless
 if (typeof WebSocket === 'undefined') {
   neonConfig.webSocketConstructor = ws;
 }
 
-if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
-  );
-}
+// Validate database URL for security
+validateDatabaseUrl();
 
-// Create pool with optimized configuration for Neon serverless
+// Create pool with security-optimized configuration for Neon serverless
 export const pool = new Pool({ 
   connectionString: process.env.DATABASE_URL,
   max: 3,
   idleTimeoutMillis: 60000, // 1 minute
   connectionTimeoutMillis: 15000, // 15 seconds
   allowExitOnIdle: false,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
 });
 
 // Add comprehensive error handling with auto-recovery
