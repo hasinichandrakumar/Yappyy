@@ -2,17 +2,57 @@ import { Express, Request, Response } from 'express';
 import session from 'express-session';
 import connectPgSimple from 'connect-pg-simple';
 import { google } from 'googleapis';
+import crypto from 'crypto';
 import { storage } from './storage';
 
+// Define proper session interface
+interface AuthenticatedSession extends session.Session {
+  oauth_state?: string;
+  access_token?: string;
+  user_id?: string;
+}
+
+interface AuthenticatedRequest extends Request {
+  session: AuthenticatedSession;
+}
+
 export function setupSimplifiedGoogleAuth(app: Express) {
-  // Session configuration (similar to Flask's session)
+  // Validate required environment variables
+  const requiredEnvVars = {
+    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+    SESSION_SECRET: process.env.SESSION_SECRET,
+    DATABASE_URL: process.env.DATABASE_URL,
+  };
+
+  const missingVars = Object.entries(requiredEnvVars)
+    .filter(([_, value]) => !value)
+    .map(([key]) => key);
+
+  if (missingVars.length > 0) {
+    console.error('❌ Missing required environment variables:', missingVars);
+    throw new Error(`Missing required environment variables: ${missingVars.join(', ')}`);
+  }
+
+  // Session configuration with proper error handling
   const PgStore = connectPgSimple(session);
-  const sessionStore = new PgStore({
-    conString: process.env.DATABASE_URL,
-    createTableIfMissing: false,
-    ttl: 7 * 24 * 60 * 60, // 7 days
-    tableName: 'sessions',
-  });
+  let sessionStore;
+
+  try {
+    sessionStore = new PgStore({
+      conString: process.env.DATABASE_URL,
+      createTableIfMissing: true, // Create table if it doesn't exist
+      ttl: 7 * 24 * 60 * 60, // 7 days
+      tableName: 'sessions',
+      pruneSessionInterval: 60, // Clean up expired sessions every minute
+    });
+    console.log('✅ Session store configured with PostgreSQL');
+  } catch (error) {
+    console.error('❌ Failed to configure session store:', error);
+    // Fallback to memory store for development
+    sessionStore = new session.MemoryStore();
+    console.log('⚠️ Using memory store as fallback');
+  }
 
   app.use(session({
     secret: process.env.SESSION_SECRET!,
@@ -22,137 +62,197 @@ export function setupSimplifiedGoogleAuth(app: Express) {
     cookie: {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax' as const,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     },
+    name: 'yappyy.sid', // Custom session name
   }));
 
-  // Create OAuth2 client (similar to Flask's oauth_flow)
+  // Create OAuth2 client
   const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
     '' // Will be set dynamically
   );
 
-  // Scopes (same as Flask)
+  // Scopes
   const scopes = [
     'https://www.googleapis.com/auth/userinfo.email',
     'openid',
     'https://www.googleapis.com/auth/userinfo.profile',
   ];
 
-  // Sign in route (equivalent to Flask's /signin)
-  app.get('/api/auth/google', (req: Request, res: Response) => {
+  // Generate cryptographically secure state
+  function generateSecureState(): string {
+    return crypto.randomBytes(32).toString('hex');
+  }
+
+  // Get current domain for callback URL
+  function getCurrentDomain(req: Request): string {
+    const host = req.get('host');
+    const protocol = req.get('x-forwarded-proto') || (req.secure ? 'https' : 'http');
+    
+    if (host) {
+      return `${protocol}://${host}`;
+    }
+    
+    // Fallback for development
+    return process.env.NODE_ENV === 'production' 
+      ? 'https://yappyy.com' 
+      : 'http://localhost:5000';
+  }
+
+  // Sign in route
+  app.get('/api/auth/google', (req: AuthenticatedRequest, res: Response) => {
     try {
-      // Dynamic callback URL (like Flask's url_for with https replacement)
-      const baseUrl = req.get('host') ? `https://${req.get('host')}` : 'http://localhost:5000';
+      // Generate secure state
+      const state = generateSecureState();
+      
+      // Store state in session
+      req.session.oauth_state = state;
+      
+      // Dynamic callback URL
+      const baseUrl = getCurrentDomain(req);
       const redirectUri = `${baseUrl}/api/auth/google/callback`;
       
       oauth2Client.redirectUri = redirectUri;
       
-      // Generate auth URL with state (like Flask)
+      // Generate auth URL
       const authUrl = oauth2Client.generateAuthUrl({
         access_type: 'offline',
         scope: scopes,
-        state: Math.random().toString(36).substring(2, 15), // Generate random state
+        state: state,
+        prompt: 'consent', // Force consent screen to get refresh token
       });
 
-      // Store state in session (like Flask's session['state'])
-      (req.session as any).oauth_state = authUrl.split('state=')[1]?.split('&')[0];
-      
       console.log('🔄 Redirecting to Google OAuth:', redirectUri);
       res.redirect(authUrl);
     } catch (error) {
       console.error('❌ OAuth initiation error:', error);
-      res.redirect('/?error=auth_error&details=' + encodeURIComponent('Failed to initiate OAuth'));
+      res.redirect('/?error=auth_error');
     }
   });
 
-  // Callback route (equivalent to Flask's /oauth2callback)
-  app.get('/api/auth/google/callback', async (req: Request, res: Response) => {
+  // Callback route
+  app.get('/api/auth/google/callback', async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { code, state, error } = req.query;
       
       if (error) {
         console.error('❌ OAuth error:', error);
-        return res.redirect('/?error=oauth_error&details=' + encodeURIComponent(error as string));
+        return res.redirect('/?error=oauth_error');
       }
 
       if (!code) {
-        return res.redirect('/?error=oauth_error&details=' + encodeURIComponent('No authorization code received'));
+        return res.redirect('/?error=oauth_error');
       }
 
-      // Validate state (like Flask's state validation)
-      const sessionState = (req.session as any).oauth_state;
-      if (state !== sessionState) {
-        return res.redirect('/?error=oauth_error&details=' + encodeURIComponent('Invalid state parameter'));
+      // Validate state
+      const sessionState = req.session.oauth_state;
+      if (!sessionState || state !== sessionState) {
+        console.error('❌ Invalid state parameter');
+        return res.redirect('/?error=oauth_error');
       }
+
+      // Clear state from session
+      delete req.session.oauth_state;
 
       // Set redirect URI for token exchange
-      const baseUrl = req.get('host') ? `https://${req.get('host')}` : 'http://localhost:5000';
+      const baseUrl = getCurrentDomain(req);
       oauth2Client.redirectUri = `${baseUrl}/api/auth/google/callback`;
 
-      // Exchange code for token (like Flask's oauth_flow.fetch_token)
+      // Exchange code for token
       const { tokens } = await oauth2Client.getToken(code as string);
       
-      // Store access token in session (exactly like Flask)
-      (req.session as any).access_token = tokens.access_token;
+      if (!tokens.access_token) {
+        console.error('❌ No access token received');
+        return res.redirect('/?error=oauth_error');
+      }
+
+      // Store access token in session
+      req.session.access_token = tokens.access_token;
       
-      console.log('✅ OAuth successful, access token stored in session');
-      res.redirect('/'); // Redirect to home page like Flask
+      // Get user info
+      const userInfo = await getUserInfo(tokens.access_token);
+      if (!userInfo) {
+        console.error('❌ Failed to get user info');
+        return res.redirect('/?error=oauth_error');
+      }
+
+      // Store user in database
+      if (userInfo.sub) {
+        try {
+          await storage.upsertUser({
+            id: userInfo.sub,
+            email: userInfo.email,
+            firstName: userInfo.given_name || '',
+            lastName: userInfo.family_name || '',
+            profileImageUrl: userInfo.picture || '',
+          });
+          req.session.user_id = userInfo.sub;
+        } catch (dbError) {
+          console.error('❌ Database error:', dbError);
+          // Continue anyway, don't fail the auth
+        }
+      }
+      
+      console.log('✅ OAuth successful for user:', userInfo.email);
+      res.redirect('/');
     } catch (error) {
       console.error('❌ OAuth callback error:', error);
-      res.redirect('/?error=oauth_error&details=' + encodeURIComponent('Authentication failed'));
+      res.redirect('/?error=oauth_error');
     }
   });
 
-  // Get user info function (like Flask's get_user_info)
+  // Get user info function
   async function getUserInfo(accessToken: string) {
     try {
       const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-        headers: { 'Authorization': `Bearer ${accessToken}` }
+        headers: { 
+          'Authorization': `Bearer ${accessToken}`,
+          'Accept': 'application/json'
+        }
       });
       
-      if (response.ok) {
-        return await response.json();
+      if (!response.ok) {
+        console.error('❌ User info request failed:', response.status, response.statusText);
+        return null;
       }
-      return null;
+      
+      const userInfo = await response.json();
+      
+      // Validate required fields
+      if (!userInfo.sub || !userInfo.email) {
+        console.error('❌ Invalid user info received:', userInfo);
+        return null;
+      }
+      
+      return userInfo;
     } catch (error) {
-      console.error('Failed to fetch user info:', error);
+      console.error('❌ Failed to fetch user info:', error);
       return null;
     }
   }
 
-  // User info route (like Flask's welcome route)
-  app.get('/api/auth/user', async (req: Request, res: Response) => {
+  // User info route
+  app.get('/api/auth/user', async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const session = req.session as any;
-      
-      if (!session.access_token) {
+      if (!req.session.access_token) {
         return res.json({ 
           isAuthenticated: false, 
           user: null 
         });
       }
 
-      const userInfo = await getUserInfo(session.access_token);
+      const userInfo = await getUserInfo(req.session.access_token);
       
       if (!userInfo) {
         // Clear invalid session
-        session.access_token = null;
+        delete req.session.access_token;
+        delete req.session.user_id;
         return res.json({ 
           isAuthenticated: false, 
           user: null 
-        });
-      }
-
-      // Store user in database if needed
-      if (userInfo.sub) {
-        await storage.upsertUser({
-          id: userInfo.sub,
-          email: userInfo.email,
-          firstName: userInfo.given_name || '',
-          lastName: userInfo.family_name || '',
-          profileImageUrl: userInfo.picture || '',
         });
       }
 
@@ -170,7 +270,7 @@ export function setupSimplifiedGoogleAuth(app: Express) {
         }
       });
     } catch (error) {
-      console.error('Error fetching user:', error);
+      console.error('❌ Error fetching user:', error);
       res.json({ 
         isAuthenticated: false, 
         user: null 
@@ -178,13 +278,48 @@ export function setupSimplifiedGoogleAuth(app: Express) {
     }
   });
 
-  // Logout route (like Flask's logout)
-  app.get('/api/auth/logout', (req: Request, res: Response) => {
-    (req.session as any).access_token = null;
-    req.session.destroy(() => {
+  // Logout route with proper cleanup
+  app.get('/api/auth/logout', async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      // Revoke Google access token if available
+      if (req.session.access_token) {
+        try {
+          oauth2Client.setCredentials({ access_token: req.session.access_token });
+          await oauth2Client.revokeCredentials();
+          console.log('✅ Google access token revoked');
+        } catch (revokeError) {
+          console.warn('⚠️ Failed to revoke Google token:', revokeError);
+        }
+      }
+
+      // Clear session
+      delete req.session.access_token;
+      delete req.session.user_id;
+      delete req.session.oauth_state;
+
+      // Destroy session
+      req.session.destroy((err) => {
+        if (err) {
+          console.error('❌ Error destroying session:', err);
+        }
+        res.redirect('/');
+      });
+    } catch (error) {
+      console.error('❌ Logout error:', error);
       res.redirect('/');
+    }
+  });
+
+  // Health check route
+  app.get('/api/auth/health', (req: Request, res: Response) => {
+    res.json({
+      status: 'ok',
+      googleClientId: process.env.GOOGLE_CLIENT_ID ? 'configured' : 'missing',
+      sessionSecret: process.env.SESSION_SECRET ? 'configured' : 'missing',
+      databaseUrl: process.env.DATABASE_URL ? 'configured' : 'missing',
+      environment: process.env.NODE_ENV || 'development'
     });
   });
 
-  console.log('✅ Simplified Google OAuth configured');
+  console.log('✅ Simplified Google OAuth configured successfully');
 }
