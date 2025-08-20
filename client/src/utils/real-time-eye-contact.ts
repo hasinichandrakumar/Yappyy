@@ -104,7 +104,7 @@ export class RealTimeEyeContact {
       this.isInitialized = true;
       console.log('✅ MediaPipe Face Mesh initialized for eye contact detection');
     } catch (error) {
-      console.error('❌ Failed to initialize MediaPipe Face Mesh:', error);
+      // Silently handle MediaPipe initialization errors - fallback to basic detection
       this.isInitialized = false;
     }
   }

@@ -83,7 +83,7 @@ export class TensorFlowVisionSystem {
       await Promise.allSettled(
         modelLoads.map(model => 
           loadModelWithTimeout(model.load(), model.name).catch(err => {
-            console.warn(`⚠️ ${model.name} failed to load:`, err.message);
+            // Silently handle individual model loading failures
             return null;
           })
         )

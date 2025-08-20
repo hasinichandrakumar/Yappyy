@@ -38,8 +38,9 @@ export function FacialExpressionDebugger({
         setErrorMessage('');
         console.log('✅ Facial Expression Debugger: TensorFlow system initialized');
       } catch (error) {
-        console.error('❌ Facial Expression Debugger: Initialization failed', error);
-        setErrorMessage('Failed to initialize facial recognition models');
+        // Silently handle TensorFlow initialization failure - models may not be available
+        setErrorMessage('Facial recognition models unavailable');
+        setIsInitialized(false);
       }
     };
 

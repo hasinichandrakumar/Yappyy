@@ -57,8 +57,8 @@ class ClientFaceDetectionEngine {
       console.log('✅ Face-api.js models loaded successfully');
       
     } catch (error) {
-      console.warn('⚠️ Failed to load Face-api.js models:', error);
-      // Continue without Face-api.js - backend TensorFlow.js will handle analysis
+      // Silently handle Face-api.js model loading failure - backend will handle analysis
+      this.isInitialized = false;
     }
   }
 

@@ -74,8 +74,8 @@ export function useMetricsProcessor() {
       poseDetectorRef.current = poseDetector;
 
     } catch (error) {
-      console.error('Failed to initialize ML models:', error);
-      setMetrics(prev => ({ ...prev, error: 'Failed to initialize ML models' }));
+      // Silently handle ML model initialization failure - use fallback metrics
+      setMetrics(prev => ({ ...prev, error: 'ML models unavailable' }));
     }
   };
 
