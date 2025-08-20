@@ -149,8 +149,12 @@ class RobustSpeechRecognition {
   private isListening = false;
   private onTranscriptUpdate: ((transcript: string, isFinal: boolean) => void) | null = null;
   private onError: ((error: string) => void) | null = null;
+  private onStatusChange: ((status: 'idle' | 'starting' | 'active' | 'error') => void) | null = null;
   private currentTranscript = '';
   private interimTranscript = '';
+  private shouldBeListening = false;
+  private retryCount = 0;
+  private maxRetries = 3;
 
   constructor() {
     this.initializeRecognition();
@@ -161,7 +165,8 @@ class RobustSpeechRecognition {
     
     // Check for browser support
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      console.error('❌ Speech recognition not supported in this browser');
+      console.warn('⚠️ Speech recognition not supported in this browser');
+      this.handleError('Speech recognition not supported in this browser');
       return false;
     }
 
@@ -179,6 +184,10 @@ class RobustSpeechRecognition {
       this.recognition.onstart = () => {
         console.log('🎤 Speech recognition started');
         this.isListening = true;
+        this.retryCount = 0; // Reset retry count on successful start
+        if (this.onStatusChange) {
+          this.onStatusChange('active');
+        }
       };
 
       this.recognition.onresult = (event: any) => {
@@ -216,10 +225,48 @@ class RobustSpeechRecognition {
       };
 
       this.recognition.onerror = (event: any) => {
-        console.error('❌ Speech recognition error:', event.error);
+        // Only log as error for critical issues, use warn for recoverable errors
+        if (event.error === 'not-allowed' || event.error === 'audio-capture' || event.error === 'service-not-allowed') {
+          console.error('❌ Speech recognition error:', event.error);
+        } else {
+          console.warn('⚠️ Speech recognition warning:', event.error);
+        }
         this.isListening = false;
+        
+        // Handle specific error types
+        let errorMessage = event.error;
+        if (event.error === 'not-allowed') {
+          errorMessage = 'Microphone access denied. Please allow microphone permissions.';
+        } else if (event.error === 'no-speech') {
+          errorMessage = 'No speech detected. Please speak clearly.';
+        } else if (event.error === 'audio-capture') {
+          errorMessage = 'Audio capture failed. Please check your microphone.';
+        } else if (event.error === 'network') {
+          errorMessage = 'Network error. Please check your internet connection.';
+        } else if (event.error === 'aborted') {
+          errorMessage = 'Speech recognition was aborted.';
+        } else if (event.error === 'service-not-allowed') {
+          errorMessage = 'Speech recognition service not allowed.';
+        }
+        
         if (this.onError) {
-          this.onError(event.error);
+          this.onError(errorMessage);
+        }
+        
+        if (this.onStatusChange) {
+          this.onStatusChange('error');
+        }
+        
+        // Auto-retry for certain errors
+        if (this.shouldBeListening && this.retryCount < this.maxRetries && 
+            (event.error === 'no-speech' || event.error === 'network')) {
+          this.retryCount++;
+          console.log(`🔄 Retrying speech recognition (attempt ${this.retryCount}/${this.maxRetries})...`);
+          setTimeout(() => {
+            if (this.shouldBeListening) {
+              this.start();
+            }
+          }, 1000);
         }
       };
 
@@ -228,9 +275,12 @@ class RobustSpeechRecognition {
         this.isListening = false;
         
         // Auto-restart if we should still be listening
-        if (this.shouldBeListening) {
+        if (this.shouldBeListening && this.retryCount < this.maxRetries) {
+          console.log('🔄 Auto-restarting speech recognition...');
           setTimeout(() => {
-            this.start();
+            if (this.shouldBeListening) {
+              this.start();
+            }
           }, 100);
         }
       };
@@ -238,26 +288,39 @@ class RobustSpeechRecognition {
       console.log('✅ Speech recognition initialized successfully');
       return true;
     } catch (error) {
-      console.error('❌ Failed to initialize speech recognition:', error);
+      console.warn('⚠️ Failed to initialize speech recognition:', error);
+      this.handleError('Failed to initialize speech recognition');
       return false;
     }
   }
 
-  private shouldBeListening = false;
+  private handleError(error: string) {
+    if (this.onError) {
+      this.onError(error);
+    }
+    if (this.onStatusChange) {
+      this.onStatusChange('error');
+    }
+  }
 
   public start() {
     if (!this.recognition) {
-      console.error('❌ Speech recognition not initialized');
+      console.warn('⚠️ Speech recognition not initialized');
+      this.handleError('Speech recognition not initialized');
       return false;
     }
 
     try {
       this.shouldBeListening = true;
+      if (this.onStatusChange) {
+        this.onStatusChange('starting');
+      }
       this.recognition.start();
       console.log('🎤 Starting speech recognition...');
       return true;
     } catch (error) {
-      console.error('❌ Failed to start speech recognition:', error);
+      console.warn('⚠️ Failed to start speech recognition:', error);
+      this.handleError('Failed to start speech recognition');
       return false;
     }
   }
@@ -269,23 +332,29 @@ class RobustSpeechRecognition {
         this.recognition.stop();
         console.log('🎤 Stopping speech recognition...');
       } catch (error) {
-        console.error('❌ Error stopping speech recognition:', error);
+        console.warn('⚠️ Error stopping speech recognition:', error);
       }
+    }
+    if (this.onStatusChange) {
+      this.onStatusChange('idle');
     }
   }
 
   public reset() {
     this.currentTranscript = '';
     this.interimTranscript = '';
+    this.retryCount = 0;
     console.log('🔄 Speech recognition transcripts reset');
   }
 
   public setCallbacks(
     onTranscriptUpdate: (transcript: string, isFinal: boolean) => void,
-    onError: (error: string) => void
+    onError: (error: string) => void,
+    onStatusChange?: (status: 'idle' | 'starting' | 'active' | 'error') => void
   ) {
     this.onTranscriptUpdate = onTranscriptUpdate;
     this.onError = onError;
+    this.onStatusChange = onStatusChange || null;
   }
 
   public getCurrentTranscript() {
@@ -294,6 +363,10 @@ class RobustSpeechRecognition {
 
   public isActive() {
     return this.isListening;
+  }
+
+  public getState() {
+    return this.recognition?.state || 'inactive';
   }
 }
 
@@ -730,7 +803,6 @@ export default function SimplifiedPracticePage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const recognitionRef = useRef<any>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const metricsTimerRef = useRef<NodeJS.Timeout | null>(null);
   const transcriptRef = useRef<string>('');
@@ -740,8 +812,11 @@ export default function SimplifiedPracticePage() {
   const fillerDetectorRef = useRef<IncrementalFillerDetector | null>(null);
   const { toast } = useToast();
 
-  // Initialize robust speech recognition
-  useEffect(() => {
+  // Setup speech recognition - now using only the robust system
+  const setupSpeechRecognition = useCallback(() => {
+    console.log('🔧 Setting up robust speech recognition...');
+    
+    // Ensure robust speech recognition is initialized
     if (!robustSpeechRecognitionRef.current) {
       console.log('🔧 Creating robust speech recognition instance...');
       robustSpeechRecognitionRef.current = new RobustSpeechRecognition();
@@ -757,63 +832,31 @@ export default function SimplifiedPracticePage() {
           
           // Increment transcript update counter
           setTranscriptUpdateCount(prev => prev + 1);
-          console.log('📝 Transcript update count:', transcriptUpdateCount + 1);
           
-          // SIMPLE WPM CALCULATION - FORCE IT TO WORK
+          // WPM calculation
           if (transcript.trim().length > 0) {
-            console.log('🎯 SIMPLE WPM calculation triggered!');
-            console.log('Transcript:', transcript.substring(0, 100));
-            console.log('Session duration:', sessionDuration);
-            console.log('Session start time:', sessionStartTime);
-            
-            // Count words
             const words = transcript.trim().split(/\s+/).filter(word => word.length > 0);
-            console.log('Word count:', words.length);
-            
-            // Calculate WPM using session duration
             let wpm = 0;
             if (sessionDuration > 0 && words.length >= 3) {
               const timeInMinutes = sessionDuration / 60;
               wpm = Math.round(words.length / timeInMinutes);
-              console.log(`📊 SIMPLE WPM: ${words.length} words / ${timeInMinutes.toFixed(2)} min = ${wpm} WPM`);
             } else if (words.length >= 3) {
-              // If no session duration, just use word count as WPM
               wpm = words.length;
-              console.log(`📊 ESTIMATED WPM: ${words.length} words = ${wpm} WPM`);
             }
             
-            // FORCE UPDATE WPM
             if (wpm > 0) {
-              console.log(`✅ FORCING WPM update to: ${wpm}`);
-              
-              // Increment debug counter
               setWpmUpdateCount(prev => prev + 1);
-              
-              // Force update metrics
-              setMetrics(prev => {
-                console.log('🔄 Updating metrics state:', { 
-                  oldWPM: prev.wordsPerMinute, 
-                  newWPM: wpm,
-                  updateCount: wpmUpdateCount + 1
-                });
-                return {
-                  ...prev,
-                  wordsPerMinute: wpm,
-                  voice: {
-                    ...prev.voice,
-                    pace: wpm
-                  }
-                };
-              });
-              
-              // Also update WPM history
+              setMetrics(prev => ({
+                ...prev,
+                wordsPerMinute: wpm,
+                voice: {
+                  ...prev.voice,
+                  pace: wpm
+                }
+              }));
               setWpmHistory(prev => [...prev.slice(-9), wpm]);
-            } else {
-              console.log('❌ WPM calculation failed - no valid result');
             }
           }
-          
-
           
           // Detect filler words
           if (transcript.trim().length > 0) {
@@ -833,17 +876,36 @@ export default function SimplifiedPracticePage() {
           }
         },
         (error: string) => {
-          console.error('❌ Speech recognition error:', error);
+          console.warn('⚠️ Speech recognition error:', error);
           setSpeechRecognitionStatus('error');
-          toast({
-            title: "Speech Recognition Error",
-            description: `Error: ${error}. Please check microphone permissions.`,
-            variant: "destructive"
-          });
+          // Only show toast for critical errors
+          if (error.includes('not-allowed') || error.includes('audio-capture') || error.includes('service-not-allowed')) {
+            toast({
+              title: "Speech Recognition Error",
+              description: `Error: ${error}. Please check microphone permissions.`,
+              variant: "destructive"
+            });
+          }
+        },
+        (status: 'idle' | 'starting' | 'active' | 'error') => {
+          console.log('🎤 Speech recognition status changed:', status);
+          setSpeechRecognitionStatus(status);
         }
       );
     }
+    
+    console.log('✅ Robust speech recognition setup complete');
+    return true;
   }, [sessionDuration, toast]);
+
+  // Initialize robust speech recognition on component mount
+  useEffect(() => {
+    try {
+      setupSpeechRecognition();
+    } catch (error) {
+      console.warn('⚠️ Failed to setup speech recognition on mount:', error);
+    }
+  }, [setupSpeechRecognition]);
 
   // Video recording refs
   const recordingVideoRef = useRef<HTMLVideoElement>(null);
@@ -995,195 +1057,6 @@ export default function SimplifiedPracticePage() {
       console.error('❌ Failed to start Deepgram/Whisper fallback:', e);
     }
   }, []);
-
-  // Setup speech recognition
-  const setupSpeechRecognition = useCallback(() => {
-    console.log('🔧 Setting up speech recognition...');
-    console.log('🔧 Browser support check:', {
-      webkitSpeechRecognition: 'webkitSpeechRecognition' in window,
-      SpeechRecognition: 'SpeechRecognition' in window
-    });
-    
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      console.warn('❌ Speech recognition not supported');
-      // Start fallback immediately
-      startDeepgramFallback();
-      return;
-    }
-
-    const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
-    const recognition = new SpeechRecognition();
-    
-    // Store recognition in ref for access outside this function
-    (recognitionRef as any).current = recognition;
-    console.log('✅ Speech recognition instance created and stored in ref');
-
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = 'en-US';
-    recognition.maxAlternatives = 3;
-    
-    console.log('🎤 Speech recognition configured with standard browser settings');
-    
-    // CRITICAL: Aggressive configuration to capture vocal fillers like "um" and "uh"
-    try {
-      // Remove any service restrictions that might filter speech
-      recognition.serviceURI = undefined;
-      
-      // Remove grammar restrictions that might filter filler words
-      // Note: grammars property expects SpeechGrammarList, not null
-      if (recognition.grammars !== undefined) {
-        try {
-          // Create an empty SpeechGrammarList instead of setting to null
-          const emptyGrammarList = new (window as any).SpeechGrammarList();
-          recognition.grammars = emptyGrammarList;
-        } catch (grammarError) {
-          console.log('🎤 Grammar list not supported, continuing without restrictions');
-        }
-      }
-      
-      // Chrome-specific optimizations for maximum filler word capture
-      if ('webkitSpeechRecognition' in window) {
-        // Use maximum sensitivity settings
-        recognition.audioTrack = null;
-        
-        // Try to disable speech filtering if possible
-        try {
-          (recognition as any).enableInterimFillers = true;
-          (recognition as any).enableVocalFillers = true;
-          (recognition as any).filterProfanity = false;
-        } catch (filterError) {
-          console.log('🎤 Advanced filler settings not available, using fallback');
-        }
-      }
-      
-      console.log('🎤 AGGRESSIVE speech recognition configured for vocal filler capture (um, uh, etc.)');
-    } catch (e) {
-      console.log('🎤 Using default speech recognition settings:', e);
-    }
-    
-    console.log('🎤 Speech recognition configured to capture all speech including filler words');
-
-    recognition.onstart = () => {
-      console.log('🎤 Speech recognition STARTED successfully');
-    };
-
-    recognition.onresult = async (event: any) => {
-      console.log('🎤 Speech recognition RESULT received:', event);
-      let finalTranscript = '';
-      let interimText = '';
-      
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const result = event.results[i];
-        
-        // Check ALL alternatives for filler words, not just the first one
-        let bestTranscript = result[0].transcript;
-        let foundFillers = false;
-        
-        // Check all alternatives for vocal fillers
-        for (let j = 0; j < result.length; j++) {
-          const altTranscript = result[j].transcript.toLowerCase();
-          if (altTranscript.includes('um') || altTranscript.includes('uh') || 
-              altTranscript.includes('ah') || altTranscript.includes('er')) {
-            bestTranscript = result[j].transcript;
-            foundFillers = true;
-            console.log('🎯 Found vocal filler in alternative:', bestTranscript);
-            break;
-          }
-        }
-        
-        // CRITICAL: Log ALL alternatives to debug why fillers aren't captured
-        console.log('🎤 Speech result:', {
-          text: bestTranscript,
-          isFinal: result.isFinal,
-          confidence: result[0].confidence,
-          foundFillers: foundFillers,
-          alternatives: result.length,
-          allAlternatives: Array.from({ length: result.length }, (_, idx) => result[idx]?.transcript || ''),
-          rawResult: result
-        });
-        
-        if (result.isFinal) {
-          finalTranscript += bestTranscript + ' ';
-        } else {
-          interimText += bestTranscript;
-        }
-      }
-
-      // Update interim transcript for live display AND check for vocal fillers
-      setInterimTranscript(interimText);
-      interimTranscriptRef.current = interimText;
-      
-      // Update full transcript
-      if (finalTranscript.trim()) {
-        const fullTranscript = transcriptRef.current + finalTranscript;
-        transcriptRef.current = fullTranscript;
-        setTranscript(fullTranscript);
-        
-        // Add words to WPM calculator for accurate calculation
-        if (wpmCalculatorRef.current && finalTranscript.trim().length > 0) {
-          const words = finalTranscript.trim().split(/\s+/).filter(word => word.length > 0);
-          const accurateWordCount = countWordsAccurately(finalTranscript);
-          wpmCalculatorRef.current.addWords(words);
-          console.log(`📊 Added ${accurateWordCount} words to WPM calculator (accurate count)`);
-        }
-        
-        // Use enhanced filler word detection for accurate counting
-        if (fullTranscript.trim().length > 0) {
-          const fillerResult = detectFillerWords(fullTranscript);
-          
-          console.log(`🎯 Enhanced filler detection: ${fillerResult.count} total fillers:`, fillerResult.words);
-          
-          // Update metrics with accurate filler count
-          setMetrics(prev => ({
-            ...prev,
-            fillerWordCount: fillerResult.count,
-            voice: {
-              ...prev.voice,
-              fillerCount: fillerResult.count
-            }
-          }));
-          
-          // Only show feedback if new fillers were detected
-          if (fillerResult.count > 0) {
-            const feedbackMessage = `${fillerResult.count} filler words detected: ${fillerResult.words.slice(-3).join(', ')}`;
-            
-            setLiveFeedback(prev => [...prev.slice(-4), {
-              id: Date.now().toString(),
-              message: feedbackMessage,
-              type: fillerResult.count > 5 ? 'warning' : 'info',
-              timestamp: Date.now()
-            }]);
-          }
-        }
-      }
-    };
-
-    // Add error handler
-    recognition.onerror = (event: any) => {
-      console.error('❌ Speech recognition error:', event.error, event);
-      // On errors like not-allowed/no-speech, ensure fallback is active
-      if (!isSpeechFallbackActive) {
-        startDeepgramFallback();
-      }
-    };
-
-    // Add end handler to restart if needed
-    recognition.onend = () => {
-      console.log('🎤 Speech recognition ended, restarting if still recording...');
-      if (isRecording && !isSpeechFallbackActive) {
-        try {
-          recognition.start();
-        } catch (e: any) {
-          console.warn('Failed to restart speech recognition, using fallback');
-          startDeepgramFallback();
-        }
-      }
-    };
-
-    console.log('✅ Speech recognition setup complete');
-
-  }, [sessionDuration, transcript, isSpeechFallbackActive, startDeepgramFallback, toast]);
 
   // Enhanced comprehensive live insights system with improved effectiveness
   const lastFeedbackTimeRef = useRef<number>(0);
@@ -1344,14 +1217,7 @@ export default function SimplifiedPracticePage() {
         ];
         
         const encouragement = encouragements[Math.floor(Math.random() * encouragements.length)];
-        setLiveFeedback(prev => [...prev.slice(-4), {
-          id: Date.now().toString(),
-          message: encouragement,
-          type: 'info',
-          timestamp: Date.now()
-        }]);
-        lastFeedbackTimeRef.current = Date.now();
-        lastFeedbackMessageRef.current = encouragement;
+        addFeedback(encouragement, 'info');
       }
     };
 
@@ -1363,7 +1229,7 @@ export default function SimplifiedPracticePage() {
       clearTimeout(initialTimeout);
       clearInterval(interval);
     };
-  }, [isRecording, metrics, sessionDuration, transcript]);
+  }, [isRecording, metrics, sessionDuration, transcript, addFeedback]);
 
   // Initialize video recording system on component mount
   useEffect(() => {
@@ -1407,6 +1273,9 @@ export default function SimplifiedPracticePage() {
   const startRecording = useCallback(async () => {
     try {
       console.log('🎬 Starting practice session...');
+      console.log('🔍 Debug: startRecording function called');
+      console.log('🔍 Debug: isRecording state:', isRecording);
+      console.log('🔍 Debug: robustSpeechRecognitionRef.current:', robustSpeechRecognitionRef.current);
       
       // Set recording state immediately to show button change
       setIsRecording(true);
@@ -1457,16 +1326,21 @@ export default function SimplifiedPracticePage() {
         }));
         
         // Start recognition
-        const success = robustSpeechRecognitionRef.current.start();
-        if (success) {
-          setSpeechRecognitionStatus('active');
-          console.log('✅ Robust speech recognition started successfully');
-        } else {
+        try {
+          const success = robustSpeechRecognitionRef.current.start();
+          if (success) {
+            setSpeechRecognitionStatus('active');
+            console.log('✅ Robust speech recognition started successfully');
+          } else {
+            setSpeechRecognitionStatus('error');
+            console.warn('⚠️ Failed to start robust speech recognition - will retry automatically');
+          }
+        } catch (error) {
+          console.warn('⚠️ Speech recognition start error:', error);
           setSpeechRecognitionStatus('error');
-          console.error('❌ Failed to start robust speech recognition');
         }
       } else {
-        console.error('❌ Robust speech recognition not initialized');
+        console.warn('⚠️ Robust speech recognition not initialized - will initialize automatically');
         setSpeechRecognitionStatus('error');
       }
 
@@ -1540,7 +1414,7 @@ export default function SimplifiedPracticePage() {
             streamRef.current = stream;
             console.log('✅ Audio-only stream obtained successfully');
           } catch (audioError) {
-            console.error('❌ Failed to get any media stream:', audioError);
+            console.warn('⚠️ Failed to get any media stream:', audioError);
             toast({
               title: "Media Access Failed",
               description: "Please allow microphone access to start recording.",
@@ -1789,36 +1663,24 @@ export default function SimplifiedPracticePage() {
         console.warn('⚠️ Vocal filler recorder unavailable:', recorderError);
       }
 
-      // Start speech recognition with fallback - ensure it actually starts
+      // Start robust speech recognition
       try {
-        console.log('🎤 Checking speech recognition availability...');
-        console.log('🎤 recognitionRef.current:', recognitionRef.current);
-        console.log('🎤 recognitionRef.current state:', recognitionRef.current?.state);
+        console.log('🎤 Starting robust speech recognition...');
         
-        if (recognitionRef.current) {
-          console.log('🎤 Starting speech recognition...');
-          recognitionRef.current.start();
-          console.log('✅ Speech recognition start() called successfully');
-          
-          // Check state after starting
-          setTimeout(() => {
-            console.log('🎤 Speech recognition state after start:', recognitionRef.current?.state);
-            if (recognitionRef.current && recognitionRef.current.state !== 'recording') {
-              console.log('🔄 Forcing speech recognition restart...');
-              try {
-                recognitionRef.current.start();
-                console.log('✅ Speech recognition restart() called successfully');
-              } catch (restartError) {
-                console.warn('⚠️ Speech recognition restart failed:', restartError);
-              }
-            }
-          }, 1000);
+        if (robustSpeechRecognitionRef.current) {
+          const success = robustSpeechRecognitionRef.current.start();
+          if (success) {
+            console.log('✅ Robust speech recognition started successfully');
+          } else {
+            console.warn('⚠️ Failed to start robust speech recognition, using fallback');
+            await startDeepgramFallback();
+          }
         } else {
-          console.warn('⚠️ No speech recognition available, starting fallback');
+          console.warn('⚠️ No robust speech recognition available, starting fallback');
           await startDeepgramFallback();
         }
       } catch (e: any) {
-        console.warn('⚠️ Web Speech start failed, using fallback:', e.message || e);
+        console.warn('⚠️ Speech recognition start failed, using fallback:', e.message || e);
         await startDeepgramFallback();
       }
 
@@ -1967,7 +1829,7 @@ export default function SimplifiedPracticePage() {
         console.warn('⚠️ Advanced voice analysis failed to start:', error);
       }
     } catch (error: any) {
-      console.error('Failed to start recording:', error);
+      console.warn('⚠️ Failed to start recording:', error);
       
       // Provide more specific error messages
       let errorMessage = "Please allow camera and microphone access";
@@ -2254,189 +2116,6 @@ export default function SimplifiedPracticePage() {
     setIsRecording(false);
     setIsVideoInitialized(false);
 
-    // Save session to database with comprehensive data
-    try {
-      console.log('💾 Preparing to save session data...');
-      
-              // Enhanced session data with all live metrics
-      const sessionData = {
-          sessionName: sessionName || `Session ${sessionNumber || 1}`,
-          purpose: sessionPurpose || 'general-presentation',
-        duration: sessionDuration,
-        transcript: transcript || '',
-        averageWPM: metrics.wordsPerMinute || 0, // Use live WPM from metrics
-        confidenceScore: metrics.confidence || 0,
-        voiceClarity: metrics.voice.clarity || 0,
-        fillerWords: metrics.fillerWordCount || 0, // Use live filler word count
-        pauseCount: 0,
-        eyeContactScore: String(metrics.eyeContact || 0),
-        coachingTips: [
-          `Speaking pace: ${metrics.wordsPerMinute || 0} WPM`,
-          `Filler words detected: ${metrics.fillerWordCount || 0}`,
-          `Eye contact: ${metrics.eyeContact || 0}%`,
-          `Confidence: ${metrics.confidence || 0}%`,
-          `Total words: ${transcript ? transcript.split(/\s+/).filter(w => w.length > 0).length : 0}`
-        ],
-        videoBlob: recordingData?.videoBlob ? await recordingData.videoBlob.arrayBuffer().then((buffer: ArrayBuffer) => 
-          Buffer.from(buffer).toString('base64')
-        ) : null,
-        facialAnalysis: JSON.stringify({
-          eyeContact: Math.min(100, Math.max(0, metrics.eyeContact || 0)),
-          confidence: Math.min(100, Math.max(0, metrics.confidence || 0)),
-          engagement: Math.min(100, Math.max(0, metrics.engagement || 0)),
-          bodyLanguage: metrics.bodyLanguage || {}
-        }),
-        voiceMetrics: JSON.stringify({
-          clarity: Math.min(100, Math.max(0, metrics.voice.clarity || 0)),
-          pace: Math.min(200, Math.max(0, metrics.voice.pace || 0)),
-          volume: Math.min(100, Math.max(0, metrics.voice.volume || 0)),
-          intonation: Math.min(100, Math.max(0, metrics.voice.intonation || 0)),
-          fillerCount: Math.max(0, metrics.voice.fillerCount || 0),
-          pauseEffectiveness: Math.min(100, Math.max(0, metrics.voice.pauseEffectiveness || 0)),
-          pitchVariation: Math.min(100, Math.max(0, metrics.voice.pitchVariation || 0)),
-          vocalFryDetection: metrics.voice.vocalFryDetection || false,
-          uptalkPatterns: Math.min(100, Math.max(0, metrics.voice.uptalkPatterns || 0))
-        }),
-        bodyLanguageMetrics: JSON.stringify({
-          eyeContact: Math.min(100, Math.max(0, metrics.bodyLanguage?.eyeContactScore || 0)),
-          postureConfidence: Math.min(100, Math.max(0, bodyMetrics?.posture?.confidence || 0)),
-          spineAlignment: Math.min(100, Math.max(0, bodyMetrics?.posture?.spineAlignment || 0)),
-          shoulderPosition: Math.min(100, Math.max(0, bodyMetrics?.posture?.shoulderPosition || 0)),
-          stability: Math.min(100, Math.max(0, bodyMetrics?.posture?.stability || 0)),
-          presence: Math.min(100, Math.max(0, bodyMetrics?.overall?.presence || 0)),
-          professionalism: Math.min(100, Math.max(0, bodyMetrics?.overall?.professionalism || 0)),
-          confidence: Math.min(100, Math.max(0, bodyMetrics?.overall?.confidence || 0))
-        }),
-        // Top-level posture score for Analysis tab
-        postureScore: Math.min(100, Math.max(0, bodyMetrics?.posture?.confidence || 0)),
-        aiAnalysis: JSON.stringify({
-          overallScore: Math.min(100, Math.max(0, Math.round((metrics.confidence + metrics.clarity + metrics.engagement) / 3) || 0)),
-          strengths: [
-            `Spoke for ${sessionDuration} seconds`,
-            `Achieved ${metrics.wordsPerMinute || 0} WPM`,
-            `Maintained ${metrics.eyeContact || 0}% eye contact`
-          ],
-          improvements: [
-            metrics.fillerWordCount > 5 ? `Reduce filler words (${metrics.fillerWordCount} detected)` : 'Good filler word control',
-            metrics.wordsPerMinute > 200 ? 'Consider slowing down your pace' : 'Good speaking pace',
-            metrics.eyeContact < 50 ? 'Work on maintaining eye contact' : 'Good eye contact'
-          ]
-        }),
-        persuasivenessScore: Math.min(100, Math.max(0, metrics.confidence || 0)),
-        
-        // Enhanced analysis data for Analysis tab
-        enhancedAnalysis: JSON.stringify({
-          transcript: transcript || 'No transcript available',
-          wpmAnalysis: {
-            averageWPM: metrics.wordsPerMinute || 0,
-            totalWords: transcript ? transcript.split(/\s+/).filter(w => w.length > 0).length : 0,
-            speakingTime: sessionDuration,
-            wordsPerSecond: sessionDuration > 0 ? (transcript ? transcript.split(/\s+/).filter(w => w.length > 0).length : 0) / sessionDuration : 0
-          },
-          fillerWordAnalysis: {
-            totalFillers: metrics.fillerWordCount || 0,
-            fillerWords: transcript ? detectFillerWords(transcript).words : [],
-            fillerBreakdown: transcript ? {
-              um: detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('um')).length,
-              uh: detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('uh')).length,
-              like: detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('like')).length,
-              youKnow: detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('you know')).length,
-              basically: detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('basically')).length,
-              actually: detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('actually')).length,
-              other: detectFillerWords(transcript).words.filter(w => 
-                !w.toLowerCase().includes('um') && 
-                !w.toLowerCase().includes('uh') && 
-                !w.toLowerCase().includes('like') && 
-                !w.toLowerCase().includes('you know') && 
-                !w.toLowerCase().includes('basically') && 
-                !w.toLowerCase().includes('actually')
-              ).length
-            } : {}
-          },
-          transcriptAnalysis: {
-            fullTranscript: transcript || 'No transcript available',
-            wordCount: transcript ? transcript.split(/\s+/).filter(w => w.length > 0).length : 0,
-            characterCount: transcript ? transcript.length : 0,
-            sentenceCount: transcript ? transcript.split(/[.!?]+/).filter(s => s.trim().length > 0).length : 0,
-            averageWordsPerSentence: transcript && transcript.split(/[.!?]+/).filter(s => s.trim().length > 0).length > 0 
-              ? Math.round((transcript ? transcript.split(/\s+/).filter(w => w.length > 0).length : 0) / transcript.split(/[.!?]+/).filter(s => s.trim().length > 0).length) 
-              : 0,
-            highlightedTranscript: transcript ? highlightFillerWords(transcript) : 'No transcript available'
-          },
-          liveMetricsHistory: {
-            wpmHistory: wpmHistory,
-            fillerWordHistory: [metrics.fillerWordCount || 0],
-            eyeContactHistory: [metrics.eyeContact || 0],
-            confidenceHistory: [metrics.confidence || 0]
-          }
-        })
-      };
-
-      console.log('📊 Session data prepared for Analysis tab:', {
-        name: sessionData.sessionName,
-        duration: sessionData.duration,
-        transcript_length: sessionData.transcript.length,
-        wpm: sessionData.averageWPM,
-        fillers: sessionData.fillerWords,
-        eyeContact: sessionData.eyeContactScore,
-        confidence: sessionData.confidenceScore,
-        totalWords: transcript ? transcript.split(/\s+/).filter(w => w.length > 0).length : 0,
-        enhancedAnalysis: 'Included with detailed breakdown'
-      });
-
-      const response = await fetch('/api/save-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(sessionData)
-      });
-
-      if (!response.ok) {
-        console.error('❌ Session save failed with status:', response.status);
-        const errorText = await response.text().catch(() => 'Unknown error');
-        throw new Error(`HTTP ${response.status}: ${errorText}`);
-      }
-
-      const result = await response.json();
-      
-      if (result.success) {
-        console.log(`✅ Session ${result.session.sessionNumber} saved successfully`);
-        
-        // Update session number for next session
-        const nextSessionNumber = result.session.sessionNumber + 1;
-        setSessionNumber(nextSessionNumber);
-        setSessionName(`Session ${nextSessionNumber}`);
-        
-        // CRITICAL: Set the analysis data and show analysis page
-        setSessionAnalysisData(result.session);
-        setShowAnalysisPage(true);
-        
-        toast({
-          title: "Session Saved Successfully! 🎉",
-          description: `Session analysis is now ready! View your detailed performance insights.`,
-          variant: "default",
-          duration: 3000
-        });
-        
-        console.log('🔄 Transitioning to analysis page with session data');
-      } else {
-        console.error('❌ Failed to save session:', result.message);
-        toast({
-          title: "Save Failed",
-          description: result.message || "Unable to save session",
-          variant: "destructive"
-        });
-      }
-    } catch (error) {
-      console.error('❌ Error saving session:', error);
-      toast({
-        title: "Session Save Error",
-        description: "Session could not be saved. Please try again.",
-        variant: "destructive"
-      });
-    }
-
     // Reset metrics to 0 after recording stops
     setTimeout(() => {
       setMetrics({
@@ -2567,12 +2246,58 @@ export default function SimplifiedPracticePage() {
         setSessionNumber(nextSessionNumber);
         setSessionName(`Session ${nextSessionNumber}`);
         
+        // CRITICAL: Create analysis data from the saved session
+        const analysisData = {
+          id: result.sessionId,
+          sessionNumber: result.sessionNumber,
+          sessionName: sessionName,
+          purpose: sessionPurpose,
+          transcript: transcript,
+          duration: sessionDuration,
+          averageWPM: metrics.wordsPerMinute || 0,
+          confidenceScore: metrics.confidence || 0,
+          voiceClarity: metrics.voice?.clarity || 0,
+          fillerWords: metrics.fillerWordCount || 0,
+          pauseCount: 0,
+          eyeContactScore: metrics.eyeContact || 0,
+          coachingTips: liveFeedback.slice(-5).map(feedback => feedback.message),
+          createdAt: new Date().toISOString(),
+          // Enhanced analysis data
+          wpmAnalysis: {
+            averageWPM: metrics.wordsPerMinute || 0,
+            wpmHistory: wpmHistory,
+            wordCount: transcript ? transcript.split(/\s+/).filter(w => w.length > 0).length : 0
+          },
+          fillerWordAnalysis: {
+            totalCount: metrics.fillerWordCount || 0,
+            fillerTypes: {},
+            fillerWords: []
+          },
+          transcriptAnalysis: {
+            totalWords: transcript ? transcript.split(/\s+/).filter(w => w.length > 0).length : 0,
+            uniqueWords: transcript ? new Set(transcript.toLowerCase().split(/\s+/).filter(w => w.length > 0)).size : 0,
+            averageWordLength: transcript ? transcript.split(/\s+/).filter(w => w.length > 0).reduce((sum, word) => sum + word.length, 0) / Math.max(1, transcript.split(/\s+/).filter(w => w.length > 0).length) : 0
+          },
+          liveMetricsHistory: {
+            wpmHistory: wpmHistory,
+            fillerWordHistory: [metrics.fillerWordCount || 0],
+            eyeContactHistory: [metrics.eyeContact || 0],
+            confidenceHistory: [metrics.confidence || 0]
+          }
+        };
+        
+        // Set the analysis data and show analysis page
+        setSessionAnalysisData(analysisData);
+        setShowAnalysisPage(true);
+        
         toast({
           title: "Session Saved Successfully! 🎉",
-          description: `Your session with ${metrics.wordsPerMinute || 0} WPM, ${metrics.fillerWordCount || 0} filler words, and ${transcript ? transcript.split(/\s+/).filter(w => w.length > 0).length : 0} words has been saved. Check the Analysis tab to view detailed insights!`,
+          description: `Your session with ${metrics.wordsPerMinute || 0} WPM, ${metrics.fillerWordCount || 0} filler words, and ${transcript ? transcript.split(/\s+/).filter(w => w.length > 0).length : 0} words has been saved. Viewing analysis now!`,
           variant: "default",
           duration: 5000
         });
+        
+        console.log('🔄 Transitioning to analysis page with session data:', analysisData);
       } else {
         console.error('❌ Failed to save session:', result.error);
         toast({
@@ -2789,7 +2514,10 @@ export default function SimplifiedPracticePage() {
                               <div className="flex flex-col lg:flex-row gap-3">
                   {!isRecording ? (
                     <>
-                      <Button onClick={startRecording} className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white shadow-lg hover:shadow-xl transition-all duration-200">
+                      <Button onClick={() => {
+                        console.log('🔍 Debug: Start Practice button clicked');
+                        startRecording();
+                      }} className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white shadow-lg hover:shadow-xl transition-all duration-200">
                         <Mic className="w-5 h-5 mr-2" />
                         Start Practice
                       </Button>
@@ -3034,8 +2762,10 @@ export default function SimplifiedPracticePage() {
                     )}
                     {isRecording && liveFeedback.length > 0 && (
                       <div className="ml-2 flex items-center gap-1">
-                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                        <span className="text-xs text-green-600 font-medium">Providing insights every 15s</span>
+                        <div className={`w-2 h-2 rounded-full ${isAICoachActive ? 'bg-orange-500 animate-ping' : 'bg-green-500 animate-pulse'}`} />
+                        <span className={`text-xs font-medium ${isAICoachActive ? 'text-orange-600' : 'text-green-600'}`}>
+                          {isAICoachActive ? 'Analyzing...' : 'Providing insights every 15s'}
+                        </span>
                       </div>
                     )}
                   </CardTitle>
