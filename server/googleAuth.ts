@@ -1,10 +1,29 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import session from "express-session";
-import type { Express } from "express";
+import type { Express, Request } from "express";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 import crypto from "crypto";
+
+// Extend Express types for Passport
+declare global {
+  namespace Express {
+    interface User {
+      id: string;
+      email: string;
+      firstName?: string;
+      lastName?: string;
+      profileImageUrl?: string;
+    }
+  }
+}
+
+// Type for authenticated requests
+type AuthenticatedRequest = Request & {
+  isAuthenticated(): boolean;
+  user?: Express.User;
+}
 
 // Simple OAuth configuration
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
@@ -32,12 +51,18 @@ export function getSession() {
         createTableIfMissing: true,
         tableName: "sessions"
       });
+      console.log('✅ Using PostgreSQL session store');
     } catch (error) {
       console.warn('⚠️ Database session store failed, using memory store');
-      sessionStore = new session.MemoryStore();
+      // Fix: Proper MemoryStore import
+      const MemoryStore = session.MemoryStore;
+      sessionStore = new MemoryStore();
     }
   } else {
-    sessionStore = new session.MemoryStore();
+    // Fix: Proper MemoryStore import
+    const MemoryStore = session.MemoryStore;
+    sessionStore = new MemoryStore();
+    console.log('⚠️ Using memory session store (not recommended for production)');
   }
   
   return session({
@@ -59,17 +84,30 @@ export function setupGoogleAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  // Serialize user
-  passport.serializeUser((user: any, done) => {
+  // Serialize user - store minimal data
+  passport.serializeUser((user: Express.User, done) => {
     done(null, user.id);
   });
 
-  // Deserialize user
+  // Deserialize user - fetch full user data
   passport.deserializeUser(async (id: string, done) => {
     try {
       const user = await storage.getUser(id);
-      done(null, user);
+      if (!user) {
+        console.warn(`⚠️ User not found during deserialization: ${id}`);
+        return done(null, null);
+      }
+      // Convert storage user to Express.User format
+      const expressUser: Express.User = {
+        id: user.id,
+        email: user.email || '',
+        firstName: user.firstName || undefined,
+        lastName: user.lastName || undefined,
+        profileImageUrl: user.profileImageUrl || undefined
+      };
+      done(null, expressUser);
     } catch (error) {
+      console.error('❌ Error during user deserialization:', error);
       done(error, null);
     }
   });
@@ -79,17 +117,19 @@ export function setupGoogleAuth(app: Express) {
     ? `${process.env.REPLIT_URL}/oauth2callback`
     : "https://0c7fe059-a7da-4a46-a7cc-18655fec2a24-00-1znejaw22ebqj.picard.replit.dev/oauth2callback";
 
-  // Simple Google Strategy
+  // Google Strategy with state parameter for CSRF protection
   passport.use(new GoogleStrategy({
     clientID: GOOGLE_CLIENT_ID!,
     clientSecret: GOOGLE_CLIENT_SECRET!,
     callbackURL: callbackURL,
-    passReqToCallback: false
+    passReqToCallback: false,
+    state: true // Enable CSRF protection
   }, async (accessToken: any, refreshToken: any, profile: any, done: any) => {
     try {
       console.log('🔐 Google OAuth: Processing user profile');
       
       if (!profile.id || !profile.emails?.[0]?.value) {
+        console.error('❌ Invalid profile data from Google:', profile);
         return done(new Error('Invalid profile data from Google'), null);
       }
 
@@ -101,6 +141,11 @@ export function setupGoogleAuth(app: Express) {
         profileImageUrl: profile.photos?.[0]?.value || ''
       });
 
+      if (!user) {
+        console.error('❌ Failed to upsert user');
+        return done(new Error('Failed to create/update user'), null);
+      }
+
       console.log('✅ Google OAuth: User authenticated successfully');
       return done(null, user);
     } catch (error) {
@@ -109,13 +154,14 @@ export function setupGoogleAuth(app: Express) {
     }
   }));
 
-  // OAuth routes
+  // OAuth routes with state parameter
   app.get('/api/auth/google', (req, res, next) => {
     console.log('🔐 Starting Google OAuth flow');
     console.log('   Callback URL:', callbackURL);
     console.log('   Client ID:', GOOGLE_CLIENT_ID!.substring(0, 30) + '...');
     passport.authenticate('google', {
-      scope: ['profile', 'email']
+      scope: ['profile', 'email'],
+      state: crypto.randomBytes(16).toString('hex') // Generate state for CSRF protection
     })(req, res, next);
   });
 
@@ -132,40 +178,49 @@ export function setupGoogleAuth(app: Express) {
   });
 
   // Auth status endpoint
-  app.get('/api/auth/user', (req, res) => {
+  app.get('/api/auth/user', (req: AuthenticatedRequest, res) => {
     res.json({
       isAuthenticated: req.isAuthenticated(),
       user: req.user || null
     });
   });
 
-  // Logout endpoint
-  app.get('/api/auth/logout', (req, res) => {
-    req.logout((err) => {
-      if (err) {
-        console.error('❌ Logout error:', err);
-        return res.status(500).json({ error: 'Logout failed' });
-      }
+  // Logout endpoint with proper callback handling
+  app.get('/api/auth/logout', (req: AuthenticatedRequest, res) => {
+    // Check if req.logout is a function (Passport v0.6+)
+    if (typeof req.logout === 'function') {
+      req.logout((err) => {
+        if (err) {
+          console.error('❌ Logout error:', err);
+          return res.status(500).json({ error: 'Logout failed' });
+        }
+        res.json({ success: true });
+      });
+    } else {
+      // Fallback for older Passport versions
+      console.warn('⚠️ Using synchronous logout (older Passport version)');
+      (req as any).logout();
       res.json({ success: true });
-    });
+    }
   });
 
-    // Test endpoint
-  app.get('/api/auth/test', (req, res) => {
+  // Test endpoint
+  app.get('/api/auth/test', (req: AuthenticatedRequest, res) => {
     res.json({
       status: 'OAuth Configuration',
       clientId: GOOGLE_CLIENT_ID!.substring(0, 30) + '...',
       hasSecret: !!GOOGLE_CLIENT_SECRET,
       callbackUrl: callbackURL,
-      isAuthenticated: req.isAuthenticated()
+      isAuthenticated: req.isAuthenticated(),
+      user: req.user || null
     });
   });
 
   console.log('✅ Google OAuth setup complete');
 }
 
-// Simple authentication middleware
-export const isAuthenticated = (req: any, res: any, next: any) => {
+// Simple authentication middleware with proper typing
+export const isAuthenticated = (req: AuthenticatedRequest, res: any, next: any) => {
   if (req.isAuthenticated()) {
     return next();
   }
