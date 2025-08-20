@@ -4,22 +4,12 @@ export interface SimpleTemplateData {
   content: string;
 }
 
-function ensurePoppins(pdf: jsPDF) {
+function ensureArial(pdf: jsPDF) {
   try {
-    const fontName = 'Poppins';
-    // @ts-ignore
-    const w: any = typeof window !== 'undefined' ? window : {};
-    if (w.__POPPINS_TTF__) {
-      // @ts-ignore
-      pdf.addFileToVFS('Poppins-Regular.ttf', w.__POPPINS_TTF__);
-      // @ts-ignore
-      pdf.addFont('Poppins-Regular.ttf', fontName, 'normal');
-      pdf.setFont(fontName, 'normal');
-      return;
-    }
-    pdf.setFont('Poppins', 'normal');
+    // Use Arial as primary font
+    pdf.setFont('Arial', 'normal');
   } catch {
-    // Fallback if Poppins not available
+    // Fallback to Helvetica if Arial not available
     pdf.setFont('helvetica', 'normal');
   }
 }
@@ -28,7 +18,7 @@ export async function generatePlainTemplatePDF(templateData: SimpleTemplateData,
   try {
     const pdf = new jsPDF('p', 'mm', 'a4');
     // Fonts should never throw; default to Helvetica
-    try { ensurePoppins(pdf); } catch { pdf.setFont('helvetica', 'normal'); }
+    try { ensureArial(pdf); } catch { pdf.setFont('helvetica', 'normal'); }
     pdf.setFontSize(12);
 
     const margin = 15;
@@ -48,9 +38,8 @@ export async function generatePlainTemplatePDF(templateData: SimpleTemplateData,
       endY = margin;
     }
     try {
-      // Arial is not built-in; attempt and fall back to Helvetica
-      // @ts-ignore
-      pdf.setFont('arial', 'normal');
+      // Use Arial for footer
+      pdf.setFont('Arial', 'normal');
     } catch {
       pdf.setFont('helvetica', 'normal');
     }

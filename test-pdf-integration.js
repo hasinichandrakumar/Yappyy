@@ -21,12 +21,14 @@ class TestPDFExportService {
     console.log('📄 Generating PDF report for session:', session.sessionName);
     
     // Add title
+    this.pdf.setFont('Arial', 'bold');
     this.pdf.setFontSize(24);
     this.pdf.setTextColor(99, 102, 241); // Yappyy brand color
     this.pdf.text('Yappyy Practice Session Report', this.margin, this.currentY);
     this.currentY += 20;
     
     // Add session details
+    this.pdf.setFont('Arial', 'normal');
     this.pdf.setFontSize(16);
     this.pdf.setTextColor(0, 0, 0);
     this.pdf.text(`Session: ${session.sessionName}`, this.margin, this.currentY);
@@ -39,11 +41,13 @@ class TestPDFExportService {
     this.currentY += 20;
     
     // Add performance metrics
+    this.pdf.setFont('Arial', 'bold');
     this.pdf.setFontSize(18);
     this.pdf.setTextColor(99, 102, 241);
     this.pdf.text('Performance Metrics', this.margin, this.currentY);
     this.currentY += 15;
     
+    this.pdf.setFont('Arial', 'normal');
     this.pdf.setFontSize(12);
     this.pdf.setTextColor(0, 0, 0);
     
@@ -63,11 +67,13 @@ class TestPDFExportService {
     // Add filler analysis if available
     if (session.analysis?.fillerAnalysis) {
       this.currentY += 10;
+      this.pdf.setFont('Arial', 'bold');
       this.pdf.setFontSize(18);
       this.pdf.setTextColor(99, 102, 241);
       this.pdf.text('Filler Words Analysis', this.margin, this.currentY);
       this.currentY += 15;
       
+      this.pdf.setFont('Arial', 'normal');
       this.pdf.setFontSize(12);
       this.pdf.setTextColor(0, 0, 0);
       
@@ -92,11 +98,13 @@ class TestPDFExportService {
     // Add facial analysis if available
     if (session.analysis?.facialAnalysis) {
       this.currentY += 10;
+      this.pdf.setFont('Arial', 'bold');
       this.pdf.setFontSize(18);
       this.pdf.setTextColor(99, 102, 241);
       this.pdf.text('Facial Analysis', this.margin, this.currentY);
       this.currentY += 15;
       
+      this.pdf.setFont('Arial', 'normal');
       this.pdf.setFontSize(12);
       this.pdf.setTextColor(0, 0, 0);
       

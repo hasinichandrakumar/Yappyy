@@ -1,12 +1,12 @@
 import { jsPDF } from 'jspdf';
 // jspdf-autotable removed to avoid deployment issues
 
-// Add Poppins font support
-const poppinsFont = {
-  normal: 'Poppins-Regular',
-  bold: 'Poppins-Bold',
-  italic: 'Poppins-Italic',
-  boldItalic: 'Poppins-BoldItalic'
+// Use Arial font for simple and minimalistic design
+const arialFont = {
+  normal: 'Arial',
+  bold: 'Arial',
+  italic: 'Arial',
+  boldItalic: 'Arial'
 };
 
 interface PDFTheme {
@@ -92,9 +92,9 @@ const enhancedTheme: PDFTheme = {
     },
   },
   fonts: {
-    primary: 'Poppins',
-    secondary: 'Poppins',
-    heading: 'Poppins',
+    primary: 'Arial',
+    secondary: 'Arial',
+    heading: 'Arial',
   },
   spacing: {
     margin: 25,
@@ -129,7 +129,7 @@ export class EnhancedPDFExport {
   }
 
   protected setupDocument(): void {
-    // Set default font (fallback to Helvetica if Poppins not available)
+    // Set default font (fallback to Helvetica if Arial not available)
     try {
       this.pdf.setFont(this.theme.fonts.primary);
     } catch {

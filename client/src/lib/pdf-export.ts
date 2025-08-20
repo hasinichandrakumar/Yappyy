@@ -21,26 +21,9 @@ export class PDFExport {
     this.pdf.setFillColor(this.colors.background.secondary[0], this.colors.background.secondary[1], this.colors.background.secondary[2]);
     this.pdf.rect(0, 0, this.pageWidth, this.pageHeight, 'F');
     
-    // Ensure Poppins is the active font; embed if available in window (added at runtime)
+    // Use Arial font for simple and minimalistic design
     try {
-      const fontName = 'Poppins';
-      // @ts-ignore
-      if (typeof window !== 'undefined' && (window as any).__POPPINS_TTF__) {
-        // Register and use embedded regular
-        // @ts-ignore
-        this.pdf.addFileToVFS('Poppins-Regular.ttf', (window as any).__POPPINS_TTF__);
-        // @ts-ignore
-        this.pdf.addFont('Poppins-Regular.ttf', fontName, 'normal');
-      }
-      // @ts-ignore
-      if (typeof window !== 'undefined' && (window as any).__POPPINS_BOLD_TTF__) {
-        // Register bold if available
-        // @ts-ignore
-        this.pdf.addFileToVFS('Poppins-Bold.ttf', (window as any).__POPPINS_BOLD_TTF__);
-        // @ts-ignore
-        this.pdf.addFont('Poppins-Bold.ttf', fontName, 'bold');
-      }
-      this.pdf.setFont(fontName, 'normal');
+      this.pdf.setFont('Arial', 'normal');
     } catch {
       this.pdf.setFont('helvetica', 'normal');
     }
@@ -89,9 +72,9 @@ export class PDFExport {
   };
 
   private setTextStyle(style: 'h1' | 'h2' | 'h3' | 'h4' | 'body' | 'caption' | 'small'): void {
-    // Always use Poppins font for consistent Yappyy branding
+    // Always use Arial font for simple and minimalistic design
     try {
-      this.pdf.setFont('Poppins');
+      this.pdf.setFont('Arial');
     } catch {
       this.pdf.setFont('helvetica');
     }
