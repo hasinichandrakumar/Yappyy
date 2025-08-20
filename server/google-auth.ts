@@ -32,17 +32,18 @@ export function setupGoogleAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  // Configure Google OAuth strategy
-  const callbackURL = process.env.REPLIT_DOMAINS 
-    ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}/api/auth/google/callback`
-    : '/api/auth/google/callback';
-    
-  console.log('🔧 Google OAuth callback URL:', callbackURL);
+  // Configure Google OAuth strategy with proper https handling
+  const getCallbackURL = (req: any) => {
+    const baseUrl = req.get('host') ? `https://${req.get('host')}` : 'http://localhost:5000';
+    return `${baseUrl}/api/auth/google/callback`;
+  };
+  
+  console.log('🔧 Google OAuth using dynamic callback URL generation');
   
   passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID!,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    callbackURL,
+    callbackURL: `https://${process.env.REPLIT_DOMAINS?.split(',')[0] || 'localhost:5000'}/api/auth/google/callback`,
   }, async (accessToken, refreshToken, profile, done) => {
     try {
       console.log('🔐 Google OAuth callback received for user:', profile.id);

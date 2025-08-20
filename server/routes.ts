@@ -9,8 +9,8 @@ import { emotionalImpactAnalyzer } from "./emotional-impact-analyzer";
 import { advancedFillerDetectionEngine } from "./advanced-filler-detection";
 import { RealTimeSessionManager } from "./redis-realtime";
 import { insertPracticeSessionSchema, insertCoachingFeedbackSchema, insertCustomTemplateSchema, practiceSessions } from "@shared/schema";
-import { setupGoogleAuth, requireAuth } from './google-auth';
-import passport from 'passport';
+import { setupSimplifiedGoogleAuth } from './simplified-google-auth';
+
 import { setupUserProgressAPI } from "./user-progress-api";
 import { userOnboardingService } from "./user-onboarding";
 import { generateClubCoaching } from "./ai-coaching";
@@ -63,10 +63,10 @@ import { graphqlHTTP } from 'express-graphql';
 import neuralGraphQL from './graphql-schema';
 import { processEnhancedAnalytics } from './analytics-route';
 
-// Helper function to extract user ID from Google OAuth request
+// Helper function to extract user ID from simplified auth session
 function getUserId(req: any): string {
-  // Google OAuth user (passport-based)
-  return req.user?.id || 'guest';
+  // Simplified Google OAuth user from session
+  return (req.session as any)?.user_id || 'guest';
 }
 
 // Helper function to get next session number
@@ -103,90 +103,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     };
   }
   
-  // Setup Google OAuth Authentication
-  setupGoogleAuth(app);
+  // Setup Simplified Google OAuth Authentication
+  setupSimplifiedGoogleAuth(app);
 
-  // Google OAuth routes
-  app.get('/api/auth/google', passport.authenticate('google', { 
-    scope: ['profile', 'email'] 
-  }));
+  // Note: Google OAuth routes are now handled by setupSimplifiedGoogleAuth
 
-  app.get('/api/auth/google/callback', (req, res, next) => {
-    console.log('🔄 OAuth callback received, authenticating...');
-    passport.authenticate('google', (err: any, user: any, info: any) => {
-      if (err) {
-        console.error('❌ OAuth authentication error:', err);
-        return res.redirect('/?error=auth_error&details=' + encodeURIComponent(err.message));
-      }
-      
-      if (!user) {
-        console.log('⚠️ OAuth authentication failed - no user returned');
-        return res.redirect('/?error=access_denied&details=The user did not consent');
-      }
-      
-      req.logIn(user, (loginErr) => {
-        if (loginErr) {
-          console.error('❌ Login error:', loginErr);
-          return res.redirect('/?error=login_error&details=' + encodeURIComponent(loginErr.message));
-        }
-        
-        console.log('✅ Google OAuth callback successful, redirecting to dashboard for user:', user.email);
-        res.redirect('/');
-      });
-    })(req, res, next);
-  });
-
-  // Get authenticated user with debug info
-  app.get('/api/auth/user', async (req: any, res) => {
-    try {
-      // Enhanced debugging
-      console.log('🔍 Auth check:', {
-        isAuthenticated: req.isAuthenticated ? req.isAuthenticated() : false,
-        hasUser: !!req.user,
-        sessionID: req.sessionID,
-        userEmail: req.user?.email
-      });
-
-      if (!req.isAuthenticated() || !req.user) {
-        return res.json({ 
-          isAuthenticated: false, 
-          user: null 
-        });
-      }
-
-      const user = req.user;
-      const userResponse = {
-        id: user.id,
-        email: user.email,
-        name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
-        username: user.email,
-        profileImageUrl: user.profileImageUrl,
-        isAuthenticated: true,
-        isNewUser: user.isNewUser,
-        welcomeMessageShown: user.welcomeMessageShown,
-        authType: 'google'
-      };
-
-      console.log('✅ User authenticated:', user.email);
-      res.json(userResponse);
-    } catch (error) {
-      console.error('❌ Error fetching user:', error);
-      res.status(500).json({ error: 'Failed to fetch user data' });
-    }
-  });
-
-  // Logout route
-  app.get('/api/auth/logout', (req: any, res) => {
-    req.logout((err: any) => {
-      if (err) {
-        console.error('Logout error:', err);
-        return res.status(500).json({ error: 'Logout failed' });
-      }
-      
-      console.log('✅ User logged out successfully');
-      res.redirect('/');
-    });
-  });
+  // All authentication routes now handled by setupSimplifiedGoogleAuth
 
   // Legacy token auth endpoint for backward compatibility
   app.post('/api/auth/token', async (req: any, res) => {
@@ -204,52 +126,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: 'Token expired' });
       }
       
-      // Create session with user data
-      req.login(user, (err: any) => {
-        if (err) {
-          console.error('Token login error:', err);
-          return res.status(500).json({ error: 'Login failed' });
-        }
-        
-        console.log('✅ Token authentication successful for:', user.email);
-        res.json({ success: true });
-      });
+      // Create simplified auth session
+      (req.session as any).access_token = 'legacy_token';
+      (req.session as any).user_id = user.id;
+      
+      console.log('✅ Token authentication successful for:', user.email);
+      res.json({ success: true });
     } catch (error) {
       console.error('Token authentication error:', error);
       res.status(401).json({ error: 'Invalid token' });
     }
   });
 
-  // User info endpoint for debugging and profile display
-  app.get('/api/user/info', (req: any, res) => {
-    const userId = getUserId(req);
-    const passportUser = req.user; // Google OAuth user from passport
-    
-    // Session debug (disabled in production)
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🔍 Session debug:', {
-        sessionId: req.sessionID,
-        hasUser: !!passportUser,
-        userId: userId,
-        isAuthenticated: req.isAuthenticated(),
-        email: passportUser?.email
-      });
-    }
-    
-    if (passportUser && req.isAuthenticated()) {
-      const userInfo = {
-        id: userId,
-        isAuthenticated: true,
-        authType: 'google',
-        username: passportUser.firstName || passportUser.email?.split('@')[0] || 'google-user',
-        name: `${passportUser.firstName || ''} ${passportUser.lastName || ''}`.trim() || 'Google User',
-        email: passportUser.email || 'google-user@gmail.com',
-        profileImageUrl: passportUser.profileImageUrl
-      };
+  // User info endpoint using simplified auth
+  app.get('/api/user/info', async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      const session = req.session as any;
       
-      console.log('🔍 Google User Info:', userInfo);
-      res.json(userInfo);
-    } else {
+      if (session.access_token && session.user_id) {
+        const user = await storage.getUser(session.user_id);
+        
+        if (user) {
+          const userInfo = {
+            id: userId,
+            isAuthenticated: true,
+            authType: 'google',
+            username: user.firstName || user.email?.split('@')[0] || 'google-user',
+            name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Google User',
+            email: user.email || 'google-user@gmail.com',
+            profileImageUrl: user.profileImageUrl
+          };
+          
+          console.log('🔍 Google User Info:', userInfo);
+          return res.json(userInfo);
+        }
+      }
+      
       const guestInfo = {
         id: 'guest',
         isAuthenticated: false,
@@ -261,68 +174,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('🔍 Guest User Info:', guestInfo);
       res.json(guestInfo);
-    }
-  });
-
-  // Auth routes for React Query with onboarding support
-  app.get('/api/auth/user', async (req: any, res) => {
-    try {
-      // Log session state for debugging
-      console.log('📊 Auth check - Session ID:', req.sessionID);
-      console.log('📊 Auth check - Passport user:', !!req.user);
-      console.log('📊 Auth check - Is authenticated:', req.isAuthenticated());
-      console.log('📊 Auth check - Session data:', req.session);
-      
-      // Check if user is authenticated
-      if (!req.isAuthenticated() || !req.user) {
-        console.log('❌ User not authenticated');
-        return res.json({ 
-          isAuthenticated: false,
-          isNewUser: true,
-          welcomeMessageShown: false 
-        });
-      }
-
-      const userId = getUserId(req);
-      console.log('✅ User authenticated with ID:', userId);
-      
-      const user = await storage.getUser(userId);
-      
-      if (!user) {
-        console.log('⚠️ User found in session but not in database:', userId);
-        return res.json({ 
-          isAuthenticated: false,
-          isNewUser: true,
-          welcomeMessageShown: false 
-        });
-      }
-      
-      // Get onboarding status using the new service
-      const onboardingStatus = await userOnboardingService.checkUserOnboardingStatus(userId);
-      
-      // Return user data with complete onboarding information
-      const responseData = {
-        ...user,
-        isAuthenticated: true,
-        isNewUser: onboardingStatus.isNewUser,
-        shouldShowWelcome: onboardingStatus.shouldShowWelcome,
-        shouldShowDailyGoals: onboardingStatus.shouldShowDailyGoals,
-        sessionCount: onboardingStatus.sessionCount,
-        dailyGoals: onboardingStatus.dailyGoals || []
-      };
-      
-      console.log('✅ Returning authenticated user data for:', user.email);
-      res.json(responseData);
     } catch (error) {
-      console.error("❌ Error fetching user:", error);
-      // Return non-authenticated state instead of error
-      res.json({ 
-        isAuthenticated: false,
-        isNewUser: true,
-        welcomeMessageShown: false 
-      });
+      console.error('Error fetching user info:', error);
+      res.status(500).json({ error: 'Failed to fetch user info' });
     }
   });
+
+  // Removed duplicate auth route - handled by setupSimplifiedGoogleAuth
 
   // Welcome message completion
   app.post('/api/user/welcome-complete', async (req: any, res) => {
