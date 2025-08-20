@@ -9,7 +9,8 @@ import { emotionalImpactAnalyzer } from "./emotional-impact-analyzer";
 import { advancedFillerDetectionEngine } from "./advanced-filler-detection";
 import { RealTimeSessionManager } from "./redis-realtime";
 import { insertPracticeSessionSchema, insertCoachingFeedbackSchema, insertCustomTemplateSchema, practiceSessions } from "@shared/schema";
-// Google Auth removed - starting fresh
+import { setupGoogleAuth, requireAuth } from './google-auth';
+import passport from 'passport';
 import { setupUserProgressAPI } from "./user-progress-api";
 import { userOnboardingService } from "./user-onboarding";
 import { generateClubCoaching } from "./ai-coaching";
@@ -102,10 +103,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     };
   }
   
-  // Setup Google OAuth Authentication (primary and only auth system)
-  // Google Auth setup removed - starting fresh
+  // Setup Google OAuth Authentication
+  setupGoogleAuth(app);
 
-  // Authenticate with token (for cross-domain OAuth)
+  // Google OAuth routes
+  app.get('/api/auth/google', passport.authenticate('google', { 
+    scope: ['profile', 'email'] 
+  }));
+
+  app.get('/api/auth/google/callback', 
+    passport.authenticate('google', { failureRedirect: '/?error=access_denied&details=The user did not consent' }),
+    (req, res) => {
+      console.log('✅ Google OAuth callback successful, redirecting to dashboard');
+      res.redirect('/');
+    }
+  );
+
+  // Get authenticated user
+  app.get('/api/auth/user', async (req: any, res) => {
+    try {
+      if (!req.isAuthenticated() || !req.user) {
+        return res.json({ 
+          isAuthenticated: false, 
+          user: null 
+        });
+      }
+
+      const user = req.user;
+      const userResponse = {
+        id: user.id,
+        email: user.email,
+        name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
+        username: user.email,
+        profileImageUrl: user.profileImageUrl,
+        isAuthenticated: true,
+        isNewUser: user.isNewUser,
+        welcomeMessageShown: user.welcomeMessageShown,
+        authType: 'google'
+      };
+
+      res.json(userResponse);
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      res.status(500).json({ error: 'Failed to fetch user data' });
+    }
+  });
+
+  // Logout route
+  app.get('/api/auth/logout', (req: any, res) => {
+    req.logout((err: any) => {
+      if (err) {
+        console.error('Logout error:', err);
+        return res.status(500).json({ error: 'Logout failed' });
+      }
+      
+      console.log('✅ User logged out successfully');
+      res.redirect('/');
+    });
+  });
+
+  // Legacy token auth endpoint for backward compatibility
   app.post('/api/auth/token', async (req: any, res) => {
     try {
       const { token } = req.body;
