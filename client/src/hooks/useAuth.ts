@@ -57,18 +57,18 @@ export function useAuth() {
     if (typeof window !== 'undefined') {
       window.sessionStorage.setItem('loggedOut', 'true');
       setIsLoggedOut(true);
-      // Call Google OAuth logout endpoint
-      fetch('/api/auth/logout', { method: 'GET' }).then(() => {
+      // Call Replit Auth logout endpoint
+      fetch('/api/logout', { method: 'GET' }).then(() => {
         window.location.href = '/';
       });
     }
   };
 
   const login = () => {
-    // Redirect to Google OAuth login
+    // Redirect to Replit Auth login
     if (typeof window !== 'undefined') {
       window.sessionStorage.removeItem('loggedOut');
-      window.location.href = '/api/auth/google';
+      window.location.href = '/api/login';
     }
   };
 

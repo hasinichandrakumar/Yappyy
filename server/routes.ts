@@ -9,8 +9,7 @@ import { emotionalImpactAnalyzer } from "./emotional-impact-analyzer";
 import { advancedFillerDetectionEngine } from "./advanced-filler-detection";
 import { RealTimeSessionManager } from "./redis-realtime";
 import { insertPracticeSessionSchema, insertCoachingFeedbackSchema, insertCustomTemplateSchema, practiceSessions } from "@shared/schema";
-import { setupGoogleAuth, requireAuth } from './google-auth';
-import passport from 'passport';
+import { setupAuth, isAuthenticated } from './replitAuth';
 import { setupUserProgressAPI } from "./user-progress-api";
 import { userOnboardingService } from "./user-onboarding";
 import { generateClubCoaching } from "./ai-coaching";
@@ -103,50 +102,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     };
   }
   
-  // Setup Google OAuth Authentication
-  setupGoogleAuth(app);
-
-  // Google OAuth routes
-  app.get('/api/auth/google', passport.authenticate('google', { 
-    scope: ['profile', 'email'] 
-  }));
-
-  app.get('/api/auth/google/callback', (req, res, next) => {
-    console.log('🔄 OAuth callback received, authenticating...');
-    passport.authenticate('google', (err, user, info) => {
-      if (err) {
-        console.error('❌ OAuth authentication error:', err);
-        return res.redirect('/?error=auth_error&details=' + encodeURIComponent(err.message));
-      }
-      
-      if (!user) {
-        console.log('⚠️ OAuth authentication failed - no user returned');
-        return res.redirect('/?error=access_denied&details=The user did not consent');
-      }
-      
-      req.logIn(user, (loginErr) => {
-        if (loginErr) {
-          console.error('❌ Login error:', loginErr);
-          return res.redirect('/?error=login_error&details=' + encodeURIComponent(loginErr.message));
-        }
-        
-        console.log('✅ Google OAuth callback successful, redirecting to dashboard for user:', user.email);
-        res.redirect('/');
-      });
-    })(req, res, next);
-  });
+  // Setup Replit Authentication
+  await setupAuth(app);
 
   // Get authenticated user
-  app.get('/api/auth/user', async (req: any, res) => {
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      if (!req.isAuthenticated() || !req.user) {
-        return res.json({ 
-          isAuthenticated: false, 
-          user: null 
-        });
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
       }
 
-      const user = req.user;
       const userResponse = {
         id: user.id,
         email: user.email,
@@ -156,58 +124,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isAuthenticated: true,
         isNewUser: user.isNewUser,
         welcomeMessageShown: user.welcomeMessageShown,
-        authType: 'google'
+        authType: 'replit'
       };
 
       res.json(userResponse);
     } catch (error) {
       console.error('Error fetching user:', error);
       res.status(500).json({ error: 'Failed to fetch user data' });
-    }
-  });
-
-  // Logout route
-  app.get('/api/auth/logout', (req: any, res) => {
-    req.logout((err: any) => {
-      if (err) {
-        console.error('Logout error:', err);
-        return res.status(500).json({ error: 'Logout failed' });
-      }
-      
-      console.log('✅ User logged out successfully');
-      res.redirect('/');
-    });
-  });
-
-  // Legacy token auth endpoint for backward compatibility
-  app.post('/api/auth/token', async (req: any, res) => {
-    try {
-      const { token } = req.body;
-      if (!token) {
-        return res.status(400).json({ error: 'Token required' });
-      }
-      
-      const decoded = JSON.parse(Buffer.from(token, 'base64').toString());
-      const { user, timestamp } = decoded;
-      
-      // Check if token is valid (within 5 minutes)
-      if (Date.now() - timestamp > 5 * 60 * 1000) {
-        return res.status(401).json({ error: 'Token expired' });
-      }
-      
-      // Create session with user data
-      req.login(user, (err: any) => {
-        if (err) {
-          console.error('Token login error:', err);
-          return res.status(500).json({ error: 'Login failed' });
-        }
-        
-        console.log('✅ Token authentication successful for:', user.email);
-        res.json({ success: true });
-      });
-    } catch (error) {
-      console.error('Token authentication error:', error);
-      res.status(401).json({ error: 'Invalid token' });
     }
   });
 

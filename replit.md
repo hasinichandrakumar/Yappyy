@@ -13,6 +13,9 @@ Preferred communication style: Simple, everyday language.
 - Resolved server startup port conflict (EADDRINUSE error on port 5000) 
 - Application now running successfully with all AI services initialized
 - Template collection cleaned up to prevent key conflicts in React rendering
+- Switched from Google OAuth to Replit Auth for seamless authentication integration
+- Updated authentication endpoints from `/api/auth/google` to `/api/login` and `/api/logout`
+- Modified user interface to show "Sign in with Replit" instead of Google branding
 
 # System Architecture
 
@@ -30,7 +33,7 @@ Preferred communication style: Simple, everyday language.
 - **Language**: TypeScript with ES modules
 - **Database**: PostgreSQL with Drizzle ORM, hosted on Neon serverless, fully migrated and operational with comprehensive schema
 - **Session Management**: Express sessions with PostgreSQL store
-- **Authentication**: Google OAuth (primary authentication system) with comprehensive user data protection. All user sessions, progress, and AI insights are securely tied to Google accounts. Anyone with a Google account can sign in. After successful OAuth authentication, users are redirected to `/dashboard` on the same domain.
+- **Authentication**: Replit Auth (primary authentication system) with comprehensive user data protection. All user sessions, progress, and AI insights are securely tied to Replit accounts. Users with Replit accounts can sign in through OpenID Connect. After successful authentication, users are redirected to the dashboard.
 - **Payload Limits**: Increased Express.js payload limit to 50mb for session saving and PDF export.
 
 ## Key Technical Implementations & Features
