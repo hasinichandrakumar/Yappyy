@@ -115,14 +115,13 @@ export function setupSimplifiedGoogleAuth(app: Express) {
       const baseUrl = getCurrentDomain(req);
       const redirectUri = `${baseUrl}/api/auth/google/callback`;
       
-      oauth2Client.redirectUri = redirectUri;
-      
       // Generate auth URL
       const authUrl = oauth2Client.generateAuthUrl({
         access_type: 'offline',
         scope: scopes,
         state: state,
         prompt: 'consent', // Force consent screen to get refresh token
+        redirect_uri: redirectUri,
       });
 
       console.log('🔄 Redirecting to Google OAuth:', redirectUri);
@@ -159,7 +158,7 @@ export function setupSimplifiedGoogleAuth(app: Express) {
 
       // Set redirect URI for token exchange
       const baseUrl = getCurrentDomain(req);
-      oauth2Client.redirectUri = `${baseUrl}/api/auth/google/callback`;
+      const redirectUri = `${baseUrl}/api/auth/google/callback`;
 
       // Exchange code for token
       const { tokens } = await oauth2Client.getToken(code as string);
@@ -197,7 +196,7 @@ export function setupSimplifiedGoogleAuth(app: Express) {
       }
       
       console.log('✅ OAuth successful for user:', userInfo.email);
-      res.redirect('/');
+      res.redirect('/dashboard'); // Redirect to dashboard after successful authentication
     } catch (error) {
       console.error('❌ OAuth callback error:', error);
       res.redirect('/?error=oauth_error');

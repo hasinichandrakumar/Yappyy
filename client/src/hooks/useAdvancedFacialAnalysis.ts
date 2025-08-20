@@ -267,25 +267,24 @@ export function useAdvancedFacialAnalysis() {
             successRate: 100,
             frameRate: 1000 / processTime,
             confidenceScore: detectionConfidence
-            });
+          });
             
-            // Generate recommendations
-            const recommendations = generateRecommendations(metrics);
+          // Generate recommendations
+          const recommendations = generateRecommendations(metrics);
             
-            // Add to analysis history
-            setAnalysisHistory(prev => [...prev, {
-              metrics,
-              recommendations,
-              timestamp: Date.now()
-            }]);
-          }
+          // Add to analysis history
+          setAnalysisHistory(prev => [...prev, {
+            metrics,
+            recommendations,
+            timestamp: Date.now()
+          }]);
         }
-      } catch (err) {
-        console.error('Analysis error:', err);
       }
-    }, 100); // Analyze every 100ms for smooth tracking
-    
-  }, [isInitialized, isAnalyzing, generateRecommendations]);
+    } catch (err) {
+      console.error('Analysis error:', err);
+    }
+  }, 100); // Analyze every 100ms for smooth tracking
+}, [isInitialized, isAnalyzing, generateRecommendations]);
   
   // Stop analysis
   const stopAnalysis = useCallback(() => {

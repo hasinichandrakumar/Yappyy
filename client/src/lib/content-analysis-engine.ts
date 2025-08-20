@@ -97,57 +97,61 @@ export class ContentAnalysisEngine {
     
     try {
       // Perform comprehensive analysis with error handling
-      const structureAnalysis = this.analyzeStructure(transcript, purpose);
-      const persuasivenessAnalysis = this.analyzePersuasiveness(transcript, purpose);
-      const coherenceAnalysis = this.analyzeCoherence(transcript);
-      const audienceAlignmentAnalysis = this.analyzeAudienceAlignment(transcript, purpose);
-      const purposeAlignmentAnalysis = this.analyzePurposeAlignment(transcript, purpose);
+      const structureAnalysis = await this.analyzeStructure(transcript, purpose);
+      const persuasivenessAnalysis = await this.analyzePersuasiveness(transcript, purpose);
+      const coherenceAnalysis = await this.analyzeCoherence(transcript);
+      const audienceAlignmentAnalysis = await this.analyzeAudienceAlignment(transcript, purpose);
+      const purposeAlignmentAnalysis = await this.analyzePurposeAlignment(transcript, purpose);
     
-    // Calculate overall score
-    const overallScore = Math.round(
-      (structureAnalysis.score * 0.25) +
-      (persuasivenessAnalysis.score * 0.25) +
-      (coherenceAnalysis.score * 0.2) +
-      (audienceAlignmentAnalysis.score * 0.15) +
-      (purposeAlignmentAnalysis.score * 0.15)
-    );
+      // Calculate overall score
+      const overallScore = Math.round(
+        (structureAnalysis.score * 0.25) +
+        (persuasivenessAnalysis.score * 0.25) +
+        (coherenceAnalysis.score * 0.2) +
+        (audienceAlignmentAnalysis.score * 0.15) +
+        (purposeAlignmentAnalysis.score * 0.15)
+      );
     
-    // Combine feedback
-    const specificFeedback: SpecificFeedback[] = [
-      ...structureAnalysis.feedback,
-      ...persuasivenessAnalysis.feedback,
-      ...coherenceAnalysis.feedback,
-      ...audienceAlignmentAnalysis.feedback,
-      ...purposeAlignmentAnalysis.feedback
-    ];
+      // Combine feedback
+      const specificFeedback: SpecificFeedback[] = [
+        ...structureAnalysis.feedback,
+        ...persuasivenessAnalysis.feedback,
+        ...coherenceAnalysis.feedback,
+        ...audienceAlignmentAnalysis.feedback,
+        ...purposeAlignmentAnalysis.feedback
+      ];
     
-    // Generate insights and recommendations
-    const keyInsights = this.generateKeyInsights(transcript, purpose, overallScore);
-    const improvementAreas = this.identifyImprovementAreas(specificFeedback);
-    const strengths = this.identifyStrengths(specificFeedback);
-    const recommendations = this.generateRecommendations(specificFeedback, purpose);
+      // Generate insights and recommendations
+      const keyInsights = this.generateKeyInsights(transcript, purpose, overallScore);
+      const improvementAreas = this.identifyImprovementAreas(specificFeedback);
+      const strengths = this.identifyStrengths(specificFeedback);
+      const recommendations = this.generateRecommendations(specificFeedback, purpose);
     
-    const result: ContentAnalysisResult = {
-      overallScore,
-      structureScore: structureAnalysis.score,
-      persuasivenessScore: persuasivenessAnalysis.score,
-      coherenceScore: coherenceAnalysis.score,
-      audienceAlignmentScore: audienceAlignmentAnalysis.score,
-      purposeAlignment: purposeAlignmentAnalysis.score,
-      keyInsights,
-      improvementAreas,
-      strengths,
-      specificFeedback,
-      recommendations
-    };
+      const result: ContentAnalysisResult = {
+        overallScore,
+        structureScore: structureAnalysis.score,
+        persuasivenessScore: persuasivenessAnalysis.score,
+        coherenceScore: coherenceAnalysis.score,
+        audienceAlignmentScore: audienceAlignmentAnalysis.score,
+        purposeAlignment: purposeAlignmentAnalysis.score,
+        keyInsights,
+        improvementAreas,
+        strengths,
+        specificFeedback,
+        recommendations
+      };
     
-    // Store in history
-    this.analysisHistory.push(result);
-    if (this.analysisHistory.length > 10) {
-      this.analysisHistory.shift();
+      // Store in history
+      this.analysisHistory.push(result);
+      if (this.analysisHistory.length > 10) {
+        this.analysisHistory.shift();
+      }
+    
+      return result;
+    } catch (error) {
+      console.error('❌ Content analysis error:', error);
+      return this.getDefaultAnalysis();
     }
-    
-    return result;
   }
   
   private async analyzeStructure(transcript: string, purpose: SpeechPurpose): Promise<{score: number, feedback: SpecificFeedback[]}> {
