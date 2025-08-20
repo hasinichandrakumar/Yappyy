@@ -1074,16 +1074,32 @@ export default function SimplifiedPracticePage() {
         streamRef.current = stream;
       }
       
-      // Start video recording if initialized - give it a small delay to ensure MediaRecorder is ready
+      // Start video recording if initialized - ensure MediaRecorder is ready
       if (videoInitialized && recordingVideoRef.current) {
-        setTimeout(() => {
-          const recordingStarted = videoRecordingManager.startRecording();
-          if (recordingStarted) {
-            console.log('🎬 Video recording started successfully');
-          } else {
-            console.warn('⚠️ Video recording failed to start');
+        // Wait a bit longer to ensure MediaRecorder is fully ready
+        setTimeout(async () => {
+          try {
+            // Double-check initialization if needed
+            let recordingReady = true;
+            if (!videoRecordingManager.isReady()) {
+              console.log('🔄 Re-initializing video recording...');
+              recordingReady = await videoRecordingManager.initializeRecording(recordingVideoRef.current!);
+            }
+            
+            if (recordingReady) {
+              const recordingStarted = videoRecordingManager.startRecording();
+              if (recordingStarted) {
+                console.log('🎬 Video recording started successfully');
+              } else {
+                console.warn('⚠️ Video recording failed to start - will record audio only');
+              }
+            } else {
+              console.warn('⚠️ Video recording not ready - will record audio only');
+            }
+          } catch (error) {
+            console.warn('⚠️ Video recording error:', error);
           }
-        }, 100);
+        }, 500);
       }
 
       // Set up video display
@@ -1430,6 +1446,20 @@ export default function SimplifiedPracticePage() {
         facialAnalysis: isFacialAnalysisActive,
         videoRecording: videoRecordingEnabled
       });
+
+      // Start advanced voice analysis
+      try {
+        console.log('🎤 Starting advanced voice analysis...');
+        const voiceAnalysisInterval = await startRealTimeVoiceAnalysis();
+        if (voiceAnalysisInterval) {
+          // Store interval for cleanup
+          return () => {
+            clearInterval(voiceAnalysisInterval);
+          };
+        }
+      } catch (error) {
+        console.warn('⚠️ Advanced voice analysis failed to start:', error);
+      }
     } catch (error: any) {
       console.error('Failed to start recording:', error);
       
@@ -1459,6 +1489,125 @@ export default function SimplifiedPracticePage() {
       });
     }
   }, [setupSpeechRecognition, toast, transcript, interimTranscript]);
+
+  // Advanced Voice Analysis Functions
+  const performAdvancedVoiceAnalysis = useCallback(async (audioBlob: Blob, transcript: string) => {
+    try {
+      console.log('🎤 Starting advanced voice analysis...');
+      
+      // Convert audio blob to base64
+      const arrayBuffer = await audioBlob.arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
+      const base64Audio = btoa(String.fromCharCode.apply(null, Array.from(uint8Array)));
+      
+      // Call free voice analysis API
+      const voiceAnalysisResponse = await fetch('/api/free-voice-analysis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          audioBuffer: base64Audio,
+          transcript: transcript,
+          duration: sessionDuration
+        })
+      });
+      
+      if (voiceAnalysisResponse.ok) {
+        const voiceAnalysis = await voiceAnalysisResponse.json();
+        console.log('🎤 Free voice analysis result:', voiceAnalysis);
+        
+        // Update metrics with advanced voice analysis
+        setMetrics(prev => ({
+          ...prev,
+          voice: {
+            ...prev.voice,
+            clarity: voiceAnalysis.clarity?.score || prev.voice.clarity,
+            sentiment: voiceAnalysis.sentiment?.score || 0,
+            professionalism: voiceAnalysis.professionalism?.score || 0
+          }
+        }));
+      }
+      
+      // Call advanced speech analysis API
+      const speechAnalysisResponse = await fetch('/api/advanced-speech-analysis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          transcript: transcript,
+          duration: sessionDuration,
+          audioBuffer: base64Audio
+        })
+      });
+      
+      if (speechAnalysisResponse.ok) {
+        const speechAnalysis = await speechAnalysisResponse.json();
+        console.log('🎤 Advanced speech analysis result:', speechAnalysis);
+        
+        // Update metrics with speech analysis
+        setMetrics(prev => ({
+          ...prev,
+          confidence: speechAnalysis.confidence || prev.confidence,
+          clarity: speechAnalysis.clarity || prev.clarity,
+          voice: {
+            ...prev.voice,
+            pace: speechAnalysis.pace || prev.voice.pace,
+            volume: speechAnalysis.volume || prev.voice.volume,
+            intonation: speechAnalysis.intonation || prev.voice.intonation
+          }
+        }));
+      }
+      
+      // Call comprehensive voice analysis API
+      const comprehensiveResponse = await fetch('/api/speech-emotion/comprehensive-analysis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          transcript: transcript,
+          audioBuffer: base64Audio,
+          duration: sessionDuration
+        })
+      });
+      
+      if (comprehensiveResponse.ok) {
+        const comprehensiveAnalysis = await comprehensiveResponse.json();
+        console.log('🎤 Comprehensive voice analysis result:', comprehensiveAnalysis);
+        
+        // Update metrics with comprehensive analysis
+        setMetrics(prev => ({
+          ...prev,
+          engagement: comprehensiveAnalysis.engagement || prev.engagement,
+          voice: {
+            ...prev.voice,
+            emotionalRange: comprehensiveAnalysis.emotionalRange || 0,
+            expressiveness: comprehensiveAnalysis.expressiveness || 0,
+            voiceWarmth: comprehensiveAnalysis.voiceWarmth || 0
+          }
+        }));
+      }
+      
+    } catch (error) {
+      console.error('❌ Advanced voice analysis failed:', error);
+    }
+  }, [sessionDuration]);
+
+  // Real-time voice analysis during recording
+  const startRealTimeVoiceAnalysis = useCallback(async () => {
+    if (!vocalFillerRecorder) return;
+    
+    // Start periodic voice analysis every 10 seconds
+    const voiceAnalysisInterval = setInterval(async () => {
+      if (isRecording && vocalFillerRecorder && vocalFillerRecorder.state === 'recording') {
+        try {
+          // Get current audio data
+          const audioBlob = new Blob([], { type: 'audio/webm' });
+          await performAdvancedVoiceAnalysis(audioBlob, transcript);
+        } catch (error) {
+          console.warn('⚠️ Real-time voice analysis failed:', error);
+        }
+      }
+    }, 10000); // Every 10 seconds
+    
+    return voiceAnalysisInterval;
+  }, [isRecording, transcript, performAdvancedVoiceAnalysis, vocalFillerRecorder]);
 
   // Stop recording
   const stopRecording = useCallback(async () => {
@@ -1520,6 +1669,16 @@ export default function SimplifiedPracticePage() {
       setVocalFillerRecorder(null);
     }
     setIsListeningForFillers(false);
+
+    // Perform final advanced voice analysis
+    try {
+      console.log('🎤 Performing final voice analysis...');
+      const finalAudioBlob = new Blob([], { type: 'audio/webm' });
+      await performAdvancedVoiceAnalysis(finalAudioBlob, transcript);
+      console.log('✅ Final voice analysis completed');
+    } catch (error) {
+      console.warn('⚠️ Final voice analysis failed:', error);
+    }
     
     // Clear any remaining intervals
     if (timerRef.current) {

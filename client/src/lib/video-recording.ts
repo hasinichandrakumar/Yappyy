@@ -125,10 +125,21 @@ export class VideoRecordingManager {
     };
   }
 
+  // Check if MediaRecorder is ready to start recording
+  isReady(): boolean {
+    return this.mediaRecorder !== null && 
+           this.mediaRecorder.state === 'inactive' && 
+           !this.isRecording;
+  }
+
   // Start video recording
   startRecording(): boolean {
     if (!this.mediaRecorder || this.isRecording) {
-      console.warn('⚠️ Cannot start recording - MediaRecorder not ready or already recording');
+      return false;
+    }
+
+    // Check MediaRecorder state
+    if (this.mediaRecorder.state !== 'inactive') {
       return false;
     }
 
