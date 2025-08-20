@@ -22,36 +22,59 @@ export class VideoRecordingManager {
   // Initialize video recording with high quality settings
   async initializeRecording(videoElement: HTMLVideoElement): Promise<boolean> {
     try {
-      // Request high-quality video and audio
-      this.stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          width: { ideal: 1920, min: 1280 },
-          height: { ideal: 1080, min: 720 },
-          frameRate: { ideal: 30, min: 24 },
-          facingMode: 'user'
-        },
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-          sampleRate: 48000
-        }
-      });
+      // Check if getUserMedia is supported
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        console.warn('getUserMedia not supported, video recording unavailable');
+        return false;
+      }
+
+      // Request media with fallback constraints
+      try {
+        this.stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            width: { ideal: 1920, min: 640 },
+            height: { ideal: 1080, min: 480 },
+            frameRate: { ideal: 30, min: 15 },
+            facingMode: 'user'
+          },
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true
+          }
+        });
+      } catch (mediaError) {
+        console.warn('High quality media failed, trying basic constraints:', mediaError);
+        
+        // Fallback to basic constraints
+        this.stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'user' },
+          audio: true
+        });
+      }
 
       // Set up video element
-      videoElement.srcObject = this.stream;
-      await videoElement.play();
+      if (videoElement.srcObject !== this.stream) {
+        videoElement.srcObject = this.stream;
+      }
+      
+      // Only play if not already playing
+      if (videoElement.paused) {
+        await videoElement.play().catch(playError => {
+          console.warn('Video play failed:', playError);
+        });
+      }
 
       // Initialize MediaRecorder with optimal settings
       const options = this.getOptimalRecordingOptions();
       this.mediaRecorder = new MediaRecorder(this.stream, options);
 
       this.setupRecordingHandlers();
-      console.log('✅ Video recording initialized with high quality settings');
+      console.log('Video recording initialized with high quality settings');
       return true;
 
     } catch (error) {
-      console.error('❌ Failed to initialize video recording:', error);
+      console.warn('Video recording initialization failed:', error);
       return false;
     }
   }
@@ -98,7 +121,7 @@ export class VideoRecordingManager {
     };
 
     this.mediaRecorder.onerror = (event) => {
-      console.error('❌ MediaRecorder error:', event);
+      console.warn('MediaRecorder error:', event);
     };
   }
 

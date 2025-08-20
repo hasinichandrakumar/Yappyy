@@ -72,39 +72,41 @@ export class RealTimeEyeContact {
    */
   private async initializeMediaPipe(): Promise<void> {
     try {
-      // Dynamic import to avoid SSR issues
-      const { FaceMesh } = await import('@mediapipe/face_mesh');
+      // Dynamic import with timeout to avoid hanging
+      const importTimeout = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('MediaPipe import timeout')), 5000)
+      );
+
+      const { FaceMesh } = await Promise.race([
+        import('@mediapipe/face_mesh'),
+        importTimeout
+      ]);
       
       this.mediaPipeFaceMesh = new FaceMesh({
         locateFile: (file: string) => {
-          // Fix CDN paths for MediaPipe assets
-          if (file.includes('face_mesh')) {
-            return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
-          } else if (file.includes('pose')) {
-            return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
-          } else if (file.includes('hands')) {
-            return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
-          } else {
-            return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
-          }
+          return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
         }
       });
       
       this.mediaPipeFaceMesh.setOptions({
         maxNumFaces: 1,
-        refineLandmarks: true,
-        minDetectionConfidence: 0.8,
-        minTrackingConfidence: 0.8
+        refineLandmarks: false, // Reduced complexity
+        minDetectionConfidence: 0.5, // More permissive
+        minTrackingConfidence: 0.5
       });
       
       this.mediaPipeFaceMesh.onResults((results: any) => {
-        this.processMediaPipeResults(results);
+        try {
+          this.processMediaPipeResults(results);
+        } catch (resultsError) {
+          console.warn('MediaPipe results processing failed:', resultsError);
+        }
       });
       
       this.isInitialized = true;
-      console.log('✅ MediaPipe Face Mesh initialized for eye contact detection');
+      console.log('MediaPipe Face Mesh initialized for eye contact detection');
     } catch (error) {
-      // Silently handle MediaPipe initialization errors - fallback to basic detection
+      console.warn('MediaPipe initialization failed, using fallback detection:', error);
       this.isInitialized = false;
     }
   }

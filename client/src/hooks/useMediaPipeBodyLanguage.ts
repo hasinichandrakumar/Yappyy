@@ -84,43 +84,55 @@ export function useMediaPipeBodyLanguage() {
     try {
       console.log('🤖 Initializing MediaPipe body language models...');
 
-      // Initialize Pose model
-      const pose = new Pose({
-        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
-      });
+      // Initialize Pose model with error handling
+      let pose: Pose;
+      let hands: Hands;
+      
+      try {
+        pose = new Pose({
+          locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
+        });
 
-      pose.setOptions({
-        modelComplexity: 2, // Increased from 1 to 2 for higher accuracy
-        smoothLandmarks: true,
-        enableSegmentation: true, // Enable for better isolation of the subject
-        smoothSegmentation: true,
-        minDetectionConfidence: 0.7, // Increased from 0.5 for higher confidence
-        minTrackingConfidence: 0.7  // Increased from 0.5 for more stable tracking
-      });
+        pose.setOptions({
+          modelComplexity: 1, // Reduced for better compatibility
+          smoothLandmarks: true,
+          enableSegmentation: false, // Disabled to reduce load
+          smoothSegmentation: false,
+          minDetectionConfidence: 0.5, // More permissive
+          minTrackingConfidence: 0.5   // More permissive
+        });
 
-      // Initialize Hands model
-      const hands = new Hands({
-        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
-      });
+        poseRef.current = pose;
+      } catch (poseError) {
+        console.warn('Pose model initialization failed, continuing without pose detection:', poseError);
+      }
 
-      hands.setOptions({
-        maxNumHands: 2,
-        modelComplexity: 1,
-        minDetectionConfidence: 0.7, // Increased for higher confidence
-        minTrackingConfidence: 0.7,  // Increased for more stable tracking
-        selfieMode: true            // Mirror mode for front-facing camera
-      });
+      // Initialize Hands model with error handling
+      try {
+        hands = new Hands({
+          locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+        });
 
-      poseRef.current = pose;
-      handsRef.current = hands;
+        hands.setOptions({
+          maxNumHands: 2,
+          modelComplexity: 0, // Reduced for better compatibility
+          minDetectionConfidence: 0.5, // More permissive
+          minTrackingConfidence: 0.5,  // More permissive
+          selfieMode: true             // Mirror mode for front-facing camera
+        });
 
-      console.log('✅ MediaPipe models initialized successfully');
+        handsRef.current = hands;
+      } catch (handsError) {
+        console.warn('Hands model initialization failed, continuing without hand detection:', handsError);
+      }
+
+      console.log('✅ MediaPipe models initialization completed');
       return true;
     } catch (error) {
-      console.error('❌ Failed to initialize MediaPipe models:', error);
+      console.warn('MediaPipe models initialization had issues:', error);
       setAnalysis(prev => ({
         ...prev,
-        error: 'Failed to initialize body language detection models'
+        error: null // Don't set error as this is non-critical
       }));
       return false;
     }

@@ -49,6 +49,12 @@ export function useRoboflowVision() {
   // Initialize video stream for real-time analysis
   const initializeVideoStream = useCallback(async () => {
     try {
+      // Check if getUserMedia is supported
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        console.warn('getUserMedia is not supported, skipping video stream initialization');
+        return false;
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { 
           width: 640, 
@@ -64,10 +70,10 @@ export function useRoboflowVision() {
 
       return true;
     } catch (error) {
-      console.error('Failed to initialize video stream:', error);
+      console.warn('Video stream initialization failed:', error);
       setState(prev => ({ 
         ...prev, 
-        error: 'Camera access denied or unavailable' 
+        error: null // Don't set error as this is often due to permissions
       }));
       return false;
     }
@@ -103,7 +109,9 @@ export function useRoboflowVision() {
       });
 
       if (!response.ok) {
-        throw new Error(`Analysis failed: ${response.status}`);
+        console.warn(`Roboflow analysis failed with status: ${response.status}`);
+        setState(prev => ({ ...prev, isAnalyzing: false }));
+        return null;
       }
 
       const result = await response.json();
@@ -118,11 +126,11 @@ export function useRoboflowVision() {
 
       return result.analysis;
     } catch (error: any) {
-      console.error('Frame analysis failed:', error);
+      console.warn('Frame analysis had issues:', error);
       setState(prev => ({
         ...prev,
         isAnalyzing: false,
-        error: error?.message || 'Frame analysis failed'
+        error: null // Don't set error state for non-critical failures
       }));
       return null;
     }

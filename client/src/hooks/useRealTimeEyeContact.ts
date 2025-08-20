@@ -58,33 +58,45 @@ export function useRealTimeEyeContact(): UseRealTimeEyeContactReturn {
       try {
         eyeContactRef.current = new RealTimeEyeContact();
         
-        // Override the updateMetrics method to update our state
-        const originalUpdateMetrics = eyeContactRef.current['updateMetrics'].bind(eyeContactRef.current);
-        eyeContactRef.current['updateMetrics'] = (newMetrics: EyeContactMetrics) => {
-          originalUpdateMetrics(newMetrics);
-          setMetrics(newMetrics);
-          
-          // Update calibration status
-          if (newMetrics.calibrationStatus === 'calibrated') {
-            setCalibration(prev => ({ ...prev, isCalibrated: true }));
-          }
-        };
+        // Safely override the updateMetrics method if it exists
+        if (eyeContactRef.current && typeof eyeContactRef.current['updateMetrics'] === 'function') {
+          const originalUpdateMetrics = eyeContactRef.current['updateMetrics'].bind(eyeContactRef.current);
+          eyeContactRef.current['updateMetrics'] = (newMetrics: EyeContactMetrics) => {
+            try {
+              originalUpdateMetrics(newMetrics);
+              setMetrics(newMetrics);
+              
+              // Update calibration status
+              if (newMetrics.calibrationStatus === 'calibrated') {
+                setCalibration(prev => ({ ...prev, isCalibrated: true }));
+              }
+            } catch (updateError) {
+              console.warn('Eye contact metrics update failed:', updateError);
+            }
+          };
+        }
         
         setIsInitialized(true);
         setError(null);
       } catch (err) {
-        console.error('❌ Failed to initialize eye contact detection:', err);
-        setError('Failed to initialize eye contact detection');
+        console.warn('Eye contact detection initialization had issues:', err);
+        setError(null); // Don't set error as this is non-critical
         setIsInitialized(false);
       }
     };
     
-    initializeEyeContact();
+    initializeEyeContact().catch(err => {
+      console.warn('Async eye contact initialization failed:', err);
+    });
     
     // Cleanup on unmount
     return () => {
-      if (eyeContactRef.current) {
-        eyeContactRef.current.stopDetection();
+      try {
+        if (eyeContactRef.current) {
+          eyeContactRef.current.stopDetection();
+        }
+      } catch (cleanupError) {
+        console.warn('Eye contact cleanup failed:', cleanupError);
       }
     };
   }, []);

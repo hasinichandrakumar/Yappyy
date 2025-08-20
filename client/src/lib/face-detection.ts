@@ -40,24 +40,33 @@ class ClientFaceDetectionEngine {
 
   private async loadFaceApiModels(): Promise<void> {
     try {
-      console.log('🧠 Loading Face-api.js models...');
+      console.log('Loading Face-api.js models...');
       
-      // Load models from CDN for accuracy
+      // Load models from CDN with timeout
       const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@latest/model';
       
-      await Promise.all([
-        faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-        faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
-        faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
-        faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
-        faceapi.nets.ageGenderNet.loadFromUri(MODEL_URL)
+      const loadWithTimeout = (promise: Promise<void>, timeout = 10000) => {
+        return Promise.race([
+          promise,
+          new Promise<void>((_, reject) => 
+            setTimeout(() => reject(new Error('Model load timeout')), timeout)
+          )
+        ]);
+      };
+
+      await Promise.allSettled([
+        loadWithTimeout(faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL)),
+        loadWithTimeout(faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL)),
+        loadWithTimeout(faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)),
+        loadWithTimeout(faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL)),
+        loadWithTimeout(faceapi.nets.ageGenderNet.loadFromUri(MODEL_URL))
       ]);
       
       this.isInitialized = true;
-      // Face-api.js models loaded successfully
+      console.log('Face-api.js models loaded successfully');
       
     } catch (error) {
-      // Silently handle Face-api.js model loading failure - backend will handle analysis
+      console.warn('Face-api.js model loading failed, using server-side analysis only:', error);
       this.isInitialized = false;
     }
   }

@@ -63,7 +63,22 @@ export function useAdvancedFillerDetection() {
   // Audio-based filler detection using frequency analysis
   const initializeAudioAnalysis = useCallback((stream: MediaStream) => {
     try {
-      audioContextRef.current = new AudioContext();
+      // Check if AudioContext is available
+      if (!window.AudioContext && !(window as any).webkitAudioContext) {
+        console.warn('AudioContext not supported, skipping audio analysis');
+        return;
+      }
+
+      const AudioContextConstructor = window.AudioContext || (window as any).webkitAudioContext;
+      audioContextRef.current = new AudioContextConstructor();
+      
+      // Resume context if suspended (required by some browsers)
+      if (audioContextRef.current.state === 'suspended') {
+        audioContextRef.current.resume().catch(resumeError => {
+          console.warn('Failed to resume audio context:', resumeError);
+        });
+      }
+      
       const source = audioContextRef.current.createMediaStreamSource(stream);
       analyserRef.current = audioContextRef.current.createAnalyser();
       
@@ -77,7 +92,8 @@ export function useAdvancedFillerDetection() {
       
       console.log('🎤 Advanced audio analysis initialized for filler detection');
     } catch (error) {
-      console.warn('⚠️ Audio analysis initialization failed:', error);
+      console.warn('Audio analysis initialization failed:', error);
+      // Don't throw error, just continue without audio analysis
     }
   }, []);
 
