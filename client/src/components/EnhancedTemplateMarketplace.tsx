@@ -42,7 +42,7 @@ import {
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { allComprehensiveTemplates } from '@/lib/comprehensive-templates-collection';
+import { comprehensiveTemplatesCollection } from '@/lib/comprehensive-templates-collection';
 import { businessPitchTemplates, salesPitchTemplates } from '@/lib/business-pitch-templates';
 import { additionalTemplatesExpansion } from '@/lib/additional-templates-expansion';
 
@@ -679,7 +679,7 @@ const generateAdditionalTemplates = (): Template[] => {
 const staticTemplates = [
   ...sampleTemplates, 
   ...generateAdditionalTemplates(),
-  ...allComprehensiveTemplates,
+  ...comprehensiveTemplatesCollection,
   ...businessPitchTemplates,
   ...salesPitchTemplates,
   ...additionalTemplatesExpansion
