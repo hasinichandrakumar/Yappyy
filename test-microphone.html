@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Microphone Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>Microphone and Speech Recognition Test</h1>
+    
+    <div id="status" class="status info">Click "Test Microphone" to start</div>
+    
+    <button onclick="testMicrophone()">Test Microphone</button>
+    <button onclick="testSpeechRecognition()">Test Speech Recognition</button>
+    <button onclick="testBoth()">Test Both</button>
+    
+    <div id="output"></div>
+
+    <script>
+        function updateStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+        }
+
+        function log(message) {
+            const output = document.getElementById('output');
+            output.innerHTML += `<p>${new Date().toLocaleTimeString()}: ${message}</p>`;
+            console.log(message);
+        }
+
+        async function testMicrophone() {
+            try {
+                updateStatus('Requesting microphone permission...', 'info');
+                log('Requesting microphone access...');
+                
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true
+                    }
+                });
+                
+                updateStatus('✅ Microphone access granted!', 'success');
+                log('Microphone stream obtained successfully');
+                log(`Audio tracks: ${stream.getAudioTracks().length}`);
+                log(`Track settings: ${JSON.stringify(stream.getAudioTracks()[0].getSettings())}`);
+                
+                // Stop the stream after testing
+                stream.getTracks().forEach(track => track.stop());
+                
+            } catch (error) {
+                updateStatus(`❌ Microphone error: ${error.message}`, 'error');
+                log(`Microphone error: ${error.message}`);
+                log(`Error name: ${error.name}`);
+            }
+        }
+
+        function testSpeechRecognition() {
+            try {
+                updateStatus('Testing speech recognition...', 'info');
+                log('Checking speech recognition support...');
+                
+                if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                    throw new Error('Speech recognition not supported in this browser');
+                }
+                
+                const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
+                const recognition = new SpeechRecognition();
+                
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US';
+                
+                recognition.onstart = () => {
+                    updateStatus('🎤 Speech recognition started - speak now!', 'success');
+                    log('Speech recognition started');
+                };
+                
+                recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    updateStatus(`✅ Speech recognized: "${transcript}"`, 'success');
+                    log(`Speech recognized: "${transcript}"`);
+                };
+                
+                recognition.onerror = (event) => {
+                    updateStatus(`❌ Speech recognition error: ${event.error}`, 'error');
+                    log(`Speech recognition error: ${event.error}`);
+                };
+                
+                recognition.onend = () => {
+                    updateStatus('Speech recognition ended', 'info');
+                    log('Speech recognition ended');
+                };
+                
+                recognition.start();
+                
+            } catch (error) {
+                updateStatus(`❌ Speech recognition error: ${error.message}`, 'error');
+                log(`Speech recognition error: ${error.message}`);
+            }
+        }
+
+        async function testBoth() {
+            updateStatus('Testing both microphone and speech recognition...', 'info');
+            log('Starting comprehensive test...');
+            
+            try {
+                // Test microphone first
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true
+                    }
+                });
+                
+                log('✅ Microphone access granted');
+                
+                // Test speech recognition
+                if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                    throw new Error('Speech recognition not supported');
+                }
+                
+                const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
+                const recognition = new SpeechRecognition();
+                
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.lang = 'en-US';
+                
+                recognition.onstart = () => {
+                    updateStatus('🎤 Both systems working! Speak now...', 'success');
+                    log('✅ Speech recognition started with microphone access');
+                };
+                
+                recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    updateStatus(`✅ Complete success! Recognized: "${transcript}"`, 'success');
+                    log(`✅ Complete test successful: "${transcript}"`);
+                    
+                    // Stop the microphone stream
+                    stream.getTracks().forEach(track => track.stop());
+                };
+                
+                recognition.onerror = (event) => {
+                    updateStatus(`❌ Speech recognition failed: ${event.error}`, 'error');
+                    log(`❌ Speech recognition error: ${event.error}`);
+                    stream.getTracks().forEach(track => track.stop());
+                };
+                
+                recognition.start();
+                
+            } catch (error) {
+                updateStatus(`❌ Test failed: ${error.message}`, 'error');
+                log(`❌ Comprehensive test failed: ${error.message}`);
+            }
+        }
+
+        // Check browser support on page load
+        window.onload = () => {
+            log('Browser support check:');
+            log(`- getUserMedia: ${!!navigator.mediaDevices?.getUserMedia}`);
+            log(`- webkitSpeechRecognition: ${!!window.webkitSpeechRecognition}`);
+            log(`- SpeechRecognition: ${!!window.SpeechRecognition}`);
+            log(`- User agent: ${navigator.userAgent}`);
+        };
+    </script>
+</body>
+</html>

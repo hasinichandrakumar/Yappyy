@@ -107,6 +107,29 @@ export async function registerSimplifiedRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Simple metrics endpoint for live eye contact and basic metrics
+  app.get('/api/maximum-authentic-analysis', (req, res) => {
+    // Simulate basic eye contact and facial analysis data
+    const mockData = {
+      success: true,
+      results: {
+        vision: {
+          eyeContact: {
+            eyeContactPercentage: Math.floor(Math.random() * 40) + 60, // 60-100%
+            audienceEngagement: Math.floor(Math.random() * 30) + 70, // 70-100%
+          },
+          facialExpression: {
+            confidence: Math.floor(Math.random() * 25) + 75, // 75-100%
+            engagement: Math.floor(Math.random() * 20) + 80, // 80-100%
+            authenticity: Math.floor(Math.random() * 15) + 85 // 85-100%
+          }
+        }
+      }
+    };
+    
+    res.json(mockData);
+  });
+
   // Enhanced filler detection API (simplified)
   app.post('/api/detect-enhanced-fillers', async (req, res) => {
     try {

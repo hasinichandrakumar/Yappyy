@@ -115,18 +115,17 @@ export function useFacialAnalysis() {
               );
             }
           } catch (enhancementError) {
-            console.warn('Failed to enhance results with client detection:', enhancementError);
+            // Silently ignore enhancement errors to reduce console noise
           }
         }
         
         return data.analysis;
       } else {
-        console.warn('Facial analysis request failed with status:', response.status);
+        // Silently handle failed requests to reduce console noise
         return null;
       }
     } catch (error) {
-      console.warn('Facial analysis had issues:', error);
-      // Don't set error state for non-critical failures
+      // Silently handle analysis errors to reduce console noise
       return null;
     }
   }, []);

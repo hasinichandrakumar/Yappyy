@@ -285,70 +285,72 @@ export default function SimplifiedPracticePage() {
     getFillerStatistics
   } = useAdvancedFillerDetection();
 
-  // FIXED: Improved filler word detection with reduced false positives
-  const detectFillerWords = useCallback((text: string): string[] => {
-    if (!text || text.trim().length === 0) return [];
-    
-    // FIXED: More conservative filler word patterns to reduce false positives
-    const primaryFillers = [
-      // Most common vocal fillers - high confidence
-      'um', 'uh', 'er', 'ah', 'eh', 'mm', 'hmm'
+  // Enhanced filler word detection function (from WorkingRecordingTest)
+  const detectFillerWords = (text: string) => {
+    const fillerWords = [
+      // Basic fillers
+      'um', 'uh', 'ah', 'er', 'erm', 'hmm', 'hm',
+      // Common phrases
+      'like', 'you know', 'basically', 'actually', 'literally',
+      'sort of', 'kind of', 'i mean', 'right', 'okay', 'so',
+      'well', 'now', 'then', 'just', 'really', 'very',
+      'totally', 'completely', 'absolutely', 'definitely',
+      'obviously', 'clearly', 'honestly', 'frankly',
+      'i guess', 'i think', 'i feel', 'i believe',
+      // Additional common fillers
+      'you see', 'i mean', 'i guess', 'i think', 'i feel',
+      'i believe', 'i suppose', 'i reckon', 'i assume',
+      'you know what', 'you know what i mean',
+      'basically', 'essentially', 'fundamentally',
+      'actually', 'literally', 'figuratively',
+      'sort of', 'kind of', 'type of', 'way of',
+      'right', 'okay', 'alright', 'all right',
+      'so', 'well', 'now', 'then', 'just',
+      'really', 'very', 'quite', 'rather',
+      'totally', 'completely', 'absolutely', 'definitely',
+      'obviously', 'clearly', 'honestly', 'frankly',
+      'truthfully', 'seriously', 'genuinely',
+      'simply', 'merely', 'only', 'just',
+      'even', 'still', 'yet', 'however',
+      'though', 'although', 'nevertheless',
+      'anyway', 'anyhow', 'regardless'
     ];
     
-    const secondaryFillers = [
-      // Common discourse markers - medium confidence
-      'like', 'so', 'well', 'okay', 'right', 'actually', 'basically'
-    ];
-    
-    const phraseFillers = [
-      // Multi-word fillers - high confidence
-      'you know', 'i mean', 'kind of', 'sort of'
-    ];
-    
+    const lowerText = text.toLowerCase();
+    let totalFillers = 0;
     const detectedFillers: string[] = [];
-    const normalizedText = text.toLowerCase()
-      .replace(/[.,!?;:'"()]/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
     
-    const words = normalizedText.split(' ').filter(word => word.length > 0);
-    
-    // FIXED: Check for phrase fillers first (higher priority)
-    for (let i = 0; i < words.length - 1; i++) {
-      const twoWords = `${words[i]} ${words[i + 1]}`;
-      if (phraseFillers.includes(twoWords)) {
-        detectedFillers.push(twoWords);
-        i++; // Skip next word since it's part of the phrase
-      }
-    }
-    
-    // FIXED: Check for single-word fillers with context awareness
-    words.forEach((word, index) => {
-      const cleanWord = word.replace(/[^a-zA-Z]/g, '');
-      
-      // Check primary fillers (high confidence)
-      if (primaryFillers.includes(cleanWord)) {
-        detectedFillers.push(cleanWord);
-      }
-      // Check secondary fillers (lower confidence, avoid false positives)
-      else if (secondaryFillers.includes(cleanWord)) {
-        // FIXED: Add context check to reduce false positives
-        const context = words.slice(Math.max(0, index - 2), index + 3).join(' ');
-        const isLikelyFiller = !context.includes('like this') && 
-                              !context.includes('so that') && 
-                              !context.includes('well done') &&
-                              !context.includes('right now') &&
-                              !context.includes('actually happened') &&
-                              !context.includes('basically correct');
-        
-        if (isLikelyFiller) {
-          detectedFillers.push(cleanWord);
-        }
+    fillerWords.forEach(filler => {
+      // Use word boundary regex to match whole words only
+      const regex = new RegExp(`\\b${filler.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+      const matches = lowerText.match(regex);
+      if (matches) {
+        totalFillers += matches.length;
+        detectedFillers.push(...matches);
+        console.log(`🔍 Found filler word "${filler}": ${matches.length} times`);
       }
     });
     
-    return detectedFillers;
-  }, []);
+    // Also check for common variations and misspellings
+    const variations = [
+      { pattern: /\b(um+|uh+|ah+|er+)\b/gi, name: 'repeated_filler' },
+      { pattern: /\b(like|lik)\b/gi, name: 'like_variation' },
+      { pattern: /\b(you know|u know|ya know)\b/gi, name: 'you_know_variation' },
+      { pattern: /\b(basically|basicly)\b/gi, name: 'basically_variation' },
+      { pattern: /\b(actually|actualy)\b/gi, name: 'actually_variation' }
+    ];
+    
+    variations.forEach(variation => {
+      const matches = lowerText.match(variation.pattern);
+      if (matches) {
+        totalFillers += matches.length;
+        detectedFillers.push(...matches);
+        console.log(`🔍 Found variation "${variation.name}": ${matches.length} times`);
+      }
+    });
+    
+    return { count: totalFillers, words: detectedFillers };
+  };
 
   // Real-time eye contact detection using MediaPipe Face Mesh (Primary system)
   // The old measureEyeContact function has been replaced with the new real-time system
@@ -726,36 +728,35 @@ export default function SimplifiedPracticePage() {
         // Add words to WPM calculator for accurate calculation
         if (wpmCalculatorRef.current && finalTranscript.trim().length > 0) {
           const words = finalTranscript.trim().split(/\s+/).filter(word => word.length > 0);
+          const accurateWordCount = countWordsAccurately(finalTranscript);
           wpmCalculatorRef.current.addWords(words);
-          console.log(`📊 Added ${words.length} words to WPM calculator`);
+          console.log(`📊 Added ${accurateWordCount} words to WPM calculator (accurate count)`);
         }
         
-        // Use incremental filler detection for accurate one-by-one counting
-        if (fillerDetectorRef.current && fullTranscript.trim().length > 0) {
-          const fillerCounts = fillerDetectorRef.current.analyzeNewTranscript(fullTranscript);
+        // Use enhanced filler word detection for accurate counting
+        if (fullTranscript.trim().length > 0) {
+          const fillerResult = detectFillerWords(fullTranscript);
           
-          console.log(`🎯 Incremental filler detection: ${fillerCounts.totalFillers} total fillers (UM: ${fillerCounts.umCount}, UH: ${fillerCounts.uhCount})`);
+          console.log(`🎯 Enhanced filler detection: ${fillerResult.count} total fillers:`, fillerResult.words);
           
           // Update metrics with accurate filler count
           setMetrics(prev => ({
             ...prev,
-            fillerWordCount: fillerCounts.totalFillers,
+            fillerWordCount: fillerResult.count,
             voice: {
               ...prev.voice,
-              fillerCount: fillerCounts.totalFillers
+              fillerCount: fillerResult.count
             }
           }));
           
           // Only show feedback if new fillers were detected
-          if (fillerCounts.totalFillers > 0) {
-            const umUhInfo = fillerCounts.umCount + fillerCounts.uhCount > 0 ? 
-              ` (UM: ${fillerCounts.umCount}, UH: ${fillerCounts.uhCount})` : '';
-            const feedbackMessage = `${fillerCounts.totalFillers} filler words detected${umUhInfo}`;
+          if (fillerResult.count > 0) {
+            const feedbackMessage = `${fillerResult.count} filler words detected: ${fillerResult.words.slice(-3).join(', ')}`;
             
             setLiveFeedback(prev => [...prev.slice(-4), {
               id: Date.now().toString(),
               message: feedbackMessage,
-              type: fillerCounts.totalFillers > 5 ? 'warning' : 'info',
+              type: fillerResult.count > 5 ? 'warning' : 'info',
               timestamp: Date.now()
             }]);
           }
@@ -777,7 +778,7 @@ export default function SimplifiedPracticePage() {
       if (isRecording && !isSpeechFallbackActive) {
         try {
           recognition.start();
-        } catch (e) {
+        } catch (e: any) {
           console.warn('Failed to restart speech recognition, using fallback');
           startDeepgramFallback();
         }
@@ -1304,7 +1305,7 @@ export default function SimplifiedPracticePage() {
           console.warn('⚠️ No speech recognition available, starting fallback');
           await startDeepgramFallback();
         }
-      } catch (e) {
+      } catch (e: any) {
         console.warn('⚠️ Web Speech start failed, using fallback:', e.message || e);
         await startDeepgramFallback();
       }
@@ -1429,13 +1430,31 @@ export default function SimplifiedPracticePage() {
         facialAnalysis: isFacialAnalysisActive,
         videoRecording: videoRecordingEnabled
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to start recording:', error);
+      
+      // Provide more specific error messages
+      let errorMessage = "Please allow camera and microphone access";
+      
+      if (error.name === 'NotAllowedError') {
+        errorMessage = "Camera and microphone permissions were denied. Please check your browser settings and allow access.";
+      } else if (error.name === 'NotFoundError') {
+        errorMessage = "No camera or microphone found on this device.";
+      } else if (error.name === 'NotSupportedError') {
+        errorMessage = "This browser does not support video/audio recording.";
+      } else if (error.name === 'NotReadableError') {
+        errorMessage = "Camera or microphone is already in use by another application.";
+      } else if (error.name === 'SecurityError') {
+        errorMessage = "Recording requires HTTPS (except on localhost).";
+      } else if (error.message) {
+        errorMessage = `Recording failed: ${error.message}`;
+      }
+      
       // Reset recording state on failure
       setIsRecording(false);
       toast({
         title: "Recording Failed",
-        description: "Please allow camera and microphone access",
+        description: errorMessage,
         variant: "destructive"
       });
     }
@@ -1708,73 +1727,145 @@ export default function SimplifiedPracticePage() {
       const realVoiceClarity = hasRealSpeech ? metrics.clarity : 0;
       const realFillerWords = hasRealSpeech ? metrics.fillerWordCount : 0;
       
-      const sessionData = {
+      // Enhanced session data with all metrics from WorkingRecordingTest
+      const enhancedSessionData = {
         userId: 'demo-user',
         duration: sessionDuration,
-        averageWPM: averageWPM,
+        averageWPM: wpmCalculatorRef.current ? wpmCalculatorRef.current.calculateWPM().averageWPM : metrics.wordsPerMinute || 0,
         confidenceScore: realConfidenceScore / 100, // Convert to 0-1 range for real type
         voiceClarity: realVoiceClarity / 100, // Convert to 0-1 range for real type
-        fillerWords: realFillerWords,
+        fillerWords: metrics.fillerWordCount || 0,
         pauseCount: hasRealSpeech ? Math.floor(sessionDuration / 30) : 0, // Only estimate pauses if speech occurred
         eyeContactScore: `${realEyeContact}%`, // String format as required by schema
         transcript: transcript || 'No transcript available',
+        
+        // Enhanced filler word analysis
+        fillerWordAnalysis: {
+          totalFillers: metrics.fillerWordCount || 0,
+          fillerWords: transcript ? detectFillerWords(transcript).words : [],
+          fillerBreakdown: {
+            um: transcript ? detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('um')).length : 0,
+            uh: transcript ? detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('uh')).length : 0,
+            like: transcript ? detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('like')).length : 0,
+            youKnow: transcript ? detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('you know')).length : 0,
+            basically: transcript ? detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('basically')).length : 0,
+            actually: transcript ? detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('actually')).length : 0,
+            other: transcript ? detectFillerWords(transcript).words.filter(w => 
+              !w.toLowerCase().includes('um') && 
+              !w.toLowerCase().includes('uh') && 
+              !w.toLowerCase().includes('like') && 
+              !w.toLowerCase().includes('you know') && 
+              !w.toLowerCase().includes('basically') && 
+              !w.toLowerCase().includes('actually')
+            ).length : 0
+          }
+        },
+        
+        // Enhanced WPM analysis
+        wpmAnalysis: {
+          averageWPM: wpmCalculatorRef.current ? wpmCalculatorRef.current.calculateWPM().averageWPM : metrics.wordsPerMinute || 0,
+          currentWPM: wpmCalculatorRef.current ? wpmCalculatorRef.current.calculateWPM().currentWPM : metrics.wordsPerMinute || 0,
+          totalWords: wpmCalculatorRef.current ? wpmCalculatorRef.current.calculateWPM().totalWords : countWordsAccurately(transcript || ''),
+          confidence: wpmCalculatorRef.current ? wpmCalculatorRef.current.calculateWPM().confidence : 0,
+          wordCountHistory: [] // Could be enhanced to track word history
+        },
+        
+        // Enhanced transcript analysis
+        transcriptAnalysis: {
+          fullTranscript: transcript || 'No transcript available',
+          wordCount: countWordsAccurately(transcript || ''),
+          characterCount: transcript ? transcript.length : 0,
+          sentenceCount: transcript ? transcript.split(/[.!?]+/).filter(s => s.trim().length > 0).length : 0,
+          averageWordsPerSentence: transcript && transcript.split(/[.!?]+/).filter(s => s.trim().length > 0).length > 0 
+            ? Math.round(countWordsAccurately(transcript) / transcript.split(/[.!?]+/).filter(s => s.trim().length > 0).length) 
+            : 0,
+          highlightedTranscript: transcript ? highlightFillerWords(transcript) : 'No transcript available'
+        },
+        
         coachingTips: hasRealSpeech ? [
           `Confidence level: ${realConfidenceScore}%`,
           `Eye contact: ${realEyeContact}%`, 
           `Engagement: ${metrics.engagement}%`,
-          `Speaking pace: ${averageWPM} WPM`
+          `Speaking pace: ${wpmCalculatorRef.current ? wpmCalculatorRef.current.calculateWPM().averageWPM : metrics.wordsPerMinute || 0} WPM`,
+          `Filler words detected: ${metrics.fillerWordCount || 0}`,
+          `Total words spoken: ${countWordsAccurately(transcript || '')}`
         ] : [
           'No speech detected in this session',
           'Try speaking during the recording to get analysis',
           'Check microphone permissions and audio settings'
         ],
+        
         // Analysis tab compatible fields
         clarityScore: realVoiceClarity / 100,
-        // Volume and intonation analysis removed - not functional
         postureScore: 0, // Posture analysis removed
-        fillerWordsUh: hasRealSpeech ? Math.floor(realFillerWords * 0.4) : 0, // Only if speech occurred
-        fillerWordsLike: hasRealSpeech ? Math.floor(realFillerWords * 0.3) : 0, // Only if speech occurred
-        fillerWordsSo: hasRealSpeech ? Math.floor(realFillerWords * 0.3) : 0, // Only if speech occurred
+        fillerWordsUh: hasRealSpeech ? Math.floor(realFillerWords * 0.4) : 0,
+        fillerWordsLike: hasRealSpeech ? Math.floor(realFillerWords * 0.3) : 0,
+        fillerWordsSo: hasRealSpeech ? Math.floor(realFillerWords * 0.3) : 0,
         name: sessionName || `Session ${Date.now()}`,
         purpose: sessionPurpose || 'General practice session',
+        
         // Enhanced AI analysis fields
         aiAnalysis: {
           overallPerformance: realConfidenceScore,
           sessionName: sessionName,
           purpose: sessionPurpose,
           facialAnalysis: facialAnalysis?.facialMetrics || null,
-          hasRealSpeech: hasRealSpeech
+          hasRealSpeech: hasRealSpeech,
+          enhancedMetrics: {
+            wpmAccuracy: wpmCalculatorRef.current ? wpmCalculatorRef.current.calculateWPM().confidence : 0,
+            fillerWordAccuracy: transcript ? detectFillerWords(transcript).count : 0,
+            eyeContactAccuracy: eyeContactPercentage > 0 ? 'Real Detection' : 'Simulated'
+          }
         },
+        
         speechPatterns: {
-          averageWPM: averageWPM,
-          fillerCount: realFillerWords,
-          clarity: realVoiceClarity
+          averageWPM: wpmCalculatorRef.current ? wpmCalculatorRef.current.calculateWPM().averageWPM : metrics.wordsPerMinute || 0,
+          currentWPM: wpmCalculatorRef.current ? wpmCalculatorRef.current.calculateWPM().currentWPM : metrics.wordsPerMinute || 0,
+          fillerCount: metrics.fillerWordCount || 0,
+          clarity: realVoiceClarity,
+          totalWords: countWordsAccurately(transcript || ''),
+          speakingTime: sessionDuration,
+          wordsPerSecond: sessionDuration > 0 ? countWordsAccurately(transcript || '') / sessionDuration : 0
         },
-          bodyLanguageMetrics: {
-            eyeContact: realEyeContact,
-            confidence: hasRealSpeech ? (bodyMetrics?.overall?.confidence || metrics.confidence) : 0,
-            postureConfidence: bodyMetrics?.posture?.confidence || 0,
-            spineAlignment: bodyMetrics?.posture?.spineAlignment || 0,
-            shoulderPosition: bodyMetrics?.posture?.shoulderPosition || 0,
-            stability: bodyMetrics?.posture?.stability || 0,
-            gesturesNaturalness: bodyMetrics?.gestures?.naturalness || 0,
-            gesturesEffectiveness: bodyMetrics?.gestures?.effectiveness || 0,
-            gesturesTiming: bodyMetrics?.gestures?.timing || 0,
-          },
+        
+        bodyLanguageMetrics: {
+          eyeContact: realEyeContact,
+          confidence: hasRealSpeech ? (bodyMetrics?.overall?.confidence || metrics.confidence) : 0,
+          postureConfidence: bodyMetrics?.posture?.confidence || 0,
+          spineAlignment: bodyMetrics?.posture?.spineAlignment || 0,
+          shoulderPosition: bodyMetrics?.posture?.shoulderPosition || 0,
+          stability: bodyMetrics?.posture?.stability || 0,
+          gesturesNaturalness: bodyMetrics?.gestures?.naturalness || 0,
+          gesturesEffectiveness: bodyMetrics?.gestures?.effectiveness || 0,
+          gesturesTiming: bodyMetrics?.gestures?.timing || 0,
+          eyeContactMethod: eyeContactPercentage > 0 ? 'Real Detection' : 'Simulated'
+        },
+        
         persuasivenessScore: realConfidenceScore / 100,
         emotionalIntelligence: {
           engagement: hasRealSpeech ? metrics.engagement : 0,
           confidence: hasRealSpeech ? metrics.confidence : 0,
           authenticity: hasRealSpeech ? (facialAnalysis?.facialMetrics?.emotionalExpression?.authenticity || 75) : 0
+        },
+        
+        // Live metrics history
+        liveMetricsHistory: {
+          wpmHistory: [], // Could be enhanced to track WPM history
+          fillerWordHistory: [], // Could be enhanced to track filler word history
+          eyeContactHistory: [], // Could be enhanced to track eye contact history
+          confidenceHistory: [], // Could be enhanced to track confidence history
+          sessionDuration: sessionDuration,
+          recordingStartTime: Date.now() - (sessionDuration * 1000),
+          recordingEndTime: Date.now()
         }
       };
 
-      console.log('💾 Saving session with schema-compliant data:', sessionData);
+      console.log('💾 Saving session with schema-compliant data:', enhancedSessionData);
 
       const response = await fetch('/api/practice-sessions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(sessionData)
+        body: JSON.stringify(enhancedSessionData)
       });
 
       if (response.ok) {
@@ -1851,16 +1942,16 @@ export default function SimplifiedPracticePage() {
               metrics: {
                 confidence: metrics.confidence || 0,
                 clarity: metrics.voice?.clarity || 0,
-                pace: metrics.voice?.pace || 0,
+                pace: wpmCalculatorRef.current ? wpmCalculatorRef.current.calculateWPM().averageWPM : metrics.wordsPerMinute || 0,
                 eyeContact: metrics.eyeContact || 0,
                 gesture: 0, // Gesture analysis removed
                 fillerWordCount: metrics.fillerWordCount || 0,
-                wordsPerMinute: metrics.wordsPerMinute || 0
+                wordsPerMinute: wpmCalculatorRef.current ? wpmCalculatorRef.current.calculateWPM().averageWPM : metrics.wordsPerMinute || 0
               },
               facialAnalysis: facialAnalysis?.facialMetrics,
               voiceMetrics: {
                 clarity: metrics.voice?.clarity || 0,
-                pace: metrics.voice?.pace || 0,
+                pace: wpmCalculatorRef.current ? wpmCalculatorRef.current.calculateWPM().averageWPM : metrics.voice?.pace || 0,
                 volume: metrics.voice?.volume || 0,
                 intonation: metrics.voice?.intonation || 0,
                 fillerCount: metrics.fillerWordCount || 0,
@@ -1868,6 +1959,46 @@ export default function SimplifiedPracticePage() {
                 pitchVariation: metrics.voice?.pitchVariation || 0,
                 vocalFryDetection: metrics.voice?.vocalFryDetection || false,
                 uptalkPatterns: metrics.voice?.uptalkPatterns || 0
+              },
+              // Enhanced metrics from WorkingRecordingTest
+              enhancedMetrics: {
+                wpmAnalysis: {
+                  averageWPM: wpmCalculatorRef.current ? wpmCalculatorRef.current.calculateWPM().averageWPM : metrics.wordsPerMinute || 0,
+                  currentWPM: wpmCalculatorRef.current ? wpmCalculatorRef.current.calculateWPM().currentWPM : metrics.wordsPerMinute || 0,
+                  totalWords: wpmCalculatorRef.current ? wpmCalculatorRef.current.calculateWPM().totalWords : countWordsAccurately(transcript || ''),
+                  confidence: wpmCalculatorRef.current ? wpmCalculatorRef.current.calculateWPM().confidence : 0
+                },
+                fillerWordAnalysis: {
+                  totalFillers: metrics.fillerWordCount || 0,
+                  fillerWords: transcript ? detectFillerWords(transcript).words : [],
+                  fillerBreakdown: {
+                    um: transcript ? detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('um')).length : 0,
+                    uh: transcript ? detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('uh')).length : 0,
+                    like: transcript ? detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('like')).length : 0,
+                    youKnow: transcript ? detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('you know')).length : 0,
+                    basically: transcript ? detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('basically')).length : 0,
+                    actually: transcript ? detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('actually')).length : 0,
+                    other: transcript ? detectFillerWords(transcript).words.filter(w => 
+                      !w.toLowerCase().includes('um') && 
+                      !w.toLowerCase().includes('uh') && 
+                      !w.toLowerCase().includes('like') && 
+                      !w.toLowerCase().includes('you know') && 
+                      !w.toLowerCase().includes('basically') && 
+                      !w.toLowerCase().includes('actually')
+                    ).length : 0
+                  }
+                },
+                transcriptAnalysis: {
+                  fullTranscript: transcript || 'No transcript available',
+                  wordCount: countWordsAccurately(transcript || ''),
+                  characterCount: transcript ? transcript.length : 0,
+                  sentenceCount: transcript ? transcript.split(/[.!?]+/).filter(s => s.trim().length > 0).length : 0,
+                  averageWordsPerSentence: transcript && transcript.split(/[.!?]+/).filter(s => s.trim().length > 0).length > 0 
+                    ? Math.round(countWordsAccurately(transcript) / transcript.split(/[.!?]+/).filter(s => s.trim().length > 0).length) 
+                    : 0,
+                  highlightedTranscript: transcript ? highlightFillerWords(transcript) : 'No transcript available'
+                },
+                eyeContactMethod: eyeContactPercentage > 0 ? 'Real Detection' : 'Simulated'
               }
             })
           });
@@ -1881,7 +2012,7 @@ export default function SimplifiedPracticePage() {
               const recordingId = sessionRecordingStorage.saveRecording(
                 recordingData,
                 transcript,
-                sessionData,
+                enhancedSessionData,
                 facialAnalysis?.facialMetrics
               );
               setCurrentRecording(recordingData);
@@ -1912,7 +2043,7 @@ export default function SimplifiedPracticePage() {
             const recordingId = sessionRecordingStorage.saveRecording(
               recordingData,
               transcript,
-              sessionData,
+              enhancedSessionData,
               facialAnalysis?.facialMetrics
             );
             setCurrentRecording(recordingData);
@@ -1999,6 +2130,23 @@ export default function SimplifiedPracticePage() {
       />
     );
   }
+
+  // More accurate word counting function (from WorkingRecordingTest)
+  const countWordsAccurately = (text: string) => {
+    // Remove extra spaces and normalize
+    const normalizedText = text.replace(/\s+/g, ' ').trim();
+    if (!normalizedText) return 0;
+    
+    // Split by spaces and filter out empty strings
+    const words = normalizedText.split(' ').filter(word => {
+      // Count words that have actual content (not just punctuation)
+      return word.length > 0 && /[a-zA-Z0-9]/.test(word);
+    });
+    
+    return words.length;
+  };
+
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 overflow-x-hidden">
@@ -2443,7 +2591,7 @@ export default function SimplifiedPracticePage() {
               
               {transcript && (
                 <div className="mt-4 flex justify-between items-center text-xs text-gray-600 bg-gray-50 px-3 py-2 rounded-lg">
-                  <span>Words: {transcript.split(' ').filter(w => w.length > 0).length}</span>
+                  <span>Words: {countWordsAccurately(transcript)}</span>
                   <span>Characters: {transcript.length}</span>
                 </div>
               )}

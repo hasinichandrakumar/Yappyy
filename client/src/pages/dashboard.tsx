@@ -25,6 +25,7 @@ import ReturningUserWelcome from "@/components/ReturningUserWelcome";
 import { WelcomeDialog } from "@/components/WelcomeDialog";
 import { DailyGoalsDialog } from "@/components/DailyGoalsDialog";
 
+
 import yappyyLogoPath from '@assets/Y-2-removebg-preview_1753384287580.png';
 
 // Dashboard Performance Tab Component
@@ -334,6 +335,8 @@ export default function Dashboard() {
             <TabsContent value="practice-alt" className="space-y-8 pb-16">
               <SimplifiedPracticePage />
             </TabsContent>
+
+
 
             <TabsContent value="templates" className="space-y-6">
               <EnhancedTemplateMarketplace />

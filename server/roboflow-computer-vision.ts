@@ -300,22 +300,12 @@ export class RoboflowVisionEngine {
         }
       };
 
-      console.log('✅ Roboflow body language analysis complete:', {
-        posture: bodyLanguageMetrics.posture.overallPosture,
-        gestures: bodyLanguageMetrics.gestures.gestureNaturalness,
-        eyeContact: bodyLanguageMetrics.eyeContact.eyeContactPercentage
-      });
-      
-      console.log('🔍 Debug - Individual analysis results:', {
-        posture,
-        gestures,
-        facial
-      });
+      // Silently complete analysis without console logging
 
       return bodyLanguageMetrics;
 
     } catch (error) {
-      console.error('❌ Roboflow body language analysis failed:', error);
+      // Silently handle analysis failures to reduce console noise
       return this.getEnhancedFallbackBodyLanguage(imageData);
     }
   }

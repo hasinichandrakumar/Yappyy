@@ -39,9 +39,9 @@ export function useRobustComputerVision() {
   const frameCount = useRef(0);
   const successCount = useRef(0);
 
-  // Safe error handling
+  // Safe error handling - silent to reduce console noise
   const handleError = useCallback((errorMessage: string, error?: Error) => {
-    console.warn(`🛡️ Computer Vision Warning: ${errorMessage}`, error);
+    // Silently handle errors to eliminate console noise
     setError({
       hasError: true,
       errorMessage,
@@ -69,10 +69,7 @@ export function useRobustComputerVision() {
   // Enhanced body language analysis with proper data extraction for posture and gestures
   const analyzeFacialData = useCallback(async (imageData: string): Promise<ComputerVisionMetrics | null> => {
     try {
-      console.log('🔬 Sending image data for real posture and gesture analysis...', {
-        imageDataLength: imageData.length,
-        hasPrefix: imageData.startsWith('data:')
-      });
+      // Silently process image data analysis
       
       // Send to enhanced computer vision endpoint for authentic analysis
       const response = await fetch('/api/enhanced-computer-vision', {

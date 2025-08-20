@@ -19,6 +19,7 @@ const IntegratedAnalysisTest = lazy(() => import("@/components/IntegratedAnalysi
 // OAuth components removed - starting fresh
 import InteractiveCommunicationStats from "@/components/InteractiveCommunicationStats";
 import ContentAnalysisPage from "@/pages/content-analysis";
+import MicrophoneDiagnostic from "@/components/MicrophoneDiagnostic";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -76,6 +77,7 @@ function Router() {
       <Switch>
         <Route path="/" component={Home} />
         <Route path="/dashboard" component={Dashboard} />
+        <Route path="/microphone-diagnostic" component={MicrophoneDiagnostic} />
         {/* OAuth loading route removed - starting fresh */}
         {/* OAuth callback route removed - starting fresh */}
         <Route component={Home} />
@@ -96,6 +98,7 @@ function Router() {
       <Route path="/integrated-test" component={IntegratedAnalysisTest} />
       <Route path="/stats" component={InteractiveCommunicationStats} />
       <Route path="/content-analysis" component={ContentAnalysisPage} />
+      <Route path="/microphone-diagnostic" component={MicrophoneDiagnostic} />
       {/* OAuth loading route removed - starting fresh */}
       {/* OAuth callback route removed - starting fresh */}
       <Route path="*" component={Dashboard} />
