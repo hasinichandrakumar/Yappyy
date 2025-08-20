@@ -124,6 +124,9 @@ export function setupSimplifiedGoogleAuth(app: Express) {
       const baseUrl = getCurrentDomain(req);
       const redirectUri = `${baseUrl}/api/auth/google/callback`;
       
+      // Set the redirect URI on the OAuth client
+      oauth2Client.setCredentials({ redirect_uris: [redirectUri] });
+      
       // Generate auth URL
       const authUrl = oauth2Client.generateAuthUrl({
         access_type: 'offline',
@@ -168,9 +171,15 @@ export function setupSimplifiedGoogleAuth(app: Express) {
       // Set redirect URI for token exchange
       const baseUrl = getCurrentDomain(req);
       const redirectUri = `${baseUrl}/api/auth/google/callback`;
+      
+      // Set the redirect URI on the OAuth client for token exchange
+      oauth2Client.setCredentials({ redirect_uris: [redirectUri] });
 
-      // Exchange code for token
-      const { tokens } = await oauth2Client.getToken(code as string);
+      // Exchange code for token with explicit redirect URI
+      const { tokens } = await oauth2Client.getToken({
+        code: code as string,
+        redirect_uri: redirectUri
+      });
       
       if (!tokens.access_token) {
         console.error('❌ No access token received');
@@ -206,9 +215,8 @@ export function setupSimplifiedGoogleAuth(app: Express) {
       
       console.log('✅ OAuth successful for user:', userInfo.email);
       
-      // Redirect to the correct domain
-      const redirectUrl = getCurrentDomain(req);
-      res.redirect(`${redirectUrl}/dashboard`); // Redirect to dashboard after successful authentication
+      // Redirect to dashboard after successful authentication
+      res.redirect('/dashboard');
     } catch (error) {
       console.error('❌ OAuth callback error:', error);
       res.redirect('/?error=oauth_error');
