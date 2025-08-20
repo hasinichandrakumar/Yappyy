@@ -93,89 +93,95 @@ export function setupSimplifiedGoogleAuth(app: Express) {
 
       // Exchange code for token (like Flask's oauth_flow.fetch_token)
       const { tokens } = await oauth2Client.getToken(code as string);
-      oauth2Client.setCredentials(tokens);
-
-      // Get user info (like Flask's get_user_info)
-      const oauth2 = google.oauth2({ version: 'v2', auth: oauth2Client });
-      const { data: userInfo } = await oauth2.userinfo.get();
-
-      if (!userInfo.id || !userInfo.email) {
-        return res.redirect('/?error=oauth_error&details=' + encodeURIComponent('Failed to retrieve user information'));
-      }
-
-      // Store user in database
-      const userData = {
-        id: userInfo.id,
-        email: userInfo.email,
-        firstName: userInfo.given_name || '',
-        lastName: userInfo.family_name || '',
-        profileImageUrl: userInfo.picture || '',
-        firstLoginAt: new Date(),
-      };
-
-      const user = await storage.upsertUser(userData);
       
-      // Store access token in session (like Flask's session['access_token'])
+      // Store access token in session (exactly like Flask)
       (req.session as any).access_token = tokens.access_token;
-      (req.session as any).user_id = user.id;
       
-      console.log('✅ User authenticated successfully:', user.email);
-      
-      // Redirect to dashboard (like Flask's redirect("/"))
-      res.redirect('/dashboard');
+      console.log('✅ OAuth successful, access token stored in session');
+      res.redirect('/'); // Redirect to home page like Flask
     } catch (error) {
       console.error('❌ OAuth callback error:', error);
       res.redirect('/?error=oauth_error&details=' + encodeURIComponent('Authentication failed'));
     }
   });
 
-  // User info route
+  // Get user info function (like Flask's get_user_info)
+  async function getUserInfo(accessToken: string) {
+    try {
+      const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { 'Authorization': `Bearer ${accessToken}` }
+      });
+      
+      if (response.ok) {
+        return await response.json();
+      }
+      return null;
+    } catch (error) {
+      console.error('Failed to fetch user info:', error);
+      return null;
+    }
+  }
+
+  // User info route (like Flask's welcome route)
   app.get('/api/auth/user', async (req: Request, res: Response) => {
     try {
       const session = req.session as any;
       
-      if (!session.access_token || !session.user_id) {
+      if (!session.access_token) {
         return res.json({ 
           isAuthenticated: false, 
           user: null 
         });
       }
 
-      const user = await storage.getUser(session.user_id);
+      const userInfo = await getUserInfo(session.access_token);
       
-      if (!user) {
+      if (!userInfo) {
         // Clear invalid session
         session.access_token = null;
-        session.user_id = null;
         return res.json({ 
           isAuthenticated: false, 
           user: null 
         });
       }
 
-      const userResponse = {
-        id: user.id,
-        email: user.email,
-        name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
-        username: user.email,
-        profileImageUrl: user.profileImageUrl,
-        isAuthenticated: true,
-        authType: 'google'
-      };
+      // Store user in database if needed
+      if (userInfo.sub) {
+        await storage.upsertUser({
+          id: userInfo.sub,
+          email: userInfo.email,
+          firstName: userInfo.given_name || '',
+          lastName: userInfo.family_name || '',
+          profileImageUrl: userInfo.picture || '',
+        });
+      }
 
-      res.json(userResponse);
+      // Return user data
+      res.json({
+        isAuthenticated: true,
+        user: {
+          id: userInfo.sub,
+          email: userInfo.email,
+          name: userInfo.name,
+          firstName: userInfo.given_name,
+          lastName: userInfo.family_name,
+          profileImageUrl: userInfo.picture,
+          authType: 'google'
+        }
+      });
     } catch (error) {
-      console.error('❌ Error fetching user:', error);
-      res.status(500).json({ error: 'Failed to fetch user data' });
+      console.error('Error fetching user:', error);
+      res.json({ 
+        isAuthenticated: false, 
+        user: null 
+      });
     }
   });
 
-  // Logout route (equivalent to Flask's /logout)
+  // Logout route (like Flask's logout)
   app.get('/api/auth/logout', (req: Request, res: Response) => {
-    req.session.destroy((err) => {
-      if (err) {
-        console.error('❌ Logout error:', err);
-      }
+    (req.session as any).access_token = null;
+    req.session.destroy(() => {
       res.redirect('/');
     });
   });

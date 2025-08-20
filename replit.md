@@ -8,6 +8,13 @@ Preferred communication style: Simple, everyday language.
 
 # Recent Changes
 
+**January 20, 2025:**
+- **Complete Google OAuth Rebuild**: Replaced complex passport-based authentication with simplified googleapis approach matching Flask implementation exactly
+- **Authentication System**: Now uses session-based access token storage (req.session.access_token) like Flask's session['access_token']
+- **User Info Fetching**: Implemented on-demand user info retrieval from Google's API using stored access tokens
+- **Callback URL**: System ready for production - just needs callback URL added to Google Cloud Console
+- **Session Management**: Simplified logout and session clearing functionality implemented
+
 **December 20, 2025:**
 - Fixed critical React duplicate key warnings by removing duplicated templates from additional-templates-expansion.ts file
 - Resolved server startup port conflict (EADDRINUSE error on port 5000) 
