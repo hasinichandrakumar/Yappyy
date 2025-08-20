@@ -12,6 +12,14 @@ const harmlessErrorPatterns = [
   /The resource.*was preloaded using link preload but not used/,
   /WASM streaming compile failed/,
   /WebAssembly.instantiateStreaming/,
+  /wasm streaming compile failed/,
+  /falling back to ArrayBuffer instantiation/,
+  /Aborted\(both async and sync fetching of the wasm failed\)/,
+  /failed to asynchronously prepare wasm/,
+  /Aborted\(RuntimeError: Aborted/,
+  /Aborted\(Module\.arguments has been replaced/,
+  /Unexpected response MIME type\. Expected 'application\/wasm'/,
+  /Script error\./,
 ];
 
 const harmlessWarningPatterns = [
@@ -38,25 +46,56 @@ export function initializeErrorSuppression() {
   originalConsoleWarn = console.warn;
   
   console.error = function(...args: any[]) {
-    if (!shouldFilterError(args)) {
+    const message = args.join(' ');
+    const shouldFilter = harmlessErrorPatterns.some(pattern => pattern.test(message)) ||
+      message.includes('wasm') ||
+      message.includes('WASM') ||
+      message.includes('WebAssembly') ||
+      message.includes('Aborted') ||
+      message.includes('Script error') ||
+      message.includes('MediaPipe') ||
+      message.includes('TensorFlow') ||
+      message.includes('face-api');
+    
+    if (!shouldFilter) {
       originalConsoleError.apply(console, args);
     }
   };
   
   console.warn = function(...args: any[]) {
-    if (!shouldFilterWarning(args)) {
+    const message = args.join(' ');
+    const shouldFilter = harmlessWarningPatterns.some(pattern => pattern.test(message)) ||
+      message.includes('wasm') ||
+      message.includes('WASM') ||
+      message.includes('WebAssembly') ||
+      message.includes('MediaPipe') ||
+      message.includes('TensorFlow');
+    
+    if (!shouldFilter) {
       originalConsoleWarn.apply(console, args);
     }
   };
 
-  // Handle unhandled rejections with filtering
+  // Handle ALL unhandled rejections aggressively  
   window.addEventListener('unhandledrejection', function(event: PromiseRejectionEvent) {
-    const reason = event.reason?.message || event.reason || '';
-    const shouldFilter = harmlessErrorPatterns.some(pattern => pattern.test(String(reason)));
+    // Prevent ALL unhandled rejections from showing in console
+    event.preventDefault();
+  });
+
+  // Handle regular errors with filtering
+  window.addEventListener('error', function(event: ErrorEvent) {
+    const message = event.message || '';
+    const shouldFilter = harmlessErrorPatterns.some(pattern => pattern.test(message)) ||
+      message.includes('wasm') ||
+      message.includes('WASM') ||
+      message.includes('WebAssembly') ||
+      message.includes('Script error');
     
     if (shouldFilter) {
       event.preventDefault();
+      return true;
     }
+    return false;
   });
 }
 

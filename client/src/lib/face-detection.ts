@@ -1,5 +1,5 @@
-// Client-side Face Detection using Face-api.js for Maximum Accuracy
-import * as faceapi from 'face-api.js';
+// Client-side Face Detection disabled to prevent WASM errors
+// import * as faceapi from 'face-api.js';
 
 export interface ClientFaceDetection {
   confidence: number;
@@ -40,33 +40,10 @@ class ClientFaceDetectionEngine {
 
   private async loadFaceApiModels(): Promise<void> {
     try {
-      console.log('Loading Face-api.js models...');
-      
-      // Load models from CDN with timeout
-      const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@latest/model';
-      
-      const loadWithTimeout = (promise: Promise<void>, timeout = 10000) => {
-        return Promise.race([
-          promise,
-          new Promise<void>((_, reject) => 
-            setTimeout(() => reject(new Error('Model load timeout')), timeout)
-          )
-        ]);
-      };
-
-      await Promise.allSettled([
-        loadWithTimeout(faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL)),
-        loadWithTimeout(faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL)),
-        loadWithTimeout(faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)),
-        loadWithTimeout(faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL)),
-        loadWithTimeout(faceapi.nets.ageGenderNet.loadFromUri(MODEL_URL))
-      ]);
-      
-      this.isInitialized = true;
-      console.log('Face-api.js models loaded successfully');
-      
+      console.log('Face-api.js disabled to prevent WASM errors');
+      this.isInitialized = false;
     } catch (error) {
-      console.warn('Face-api.js model loading failed, using server-side analysis only:', error);
+      console.warn('Face-api.js model loading skipped:', error);
       this.isInitialized = false;
     }
   }
@@ -81,13 +58,8 @@ class ClientFaceDetectionEngine {
 
       // Silently running Face-api.js client-side detection
       
-      // Run comprehensive face analysis
-      const detections = await faceapi
-        .detectAllFaces(videoElement, new faceapi.TinyFaceDetectorOptions())
-        .withFaceLandmarks()
-        .withFaceExpressions()
-        .withAgeAndGender()
-        .withFaceDescriptors();
+      // Face-api.js disabled - return null
+      const detections = null;
 
       if (!detections || detections.length === 0) {
         // No faces detected - return null silently

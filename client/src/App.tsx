@@ -26,12 +26,30 @@ function Router() {
 
   // Complete error suppression for clean development experience
   useEffect(() => {
+    // Initialize WASM error handling first
+    import('@/lib/wasm-error-handler').then(({ WasmErrorHandler }) => {
+      WasmErrorHandler.initialize();
+      WasmErrorHandler.disableMediaPipeWasm();
+    }).catch(() => {
+      console.log('WASM handler initialization skipped');
+    });
+    
+    // Disable WASM modules
+    import('@/utils/disable-wasm-modules').then(({ disableWasmModules }) => {
+      disableWasmModules();
+    }).catch(() => {
+      console.log('WASM module disabling skipped');
+    });
+    
+    // Then initialize general error suppression
     import('@/utils/error-suppression').then(({ initializeErrorSuppression, restoreErrorHandling }) => {
       initializeErrorSuppression();
       
       return () => {
         restoreErrorHandling();
       };
+    }).catch(() => {
+      console.log('Error suppression initialization skipped');
     });
   }, []);
 

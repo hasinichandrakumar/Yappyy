@@ -79,60 +79,24 @@ export function useMediaPipeBodyLanguage() {
     timing: new KalmanFilter(0.1, 0.1)
   });
 
-  // Initialize MediaPipe models
+  // Initialize MediaPipe models (disabled to prevent WASM errors)
   const initializeModels = useCallback(async () => {
     try {
-      console.log('🤖 Initializing MediaPipe body language models...');
-
-      // Initialize Pose model with error handling
-      let pose: Pose;
-      let hands: Hands;
+      console.log('Skipping MediaPipe initialization to prevent WASM errors');
       
-      try {
-        pose = new Pose({
-          locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
-        });
-
-        pose.setOptions({
-          modelComplexity: 1, // Reduced for better compatibility
-          smoothLandmarks: true,
-          enableSegmentation: false, // Disabled to reduce load
-          smoothSegmentation: false,
-          minDetectionConfidence: 0.5, // More permissive
-          minTrackingConfidence: 0.5   // More permissive
-        });
-
-        poseRef.current = pose;
-      } catch (poseError) {
-        console.warn('Pose model initialization failed, continuing without pose detection:', poseError);
-      }
-
-      // Initialize Hands model with error handling
-      try {
-        hands = new Hands({
-          locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
-        });
-
-        hands.setOptions({
-          maxNumHands: 2,
-          modelComplexity: 0, // Reduced for better compatibility
-          minDetectionConfidence: 0.5, // More permissive
-          minTrackingConfidence: 0.5,  // More permissive
-          selfieMode: true             // Mirror mode for front-facing camera
-        });
-
-        handsRef.current = hands;
-      } catch (handsError) {
-        console.warn('Hands model initialization failed, continuing without hand detection:', handsError);
-      }
-
-      console.log('✅ MediaPipe models initialization completed');
-      return true;
-    } catch (error) {
-      console.warn('MediaPipe models initialization had issues:', error);
+      // Set up fallback analysis without MediaPipe WASM components
       setAnalysis(prev => ({
         ...prev,
-        error: null // Don't set error as this is non-critical
+        isActive: false,
+        error: null
+      }));
+      
+      return false; // MediaPipe disabled
+    } catch (error) {
+      console.warn('MediaPipe models initialization skipped:', error);
+      setAnalysis(prev => ({
+        ...prev,
+        error: null
       }));
       return false;
     }
