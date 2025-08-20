@@ -19,8 +19,8 @@ interface AuthenticatedRequest extends Request {
 export function setupSimplifiedGoogleAuth(app: Express) {
   // Validate required environment variables
   const requiredEnvVars = {
-    GOOGLE_OAUTH_CLIENT_ID: process.env.GOOGLE_OAUTH_CLIENT_ID,
-    GOOGLE_OAUTH_CLIENT_SECRET: process.env.GOOGLE_OAUTH_CLIENT_SECRET,
+    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
     SESSION_SECRET: process.env.SESSION_SECRET,
     DATABASE_URL: process.env.DATABASE_URL,
   };
@@ -70,8 +70,8 @@ export function setupSimplifiedGoogleAuth(app: Express) {
 
   // Create OAuth2 client
   const oauth2Client = new google.auth.OAuth2(
-    process.env.GOOGLE_OAUTH_CLIENT_ID,
-    process.env.GOOGLE_OAUTH_CLIENT_SECRET,
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
     '' // Will be set dynamically
   );
 
@@ -89,17 +89,21 @@ export function setupSimplifiedGoogleAuth(app: Express) {
 
   // Get current domain for callback URL
   function getCurrentDomain(req: Request): string {
+    // For development, always use localhost:5000 to ensure consistency
+    if (process.env.NODE_ENV === 'development') {
+      return 'http://localhost:5000';
+    }
+    
+    // For production, use the actual domain
     const host = req.get('host');
     const protocol = req.get('x-forwarded-proto') || (req.secure ? 'https' : 'http');
     
-    if (host) {
+    if (host && !host.includes('replit.dev')) {
       return `${protocol}://${host}`;
     }
     
-    // Fallback for development
-    return process.env.NODE_ENV === 'production' 
-      ? 'https://yappyy.com' 
-      : 'http://localhost:5000';
+    // Fallback for production
+    return 'https://yappyy.com';
   }
 
   // Sign in route
@@ -195,8 +199,11 @@ export function setupSimplifiedGoogleAuth(app: Express) {
         }
       }
       
-      console.log('✅ OAuth successful for user:', userInfo.email);
-      res.redirect('/dashboard'); // Redirect to dashboard after successful authentication
+              console.log('✅ OAuth successful for user:', userInfo.email);
+        
+        // Redirect to the correct domain
+        const redirectUrl = getCurrentDomain(req);
+        res.redirect(`${redirectUrl}/dashboard`); // Redirect to dashboard after successful authentication
     } catch (error) {
       console.error('❌ OAuth callback error:', error);
       res.redirect('/?error=oauth_error');
