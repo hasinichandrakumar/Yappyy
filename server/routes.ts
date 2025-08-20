@@ -136,9 +136,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     })(req, res, next);
   });
 
-  // Get authenticated user
+  // Get authenticated user with debug info
   app.get('/api/auth/user', async (req: any, res) => {
     try {
+      // Enhanced debugging
+      console.log('🔍 Auth check:', {
+        isAuthenticated: req.isAuthenticated ? req.isAuthenticated() : false,
+        hasUser: !!req.user,
+        sessionID: req.sessionID,
+        userEmail: req.user?.email
+      });
+
       if (!req.isAuthenticated() || !req.user) {
         return res.json({ 
           isAuthenticated: false, 
@@ -159,9 +167,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         authType: 'google'
       };
 
+      console.log('✅ User authenticated:', user.email);
       res.json(userResponse);
     } catch (error) {
-      console.error('Error fetching user:', error);
+      console.error('❌ Error fetching user:', error);
       res.status(500).json({ error: 'Failed to fetch user data' });
     }
   });
