@@ -223,196 +223,50 @@ export const additionalTemplatesExpansion: Template[] = [
     bodyLanguageAdvice: 'Use energetic, confident gestures. Maintain high energy. Show entrepreneurial spirit.'
   },
 
-  // INNOVATION & R&D TEMPLATES (10 templates)
-  {
-    id: 'innovation-showcase',
-    title: 'Innovation Showcase Presentation',
-    category: 'business',
-    description: 'Present new innovations and research developments',
-    duration: '25-30 minutes',
-    difficulty: 'Advanced',
-    icon: Zap,
-    color: 'text-yellow-600',
-    content: `[Innovation Overview - 3 minutes]
-• Technology introduction
-• Problem solution
-• Market opportunity
-• Competitive advantage
-
-[Technical Deep Dive - 8 minutes]
-• Technology explanation
-• Development process
-• Technical specifications
-• Innovation highlights
-
-[Market Application - 6 minutes]
-• Use case scenarios
-• Target markets
-• Customer benefits
-• Market potential
-
-[Development Timeline - 4 minutes]
-• Research phases
-• Development milestones
-• Testing results
-• Launch timeline
-
-[Business Impact - 4 minutes]
-• Revenue potential
-• Cost savings
-• Competitive positioning
-• Strategic value
-
-[Next Steps - 3 minutes]
-• Development priorities
-• Resource requirements
-• Partnership opportunities
-• Success metrics`,
-    tags: ['innovation', 'research', 'technology', 'development'],
-    contentAdvice: 'Explain complex technology simply. Show clear market value. Demonstrate competitive advantage.',
-    voiceAdvice: 'Show excitement for innovation. Use dynamic, engaging tone. Emphasize breakthrough potential.',
-    bodyLanguageAdvice: 'Use energetic, confident gestures. Show passion for innovation. Maintain high energy.'
-  },
-
-  // CUSTOMER SERVICE & SUPPORT TEMPLATES (8 templates)
-  {
-    id: 'customer-service-training',
-    title: 'Customer Service Excellence Training',
-    category: 'business',
-    description: 'Train teams on exceptional customer service delivery',
-    duration: '45-60 minutes',
-    difficulty: 'Intermediate',
-    icon: MessageSquare,
-    color: 'text-blue-500',
-    content: `[Service Philosophy - 5 minutes]
-• Customer-centric approach
-• Service standards
-• Brand promise
-• Value creation
-
-[Communication Skills - 15 minutes]
-• Active listening techniques
-• Empathy and understanding
-• Clear communication
-• Problem-solving approach
-
-[Service Scenarios - 15 minutes]
-• Common situations
-• Best practices
-• Role-playing exercises
-• Skill application
-
-[Technology & Tools - 10 minutes]
-• CRM systems
-• Communication platforms
-• Knowledge bases
-• Performance tracking
-
-[Quality Assurance - 8 minutes]
-• Service standards
-• Quality metrics
-• Feedback systems
-• Continuous improvement
-
-[Team Engagement - 7 minutes]
-• Motivation strategies
-• Recognition programs
-• Career development
-• Team collaboration`,
-    tags: ['customer-service', 'training', 'communication', 'excellence'],
-    contentAdvice: 'Use real-world examples. Include interactive elements. Focus on practical application.',
-    voiceAdvice: 'Show enthusiasm for service excellence. Use engaging, supportive tone. Encourage participation.',
-    bodyLanguageAdvice: 'Use welcoming, inclusive gestures. Show approachability. Maintain positive energy.'
-  },
-
-  // ENVIRONMENTAL & SUSTAINABILITY TEMPLATES (6 templates)
-  {
-    id: 'sustainability-initiative',
-    title: 'Sustainability Initiative Launch',
-    category: 'business',
-    description: 'Launch environmental and sustainability programs',
-    duration: '20-25 minutes',
-    difficulty: 'Intermediate',
-    icon: Leaf,
-    color: 'text-green-600',
-    content: `[Environmental Context - 3 minutes]
-• Current environmental challenges
-• Business impact assessment
-• Stakeholder expectations
-• Regulatory requirements
-
-[Initiative Overview - 5 minutes]
-• Program objectives
-• Key initiatives
-• Expected outcomes
-• Success metrics
-
-[Implementation Plan - 8 minutes]
-• Phase-by-phase approach
-• Resource requirements
-• Timeline and milestones
-• Team responsibilities
-
-[Stakeholder Engagement - 4 minutes]
-• Employee involvement
-• Community partnerships
-• Supplier collaboration
-• Customer communication
-
-[Measurement & Reporting - 3 minutes]
-• Performance tracking
-• Progress reporting
-• Continuous improvement
-• Transparency measures
-
-[Call to Action - 2 minutes]
-• Commitment request
-• Participation opportunities
-• Next steps
-• Support requirements`,
-    tags: ['sustainability', 'environmental', 'corporate-responsibility', 'green-initiatives'],
-    contentAdvice: 'Show clear environmental impact. Demonstrate business value. Engage stakeholders effectively.',
-    voiceAdvice: 'Show passion for sustainability. Use inspiring, motivational tone. Emphasize collective action.',
-    bodyLanguageAdvice: 'Use inclusive, engaging gestures. Show environmental commitment. Maintain inspiring presence.'
-  },
-
   // DIVERSITY & INCLUSION TEMPLATES (6 templates)
   {
-    id: 'diversity-initiative-launch',
-    title: 'Diversity & Inclusion Initiative Launch',
+    id: 'diversity-training-workshop',
+    title: 'Diversity & Inclusion Training Workshop',
     category: 'leadership',
-    description: 'Launch organizational diversity and inclusion programs',
-    duration: '20-25 minutes',
+    description: 'Conduct comprehensive diversity and inclusion training sessions',
+    duration: '30-40 minutes',
     difficulty: 'Intermediate',
     icon: Users,
     color: 'text-purple-600',
-    content: `[D&I Vision - 3 minutes]
-• Organizational commitment
-• Vision and goals
-• Business case
-• Cultural transformation
+    content: `[Workshop Introduction - 3 minutes]
+• Training objectives
+• Ground rules
+• Safe space guidelines
+• Participant expectations
 
-[Current State Assessment - 5 minutes]
-• Diversity metrics
-• Inclusion survey results
-• Gap analysis
-• Opportunity identification
+[Unconscious Bias Training - 8 minutes]
+• Bias awareness
+• Impact on decision-making
+• Self-reflection exercises
+• Mitigation strategies
 
-[Initiative Overview - 8 minutes]
-• Program components
-• Key initiatives
-• Success metrics
-• Implementation approach
+[Inclusive Communication - 10 minutes]
+• Language awareness
+• Cultural sensitivity
+• Active listening skills
+• Respectful dialogue
 
-[Leadership Commitment - 4 minutes]
-• Executive support
-• Resource allocation
+[Building Inclusive Teams - 8 minutes]
+• Team dynamics
+• Psychological safety
+• Valuing differences
+• Collaboration strategies
+
+[Action Planning - 6 minutes]
+• Personal commitments
+• Team initiatives
+• Organizational goals
 • Accountability measures
-• Cultural leadership
 
-[Employee Engagement - 3 minutes]
-• Participation opportunities
-• Training programs
+[Resources & Follow-up - 5 minutes]
+• Additional training
+• Support systems
+• Measurement tools
 • Resource groups
 • Recognition programs
 
