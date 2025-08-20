@@ -95,7 +95,7 @@ export function useFacialAnalysis() {
         // If we have client-side detection, enhance the results
         if (clientDetection) {
           const clientMetrics = convertClientDetectionToMetrics(clientDetection);
-          console.log('🎭 Enhanced with Face-api.js client detection:', clientMetrics);
+          // Enhanced with Face-api.js client detection
           
           // Blend client and server results for maximum accuracy
           if (data.analysis?.facialMetrics) {
@@ -140,7 +140,7 @@ export function useFacialAnalysis() {
       setIsActive(true);
       setError(null);
       
-      console.log('🎭 Starting facial analysis...');
+      // Starting facial analysis
       
       // Start periodic facial analysis
       intervalRef.current = setInterval(async () => {
@@ -151,11 +151,7 @@ export function useFacialAnalysis() {
             setCurrentAnalysis(analysis);
             setAnalysisHistory(prev => [...prev.slice(-20), analysis]); // Keep last 20 analyses
             
-            console.log('🎭 Facial analysis update:', {
-              confidence: analysis.facialMetrics.emotionalExpression.confidence,
-              engagement: analysis.facialMetrics.emotionalExpression.engagement,
-              eyeContact: analysis.facialMetrics.communicationSignals.eyeContactQuality
-            });
+            // Facial analysis update completed
           }
         }
       }, analysisInterval);
@@ -180,7 +176,7 @@ export function useFacialAnalysis() {
     }
     
     setIsActive(false);
-    console.log('🎭 Facial analysis stopped');
+    // Facial analysis stopped
   }, []);
 
   const getAverageFacialMetrics = useCallback((): FacialMetrics | null => {

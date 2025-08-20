@@ -54,7 +54,7 @@ class ClientFaceDetectionEngine {
       ]);
       
       this.isInitialized = true;
-      console.log('✅ Face-api.js models loaded successfully');
+      // Face-api.js models loaded successfully
       
     } catch (error) {
       // Silently handle Face-api.js model loading failure - backend will handle analysis
@@ -70,7 +70,7 @@ class ClientFaceDetectionEngine {
         return null;
       }
 
-      console.log('🎭 Running Face-api.js client-side detection...');
+      // Silently running Face-api.js client-side detection
       
       // Run comprehensive face analysis
       const detections = await faceapi
@@ -81,7 +81,7 @@ class ClientFaceDetectionEngine {
         .withFaceDescriptors();
 
       if (!detections || detections.length === 0) {
-        console.log('👤 No faces detected by Face-api.js');
+        // No faces detected - return null silently
         return null;
       }
 

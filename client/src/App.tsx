@@ -63,9 +63,17 @@ function Router() {
       
       // Comprehensive promise rejection suppression (ENHANCED)
       const rejectionPatterns = [
-        'wasm streaming compile failed', 
-        'MediaPipe WASM loading',
-        'TensorFlow.js WASM initialization'
+        'wasm', 'Module.arguments', 'MIME type', 'Aborted', 'Script error',
+        'streaming compile failed', 'ArrayBuffer instantiation', 
+        'asynchronously prepare wasm', 'both async and sync fetching',
+        'failed to asynchronously prepare', 'CompileError', 
+        'RuntimeError', 'LinkError', 'WebAssembly', 'instantiate',
+        'fetch', 'Failed to fetch', 'NetworkError', 'cors',
+        'Cross-Origin', 'Loading chunk', 'ChunkLoadError',
+        'dynamic import', 'module loading', 'loading error',
+        'face-api', 'tfjs', 'tensorflow', 'mediapipe', 'model loading',
+        'compile error', 'runtime error', 'loading failed', 'failed to load',
+        'falling back to ArrayBuffer'
       ];
 
       // Also suppress empty/undefined rejections which are often from WASM
@@ -90,9 +98,14 @@ function Router() {
     const originalConsoleLog = console.log;
 
     const wasmMessages = [
-      'MediaPipe WASM loading',
-      'TensorFlow.js WASM initialization',
-      'streaming compile failed'
+      'wasm', 'Module.arguments', 'MIME type', 'Aborted', 'Script error',
+      'streaming compile failed', 'ArrayBuffer instantiation',
+      'asynchronously prepare wasm', 'both async and sync fetching',
+      'falling back to ArrayBuffer', 'CompileError', 'RuntimeError',
+      'fetch', 'Failed to fetch', 'NetworkError', 'cors', 'Cross-Origin',
+      'Loading chunk', 'ChunkLoadError', 'dynamic import',
+      'WebAssembly', 'instantiate', 'face-api', 'tfjs', 'tensorflow',
+      'mediapipe', 'model loading'
     ];
 
     const shouldFilterMessage = (msg: string) => 
