@@ -89,8 +89,10 @@ export function setupSimplifiedGoogleAuth(app: Express) {
 
   // Get current domain for callback URL
   function getCurrentDomain(req: Request): string {
-    // For development, always use localhost:5000 to ensure consistency
+    // For development, ALWAYS use localhost:5000 to ensure consistency
+    // This prevents issues with Replit domains and other development environments
     if (process.env.NODE_ENV === 'development') {
+      console.log('🔧 Using localhost:5000 for development (forced)');
       return 'http://localhost:5000';
     }
     
@@ -98,6 +100,9 @@ export function setupSimplifiedGoogleAuth(app: Express) {
     const host = req.get('host');
     const protocol = req.get('x-forwarded-proto') || (req.secure ? 'https' : 'http');
     
+    console.log('🔧 Host:', host, 'Protocol:', protocol, 'NODE_ENV:', process.env.NODE_ENV);
+    
+    // In production, avoid Replit domains and use yappyy.com
     if (host && !host.includes('replit.dev')) {
       return `${protocol}://${host}`;
     }
