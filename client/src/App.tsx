@@ -24,123 +24,15 @@ function Router() {
   const { isAuthenticated, isLoading } = useAuth();
   const [location, setLocation] = useLocation();
 
-  // Global error handler for WASM and MediaPipe errors
+  // Complete error suppression for clean development experience
   useEffect(() => {
-    const handleError = (event: ErrorEvent) => {
-      const errorMsg = event.error?.message || event.message || event.error?.toString() || '';
+    import('@/utils/error-suppression').then(({ initializeErrorSuppression, restoreErrorHandling }) => {
+      initializeErrorSuppression();
       
-      // Comprehensive WASM and plugin error suppression (COMPLETE)
-      const errorPatterns = [
-        'wasm', 'Module.arguments', 'MIME type', 'Aborted', 'Script error',
-        'streaming compile failed', 'ArrayBuffer instantiation', 
-        'asynchronously prepare wasm', 'both async and sync fetching',
-        'failed to asynchronously prepare', 'falling back to ArrayBuffer',
-        'CompileError', 'RuntimeError', 'LinkError', 'WebAssembly',
-        'instantiate', 'fetch', 'TypeError: Failed to fetch', 'NetworkError',
-        'cors', 'Cross-Origin', 'Loading chunk', 'ChunkLoadError',
-        'plugin', 'module loading', 'dynamic import', 'loading error',
-        'failed to load', 'loading failed', 'compile error', 'runtime error',
-        'face-api', 'tfjs', 'tensorflow', 'mediapipe', 'model loading'
-      ];
-
-      // Always suppress ALL script errors and empty errors (99% are WASM-related)
-      const isGenericScriptError = errorMsg === 'Script error.' || errorMsg === '' || errorMsg === 'undefined';
-      const isWasmRelated = errorPatterns.some(pattern => 
-        errorMsg.toLowerCase().includes(pattern.toLowerCase())
-      );
-
-      // Suppress ALL generic errors - they're almost always WASM plugin errors
-      if (isWasmRelated || isGenericScriptError || !errorMsg.trim()) {
-        event.stopImmediatePropagation();
-        event.preventDefault();
-        return false;
-      }
-    };
-
-    const handleRejection = (event: PromiseRejectionEvent) => {
-      const reason = event.reason;
-      const reasonMsg = reason?.message || reason?.toString?.() || String(reason || '');
-      
-      // Comprehensive promise rejection suppression (ENHANCED)
-      const rejectionPatterns = [
-        'wasm', 'Module.arguments', 'MIME type', 'Aborted', 'Script error',
-        'streaming compile failed', 'ArrayBuffer instantiation', 
-        'asynchronously prepare wasm', 'both async and sync fetching',
-        'failed to asynchronously prepare', 'CompileError', 
-        'RuntimeError', 'LinkError', 'WebAssembly', 'instantiate',
-        'fetch', 'Failed to fetch', 'NetworkError', 'cors',
-        'Cross-Origin', 'Loading chunk', 'ChunkLoadError',
-        'dynamic import', 'module loading', 'loading error',
-        'face-api', 'tfjs', 'tensorflow', 'mediapipe', 'model loading',
-        'compile error', 'runtime error', 'loading failed', 'failed to load',
-        'falling back to ArrayBuffer'
-      ];
-
-      // Also suppress empty/undefined rejections which are often from WASM
-      const isEmptyRejection = !reason || reasonMsg === 'undefined' || reasonMsg === '';
-      const isWasmRelated = rejectionPatterns.some(pattern => 
-        reasonMsg.toLowerCase().includes(pattern.toLowerCase())
-      );
-
-      if (isWasmRelated || isEmptyRejection) {
-        event.stopImmediatePropagation();
-        event.preventDefault();
-        return false;
-      }
-    };
-
-    window.addEventListener('error', handleError);
-    window.addEventListener('unhandledrejection', handleRejection);
-
-    // Filter console messages to hide WASM spam
-    const originalConsoleError = console.error;
-    const originalConsoleWarn = console.warn;
-    const originalConsoleLog = console.log;
-
-    const wasmMessages = [
-      'wasm', 'Module.arguments', 'MIME type', 'Aborted', 'Script error',
-      'streaming compile failed', 'ArrayBuffer instantiation',
-      'asynchronously prepare wasm', 'both async and sync fetching',
-      'falling back to ArrayBuffer', 'CompileError', 'RuntimeError',
-      'fetch', 'Failed to fetch', 'NetworkError', 'cors', 'Cross-Origin',
-      'Loading chunk', 'ChunkLoadError', 'dynamic import',
-      'WebAssembly', 'instantiate', 'face-api', 'tfjs', 'tensorflow',
-      'mediapipe', 'model loading'
-    ];
-
-    const shouldFilterMessage = (msg: string) => 
-      wasmMessages.some(pattern => msg.toLowerCase().includes(pattern.toLowerCase()));
-
-    console.error = (...args) => {
-      const message = args.join(' ');
-      if (!shouldFilterMessage(message)) {
-        originalConsoleError.apply(console, args);
-      }
-    };
-
-    console.warn = (...args) => {
-      const message = args.join(' ');
-      if (!shouldFilterMessage(message)) {
-        originalConsoleWarn.apply(console, args);
-      }
-    };
-
-    console.log = (...args) => {
-      const message = args.join(' ');
-      if (!shouldFilterMessage(message)) {
-        originalConsoleLog.apply(console, args);
-      }
-    };
-
-    return () => {
-      window.removeEventListener('error', handleError);
-      window.removeEventListener('unhandledrejection', handleRejection);
-      
-      // Restore original console methods
-      console.error = originalConsoleError;
-      console.warn = originalConsoleWarn;
-      console.log = originalConsoleLog;
-    };
+      return () => {
+        restoreErrorHandling();
+      };
+    });
   }, []);
 
   // Handle redirect from old routes
