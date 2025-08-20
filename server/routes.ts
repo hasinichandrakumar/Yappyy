@@ -111,13 +111,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     scope: ['profile', 'email'] 
   }));
 
-  app.get('/api/auth/google/callback', 
-    passport.authenticate('google', { failureRedirect: '/?error=access_denied&details=The user did not consent' }),
-    (req, res) => {
-      console.log('✅ Google OAuth callback successful, redirecting to dashboard');
-      res.redirect('/');
-    }
-  );
+  app.get('/api/auth/google/callback', (req, res, next) => {
+    console.log('🔄 OAuth callback received, authenticating...');
+    passport.authenticate('google', (err, user, info) => {
+      if (err) {
+        console.error('❌ OAuth authentication error:', err);
+        return res.redirect('/?error=auth_error&details=' + encodeURIComponent(err.message));
+      }
+      
+      if (!user) {
+        console.log('⚠️ OAuth authentication failed - no user returned');
+        return res.redirect('/?error=access_denied&details=The user did not consent');
+      }
+      
+      req.logIn(user, (loginErr) => {
+        if (loginErr) {
+          console.error('❌ Login error:', loginErr);
+          return res.redirect('/?error=login_error&details=' + encodeURIComponent(loginErr.message));
+        }
+        
+        console.log('✅ Google OAuth callback successful, redirecting to dashboard for user:', user.email);
+        res.redirect('/');
+      });
+    })(req, res, next);
+  });
 
   // Get authenticated user
   app.get('/api/auth/user', async (req: any, res) => {
