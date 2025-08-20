@@ -983,14 +983,11 @@ export default function SimplifiedPracticePage() {
     try {
       console.log('🎬 Starting practice session...');
       
-      // Set recording state immediately to show UI feedback
-      setIsRecording(true);
-      
       // Initialize video recording first and wait for it to be ready
       const videoInitialized = await initializeVideoRecording();
       console.log('📹 Video initialization result:', videoInitialized);
 
-      // Initialize speech recognition
+      // Initialize speech recognition BEFORE setting recording state
       setupSpeechRecognition();
 
       // Start session timer
@@ -1297,21 +1294,24 @@ export default function SimplifiedPracticePage() {
         console.warn('⚠️ Vocal filler recorder unavailable:', recorderError);
       }
 
-      // Start speech recognition with fallback
-      setupSpeechRecognition();
+      // Start speech recognition with fallback - this was already called above
       try {
         if (recognitionRef.current) {
+          console.log('🎤 Starting speech recognition...');
           recognitionRef.current.start();
+          console.log('✅ Speech recognition started successfully');
         } else {
-          // No recognition available, start fallback
+          console.warn('⚠️ No speech recognition available, starting fallback');
           await startDeepgramFallback();
         }
       } catch (e) {
-        console.warn('⚠️ Web Speech start failed, using fallback', e);
+        console.warn('⚠️ Web Speech start failed, using fallback:', e.message || e);
         await startDeepgramFallback();
       }
 
+      // Set recording state AFTER all systems are initialized
       setIsRecording(true);
+      console.log('✅ Recording state set - all systems active');
 
       // Initialize accurate WPM calculator
       if (!wpmCalculatorRef.current) {
