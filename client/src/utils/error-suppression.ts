@@ -40,39 +40,75 @@ function shouldFilterWarning(args: any[]): boolean {
   return harmlessWarningPatterns.some(pattern => pattern.test(message));
 }
 
+let isInitialized = false;
+
 export function initializeErrorSuppression() {
-  // Override console methods with filtering
-  originalConsoleError = console.error;
-  originalConsoleWarn = console.warn;
+  // Prevent multiple initializations
+  if (isInitialized) {
+    console.log('Error suppression already initialized, skipping...');
+    return;
+  }
+  
+  // Store original console methods safely
+  if (typeof console.error === 'function') {
+    originalConsoleError = console.error;
+  }
+  if (typeof console.warn === 'function') {
+    originalConsoleWarn = console.warn;
+  }
+  
+  isInitialized = true;
   
   console.error = function(...args: any[]) {
-    const message = args.join(' ');
-    const shouldFilter = harmlessErrorPatterns.some(pattern => pattern.test(message)) ||
-      message.includes('wasm') ||
-      message.includes('WASM') ||
-      message.includes('WebAssembly') ||
-      message.includes('Aborted') ||
-      message.includes('Script error') ||
-      message.includes('MediaPipe') ||
-      message.includes('TensorFlow') ||
-      message.includes('face-api');
-    
-    if (!shouldFilter) {
-      originalConsoleError.apply(console, args);
+    try {
+      const message = args.join(' ');
+      const shouldFilter = harmlessErrorPatterns.some(pattern => pattern.test(message)) ||
+        message.includes('wasm') ||
+        message.includes('WASM') ||
+        message.includes('WebAssembly') ||
+        message.includes('Aborted') ||
+        message.includes('Script error') ||
+        message.includes('MediaPipe') ||
+        message.includes('TensorFlow') ||
+        message.includes('face-api');
+      
+      if (!shouldFilter) {
+        // Use the original console.error directly to avoid recursion
+        if (originalConsoleError && typeof originalConsoleError === 'function') {
+          originalConsoleError.apply(console, args);
+        } else {
+          // Fallback to native console.error if original is not available
+          console.log('[ERROR]', ...args);
+        }
+      }
+    } catch (e) {
+      // If error suppression itself fails, just log normally
+      console.log('[ERROR]', ...args);
     }
   };
   
   console.warn = function(...args: any[]) {
-    const message = args.join(' ');
-    const shouldFilter = harmlessWarningPatterns.some(pattern => pattern.test(message)) ||
-      message.includes('wasm') ||
-      message.includes('WASM') ||
-      message.includes('WebAssembly') ||
-      message.includes('MediaPipe') ||
-      message.includes('TensorFlow');
-    
-    if (!shouldFilter) {
-      originalConsoleWarn.apply(console, args);
+    try {
+      const message = args.join(' ');
+      const shouldFilter = harmlessWarningPatterns.some(pattern => pattern.test(message)) ||
+        message.includes('wasm') ||
+        message.includes('WASM') ||
+        message.includes('WebAssembly') ||
+        message.includes('MediaPipe') ||
+        message.includes('TensorFlow');
+      
+      if (!shouldFilter) {
+        // Use the original console.warn directly to avoid recursion
+        if (originalConsoleWarn && typeof originalConsoleWarn === 'function') {
+          originalConsoleWarn.apply(console, args);
+        } else {
+          // Fallback to native console.warn if original is not available
+          console.log('[WARN]', ...args);
+        }
+      }
+    } catch (e) {
+      // If error suppression itself fails, just log normally
+      console.log('[WARN]', ...args);
     }
   };
 

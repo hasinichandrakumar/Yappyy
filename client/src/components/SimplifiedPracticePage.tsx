@@ -15,7 +15,7 @@ import {
   Library, Camera, Briefcase, GraduationCap,
   Heart, Target, BookOpen, BarChart3, Award,
   Presentation, Building, Lightbulb, CheckCircle,
-  AlertTriangle, Info
+  AlertTriangle, Info, Volume2, VolumeX
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { SessionDataViewer } from '@/components/SessionDataViewer';
@@ -143,6 +143,160 @@ const SESSION_PURPOSE_OPTIONS = [
   }
 ];
 
+// Enhanced Speech Recognition System
+class RobustSpeechRecognition {
+  private recognition: any = null;
+  private isListening = false;
+  private onTranscriptUpdate: ((transcript: string, isFinal: boolean) => void) | null = null;
+  private onError: ((error: string) => void) | null = null;
+  private currentTranscript = '';
+  private interimTranscript = '';
+
+  constructor() {
+    this.initializeRecognition();
+  }
+
+  private initializeRecognition() {
+    console.log('🔧 Initializing robust speech recognition...');
+    
+    // Check for browser support
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      console.error('❌ Speech recognition not supported in this browser');
+      return false;
+    }
+
+    try {
+      const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+      this.recognition = new SpeechRecognition();
+      
+      // Configure for optimal performance
+      this.recognition.continuous = true;
+      this.recognition.interimResults = true;
+      this.recognition.lang = 'en-US';
+      this.recognition.maxAlternatives = 3;
+      
+      // Set up event handlers
+      this.recognition.onstart = () => {
+        console.log('🎤 Speech recognition started');
+        this.isListening = true;
+      };
+
+      this.recognition.onresult = (event: any) => {
+        let finalTranscript = '';
+        let interimText = '';
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const result = event.results[i];
+          const transcript = result[0].transcript;
+          
+          console.log('🎤 Speech result:', {
+            transcript,
+            isFinal: result.isFinal,
+            confidence: result[0].confidence
+          });
+
+          if (result.isFinal) {
+            finalTranscript += transcript + ' ';
+          } else {
+            interimText += transcript;
+          }
+        }
+
+        // Update transcripts
+        if (finalTranscript) {
+          this.currentTranscript += finalTranscript;
+        }
+        this.interimTranscript = interimText;
+
+        // Call callback with full transcript
+        const fullTranscript = this.currentTranscript + this.interimTranscript;
+        if (this.onTranscriptUpdate) {
+          this.onTranscriptUpdate(fullTranscript, finalTranscript.length > 0);
+        }
+      };
+
+      this.recognition.onerror = (event: any) => {
+        console.error('❌ Speech recognition error:', event.error);
+        this.isListening = false;
+        if (this.onError) {
+          this.onError(event.error);
+        }
+      };
+
+      this.recognition.onend = () => {
+        console.log('🎤 Speech recognition ended');
+        this.isListening = false;
+        
+        // Auto-restart if we should still be listening
+        if (this.shouldBeListening) {
+          setTimeout(() => {
+            this.start();
+          }, 100);
+        }
+      };
+
+      console.log('✅ Speech recognition initialized successfully');
+      return true;
+    } catch (error) {
+      console.error('❌ Failed to initialize speech recognition:', error);
+      return false;
+    }
+  }
+
+  private shouldBeListening = false;
+
+  public start() {
+    if (!this.recognition) {
+      console.error('❌ Speech recognition not initialized');
+      return false;
+    }
+
+    try {
+      this.shouldBeListening = true;
+      this.recognition.start();
+      console.log('🎤 Starting speech recognition...');
+      return true;
+    } catch (error) {
+      console.error('❌ Failed to start speech recognition:', error);
+      return false;
+    }
+  }
+
+  public stop() {
+    this.shouldBeListening = false;
+    if (this.recognition && this.isListening) {
+      try {
+        this.recognition.stop();
+        console.log('🎤 Stopping speech recognition...');
+      } catch (error) {
+        console.error('❌ Error stopping speech recognition:', error);
+      }
+    }
+  }
+
+  public reset() {
+    this.currentTranscript = '';
+    this.interimTranscript = '';
+    console.log('🔄 Speech recognition transcripts reset');
+  }
+
+  public setCallbacks(
+    onTranscriptUpdate: (transcript: string, isFinal: boolean) => void,
+    onError: (error: string) => void
+  ) {
+    this.onTranscriptUpdate = onTranscriptUpdate;
+    this.onError = onError;
+  }
+
+  public getCurrentTranscript() {
+    return this.currentTranscript + this.interimTranscript;
+  }
+
+  public isActive() {
+    return this.isListening;
+  }
+}
+
 export default function SimplifiedPracticePage() {
   // Core session state
   const [isRecording, setIsRecording] = useState(false);
@@ -153,6 +307,7 @@ export default function SimplifiedPracticePage() {
   const [sessionNumber, setSessionNumber] = useState(1);
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingPurpose, setIsEditingPurpose] = useState(false);
+  const [isSavingSession, setIsSavingSession] = useState(false);
   const [sessionDuration, setSessionDuration] = useState(0);
   const [wordCount, setWordCount] = useState(0);
   const [currentWPM, setCurrentWPM] = useState(0);
@@ -222,6 +377,7 @@ export default function SimplifiedPracticePage() {
 
   // Live feedback
   const [liveFeedback, setLiveFeedback] = useState<LiveFeedback[]>([]);
+  const [isAICoachActive, setIsAICoachActive] = useState(false);
   
   // Enhanced analytics state
   const [enhancedAnalytics, setEnhancedAnalytics] = useState<any>(null);
@@ -238,6 +394,18 @@ export default function SimplifiedPracticePage() {
   // Eye contact tracking state
   // Removed old eye contact state - now using real-time eye contact system
   const [eyeContactScore, setEyeContactScore] = useState(0);
+  
+  // Robust speech recognition state
+  const [speechRecognitionStatus, setSpeechRecognitionStatus] = useState<'idle' | 'starting' | 'active' | 'error'>('idle');
+  const robustSpeechRecognitionRef = useRef<RobustSpeechRecognition | null>(null);
+  
+  // Enhanced WPM tracking
+  const [wpmHistory, setWpmHistory] = useState<number[]>([]);
+  const [lastWordCount, setLastWordCount] = useState(0);
+  const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
+  const wpmUpdateIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [wpmUpdateCount, setWpmUpdateCount] = useState(0); // Debug counter
+  const [transcriptUpdateCount, setTranscriptUpdateCount] = useState(0); // Debug counter
 
   // Roboflow computer vision integration
   const {
@@ -285,70 +453,180 @@ export default function SimplifiedPracticePage() {
     getFillerStatistics
   } = useAdvancedFillerDetection();
 
-  // Enhanced filler word detection function (from WorkingRecordingTest)
+
+
+  // Enhanced WPM calculation function
+  const calculateAccurateWPM = useCallback((currentTranscript: string, currentTime: number) => {
+    console.log('🔍 WPM calculation debug:', {
+      sessionStartTime,
+      transcriptLength: currentTranscript.trim().length,
+      currentTime
+    });
+
+    if (!sessionStartTime || currentTranscript.trim().length === 0) {
+      console.log('❌ WPM calculation skipped - no session start time or empty transcript');
+      return 0;
+    }
+
+    // Clean the transcript for accurate word counting
+    const cleanTranscript = currentTranscript
+      .replace(/[.,!?;:'"()]/g, ' ') // Remove punctuation
+      .replace(/\s+/g, ' ') // Normalize whitespace
+      .trim();
+
+    const words = cleanTranscript.split(/\s+/).filter(word => word.length > 0);
+    const currentWordCount = words.length;
+    
+    // Calculate time elapsed since session start
+    const timeElapsed = (currentTime - sessionStartTime) / 1000; // Convert to seconds
+    const timeInMinutes = timeElapsed / 60;
+    
+    console.log('🔍 WPM calculation details:', {
+      currentWordCount,
+      timeElapsed: timeElapsed.toFixed(1),
+      timeInMinutes: timeInMinutes.toFixed(2),
+      sessionStartTime,
+      currentTime
+    });
+    
+    // Only calculate WPM if we have meaningful data
+    if (timeInMinutes < 0.1 || currentWordCount < 3) {
+      console.log('❌ WPM calculation skipped - insufficient data');
+      return 0;
+    }
+    
+    const wpm = Math.round(currentWordCount / timeInMinutes);
+    
+    console.log(`📊 Accurate WPM calculation: ${currentWordCount} words in ${timeElapsed.toFixed(1)}s (${timeInMinutes.toFixed(2)} min) = ${wpm} WPM`);
+    
+    return wpm;
+  }, [sessionStartTime]);
+
+  // Calculate average WPM from history
+  const getAverageWPM = useCallback(() => {
+    if (wpmHistory.length === 0) return 0;
+    const sum = wpmHistory.reduce((acc, wpm) => acc + wpm, 0);
+    return Math.round(sum / wpmHistory.length);
+  }, [wpmHistory]);
+
+  // Enhanced filler word detection function with accurate counting
   const detectFillerWords = (text: string) => {
-    const fillerWords = [
-      // Basic fillers
+    if (!text || text.trim().length === 0) {
+      return { count: 0, words: [] };
+    }
+
+    // Define filler words with proper categorization to avoid duplicates
+    const singleWordFillers = [
       'um', 'uh', 'ah', 'er', 'erm', 'hmm', 'hm',
-      // Common phrases
-      'like', 'you know', 'basically', 'actually', 'literally',
-      'sort of', 'kind of', 'i mean', 'right', 'okay', 'so',
-      'well', 'now', 'then', 'just', 'really', 'very',
+      'like', 'basically', 'actually', 'literally',
+      'right', 'okay', 'so', 'well', 'now', 'then', 'just', 'really', 'very',
       'totally', 'completely', 'absolutely', 'definitely',
       'obviously', 'clearly', 'honestly', 'frankly',
-      'i guess', 'i think', 'i feel', 'i believe',
-      // Additional common fillers
-      'you see', 'i mean', 'i guess', 'i think', 'i feel',
-      'i believe', 'i suppose', 'i reckon', 'i assume',
-      'you know what', 'you know what i mean',
-      'basically', 'essentially', 'fundamentally',
-      'actually', 'literally', 'figuratively',
-      'sort of', 'kind of', 'type of', 'way of',
-      'right', 'okay', 'alright', 'all right',
-      'so', 'well', 'now', 'then', 'just',
-      'really', 'very', 'quite', 'rather',
-      'totally', 'completely', 'absolutely', 'definitely',
-      'obviously', 'clearly', 'honestly', 'frankly',
+      'i', 'guess', 'think', 'feel', 'believe', 'suppose', 'reckon', 'assume',
+      'essentially', 'fundamentally', 'figuratively',
+      'sort', 'kind', 'type', 'way',
+      'alright', 'all', 'quite', 'rather',
       'truthfully', 'seriously', 'genuinely',
-      'simply', 'merely', 'only', 'just',
+      'simply', 'merely', 'only',
       'even', 'still', 'yet', 'however',
       'though', 'although', 'nevertheless',
       'anyway', 'anyhow', 'regardless'
     ];
-    
-    const lowerText = text.toLowerCase();
-    let totalFillers = 0;
-    const detectedFillers: string[] = [];
-    
-    fillerWords.forEach(filler => {
-      // Use word boundary regex to match whole words only
-      const regex = new RegExp(`\\b${filler.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
-      const matches = lowerText.match(regex);
-      if (matches) {
-        totalFillers += matches.length;
-        detectedFillers.push(...matches);
-        console.log(`🔍 Found filler word "${filler}": ${matches.length} times`);
-      }
-    });
-    
-    // Also check for common variations and misspellings
-    const variations = [
-      { pattern: /\b(um+|uh+|ah+|er+)\b/gi, name: 'repeated_filler' },
-      { pattern: /\b(like|lik)\b/gi, name: 'like_variation' },
-      { pattern: /\b(you know|u know|ya know)\b/gi, name: 'you_know_variation' },
-      { pattern: /\b(basically|basicly)\b/gi, name: 'basically_variation' },
-      { pattern: /\b(actually|actualy)\b/gi, name: 'actually_variation' }
+
+    const multiWordFillers = [
+      'you know', 'i mean', 'kind of', 'sort of', 'i guess', 'you see',
+      'you know what', 'you know what i mean', 'i dont know', 'what i mean',
+      'the thing is', 'blah blah blah'
     ];
-    
-    variations.forEach(variation => {
-      const matches = lowerText.match(variation.pattern);
-      if (matches) {
-        totalFillers += matches.length;
-        detectedFillers.push(...matches);
-        console.log(`🔍 Found variation "${variation.name}": ${matches.length} times`);
+
+    const lowerText = text.toLowerCase();
+    const detectedFillers: string[] = [];
+    const processedPositions = new Set<number>(); // Track processed positions to avoid duplicates
+
+    // Process multi-word fillers first (to avoid partial matches)
+    multiWordFillers.forEach(phrase => {
+      const regex = new RegExp(`\\b${phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+      let match;
+      while ((match = regex.exec(lowerText)) !== null) {
+        // Check if this position hasn't been processed yet
+        const startPos = match.index;
+        const endPos = startPos + match[0].length;
+        let isDuplicate = false;
+        
+        for (let i = startPos; i < endPos; i++) {
+          if (processedPositions.has(i)) {
+            isDuplicate = true;
+            break;
+          }
+        }
+        
+        if (!isDuplicate) {
+          detectedFillers.push(match[0]);
+          // Mark these positions as processed
+          for (let i = startPos; i < endPos; i++) {
+            processedPositions.add(i);
+          }
+        }
       }
     });
+
+    // Process single-word fillers
+    singleWordFillers.forEach(word => {
+      const regex = new RegExp(`\\b${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+      let match;
+      while ((match = regex.exec(lowerText)) !== null) {
+        // Check if this position hasn't been processed yet
+        const startPos = match.index;
+        const endPos = startPos + match[0].length;
+        let isDuplicate = false;
+        
+        for (let i = startPos; i < endPos; i++) {
+          if (processedPositions.has(i)) {
+            isDuplicate = true;
+            break;
+          }
+        }
+        
+        if (!isDuplicate) {
+          detectedFillers.push(match[0]);
+          // Mark these positions as processed
+          for (let i = startPos; i < endPos; i++) {
+            processedPositions.add(i);
+          }
+        }
+      }
+    });
+
+    // Handle repeated fillers (ummm, uhhh, etc.)
+    const repeatedPattern = /\b(um+|uh+|ah+|er+)\b/gi;
+    let repeatedMatch;
+    while ((repeatedMatch = repeatedPattern.exec(lowerText)) !== null) {
+      const startPos = repeatedMatch.index;
+      const endPos = startPos + repeatedMatch[0].length;
+      let isDuplicate = false;
+      
+      for (let i = startPos; i < endPos; i++) {
+        if (processedPositions.has(i)) {
+          isDuplicate = true;
+          break;
+        }
+      }
+      
+      if (!isDuplicate) {
+        detectedFillers.push(repeatedMatch[0]);
+        // Mark these positions as processed
+        for (let i = startPos; i < endPos; i++) {
+          processedPositions.add(i);
+        }
+      }
+    }
+
+    const totalFillers = detectedFillers.length;
     
+    if (totalFillers > 0) {
+      console.log(`🔍 Filler words detected: ${totalFillers} total - ${detectedFillers.join(', ')}`);
+    }
+
     return { count: totalFillers, words: detectedFillers };
   };
 
@@ -461,6 +739,111 @@ export default function SimplifiedPracticePage() {
   const wpmCalculatorRef = useRef<AccurateWPMCalculator | null>(null);
   const fillerDetectorRef = useRef<IncrementalFillerDetector | null>(null);
   const { toast } = useToast();
+
+  // Initialize robust speech recognition
+  useEffect(() => {
+    if (!robustSpeechRecognitionRef.current) {
+      console.log('🔧 Creating robust speech recognition instance...');
+      robustSpeechRecognitionRef.current = new RobustSpeechRecognition();
+      
+      // Set up callbacks
+      robustSpeechRecognitionRef.current.setCallbacks(
+        (transcript: string, isFinal: boolean) => {
+          console.log('📝 Transcript update:', { transcript: transcript.substring(0, 100) + '...', isFinal });
+          
+          // Update state
+          setTranscript(transcript);
+          transcriptRef.current = transcript;
+          
+          // Increment transcript update counter
+          setTranscriptUpdateCount(prev => prev + 1);
+          console.log('📝 Transcript update count:', transcriptUpdateCount + 1);
+          
+          // SIMPLE WPM CALCULATION - FORCE IT TO WORK
+          if (transcript.trim().length > 0) {
+            console.log('🎯 SIMPLE WPM calculation triggered!');
+            console.log('Transcript:', transcript.substring(0, 100));
+            console.log('Session duration:', sessionDuration);
+            console.log('Session start time:', sessionStartTime);
+            
+            // Count words
+            const words = transcript.trim().split(/\s+/).filter(word => word.length > 0);
+            console.log('Word count:', words.length);
+            
+            // Calculate WPM using session duration
+            let wpm = 0;
+            if (sessionDuration > 0 && words.length >= 3) {
+              const timeInMinutes = sessionDuration / 60;
+              wpm = Math.round(words.length / timeInMinutes);
+              console.log(`📊 SIMPLE WPM: ${words.length} words / ${timeInMinutes.toFixed(2)} min = ${wpm} WPM`);
+            } else if (words.length >= 3) {
+              // If no session duration, just use word count as WPM
+              wpm = words.length;
+              console.log(`📊 ESTIMATED WPM: ${words.length} words = ${wpm} WPM`);
+            }
+            
+            // FORCE UPDATE WPM
+            if (wpm > 0) {
+              console.log(`✅ FORCING WPM update to: ${wpm}`);
+              
+              // Increment debug counter
+              setWpmUpdateCount(prev => prev + 1);
+              
+              // Force update metrics
+              setMetrics(prev => {
+                console.log('🔄 Updating metrics state:', { 
+                  oldWPM: prev.wordsPerMinute, 
+                  newWPM: wpm,
+                  updateCount: wpmUpdateCount + 1
+                });
+                return {
+                  ...prev,
+                  wordsPerMinute: wpm,
+                  voice: {
+                    ...prev.voice,
+                    pace: wpm
+                  }
+                };
+              });
+              
+              // Also update WPM history
+              setWpmHistory(prev => [...prev.slice(-9), wpm]);
+            } else {
+              console.log('❌ WPM calculation failed - no valid result');
+            }
+          }
+          
+
+          
+          // Detect filler words
+          if (transcript.trim().length > 0) {
+            const fillerResult = detectFillerWords(transcript);
+            setMetrics(prev => ({
+              ...prev,
+              fillerWordCount: fillerResult.count,
+              voice: {
+                ...prev.voice,
+                fillerCount: fillerResult.count
+              }
+            }));
+            
+            if (fillerResult.count > 0) {
+              console.log(`🎯 Filler words detected: ${fillerResult.count} - ${fillerResult.words.join(', ')}`);
+            }
+          }
+        },
+        (error: string) => {
+          console.error('❌ Speech recognition error:', error);
+          setSpeechRecognitionStatus('error');
+          toast({
+            title: "Speech Recognition Error",
+            description: `Error: ${error}. Please check microphone permissions.`,
+            variant: "destructive"
+          });
+        }
+      );
+    }
+  }, [sessionDuration, toast]);
 
   // Video recording refs
   const recordingVideoRef = useRef<HTMLVideoElement>(null);
@@ -593,15 +976,15 @@ export default function SimplifiedPracticePage() {
           });
         }
 
-        // Update live metrics
+        // Update live metrics - use absolute count, not accumulation
         setMetrics(prev => ({
           ...prev,
           wordsPerMinute: analytics.speakingRate || prev.wordsPerMinute,
-          fillerWordCount: (prev.fillerWordCount || 0) + (analytics.fillerWords?.length || 0),
+          fillerWordCount: analytics.fillerWords?.length || 0, // Use absolute count
           voice: {
             ...prev.voice,
             pace: analytics.speakingRate || prev.voice.pace,
-            fillerCount: (prev.voice.fillerCount || 0) + (analytics.fillerWords?.length || 0)
+            fillerCount: analytics.fillerWords?.length || 0 // Use absolute count
           }
         }));
       });
@@ -615,8 +998,14 @@ export default function SimplifiedPracticePage() {
 
   // Setup speech recognition
   const setupSpeechRecognition = useCallback(() => {
+    console.log('🔧 Setting up speech recognition...');
+    console.log('🔧 Browser support check:', {
+      webkitSpeechRecognition: 'webkitSpeechRecognition' in window,
+      SpeechRecognition: 'SpeechRecognition' in window
+    });
+    
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      console.warn('Speech recognition not supported');
+      console.warn('❌ Speech recognition not supported');
       // Start fallback immediately
       startDeepgramFallback();
       return;
@@ -627,6 +1016,7 @@ export default function SimplifiedPracticePage() {
     
     // Store recognition in ref for access outside this function
     (recognitionRef as any).current = recognition;
+    console.log('✅ Speech recognition instance created and stored in ref');
 
     recognition.continuous = true;
     recognition.interimResults = true;
@@ -674,7 +1064,12 @@ export default function SimplifiedPracticePage() {
     
     console.log('🎤 Speech recognition configured to capture all speech including filler words');
 
+    recognition.onstart = () => {
+      console.log('🎤 Speech recognition STARTED successfully');
+    };
+
     recognition.onresult = async (event: any) => {
+      console.log('🎤 Speech recognition RESULT received:', event);
       let finalTranscript = '';
       let interimText = '';
       
@@ -766,7 +1161,7 @@ export default function SimplifiedPracticePage() {
 
     // Add error handler
     recognition.onerror = (event: any) => {
-      console.error('Speech recognition error:', event.error);
+      console.error('❌ Speech recognition error:', event.error, event);
       // On errors like not-allowed/no-speech, ensure fallback is active
       if (!isSpeechFallbackActive) {
         startDeepgramFallback();
@@ -775,6 +1170,7 @@ export default function SimplifiedPracticePage() {
 
     // Add end handler to restart if needed
     recognition.onend = () => {
+      console.log('🎤 Speech recognition ended, restarting if still recording...');
       if (isRecording && !isSpeechFallbackActive) {
         try {
           recognition.start();
@@ -785,9 +1181,29 @@ export default function SimplifiedPracticePage() {
       }
     };
 
+    console.log('✅ Speech recognition setup complete');
+
   }, [sessionDuration, transcript, isSpeechFallbackActive, startDeepgramFallback, toast]);
 
   // Enhanced comprehensive live insights system with improved effectiveness
+  const lastFeedbackTimeRef = useRef<number>(0);
+  const lastFeedbackMessageRef = useRef<string>('');
+
+  // Helper function to add feedback and manage AI coach state
+  const addFeedback = useCallback((message: string, type: 'success' | 'warning' | 'info') => {
+    setLiveFeedback(prev => [...prev.slice(-4), {
+      id: Date.now().toString(),
+      message,
+      type,
+      timestamp: Date.now()
+    }]);
+    lastFeedbackTimeRef.current = Date.now();
+    lastFeedbackMessageRef.current = message;
+    
+    // Reset AI coach active state after a short delay
+    setTimeout(() => setIsAICoachActive(false), 2000);
+  }, []);
+
   useEffect(() => {
     if (!isRecording) return;
 
@@ -798,136 +1214,144 @@ export default function SimplifiedPracticePage() {
       const eyeContact = metrics.eyeContact;
       const engagement = metrics.engagement;
       const sessionMinutes = sessionDuration / 60;
-      const lastMessage = liveFeedback[liveFeedback.length - 1];
-      const timeSinceLastFeedback = lastMessage ? (Date.now() - lastMessage.timestamp) / 1000 : 999;
+      const timeSinceLastFeedback = (Date.now() - lastFeedbackTimeRef.current) / 1000;
 
-      // Only generate feedback if enough time has passed (avoid spam)
+      // Only generate feedback if enough time has passed (15 seconds minimum)
       if (timeSinceLastFeedback < 15) return;
 
+      // Set AI coach as active when generating feedback
+      setIsAICoachActive(true);
+
+      console.log('🤖 Generating live AI feedback:', {
+        sessionDuration,
+        currentWPM,
+        fillerCount,
+        eyeContact,
+        timeSinceLastFeedback
+      });
+
       // Starting feedback to get users engaged
-      if (sessionDuration >= 3 && sessionDuration < 10 && (!lastMessage || !lastMessage.message.includes('Welcome'))) {
-        setLiveFeedback(prev => [...prev.slice(-4), {
-          id: Date.now().toString(),
-          message: 'Recording started! Begin speaking naturally for live analysis',
-          type: 'info',
-          timestamp: Date.now()
-        }]);
+      if (sessionDuration >= 3 && sessionDuration < 10 && !lastFeedbackMessageRef.current.includes('Welcome')) {
+        addFeedback('🎯 Recording started! Begin speaking naturally for live AI analysis', 'info');
         return;
       }
 
       // Voice and Speech Analytics (improved thresholds)
       if (currentWPM > 0 && sessionDuration >= 10) {
-        if (currentWPM >= 130 && currentWPM <= 170 && (!lastMessage || !lastMessage.message.includes('Perfect pace'))) {
-          setLiveFeedback(prev => [...prev.slice(-4), {
-            id: Date.now().toString(),
-            message: `Great pace at ${currentWPM} WPM! Keep this rhythm going`,
-            type: 'success',
-            timestamp: Date.now()
-          }]);
-        } else if (currentWPM > 200 && (!lastMessage || !lastMessage.message.includes('too fast'))) {
-          setLiveFeedback(prev => [...prev.slice(-4), {
-            id: Date.now().toString(),
-            message: `Speaking quite fast at ${currentWPM} WPM - consider slowing down`,
-            type: 'warning',
-            timestamp: Date.now()
-          }]);
-        } else if (currentWPM < 110 && currentWPM > 30 && sessionMinutes > 0.5 && (!lastMessage || !lastMessage.message.includes('increase energy'))) {
-          setLiveFeedback(prev => [...prev.slice(-4), {
-            id: Date.now().toString(),
-            message: `Try increasing energy - current pace: ${currentWPM} WPM`,
-            type: 'info',
-            timestamp: Date.now()
-          }]);
+        if (currentWPM >= 130 && currentWPM <= 170 && !lastFeedbackMessageRef.current.includes('Perfect pace')) {
+          addFeedback(`🎯 Perfect pace at ${currentWPM} WPM! This is ideal for presentations`, 'success');
+          return;
+        } else if (currentWPM > 200 && !lastFeedbackMessageRef.current.includes('too fast')) {
+          addFeedback(`⚡ Speaking quite fast at ${currentWPM} WPM - try taking deeper breaths and pausing between sentences`, 'warning');
+          return;
+        } else if (currentWPM < 110 && currentWPM > 30 && sessionMinutes > 0.5 && !lastFeedbackMessageRef.current.includes('increase energy')) {
+          addFeedback(`💪 Try increasing energy and enthusiasm - current pace: ${currentWPM} WPM`, 'info');
+          return;
         }
       }
 
       // Transcript length feedback  
       const transcriptLength = transcript.trim().length;
-      if (sessionDuration >= 15 && transcriptLength < 50 && (!lastMessage || !lastMessage.message.includes('Keep talking'))) {
-        setLiveFeedback(prev => [...prev.slice(-4), {
-          id: Date.now().toString(),
-          message: 'Keep talking! I\'m analyzing your speech patterns',
-          type: 'info',
-          timestamp: Date.now()
-        }]);
+      if (sessionDuration >= 15 && transcriptLength < 50 && !lastFeedbackMessageRef.current.includes('Keep talking')) {
+        addFeedback('🗣️ Keep talking! I\'m analyzing your speech patterns and will provide insights', 'info');
+        return;
       }
 
       // Filler Word Analysis (improved sensitivity)
       if (sessionMinutes > 0.8) {
         const fillersPerMinute = fillerCount / sessionMinutes;
-        if (fillersPerMinute > 4 && (!lastMessage || !lastMessage.message.includes('filler'))) {
-          setLiveFeedback(prev => [...prev.slice(-4), {
-            id: Date.now().toString(),
-            message: `${Math.round(fillersPerMinute)} fillers/min detected - try pausing instead`,
-            type: 'warning',
-            timestamp: Date.now()
-          }]);
-        } else if (fillersPerMinute <= 1 && fillerCount > 2 && (!lastMessage || !lastMessage.message.includes('clean speech'))) {
-          setLiveFeedback(prev => [...prev.slice(-4), {
-            id: Date.now().toString(),
-            message: 'Excellent! Very clean speech with minimal fillers',
-            type: 'success',
-            timestamp: Date.now()
-          }]);
+        if (fillersPerMinute > 4 && !lastFeedbackMessageRef.current.includes('filler')) {
+          addFeedback(`⚠️ ${Math.round(fillersPerMinute)} fillers/min detected - try pausing instead of using "um", "uh", "like"`, 'warning');
+          return;
+        } else if (fillersPerMinute <= 1 && fillerCount > 2 && !lastFeedbackMessageRef.current.includes('clean speech')) {
+          addFeedback('✨ Excellent! Very clean speech with minimal fillers - you sound professional', 'success');
+          return;
         }
       }
 
       // Computer Vision Feedback (only when real data available)
-      if (eyeContact > 75 && (!lastMessage || !lastMessage.message.includes('eye contact'))) {
-        setLiveFeedback(prev => [...prev.slice(-4), {
-          id: Date.now().toString(),
-          message: 'Excellent eye contact! You\'re engaging your audience well',
-          type: 'success',
-          timestamp: Date.now()
-        }]);
-      } else if (eyeContact > 0 && eyeContact < 45 && (!lastMessage || !lastMessage.message.includes('Look at'))) {
-        setLiveFeedback(prev => [...prev.slice(-4), {
-          id: Date.now().toString(),
-          message: 'Try looking at the camera more - aim for 60%+ eye contact',
-          type: 'info',
-          timestamp: Date.now()
-        }]);
+      if (eyeContact > 75 && !lastFeedbackMessageRef.current.includes('eye contact')) {
+        addFeedback('👁️ Excellent eye contact! You\'re engaging your audience well', 'success');
+        return;
+      } else if (eyeContact > 0 && eyeContact < 45 && !lastFeedbackMessageRef.current.includes('Look at')) {
+        addFeedback('👀 Try looking at the camera more - aim for 60%+ eye contact for better engagement', 'info');
+        return;
       }
 
       // Confidence feedback (when available)
-      if (confidence > 85 && (!lastMessage || !lastMessage.message.includes('confident'))) {
-        setLiveFeedback(prev => [...prev.slice(-4), {
-          id: Date.now().toString(),
-          message: 'Great confidence! Your posture and presence look strong',
-          type: 'success',
-          timestamp: Date.now()
-        }]);
+      if (confidence > 85 && !lastFeedbackMessageRef.current.includes('confident')) {
+        addFeedback('💪 Great confidence! Your posture and presence look strong', 'success');
+        return;
       }
 
       // Engagement encouragement
-      if (sessionDuration >= 30 && sessionDuration < 35 && (!lastMessage || !lastMessage.message.includes('doing great'))) {
+      if (sessionDuration >= 30 && sessionDuration < 35 && !lastFeedbackMessageRef.current.includes('doing great')) {
+        addFeedback('🌟 You\'re doing great! Keep practicing for better results', 'info');
+        return;
+      }
+
+      // Professional tips (every 30 seconds)
+      if (sessionDuration >= 45 && sessionDuration % 30 < 2 && timeSinceLastFeedback > 25) {
+        const practicalTips = [
+          '💡 Use hand gestures to emphasize key points and appear more confident',
+          '🎵 Vary your vocal pitch to maintain audience interest and avoid monotone', 
+          '⏸️ Use strategic pauses for impact - silence can be powerful',
+          '🫁 Project your voice from your diaphragm for better resonance',
+          '🧘 Keep shoulders relaxed and spine straight for better posture',
+          '🎯 Focus on one main point per sentence for clarity',
+          '👥 Imagine speaking to one person to feel more connected',
+          '📝 Use the rule of three - groups of three are memorable'
+        ];
+        
+        const tipIndex = Math.floor((sessionDuration - 45) / 30) % practicalTips.length;
+        const randomTip = practicalTips[tipIndex];
+        
+        if (!lastFeedbackMessageRef.current.includes(randomTip.substring(0, 10))) {
+          addFeedback(randomTip, 'info');
+          return;
+        }
+      }
+
+      // Session progress milestones
+      if (sessionDuration >= 60 && sessionDuration < 65 && !lastFeedbackMessageRef.current.includes('minute')) {
+        addFeedback('⏰ Great! You\'ve been practicing for a full minute. Your speaking skills are improving!', 'success');
+        return;
+      }
+
+      // Volume and energy feedback (when available)
+      if (metrics.voice && metrics.voice.volume > 80 && !lastFeedbackMessageRef.current.includes('volume')) {
+        addFeedback('🔊 Great volume! You\'re projecting your voice well and sounding confident', 'success');
+        return;
+      }
+
+      // Engagement and enthusiasm feedback
+      if (engagement > 80 && !lastFeedbackMessageRef.current.includes('enthusiasm')) {
+        addFeedback('🔥 Excellent enthusiasm! Your energy is contagious and engaging', 'success');
+        return;
+      }
+
+      // General encouragement if no specific feedback was given
+      if (sessionDuration >= 20 && timeSinceLastFeedback > 20) {
+        const encouragements = [
+          '🎯 Keep going! You\'re building great speaking skills',
+          '💪 Your practice is paying off - stay focused',
+          '🌟 Every word you speak is improving your confidence',
+          '🚀 You\'re developing into a strong communicator',
+          '🎭 Remember to breathe naturally and stay relaxed',
+          '📈 Your progress is visible - keep up the great work!',
+          '🎪 You\'re becoming a more confident speaker with each session',
+          '💎 Your communication skills are shining through'
+        ];
+        
+        const encouragement = encouragements[Math.floor(Math.random() * encouragements.length)];
         setLiveFeedback(prev => [...prev.slice(-4), {
           id: Date.now().toString(),
-          message: 'You\'re doing great! Keep practicing for better results',
+          message: encouragement,
           type: 'info',
           timestamp: Date.now()
         }]);
-      }
-
-      // Professional tips (less frequent, more targeted)
-      if (sessionDuration >= 45 && sessionDuration % 30 < 2 && (!lastMessage || timeSinceLastFeedback > 25)) {
-        const practicalTips = [
-          'Use hand gestures to emphasize key points',
-          'Vary your vocal pitch to maintain interest', 
-          'Use strategic pauses for impact',
-          'Project your voice from your diaphragm',
-          'Keep shoulders relaxed and spine straight'
-        ];
-        
-        const randomTip = practicalTips[Math.floor(sessionDuration / 30) % practicalTips.length];
-        if (!lastMessage || !lastMessage.message.includes(randomTip.substring(0, 10))) {
-          setLiveFeedback(prev => [...prev.slice(-4), {
-            id: Date.now().toString(),
-            message: randomTip,
-            type: 'info',
-            timestamp: Date.now()
-          }]);
-        }
+        lastFeedbackTimeRef.current = Date.now();
+        lastFeedbackMessageRef.current = encouragement;
       }
     };
 
@@ -939,7 +1363,7 @@ export default function SimplifiedPracticePage() {
       clearTimeout(initialTimeout);
       clearInterval(interval);
     };
-  }, [isRecording, metrics, sessionDuration, liveFeedback, transcript]);
+  }, [isRecording, metrics, sessionDuration, transcript]);
 
   // Initialize video recording system on component mount
   useEffect(() => {
@@ -984,94 +1408,148 @@ export default function SimplifiedPracticePage() {
     try {
       console.log('🎬 Starting practice session...');
       
+      // Set recording state immediately to show button change
+      setIsRecording(true);
+      console.log('✅ Recording state set immediately');
+      
+      // Reset AI coach feedback tracking for new session
+      lastFeedbackTimeRef.current = 0;
+      lastFeedbackMessageRef.current = '';
+      setLiveFeedback([]);
+      console.log('🔄 AI coach feedback reset for new session');
+      
       // Initialize video recording first and wait for it to be ready
-      const videoInitialized = await initializeVideoRecording();
-      console.log('📹 Video initialization result:', videoInitialized);
+      let videoInitialized = false;
+      try {
+        videoInitialized = await initializeVideoRecording();
+        console.log('📹 Video initialization result:', videoInitialized);
+      } catch (videoError) {
+        console.warn('⚠️ Video initialization failed, continuing with audio only:', videoError);
+        videoInitialized = false;
+      }
 
-      // Initialize speech recognition BEFORE setting recording state
-      setupSpeechRecognition();
+      // Initialize session start time for accurate WPM calculation
+      setSessionStartTime(Date.now());
+      setWpmHistory([]);
+      setLastWordCount(0);
+      console.log('⏱️ Session start time initialized for accurate WPM tracking');
+      
+      // Start robust speech recognition
+      if (robustSpeechRecognitionRef.current) {
+        console.log('🎤 Starting robust speech recognition...');
+        setSpeechRecognitionStatus('starting');
+        
+        // Reset transcripts and metrics
+        robustSpeechRecognitionRef.current.reset();
+        setTranscript('');
+        setInterimTranscript('');
+        transcriptRef.current = '';
+        interimTranscriptRef.current = '';
+        
+        // Reset filler word count for new session
+        setMetrics(prev => ({
+          ...prev,
+          fillerWordCount: 0,
+          voice: {
+            ...prev.voice,
+            fillerCount: 0
+          }
+        }));
+        
+        // Start recognition
+        const success = robustSpeechRecognitionRef.current.start();
+        if (success) {
+          setSpeechRecognitionStatus('active');
+          console.log('✅ Robust speech recognition started successfully');
+        } else {
+          setSpeechRecognitionStatus('error');
+          console.error('❌ Failed to start robust speech recognition');
+        }
+      } else {
+        console.error('❌ Robust speech recognition not initialized');
+        setSpeechRecognitionStatus('error');
+      }
 
-      // Start session timer
+      // Start session timer with enhanced WPM tracking
       const sessionStartTime = Date.now();
       timerRef.current = setInterval(() => {
         const elapsedSeconds = Math.floor((Date.now() - sessionStartTime) / 1000);
         setSessionDuration(elapsedSeconds);
         
-        // FIXED: Improved WPM calculation with proper word counting
+        // Real-time WPM update every second
         if (transcript.trim().length > 0) {
-          const currentTranscript = transcript + interimTranscriptRef.current;
-          const hasActualSpeech = currentTranscript.trim().length > 5;
+          const currentTime = Date.now();
+          const accurateWPM = calculateAccurateWPM(transcript, currentTime);
           
-          if (hasActualSpeech) {
-            // FIXED: Better word counting - only count actual words, not punctuation or filler markers
-            const sanitized = currentTranscript
-              .replace(/\[[^\]]*\]/g, ' ') // Remove speech recognition markers
-              .replace(/[.,!?;:'"()]/g, ' ') // Remove punctuation
-              .replace(/\s+/g, ' ') // Normalize whitespace
-              .trim();
-            
-            const words = sanitized.split(/\s+/).filter(word => word.length > 0);
-            const wordCount = words.length;
-            
-            // FIXED: Proper WPM calculation with minimum time threshold
-            const timeInMinutes = elapsedSeconds / 60;
-            const wpm = timeInMinutes > 0.1 && wordCount >= 3 && timeInMinutes > 0 ? Math.round(wordCount / timeInMinutes) : 0;
-            
-            console.log(`🔄 Live WPM update: ${wordCount} words in ${elapsedSeconds}s = ${wpm} WPM`);
+          if (accurateWPM > 0) {
             setMetrics(prev => ({ 
               ...prev, 
-              wordsPerMinute: wpm,
+              wordsPerMinute: accurateWPM,
               voice: {
                 ...prev.voice,
-                pace: wpm,
-                volume: prev.voice.volume ?? 0,
-                intonation: prev.voice.intonation ?? 0,
-                pauseEffectiveness: prev.voice.pauseEffectiveness ?? 0,
-                pitchVariation: prev.voice.pitchVariation ?? 0,
-                vocalFryDetection: prev.voice.vocalFryDetection ?? false,
-                uptalkPatterns: prev.voice.uptalkPatterns ?? 0
-              }
-            }));
-          } else {
-            // No speech detected, keep WPM at 0
-            setMetrics(prev => ({ 
-              ...prev, 
-              wordsPerMinute: 0,
-              voice: {
-                ...prev.voice,
-                pace: 0,
-                volume: prev.voice.volume ?? 0,
-                intonation: prev.voice.intonation ?? 0,
-                pauseEffectiveness: prev.voice.pauseEffectiveness ?? 0,
-                pitchVariation: prev.voice.pitchVariation ?? 0,
-                vocalFryDetection: prev.voice.vocalFryDetection ?? false,
-                uptalkPatterns: prev.voice.uptalkPatterns ?? 0
+                pace: accurateWPM
               }
             }));
           }
         }
+        
+        // Debug: Log live metrics status
+        console.log('🔄 Live metrics update:', {
+          elapsedSeconds,
+          transcriptLength: transcript.length,
+          wordCount: transcript.split(' ').filter(w => w.length > 0).length,
+          currentWPM: metrics.wordsPerMinute,
+          isRecording
+        });
       }, 1000);
 
       // Get media stream for the entire session (don't duplicate getUserMedia calls)
       let stream = streamRef.current;
       if (!stream) {
-        stream = await navigator.mediaDevices.getUserMedia({
-          audio: {
-            echoCancellation: false,
-            noiseSuppression: false,
-            autoGainControl: false,
-            sampleRate: 44100,
-            channelCount: 1
-          },
-          // Start with lightweight video constraints for fastest device start, upgrade after playback
-          video: {
-            width: { ideal: 640, min: 480 },
-            height: { ideal: 360, min: 270 },
-            frameRate: { ideal: 24, min: 20 },
-            facingMode: 'user'
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+              echoCancellation: false,
+              noiseSuppression: false,
+              autoGainControl: false,
+              sampleRate: 44100,
+              channelCount: 1
+            },
+            // Start with lightweight video constraints for fastest device start, upgrade after playback
+            video: {
+              width: { ideal: 640, min: 480 },
+              height: { ideal: 360, min: 270 },
+              frameRate: { ideal: 24, min: 20 },
+              facingMode: 'user'
+            }
+          });
+          streamRef.current = stream;
+          console.log('✅ Media stream obtained successfully');
+        } catch (mediaError) {
+          console.warn('⚠️ Video stream failed, trying audio only:', mediaError);
+          try {
+            stream = await navigator.mediaDevices.getUserMedia({
+              audio: {
+                echoCancellation: false,
+                noiseSuppression: false,
+                autoGainControl: false,
+                sampleRate: 44100,
+                channelCount: 1
+              }
+            });
+            streamRef.current = stream;
+            console.log('✅ Audio-only stream obtained successfully');
+          } catch (audioError) {
+            console.error('❌ Failed to get any media stream:', audioError);
+            toast({
+              title: "Media Access Failed",
+              description: "Please allow microphone access to start recording.",
+              variant: "destructive"
+            });
+            setIsRecording(false);
+            return;
           }
-        });
-        streamRef.current = stream;
+        }
       }
       
       // Start video recording if initialized - ensure MediaRecorder is ready
@@ -1311,12 +1789,30 @@ export default function SimplifiedPracticePage() {
         console.warn('⚠️ Vocal filler recorder unavailable:', recorderError);
       }
 
-      // Start speech recognition with fallback - this was already called above
+      // Start speech recognition with fallback - ensure it actually starts
       try {
+        console.log('🎤 Checking speech recognition availability...');
+        console.log('🎤 recognitionRef.current:', recognitionRef.current);
+        console.log('🎤 recognitionRef.current state:', recognitionRef.current?.state);
+        
         if (recognitionRef.current) {
           console.log('🎤 Starting speech recognition...');
           recognitionRef.current.start();
-          console.log('✅ Speech recognition started successfully');
+          console.log('✅ Speech recognition start() called successfully');
+          
+          // Check state after starting
+          setTimeout(() => {
+            console.log('🎤 Speech recognition state after start:', recognitionRef.current?.state);
+            if (recognitionRef.current && recognitionRef.current.state !== 'recording') {
+              console.log('🔄 Forcing speech recognition restart...');
+              try {
+                recognitionRef.current.start();
+                console.log('✅ Speech recognition restart() called successfully');
+              } catch (restartError) {
+                console.warn('⚠️ Speech recognition restart failed:', restartError);
+              }
+            }
+          }, 1000);
         } else {
           console.warn('⚠️ No speech recognition available, starting fallback');
           await startDeepgramFallback();
@@ -1326,9 +1822,8 @@ export default function SimplifiedPracticePage() {
         await startDeepgramFallback();
       }
 
-      // Set recording state AFTER all systems are initialized
-      setIsRecording(true);
-      console.log('✅ Recording state set - all systems active');
+      // Recording state already set at the beginning
+      console.log('✅ All systems initialized - recording active');
 
       // Initialize accurate WPM calculator
       if (!wpmCalculatorRef.current) {
@@ -1424,15 +1919,26 @@ export default function SimplifiedPracticePage() {
           ...prev,
           // Use real-time eye contact as primary system, with fallback
           eyeContact: eyeContactPercentage > 0 ? eyeContactPercentage : prev.eyeContact,
-          confidence: facialAnalysis?.facialMetrics?.emotionalExpression?.confidence ?? computerVisionMetrics?.confidence ?? prev.confidence,
-          engagement: facialAnalysis?.facialMetrics?.emotionalExpression?.engagement ?? computerVisionMetrics?.engagement ?? prev.engagement,
-          clarity: facialAnalysis?.facialMetrics?.emotionalExpression?.authenticity ?? prev.clarity,
+          confidence: Math.max(
+            facialAnalysis?.facialMetrics?.emotionalExpression?.confidence || 0,
+            computerVisionMetrics?.confidence || 0,
+            prev.confidence || 0
+          ),
+          engagement: Math.max(
+            facialAnalysis?.facialMetrics?.emotionalExpression?.engagement || 0,
+            computerVisionMetrics?.engagement || 0,
+            prev.engagement || 0
+          ),
+          clarity: Math.max(
+            facialAnalysis?.facialMetrics?.emotionalExpression?.authenticity || 0,
+            prev.clarity || 0
+          ),
           bodyLanguage: {
             ...prev.bodyLanguage,
             // Use real-time eye contact as primary system, with fallback
             eyeContactScore: eyeContactPercentage > 0 ? eyeContactPercentage : prev.bodyLanguage.eyeContactScore,
-            facialExpressions: bodyMetrics?.gestures?.naturalness ?? prev.bodyLanguage.facialExpressions,
-            overallPresence: bodyMetrics?.overall?.presence ?? prev.bodyLanguage.overallPresence
+            facialExpressions: bodyMetrics?.gestures?.naturalness || prev.bodyLanguage.facialExpressions || 0,
+            overallPresence: bodyMetrics?.overall?.presence || prev.bodyLanguage.overallPresence || 0
           }
         }));
       }, 1000);
@@ -1520,9 +2026,9 @@ export default function SimplifiedPracticePage() {
           ...prev,
           voice: {
             ...prev.voice,
-            clarity: voiceAnalysis.clarity?.score || prev.voice.clarity,
-            sentiment: voiceAnalysis.sentiment?.score || 0,
-            professionalism: voiceAnalysis.professionalism?.score || 0
+            clarity: Math.min(100, Math.max(0, voiceAnalysis.clarity?.score || prev.voice.clarity || 0)),
+            sentiment: Math.min(100, Math.max(0, voiceAnalysis.sentiment?.score || 0)),
+            professionalism: Math.min(100, Math.max(0, voiceAnalysis.professionalism?.score || 0))
           }
         }));
       }
@@ -1545,13 +2051,13 @@ export default function SimplifiedPracticePage() {
         // Update metrics with speech analysis
         setMetrics(prev => ({
           ...prev,
-          confidence: speechAnalysis.confidence || prev.confidence,
-          clarity: speechAnalysis.clarity || prev.clarity,
+          confidence: Math.min(100, Math.max(0, speechAnalysis.confidence || prev.confidence || 0)),
+          clarity: Math.min(100, Math.max(0, speechAnalysis.clarity || prev.clarity || 0)),
           voice: {
             ...prev.voice,
-            pace: speechAnalysis.pace || prev.voice.pace,
-            volume: speechAnalysis.volume || prev.voice.volume,
-            intonation: speechAnalysis.intonation || prev.voice.intonation
+            pace: Math.min(200, Math.max(0, speechAnalysis.pace || prev.voice.pace || 0)),
+            volume: Math.min(100, Math.max(0, speechAnalysis.volume || prev.voice.volume || 0)),
+            intonation: Math.min(100, Math.max(0, speechAnalysis.intonation || prev.voice.intonation || 0))
           }
         }));
       }
@@ -1574,12 +2080,12 @@ export default function SimplifiedPracticePage() {
         // Update metrics with comprehensive analysis
         setMetrics(prev => ({
           ...prev,
-          engagement: comprehensiveAnalysis.engagement || prev.engagement,
+          engagement: Math.min(100, Math.max(0, comprehensiveAnalysis.engagement || prev.engagement || 0)),
           voice: {
             ...prev.voice,
-            emotionalRange: comprehensiveAnalysis.emotionalRange || 0,
-            expressiveness: comprehensiveAnalysis.expressiveness || 0,
-            voiceWarmth: comprehensiveAnalysis.voiceWarmth || 0
+            emotionalRange: Math.min(100, Math.max(0, comprehensiveAnalysis.emotionalRange || 0)),
+            expressiveness: Math.min(100, Math.max(0, comprehensiveAnalysis.expressiveness || 0)),
+            voiceWarmth: Math.min(100, Math.max(0, comprehensiveAnalysis.voiceWarmth || 0))
           }
         }));
       }
@@ -1595,11 +2101,11 @@ export default function SimplifiedPracticePage() {
     
     // Start periodic voice analysis every 10 seconds
     const voiceAnalysisInterval = setInterval(async () => {
-      if (isRecording && vocalFillerRecorder && vocalFillerRecorder.state === 'recording') {
+      if (isRecording && vocalFillerRecorder && vocalFillerRecorder.state === 'recording' && transcript.length > 10) {
         try {
-          // Get current audio data
-          const audioBlob = new Blob([], { type: 'audio/webm' });
-          await performAdvancedVoiceAnalysis(audioBlob, transcript);
+          // Only perform analysis if we have meaningful transcript data
+          console.log('🎤 Performing real-time voice analysis with transcript length:', transcript.length);
+          await performAdvancedVoiceAnalysis(new Blob([], { type: 'audio/webm' }), transcript);
         } catch (error) {
           console.warn('⚠️ Real-time voice analysis failed:', error);
         }
@@ -1627,9 +2133,18 @@ export default function SimplifiedPracticePage() {
       streamRef.current = null;
     }
 
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
+    // Stop robust speech recognition
+    if (robustSpeechRecognitionRef.current) {
+      robustSpeechRecognitionRef.current.stop();
+      setSpeechRecognitionStatus('idle');
+      console.log('🎤 Robust speech recognition stopped');
     }
+    
+    // Clean up WPM tracking
+    setSessionStartTime(null);
+    setWpmHistory([]);
+    setLastWordCount(0);
+    console.log('📊 WPM tracking cleaned up');
 
     // Stop Deepgram/Whisper fallback if active
     if (deepgramServiceRef.current) {
@@ -1672,10 +2187,14 @@ export default function SimplifiedPracticePage() {
 
     // Perform final advanced voice analysis
     try {
-      console.log('🎤 Performing final voice analysis...');
-      const finalAudioBlob = new Blob([], { type: 'audio/webm' });
-      await performAdvancedVoiceAnalysis(finalAudioBlob, transcript);
-      console.log('✅ Final voice analysis completed');
+      if (transcript.length > 10) {
+        console.log('🎤 Performing final voice analysis with transcript length:', transcript.length);
+        const finalAudioBlob = new Blob([], { type: 'audio/webm' });
+        await performAdvancedVoiceAnalysis(finalAudioBlob, transcript);
+        console.log('✅ Final voice analysis completed');
+      } else {
+        console.log('⚠️ Skipping final voice analysis - insufficient transcript data');
+      }
     } catch (error) {
       console.warn('⚠️ Final voice analysis failed:', error);
     }
@@ -1739,67 +2258,133 @@ export default function SimplifiedPracticePage() {
     try {
       console.log('💾 Preparing to save session data...');
       
-              const sessionData = {
+              // Enhanced session data with all live metrics
+      const sessionData = {
           sessionName: sessionName || `Session ${sessionNumber || 1}`,
           purpose: sessionPurpose || 'general-presentation',
         duration: sessionDuration,
         transcript: transcript || '',
-        averageWPM: wpmCalculatorRef.current ? wpmCalculatorRef.current.calculateWPM().averageWPM : metrics.wordsPerMinute || 0,
+        averageWPM: metrics.wordsPerMinute || 0, // Use live WPM from metrics
         confidenceScore: metrics.confidence || 0,
         voiceClarity: metrics.voice.clarity || 0,
-        fillerWords: metrics.fillerWordCount || 0,
+        fillerWords: metrics.fillerWordCount || 0, // Use live filler word count
         pauseCount: 0,
         eyeContactScore: String(metrics.eyeContact || 0),
-        coachingTips: [],
+        coachingTips: [
+          `Speaking pace: ${metrics.wordsPerMinute || 0} WPM`,
+          `Filler words detected: ${metrics.fillerWordCount || 0}`,
+          `Eye contact: ${metrics.eyeContact || 0}%`,
+          `Confidence: ${metrics.confidence || 0}%`,
+          `Total words: ${transcript ? transcript.split(/\s+/).filter(w => w.length > 0).length : 0}`
+        ],
         videoBlob: recordingData?.videoBlob ? await recordingData.videoBlob.arrayBuffer().then((buffer: ArrayBuffer) => 
           Buffer.from(buffer).toString('base64')
         ) : null,
         facialAnalysis: JSON.stringify({
-          eyeContact: metrics.eyeContact || 0,
-          confidence: metrics.confidence || 0,
-          engagement: metrics.engagement || 0,
+          eyeContact: Math.min(100, Math.max(0, metrics.eyeContact || 0)),
+          confidence: Math.min(100, Math.max(0, metrics.confidence || 0)),
+          engagement: Math.min(100, Math.max(0, metrics.engagement || 0)),
           bodyLanguage: metrics.bodyLanguage || {}
         }),
         voiceMetrics: JSON.stringify({
-          clarity: metrics.voice.clarity || 0,
-          pace: metrics.voice.pace || 0,
-          volume: metrics.voice.volume || 0,
-          intonation: metrics.voice.intonation || 0,
-          fillerCount: metrics.voice.fillerCount || 0,
-          pauseEffectiveness: metrics.voice.pauseEffectiveness || 0,
-          pitchVariation: metrics.voice.pitchVariation || 0,
+          clarity: Math.min(100, Math.max(0, metrics.voice.clarity || 0)),
+          pace: Math.min(200, Math.max(0, metrics.voice.pace || 0)),
+          volume: Math.min(100, Math.max(0, metrics.voice.volume || 0)),
+          intonation: Math.min(100, Math.max(0, metrics.voice.intonation || 0)),
+          fillerCount: Math.max(0, metrics.voice.fillerCount || 0),
+          pauseEffectiveness: Math.min(100, Math.max(0, metrics.voice.pauseEffectiveness || 0)),
+          pitchVariation: Math.min(100, Math.max(0, metrics.voice.pitchVariation || 0)),
           vocalFryDetection: metrics.voice.vocalFryDetection || false,
-          uptalkPatterns: metrics.voice.uptalkPatterns || 0
+          uptalkPatterns: Math.min(100, Math.max(0, metrics.voice.uptalkPatterns || 0))
         }),
         bodyLanguageMetrics: JSON.stringify({
-          eyeContact: metrics.bodyLanguage?.eyeContactScore || 0,
-          postureConfidence: bodyMetrics?.posture?.confidence || 0,
-          spineAlignment: bodyMetrics?.posture?.spineAlignment || 0,
-          shoulderPosition: bodyMetrics?.posture?.shoulderPosition || 0,
-          stability: bodyMetrics?.posture?.stability || 0,
-          presence: bodyMetrics?.overall?.presence || 0,
-          professionalism: bodyMetrics?.overall?.professionalism || 0,
-          confidence: bodyMetrics?.overall?.confidence || 0
+          eyeContact: Math.min(100, Math.max(0, metrics.bodyLanguage?.eyeContactScore || 0)),
+          postureConfidence: Math.min(100, Math.max(0, bodyMetrics?.posture?.confidence || 0)),
+          spineAlignment: Math.min(100, Math.max(0, bodyMetrics?.posture?.spineAlignment || 0)),
+          shoulderPosition: Math.min(100, Math.max(0, bodyMetrics?.posture?.shoulderPosition || 0)),
+          stability: Math.min(100, Math.max(0, bodyMetrics?.posture?.stability || 0)),
+          presence: Math.min(100, Math.max(0, bodyMetrics?.overall?.presence || 0)),
+          professionalism: Math.min(100, Math.max(0, bodyMetrics?.overall?.professionalism || 0)),
+          confidence: Math.min(100, Math.max(0, bodyMetrics?.overall?.confidence || 0))
         }),
         // Top-level posture score for Analysis tab
-        postureScore: bodyMetrics?.posture?.confidence || 0,
+        postureScore: Math.min(100, Math.max(0, bodyMetrics?.posture?.confidence || 0)),
         aiAnalysis: JSON.stringify({
-          overallScore: Math.round((metrics.confidence + metrics.clarity + metrics.engagement) / 3) || 0,
-          strengths: [],
-          improvements: []
+          overallScore: Math.min(100, Math.max(0, Math.round((metrics.confidence + metrics.clarity + metrics.engagement) / 3) || 0)),
+          strengths: [
+            `Spoke for ${sessionDuration} seconds`,
+            `Achieved ${metrics.wordsPerMinute || 0} WPM`,
+            `Maintained ${metrics.eyeContact || 0}% eye contact`
+          ],
+          improvements: [
+            metrics.fillerWordCount > 5 ? `Reduce filler words (${metrics.fillerWordCount} detected)` : 'Good filler word control',
+            metrics.wordsPerMinute > 200 ? 'Consider slowing down your pace' : 'Good speaking pace',
+            metrics.eyeContact < 50 ? 'Work on maintaining eye contact' : 'Good eye contact'
+          ]
         }),
-        persuasivenessScore: metrics.confidence || 0
+        persuasivenessScore: Math.min(100, Math.max(0, metrics.confidence || 0)),
+        
+        // Enhanced analysis data for Analysis tab
+        enhancedAnalysis: JSON.stringify({
+          transcript: transcript || 'No transcript available',
+          wpmAnalysis: {
+            averageWPM: metrics.wordsPerMinute || 0,
+            totalWords: transcript ? transcript.split(/\s+/).filter(w => w.length > 0).length : 0,
+            speakingTime: sessionDuration,
+            wordsPerSecond: sessionDuration > 0 ? (transcript ? transcript.split(/\s+/).filter(w => w.length > 0).length : 0) / sessionDuration : 0
+          },
+          fillerWordAnalysis: {
+            totalFillers: metrics.fillerWordCount || 0,
+            fillerWords: transcript ? detectFillerWords(transcript).words : [],
+            fillerBreakdown: transcript ? {
+              um: detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('um')).length,
+              uh: detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('uh')).length,
+              like: detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('like')).length,
+              youKnow: detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('you know')).length,
+              basically: detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('basically')).length,
+              actually: detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('actually')).length,
+              other: detectFillerWords(transcript).words.filter(w => 
+                !w.toLowerCase().includes('um') && 
+                !w.toLowerCase().includes('uh') && 
+                !w.toLowerCase().includes('like') && 
+                !w.toLowerCase().includes('you know') && 
+                !w.toLowerCase().includes('basically') && 
+                !w.toLowerCase().includes('actually')
+              ).length
+            } : {}
+          },
+          transcriptAnalysis: {
+            fullTranscript: transcript || 'No transcript available',
+            wordCount: transcript ? transcript.split(/\s+/).filter(w => w.length > 0).length : 0,
+            characterCount: transcript ? transcript.length : 0,
+            sentenceCount: transcript ? transcript.split(/[.!?]+/).filter(s => s.trim().length > 0).length : 0,
+            averageWordsPerSentence: transcript && transcript.split(/[.!?]+/).filter(s => s.trim().length > 0).length > 0 
+              ? Math.round((transcript ? transcript.split(/\s+/).filter(w => w.length > 0).length : 0) / transcript.split(/[.!?]+/).filter(s => s.trim().length > 0).length) 
+              : 0,
+            highlightedTranscript: transcript ? highlightFillerWords(transcript) : 'No transcript available'
+          },
+          liveMetricsHistory: {
+            wpmHistory: wpmHistory,
+            fillerWordHistory: [metrics.fillerWordCount || 0],
+            eyeContactHistory: [metrics.eyeContact || 0],
+            confidenceHistory: [metrics.confidence || 0]
+          }
+        })
       };
 
-      console.log('📊 Session data prepared:', {
+      console.log('📊 Session data prepared for Analysis tab:', {
         name: sessionData.sessionName,
         duration: sessionData.duration,
         transcript_length: sessionData.transcript.length,
         wpm: sessionData.averageWPM,
-        fillers: sessionData.fillerWords
+        fillers: sessionData.fillerWords,
+        eyeContact: sessionData.eyeContactScore,
+        confidence: sessionData.confidenceScore,
+        totalWords: transcript ? transcript.split(/\s+/).filter(w => w.length > 0).length : 0,
+        enhancedAnalysis: 'Included with detailed breakdown'
       });
 
-      const response = await fetch('/api/sessions/save', {
+      const response = await fetch('/api/save-session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1823,11 +2408,18 @@ export default function SimplifiedPracticePage() {
         setSessionNumber(nextSessionNumber);
         setSessionName(`Session ${nextSessionNumber}`);
         
+        // CRITICAL: Set the analysis data and show analysis page
+        setSessionAnalysisData(result.session);
+        setShowAnalysisPage(true);
+        
         toast({
-          title: "Session Saved!",
-          description: `${result.message} - Check the Analysis tab to view your session`,
-          variant: "default"
+          title: "Session Saved Successfully! 🎉",
+          description: `Session analysis is now ready! View your detailed performance insights.`,
+          variant: "default",
+          duration: 3000
         });
+        
+        console.log('🔄 Transitioning to analysis page with session data');
       } else {
         console.error('❌ Failed to save session:', result.message);
         toast({
@@ -1873,357 +2465,133 @@ export default function SimplifiedPracticePage() {
       });
     }, 1000); // Small delay to allow final session save
 
-    // Save session with schema-compliant data structure - ONLY REAL DATA
+    // Enhanced session data preparation - consolidated save logic
+    if (isSavingSession) {
+      console.log('⚠️ Session save already in progress, skipping...');
+      return;
+    }
+    
+    setIsSavingSession(true);
+    
     try {
-      // Check if there was actual speech input
-      const hasRealSpeech = transcript && transcript.trim().length > 10;
-      const words = hasRealSpeech ? transcript.split(' ').filter(w => w.length > 0) : [];
-      const averageWPM = hasRealSpeech && sessionDuration > 0 ? Math.round((words.length / sessionDuration) * 60) : 0;
-      
-      // Only calculate metrics if there was real speech, otherwise use 0 values
-      const realConfidenceScore = hasRealSpeech ? Math.round((metrics.eyeContact + metrics.confidence + metrics.engagement) / 3) : 0;
-      const realEyeContact = hasRealSpeech ? metrics.eyeContact : 0;
-      const realVoiceClarity = hasRealSpeech ? metrics.clarity : 0;
-      const realFillerWords = hasRealSpeech ? metrics.fillerWordCount : 0;
-      
-      // Enhanced session data with all metrics from WorkingRecordingTest
-      const enhancedSessionData = {
-        userId: 'demo-user',
+      // Prepare session data in the format expected by the backend
+      const sessionData = {
+        transcript: transcript || '',
         duration: sessionDuration,
-        averageWPM: wpmCalculatorRef.current ? wpmCalculatorRef.current.calculateWPM().averageWPM : metrics.wordsPerMinute || 0,
-        confidenceScore: realConfidenceScore / 100, // Convert to 0-1 range for real type
-        voiceClarity: realVoiceClarity / 100, // Convert to 0-1 range for real type
-        fillerWords: metrics.fillerWordCount || 0,
-        pauseCount: hasRealSpeech ? Math.floor(sessionDuration / 30) : 0, // Only estimate pauses if speech occurred
-        eyeContactScore: `${realEyeContact}%`, // String format as required by schema
-        transcript: transcript || 'No transcript available',
-        
-        // Enhanced filler word analysis
+        purpose: sessionPurpose,
+        sessionName: sessionName,
+        sessionNumber: sessionNumber,
+        metrics: {
+          wordsPerMinute: metrics.wordsPerMinute || 0,
+          fillerWordCount: metrics.fillerWordCount || 0,
+          eyeContact: metrics.eyeContact || 0,
+          confidence: metrics.confidence || 0,
+          engagement: metrics.engagement || 0,
+          clarity: metrics.clarity || 0
+        },
+        wpmAnalysis: {
+          averageWPM: metrics.wordsPerMinute || 0,
+          totalWords: transcript ? transcript.split(/\s+/).filter(w => w.length > 0).length : 0,
+          speakingTime: sessionDuration,
+          wordsPerSecond: sessionDuration > 0 ? (transcript ? transcript.split(/\s+/).filter(w => w.length > 0).length : 0) / sessionDuration : 0
+        },
         fillerWordAnalysis: {
-          totalFillers: metrics.fillerWordCount || 0,
-          fillerWords: transcript ? detectFillerWords(transcript).words : [],
-          fillerBreakdown: {
-            um: transcript ? detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('um')).length : 0,
-            uh: transcript ? detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('uh')).length : 0,
-            like: transcript ? detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('like')).length : 0,
-            youKnow: transcript ? detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('you know')).length : 0,
-            basically: transcript ? detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('basically')).length : 0,
-            actually: transcript ? detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('actually')).length : 0,
-            other: transcript ? detectFillerWords(transcript).words.filter(w => 
+          totalCount: metrics.fillerWordCount || 0,
+          words: transcript ? detectFillerWords(transcript).words : [],
+          breakdown: transcript ? {
+            um: detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('um')).length,
+            uh: detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('uh')).length,
+            like: detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('like')).length,
+            youKnow: detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('you know')).length,
+            basically: detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('basically')).length,
+            actually: detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('actually')).length,
+            other: detectFillerWords(transcript).words.filter(w => 
               !w.toLowerCase().includes('um') && 
               !w.toLowerCase().includes('uh') && 
               !w.toLowerCase().includes('like') && 
               !w.toLowerCase().includes('you know') && 
               !w.toLowerCase().includes('basically') && 
               !w.toLowerCase().includes('actually')
-            ).length : 0
-          }
+            ).length
+          } : {}
         },
-        
-        // Enhanced WPM analysis
-        wpmAnalysis: {
-          averageWPM: wpmCalculatorRef.current ? wpmCalculatorRef.current.calculateWPM().averageWPM : metrics.wordsPerMinute || 0,
-          currentWPM: wpmCalculatorRef.current ? wpmCalculatorRef.current.calculateWPM().currentWPM : metrics.wordsPerMinute || 0,
-          totalWords: wpmCalculatorRef.current ? wpmCalculatorRef.current.calculateWPM().totalWords : countWordsAccurately(transcript || ''),
-          confidence: wpmCalculatorRef.current ? wpmCalculatorRef.current.calculateWPM().confidence : 0,
-          wordCountHistory: [] // Could be enhanced to track word history
-        },
-        
-        // Enhanced transcript analysis
         transcriptAnalysis: {
           fullTranscript: transcript || 'No transcript available',
-          wordCount: countWordsAccurately(transcript || ''),
+          wordCount: transcript ? transcript.split(/\s+/).filter(w => w.length > 0).length : 0,
           characterCount: transcript ? transcript.length : 0,
           sentenceCount: transcript ? transcript.split(/[.!?]+/).filter(s => s.trim().length > 0).length : 0,
           averageWordsPerSentence: transcript && transcript.split(/[.!?]+/).filter(s => s.trim().length > 0).length > 0 
-            ? Math.round(countWordsAccurately(transcript) / transcript.split(/[.!?]+/).filter(s => s.trim().length > 0).length) 
+            ? Math.round((transcript ? transcript.split(/\s+/).filter(w => w.length > 0).length : 0) / transcript.split(/[.!?]+/).filter(s => s.trim().length > 0).length) 
             : 0,
           highlightedTranscript: transcript ? highlightFillerWords(transcript) : 'No transcript available'
         },
-        
-        coachingTips: hasRealSpeech ? [
-          `Confidence level: ${realConfidenceScore}%`,
-          `Eye contact: ${realEyeContact}%`, 
-          `Engagement: ${metrics.engagement}%`,
-          `Speaking pace: ${wpmCalculatorRef.current ? wpmCalculatorRef.current.calculateWPM().averageWPM : metrics.wordsPerMinute || 0} WPM`,
-          `Filler words detected: ${metrics.fillerWordCount || 0}`,
-          `Total words spoken: ${countWordsAccurately(transcript || '')}`
-        ] : [
-          'No speech detected in this session',
-          'Try speaking during the recording to get analysis',
-          'Check microphone permissions and audio settings'
-        ],
-        
-        // Analysis tab compatible fields
-        clarityScore: realVoiceClarity / 100,
-        postureScore: 0, // Posture analysis removed
-        fillerWordsUh: hasRealSpeech ? Math.floor(realFillerWords * 0.4) : 0,
-        fillerWordsLike: hasRealSpeech ? Math.floor(realFillerWords * 0.3) : 0,
-        fillerWordsSo: hasRealSpeech ? Math.floor(realFillerWords * 0.3) : 0,
-        name: sessionName || `Session ${Date.now()}`,
-        purpose: sessionPurpose || 'General practice session',
-        
-        // Enhanced AI analysis fields
-        aiAnalysis: {
-          overallPerformance: realConfidenceScore,
-          sessionName: sessionName,
-          purpose: sessionPurpose,
-          facialAnalysis: facialAnalysis?.facialMetrics || null,
-          hasRealSpeech: hasRealSpeech,
-          enhancedMetrics: {
-            wpmAccuracy: wpmCalculatorRef.current ? wpmCalculatorRef.current.calculateWPM().confidence : 0,
-            fillerWordAccuracy: transcript ? detectFillerWords(transcript).count : 0,
-            eyeContactAccuracy: eyeContactPercentage > 0 ? 'Real Detection' : 'Simulated'
-          }
-        },
-        
-        speechPatterns: {
-          averageWPM: wpmCalculatorRef.current ? wpmCalculatorRef.current.calculateWPM().averageWPM : metrics.wordsPerMinute || 0,
-          currentWPM: wpmCalculatorRef.current ? wpmCalculatorRef.current.calculateWPM().currentWPM : metrics.wordsPerMinute || 0,
-          fillerCount: metrics.fillerWordCount || 0,
-          clarity: realVoiceClarity,
-          totalWords: countWordsAccurately(transcript || ''),
-          speakingTime: sessionDuration,
-          wordsPerSecond: sessionDuration > 0 ? countWordsAccurately(transcript || '') / sessionDuration : 0
-        },
-        
-        bodyLanguageMetrics: {
-          eyeContact: realEyeContact,
-          confidence: hasRealSpeech ? (bodyMetrics?.overall?.confidence || metrics.confidence) : 0,
-          postureConfidence: bodyMetrics?.posture?.confidence || 0,
-          spineAlignment: bodyMetrics?.posture?.spineAlignment || 0,
-          shoulderPosition: bodyMetrics?.posture?.shoulderPosition || 0,
-          stability: bodyMetrics?.posture?.stability || 0,
-          gesturesNaturalness: bodyMetrics?.gestures?.naturalness || 0,
-          gesturesEffectiveness: bodyMetrics?.gestures?.effectiveness || 0,
-          gesturesTiming: bodyMetrics?.gestures?.timing || 0,
-          eyeContactMethod: eyeContactPercentage > 0 ? 'Real Detection' : 'Simulated'
-        },
-        
-        persuasivenessScore: realConfidenceScore / 100,
-        emotionalIntelligence: {
-          engagement: hasRealSpeech ? metrics.engagement : 0,
-          confidence: hasRealSpeech ? metrics.confidence : 0,
-          authenticity: hasRealSpeech ? (facialAnalysis?.facialMetrics?.emotionalExpression?.authenticity || 75) : 0
-        },
-        
-        // Live metrics history
         liveMetricsHistory: {
-          wpmHistory: [], // Could be enhanced to track WPM history
-          fillerWordHistory: [], // Could be enhanced to track filler word history
-          eyeContactHistory: [], // Could be enhanced to track eye contact history
-          confidenceHistory: [], // Could be enhanced to track confidence history
-          sessionDuration: sessionDuration,
-          recordingStartTime: Date.now() - (sessionDuration * 1000),
-          recordingEndTime: Date.now()
-        }
+          wpmHistory: wpmHistory,
+          fillerWordHistory: [metrics.fillerWordCount || 0],
+          eyeContactHistory: [metrics.eyeContact || 0],
+          confidenceHistory: [metrics.confidence || 0]
+        },
+        coachingTips: liveFeedback.slice(-5).map(feedback => feedback.message)
       };
 
-      console.log('💾 Saving session with schema-compliant data:', enhancedSessionData);
-
-      const response = await fetch('/api/practice-sessions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(enhancedSessionData)
+      console.log('📊 Session data prepared for backend:', {
+        duration: sessionData.duration,
+        transcriptLength: sessionData.transcript.length,
+        wpm: sessionData.metrics.wordsPerMinute,
+        fillers: sessionData.metrics.fillerWordCount,
+        eyeContact: sessionData.metrics.eyeContact,
+        coachingTips: sessionData.coachingTips.length
       });
 
-      if (response.ok) {
-        const savedSession = await response.json();
-        console.log('✅ Session saved successfully:', savedSession);
+      const response = await fetch('/api/save-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(sessionData)
+      });
+
+      if (!response.ok) {
+        console.error('❌ Session save failed with status:', response.status);
+        const errorText = await response.text().catch(() => 'Unknown error');
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        console.log(`✅ Session ${result.sessionNumber} saved successfully`);
+        
+        // Update session number for next session
+        const nextSessionNumber = result.sessionNumber + 1;
+        setSessionNumber(nextSessionNumber);
+        setSessionName(`Session ${nextSessionNumber}`);
         
         toast({
-          title: "✅ Session Saved Successfully",
-          description: `${sessionName} saved with full transcript and analytics - view anytime in Analysis tab`,
+          title: "Session Saved Successfully! 🎉",
+          description: `Your session with ${metrics.wordsPerMinute || 0} WPM, ${metrics.fillerWordCount || 0} filler words, and ${transcript ? transcript.split(/\s+/).filter(w => w.length > 0).length : 0} words has been saved. Check the Analysis tab to view detailed insights!`,
+          variant: "default",
+          duration: 5000
         });
-        
-        // Prepare analysis data that matches AuthenticAnalysisPage interface exactly
-        const analysisData = {
-          id: Date.now(),
-          sessionNumber: sessionNumber || 1,
-          sessionName: sessionName || 'Practice Session',
-          purpose: sessionPurpose || 'General Practice',
-          duration: sessionDuration,
-          transcript: transcript || 'No transcript available',
-          averageWPM: metrics.wordsPerMinute || 0,
-          confidenceScore: Math.round(metrics.confidence || 0),
-          voiceClarity: Math.round(metrics.voice?.clarity || 0),
-          fillerWords: metrics.fillerWordCount || 0,
-          pauseCount: 0,
-          eyeContactScore: `${Math.round(metrics.eyeContact || 0)}%`,
-          coachingTips: [],
-          facialAnalysis: facialAnalysis?.facialMetrics,
-          voiceMetrics: {
-            clarity: Math.round(metrics.voice?.clarity || 0),
-            pace: metrics.wordsPerMinute || 0,
-            fillerCount: metrics.fillerWordCount || 0
-          },
-          bodyLanguageMetrics: {
-            eyeContact: metrics.eyeContact || 0,
-            confidence: metrics.confidence || 0,
-            posture: 0
-          },
-          persuasivenessScore: Math.round((metrics.confidence + metrics.eyeContact) / 2) || 0,
-          createdAt: new Date().toISOString(),
-          hasRealSpeech: transcript && transcript.trim().length > 10
-        };
-        
-        console.log('📊 Analysis data prepared for AuthenticAnalysisPage:', analysisData);
-        
-        // Save session with video and transcript to database
-        try {
-          let base64Video = null;
-          if (recordingData && recordingData.videoBlob) {
-            try {
-              const videoData = await recordingData.videoBlob.arrayBuffer();
-              const uint8Array = new Uint8Array(videoData);
-              let binaryString = '';
-              for (let i = 0; i < uint8Array.length; i++) {
-                binaryString += String.fromCharCode(uint8Array[i]);
-              }
-              base64Video = btoa(binaryString);
-            } catch (error) {
-              console.warn('⚠️ Failed to convert video to base64:', error);
-              base64Video = null;
-            }
-          }
-          
-          const saveVideoResponse = await fetch('/api/sessions/save-with-video', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              sessionName: sessionName,
-              sessionPurpose: sessionPurpose,
-              transcript: transcript,
-              videoData: base64Video,
-              duration: sessionDuration,
-              metrics: {
-                confidence: metrics.confidence || 0,
-                clarity: metrics.voice?.clarity || 0,
-                pace: wpmCalculatorRef.current ? wpmCalculatorRef.current.calculateWPM().averageWPM : metrics.wordsPerMinute || 0,
-                eyeContact: metrics.eyeContact || 0,
-                gesture: 0, // Gesture analysis removed
-                fillerWordCount: metrics.fillerWordCount || 0,
-                wordsPerMinute: wpmCalculatorRef.current ? wpmCalculatorRef.current.calculateWPM().averageWPM : metrics.wordsPerMinute || 0
-              },
-              facialAnalysis: facialAnalysis?.facialMetrics,
-              voiceMetrics: {
-                clarity: metrics.voice?.clarity || 0,
-                pace: wpmCalculatorRef.current ? wpmCalculatorRef.current.calculateWPM().averageWPM : metrics.voice?.pace || 0,
-                volume: metrics.voice?.volume || 0,
-                intonation: metrics.voice?.intonation || 0,
-                fillerCount: metrics.fillerWordCount || 0,
-                pauseEffectiveness: metrics.voice?.pauseEffectiveness || 0,
-                pitchVariation: metrics.voice?.pitchVariation || 0,
-                vocalFryDetection: metrics.voice?.vocalFryDetection || false,
-                uptalkPatterns: metrics.voice?.uptalkPatterns || 0
-              },
-              // Enhanced metrics from WorkingRecordingTest
-              enhancedMetrics: {
-                wpmAnalysis: {
-                  averageWPM: wpmCalculatorRef.current ? wpmCalculatorRef.current.calculateWPM().averageWPM : metrics.wordsPerMinute || 0,
-                  currentWPM: wpmCalculatorRef.current ? wpmCalculatorRef.current.calculateWPM().currentWPM : metrics.wordsPerMinute || 0,
-                  totalWords: wpmCalculatorRef.current ? wpmCalculatorRef.current.calculateWPM().totalWords : countWordsAccurately(transcript || ''),
-                  confidence: wpmCalculatorRef.current ? wpmCalculatorRef.current.calculateWPM().confidence : 0
-                },
-                fillerWordAnalysis: {
-                  totalFillers: metrics.fillerWordCount || 0,
-                  fillerWords: transcript ? detectFillerWords(transcript).words : [],
-                  fillerBreakdown: {
-                    um: transcript ? detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('um')).length : 0,
-                    uh: transcript ? detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('uh')).length : 0,
-                    like: transcript ? detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('like')).length : 0,
-                    youKnow: transcript ? detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('you know')).length : 0,
-                    basically: transcript ? detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('basically')).length : 0,
-                    actually: transcript ? detectFillerWords(transcript).words.filter(w => w.toLowerCase().includes('actually')).length : 0,
-                    other: transcript ? detectFillerWords(transcript).words.filter(w => 
-                      !w.toLowerCase().includes('um') && 
-                      !w.toLowerCase().includes('uh') && 
-                      !w.toLowerCase().includes('like') && 
-                      !w.toLowerCase().includes('you know') && 
-                      !w.toLowerCase().includes('basically') && 
-                      !w.toLowerCase().includes('actually')
-                    ).length : 0
-                  }
-                },
-                transcriptAnalysis: {
-                  fullTranscript: transcript || 'No transcript available',
-                  wordCount: countWordsAccurately(transcript || ''),
-                  characterCount: transcript ? transcript.length : 0,
-                  sentenceCount: transcript ? transcript.split(/[.!?]+/).filter(s => s.trim().length > 0).length : 0,
-                  averageWordsPerSentence: transcript && transcript.split(/[.!?]+/).filter(s => s.trim().length > 0).length > 0 
-                    ? Math.round(countWordsAccurately(transcript) / transcript.split(/[.!?]+/).filter(s => s.trim().length > 0).length) 
-                    : 0,
-                  highlightedTranscript: transcript ? highlightFillerWords(transcript) : 'No transcript available'
-                },
-                eyeContactMethod: eyeContactPercentage > 0 ? 'Real Detection' : 'Simulated'
-              }
-            })
-          });
-
-                    if (saveVideoResponse.ok) {
-            const savedVideoSession = await saveVideoResponse.json();
-            console.log('✅ Session with video/transcript saved to database:', savedVideoSession.sessionId);
-            
-            // Also save to local recording storage for immediate playback
-            if (recordingData) {
-              const recordingId = sessionRecordingStorage.saveRecording(
-                recordingData,
-                transcript,
-                enhancedSessionData,
-                facialAnalysis?.facialMetrics
-              );
-              setCurrentRecording(recordingData);
-              console.log('🎬 Video recording also saved locally:', recordingId);
-            }
-            
-            toast({
-              title: "Session & Video Saved Successfully",
-              description: `Session saved to database with ${savedVideoSession.hasVideo ? 'video recording' : 'transcript'} - view anytime in Analysis tab`,
-              duration: 4000
-            });
-          } else {
-            const errorText = await saveVideoResponse.text().catch(() => 'Unknown error');
-            throw new Error(`Video save failed: ${errorText}`);
-          }
-          
-        } catch (videoSaveError) {
-          console.error('❌ Failed to save session with video:', videoSaveError);
-          toast({
-            title: "Video Save Warning", 
-            description: "Session saved but video may not be available for review",
-            variant: "destructive",
-            duration: 5000
-          });
-          
-          // Fallback to local storage only
-          if (recordingData) {
-            const recordingId = sessionRecordingStorage.saveRecording(
-              recordingData,
-              transcript,
-              enhancedSessionData,
-              facialAnalysis?.facialMetrics
-            );
-            setCurrentRecording(recordingData);
-            console.log('🎬 Video saved locally as fallback:', recordingId);
-          }
-        }
-
-        console.log('🔄 Setting analysis data and showing analysis page...');
-        setSessionAnalysisData(analysisData);
-        setShowAnalysisPage(true);
-        console.log('✅ Analysis page should now be visible with data:', { showAnalysisPage: true, hasAnalysisData: !!analysisData });
+      } else {
+        console.error('❌ Failed to save session:', result.error);
+        toast({
+          title: "Save Failed",
+          description: result.error || "Unable to save session",
+          variant: "destructive"
+        });
       }
     } catch (error) {
-      console.error('Error saving session:', error);
+      console.error('❌ Error saving session:', error);
       toast({
-        title: "Save Failed",
-        description: "Could not save session data",
+        title: "Session Save Error",
+        description: "Session could not be saved. Please try again.",
         variant: "destructive"
       });
+    } finally {
+      setIsSavingSession(false);
     }
-  }, [sessionName, sessionPurpose, sessionDuration, transcript, metrics, toast]);
+  }, [sessionName, sessionPurpose, sessionDuration, transcript, metrics.wordsPerMinute, metrics.fillerWordCount, metrics.eyeContact, metrics.confidence, metrics.engagement, metrics.clarity, toast]);
 
   // Show video playback if requested
   if (showVideoPlayback && currentRecording) {
@@ -2255,8 +2623,9 @@ export default function SimplifiedPracticePage() {
           setShowAnalysisPage(false);
           setSessionAnalysisData(null);
           // Reset all session data
-          setSessionName("");
-          setSessionPurpose("");
+          setSessionName(`Session ${sessionNumber + 1}`);
+          setSessionPurpose("general-presentation");
+          setSessionNumber(sessionNumber + 1);
           setTranscript("");
           setInterimTranscript("");
           setSessionDuration(0);
@@ -2417,13 +2786,32 @@ export default function SimplifiedPracticePage() {
               </div>
 
               {/* Recording Controls */}
-              <div className="flex flex-col lg:flex-row gap-3">
-                {!isRecording ? (
-                  <Button onClick={startRecording} className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white shadow-lg hover:shadow-xl transition-all duration-200">
-                    <Mic className="w-5 h-5 mr-2" />
-                    Start Practice
-                  </Button>
-                ) : (
+                              <div className="flex flex-col lg:flex-row gap-3">
+                  {!isRecording ? (
+                    <>
+                      <Button onClick={startRecording} className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white shadow-lg hover:shadow-xl transition-all duration-200">
+                        <Mic className="w-5 h-5 mr-2" />
+                        Start Practice
+                      </Button>
+                      
+                                  {/* Speech recognition status indicator */}
+            <div className="flex items-center gap-2 ml-2">
+              <div className={`w-3 h-3 rounded-full ${
+                speechRecognitionStatus === 'active' ? 'bg-green-500 animate-pulse' :
+                speechRecognitionStatus === 'starting' ? 'bg-yellow-500 animate-pulse' :
+                speechRecognitionStatus === 'error' ? 'bg-red-500' : 'bg-gray-400'
+              }`} />
+              <span className="text-sm text-gray-600">
+                {speechRecognitionStatus === 'active' ? 'Listening' :
+                 speechRecognitionStatus === 'starting' ? 'Starting...' :
+                 speechRecognitionStatus === 'error' ? 'Error' : 'Ready'}
+              </span>
+              <span className="text-xs text-gray-500">({transcriptUpdateCount})</span>
+            </div>
+            
+
+                    </>
+                  ) : (
                   <div className="flex items-center gap-2">
                     <Button 
                       onClick={stopRecording} 
@@ -2434,8 +2822,8 @@ export default function SimplifiedPracticePage() {
                       <Square className="w-5 h-5 mr-2" />
                       End Session ({Math.floor(sessionDuration / 60)}:{(sessionDuration % 60).toString().padStart(2, '0')})
                     </Button>
-                    <div className="text-sm text-gray-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
-                      💾 Auto-saves to Analysis tab
+                    <div className="text-sm text-blue-700 bg-blue-50 px-3 py-1 rounded-full border border-blue-200 font-medium">
+                      💾 Auto-saves transcript, WPM, & filler words to Analysis tab
                     </div>
                   </div>
                 )}
@@ -2471,15 +2859,42 @@ export default function SimplifiedPracticePage() {
                     Library
                   </Button>
                   
-                  {/* Live Transcript Toggle */}
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowLiveTranscript(!showLiveTranscript)}
-                    className="flex items-center gap-2 hover:bg-blue-50 hover:border-blue-200 transition-all duration-200"
-                  >
-                    <FileText className="w-4 h-4" />
-                    {showLiveTranscript ? 'Hide' : 'Show'} Transcript
-                  </Button>
+                                {/* Live Transcript Toggle */}
+              <Button
+                variant="outline"
+                onClick={() => setShowLiveTranscript(!showLiveTranscript)}
+                className="flex items-center gap-2 hover:bg-blue-50 hover:border-blue-200 transition-all duration-200"
+              >
+                <FileText className="w-4 h-4" />
+                {showLiveTranscript ? 'Hide' : 'Show'} Transcript
+              </Button>
+              
+              {/* Test Live Metrics */}
+              <Button
+                variant="outline"
+                onClick={() => {
+                  const fillerResult = detectFillerWords(transcript);
+                  console.log('🧪 Testing live metrics:', {
+                    transcript: transcript.substring(0, 100) + '...',
+                    sessionDuration: sessionDuration,
+                    wordCount: transcript.split(' ').filter(w => w.length > 0).length,
+                    wpm: Math.round((transcript.split(' ').filter(w => w.length > 0).length / Math.max(1, sessionDuration / 60))),
+                    fillerWords: fillerResult.words,
+                    fillerCount: fillerResult.count,
+                    currentFillerCount: metrics.fillerWordCount,
+                    isRecording: isRecording
+                  });
+                  toast({
+                    title: "Live Metrics Test",
+                    description: `Fillers: ${fillerResult.count} detected (${fillerResult.words.join(', ')})`,
+                    variant: "default"
+                  });
+                }}
+                className="flex items-center gap-2 hover:bg-green-50 hover:border-green-200 transition-all duration-200"
+              >
+                <Activity className="w-4 h-4" />
+                Test Fillers
+              </Button>
                   
                   {/* AI Coach Toggle */}
                   <Button
@@ -2617,6 +3032,12 @@ export default function SimplifiedPracticePage() {
                         Active
                       </Badge>
                     )}
+                    {isRecording && liveFeedback.length > 0 && (
+                      <div className="ml-2 flex items-center gap-1">
+                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                        <span className="text-xs text-green-600 font-medium">Providing insights every 15s</span>
+                      </div>
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="flex-1 flex flex-col overflow-hidden">
@@ -2660,8 +3081,14 @@ export default function SimplifiedPracticePage() {
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-blue-50 border border-blue-200">
                           <TrendingUp className="w-3 h-3 text-blue-600" />
-                          <span className="text-xs font-semibold text-blue-700">{metrics.wordsPerMinute}</span>
+                          <span className="text-xs font-semibold text-blue-700">
+                            {metrics.wordsPerMinute > 0 ? metrics.wordsPerMinute : '--'}
+                          </span>
                           <span className="text-[10px] text-gray-600 uppercase">WPM</span>
+                          <span className="text-[8px] text-gray-500">({wpmUpdateCount})</span>
+                          {sessionStartTime && metrics.wordsPerMinute > 0 && (
+                            <div className="w-1 h-1 bg-green-500 rounded-full animate-pulse ml-1" />
+                          )}
                         </div>
                         <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-purple-50 border border-purple-200">
                           <AlertTriangle className="w-3 h-3 text-purple-600" />
@@ -2691,10 +3118,22 @@ export default function SimplifiedPracticePage() {
                 <div className="flex items-center gap-2">
                   <FileText className="w-5 h-5 text-blue-600" />
                   <span className="text-blue-800 font-semibold">Live Transcript</span>
-                  {isRecording && (
+                  {speechRecognitionStatus === 'active' && (
                     <Badge variant="secondary" className="ml-2 bg-green-100 text-green-800 border-green-200">
-                      <Activity className="w-3 h-3 mr-1" />
-                      Live
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-1" />
+                      Listening
+                    </Badge>
+                  )}
+                  {speechRecognitionStatus === 'starting' && (
+                    <Badge variant="secondary" className="ml-2 bg-yellow-100 text-yellow-800 border-yellow-200">
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse mr-1" />
+                      Starting...
+                    </Badge>
+                  )}
+                  {speechRecognitionStatus === 'error' && (
+                    <Badge variant="destructive" className="ml-2">
+                      <AlertTriangle className="w-3 h-3 mr-1" />
+                      Error
                     </Badge>
                   )}
                 </div>
@@ -2710,38 +3149,58 @@ export default function SimplifiedPracticePage() {
             </CardHeader>
             <CardContent>
               <div className="bg-white border-2 border-gray-100 p-6 rounded-lg max-h-60 overflow-y-auto shadow-inner">
-                {transcript || interimTranscript ? (
+                {transcript.trim() ? (
                   <div className="text-sm leading-relaxed">
-                    <FillerWordHighlighter 
-                      text={transcript}
+                    <div 
                       className="text-gray-900"
+                      dangerouslySetInnerHTML={{ 
+                        __html: highlightFillerWords(transcript) 
+                      }}
                     />
-                    {interimTranscript && (
-                      <span className="text-gray-400 italic">
-                        {' ' + interimTranscript}
-                      </span>
-                    )}
                     
-                    {/* Show filler word count summary */}
-                    {metrics.fillerWordCount > 0 && (
-                      <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-xs">
-                        <strong>Fillers detected:</strong> {metrics.fillerWordCount} words
-                        {transcript.includes('[UM') && ' (including UM sounds)'}
-                        {transcript.includes('[UH') && ' (including UH sounds)'}
-                      </div>
-                    )}
+                    {/* Show WPM and filler word summary */}
+                    <div className="mt-4 space-y-2">
+                      {metrics.wordsPerMinute > 0 && (
+                        <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs">
+                          <div className="flex items-center justify-between">
+                            <strong className="text-blue-800">Speaking Pace:</strong>
+                            <span className="font-semibold text-blue-700">{metrics.wordsPerMinute} WPM</span>
+                          </div>
+                          {sessionStartTime && (
+                            <div className="text-blue-600 mt-1">
+                              {transcript.split(' ').filter(w => w.length > 0).length} words in {Math.floor((Date.now() - sessionStartTime) / 1000)}s
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      {metrics.fillerWordCount > 0 && (
+                        <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-xs">
+                          <strong>Fillers detected:</strong> {metrics.fillerWordCount} words
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ) : (
                   <div className="text-center text-gray-500 py-12">
-                    {isRecording ? (
+                    {speechRecognitionStatus === 'active' ? (
                       <div className="flex items-center justify-center gap-2">
-                        <Activity className="w-4 h-4 animate-pulse" />
-                        <span>Listening for speech...</span>
+                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                        <span>Listening for speech... Start speaking to see your transcript here</span>
+                      </div>
+                    ) : speechRecognitionStatus === 'starting' ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" />
+                        <span>Initializing speech recognition...</span>
+                      </div>
+                    ) : speechRecognitionStatus === 'error' ? (
+                      <div className="flex items-center justify-center gap-2 text-red-600">
+                        <AlertTriangle className="w-4 h-4" />
+                        <span>Speech recognition error. Please check microphone permissions.</span>
                       </div>
                     ) : (
                       <div className="flex items-center justify-center gap-2">
                         <Mic className="w-4 h-4" />
-                        <span>Start recording to see live transcript</span>
+                        <span>Click "Start Practice" to begin recording your speech</span>
                       </div>
                     )}
                   </div>

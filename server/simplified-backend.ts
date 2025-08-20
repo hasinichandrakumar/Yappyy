@@ -266,34 +266,75 @@ export async function registerSimplifiedRoutes(app: Express): Promise<Server> {
   app.post('/api/save-session', async (req, res) => {
     try {
       const userId = getUserId(req);
-      const { transcript, duration, purpose, metrics } = req.body;
+      const { 
+        transcript = '', 
+        duration = 0, 
+        purpose = 'general-presentation',
+        metrics = {},
+        sessionName = 'Practice Session',
+        sessionNumber: requestSessionNumber = 1,
+        wpmAnalysis = {},
+        fillerWordAnalysis = {},
+        transcriptAnalysis = {},
+        liveMetricsHistory = [],
+        coachingTips = []
+      } = req.body;
 
-      if (!transcript || !duration) {
-        return res.status(400).json({ 
-          error: 'Transcript and duration are required',
-          success: false 
-        });
-      }
+      console.log('💾 Saving session data:', {
+        userId,
+        duration,
+        transcriptLength: transcript.length,
+        metrics: Object.keys(metrics),
+        wpmAnalysis: Object.keys(wpmAnalysis),
+        fillerWordAnalysis: Object.keys(fillerWordAnalysis)
+      });
 
       const sessionNumber = await getNextSessionNumber(userId);
+      
+      // Extract metrics with defaults to prevent null constraint violations
+      const averageWPM = metrics.wordsPerMinute || wpmAnalysis.averageWPM || 0;
+      const confidenceScore = metrics.confidence || 0.5;
+      const voiceClarity = metrics.voiceClarity || 0.5;
+      const fillerWords = metrics.fillerWordCount || fillerWordAnalysis.totalCount || 0;
+      const pauseCount = metrics.pauseCount || 0;
+      const eyeContactScore = metrics.eyeContact ? metrics.eyeContact.toString() : '0';
       
       const sessionData = {
         userId,
         sessionNumber,
-        transcript,
-        duration,
+        transcript: transcript || '',
+        duration: duration || 0,
         purpose: purpose || 'general-presentation',
-        metrics: metrics || {},
+        averageWPM: Math.round(averageWPM),
+        confidenceScore: Math.max(0, Math.min(1, confidenceScore)),
+        voiceClarity: Math.max(0, Math.min(1, voiceClarity)),
+        fillerWords: Math.max(0, fillerWords),
+        pauseCount: Math.max(0, pauseCount),
+        eyeContactScore: eyeContactScore,
+        coachingTips: coachingTips.length > 0 ? coachingTips : ['Keep practicing to improve your skills!'],
+        sessionName: sessionName || 'Practice Session',
+        wordsPerMinute: Math.round(averageWPM),
+        fillerWordCount: Math.max(0, fillerWords),
         createdAt: new Date()
       };
 
+      console.log('📊 Processed session data:', {
+        averageWPM: sessionData.averageWPM,
+        confidenceScore: sessionData.confidenceScore,
+        voiceClarity: sessionData.voiceClarity,
+        fillerWords: sessionData.fillerWords,
+        pauseCount: sessionData.pauseCount,
+        eyeContactScore: sessionData.eyeContactScore
+      });
+
       const result = await db.insert(practiceSessions).values(sessionData);
       
-      console.log('✅ Session saved:', {
+      console.log('✅ Session saved successfully:', {
         userId,
         sessionNumber,
         duration,
-        transcriptLength: transcript.length
+        transcriptLength: transcript.length,
+        sessionId: result.insertId
       });
 
       res.json({ 
