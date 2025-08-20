@@ -6,6 +6,14 @@ Yappyy is a world-class AI-powered public speaking improvement platform built wi
 
 Preferred communication style: Simple, everyday language.
 
+# Recent Changes
+
+**December 20, 2025:**
+- Fixed critical React duplicate key warnings by removing duplicated templates from additional-templates-expansion.ts file
+- Resolved server startup port conflict (EADDRINUSE error on port 5000) 
+- Application now running successfully with all AI services initialized
+- Template collection cleaned up to prevent key conflicts in React rendering
+
 # System Architecture
 
 ## Frontend Architecture
