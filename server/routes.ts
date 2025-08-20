@@ -113,7 +113,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/auth/google/callback', (req, res, next) => {
     console.log('🔄 OAuth callback received, authenticating...');
-    passport.authenticate('google', (err, user, info) => {
+    passport.authenticate('google', (err: any, user: any, info: any) => {
       if (err) {
         console.error('❌ OAuth authentication error:', err);
         return res.redirect('/?error=auth_error&details=' + encodeURIComponent(err.message));

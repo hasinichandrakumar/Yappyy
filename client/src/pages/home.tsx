@@ -118,7 +118,7 @@ export default function HomePage() {
               </Button>
               {!isAuthenticated ? (
                 <Button
-                  onClick={() => window.location.href = '/oauth-loading'}
+                  onClick={() => window.location.href = '/api/auth/google'}
                 className="bg-white/95 backdrop-blur-sm border-0 text-gray-700 hover:bg-white hover:scale-105 hover:text-gray-800 shadow-lg hover:shadow-xl transition-all duration-300 flex items-center space-x-3 px-6 py-3 h-12"
                 >
                   <svg className="h-5 w-5" viewBox="0 0 24 24">
@@ -172,9 +172,9 @@ export default function HomePage() {
                 className="bg-gradient-to-br from-[#2563eb] to-[#22d3ee] hover:from-[#1d4ed8] hover:to-[#06b6d4] text-white hover:text-white active:text-white focus:text-white font-button shadow-lg hover:shadow-xl transition-all duration-300"
                 onClick={() => {
                   if (isAuthenticated) {
-                    window.location.href = 'https://yappyy.com/dashboard';
+                    window.location.href = '/dashboard';
                   } else {
-                    window.location.href = '/oauth-loading';
+                    window.location.href = '/api/auth/google';
                   }
                 }}
               >
@@ -217,7 +217,7 @@ export default function HomePage() {
                   if (isAuthenticated) {
                     window.location.href = '/dashboard';
                   } else {
-                    window.location.href = '/oauth-loading';
+                    window.location.href = '/api/auth/google';
                   }
                 }}
               >
