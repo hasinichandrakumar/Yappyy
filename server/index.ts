@@ -1,10 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { setDefaultResultOrder } from "node:dns";
-import { registerRoutes } from "./routes";
+import { registerSimplifiedRoutes } from "./simplified-backend";
 import { setupVite, serveStatic, log } from "./vite";
-import { huggingFaceCV } from "./huggingface-computer-vision";
-import { speechEmotionRecognition } from "./speech-emotion-recognition";
-import { facialExpressionAnalysis } from "./facial-expression-analysis";
 
 // Prefer IPv4 to avoid TLS handshake failures on hosts with broken IPv6
 try {
@@ -58,23 +55,10 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Initialize Hugging Face AI Systems
-  console.log("🤗 Initializing Hugging Face Computer Vision for FREE AI analysis...");
-  if (huggingFaceCV.isReady()) {
-    console.log("✅ Hugging Face Computer Vision activated as Roboflow alternative");
-  }
+  console.log("🚀 Starting Simplified Backend - Core Recording Functionality");
+  console.log("✅ No external AI dependencies required");
   
-  console.log("🎤 Initializing Advanced Speech Emotion Recognition...");
-  if (speechEmotionRecognition.isReady()) {
-    console.log("✅ Speech Emotion Recognition activated with wav2vec2 models");
-  }
-  
-  console.log("😊 Initializing Advanced Facial Expression Analysis...");
-  if (facialExpressionAnalysis.isReady()) {
-    console.log("✅ Facial Expression Analysis activated with multiple AI services");
-  }
-  
-  const server = await registerRoutes(app);
+  const server = await registerSimplifiedRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
@@ -98,6 +82,10 @@ app.use((req, res, next) => {
   const host = process.env.HOST || "0.0.0.0"; // bind IPv4
 
   server.listen(port, host, () => {
-    log(`serving on port ${port}`);
+    log(`🚀 Simplified backend serving on port ${port}`);
+    log(`✅ Core recording functionality ready`);
+    log(`✅ Filler word detection active`);
+    log(`✅ Session analysis available`);
+    log(`✅ Google OAuth configured`);
   });
 })();
