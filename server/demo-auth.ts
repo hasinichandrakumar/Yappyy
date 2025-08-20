@@ -163,7 +163,7 @@ export function setupDemoAuth(app: Express) {
     }
   });
 
-  // Note: /api/auth/user endpoint is handled by Google auth setup in googleAuth.ts
+  // Note: /api/auth/user endpoint removed - starting fresh
 
   // Logout route
   app.get("/api/auth/logout", (req: any, res) => {

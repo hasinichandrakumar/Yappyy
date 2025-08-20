@@ -9,7 +9,7 @@ import { emotionalImpactAnalyzer } from "./emotional-impact-analyzer";
 import { advancedFillerDetectionEngine } from "./advanced-filler-detection";
 import { RealTimeSessionManager } from "./redis-realtime";
 import { insertPracticeSessionSchema, insertCoachingFeedbackSchema, insertCustomTemplateSchema, practiceSessions } from "@shared/schema";
-import { setupGoogleAuth, isAuthenticated } from "./googleAuth";
+// Google Auth removed - starting fresh
 import { setupUserProgressAPI } from "./user-progress-api";
 import { userOnboardingService } from "./user-onboarding";
 import { generateClubCoaching } from "./ai-coaching";
@@ -103,7 +103,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }
   
   // Setup Google OAuth Authentication (primary and only auth system)
-  await setupGoogleAuth(app);
+  // Google Auth setup removed - starting fresh
 
   // Authenticate with token (for cross-domain OAuth)
   app.post('/api/auth/token', async (req: any, res) => {
@@ -4243,7 +4243,7 @@ Provide specific, actionable coaching tips to improve this presentation. Focus o
   });
 
   // Custom Templates API endpoints
-  app.post('/api/custom-templates', isAuthenticated, async (req: any, res) => {
+  app.post('/api/custom-templates', async (req: any, res) => {
     try {
       const userId = req.user?.id;
       if (!userId) {
@@ -4283,7 +4283,7 @@ Provide specific, actionable coaching tips to improve this presentation. Focus o
     }
   });
 
-  app.post('/api/improve-template', isAuthenticated, async (req: any, res) => {
+  app.post('/api/improve-template', async (req: any, res) => {
     try {
       const { title, category, description, content } = req.body;
 

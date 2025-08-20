@@ -2,11 +2,11 @@ import type { Express } from "express";
 import { db } from "./db";
 import { users, practiceSessions, userProgress, aiInsights, coachingAnalytics } from "@shared/schema";
 import { eq, desc, asc, avg, count, sum, and, gte, sql } from "drizzle-orm";
-import { isAuthenticated } from "./googleAuth";
+// Google Auth removed - starting fresh
 
 export function setupUserProgressAPI(app: Express) {
   // Get comprehensive user progress dashboard
-  app.get('/api/user/progress/dashboard', isAuthenticated, async (req: any, res) => {
+  app.get('/api/user/progress/dashboard', async (req: any, res) => {
     try {
       const userId = req.user?.id;
       if (!userId) {
@@ -111,7 +111,7 @@ export function setupUserProgressAPI(app: Express) {
   });
 
   // Get detailed progress for a specific skill area
-  app.get('/api/user/progress/skill/:skillArea', isAuthenticated, async (req: any, res) => {
+  app.get('/api/user/progress/skill/:skillArea', async (req: any, res) => {
     try {
       const userId = req.user?.id;
       const { skillArea } = req.params;
@@ -152,7 +152,7 @@ export function setupUserProgressAPI(app: Express) {
   });
 
   // Update user progress for a skill area
-  app.post('/api/user/progress/update', isAuthenticated, async (req: any, res) => {
+  app.post('/api/user/progress/update', async (req: any, res) => {
     try {
       const userId = req.user?.id;
       const { skillArea, sessionScore, sessionData } = req.body;
@@ -216,7 +216,7 @@ export function setupUserProgressAPI(app: Express) {
   });
 
   // Get user's achievement milestones
-  app.get('/api/user/achievements', isAuthenticated, async (req: any, res) => {
+  app.get('/api/user/achievements', async (req: any, res) => {
     try {
       const userId = req.user?.id;
       if (!userId) {
@@ -300,7 +300,7 @@ export function setupUserProgressAPI(app: Express) {
   });
 
   // Get user's practice streak information
-  app.get('/api/user/streak', isAuthenticated, async (req: any, res) => {
+  app.get('/api/user/streak', async (req: any, res) => {
     try {
       const userId = req.user?.id;
       if (!userId) {
