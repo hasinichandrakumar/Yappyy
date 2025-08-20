@@ -739,7 +739,7 @@ export class FacialAnalysisEngine {
       mouthMetrics: this.getFallbackMouthMetrics(brightness, quality),
       geometry: this.getFallbackGeometry(quality),
       skinAnalysis: this.getFallbackSkinAnalysis(brightness),
-      headPose: this.getFallbackHeadPose()
+      headPose: this.getFallbackHeadPose(quality)
     };
   }
 
@@ -815,7 +815,7 @@ export class FacialAnalysisEngine {
     };
   }
 
-  private getFallbackHeadPose(): any {
+  private getFallbackHeadPose(quality: number): any {
     return {
       pitch: 0, // Neutral head position
       yaw: 0,   // Neutral head position
