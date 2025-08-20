@@ -135,7 +135,8 @@ export class EnhancedPDFExport {
     } catch {
       this.pdf.setFont('helvetica');
     }
-    this.setTextStyle('body');
+    this.pdf.setFontSize(11);
+    this.pdf.setTextColor(0, 0, 0);
   }
 
   protected mergeThemes(base: PDFTheme, override: Partial<PDFTheme>): PDFTheme {
@@ -168,108 +169,64 @@ export class EnhancedPDFExport {
     
     switch (style) {
       case 'h1':
-        this.pdf.setFontSize(28);
-        this.pdf.setFont(this.theme.fonts.heading, 'bold');
-        this.pdf.setTextColor(text.primary[0], text.primary[1], text.primary[2]);
+        this.pdf.setFontSize(16);
+        this.pdf.setFont('Arial', 'bold');
+        this.pdf.setTextColor(0, 0, 0);
         break;
       case 'h2':
-        this.pdf.setFontSize(22);
-        this.pdf.setFont(this.theme.fonts.heading, 'bold');
-        this.pdf.setTextColor(text.primary[0], text.primary[1], text.primary[2]);
+        this.pdf.setFontSize(14);
+        this.pdf.setFont('Arial', 'bold');
+        this.pdf.setTextColor(0, 0, 0);
         break;
       case 'h3':
-        this.pdf.setFontSize(18);
-        this.pdf.setFont(this.theme.fonts.heading, 'bold');
-        this.pdf.setTextColor(text.primary[0], text.primary[1], text.primary[2]);
+        this.pdf.setFontSize(12);
+        this.pdf.setFont('Arial', 'bold');
+        this.pdf.setTextColor(0, 0, 0);
         break;
       case 'h4':
-        this.pdf.setFontSize(14);
-        this.pdf.setFont(this.theme.fonts.heading, 'bold');
-        this.pdf.setTextColor(text.secondary[0], text.secondary[1], text.secondary[2]);
+        this.pdf.setFontSize(12);
+        this.pdf.setFont('Arial', 'bold');
+        this.pdf.setTextColor(0, 0, 0);
         break;
       case 'body':
         this.pdf.setFontSize(11);
-        this.pdf.setFont(this.theme.fonts.primary, 'normal');
-        this.pdf.setTextColor(text.primary[0], text.primary[1], text.primary[2]);
+        this.pdf.setFont('Arial', 'normal');
+        this.pdf.setTextColor(0, 0, 0);
         break;
       case 'caption':
         this.pdf.setFontSize(10);
-        this.pdf.setFont(this.theme.fonts.secondary, 'normal');
-        this.pdf.setTextColor(text.secondary[0], text.secondary[1], text.secondary[2]);
+        this.pdf.setFont('Arial', 'normal');
+        this.pdf.setTextColor(0, 0, 0);
         break;
       case 'small':
         this.pdf.setFontSize(9);
-        this.pdf.setFont(this.theme.fonts.secondary, 'normal');
-        this.pdf.setTextColor(text.muted[0], text.muted[1], text.muted[2]);
+        this.pdf.setFont('Arial', 'normal');
+        this.pdf.setTextColor(0, 0, 0);
         break;
     }
   }
 
   protected addHeader(title: string, subtitle?: string): void {
-    const { colors, spacing } = this.theme;
+    const { spacing } = this.theme;
     
-    // Create gradient header background
-    this.createGradientBackground(0, 0, this.pageWidth, 50, colors.background.gradient.from, colors.background.gradient.to);
-    
-    // Add subtle pattern overlay
-    this.addPatternOverlay(0, 0, this.pageWidth, 50);
-    
-    // Logo/Title with shadow effect
-    this.pdf.setTextColor(255, 255, 255);
+    // Simple text header only
     this.setTextStyle('h1');
+    this.pdf.setTextColor(0, 0, 0);
+    this.pdf.text(title, spacing.margin, this.currentY);
+    this.currentY += 15;
     
-    // Add text shadow effect
-    this.pdf.setTextColor(0, 0, 0, 0.1);
-    this.pdf.text('Yappyy', spacing.margin + 1, 16);
-    this.pdf.setTextColor(255, 255, 255);
-    this.pdf.text('Yappyy', spacing.margin, 15);
-    
-    // Subtitle
     if (subtitle) {
       this.setTextStyle('h4');
-      this.pdf.setTextColor(255, 255, 255, 0.9);
-      this.pdf.text(subtitle, spacing.margin, 28);
+      this.pdf.text(subtitle, spacing.margin, this.currentY);
+      this.currentY += 12;
     }
     
-    // Document Title with modern styling
-    this.setTextStyle('h2');
-    this.pdf.setTextColor(colors.text.primary[0], colors.text.primary[1], colors.text.primary[2]);
-    this.pdf.text(title, spacing.margin, 65);
-    
-    // Add decorative line
-    this.pdf.setDrawColor(colors.primary[0], colors.primary[1], colors.primary[2]);
-    this.pdf.setLineWidth(2);
-    this.pdf.line(spacing.margin, 70, spacing.margin + 60, 70);
-    
-    this.currentY = 85;
+    this.currentY += 10;
   }
 
-  protected createGradientBackground(x: number, y: number, width: number, height: number, fromColor: number[], toColor: number[]): void {
-    const steps = 20;
-    for (let i = 0; i < steps; i++) {
-      const ratio = i / (steps - 1);
-      const r = Math.round(fromColor[0] + (toColor[0] - fromColor[0]) * ratio);
-      const g = Math.round(fromColor[1] + (toColor[1] - fromColor[1]) * ratio);
-      const b = Math.round(fromColor[2] + (toColor[2] - fromColor[2]) * ratio);
-      
-      this.pdf.setFillColor(r, g, b);
-      this.pdf.rect(x, y + (i * height / steps), width, height / steps, 'F');
-    }
-  }
+  // Removed gradient background method - using plain text only
 
-  protected addPatternOverlay(x: number, y: number, width: number, height: number): void {
-    // Add subtle geometric pattern
-    this.pdf.setDrawColor(255, 255, 255, 0.1);
-    this.pdf.setLineWidth(0.5);
-    
-    for (let i = 0; i < width; i += 10) {
-      for (let j = 0; j < height; j += 10) {
-        if ((i + j) % 20 === 0) {
-          this.pdf.line(x + i, y + j, x + i + 5, y + j + 5);
-        }
-      }
-    }
-  }
+  // Removed pattern overlay method - using plain text only
 
   protected addSection(title: string, content: string | string[], icon?: string): void {
     const { colors, spacing } = this.theme;
@@ -291,94 +248,57 @@ export class EnhancedPDFExport {
   }
 
   protected addSectionHeader(title: string, icon?: string): void {
-    const { colors, spacing } = this.theme;
+    const { spacing } = this.theme;
     
-    // Section background card
-    const headerHeight = 25;
-    this.pdf.setFillColor(colors.background.secondary[0], colors.background.secondary[1], colors.background.secondary[2]);
-    this.pdf.roundedRect(spacing.margin, this.currentY, this.pageWidth - (spacing.margin * 2), headerHeight, this.theme.borderRadius.medium, this.theme.borderRadius.medium, 'F');
-    
-    // Left accent border
-    this.pdf.setFillColor(colors.primary[0], colors.primary[1], colors.primary[2]);
-    this.pdf.roundedRect(spacing.margin, this.currentY, 4, headerHeight, this.theme.borderRadius.small, this.theme.borderRadius.small, 'F');
-    
-    // Title
+    // Simple text header only
     this.setTextStyle('h3');
-    this.pdf.setTextColor(colors.text.primary[0], colors.text.primary[1], colors.text.primary[2]);
-    this.pdf.text(title, spacing.margin + 15, this.currentY + 17);
+    this.pdf.setTextColor(0, 0, 0);
+    this.pdf.text(title, spacing.margin, this.currentY);
     
-    this.currentY += headerHeight + spacing.gap;
+    this.currentY += 15;
   }
 
   protected addCard(title: string, content: string, color: number[] = this.theme.colors.primary, icon?: string): void {
     const { spacing } = this.theme;
     const cardWidth = this.pageWidth - (spacing.margin * 2);
-    const lines = this.pdf.splitTextToSize(content, cardWidth - (spacing.padding * 2));
-    const cardHeight = (lines.length * 8) + (spacing.padding * 3) + 20;
+    const lines = this.pdf.splitTextToSize(content, cardWidth);
     
-    this.checkPageBreak(cardHeight + spacing.gap);
+    this.checkPageBreak(50);
     
-    // Card with modern styling
-    this.createModernCard(spacing.margin, this.currentY, cardWidth, cardHeight, color);
-    
-    // Title with icon
+    // Simple text layout only
     this.setTextStyle('h4');
-    this.pdf.setTextColor(color[0], color[1], color[2]);
-    this.pdf.text(title, spacing.margin + spacing.padding, this.currentY + spacing.padding + 15);
+    this.pdf.setTextColor(0, 0, 0);
+    this.pdf.text(title, spacing.margin, this.currentY);
+    this.currentY += 12;
     
     // Content
     this.setTextStyle('body');
-    this.pdf.setTextColor(this.theme.colors.text.primary[0], this.theme.colors.text.primary[1], this.theme.colors.text.primary[2]);
-    this.pdf.text(lines, spacing.margin + spacing.padding, this.currentY + spacing.padding + 30);
+    this.pdf.setTextColor(0, 0, 0);
+    this.pdf.text(lines, spacing.margin, this.currentY);
     
-    this.currentY += cardHeight + spacing.gap;
+    this.currentY += (lines.length * 5) + 15;
   }
 
-  protected createModernCard(x: number, y: number, width: number, height: number, color: number[]): void {
-    const { borderRadius } = this.theme;
-    
-    // Card shadow effect
-    this.pdf.setFillColor(0, 0, 0, 0.05);
-    this.pdf.roundedRect(x + 2, y + 2, width, height, borderRadius.medium, borderRadius.medium, 'F');
-    
-    // Card background with gradient
-    this.pdf.setFillColor(color[0], color[1], color[2], 0.05);
-    this.pdf.roundedRect(x, y, width, height, borderRadius.medium, borderRadius.medium, 'F');
-    
-    // Card border
-    this.pdf.setDrawColor(color[0], color[1], color[2], 0.2);
-    this.pdf.setLineWidth(0.5);
-    this.pdf.roundedRect(x, y, width, height, borderRadius.medium, borderRadius.medium, 'D');
-  }
+  // Removed modern card method - using plain text only
 
   protected addMetricCard(title: string, value: string, subtitle?: string, color: number[] = this.theme.colors.primary): void {
     const { spacing } = this.theme;
-    const cardWidth = (this.pageWidth - (spacing.margin * 2) - spacing.gap) / 2;
-    const cardHeight = 45;
     
-    this.checkPageBreak(cardHeight + spacing.gap);
+    this.checkPageBreak(20);
     
-    // Create modern metric card
-    this.createModernCard(spacing.margin, this.currentY, cardWidth, cardHeight, color);
+    // Simple text layout only
+    this.setTextStyle('body');
+    this.pdf.setTextColor(0, 0, 0);
+    this.pdf.text(`${title}: ${value}`, spacing.margin, this.currentY);
+    this.currentY += 8;
     
-    // Title
-    this.setTextStyle('caption');
-    this.pdf.setTextColor(this.theme.colors.text.secondary[0], this.theme.colors.text.secondary[1], this.theme.colors.text.secondary[2]);
-    this.pdf.text(title, spacing.margin + spacing.padding, this.currentY + spacing.padding + 8);
-    
-    // Value
-    this.setTextStyle('h2');
-    this.pdf.setTextColor(color[0], color[1], color[2]);
-    this.pdf.text(value, spacing.margin + spacing.padding, this.currentY + spacing.padding + 25);
-    
-    // Subtitle
     if (subtitle) {
       this.setTextStyle('small');
-      this.pdf.setTextColor(this.theme.colors.text.muted[0], this.theme.colors.text.muted[1], this.theme.colors.text.muted[2]);
-      this.pdf.text(subtitle, spacing.margin + spacing.padding, this.currentY + spacing.padding + 35);
+      this.pdf.text(subtitle, spacing.margin + 10, this.currentY);
+      this.currentY += 8;
     }
     
-    this.currentY += cardHeight + spacing.gap;
+    this.currentY += 5;
   }
 
   protected addTable(headers: string[], data: string[][], title?: string): void {
@@ -399,31 +319,15 @@ export class EnhancedPDFExport {
 
   protected addProgressBar(label: string, value: number, maxValue: number = 100, color: number[] = this.theme.colors.primary): void {
     const { spacing } = this.theme;
-    const barWidth = this.pageWidth - (spacing.margin * 2);
-    const barHeight = 8;
     
-    this.checkPageBreak(30);
+    this.checkPageBreak(15);
     
-    // Label
+    // Simple text representation only
     this.setTextStyle('body');
-    this.pdf.setTextColor(this.theme.colors.text.primary[0], this.theme.colors.text.primary[1], this.theme.colors.text.primary[2]);
-    this.pdf.text(label, spacing.margin, this.currentY);
+    this.pdf.setTextColor(0, 0, 0);
+    this.pdf.text(`${label}: ${Math.round(value)}%`, spacing.margin, this.currentY);
     
-    // Progress bar background
-    this.pdf.setFillColor(this.theme.colors.background.accent[0], this.theme.colors.background.accent[1], this.theme.colors.background.accent[2]);
-    this.pdf.roundedRect(spacing.margin, this.currentY + 8, barWidth, barHeight, this.theme.borderRadius.small, this.theme.borderRadius.small, 'F');
-    
-    // Progress bar fill
-    const fillWidth = (value / maxValue) * barWidth;
-    this.pdf.setFillColor(color[0], color[1], color[2]);
-    this.pdf.roundedRect(spacing.margin, this.currentY + 8, fillWidth, barHeight, this.theme.borderRadius.small, this.theme.borderRadius.small, 'F');
-    
-    // Percentage text
-    this.setTextStyle('caption');
-    this.pdf.setTextColor(color[0], color[1], color[2]);
-    this.pdf.text(`${Math.round(value)}%`, spacing.margin + barWidth + 5, this.currentY + 15);
-    
-    this.currentY += 25;
+    this.currentY += 15;
   }
 
   protected addFooter(text: string = 'Generated by Yappyy AI Speech Coach'): void {

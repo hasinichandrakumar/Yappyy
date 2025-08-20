@@ -72,141 +72,96 @@ export class TemplatePDFExportService {
   }
 
   private addCleanHeader(title: string): void {
-    // Blue header background
-    this.pdf.setFillColor(this.colors.primary[0], this.colors.primary[1], this.colors.primary[2]);
-    this.pdf.rect(0, 0, this.pageWidth, 40, 'F');
-    
-    // Yappyy logo
-    this.pdf.setFontSize(24);
+    // Simple title only
+    this.pdf.setFontSize(16);
     this.pdf.setFont('Arial', 'bold');
-    this.pdf.setTextColor(this.colors.white[0], this.colors.white[1], this.colors.white[2]);
-    this.pdf.text('Yappyy', this.margin, 20);
-    
-    // Template title
-    this.pdf.setFontSize(14);
-    this.pdf.setFont('Arial', 'normal');
-    this.pdf.text('Speech Template Guide', this.margin, 30);
-    
-    this.currentY = 55;
-    
-    // Template name
-    this.pdf.setFontSize(20);
-    this.pdf.setFont('Arial', 'bold');
-    this.pdf.setTextColor(this.colors.text[0], this.colors.text[1], this.colors.text[2]);
+    this.pdf.setTextColor(0, 0, 0);
     this.pdf.text(title, this.margin, this.currentY);
-    this.currentY += 20;
+    this.currentY += 15;
   }
 
   private addTemplateCards(templateData: TemplateData): void {
-    const cardWidth = (this.pageWidth - this.margin * 2 - 5) / 2;
-    const cardHeight = 20;
-    
-    // Category card
-    this.addInfoCard('Category', templateData.category, this.margin, this.currentY, cardWidth, cardHeight, this.colors.primary);
-    
-    // Difficulty card
-    this.addInfoCard('Difficulty', templateData.difficulty, this.margin + cardWidth + 5, this.currentY, cardWidth, cardHeight, this.colors.warning);
-    
-    this.currentY += cardHeight + 5;
-    
-    // Duration card
-    this.addInfoCard('Duration', templateData.duration, this.margin, this.currentY, cardWidth, cardHeight, this.colors.success);
-    
-    // Description card
-    const description = templateData.description || 'Professional speech template';
-    this.addInfoCard('Description', description, this.margin + cardWidth + 5, this.currentY, cardWidth, cardHeight, this.colors.accent);
-    
-    this.currentY += cardHeight + 20;
-  }
-
-  private addInfoCard(label: string, value: string, x: number, y: number, width: number, height: number, color: number[]): void {
-    // Card background
-    this.pdf.setFillColor(color[0], color[1], color[2]);
-    this.pdf.roundedRect(x, y, width, height, 2, 2, 'F');
-    
-    // Label
-    this.pdf.setFontSize(10);
-    this.pdf.setFont('Arial', 'bold');
-    this.pdf.setTextColor(this.colors.white[0], this.colors.white[1], this.colors.white[2]);
-    this.pdf.text(label, x + 5, y + 8);
-    
-    // Value
+    // Simple text information
     this.pdf.setFontSize(12);
     this.pdf.setFont('Arial', 'normal');
-    this.pdf.text(value, x + 5, y + 15);
+    this.pdf.setTextColor(0, 0, 0);
+    
+    this.pdf.text(`Category: ${templateData.category}`, this.margin, this.currentY);
+    this.currentY += 8;
+    this.pdf.text(`Difficulty: ${templateData.difficulty}`, this.margin, this.currentY);
+    this.currentY += 8;
+    this.pdf.text(`Duration: ${templateData.duration}`, this.margin, this.currentY);
+    this.currentY += 8;
+    
+    if (templateData.description) {
+      this.pdf.text(`Description: ${templateData.description}`, this.margin, this.currentY);
+      this.currentY += 8;
+    }
+    
+    this.currentY += 10;
   }
+
+  // Removed info card method - using simple text instead
 
   private addContentSection(templateData: TemplateData): void {
     // Section title
-    this.pdf.setFontSize(16);
+    this.pdf.setFontSize(14);
     this.pdf.setFont('Arial', 'bold');
-    this.pdf.setTextColor(this.colors.primary[0], this.colors.primary[1], this.colors.primary[2]);
+    this.pdf.setTextColor(0, 0, 0);
     this.pdf.text('Template Content', this.margin, this.currentY);
     this.currentY += 15;
     
-    // Content background
-    this.pdf.setFillColor(this.colors.gray[0], this.colors.gray[1], this.colors.gray[2]);
-    const contentHeight = 80;
-    this.pdf.rect(this.margin, this.currentY, this.pageWidth - this.margin * 2, contentHeight, 'F');
-    
     // Content text
-    this.pdf.setFontSize(10);
+    this.pdf.setFontSize(11);
     this.pdf.setFont('Arial', 'normal');
-    this.pdf.setTextColor(this.colors.text[0], this.colors.text[1], this.colors.text[2]);
+    this.pdf.setTextColor(0, 0, 0);
     
-    const lines = this.pdf.splitTextToSize(templateData.content, this.pageWidth - this.margin * 2 - 10);
-    this.pdf.text(lines, this.margin + 5, this.currentY + 10);
+    const lines = this.pdf.splitTextToSize(templateData.content, this.pageWidth - this.margin * 2);
+    this.pdf.text(lines, this.margin, this.currentY);
     
-    this.currentY += contentHeight + 15;
+    this.currentY += lines.length * 5 + 15;
   }
 
   private addCoachingSection(templateData: TemplateData): void {
     // Section title
-    this.pdf.setFontSize(16);
+    this.pdf.setFontSize(14);
     this.pdf.setFont('Arial', 'bold');
-    this.pdf.setTextColor(this.colors.primary[0], this.colors.primary[1], this.colors.primary[2]);
+    this.pdf.setTextColor(0, 0, 0);
     this.pdf.text('Coaching Advice', this.margin, this.currentY);
     this.currentY += 15;
     
     // Content advice
-    this.addAdviceBox('Content', templateData.contentAdvice, this.colors.primary);
+    this.addAdviceText('Content', templateData.contentAdvice);
     
     // Voice advice
-    this.addAdviceBox('Voice', templateData.voiceAdvice, this.colors.success);
+    this.addAdviceText('Voice', templateData.voiceAdvice);
     
     // Body language advice
-    this.addAdviceBox('Body Language', templateData.bodyLanguageAdvice, this.colors.accent);
+    this.addAdviceText('Body Language', templateData.bodyLanguageAdvice);
   }
 
-  private addAdviceBox(label: string, advice: string, color: number[]): void {
-    // Box background
-    this.pdf.setFillColor(color[0], color[1], color[2]);
-    this.pdf.rect(this.margin, this.currentY, this.pageWidth - this.margin * 2, 25, 'F');
-    
+  private addAdviceText(label: string, advice: string): void {
     // Label
     this.pdf.setFontSize(12);
     this.pdf.setFont('Arial', 'bold');
-    this.pdf.setTextColor(this.colors.white[0], this.colors.white[1], this.colors.white[2]);
-    this.pdf.text(label, this.margin + 5, this.currentY + 8);
+    this.pdf.setTextColor(0, 0, 0);
+    this.pdf.text(`${label}:`, this.margin, this.currentY);
+    this.currentY += 8;
     
     // Advice text
-    this.pdf.setFontSize(10);
+    this.pdf.setFontSize(11);
     this.pdf.setFont('Arial', 'normal');
-    const lines = this.pdf.splitTextToSize(advice, this.pageWidth - this.margin * 2 - 10);
-    this.pdf.text(lines, this.margin + 5, this.currentY + 16);
+    const lines = this.pdf.splitTextToSize(advice, this.pageWidth - this.margin * 2);
+    this.pdf.text(lines, this.margin, this.currentY);
     
-    this.currentY += 30;
+    this.currentY += lines.length * 5 + 10;
   }
 
   private addFooter(): void {
-    // Footer line
-    this.pdf.setDrawColor(this.colors.textMuted[0], this.colors.textMuted[1], this.colors.textMuted[2]);
-    this.pdf.line(this.margin, this.pageHeight - 30, this.pageWidth - this.margin, this.pageHeight - 30);
-    
-    // Footer text
+    // Simple footer text only
     this.pdf.setFontSize(9);
     this.pdf.setFont('Arial', 'normal');
-    this.pdf.setTextColor(this.colors.textMuted[0], this.colors.textMuted[1], this.colors.textMuted[2]);
+    this.pdf.setTextColor(0, 0, 0);
     this.pdf.text('Generated by Yappyy', this.margin, this.pageHeight - 20);
     
     const date = new Date().toLocaleDateString();

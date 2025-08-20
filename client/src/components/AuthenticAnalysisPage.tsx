@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -18,11 +18,12 @@ import {
   Video,
   Volume2,
   Pause,
-  Hash
+  Hash,
+  Loader2
 } from "lucide-react";
 
 interface AuthenticAnalysisProps {
-  session: {
+  session?: {
     id: number;
     sessionNumber: number;
     sessionName: string;
@@ -81,24 +82,134 @@ const getScoreLabel = (score: number): string => {
   return "Needs Improvement";
 };
 
-export default function AuthenticAnalysisPage({ session, onClose, onNewSession }: AuthenticAnalysisProps) {
-  console.log('🔍 AuthenticAnalysisPage received session data:', session);
+export default function AuthenticAnalysisPage({ session: propSession, onClose, onNewSession }: AuthenticAnalysisProps) {
+  const [sessions, setSessions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedSession, setSelectedSession] = useState<any>(propSession);
+
+  // Fetch sessions from server
+  useEffect(() => {
+    const fetchSessions = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/practice-sessions');
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch sessions: ${response.status}`);
+        }
+        
+        const fetchedSessions = await response.json();
+        console.log('📊 Fetched sessions from server:', fetchedSessions);
+        
+        setSessions(fetchedSessions);
+        
+        // If no session was passed as prop, use the most recent session
+        if (!propSession && fetchedSessions.length > 0) {
+          setSelectedSession(fetchedSessions[0]);
+        }
+        
+      } catch (err) {
+        console.error('❌ Failed to fetch sessions:', err);
+        setError(err instanceof Error ? err.message : 'Failed to fetch sessions');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSessions();
+  }, [propSession]);
+
+  // Use the selected session or the prop session
+  const session = selectedSession || propSession;
+
+  console.log('🔍 AuthenticAnalysisPage session data:', session);
   
   // Only display metrics that have authentic, validated data
   const authenticMetrics = {
-    duration: validateMetric(session.duration) ? session.duration : null,
-    wpm: validateMetric(session.averageWPM) ? session.averageWPM : null,
-    confidence: validateMetric(session.confidenceScore) ? session.confidenceScore : null,
-    clarity: validateMetric(session.voiceClarity) ? session.voiceClarity : null,
-    fillerWords: validateMetric(session.fillerWords) ? session.fillerWords : null,
-    pauseCount: validateMetric(session.pauseCount) ? session.pauseCount : null,
-    transcript: validateMetric(session.transcript, 'string') ? session.transcript : null,
-    coachingTips: validateMetric(session.coachingTips, 'array') ? session.coachingTips : null,
-    persuasiveness: validateMetric(session.persuasivenessScore) ? session.persuasivenessScore : null,
-    hasVideo: validateMetric(session.videoBlob, 'string'),
-    hasFacialAnalysis: session.facialAnalysis !== null && session.facialAnalysis !== undefined,
-    hasVoiceMetrics: session.voiceMetrics !== null && session.voiceMetrics !== undefined
+    duration: validateMetric(session?.duration) ? session.duration : null,
+    wpm: validateMetric(session?.averageWPM) ? session.averageWPM : null,
+    confidence: validateMetric(session?.confidenceScore) ? session.confidenceScore : null,
+    clarity: validateMetric(session?.voiceClarity) ? session.voiceClarity : null,
+    fillerWords: validateMetric(session?.fillerWords) ? session.fillerWords : null,
+    pauseCount: validateMetric(session?.pauseCount) ? session.pauseCount : null,
+    transcript: validateMetric(session?.transcript, 'string') ? session.transcript : null,
+    coachingTips: validateMetric(session?.coachingTips, 'array') ? session.coachingTips : null,
+    persuasiveness: validateMetric(session?.persuasivenessScore) ? session.persuasivenessScore : null,
+    hasVideo: validateMetric(session?.videoBlob, 'string'),
+    hasFacialAnalysis: session?.facialAnalysis !== null && session?.facialAnalysis !== undefined,
+    hasVoiceMetrics: session?.voiceMetrics !== null && session?.voiceMetrics !== undefined
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 p-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
+              <p className="text-gray-600">Loading session data...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 p-6">
+        <div className="max-w-4xl mx-auto">
+          <Card className="border-red-200 bg-red-50">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <AlertTriangle className="h-6 w-6 text-red-600" />
+                <div>
+                  <h3 className="font-semibold text-red-900">Error Loading Sessions</h3>
+                  <p className="text-sm text-red-700">{error}</p>
+                  <Button 
+                    onClick={() => window.location.reload()} 
+                    className="mt-2"
+                    variant="outline"
+                  >
+                    Retry
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 p-6">
+        <div className="max-w-4xl mx-auto">
+          <Card className="border-yellow-200 bg-yellow-50">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <AlertTriangle className="h-6 w-6 text-yellow-600" />
+                <div>
+                  <h3 className="font-semibold text-yellow-900">No Sessions Found</h3>
+                  <p className="text-sm text-yellow-700">
+                    No practice sessions found. Complete a practice session to see your analytics.
+                  </p>
+                  <Button 
+                    onClick={onNewSession} 
+                    className="mt-2"
+                  >
+                    Start Practice Session
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-4">
@@ -121,6 +232,35 @@ export default function AuthenticAnalysisPage({ session, onClose, onNewSession }
             </div>
           </CardHeader>
         </Card>
+
+        {/* Session Selector */}
+        {sessions.length > 1 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Select Session</CardTitle>
+              <CardDescription>Choose a different session to analyze</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {sessions.map((sess) => (
+                  <Button
+                    key={sess.id}
+                    variant={selectedSession?.id === sess.id ? "default" : "outline"}
+                    onClick={() => setSelectedSession(sess)}
+                    className="justify-start text-left h-auto p-3"
+                  >
+                    <div>
+                      <div className="font-medium">{sess.sessionName}</div>
+                      <div className="text-sm text-gray-500">
+                        Session #{sess.sessionNumber} • {formatDuration(sess.duration)}
+                      </div>
+                    </div>
+                  </Button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Core Metrics - Only Authentic Data */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

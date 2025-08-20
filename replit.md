@@ -5,7 +5,7 @@ Yappyy is a world-class AI-powered public speaking improvement platform built wi
 # User Preferences
 
 Preferred communication style: Simple, everyday language.
-PDF Export Formatting: Use only Arial font, simple and minimalistic design.
+PDF Export Formatting: Use only Arial font, simple and minimalistic design. No fancy headers, complicated images, or decorative elements. PDFs should contain only plain text content without visual styling.
 
 # Recent Changes
 

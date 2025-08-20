@@ -375,7 +375,6 @@ export default function SimplifiedPracticePage() {
   const [isRecording, setIsRecording] = useState(false);
   const [sessionName, setSessionName] = useState("Session 1");
   const [showAnalysisPage, setShowAnalysisPage] = useState(false);
-  const [sessionAnalysisData, setSessionAnalysisData] = useState<any>(null);
   const [sessionPurpose, setSessionPurpose] = useState("general-presentation");
   const [sessionNumber, setSessionNumber] = useState(1);
   const [isEditingName, setIsEditingName] = useState(false);
@@ -2246,48 +2245,7 @@ export default function SimplifiedPracticePage() {
         setSessionNumber(nextSessionNumber);
         setSessionName(`Session ${nextSessionNumber}`);
         
-        // CRITICAL: Create analysis data from the saved session
-        const analysisData = {
-          id: result.sessionId,
-          sessionNumber: result.sessionNumber,
-          sessionName: sessionName,
-          purpose: sessionPurpose,
-          transcript: transcript,
-          duration: sessionDuration,
-          averageWPM: metrics.wordsPerMinute || 0,
-          confidenceScore: metrics.confidence || 0,
-          voiceClarity: metrics.voice?.clarity || 0,
-          fillerWords: metrics.fillerWordCount || 0,
-          pauseCount: 0,
-          eyeContactScore: metrics.eyeContact || 0,
-          coachingTips: liveFeedback.slice(-5).map(feedback => feedback.message),
-          createdAt: new Date().toISOString(),
-          // Enhanced analysis data
-          wpmAnalysis: {
-            averageWPM: metrics.wordsPerMinute || 0,
-            wpmHistory: wpmHistory,
-            wordCount: transcript ? transcript.split(/\s+/).filter(w => w.length > 0).length : 0
-          },
-          fillerWordAnalysis: {
-            totalCount: metrics.fillerWordCount || 0,
-            fillerTypes: {},
-            fillerWords: []
-          },
-          transcriptAnalysis: {
-            totalWords: transcript ? transcript.split(/\s+/).filter(w => w.length > 0).length : 0,
-            uniqueWords: transcript ? new Set(transcript.toLowerCase().split(/\s+/).filter(w => w.length > 0)).size : 0,
-            averageWordLength: transcript ? transcript.split(/\s+/).filter(w => w.length > 0).reduce((sum, word) => sum + word.length, 0) / Math.max(1, transcript.split(/\s+/).filter(w => w.length > 0).length) : 0
-          },
-          liveMetricsHistory: {
-            wpmHistory: wpmHistory,
-            fillerWordHistory: [metrics.fillerWordCount || 0],
-            eyeContactHistory: [metrics.eyeContact || 0],
-            confidenceHistory: [metrics.confidence || 0]
-          }
-        };
-        
-        // Set the analysis data and show analysis page
-        setSessionAnalysisData(analysisData);
+        // Show analysis page (it will fetch session data from server)
         setShowAnalysisPage(true);
         
         toast({
@@ -2297,7 +2255,7 @@ export default function SimplifiedPracticePage() {
           duration: 5000
         });
         
-        console.log('🔄 Transitioning to analysis page with session data:', analysisData);
+        console.log('🔄 Transitioning to analysis page - will fetch session data from server');
       } else {
         console.error('❌ Failed to save session:', result.error);
         toast({
@@ -2339,14 +2297,12 @@ export default function SimplifiedPracticePage() {
   }
 
   // Show analysis page if session is complete
-  if (showAnalysisPage && sessionAnalysisData) {
+  if (showAnalysisPage) {
     return (
       <AuthenticAnalysisPage
-        session={sessionAnalysisData}
         onClose={() => setShowAnalysisPage(false)}
         onNewSession={() => {
           setShowAnalysisPage(false);
-          setSessionAnalysisData(null);
           // Reset all session data
           setSessionName(`Session ${sessionNumber + 1}`);
           setSessionPurpose("general-presentation");
