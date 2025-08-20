@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session Debug</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .warning { background-color: #fff3cd; color: #856404; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .debug { background-color: #17a2b8; color: white; }
+        .save { background-color: #28a745; color: white; }
+        .fetch { background-color: #007bff; color: white; }
+        .clear { background-color: #6c757d; color: white; }
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
+            font-size: 12px;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Session Debug Tool</h1>
+    
+    <div id="status" class="status info">Ready to debug session issues</div>
+    
+    <div class="section">
+        <h3>Authentication & User Info</h3>
+        <button id="userInfoBtn" class="debug">Get User Info</button>
+        <button id="authStatusBtn" class="debug">Check Auth Status</button>
+        <pre id="userInfo"></pre>
+    </div>
+    
+    <div class="section">
+        <h3>Session Operations</h3>
+        <button id="saveBtn" class="save">Save Test Session</button>
+        <button id="fetchBtn" class="fetch">Fetch All Sessions</button>
+        <button id="clearBtn" class="clear">Clear Log</button>
+        <pre id="sessionLog"></pre>
+    </div>
+    
+    <div class="section">
+        <h3>Database Debug</h3>
+        <button id="dbCheckBtn" class="debug">Check Database Connection</button>
+        <button id="tableCheckBtn" class="debug">Check Table Structure</button>
+        <pre id="dbLog"></pre>
+    </div>
+
+    <script>
+        const statusDiv = document.getElementById('status');
+        const userInfoDiv = document.getElementById('userInfo');
+        const sessionLogDiv = document.getElementById('sessionLog');
+        const dbLogDiv = document.getElementById('dbLog');
+
+        function addToLog(logDiv, message) {
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function updateStatus(message, type = 'info') {
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+        }
+
+        // Get user info
+        document.getElementById('userInfoBtn').addEventListener('click', async () => {
+            try {
+                addToLog(userInfoDiv, '🔍 Fetching user info...');
+                
+                const response = await fetch('/api/user/info');
+                const userInfo = await response.json();
+                
+                addToLog(userInfoDiv, '✅ User info received:');
+                addToLog(userInfoDiv, JSON.stringify(userInfo, null, 2));
+                
+                updateStatus(`User: ${userInfo.name || userInfo.username || 'Unknown'} (${userInfo.id})`, 'success');
+            } catch (error) {
+                addToLog(userInfoDiv, `❌ Failed to get user info: ${error.message}`);
+                updateStatus('Failed to get user info', 'error');
+            }
+        });
+
+        // Check auth status
+        document.getElementById('authStatusBtn').addEventListener('click', async () => {
+            try {
+                addToLog(userInfoDiv, '🔍 Checking auth status...');
+                
+                const response = await fetch('/api/auth/status');
+                const authStatus = await response.json();
+                
+                addToLog(userInfoDiv, '✅ Auth status:');
+                addToLog(userInfoDiv, JSON.stringify(authStatus, null, 2));
+            } catch (error) {
+                addToLog(userInfoDiv, `❌ Failed to check auth status: ${error.message}`);
+            }
+        });
+
+        // Save test session
+        document.getElementById('saveBtn').addEventListener('click', async () => {
+            try {
+                addToLog(sessionLogDiv, '💾 Saving test session...');
+                
+                const testSessionData = {
+                    transcript: "Debug test session - this is a test to verify session saving and retrieval.",
+                    duration: 15,
+                    purpose: "debug-test",
+                    sessionName: "Debug Test Session",
+                    sessionNumber: 1,
+                    metrics: {
+                        wordsPerMinute: 100,
+                        fillerWordCount: 1,
+                        eyeContact: 80,
+                        confidence: 75,
+                        engagement: 85,
+                        clarity: 90
+                    }
+                };
+
+                const response = await fetch('/api/save-session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testSessionData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+                }
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    addToLog(sessionLogDiv, `✅ Session saved successfully!`);
+                    addToLog(sessionLogDiv, `   Session ID: ${result.sessionId}`);
+                    addToLog(sessionLogDiv, `   Session Number: ${result.sessionNumber}`);
+                    updateStatus(`Session saved! ID: ${result.sessionId}`, 'success');
+                } else {
+                    throw new Error(result.error || 'Unknown error');
+                }
+            } catch (error) {
+                addToLog(sessionLogDiv, `❌ Failed to save session: ${error.message}`);
+                updateStatus('Session save failed', 'error');
+            }
+        });
+
+        // Fetch sessions
+        document.getElementById('fetchBtn').addEventListener('click', async () => {
+            try {
+                addToLog(sessionLogDiv, '📥 Fetching sessions...');
+                
+                const response = await fetch('/api/practice-sessions');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+                }
+
+                const sessions = await response.json();
+                
+                addToLog(sessionLogDiv, `✅ Fetched ${sessions.length} sessions`);
+                
+                if (sessions.length > 0) {
+                    addToLog(sessionLogDiv, '📊 Sessions found:');
+                    sessions.forEach((session, index) => {
+                        addToLog(sessionLogDiv, `  ${index + 1}. ID: ${session.id}, Session ${session.sessionNumber}: "${session.sessionName}"`);
+                        addToLog(sessionLogDiv, `     Duration: ${session.duration}s, WPM: ${session.averageWPM}, Fillers: ${session.fillerWords}`);
+                        addToLog(sessionLogDiv, `     User ID: ${session.userId}, Created: ${session.createdAt}`);
+                    });
+                    updateStatus(`Found ${sessions.length} sessions`, 'success');
+                } else {
+                    addToLog(sessionLogDiv, '⚠️ No sessions found');
+                    updateStatus('No sessions found', 'warning');
+                }
+            } catch (error) {
+                addToLog(sessionLogDiv, `❌ Failed to fetch sessions: ${error.message}`);
+                updateStatus('Failed to fetch sessions', 'error');
+            }
+        });
+
+        // Check database connection
+        document.getElementById('dbCheckBtn').addEventListener('click', async () => {
+            try {
+                addToLog(dbLogDiv, '🔍 Checking database connection...');
+                
+                const response = await fetch('/api/health');
+                const health = await response.json();
+                
+                addToLog(dbLogDiv, '✅ Health check response:');
+                addToLog(dbLogDiv, JSON.stringify(health, null, 2));
+            } catch (error) {
+                addToLog(dbLogDiv, `❌ Failed to check database: ${error.message}`);
+            }
+        });
+
+        // Check table structure
+        document.getElementById('tableCheckBtn').addEventListener('click', async () => {
+            try {
+                addToLog(dbLogDiv, '🔍 Checking table structure...');
+                
+                // Try to get a single session to check table structure
+                const response = await fetch('/api/practice-sessions?limit=1');
+                const sessions = await response.json();
+                
+                if (sessions.length > 0) {
+                    addToLog(dbLogDiv, '✅ Table structure (sample session):');
+                    addToLog(dbLogDiv, JSON.stringify(sessions[0], null, 2));
+                } else {
+                    addToLog(dbLogDiv, '⚠️ No sessions to check table structure');
+                }
+            } catch (error) {
+                addToLog(dbLogDiv, `❌ Failed to check table structure: ${error.message}`);
+            }
+        });
+
+        // Clear log
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            sessionLogDiv.innerHTML = '';
+            addToLog(sessionLogDiv, '🧹 Session log cleared');
+        });
+
+        // Initial message
+        addToLog(sessionLogDiv, '🚀 Session debug tool loaded');
+    </script>
+</body>
+</html>

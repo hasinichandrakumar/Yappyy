@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session Save Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .warning { background-color: #fff3cd; color: #856404; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .save { background-color: #28a745; color: white; }
+        .fetch { background-color: #007bff; color: white; }
+        .clear { background-color: #6c757d; color: white; }
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Session Save Test</h1>
+    
+    <div id="status" class="status info">Ready to test session saving and retrieval</div>
+    
+    <div>
+        <button id="saveBtn" class="save">Save Test Session</button>
+        <button id="fetchBtn" class="fetch">Fetch Sessions</button>
+        <button id="clearBtn" class="clear">Clear Log</button>
+    </div>
+    
+    <h3>Test Session Data:</h3>
+    <pre id="sessionData">{
+  "transcript": "This is a test session to verify that sessions are being saved and retrieved correctly. I'm speaking at a moderate pace to test the word count and WPM calculation.",
+  "duration": 30,
+  "purpose": "test-session",
+  "sessionName": "Test Session",
+  "sessionNumber": 1,
+  "metrics": {
+    "wordsPerMinute": 120,
+    "fillerWordCount": 2,
+    "eyeContact": 85,
+    "confidence": 78,
+    "engagement": 82,
+    "clarity": 88
+  }
+}</pre>
+    
+    <h3>Console Log:</h3>
+    <pre id="consoleLog"></pre>
+
+    <script>
+        const statusDiv = document.getElementById('status');
+        const saveBtn = document.getElementById('saveBtn');
+        const fetchBtn = document.getElementById('fetchBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const consoleLogDiv = document.getElementById('consoleLog');
+
+        function addToConsole(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            consoleLogDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            consoleLogDiv.scrollTop = consoleLogDiv.scrollHeight;
+        }
+
+        // Test session data
+        const testSessionData = {
+            transcript: "This is a test session to verify that sessions are being saved and retrieved correctly. I'm speaking at a moderate pace to test the word count and WPM calculation.",
+            duration: 30,
+            purpose: "test-session",
+            sessionName: "Test Session",
+            sessionNumber: 1,
+            metrics: {
+                wordsPerMinute: 120,
+                fillerWordCount: 2,
+                eyeContact: 85,
+                confidence: 78,
+                engagement: 82,
+                clarity: 88
+            },
+            wpmAnalysis: {
+                averageWPM: 120,
+                totalWords: 25,
+                speakingTime: 30,
+                wordsPerSecond: 0.83
+            },
+            fillerWordAnalysis: {
+                totalCount: 2,
+                words: ["is", "that"],
+                breakdown: {
+                    um: 0,
+                    uh: 0,
+                    like: 0,
+                    youKnow: 0,
+                    basically: 0,
+                    actually: 0,
+                    other: 2
+                }
+            },
+            transcriptAnalysis: {
+                fullTranscript: "This is a test session to verify that sessions are being saved and retrieved correctly. I'm speaking at a moderate pace to test the word count and WPM calculation.",
+                wordCount: 25,
+                characterCount: 150,
+                sentenceCount: 2,
+                averageWordsPerSentence: 12,
+                highlightedTranscript: "This is a test session to verify that sessions are being saved and retrieved correctly. I'm speaking at a moderate pace to test the word count and WPM calculation."
+            },
+            liveMetricsHistory: {
+                wpmHistory: [120],
+                fillerWordHistory: [2],
+                eyeContactHistory: [85],
+                confidenceHistory: [78]
+            },
+            coachingTips: ["Great pace!", "Good eye contact", "Reduce filler words"]
+        };
+
+        // Save test session
+        saveBtn.addEventListener('click', async () => {
+            try {
+                addToConsole('💾 Saving test session...');
+                statusDiv.textContent = 'Saving session...';
+                statusDiv.className = 'status info';
+
+                const response = await fetch('/api/save-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testSessionData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+                }
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    addToConsole(`✅ Session saved successfully! Session ID: ${result.sessionId}, Session Number: ${result.sessionNumber}`);
+                    statusDiv.textContent = `Session saved successfully! ID: ${result.sessionId}`;
+                    statusDiv.className = 'status success';
+                } else {
+                    throw new Error(result.error || 'Unknown error');
+                }
+            } catch (error) {
+                addToConsole(`❌ Failed to save session: ${error.message}`);
+                statusDiv.textContent = `Save failed: ${error.message}`;
+                statusDiv.className = 'status error';
+            }
+        });
+
+        // Fetch sessions
+        fetchBtn.addEventListener('click', async () => {
+            try {
+                addToConsole('📥 Fetching sessions...');
+                statusDiv.textContent = 'Fetching sessions...';
+                statusDiv.className = 'status info';
+
+                const response = await fetch('/api/practice-sessions');
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+                }
+
+                const sessions = await response.json();
+                
+                addToConsole(`✅ Fetched ${sessions.length} sessions`);
+                addToConsole('📊 Sessions data:');
+                sessions.forEach((session, index) => {
+                    addToConsole(`  ${index + 1}. Session ${session.sessionNumber}: "${session.sessionName}" (${session.duration}s, ${session.averageWPM} WPM, ${session.fillerWords} fillers)`);
+                });
+                
+                statusDiv.textContent = `Fetched ${sessions.length} sessions successfully`;
+                statusDiv.className = 'status success';
+            } catch (error) {
+                addToConsole(`❌ Failed to fetch sessions: ${error.message}`);
+                statusDiv.textContent = `Fetch failed: ${error.message}`;
+                statusDiv.className = 'status error';
+            }
+        });
+
+        // Clear log
+        clearBtn.addEventListener('click', () => {
+            consoleLogDiv.innerHTML = '';
+            addToConsole('🧹 Log cleared');
+        });
+
+        // Initial console message
+        addToConsole('🚀 Session save test page loaded');
+    </script>
+</body>
+</html>
