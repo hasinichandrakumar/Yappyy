@@ -84,15 +84,22 @@ const getScoreLabel = (score: number): string => {
 
 export default function AuthenticAnalysisPage({ session: propSession, onClose, onNewSession }: AuthenticAnalysisProps) {
   const [sessions, setSessions] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Changed to false since we have propSession
   const [error, setError] = useState<string | null>(null);
   const [selectedSession, setSelectedSession] = useState<any>(propSession);
+
+  // Log initial props
+  console.log('📊 AuthenticAnalysisPage mounted with session:', propSession);
 
   // Fetch sessions from server
   useEffect(() => {
     const fetchSessions = async () => {
       try {
-        setLoading(true);
+        // Only show loading if we don't have a propSession
+        if (!propSession) {
+          setLoading(true);
+        }
+        
         const response = await fetch('/api/practice-sessions');
         
         if (!response.ok) {
@@ -106,6 +113,7 @@ export default function AuthenticAnalysisPage({ session: propSession, onClose, o
         
         // If no session was passed as prop, use the most recent session
         if (!propSession && fetchedSessions.length > 0) {
+          console.log('📊 Using most recent session:', fetchedSessions[0]);
           setSelectedSession(fetchedSessions[0]);
         }
         
@@ -123,7 +131,14 @@ export default function AuthenticAnalysisPage({ session: propSession, onClose, o
   // Use the selected session or the prop session
   const session = selectedSession || propSession;
 
-  console.log('🔍 AuthenticAnalysisPage session data:', session);
+  console.log('🔍 AuthenticAnalysisPage session data:', {
+    session,
+    propSession,
+    selectedSession,
+    hasSession: !!session,
+    sessionId: session?.id,
+    sessionNumber: session?.sessionNumber
+  });
   
   // Only display metrics that have authentic, validated data
   const authenticMetrics = {
