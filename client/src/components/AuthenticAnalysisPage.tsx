@@ -54,11 +54,14 @@ const validateMetric = (value: any, type: 'number' | 'string' | 'array' = 'numbe
   
   switch (type) {
     case 'number':
-      return typeof value === 'number' && value > 0 && !isNaN(value);
+      // Allow 0 as a valid value (for metrics that can be 0)
+      return typeof value === 'number' && value >= 0 && !isNaN(value);
     case 'string':
-      return typeof value === 'string' && value.trim().length > 0;
+      // Allow empty strings for transcript (user might not have spoken)
+      return typeof value === 'string';
     case 'array':
-      return Array.isArray(value) && value.length > 0;
+      // Allow empty arrays (no coaching tips is valid)
+      return Array.isArray(value);
     default:
       return false;
   }
@@ -106,7 +109,21 @@ export default function AuthenticAnalysisPage({ session: propSession, onClose, o
           throw new Error(`Failed to fetch sessions: ${response.status}`);
         }
         
-        const fetchedSessions = await response.json();
+        const responseText = await response.text();
+        let fetchedSessions;
+        
+        try {
+          fetchedSessions = JSON.parse(responseText);
+        } catch (parseErr) {
+          console.error('Failed to parse sessions response:', responseText);
+          // If we can't parse but have propSession, just use that
+          if (propSession) {
+            console.log('Using propSession despite fetch error');
+            return;
+          }
+          throw parseErr;
+        }
+        
         console.log('📊 Fetched sessions from server:', fetchedSessions);
         
         setSessions(fetchedSessions);
@@ -119,7 +136,10 @@ export default function AuthenticAnalysisPage({ session: propSession, onClose, o
         
       } catch (err) {
         console.error('❌ Failed to fetch sessions:', err);
-        setError(err instanceof Error ? err.message : 'Failed to fetch sessions');
+        // Only set error if we don't have a propSession to display
+        if (!propSession) {
+          setError(err instanceof Error ? err.message : 'Failed to fetch sessions');
+        }
       } finally {
         setLoading(false);
       }
@@ -131,13 +151,15 @@ export default function AuthenticAnalysisPage({ session: propSession, onClose, o
   // Use the selected session or the prop session
   const session = selectedSession || propSession;
 
-  console.log('🔍 AuthenticAnalysisPage session data:', {
-    session,
-    propSession,
-    selectedSession,
+  console.log('🔍 AuthenticAnalysisPage render:', {
     hasSession: !!session,
+    hasPropSession: !!propSession,
+    hasSelectedSession: !!selectedSession,
+    loading,
+    error,
     sessionId: session?.id,
-    sessionNumber: session?.sessionNumber
+    sessionNumber: session?.sessionNumber,
+    transcript: session?.transcript?.substring(0, 50)
   });
   
   // Only display metrics that have authentic, validated data
@@ -198,7 +220,8 @@ export default function AuthenticAnalysisPage({ session: propSession, onClose, o
     );
   }
 
-  if (!session) {
+  // Don't show "No Sessions Found" if we're still loading or if we have a propSession
+  if (!session && !loading && !propSession) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 p-6">
         <div className="max-w-4xl mx-auto">
@@ -221,6 +244,22 @@ export default function AuthenticAnalysisPage({ session: propSession, onClose, o
               </div>
             </CardContent>
           </Card>
+        </div>
+      </div>
+    );
+  }
+  
+  // If we don't have a session yet but we're expecting one, show loading
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 p-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
+              <p className="text-gray-600">Loading session data...</p>
+            </div>
+          </div>
         </div>
       </div>
     );
