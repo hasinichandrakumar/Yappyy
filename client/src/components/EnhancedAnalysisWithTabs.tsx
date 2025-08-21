@@ -73,7 +73,15 @@ export default function EnhancedAnalysisWithTabs() {
     queryKey: ['/api/practice-sessions'],
   });
 
-  const typedSessions = sessions as any[];
+  // Sort sessions by sessionNumber in descending order (newest first)
+  const typedSessions = (sessions as any[]).sort((a, b) => {
+    const numA = a.sessionNumber || a.id;
+    const numB = b.sessionNumber || b.id;
+    return numB - numA; // Descending order
+  });
+  
+  // Log sessions for debugging
+  console.log('Analytics: Sessions loaded:', typedSessions.length, 'sessions');
 
   // Filter sessions based on selection
   const filteredSessions = selectedSession === 'all' 
@@ -325,7 +333,7 @@ export default function EnhancedAnalysisWithTabs() {
                 <SelectItem value="all">All Sessions</SelectItem>
                 {typedSessions.map((session: any) => (
                   <SelectItem key={session.id} value={session.id.toString()}>
-                    Session {session.id} - {new Date(session.createdAt).toLocaleDateString()}
+                    {session.name || session.sessionName || `Session ${session.sessionNumber || session.id}`} - {new Date(session.createdAt).toLocaleDateString()}
                   </SelectItem>
                 ))}
               </SelectContent>
