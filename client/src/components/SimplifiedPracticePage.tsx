@@ -897,6 +897,10 @@ export default function SimplifiedPracticePage() {
     
     console.log('✅ Robust speech recognition setup complete');
     return true;
+    } catch (error) {
+      console.warn('⚠️ Failed to setup speech recognition:', error);
+      return false;
+    }
   }, [sessionDuration, toast]);
 
   // Initialize robust speech recognition on component mount
