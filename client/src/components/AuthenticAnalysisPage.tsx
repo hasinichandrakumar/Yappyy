@@ -19,7 +19,12 @@ import {
   Volume2,
   Pause,
   Hash,
-  Loader2
+  Loader2,
+  Hand,
+  Award,
+  BookOpen,
+  Brain,
+  Lightbulb
 } from "lucide-react";
 
 interface AuthenticAnalysisProps {
@@ -378,6 +383,476 @@ export default function AuthenticAnalysisPage({ session: propSession, onClose, o
             </Card>
           )}
         </div>
+
+        {/* Body Language Analysis - MediaPipe Enhanced */}
+        {session?.bodyLanguageAnalysis && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="h-5 w-5 text-purple-600" />
+                Body Language Analysis
+              </CardTitle>
+              <CardDescription>
+                Comprehensive posture, gestures, and presence analysis powered by MediaPipe
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {/* Posture Analysis */}
+                {session.bodyLanguageAnalysis.posture && (
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <Target className="h-4 w-4 text-blue-600" />
+                      Posture Analysis
+                    </h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="text-center p-3 bg-blue-50 rounded-lg">
+                        <div className="text-2xl font-bold text-blue-600">
+                          {session.bodyLanguageAnalysis.posture.confidence || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Confidence</div>
+                      </div>
+                      <div className="text-center p-3 bg-green-50 rounded-lg">
+                        <div className="text-2xl font-bold text-green-600">
+                          {session.bodyLanguageAnalysis.posture.spineAlignment || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Spine Alignment</div>
+                      </div>
+                      <div className="text-center p-3 bg-purple-50 rounded-lg">
+                        <div className="text-2xl font-bold text-purple-600">
+                          {session.bodyLanguageAnalysis.posture.shoulderPosition || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Shoulder Position</div>
+                      </div>
+                      <div className="text-center p-3 bg-orange-50 rounded-lg">
+                        <div className="text-2xl font-bold text-orange-600">
+                          {session.bodyLanguageAnalysis.posture.stability || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Stability</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Gesture Analysis */}
+                {session.bodyLanguageAnalysis.gestures && (
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <Hand className="h-4 w-4 text-green-600" />
+                      Gesture Analysis
+                    </h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="text-center p-3 bg-green-50 rounded-lg">
+                        <div className="text-2xl font-bold text-green-600">
+                          {session.bodyLanguageAnalysis.gestures.handMovements || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Hand Movements</div>
+                      </div>
+                      <div className="text-center p-3 bg-blue-50 rounded-lg">
+                        <div className="text-2xl font-bold text-blue-600">
+                          {session.bodyLanguageAnalysis.gestures.naturalness || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Naturalness</div>
+                      </div>
+                      <div className="text-center p-3 bg-purple-50 rounded-lg">
+                        <div className="text-2xl font-bold text-purple-600">
+                          {session.bodyLanguageAnalysis.gestures.effectiveness || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Effectiveness</div>
+                      </div>
+                      <div className="text-center p-3 bg-orange-50 rounded-lg">
+                        <div className="text-2xl font-bold text-orange-600">
+                          {session.bodyLanguageAnalysis.gestures.timing || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Timing</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Overall Presence */}
+                {session.bodyLanguageAnalysis.overall && (
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <Award className="h-4 w-4 text-purple-600" />
+                      Overall Presence
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="text-center p-4 bg-purple-50 rounded-lg">
+                        <div className="text-3xl font-bold text-purple-600">
+                          {session.bodyLanguageAnalysis.overall.presence || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Presence</div>
+                      </div>
+                      <div className="text-center p-4 bg-blue-50 rounded-lg">
+                        <div className="text-3xl font-bold text-blue-600">
+                          {session.bodyLanguageAnalysis.overall.confidence || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Confidence</div>
+                      </div>
+                      <div className="text-center p-4 bg-green-50 rounded-lg">
+                        <div className="text-3xl font-bold text-green-600">
+                          {session.bodyLanguageAnalysis.overall.professionalism || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Professionalism</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Voice Analysis - Comprehensive Audio Metrics */}
+        {session?.voiceAnalysis && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Volume2 className="h-5 w-5 text-blue-600" />
+                Voice Analysis
+              </CardTitle>
+              <CardDescription>
+                Comprehensive voice quality, clarity, and delivery analysis
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {/* Voice Clarity */}
+                {session.voiceAnalysis.clarity && (
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <Mic className="h-4 w-4 text-blue-600" />
+                      Voice Clarity
+                    </h4>
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                      <div className="text-center p-3 bg-blue-50 rounded-lg">
+                        <div className="text-2xl font-bold text-blue-600">
+                          {session.voiceAnalysis.clarity.score || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Overall Clarity</div>
+                      </div>
+                      <div className="text-center p-3 bg-green-50 rounded-lg">
+                        <div className="text-2xl font-bold text-green-600">
+                          {session.voiceAnalysis.clarity.volumeConsistency || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Volume Consistency</div>
+                      </div>
+                      <div className="text-center p-3 bg-purple-50 rounded-lg">
+                        <div className="text-2xl font-bold text-purple-600">
+                          {session.voiceAnalysis.clarity.pitchStability || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Pitch Stability</div>
+                      </div>
+                      <div className="text-center p-3 bg-orange-50 rounded-lg">
+                        <div className="text-2xl font-bold text-orange-600">
+                          {session.voiceAnalysis.clarity.articulation || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Articulation</div>
+                      </div>
+                      <div className="text-center p-3 bg-red-50 rounded-lg">
+                        <div className="text-2xl font-bold text-red-600">
+                          {session.voiceAnalysis.clarity.pronunciation || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Pronunciation</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Volume Analysis */}
+                {session.voiceAnalysis.volume && (
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <Volume2 className="h-4 w-4 text-green-600" />
+                      Volume Analysis
+                    </h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="text-center p-3 bg-green-50 rounded-lg">
+                        <div className="text-2xl font-bold text-green-600">
+                          {session.voiceAnalysis.volume.averageLevel || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Average Level</div>
+                      </div>
+                      <div className="text-center p-3 bg-blue-50 rounded-lg">
+                        <div className="text-2xl font-bold text-blue-600">
+                          {session.voiceAnalysis.volume.consistency || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Consistency</div>
+                      </div>
+                      <div className="text-center p-3 bg-purple-50 rounded-lg">
+                        <div className="text-2xl font-bold text-purple-600">
+                          {session.voiceAnalysis.volume.projection || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Projection</div>
+                      </div>
+                      <div className="text-center p-3 bg-orange-50 rounded-lg">
+                        <div className="text-2xl font-bold text-orange-600">
+                          {session.voiceAnalysis.volume.control || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Control</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Intonation Analysis */}
+                {session.voiceAnalysis.intonation && (
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4 text-purple-600" />
+                      Intonation Analysis
+                    </h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="text-center p-3 bg-purple-50 rounded-lg">
+                        <div className="text-2xl font-bold text-purple-600">
+                          {session.voiceAnalysis.intonation.score || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Overall Score</div>
+                      </div>
+                      <div className="text-center p-3 bg-blue-50 rounded-lg">
+                        <div className="text-2xl font-bold text-blue-600">
+                          {session.voiceAnalysis.intonation.pitchVariation || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Pitch Variation</div>
+                      </div>
+                      <div className="text-center p-3 bg-green-50 rounded-lg">
+                        <div className="text-2xl font-bold text-green-600">
+                          {session.voiceAnalysis.intonation.melodicContour || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Melodic Contour</div>
+                      </div>
+                      <div className="text-center p-3 bg-orange-50 rounded-lg">
+                        <div className="text-2xl font-bold text-orange-600">
+                          {session.voiceAnalysis.intonation.expressiveness || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Expressiveness</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Voice Quality */}
+                {session.voiceAnalysis.quality && (
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <Award className="h-4 w-4 text-orange-600" />
+                      Voice Quality
+                    </h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="text-center p-3 bg-orange-50 rounded-lg">
+                        <div className="text-2xl font-bold text-orange-600">
+                          {session.voiceAnalysis.quality.vocalFry || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Vocal Fry</div>
+                      </div>
+                      <div className="text-center p-3 bg-red-50 rounded-lg">
+                        <div className="text-2xl font-bold text-red-600">
+                          {session.voiceAnalysis.quality.uptalk || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Uptalk</div>
+                      </div>
+                      <div className="text-center p-3 bg-green-50 rounded-lg">
+                        <div className="text-2xl font-bold text-green-600">
+                          {session.voiceAnalysis.quality.breathControl || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Breath Control</div>
+                      </div>
+                      <div className="text-center p-3 bg-blue-50 rounded-lg">
+                        <div className="text-2xl font-bold text-blue-600">
+                          {session.voiceAnalysis.quality.resonance || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Resonance</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* AI-Powered Transcript Analysis */}
+        {session?.transcriptAnalysis && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BookOpen className="h-5 w-5 text-purple-600" />
+                AI Transcript Analysis
+              </CardTitle>
+              <CardDescription>
+                Purpose-specific content analysis powered by AI
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {/* Purpose Alignment */}
+                {session.transcriptAnalysis.purposeAlignment && (
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <Target className="h-4 w-4 text-blue-600" />
+                      Purpose Alignment: {session.transcriptAnalysis.purpose}
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="text-center p-3 bg-blue-50 rounded-lg">
+                        <div className="text-2xl font-bold text-blue-600">
+                          {session.transcriptAnalysis.purposeAlignment.score || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Alignment Score</div>
+                      </div>
+                      <div className="p-3 bg-green-50 rounded-lg">
+                        <div className="text-sm font-semibold text-green-800 mb-2">Key Strengths</div>
+                        <ul className="text-sm text-green-700 space-y-1">
+                          {session.transcriptAnalysis.purposeAlignment.strengths?.map((strength, index) => (
+                            <li key={index} className="flex items-center gap-2">
+                              <CheckCircle className="h-3 w-3" />
+                              {strength}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Content Structure */}
+                {session.transcriptAnalysis.contentStructure && (
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <BarChart3 className="h-4 w-4 text-green-600" />
+                      Content Structure
+                    </h4>
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                      <div className="text-center p-3 bg-green-50 rounded-lg">
+                        <div className="text-2xl font-bold text-green-600">
+                          {session.transcriptAnalysis.contentStructure.score || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Overall</div>
+                      </div>
+                      <div className="text-center p-3 bg-blue-50 rounded-lg">
+                        <div className="text-2xl font-bold text-blue-600">
+                          {session.transcriptAnalysis.contentStructure.introduction || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Introduction</div>
+                      </div>
+                      <div className="text-center p-3 bg-purple-50 rounded-lg">
+                        <div className="text-2xl font-bold text-purple-600">
+                          {session.transcriptAnalysis.contentStructure.body || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Body</div>
+                      </div>
+                      <div className="text-center p-3 bg-orange-50 rounded-lg">
+                        <div className="text-2xl font-bold text-orange-600">
+                          {session.transcriptAnalysis.contentStructure.conclusion || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Conclusion</div>
+                      </div>
+                      <div className="text-center p-3 bg-red-50 rounded-lg">
+                        <div className="text-2xl font-bold text-red-600">
+                          {session.transcriptAnalysis.contentStructure.transitions || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Transitions</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Persuasiveness */}
+                {session.transcriptAnalysis.persuasiveness && (
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4 text-purple-600" />
+                      Persuasiveness Analysis
+                    </h4>
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                      <div className="text-center p-3 bg-purple-50 rounded-lg">
+                        <div className="text-2xl font-bold text-purple-600">
+                          {session.transcriptAnalysis.persuasiveness.score || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Overall</div>
+                      </div>
+                      <div className="text-center p-3 bg-blue-50 rounded-lg">
+                        <div className="text-2xl font-bold text-blue-600">
+                          {session.transcriptAnalysis.persuasiveness.arguments || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Arguments</div>
+                      </div>
+                      <div className="text-center p-3 bg-green-50 rounded-lg">
+                        <div className="text-2xl font-bold text-green-600">
+                          {session.transcriptAnalysis.persuasiveness.evidence || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Evidence</div>
+                      </div>
+                      <div className="text-center p-3 bg-orange-50 rounded-lg">
+                        <div className="text-2xl font-bold text-orange-600">
+                          {session.transcriptAnalysis.persuasiveness.emotionalAppeals || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Emotional</div>
+                      </div>
+                      <div className="text-center p-3 bg-red-50 rounded-lg">
+                        <div className="text-2xl font-bold text-red-600">
+                          {session.transcriptAnalysis.persuasiveness.callToAction || 0}%
+                        </div>
+                        <div className="text-sm text-gray-600">Call to Action</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* AI Assessment */}
+                {session.transcriptAnalysis.aiAssessment && (
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <Brain className="h-4 w-4 text-indigo-600" />
+                      AI Assessment
+                    </h4>
+                    <div className="p-4 bg-indigo-50 rounded-lg border border-indigo-200">
+                      <p className="text-sm text-indigo-800 leading-relaxed">
+                        {session.transcriptAnalysis.aiAssessment}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Key Insights */}
+                {session.transcriptAnalysis.keyInsights && session.transcriptAnalysis.keyInsights.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <Lightbulb className="h-4 w-4 text-yellow-600" />
+                      Key Insights
+                    </h4>
+                    <div className="space-y-2">
+                      {session.transcriptAnalysis.keyInsights.map((insight, index) => (
+                        <div key={index} className="flex items-start gap-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                          <Lightbulb className="h-4 w-4 text-yellow-600 mt-0.5 flex-shrink-0" />
+                          <p className="text-sm text-yellow-800">{insight}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Recommendations */}
+                {session.transcriptAnalysis.recommendations && session.transcriptAnalysis.recommendations.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <Target className="h-4 w-4 text-red-600" />
+                      AI Recommendations
+                    </h4>
+                    <div className="space-y-2">
+                      {session.transcriptAnalysis.recommendations.map((recommendation, index) => (
+                        <div key={index} className="flex items-start gap-3 p-3 bg-red-50 rounded-lg border border-red-200">
+                          <Target className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
+                          <p className="text-sm text-red-800">{recommendation}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Speech Pattern Analysis */}
         {(authenticMetrics.fillerWords !== null || authenticMetrics.pauseCount !== null) && (

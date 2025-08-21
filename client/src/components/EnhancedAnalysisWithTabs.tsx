@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
+import AICoachInsights from './AICoachInsights';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
@@ -315,6 +316,11 @@ export default function EnhancedAnalysisWithTabs() {
 
   return (
     <div className="space-y-6">
+      {/* AI Coach Insights - Show when there are multiple sessions */}
+      {sessionCount >= 3 && (
+        <AICoachInsights />
+      )}
+      
       {/* Session Selector Header */}
       <Card className="p-6 bg-white/70 backdrop-blur-sm border border-white/30 shadow-xl">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">

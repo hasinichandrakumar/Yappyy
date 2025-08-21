@@ -7,6 +7,7 @@ import { storage } from './storage';
 import { insertPracticeSessionSchema, insertCoachingFeedbackSchema, insertCustomTemplateSchema, practiceSessions } from '@shared/schema';
 import { setupSimplifiedGoogleAuth } from './simplified-google-auth';
 import { setupUserProgressAPI } from './user-progress-api';
+import { generateCoachingInsights, generateSessionComparison } from './ai-coach-insights';
 
 // Helper function to extract user ID from simplified auth session
 function getUserId(req: any): string {
@@ -276,6 +277,65 @@ export async function registerSimplifiedRoutes(app: Express): Promise<Server> {
       console.error('❌ Failed to fetch practice sessions:', error);
       res.status(500).json({ 
         error: 'Failed to fetch sessions',
+        details: error.message 
+      });
+    }
+  });
+
+  // Get AI coaching insights across all sessions
+  app.get('/api/ai-coach/insights', async (req, res) => {
+    try {
+      const userId = getUserId(req);
+      console.log('🤖 Generating AI coaching insights for user:', userId);
+      
+      const sessions = await storage.getUserPracticeSessions(userId);
+      
+      if (!sessions || sessions.length === 0) {
+        return res.json({
+          message: 'No sessions found. Complete some practice sessions to get personalized insights.'
+        });
+      }
+
+      const insights = await generateCoachingInsights(sessions);
+      
+      console.log('✅ AI coaching insights generated successfully');
+      res.json(insights);
+    } catch (error: any) {
+      console.error('❌ Failed to generate AI insights:', error);
+      res.status(500).json({ 
+        error: 'Failed to generate insights',
+        details: error.message 
+      });
+    }
+  });
+
+  // Compare current session with historical performance
+  app.post('/api/ai-coach/compare-session', async (req, res) => {
+    try {
+      const userId = getUserId(req);
+      const { sessionId } = req.body;
+      
+      if (!sessionId) {
+        return res.status(400).json({ error: 'Session ID required' });
+      }
+
+      console.log('📊 Generating session comparison for session:', sessionId);
+      
+      const sessions = await storage.getUserPracticeSessions(userId);
+      const currentSession = sessions.find(s => s.id === sessionId);
+      
+      if (!currentSession) {
+        return res.status(404).json({ error: 'Session not found' });
+      }
+
+      const comparison = await generateSessionComparison(currentSession, sessions);
+      
+      console.log('✅ Session comparison generated successfully');
+      res.json({ comparison });
+    } catch (error: any) {
+      console.error('❌ Failed to generate session comparison:', error);
+      res.status(500).json({ 
+        error: 'Failed to generate comparison',
         details: error.message 
       });
     }

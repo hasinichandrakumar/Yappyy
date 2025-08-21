@@ -9,6 +9,13 @@ PDF Export Formatting: Use only Arial font, simple and minimalistic design. No f
 
 # Recent Changes
 
+**January 21, 2025:**
+- **AI Coach Insights System**: Implemented comprehensive AI-powered coaching analysis that learns from user's practice sessions across time
+- **Pattern-Based Analytics**: Created robust fallback system using mathematical pattern analysis when OpenAI API is unavailable
+- **Intelligent Progress Tracking**: System analyzes trends, strengths, improvement areas, and provides personalized coaching tips
+- **Multi-Tab Insights Display**: Added Overview, Patterns, Tips, and Next Steps tabs for organized coaching feedback
+- **Automatic Fallback**: When OpenAI API has quota issues, system seamlessly switches to pattern-based analysis
+
 **January 20, 2025:**
 - **Complete Google OAuth Rebuild**: Replaced complex passport-based authentication with simplified googleapis approach matching Flask implementation exactly
 - **Authentication System**: Now uses session-based access token storage (req.session.access_token) like Flask's session['access_token']
@@ -44,6 +51,8 @@ PDF Export Formatting: Use only Arial font, simple and minimalistic design. No f
 ## Key Technical Implementations & Features
 - **AI Integration**:
     - **Multi-Modal AI**: OpenAI GPT-4o and Anthropic Claude 3.5 Sonnet for diverse coaching.
+    - **AI Coach Insights**: Intelligent system that analyzes all user sessions across time to provide personalized coaching like a human coach would. Includes trend analysis, pattern recognition, and personalized improvement recommendations.
+    - **Pattern-Based Fallback**: Robust mathematical analysis system that provides coaching insights even when API services are unavailable, ensuring continuous value delivery.
     - **Personalized AI Coach**: True neural network architecture with multi-layer perceptron, self-learning feedback system, and individual user neural profiles. Continuously learns user preferences and adapts coaching style.
     - **Ultra-Detailed Content Analysis**: Comprehensive purpose-specific analysis for all speaking contexts including sales pitches, business presentations, TED Talks, academic presentations, conference talks, and educational content.
     - **Elite Expert-Level AI**: Multi-domain expertise spanning Fortune 500 executive coaching, Harvard PhD-level academic rigor, Stanford teaching excellence, and TED Talk presentation mastery.
