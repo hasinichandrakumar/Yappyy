@@ -262,7 +262,26 @@ export async function registerSimplifiedRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Save session endpoint
+  // Get all practice sessions endpoint
+  app.get('/api/practice-sessions', async (req, res) => {
+    try {
+      const userId = getUserId(req);
+      console.log('📋 Fetching practice sessions for user:', userId);
+      
+      const sessions = await storage.getUserPracticeSessions(userId);
+      
+      console.log(`✅ Found ${sessions.length} sessions for user ${userId}`);
+      res.json(sessions);
+    } catch (error: any) {
+      console.error('❌ Failed to fetch practice sessions:', error);
+      res.status(500).json({ 
+        error: 'Failed to fetch sessions',
+        details: error.message 
+      });
+    }
+  });
+
+  // Save session endpoint (both routes for compatibility)
   app.post('/api/save-session', async (req, res) => {
     try {
       const userId = getUserId(req);
