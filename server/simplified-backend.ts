@@ -412,5 +412,121 @@ export async function registerSimplifiedRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Save practice session endpoint
+  app.post('/api/sessions/save', async (req, res) => {
+    try {
+      const userId = getUserId(req);
+      const sessionNumber = await getNextSessionNumber(userId);
+      
+      console.log('📝 Saving session for user:', userId, 'Session number:', sessionNumber);
+      
+      // Extract core session data
+      const {
+        transcript = '',
+        duration = 0,
+        averageWPM,
+        metrics = {},
+        name,
+        purpose,
+        coachingTips = [],
+        transcriptAnalysis = {},
+        fillerWordAnalysis = {},
+        liveMetricsHistory = {}
+      } = req.body;
+
+      // Get WPM from either averageWPM or metrics.wordsPerMinute
+      const wpm = averageWPM || metrics.wordsPerMinute || 0;
+      
+      // Create session data with all required fields from schema
+      const sessionData: any = {
+        userId,
+        sessionNumber,
+        name: name || `Session ${sessionNumber}`,
+        purpose: purpose || 'General Practice',
+        sessionName: name || `Session ${sessionNumber}`,  // Required field
+        transcript: transcript || '',
+        duration: duration || 0,
+        averageWPM: wpm,  // Required field
+        wordCount: transcript ? transcript.split(/\s+/).filter((w: string) => w.length > 0).length : 0,
+        wordsPerMinute: wpm,  // Also store as wordsPerMinute
+        
+        // Required fields from schema
+        confidenceScore: metrics.confidence || req.body.confidenceScore || 75,
+        voiceClarity: metrics.clarity || req.body.clarityScore || 80,  // Required field
+        fillerWords: metrics.fillerWordCount || req.body.fillerWords || 0,  // Required field
+        pauseCount: 0,  // Required field - default to 0
+        eyeContactScore: String(metrics.eyeContact || req.body.eyeContactScore || '75'),  // Required as text
+        coachingTips: coachingTips || [],  // Required array
+        
+        // Optional metrics from frontend
+        fillerWordCount: metrics.fillerWordCount || req.body.fillerWords || 0,
+        engagementScore: metrics.engagement || req.body.engagementScore || 0,
+        clarityScore: metrics.clarity || req.body.clarityScore || 0,
+        
+        // Additional analysis data (stored as JSON)
+        transcriptAnalysis: transcriptAnalysis || {},
+        fillerWordAnalysis: fillerWordAnalysis || {},
+        liveMetricsHistory: liveMetricsHistory || {},
+        
+        // Calculate overall score
+        overallScore: 0,
+        
+        createdAt: new Date()
+      };
+
+      // Calculate overall score
+      const weights = {
+        confidence: 0.25,
+        engagement: 0.2,
+        eyeContact: 0.2,
+        pace: 0.2,
+        fillers: 0.15
+      };
+
+      const confidence = sessionData.confidenceScore || 0;
+      const engagement = sessionData.engagementScore || 0;
+      const eyeContact = sessionData.eyeContactScore || 0;
+      const paceScore = wpm > 0 ? Math.min(100, Math.max(0, 100 - Math.abs(wpm - 150) * 0.5)) : 0;
+      const fillerScore = sessionData.wordCount > 0 
+        ? Math.max(0, 100 - (sessionData.fillerWordCount / sessionData.wordCount) * 200)
+        : 100;
+
+      sessionData.overallScore = Math.round(
+        confidence * weights.confidence +
+        engagement * weights.engagement +
+        eyeContact * weights.eyeContact +
+        paceScore * weights.pace +
+        fillerScore * weights.fillers
+      );
+
+      console.log('💾 Saving session data:', {
+        userId,
+        sessionNumber,
+        wpm,
+        wordCount: sessionData.wordCount,
+        overallScore: sessionData.overallScore
+      });
+
+      // Save to database
+      const savedSession = await storage.createPracticeSession(sessionData);
+      
+      console.log('✅ Session saved successfully:', savedSession.id);
+      
+      res.json({
+        success: true,
+        session: savedSession,
+        message: `Session ${sessionNumber} saved successfully`
+      });
+      
+    } catch (error: any) {
+      console.error('❌ Error saving session:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to save session',
+        details: error.message
+      });
+    }
+  });
+
   return server;
 }

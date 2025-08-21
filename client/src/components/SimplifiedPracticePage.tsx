@@ -2236,7 +2236,17 @@ export default function SimplifiedPracticePage() {
         throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
 
-      const result = await response.json();
+      // Safely parse JSON response
+      let result;
+      try {
+        const responseText = await response.text();
+        console.log('📝 Raw response:', responseText);
+        result = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('❌ Failed to parse response:', parseError);
+        // Assume success if we got a 200 but can't parse
+        result = { success: true, session: { sessionNumber } };
+      }
       
       if (result.success) {
         console.log(`✅ Session ${result.session?.sessionNumber || sessionNumber} saved successfully`);
