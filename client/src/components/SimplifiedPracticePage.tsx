@@ -387,6 +387,7 @@ export default function SimplifiedPracticePage() {
   const [interimTranscript, setInterimTranscript] = useState<string>('');
   const [showLiveTranscript, setShowLiveTranscript] = useState(true);
   const [showLiveMetrics, setShowLiveMetrics] = useState(true);
+  const [savedSessionData, setSavedSessionData] = useState<any>(null);
 
   // Height sync between left recording area and right AI coach card
   const recordingSectionRef = useRef<HTMLDivElement | null>(null);
@@ -2221,7 +2222,7 @@ export default function SimplifiedPracticePage() {
         coachingTips: sessionData.coachingTips.length
       });
 
-      const response = await fetch('/api/save-session', {
+      const response = await fetch('/api/sessions/save', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -2238,14 +2239,18 @@ export default function SimplifiedPracticePage() {
       const result = await response.json();
       
       if (result.success) {
-        console.log(`✅ Session ${result.sessionNumber} saved successfully`);
+        console.log(`✅ Session ${result.session?.sessionNumber || sessionNumber} saved successfully`);
+        console.log('📊 Saved session data:', result.session);
+        
+        // Store the saved session data to pass to analysis page
+        setSavedSessionData(result.session);
         
         // Update session number for next session
-        const nextSessionNumber = result.sessionNumber + 1;
+        const nextSessionNumber = (result.session?.sessionNumber || sessionNumber) + 1;
         setSessionNumber(nextSessionNumber);
         setSessionName(`Session ${nextSessionNumber}`);
         
-        // Show analysis page (it will fetch session data from server)
+        // Show analysis page with the saved session data
         setShowAnalysisPage(true);
         
         toast({
@@ -2255,7 +2260,7 @@ export default function SimplifiedPracticePage() {
           duration: 5000
         });
         
-        console.log('🔄 Transitioning to analysis page - will fetch session data from server');
+        console.log('🔄 Transitioning to analysis page with saved session data');
       } else {
         console.error('❌ Failed to save session:', result.error);
         toast({
@@ -2300,6 +2305,7 @@ export default function SimplifiedPracticePage() {
   if (showAnalysisPage) {
     return (
       <AuthenticAnalysisPage
+        session={savedSessionData}
         onClose={() => setShowAnalysisPage(false)}
         onNewSession={() => {
           setShowAnalysisPage(false);
