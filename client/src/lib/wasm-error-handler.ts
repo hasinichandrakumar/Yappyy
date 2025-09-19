@@ -75,8 +75,11 @@ export class WasmErrorHandler {
         (window as any).Module = void 0;
         
         // Override dynamic imports for problematic modules  
-        const originalImport = window.import || ((path: string) => import(path));
-        window.import = async function(path: string) {
+        const originalImport = (window as any).import || ((path: string) => {
+          // @vite-ignore
+          return /* @vite-ignore */ import(path);
+        });
+        (window as any).import = async function(path: string) {
           if (path.includes('mediapipe') || 
               path.includes('tensorflow') || 
               path.includes('face-api') ||

@@ -2075,6 +2075,68 @@ Evaluate how well this speech achieved its stated PURPOSE with the depth and det
       const nextSessionNumber = await getNextSessionNumber(userId);
       console.log(`📹 Saving video session ${nextSessionNumber} for user ${userId}`);
 
+      // 🔍 TEMPORARY LOGGING: Check what data we're receiving
+      console.log('🔍 VIDEO SESSION DATA DEBUG:', {
+        hasTranscript: !!transcript,
+        hasVideoData: !!videoData,
+        transcriptLength: transcript?.length || 0,
+        duration: duration,
+        hasFacialAnalysis: !!facialAnalysis,
+        hasVoiceMetrics: !!voiceMetrics,
+        metricsKeys: Object.keys(metrics || {})
+      });
+
+      // 🤖 AI MODEL PROCESSING: Process video data if available
+      let processedFacialAnalysis = facialAnalysis;
+      let processedVoiceMetrics = voiceMetrics;
+      let processedPostureMetrics = null;
+
+      try {
+        // Extract frame from video for analysis if we have video data
+        if (videoData && !facialAnalysis) {
+          console.log('🎭 Processing video frame for facial analysis...');
+          const { FacialAnalysisEngine } = await import('./facial-analysis-engine.js');
+          const facialEngine = new FacialAnalysisEngine();
+          // For now, we'll use a placeholder - in production you'd extract frames from video
+          const frameData = videoData; // This would be extracted frame in real implementation
+          processedFacialAnalysis = await facialEngine.analyzeFacialFrame(frameData);
+          console.log('✅ Video facial analysis result:', {
+            confidence: processedFacialAnalysis?.facialMetrics?.emotionalExpression?.confidence,
+            engagement: processedFacialAnalysis?.facialMetrics?.emotionalExpression?.engagement
+          });
+        }
+
+        // Process voice analysis if we have transcript but no voice metrics
+        if (transcript && !voiceMetrics) {
+          console.log('🎵 Processing transcript for voice analysis...');
+          const { FreeVoiceAnalysisEngine } = await import('./free-voice-analysis.js');
+          const voiceEngine = new FreeVoiceAnalysisEngine();
+          processedVoiceMetrics = await voiceEngine.analyzeTranscript(transcript);
+          console.log('✅ Voice analysis result:', {
+            clarity: processedVoiceMetrics?.clarity,
+            confidence: processedVoiceMetrics?.confidence,
+            professionalism: processedVoiceMetrics?.professionalism,
+            sentiment: processedVoiceMetrics?.sentiment
+          });
+        }
+
+        // Process posture analysis if we have video data
+        if (videoData) {
+          console.log('🏃 Processing video for posture analysis...');
+          const { RoboflowVisionEngine } = await import('./roboflow-computer-vision.js');
+          const postureEngine = new RoboflowVisionEngine();
+          const frameData = videoData; // This would be extracted frame in real implementation
+          processedPostureMetrics = await postureEngine.analyzeFrame(frameData);
+          console.log('✅ Posture analysis result:', {
+            posture: processedPostureMetrics?.posture?.confidence,
+            gestures: processedPostureMetrics?.gestures?.effectiveness
+          });
+        }
+      } catch (modelError) {
+        console.error('❌ AI model processing failed:', modelError);
+        // Continue with session saving even if AI processing fails
+      }
+
       // Create practice session with comprehensive data
       const sessionData = {
         userId,
@@ -2086,11 +2148,11 @@ Evaluate how well this speech achieved its stated PURPOSE with the depth and det
         // Store video as base64 if provided
         videoBlob: videoData ? Buffer.from(videoData, 'base64').toString('base64') : null,
         // Extract metrics with proper defaults and computer vision integration
-        confidenceScore: metrics?.confidence || facialAnalysis?.emotionalExpression?.confidence || 0,
-        clarityScore: metrics?.clarity || voiceMetrics?.clarity || 0,  
-        paceScore: metrics?.pace || voiceMetrics?.pace || 0,
-        eyeContactScore: (metrics?.eyeContact || facialAnalysis?.communicationSignals?.eyeContactQuality || 0).toString(),
-        gestureScore: metrics?.gesture || facialAnalysis?.bodyLanguage?.gestureNaturalness || 0,
+        confidenceScore: metrics?.confidence || processedFacialAnalysis?.emotionalExpression?.confidence || 0,
+        clarityScore: metrics?.clarity || processedVoiceMetrics?.clarity || 0,  
+        paceScore: metrics?.pace || processedVoiceMetrics?.pace || 0,
+        eyeContactScore: (metrics?.eyeContact || processedFacialAnalysis?.communicationSignals?.eyeContactQuality || 0).toString(),
+        gestureScore: metrics?.gesture || processedFacialAnalysis?.bodyLanguage?.gestureNaturalness || 0,
         overallScore: 0, // Will be calculated after the helper function is defined
         fillerWordCount: metrics?.fillerWordCount || 0,
         wordsPerMinute: metrics?.wordsPerMinute || 0,
@@ -2100,9 +2162,16 @@ Evaluate how well this speech achieved its stated PURPOSE with the depth and det
         fillerWords: metrics?.fillerWordCount || 0,
         pauseCount: metrics?.pauseCount || 0,
         coachingTips: ["Session saved successfully"],
-        // Store additional analysis
-        facialAnalysis: facialAnalysis ? JSON.stringify(facialAnalysis) : null,
-        voiceMetrics: voiceMetrics ? JSON.stringify(voiceMetrics) : null
+        
+        // 🤖 AI MODEL RESULTS: Store processed metrics
+        facialAnalysis: processedFacialAnalysis ? JSON.stringify(processedFacialAnalysis) : null,
+        voiceMetrics: processedVoiceMetrics ? JSON.stringify(processedVoiceMetrics) : null,
+        bodyLanguageMetrics: processedPostureMetrics ? JSON.stringify(processedPostureMetrics) : null,
+        
+        // Enhanced metrics from AI processing
+        postureScore: processedPostureMetrics?.posture?.confidence || metrics?.posture || null,
+        volumeConsistency: processedVoiceMetrics?.confidence || metrics?.volume || null,
+        intonationScore: processedVoiceMetrics?.professionalism || metrics?.intonation || null
       };
 
       // Calculate overall score with weighted, normalized components

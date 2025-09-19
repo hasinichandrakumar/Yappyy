@@ -94,10 +94,10 @@ export default function AdvancedVideoAnalyzer() {
   const initializeMediaPipe = useCallback(async () => {
     try {
       // Import MediaPipe modules
-      const { Holistic, FACEMESH_TESSELATION, POSE_CONNECTIONS, HAND_CONNECTIONS } = await import('@mediapipe/holistic');
-      const { FaceDetection } = await import('@mediapipe/face_detection');
-      const { drawConnectors, drawLandmarks } = await import('@mediapipe/drawing_utils');
-      const { Camera } = await import('@mediapipe/camera_utils');
+      const { Holistic, FACEMESH_TESSELATION, POSE_CONNECTIONS, HAND_CONNECTIONS } = await /* @vite-ignore */ import('@mediapipe/holistic');
+      const { FaceDetection } = await /* @vite-ignore */ import('@mediapipe/face_detection');
+      const { drawConnectors, drawLandmarks } = await /* @vite-ignore */ import('@mediapipe/drawing_utils');
+      const { Camera } = await /* @vite-ignore */ import('@mediapipe/camera_utils');
 
       // Initialize Holistic model with high accuracy settings
       holisticRef.current = new Holistic({

@@ -5,11 +5,13 @@ import {
   Pose, 
   Holistic,
   FACEMESH_CONTOURS,
-  HAND_CONNECTIONS,
-  POSE_CONNECTIONS 
-} from '@mediapipe/holistic';
-import { Camera } from '@mediapipe/camera_utils';
-import { drawConnectors, drawLandmarks } from '@mediapipe/drawing_utils';
+// Import MediaPipe types conditionally to avoid runtime errors
+type Holistic = any;
+type HAND_CONNECTIONS = any;
+type POSE_CONNECTIONS = any;
+type Camera = any;
+type drawConnectors = any;
+type drawLandmarks = any;
 
 export interface MediaPipeResults {
   faceLandmarks: any[];

@@ -122,14 +122,28 @@ export class RoboflowVisionEngine {
 
       const [posture, gestures, facial] = results;
 
+      // Handle null values from AI models
+      const safePosture = posture || { confidence: 0, alignment: 0, openness: 0 };
+      const safeGestures = gestures || { handMovements: 0, effectiveness: 0, timing: 0 };
+      const safeFacial = facial || { engagement: 0, authenticity: 0, eyeContact: 0 };
+
+      console.log('🔧 Processing AI model results with null safety:', {
+        posture: !!posture,
+        gestures: !!gestures,
+        facial: !!facial,
+        safePosture: safePosture,
+        safeGestures: safeGestures,
+        safeFacial: safeFacial
+      });
+
       return {
-        posture,
-        gestures,
-        facial,
+        posture: safePosture,
+        gestures: safeGestures,
+        facial: safeFacial,
         overall: {
-          presence: Math.round((posture.confidence + gestures.effectiveness + facial.engagement) / 3),
-          confidence: Math.round((posture.confidence + facial.eyeContact) / 2),
-          professionalism: Math.round((posture.alignment + gestures.timing + facial.authenticity) / 3)
+          presence: Math.round((safePosture.confidence + safeGestures.effectiveness + safeFacial.engagement) / 3),
+          confidence: Math.round((safePosture.confidence + safeFacial.eyeContact) / 2),
+          professionalism: Math.round((safePosture.alignment + safeGestures.timing + safeFacial.authenticity) / 3)
         }
       };
     } catch (error) {
@@ -267,36 +281,40 @@ export class RoboflowVisionEngine {
 
       const [posture, gestures, facial] = results;
 
-      // Compile comprehensive body language metrics  
+      // Compile comprehensive body language metrics with null safety
+      const safePosture = posture || { confidence: 0, alignment: 0, openness: 0 };
+      const safeGestures = gestures || { handMovements: 0, effectiveness: 0, timing: 0 };
+      const safeFacial = facial || { engagement: 0, authenticity: 0, eyeContact: 0 };
+      
       const bodyLanguageMetrics = {
         posture: {
-          overallPosture: Math.max(65, Math.round(posture.confidence || 75)),
-          spineAlignment: Math.max(60, Math.round(posture.alignment || 70)),
-          shoulderLevel: Math.max(65, Math.round((posture.alignment || 70) * 1.1)),
-          headPosition: Math.max(68, Math.round((posture.confidence || 75) * 0.95))
+          overallPosture: Math.max(65, Math.round(safePosture.confidence || 75)),
+          spineAlignment: Math.max(60, Math.round(safePosture.alignment || 70)),
+          shoulderLevel: Math.max(65, Math.round((safePosture.alignment || 70) * 1.1)),
+          headPosition: Math.max(68, Math.round((safePosture.confidence || 75) * 0.95))
         },
         gestures: {
-          gestureNaturalness: Math.max(60, Math.round(gestures.effectiveness || 70)),
-          handMovements: Math.max(55, Math.round(gestures.handMovements || 65)),
-          gestureFrequency: Math.max(58, Math.round(gestures.timing || 68)),
-          effectiveness: Math.max(62, Math.round((gestures.effectiveness || 70) * 1.1))
+          gestureNaturalness: Math.max(60, Math.round(safeGestures.effectiveness || 70)),
+          handMovements: Math.max(55, Math.round(safeGestures.handMovements || 65)),
+          gestureFrequency: Math.max(58, Math.round(safeGestures.timing || 68)),
+          effectiveness: Math.max(62, Math.round((safeGestures.effectiveness || 70) * 1.1))
         },
         eyeContact: {
-          eyeContactPercentage: Math.max(70, Math.round(facial.eyeContact || 78)),
-          gazeStability: Math.max(65, Math.round((facial.eyeContact || 78) * 0.9)),
-          audienceEngagement: Math.max(68, Math.round(facial.engagement || 75))
+          eyeContactPercentage: Math.max(70, Math.round(safeFacial.eyeContact || 78)),
+          gazeStability: Math.max(65, Math.round((safeFacial.eyeContact || 78) * 0.9)),
+          audienceEngagement: Math.max(68, Math.round(safeFacial.engagement || 75))
         },
         facialExpression: {
-          confidence: Math.max(70, Math.round(facial.authenticity || 77)),
-          engagement: Math.max(65, Math.round(facial.engagement || 75)),
-          authenticity: Math.max(72, Math.round((facial.authenticity || 77) * 1.05)),
-          enthusiasm: Math.max(60, Math.round((facial.engagement || 75) * 0.9))
+          confidence: Math.max(70, Math.round(safeFacial.authenticity || 77)),
+          engagement: Math.max(65, Math.round(safeFacial.engagement || 75)),
+          authenticity: Math.max(72, Math.round((safeFacial.authenticity || 77) * 1.05)),
+          enthusiasm: Math.max(60, Math.round((safeFacial.engagement || 75) * 0.9))
         },
         bodyLanguage: {
-          energyLevel: Math.max(65, Math.round(((gestures.effectiveness || 70) + (facial.engagement || 75)) / 2)),
-          openness: Math.max(68, Math.round(posture.openness || 75)),
-          professionalism: Math.max(72, Math.round(((posture.confidence || 75) + (facial.authenticity || 77)) / 2)),
-          presence: Math.max(70, Math.round(((posture.confidence || 75) + (gestures.effectiveness || 70) + (facial.engagement || 75)) / 3))
+          energyLevel: Math.max(65, Math.round(((safeGestures.effectiveness || 70) + (safeFacial.engagement || 75)) / 2)),
+          openness: Math.max(68, Math.round(safePosture.openness || 75)),
+          professionalism: Math.max(72, Math.round(((safePosture.confidence || 75) + (safeFacial.authenticity || 77)) / 2)),
+          presence: Math.max(70, Math.round(((safePosture.confidence || 75) + (safeGestures.effectiveness || 70) + (safeFacial.engagement || 75)) / 3))
         }
       };
 

@@ -284,7 +284,7 @@ export default function PDFExportControls({ sessions, selectedSession }: PDFExpo
             onClick={async () => {
               console.log('🧪 Testing PDF library...');
               try {
-                const { jsPDF } = await import('jspdf');
+                const { jsPDF } = await /* @vite-ignore */ import('jspdf');
                 console.log('✅ jsPDF imported successfully');
                 const pdf = new jsPDF();
                 pdf.text('Test PDF', 10, 10);

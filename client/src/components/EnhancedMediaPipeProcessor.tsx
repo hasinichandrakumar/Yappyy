@@ -1,8 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import { Holistic, Results } from '@mediapipe/holistic';
-import { Camera } from '@mediapipe/camera_utils';
-import { drawConnectors, drawLandmarks } from '@mediapipe/drawing_utils';
-import { POSE_CONNECTIONS, HAND_CONNECTIONS, FACEMESH_TESSELATION } from '@mediapipe/holistic';
+// Import MediaPipe types conditionally to avoid runtime errors
+type Holistic = any;
+type Results = any;
+type Camera = any;
+type drawConnectors = any;
+type drawLandmarks = any;
+type POSE_CONNECTIONS = any;
+type HAND_CONNECTIONS = any;
+type FACEMESH_TESSELATION = any;
 
 interface MediaPipeAnalysis {
   handGestures: {

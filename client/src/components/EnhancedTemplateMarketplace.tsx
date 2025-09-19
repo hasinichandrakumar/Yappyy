@@ -1069,11 +1069,11 @@ Make it highly personal, engaging, and tailored to these specific requirements. 
 
       // Minimal, plain-text PDF with Poppins
       try {
-        const { generatePlainTemplatePDF } = await import('@/lib/simple-pdf');
+        const { generatePlainTemplatePDF } = await /* @vite-ignore */ import('@/lib/simple-pdf');
         await generatePlainTemplatePDF({ content: templateData.content }, filename);
       } catch (primaryError) {
         console.warn('Simple PDF export failed, trying enhanced exporter:', primaryError);
-        const { generateTemplatePDF } = await import('@/lib/pdf-export');
+                  const { generateTemplatePDF } = await /* @vite-ignore */ import('@/lib/pdf-export');
         await generateTemplatePDF(templateData, filename);
       }
 

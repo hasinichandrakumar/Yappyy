@@ -3,6 +3,7 @@
 
 let originalConsoleError: any;
 let originalConsoleWarn: any;
+let originalAddEventListener: any;
 
 const harmlessErrorPatterns = [
   /ResizeObserver loop limit exceeded/,

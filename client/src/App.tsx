@@ -28,6 +28,7 @@ function Router() {
   // Complete error suppression for clean development experience
   useEffect(() => {
     // Initialize WASM error handling first
+    // @vite-ignore
     import('@/lib/wasm-error-handler').then(({ WasmErrorHandler }) => {
       WasmErrorHandler.initialize();
       WasmErrorHandler.disableMediaPipeWasm();
@@ -36,6 +37,7 @@ function Router() {
     });
     
     // Disable WASM modules
+    // @vite-ignore
     import('@/utils/disable-wasm-modules').then(({ disableWasmModules }) => {
       disableWasmModules();
     }).catch(() => {
@@ -43,6 +45,7 @@ function Router() {
     });
     
     // Then initialize general error suppression
+    // @vite-ignore
     import('@/utils/error-suppression').then(({ initializeErrorSuppression, restoreErrorHandling }) => {
       initializeErrorSuppression();
       

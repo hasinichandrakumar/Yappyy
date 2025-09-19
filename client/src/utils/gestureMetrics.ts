@@ -1,4 +1,5 @@
-import { Results } from '@mediapipe/hands';
+// Import MediaPipe types conditionally to avoid runtime errors
+type Results = any;
 
 interface GestureMetrics {
   handMovements: number;

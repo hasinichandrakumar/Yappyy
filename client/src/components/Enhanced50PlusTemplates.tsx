@@ -649,11 +649,11 @@ export default function Enhanced50PlusTemplates() {
       const filename = `${safeTitle.replace(/\s+/g, '_')}_Template.pdf`;
       // Minimal, plain-text PDF first
       try {
-        const { generatePlainTemplatePDF } = await import('@/lib/simple-pdf');
+        const { generatePlainTemplatePDF } = await /* @vite-ignore */ import('@/lib/simple-pdf');
         await generatePlainTemplatePDF({ content: templateData.content }, filename);
       } catch (primaryError) {
         console.warn('Simple PDF export failed on 50+ templates, using fallback:', primaryError);
-        const { TemplatePDFExportService } = await import('@/lib/template-pdf-export');
+                  const { TemplatePDFExportService } = await /* @vite-ignore */ import('@/lib/template-pdf-export');
         const pdfService = new TemplatePDFExportService();
         await pdfService.generateTemplateReport(templateData);
         await pdfService.downloadPDF(filename);

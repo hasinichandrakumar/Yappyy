@@ -146,9 +146,9 @@ export default function EnhancedPracticeHub() {
   const initializeAdvancedSystems = useCallback(async () => {
     try {
       // Load MediaPipe models with enhanced configurations
-      const mediapipeHolistic = await import('@mediapipe/holistic');
-      const mediapipeFace = await import('@mediapipe/face_mesh');
-      const mediapipeHands = await import('@mediapipe/hands');
+      const mediapipeHolistic = await /* @vite-ignore */ import('@mediapipe/holistic');
+      const mediapipeFace = await /* @vite-ignore */ import('@mediapipe/face_mesh');
+      const mediapipeHands = await /* @vite-ignore */ import('@mediapipe/hands');
       
       // Initialize Holistic model with maximum accuracy
       holisticModel.current = new mediapipeHolistic.Holistic({

@@ -819,84 +819,84 @@ export default function SimplifiedPracticePage() {
       
       // Ensure robust speech recognition is initialized
       if (!robustSpeechRecognitionRef.current) {
-      console.log('🔧 Creating robust speech recognition instance...');
-      robustSpeechRecognitionRef.current = new RobustSpeechRecognition();
-      
-      // Set up callbacks
-      robustSpeechRecognitionRef.current.setCallbacks(
-        (transcript: string, isFinal: boolean) => {
-          console.log('📝 Transcript update:', { transcript: transcript.substring(0, 100) + '...', isFinal });
-          
-          // Update state
-          setTranscript(transcript);
-          transcriptRef.current = transcript;
-          
-          // Increment transcript update counter
-          setTranscriptUpdateCount(prev => prev + 1);
-          
-          // WPM calculation
-          if (transcript.trim().length > 0) {
-            const words = transcript.trim().split(/\s+/).filter(word => word.length > 0);
-            let wpm = 0;
-            if (sessionDuration > 0 && words.length >= 3) {
-              const timeInMinutes = sessionDuration / 60;
-              wpm = Math.round(words.length / timeInMinutes);
-            } else if (words.length >= 3) {
-              wpm = words.length;
+        console.log('🔧 Creating robust speech recognition instance...');
+        robustSpeechRecognitionRef.current = new RobustSpeechRecognition();
+        
+        // Set up callbacks
+        robustSpeechRecognitionRef.current.setCallbacks(
+          (transcript: string, isFinal: boolean) => {
+            console.log('📝 Transcript update:', { transcript: transcript.substring(0, 100) + '...', isFinal });
+            
+            // Update state
+            setTranscript(transcript);
+            transcriptRef.current = transcript;
+            
+            // Increment transcript update counter
+            setTranscriptUpdateCount(prev => prev + 1);
+            
+            // WPM calculation
+            if (transcript.trim().length > 0) {
+              const words = transcript.trim().split(/\s+/).filter(word => word.length > 0);
+              let wpm = 0;
+              if (sessionDuration > 0 && words.length >= 3) {
+                const timeInMinutes = sessionDuration / 60;
+                wpm = Math.round(words.length / timeInMinutes);
+              } else if (words.length >= 3) {
+                wpm = words.length;
+              }
+              
+              if (wpm > 0) {
+                setWpmUpdateCount(prev => prev + 1);
+                setMetrics(prev => ({
+                  ...prev,
+                  wordsPerMinute: wpm,
+                  voice: {
+                    ...prev.voice,
+                    pace: wpm
+                  }
+                }));
+                setWpmHistory(prev => [...prev.slice(-9), wpm]);
+              }
             }
             
-            if (wpm > 0) {
-              setWpmUpdateCount(prev => prev + 1);
+            // Detect filler words
+            if (transcript.trim().length > 0) {
+              const fillerResult = detectFillerWords(transcript);
               setMetrics(prev => ({
                 ...prev,
-                wordsPerMinute: wpm,
+                fillerWordCount: fillerResult.count,
                 voice: {
                   ...prev.voice,
-                  pace: wpm
+                  fillerCount: fillerResult.count
                 }
               }));
-              setWpmHistory(prev => [...prev.slice(-9), wpm]);
-            }
-          }
-          
-          // Detect filler words
-          if (transcript.trim().length > 0) {
-            const fillerResult = detectFillerWords(transcript);
-            setMetrics(prev => ({
-              ...prev,
-              fillerWordCount: fillerResult.count,
-              voice: {
-                ...prev.voice,
-                fillerCount: fillerResult.count
+              
+              if (fillerResult.count > 0) {
+                console.log(`🎯 Filler words detected: ${fillerResult.count} - ${fillerResult.words.join(', ')}`);
               }
-            }));
-            
-            if (fillerResult.count > 0) {
-              console.log(`🎯 Filler words detected: ${fillerResult.count} - ${fillerResult.words.join(', ')}`);
             }
+          },
+          (error: string) => {
+            console.warn('⚠️ Speech recognition error:', error);
+            setSpeechRecognitionStatus('error');
+            // Only show toast for critical errors
+            if (error.includes('not-allowed') || error.includes('audio-capture') || error.includes('service-not-allowed')) {
+              toast({
+                title: "Speech Recognition Error",
+                description: `Error: ${error}. Please check microphone permissions.`,
+                variant: "destructive"
+              });
+            }
+          },
+          (status: 'idle' | 'starting' | 'active' | 'error') => {
+            console.log('🎤 Speech recognition status changed:', status);
+            setSpeechRecognitionStatus(status);
           }
-        },
-        (error: string) => {
-          console.warn('⚠️ Speech recognition error:', error);
-          setSpeechRecognitionStatus('error');
-          // Only show toast for critical errors
-          if (error.includes('not-allowed') || error.includes('audio-capture') || error.includes('service-not-allowed')) {
-            toast({
-              title: "Speech Recognition Error",
-              description: `Error: ${error}. Please check microphone permissions.`,
-              variant: "destructive"
-            });
-          }
-        },
-        (status: 'idle' | 'starting' | 'active' | 'error') => {
-          console.log('🎤 Speech recognition status changed:', status);
-          setSpeechRecognitionStatus(status);
-        }
-      );
-    }
-    
-    console.log('✅ Robust speech recognition setup complete');
-    return true;
+        );
+      }
+      
+      console.log('✅ Robust speech recognition setup complete');
+      return true;
     } catch (error) {
       console.warn('⚠️ Failed to setup speech recognition:', error);
       return false;

@@ -34,26 +34,31 @@ export default function SimpleDetailedAnalysis() {
       ? bodyLanguageScores.reduce((sum, score) => sum + (score || 0), 0) / bodyLanguageScores.length 
       : null;
 
+    // Extract metrics from facial analysis if available
+    const facialData = session.facialAnalysis ? (typeof session.facialAnalysis === 'string' ? JSON.parse(session.facialAnalysis) : session.facialAnalysis) : null;
+    const voiceData = session.voiceMetrics ? (typeof session.voiceMetrics === 'string' ? JSON.parse(session.voiceMetrics) : session.voiceMetrics) : null;
+
     return {
       bodyLanguage: {
-        posture: session.postureScore || null,
-        gestures: session.gestureNaturalness || null,
-        eyeContact: eyeContactScore,
+        posture: session.postureScore || facialData?.bodyLanguage?.postureScore || null,
+        gestures: session.gestureNaturalness || facialData?.bodyLanguage?.gestureNaturalness || null,
+        eyeContact: eyeContactScore || facialData?.communicationSignals?.eyeContactQuality || null,
         overall: bodyLanguageOverall
       },
       voice: {
-        clarity: session.voiceClarity || null,
-        pace: session.averageWPM || null,
-        volume: session.volumeConsistency || null,
+        clarity: session.voiceClarity || voiceData?.clarity || null,
+        pace: session.averageWPM || voiceData?.pace || null,
+        volume: session.volumeConsistency || voiceData?.volume || null,
+        intonation: session.intonationScore || voiceData?.intonation || null,
         fillerWords: session.fillerWords || 0
       },
       content: {
         structure: session.structureScore || null,
         clarity: session.clarityScore || null,
-        engagement: session.engagementScore || session.persuasivenessScore || null
+        engagement: session.engagementScore || session.persuasivenessScore || facialData?.emotionalExpression?.engagement || null
       },
       overall: {
-        score: session.confidenceScore || null,
+        score: session.confidenceScore || facialData?.emotionalExpression?.confidence || null,
         duration: session.duration || 0,
         wordCount: wordCount
       }
@@ -141,7 +146,7 @@ export default function SimpleDetailedAnalysis() {
                 </div>
                 
                 <div className="space-y-4">
-                  {metrics.bodyLanguage.posture && (
+                  {metrics.bodyLanguage.posture !== null && metrics.bodyLanguage.posture !== undefined && (
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <span className="font-medium">Posture</span>
@@ -156,7 +161,7 @@ export default function SimpleDetailedAnalysis() {
                     </div>
                   )}
                   
-                  {metrics.bodyLanguage.gestures && (
+                  {metrics.bodyLanguage.gestures !== null && metrics.bodyLanguage.gestures !== undefined && (
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <span className="font-medium">Hand Gestures</span>
@@ -171,7 +176,7 @@ export default function SimpleDetailedAnalysis() {
                     </div>
                   )}
                   
-                  {metrics.bodyLanguage.eyeContact && (
+                  {metrics.bodyLanguage.eyeContact !== null && metrics.bodyLanguage.eyeContact !== undefined && (
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <span className="font-medium">Eye Contact</span>
@@ -186,7 +191,9 @@ export default function SimpleDetailedAnalysis() {
                     </div>
                   )}
                   
-                  {!metrics.bodyLanguage.posture && !metrics.bodyLanguage.gestures && !metrics.bodyLanguage.eyeContact && (
+                  {(metrics.bodyLanguage.posture === null || metrics.bodyLanguage.posture === undefined) && 
+                   (metrics.bodyLanguage.gestures === null || metrics.bodyLanguage.gestures === undefined) && 
+                   (metrics.bodyLanguage.eyeContact === null || metrics.bodyLanguage.eyeContact === undefined) && (
                     <div className="text-center py-8 text-gray-500">
                       <User className="h-12 w-12 mx-auto mb-3 opacity-50" />
                       <p className="text-sm">Body language data not available for this session.</p>
@@ -208,7 +215,7 @@ export default function SimpleDetailedAnalysis() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-4">
-                  {metrics.voice.clarity && (
+                  {metrics.voice.clarity !== null && (
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <span className="font-medium">Clarity</span>
@@ -223,7 +230,7 @@ export default function SimpleDetailedAnalysis() {
                     </div>
                   )}
                   
-                  {metrics.voice.pace && (
+                  {metrics.voice.pace !== null && (
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <span className="font-medium">Speaking Pace</span>
@@ -253,7 +260,7 @@ export default function SimpleDetailedAnalysis() {
                     </p>
                   </div>
 
-                  {metrics.voice.volume && (
+                  {metrics.voice.volume !== null && metrics.voice.volume !== undefined && (
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <span className="font-medium">Volume Consistency</span>
@@ -268,7 +275,9 @@ export default function SimpleDetailedAnalysis() {
                     </div>
                   )}
                   
-                  {!metrics.voice.clarity && !metrics.voice.pace && !metrics.voice.volume && (
+                  {(metrics.voice.clarity === null || metrics.voice.clarity === undefined) && 
+                   (metrics.voice.pace === null || metrics.voice.pace === undefined) && 
+                   (metrics.voice.volume === null || metrics.voice.volume === undefined) && (
                     <div className="text-center py-8 text-gray-500">
                       <Volume2 className="h-12 w-12 mx-auto mb-3 opacity-50" />
                       <p className="text-sm">Voice analysis data not available for this session.</p>

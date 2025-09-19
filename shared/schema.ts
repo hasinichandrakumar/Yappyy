@@ -226,6 +226,7 @@ export const practiceSessions = pgTable("practice_sessions", {
   volumeConsistency: real("volume_consistency"),
   intonationScore: real("intonation_score"),
   postureScore: real("posture_score"),
+  // emotionalScore: real("emotional_score"), // 🎭 TODO: Add to database schema
   fillerWordsUh: integer("filler_words_uh").default(0),
   fillerWordsLike: integer("filler_words_like").default(0),
   fillerWordsSo: integer("filler_words_so").default(0),

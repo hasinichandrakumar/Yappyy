@@ -611,7 +611,7 @@ export default function WorkingRecordingTest() {
     try {
       if (!window.faceapi) {
         console.log('Loading face-api.js...');
-        await import('face-api.js');
+        await /* @vite-ignore */ import('face-api.js');
       }
       
       const MODEL_URL = '/models';

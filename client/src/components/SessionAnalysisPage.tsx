@@ -291,7 +291,7 @@ export default function SessionAnalysisPage({ sessionData, onClose, onNewSession
       console.log('🎯 Exporting session to PDF with enhanced styling...');
       
       // Import the enhanced PDF export
-      const { generateSessionPDF } = await import('@/lib/pdf-export');
+      const { generateSessionPDF } = await /* @vite-ignore */ import('@/lib/pdf-export');
       
       // Convert NORMALIZED sessionData to PDF format - ensures accurate percentages
       const sessionForPDF = {

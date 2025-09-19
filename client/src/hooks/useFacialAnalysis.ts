@@ -72,7 +72,7 @@ export function useFacialAnalysis() {
       
       // Try client-side Face-api.js first for maximum accuracy
       try {
-        const { clientFaceDetection, convertClientDetectionToMetrics } = await import('@/lib/face-detection');
+        const { clientFaceDetection, convertClientDetectionToMetrics } = await /* @vite-ignore */ import('@/lib/face-detection');
         
         if (videoRef.current && clientFaceDetection.isReady()) {
           clientDetection = await clientFaceDetection.detectFace(videoRef.current);
@@ -100,7 +100,7 @@ export function useFacialAnalysis() {
         // If we have client-side detection, enhance the results
         if (clientDetection) {
           try {
-            const { convertClientDetectionToMetrics } = await import('@/lib/face-detection');
+            const { convertClientDetectionToMetrics } = await /* @vite-ignore */ import('@/lib/face-detection');
             const clientMetrics = convertClientDetectionToMetrics(clientDetection);
             
             // Blend client and server results for maximum accuracy
