@@ -81,17 +81,11 @@ app.use((req, res, next) => {
   const port = parseInt(process.env.PORT || "5000");
   const host = process.env.HOST || "0.0.0.0"; // bind IPv4
 
-  try {
-    server.listen(port, host, () => {
-      log(`🚀 Simplified backend serving on port ${port}`);
-      log(`✅ Core recording functionality ready`);
-      log(`✅ Filler word detection active`);
-      log(`✅ Session analysis available`);
-      log(`✅ Google OAuth configured`);
-    });
-  } catch (error: any) {
+  // Handle server errors properly with event listeners
+  server.on('error', (error: any) => {
     if (error.code === 'EADDRINUSE') {
-      // Silently try next port to reduce console noise
+      console.log(`⚠️ Port ${port} is in use, trying port ${port + 1}...`);
+      // Try next port
       server.listen(port + 1, host, () => {
         log(`🚀 Simplified backend serving on port ${port + 1}`);
         log(`✅ Core recording functionality ready`);
@@ -103,5 +97,13 @@ app.use((req, res, next) => {
       console.error('❌ Server error:', error);
       process.exit(1);
     }
-  }
+  });
+
+  server.listen(port, host, () => {
+    log(`🚀 Simplified backend serving on port ${port}`);
+    log(`✅ Core recording functionality ready`);
+    log(`✅ Filler word detection active`);
+    log(`✅ Session analysis available`);
+    log(`✅ Google OAuth configured`);
+  });
 })();
