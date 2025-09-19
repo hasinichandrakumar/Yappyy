@@ -25,26 +25,18 @@ function Router() {
   const { isAuthenticated, isLoading } = useAuth();
   const [location, setLocation] = useLocation();
 
-  // Complete error suppression for clean development experience
+  // Enhanced AI capabilities with proper error handling
   useEffect(() => {
-    // Initialize WASM error handling first
+    // Initialize enhanced WASM handler to enable AI capabilities
     // @vite-ignore
-    import('@/lib/wasm-error-handler').then(({ WasmErrorHandler }) => {
-      WasmErrorHandler.initialize();
-      WasmErrorHandler.disableMediaPipeWasm();
+    import('@/lib/enhanced-wasm-handler').then(({ EnhancedWasmHandler }) => {
+      EnhancedWasmHandler.initialize();
+      console.log('🚀 AI capabilities enabled with enhanced error handling');
     }).catch(() => {
-      console.log('WASM handler initialization skipped');
+      console.log('Enhanced WASM handler initialization skipped');
     });
     
-    // Disable WASM modules
-    // @vite-ignore
-    import('@/utils/disable-wasm-modules').then(({ disableWasmModules }) => {
-      disableWasmModules();
-    }).catch(() => {
-      console.log('WASM module disabling skipped');
-    });
-    
-    // Then initialize general error suppression
+    // Initialize general error suppression for non-AI errors
     // @vite-ignore
     import('@/utils/error-suppression').then(({ initializeErrorSuppression, restoreErrorHandling }) => {
       initializeErrorSuppression();

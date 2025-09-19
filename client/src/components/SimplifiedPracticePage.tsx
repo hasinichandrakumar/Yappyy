@@ -23,6 +23,9 @@ import { useRoboflowVision } from '@/hooks/useRoboflowVision';
 import { useFacialAnalysis } from '@/hooks/useFacialAnalysis';
 import { useRobustComputerVision } from '@/hooks/useRobustComputerVision';
 import { useAdvancedFillerDetection } from '@/hooks/useAdvancedFillerDetection';
+import { useEnhancedMediaPipe } from '@/hooks/useEnhancedMediaPipe';
+import { useEnhancedTensorFlow } from '@/hooks/useEnhancedTensorFlow';
+import { useEnhancedWebGazer } from '@/hooks/useEnhancedWebGazer';
 import AuthenticAnalysisPage from './AuthenticAnalysisPage';
 import VideoPlaybackViewer from './VideoPlaybackViewer';
 import RecordingLibrary from './RecordingLibrary';
@@ -526,7 +529,103 @@ export default function SimplifiedPracticePage() {
     getFillerStatistics
   } = useAdvancedFillerDetection();
 
+  // Enhanced AI capabilities
+  const {
+    result: mediaPipeResult,
+    isInitialized: isMediaPipeInitialized,
+    isLoading: isMediaPipeLoading,
+    error: mediaPipeError,
+    startAnalysis: startMediaPipeAnalysis,
+    stopAnalysis: stopMediaPipeAnalysis,
+    cleanup: cleanupMediaPipe
+  } = useEnhancedMediaPipe({
+    modelComplexity: 1,
+    smoothLandmarks: true,
+    enableSegmentation: false,
+    minDetectionConfidence: 0.5,
+    minTrackingConfidence: 0.5
+  });
 
+  const {
+    emotionResult,
+    isInitialized: isTensorFlowInitialized,
+    isLoading: isTensorFlowLoading,
+    error: tensorFlowError,
+    startEmotionAnalysis,
+    stopEmotionAnalysis,
+    cleanup: cleanupTensorFlow
+  } = useEnhancedTensorFlow({
+    confidenceThreshold: 0.6
+  });
+
+  const {
+    eyeTrackingResult,
+    isInitialized: isWebGazerInitialized,
+    isLoading: isWebGazerLoading,
+    isCalibrated,
+    error: webGazerError,
+    startEyeTracking,
+    stopEyeTracking,
+    calibrate,
+    setTargetRegion,
+    cleanup: cleanupWebGazer
+  } = useEnhancedWebGazer({
+    targetRegion: {
+      x: 0.3,
+      y: 0.3,
+      width: 0.4,
+      height: 0.4
+    },
+    calibrationPoints: 9
+  });
+
+
+
+  // Update metrics with enhanced AI results
+  useEffect(() => {
+    if (isRecording) {
+      // Update metrics with MediaPipe results
+      if (mediaPipeResult.isWorking) {
+        setMetrics(prev => ({
+          ...prev,
+          eyeContact: mediaPipeResult.eyeContact || prev.eyeContact,
+          bodyLanguage: {
+            ...prev.bodyLanguage,
+            eyeContactScore: mediaPipeResult.eyeContact || prev.bodyLanguage.eyeContactScore,
+            postureScore: mediaPipeResult.posture || prev.bodyLanguage.postureScore,
+            gestureScore: mediaPipeResult.gesture || prev.bodyLanguage.gestureScore,
+            overallPresence: Math.round((mediaPipeResult.posture + mediaPipeResult.gesture + mediaPipeResult.eyeContact) / 3) || prev.bodyLanguage.overallPresence
+          }
+        }));
+      }
+
+      // Update metrics with TensorFlow emotion results
+      if (emotionResult.isWorking) {
+        setMetrics(prev => ({
+          ...prev,
+          confidence: Math.round(emotionResult.confidence * 100) || prev.confidence,
+          engagement: emotionResult.emotion === 'happy' || emotionResult.emotion === 'surprised' ? 90 : 
+                     emotionResult.emotion === 'neutral' ? 70 : 50,
+          bodyLanguage: {
+            ...prev.bodyLanguage,
+            facialExpressions: Math.round(emotionResult.confidence * 100) || prev.bodyLanguage.facialExpressions
+          }
+        }));
+      }
+
+      // Update metrics with WebGazer eye tracking results
+      if (eyeTrackingResult.isWorking) {
+        setMetrics(prev => ({
+          ...prev,
+          eyeContact: Math.round(eyeTrackingResult.confidence * 100) || prev.eyeContact,
+          bodyLanguage: {
+            ...prev.bodyLanguage,
+            eyeContactScore: Math.round(eyeTrackingResult.confidence * 100) || prev.bodyLanguage.eyeContactScore
+          }
+        }));
+      }
+    }
+  }, [isRecording, mediaPipeResult, emotionResult, eyeTrackingResult]);
 
   // Enhanced WPM calculation function
   const calculateAccurateWPM = useCallback((currentTranscript: string, currentTime: number) => {
@@ -1492,10 +1591,14 @@ export default function SimplifiedPracticePage() {
           startRealTimeAnalysis(1500),
           videoRef.current ? startFacialAnalysis(videoRef.current) : Promise.resolve(),
           videoRef.current ? startComputerVisionAnalysis(videoRef.current).catch(() => false) : Promise.resolve(false),
-          videoRef.current ? startBodyAnalysis(videoRef.current) : Promise.resolve(false)
+          videoRef.current ? startBodyAnalysis(videoRef.current) : Promise.resolve(false),
+          // Enhanced AI capabilities
+          videoRef.current && isMediaPipeInitialized ? startMediaPipeAnalysis(videoRef.current).catch(() => false) : Promise.resolve(false),
+          videoRef.current && isTensorFlowInitialized ? startEmotionAnalysis(videoRef.current).catch(() => false) : Promise.resolve(false),
+          videoRef.current && isWebGazerInitialized ? startEyeTracking(videoRef.current).catch(() => false) : Promise.resolve(false)
         ];
         Promise.allSettled(startupTasks).then(() => {
-          console.log('✅ Vision pipelines initialized');
+          console.log('✅ Vision pipelines and enhanced AI systems initialized');
         });
       }
 
@@ -2126,6 +2229,34 @@ export default function SimplifiedPracticePage() {
     console.log('🏃 Body analysis stopped');
   } catch (error) {
     console.warn('⚠️ Error stopping body analysis');
+  }
+
+  // Stop enhanced AI systems
+  try {
+    if (isMediaPipeInitialized) {
+      stopMediaPipeAnalysis();
+      console.log('🎯 MediaPipe body language analysis stopped');
+    }
+  } catch (error) {
+    console.warn('⚠️ Error stopping MediaPipe analysis');
+  }
+
+  try {
+    if (isTensorFlowInitialized) {
+      stopEmotionAnalysis();
+      console.log('🧠 TensorFlow emotion analysis stopped');
+    }
+  } catch (error) {
+    console.warn('⚠️ Error stopping TensorFlow analysis');
+  }
+
+  try {
+    if (isWebGazerInitialized) {
+      stopEyeTracking();
+      console.log('👁️ WebGazer eye tracking stopped');
+    }
+  } catch (error) {
+    console.warn('⚠️ Error stopping WebGazer analysis');
   }
 
   // Stop eye contact detection
