@@ -2554,6 +2554,8 @@ export default function SimplifiedPracticePage() {
         voiceClarity: metrics.clarity || 0,  // Backend expects this at top level
         fillerWords: metrics.fillerWordCount || 0,  // Backend expects this at top level
         eyeContactScore: String(metrics.eyeContact || 0),  // Backend expects string
+        postureScore: metrics.bodyLanguage?.postureScore || 0,  // MediaPipe posture data
+        gestureScore: metrics.bodyLanguage?.gestureScore || 0,  // MediaPipe gesture data
         pauseCount: 0,  // Add default pauseCount
         persuasivenessScore: 0,  // Add default persuasivenessScore
         metrics: {
@@ -2562,7 +2564,12 @@ export default function SimplifiedPracticePage() {
           eyeContact: metrics.eyeContact || 0,
           confidence: metrics.confidence || 0,
           engagement: metrics.engagement || 0,
-          clarity: metrics.clarity || 0
+          clarity: metrics.clarity || 0,
+          // MediaPipe metrics
+          postureScore: metrics.bodyLanguage?.postureScore || 0,
+          gestureScore: metrics.bodyLanguage?.gestureScore || 0,
+          eyeContactScore: metrics.bodyLanguage?.eyeContactScore || 0,
+          overallPresence: metrics.bodyLanguage?.overallPresence || 0
         },
         wpmAnalysis: {
           averageWPM: metrics.wordsPerMinute || 0,

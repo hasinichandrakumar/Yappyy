@@ -222,29 +222,6 @@ export function useEnhancedMediaPipe(options: MediaPipeOptions = {}) {
     }
   }, []);
 
-  const setupFallbackAnalysis = useCallback(() => {
-    // Fallback analysis when MediaPipe fails
-    console.log('🔧 Setting up fallback analysis...');
-    
-    // Simulate basic analysis
-    const fallbackInterval = setInterval(() => {
-      if (!isInitialized) {
-        setResult(prev => ({
-          ...prev,
-          posture: Math.random() * 40 + 60, // 60-100
-          gesture: Math.random() * 30 + 70, // 70-100
-          eyeContact: Math.random() * 25 + 75, // 75-100
-          confidence: 0.5,
-          isWorking: false
-        }));
-      } else {
-        clearInterval(fallbackInterval);
-      }
-    }, 1000);
-
-    return () => clearInterval(fallbackInterval);
-  }, [isInitialized]);
-
   const startAnalysis = useCallback(async (videoElement: HTMLVideoElement, canvasElement?: HTMLCanvasElement) => {
     if (!videoElement) {
       setError('Video element is required');

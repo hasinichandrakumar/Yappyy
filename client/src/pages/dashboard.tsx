@@ -26,6 +26,7 @@ import { WelcomeDialog } from "@/components/WelcomeDialog";
 import { DailyGoalsDialog } from "@/components/DailyGoalsDialog";
 import AICapabilitiesTest from "@/components/AICapabilitiesTest";
 import MediaPipeTest from "@/components/MediaPipeTest";
+import MediaPipeAnalyticsTest from "@/components/MediaPipeAnalyticsTest";
 
 
 import yappyyLogoPath from '@assets/Y-2-removebg-preview_1753384287580.png';
