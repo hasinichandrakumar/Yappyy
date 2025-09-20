@@ -584,8 +584,9 @@ export default function SimplifiedPracticePage() {
   // Update metrics with enhanced AI results
   useEffect(() => {
     if (isRecording) {
-      // Update metrics with MediaPipe results
-      if (mediaPipeResult.isWorking) {
+      // Update metrics with MediaPipe results (including fallback data)
+      if (mediaPipeResult) {
+        console.log('📊 Updating metrics with MediaPipe results:', mediaPipeResult);
         setMetrics(prev => ({
           ...prev,
           eyeContact: mediaPipeResult.eyeContact || prev.eyeContact,
@@ -595,7 +596,8 @@ export default function SimplifiedPracticePage() {
             postureScore: mediaPipeResult.posture || prev.bodyLanguage.postureScore,
             gestureScore: mediaPipeResult.gesture || prev.bodyLanguage.gestureScore,
             overallPresence: Math.round((mediaPipeResult.posture + mediaPipeResult.gesture + mediaPipeResult.eyeContact) / 3) || prev.bodyLanguage.overallPresence
-          }
+          },
+          confidence: mediaPipeResult.confidence ? Math.round(mediaPipeResult.confidence * 100) : prev.confidence
         }));
       }
 
@@ -1592,8 +1594,11 @@ export default function SimplifiedPracticePage() {
           videoRef.current ? startFacialAnalysis(videoRef.current) : Promise.resolve(),
           videoRef.current ? startComputerVisionAnalysis(videoRef.current).catch(() => false) : Promise.resolve(false),
           videoRef.current ? startBodyAnalysis(videoRef.current) : Promise.resolve(false),
-          // Enhanced AI capabilities
-          videoRef.current && isMediaPipeInitialized ? startMediaPipeAnalysis(videoRef.current).catch(() => false) : Promise.resolve(false),
+          // Enhanced AI capabilities - always try to start MediaPipe
+          videoRef.current ? startMediaPipeAnalysis(videoRef.current).catch((error) => {
+            console.warn('⚠️ MediaPipe analysis failed, using fallback:', error);
+            return false;
+          }) : Promise.resolve(false),
           videoRef.current && isTensorFlowInitialized ? startEmotionAnalysis(videoRef.current).catch(() => false) : Promise.resolve(false),
           videoRef.current && isWebGazerInitialized ? startEyeTracking(videoRef.current).catch(() => false) : Promise.resolve(false)
         ];

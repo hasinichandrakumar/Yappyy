@@ -706,6 +706,7 @@ export default function EnhancedTemplateMarketplace() {
   
   // Personalization dialog state
   const [showPersonalizationDialog, setShowPersonalizationDialog] = useState(false);
+  const [templateSaved, setTemplateSaved] = useState(false);
   const [personalizationData, setPersonalizationData] = useState({
     purpose: '',
     audience: '',
@@ -928,6 +929,7 @@ Make it highly personal, engaging, and tailored to these specific requirements. 
     setSelectedTemplate(template);
     setEditedContent(template.content);
     setEditMode(false);
+    setTemplateSaved(false);
   };
 
   const handleEditToggle = () => {
@@ -1186,8 +1188,30 @@ Make it highly personal, engaging, and tailored to these specific requirements. 
     </div>
   );
 
+  const handleSavePersonalizedTemplate = () => {
+    if (!selectedTemplate || !editedContent) return;
+    
+    const templateData = {
+      title: `${selectedTemplate.title} (Personalized)`,
+      category: selectedTemplate.category,
+      description: `Personalized version of: ${selectedTemplate.description}`,
+      content: editedContent,
+      difficulty: selectedTemplate.difficulty || 'Beginner',
+      duration: selectedTemplate.duration || '5-10 minutes',
+      tags: [...(selectedTemplate.tags || []), 'personalized', 'ai-enhanced']
+    };
+
+    saveCustomTemplateMutation.mutate(templateData);
+    setTemplateSaved(true);
+    
+    // Reset saved state after a few seconds
+    setTimeout(() => setTemplateSaved(false), 5000);
+  };
+
   const renderTemplateEditor = () => {
     if (!selectedTemplate) return null;
+
+    const hasBeenPersonalized = editedContent !== selectedTemplate.content;
 
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -1196,6 +1220,11 @@ Make it highly personal, engaging, and tailored to these specific requirements. 
           <div>
             <h2 className="text-2xl font-bold">{selectedTemplate.title}</h2>
             <p className="text-gray-600">{selectedTemplate.description}</p>
+            {hasBeenPersonalized && (
+              <Badge className="mt-2 bg-green-100 text-green-700">
+                ✨ Personalized with AI
+              </Badge>
+            )}
           </div>
           <div className="flex gap-3">
             <Button 
@@ -1216,6 +1245,17 @@ Make it highly personal, engaging, and tailored to these specific requirements. 
               <Sparkles className="h-5 w-5 mr-2" />
               {personalizeTemplateMutation.isPending ? 'Personalizing...' : 'Make it Personal'}
             </Button>
+            {hasBeenPersonalized && (
+              <Button 
+                onClick={handleSavePersonalizedTemplate}
+                disabled={saveCustomTemplateMutation.isPending}
+                size="lg"
+                className="text-base font-medium bg-green-600 hover:bg-green-700 text-white"
+              >
+                <Save className="h-5 w-5 mr-2" />
+                {saveCustomTemplateMutation.isPending ? 'Saving...' : 'Save as My Template'}
+              </Button>
+            )}
             <Button 
               onClick={handleDownloadPDF}
               size="lg"
@@ -1686,7 +1726,9 @@ Tips:
                 onContentUpdate={(newContent) => {
                   setEditedContent(newContent);
                   setEditMode(true);
+                  setTemplateSaved(false);
                 }}
+                hasBeenSaved={templateSaved}
               />
             )}
           </div>

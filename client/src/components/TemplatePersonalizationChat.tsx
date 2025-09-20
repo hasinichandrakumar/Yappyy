@@ -18,12 +18,14 @@ interface TemplatePersonalizationChatProps {
   template: any;
   editedContent: string;
   onContentUpdate: (content: string) => void;
+  hasBeenSaved?: boolean;
 }
 
 export default function TemplatePersonalizationChat({ 
   template, 
   editedContent, 
-  onContentUpdate 
+  onContentUpdate,
+  hasBeenSaved 
 }: TemplatePersonalizationChatProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -139,6 +141,16 @@ export default function TemplatePersonalizationChat({
 
   return (
     <div className="flex flex-col h-[500px]">
+      {/* Success Banner */}
+      {hasBeenSaved && (
+        <div className="mb-3 p-3 bg-green-100 border border-green-300 rounded-lg flex items-center gap-2">
+          <Sparkles className="w-5 h-5 text-green-600" />
+          <span className="text-green-700 font-medium">
+            Template saved successfully! You can find it in "My Templates"
+          </span>
+        </div>
+      )}
+      
       {/* Chat Messages Area */}
       <ScrollArea ref={scrollAreaRef} className="flex-1 p-4 border rounded-lg bg-gray-50">
         <div className="space-y-4">
