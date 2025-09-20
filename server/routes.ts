@@ -2721,6 +2721,87 @@ Make the template more engaging and personal while keeping the structure intact.
     }
   });
 
+  // Template personalization chat endpoint
+  app.post("/api/personalize-chat", async (req: any, res) => {
+    try {
+      const { message, template, currentContent, conversationHistory } = req.body;
+
+      if (!message || !template) {
+        return res.status(400).json({ message: "Message and template are required" });
+      }
+
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: `You are an expert speech writer and communication coach having a conversation with a user to help personalize their speech template. 
+              
+You should:
+1. Ask clarifying questions to understand their specific needs
+2. Provide suggestions and improvements based on their input
+3. Update the template content when they provide enough information
+4. Be conversational and helpful
+5. Make the template more engaging, personal, and effective
+
+When the user provides specific requirements or asks for changes, update the template accordingly.
+
+Respond with JSON in this format:
+{
+  "response": "your conversational response to the user",
+  "updatedContent": "the updated template content (only include if you're making changes)",
+  "suggestions": ["optional list of quick suggestions the user might want"]
+}`
+            },
+            ...conversationHistory.map((msg: any) => ({
+              role: msg.role === 'assistant' ? 'assistant' : 'user',
+              content: msg.content
+            })),
+            {
+              role: "user",
+              content: `Current template: ${template.title} (${template.category})
+Current content: ${currentContent || template.content}
+
+User says: ${message}
+
+Please respond conversationally and update the template if the user has provided specific personalization requirements.`
+            }
+          ],
+          temperature: 0.7,
+          response_format: { type: "json_object" }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`OpenAI API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const result = JSON.parse(data.choices[0].message.content);
+      res.json(result);
+    } catch (error: any) {
+      console.error("Error in personalization chat:", error);
+      
+      // Provide a fallback response if AI is unavailable
+      res.json({
+        response: "I understand you want to personalize your template. Could you tell me more about your specific audience, the occasion, and any personal stories or examples you'd like to include? I'll help you make this speech uniquely yours.",
+        updatedContent: null,
+        suggestions: [
+          "Tell me about your audience",
+          "Share the occasion or context",
+          "Include a personal story",
+          "Adjust the tone"
+        ]
+      });
+    }
+  });
+
   // Template feedback endpoint
   app.post("/api/template-feedback",  async (req: any, res) => {
     try {

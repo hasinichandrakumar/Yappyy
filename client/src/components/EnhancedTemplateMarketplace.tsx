@@ -41,6 +41,7 @@ import {
   BarChart3,
   FileDown
 } from "lucide-react";
+import TemplatePersonalizationChat from "./TemplatePersonalizationChat";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { comprehensiveTemplatesCollection } from '@/lib/comprehensive-templates-collection';
@@ -1664,117 +1665,42 @@ Tips:
         </TabsContent>
       </Tabs>
 
-      {/* Personalization Dialog */}
+      {/* Personalization Chat Dialog */}
       <Dialog open={showPersonalizationDialog} onOpenChange={setShowPersonalizationDialog}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-blue-600" />
-              Personalize Your Template
+              <MessageSquare className="h-5 w-5 text-blue-600" />
+              AI Template Personalization Chat
             </DialogTitle>
             <p className="text-gray-600">
-              {`Help us tailor "${(selectedTemplate as any)?.title ?? 'this template'}" to your specific needs and make it uniquely yours.`}
+              Chat with AI to personalize your "{selectedTemplate?.title}" template
             </p>
           </DialogHeader>
 
-          <div className="space-y-6 mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="purpose">What's the main purpose of your speech?</Label>
-                <Input
-                  id="purpose"
-                  placeholder="e.g., Convince investors to fund my startup"
-                  value={personalizationData.purpose}
-                  onChange={(e) => setPersonalizationData(prev => ({ ...prev, purpose: e.target.value }))}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="audience">Who is your target audience?</Label>
-                <Input
-                  id="audience"
-                  placeholder="e.g., Angel investors, VCs, business executives"
-                  value={personalizationData.audience}
-                  onChange={(e) => setPersonalizationData(prev => ({ ...prev, audience: e.target.value }))}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="context">Where will you deliver this speech?</Label>
-                <Input
-                  id="context"
-                  placeholder="e.g., Pitch competition, board meeting, conference"
-                  value={personalizationData.context}
-                  onChange={(e) => setPersonalizationData(prev => ({ ...prev, context: e.target.value }))}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="tone">What tone do you want?</Label>
-                <Select value={personalizationData.tone} onValueChange={(value) => setPersonalizationData(prev => ({ ...prev, tone: value }))}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose a tone" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="professional">Professional & Formal</SelectItem>
-                    <SelectItem value="conversational">Conversational & Friendly</SelectItem>
-                    <SelectItem value="motivational">Motivational & Inspiring</SelectItem>
-                    <SelectItem value="authoritative">Authoritative & Confident</SelectItem>
-                    <SelectItem value="passionate">Passionate & Energetic</SelectItem>
-                    <SelectItem value="humble">Humble & Approachable</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="specificGoals">What specific outcome do you want from this speech?</Label>
-              <Input
-                id="specificGoals"
-                placeholder="e.g., Secure $500K funding, Get 10 new clients, Win the competition"
-                value={personalizationData.specificGoals}
-                onChange={(e) => setPersonalizationData(prev => ({ ...prev, specificGoals: e.target.value }))}
+          <div className="mt-4">
+            {selectedTemplate && (
+              <TemplatePersonalizationChat
+                template={selectedTemplate}
+                editedContent={editedContent}
+                onContentUpdate={(newContent) => {
+                  setEditedContent(newContent);
+                  setEditMode(true);
+                }}
               />
-            </div>
+            )}
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="personalStory">Share a personal story or example to include</Label>
-              <Textarea
-                id="personalStory"
-                placeholder="Describe a relevant personal experience, achievement, or story that would make your speech more compelling and authentic..."
-                value={personalizationData.personalStory}
-                onChange={(e) => setPersonalizationData(prev => ({ ...prev, personalStory: e.target.value }))}
-                rows={3}
-              />
-            </div>
-
-            <div className="flex justify-end gap-3 pt-4 border-t">
-              <Button
-                variant="outline"
-                onClick={() => setShowPersonalizationDialog(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handlePersonalizationSubmit}
-                disabled={personalizeTemplateMutation.isPending || !personalizationData.purpose.trim()}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                {personalizeTemplateMutation.isPending ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Personalizing...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    Personalize Template
-                  </>
-                )}
-              </Button>
-            </div>
+          <div className="flex justify-between items-center pt-4 border-t mt-4">
+            <p className="text-sm text-gray-600">
+              Your template will update automatically as you chat
+            </p>
+            <Button
+              variant="outline"
+              onClick={() => setShowPersonalizationDialog(false)}
+            >
+              Done
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
