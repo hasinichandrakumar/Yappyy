@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediaPipe Simple Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .status { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>MediaPipe Simple Test</h1>
+    <div id="status" class="status info">Testing MediaPipe availability...</div>
+    <div id="results"></div>
+
+    <!-- Load MediaPipe from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/holistic/holistic.js"></script>
+
+    <script>
+        const statusDiv = document.getElementById('status');
+        const resultsDiv = document.getElementById('results');
+        
+        function updateStatus(message, type = 'info') {
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+        }
+        
+        function updateResults(data) {
+            resultsDiv.innerHTML = `
+                <h3>MediaPipe Test Results:</h3>
+                <p><strong>Holistic Available:</strong> ${data.holistic ? 'Yes' : 'No'}</p>
+                <p><strong>Camera Available:</strong> ${data.camera ? 'Yes' : 'No'}</p>
+                <p><strong>Drawing Utils Available:</strong> ${data.drawingUtils ? 'Yes' : 'No'}</p>
+                <p><strong>Control Utils Available:</strong> ${data.controlUtils ? 'Yes' : 'No'}</p>
+                <p><strong>Camera Utils Available:</strong> ${data.cameraUtils ? 'Yes' : 'No'}</p>
+                <p><strong>Overall Status:</strong> ${data.overall ? '✅ WORKING' : '❌ FAILED'}</p>
+            `;
+        }
+        
+        // Test MediaPipe availability
+        function testMediaPipe() {
+            updateStatus('Checking MediaPipe modules...', 'info');
+            
+            const holistic = typeof Holistic !== 'undefined';
+            const camera = typeof Camera !== 'undefined';
+            const drawingUtils = typeof DrawingUtils !== 'undefined';
+            const controlUtils = typeof ControlUtils !== 'undefined';
+            const cameraUtils = typeof CameraUtils !== 'undefined';
+            
+            const overall = holistic && camera && drawingUtils && controlUtils && cameraUtils;
+            
+            updateResults({
+                holistic,
+                camera,
+                drawingUtils,
+                controlUtils,
+                cameraUtils,
+                overall
+            });
+            
+            if (overall) {
+                updateStatus('✅ MediaPipe is fully loaded and working!', 'success');
+            } else {
+                updateStatus('❌ MediaPipe failed to load properly', 'error');
+            }
+        }
+        
+        // Run test when page loads
+        window.addEventListener('load', () => {
+            setTimeout(testMediaPipe, 1000); // Give scripts time to load
+        });
+    </script>
+</body>
+</html>

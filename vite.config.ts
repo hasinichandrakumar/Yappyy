@@ -40,5 +40,12 @@ export default defineConfig({
         secure: false,
       },
     },
+    headers: {
+      'Cross-Origin-Embedder-Policy': 'require-corp',
+      'Cross-Origin-Opener-Policy': 'same-origin',
+    },
+  },
+  optimizeDeps: {
+    exclude: ['@mediapipe/holistic', '@mediapipe/camera_utils', '@mediapipe/control_utils', '@mediapipe/drawing_utils'],
   },
 });

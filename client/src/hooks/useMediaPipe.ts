@@ -42,9 +42,9 @@ export function useMediaPipe() {
     }
 
     try {
-      // Check if Holistic is available
+      // Check if Holistic is available from CDN
       if (!(window as any).Holistic) {
-        console.warn('⚠️ Holistic not available, using fallback');
+        console.warn('⚠️ Holistic not available from CDN, using fallback');
         return;
       }
 

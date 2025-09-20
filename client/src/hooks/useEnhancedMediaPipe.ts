@@ -46,21 +46,12 @@ export function useEnhancedMediaPipe(options: MediaPipeOptions = {}) {
     try {
       console.log('🎯 Initializing Enhanced MediaPipe...');
       
-      // Try to load MediaPipe Holistic with better error handling
-      let Holistic, Camera;
-      try {
-        const mediapipeModule = await import('@mediapipe/holistic');
-        Holistic = mediapipeModule.Holistic;
-        Camera = mediapipeModule.Camera;
-      } catch (importError) {
-        console.warn('⚠️ MediaPipe import failed, trying alternative loading:', importError);
-        // Try alternative loading method
-        Holistic = (window as any).Holistic;
-        Camera = (window as any).Camera;
-      }
+      // Load MediaPipe from global CDN scripts
+      const Holistic = (window as any).Holistic;
+      const Camera = (window as any).Camera;
       
       if (!Holistic || !Camera) {
-        throw new Error('MediaPipe Holistic not available - using fallback analysis');
+        throw new Error('MediaPipe not loaded from CDN - check script tags');
       }
       
       // Initialize Holistic with error handling

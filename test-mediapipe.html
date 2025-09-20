@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediaPipe Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #video { width: 640px; height: 480px; border: 1px solid #ccc; }
+        #canvas { width: 640px; height: 480px; border: 1px solid #ccc; }
+        .status { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>MediaPipe Test</h1>
+    
+    <div id="status" class="status info">Initializing...</div>
+    
+    <div>
+        <video id="video" autoplay muted playsinline></video>
+        <canvas id="canvas"></canvas>
+    </div>
+    
+    <div id="results"></div>
+    
+    <button id="startBtn">Start Camera</button>
+    <button id="stopBtn" disabled>Stop Camera</button>
+
+    <!-- Load MediaPipe from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/holistic/holistic.js"></script>
+
+    <script>
+        const statusDiv = document.getElementById('status');
+        const resultsDiv = document.getElementById('results');
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        
+        let holistic = null;
+        let camera = null;
+        let isRunning = false;
+        
+        function updateStatus(message, type = 'info') {
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+        }
+        
+        function updateResults(data) {
+            resultsDiv.innerHTML = `
+                <h3>Results:</h3>
+                <p><strong>Posture:</strong> ${data.posture || 'N/A'}</p>
+                <p><strong>Gesture:</strong> ${data.gesture || 'N/A'}</p>
+                <p><strong>Eye Contact:</strong> ${data.eyeContact || 'N/A'}</p>
+                <p><strong>Confidence:</strong> ${data.confidence || 'N/A'}</p>
+                <p><strong>Working:</strong> ${data.isWorking ? 'Yes' : 'No'}</p>
+                ${data.error ? `<p><strong>Error:</strong> ${data.error}</p>` : ''}
+            `;
+        }
+        
+        async function initializeMediaPipe() {
+            try {
+                updateStatus('Loading MediaPipe...', 'info');
+                
+                // Check if MediaPipe is available
+                if (typeof Holistic === 'undefined') {
+                    throw new Error('MediaPipe Holistic not loaded');
+                }
+                
+                updateStatus('Initializing MediaPipe Holistic...', 'info');
+                
+                holistic = new Holistic({
+                    locateFile: (file) => {
+                        return `https://cdn.jsdelivr.net/npm/@mediapipe/holistic/${file}`;
+                    }
+                });
+                
+                holistic.setOptions({
+                    modelComplexity: 1,
+                    smoothLandmarks: true,
+                    enableSegmentation: false,
+                    minDetectionConfidence: 0.5,
+                    minTrackingConfidence: 0.5,
+                    selfieMode: true
+                });
+                
+                holistic.onResults((results) => {
+                    try {
+                        let posture = null;
+                        let gesture = null;
+                        let eyeContact = null;
+                        let confidence = 0;
+                        
+                        // Analyze pose landmarks
+                        if (results.poseLandmarks && results.poseLandmarks.length > 0) {
+                            const landmarks = results.poseLandmarks;
+                            
+                            // Posture analysis
+                            if (landmarks[11] && landmarks[12]) {
+                                const leftShoulder = landmarks[11];
+                                const rightShoulder = landmarks[12];
+                                const shoulderDiff = Math.abs(leftShoulder.y - rightShoulder.y);
+                                posture = Math.max(0, 100 - (shoulderDiff * 1000));
+                            }
+                            
+                            // Gesture analysis
+                            if (landmarks[15] && landmarks[16]) {
+                                const leftWrist = landmarks[15];
+                                const rightWrist = landmarks[16];
+                                const handDistance = Math.sqrt(
+                                    Math.pow(leftWrist.x - rightWrist.x, 2) + 
+                                    Math.pow(leftWrist.y - rightWrist.y, 2)
+                                );
+                                gesture = Math.min(100, handDistance * 200);
+                            }
+                        }
+                        
+                        // Eye contact analysis
+                        if (results.faceLandmarks && results.faceLandmarks.length > 0) {
+                            const landmarks = results.faceLandmarks;
+                            if (landmarks[33] && landmarks[362]) {
+                                const leftEye = landmarks[33];
+                                const rightEye = landmarks[362];
+                                const eyeCenter = {
+                                    x: (leftEye.x + rightEye.x) / 2,
+                                    y: (leftEye.y + rightEye.y) / 2
+                                };
+                                
+                                const centerDistance = Math.sqrt(
+                                    Math.pow(eyeCenter.x - 0.5, 2) + 
+                                    Math.pow(eyeCenter.y - 0.5, 2)
+                                );
+                                eyeContact = Math.max(0, 100 - (centerDistance * 200));
+                            }
+                        }
+                        
+                        confidence = results.poseLandmarks ? 0.8 : 0.3;
+                        
+                        updateResults({
+                            posture: posture ? Math.round(posture) : null,
+                            gesture: gesture ? Math.round(gesture) : null,
+                            eyeContact: eyeContact ? Math.round(eyeContact) : null,
+                            confidence: Math.round(confidence * 100) / 100,
+                            isWorking: true
+                        });
+                        
+                    } catch (error) {
+                        console.error('Result processing error:', error);
+                        updateResults({
+                            error: error.message,
+                            isWorking: false
+                        });
+                    }
+                });
+                
+                updateStatus('MediaPipe initialized successfully!', 'success');
+                return true;
+                
+            } catch (error) {
+                console.error('MediaPipe initialization failed:', error);
+                updateStatus(`MediaPipe failed: ${error.message}`, 'error');
+                updateResults({
+                    error: error.message,
+                    isWorking: false
+                });
+                return false;
+            }
+        }
+        
+        async function startCamera() {
+            try {
+                updateStatus('Starting camera...', 'info');
+                
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: 640, height: 480 }
+                });
+                
+                video.srcObject = stream;
+                
+                if (holistic) {
+                    camera = new Camera(video, {
+                        onFrame: async () => {
+                            if (holistic && isRunning) {
+                                await holistic.send({ image: video });
+                            }
+                        },
+                        width: 640,
+                        height: 480
+                    });
+                    
+                    await camera.start();
+                    isRunning = true;
+                    updateStatus('Camera and MediaPipe running!', 'success');
+                } else {
+                    updateStatus('Camera started but MediaPipe not initialized', 'error');
+                }
+                
+            } catch (error) {
+                console.error('Camera start failed:', error);
+                updateStatus(`Camera failed: ${error.message}`, 'error');
+            }
+        }
+        
+        function stopCamera() {
+            if (camera) {
+                camera.stop();
+                camera = null;
+            }
+            
+            if (video.srcObject) {
+                const tracks = video.srcObject.getTracks();
+                tracks.forEach(track => track.stop());
+                video.srcObject = null;
+            }
+            
+            isRunning = false;
+            updateStatus('Camera stopped', 'info');
+        }
+        
+        // Event listeners
+        startBtn.addEventListener('click', async () => {
+            const initialized = await initializeMediaPipe();
+            if (initialized) {
+                await startCamera();
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+            }
+        });
+        
+        stopBtn.addEventListener('click', () => {
+            stopCamera();
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+        });
+        
+        // Initialize on load
+        window.addEventListener('load', () => {
+            updateStatus('Ready to test MediaPipe. Click "Start Camera" to begin.', 'info');
+        });
+    </script>
+</body>
+</html>
