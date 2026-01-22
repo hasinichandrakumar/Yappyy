@@ -3311,25 +3311,7 @@ export default function SimplifiedPracticePage() {
                         </div>
                       </div>
                       
-                      {/* Voice Analysis Metrics */}
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-orange-50 border border-orange-200">
-                          <Volume2 className="w-3 h-3 text-orange-600" />
-                          <span className="text-xs font-semibold text-orange-700">{metrics.voice?.clarity || 0}%</span>
-                          <span className="text-[10px] text-gray-600 uppercase">Clarity</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-red-50 border border-red-200">
-                          <Mic className="w-3 h-3 text-red-600" />
-                          <span className="text-xs font-semibold text-red-700">{metrics.voice?.volume || 0}%</span>
-                          <span className="text-[10px] text-gray-600 uppercase">Volume</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-indigo-50 border border-indigo-200">
-                          <TrendingUp className="w-3 h-3 text-indigo-600" />
-                          <span className="text-xs font-semibold text-indigo-700">{metrics.voice?.intonation || 0}%</span>
-                          <span className="text-[10px] text-gray-600 uppercase">Tone</span>
-                        </div>
-                      </div>
-                    </div>
+                                          </div>
                   </div>
                 </CardContent>
               </Card>
