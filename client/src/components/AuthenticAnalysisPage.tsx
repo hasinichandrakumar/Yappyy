@@ -636,23 +636,32 @@ export default function AuthenticAnalysisPage({ session: propSession, onClose, o
         {/* AI-Powered Transcript Analysis */}
         {session?.transcriptAnalysis && (
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BookOpen className="h-5 w-5 text-purple-600" />
-                AI Transcript Analysis
-              </CardTitle>
-              <CardDescription>
-                Purpose-specific content analysis powered by AI
-              </CardDescription>
+            <CardHeader className="bg-gradient-to-r from-purple-50 to-indigo-50">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <BookOpen className="h-5 w-5 text-purple-600" />
+                    {session.purpose || session.transcriptAnalysis.purpose || 'Speech'} Analysis
+                  </CardTitle>
+                  <CardDescription className="mt-1">
+                    Tailored feedback for your {session.purpose || session.transcriptAnalysis.purpose || 'presentation'} goals
+                  </CardDescription>
+                </div>
+                {session.purpose && (
+                  <div className="px-3 py-1 bg-purple-100 rounded-full">
+                    <span className="text-sm font-medium text-purple-700">{session.purpose}</span>
+                  </div>
+                )}
+              </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               <div className="space-y-6">
                 {/* Purpose Alignment */}
                 {session.transcriptAnalysis.purposeAlignment && (
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                      <Target className="h-4 w-4 text-blue-600" />
-                      Purpose Alignment: {session.transcriptAnalysis.purpose}
+                  <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
+                    <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                      <Target className="h-5 w-5 text-blue-600" />
+                      {session.purpose || session.transcriptAnalysis.purpose || 'Purpose'} Alignment
                     </h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="text-center p-3 bg-blue-50 rounded-lg">
