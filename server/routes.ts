@@ -7155,17 +7155,9 @@ Respond with detailed analysis in JSON format:
       
       const pace = Math.min(100, Math.max(0, Math.round((wordsPerMinute / 160) * 100))); // 160 WPM is ideal
       
-      // Calculate clarity based on transcript quality
+      // Calculate clarity based on filler word ratio and sentence structure only
       const sentences = transcript.split(/[.!?]+/).filter((s: string) => s.trim().length > 0);
       const avgWordsPerSentence = sentences.length > 0 ? words.length / sentences.length : 0;
-      const hasProperPunctuation = /[.!?]/.test(transcript);
-      const hasCapitalization = /[A-Z]/.test(transcript);
-      
-      // Clarity score based on sentence structure and punctuation
-      let clarityScore = 70; // Base score
-      if (avgWordsPerSentence >= 8 && avgWordsPerSentence <= 20) clarityScore += 10;
-      if (hasProperPunctuation) clarityScore += 10;
-      if (hasCapitalization) clarityScore += 10;
       
       // Analyze for filler words
       const fillerWords = ['um', 'uh', 'like', 'you know', 'so', 'basically', 'actually'];
@@ -7177,11 +7169,38 @@ Respond with detailed analysis in JSON format:
         if (matches) fillerCount += matches.length;
       });
       
-      // Reduce clarity for excessive filler words
-      const fillerRatio = fillerCount / Math.max(1, words.length);
-      if (fillerRatio > 0.05) clarityScore -= 10;
-      if (fillerRatio > 0.1) clarityScore -= 10;
+      // Calculate clarity score (0-100) based on two factors:
+      // 1. Sentence structure score (50 points max): ideal sentence length is 10-18 words
+      let sentenceStructureScore = 50;
+      if (avgWordsPerSentence < 5) {
+        sentenceStructureScore = 20; // Too short/choppy
+      } else if (avgWordsPerSentence >= 5 && avgWordsPerSentence < 10) {
+        sentenceStructureScore = 35; // Slightly short
+      } else if (avgWordsPerSentence >= 10 && avgWordsPerSentence <= 18) {
+        sentenceStructureScore = 50; // Ideal range
+      } else if (avgWordsPerSentence > 18 && avgWordsPerSentence <= 25) {
+        sentenceStructureScore = 35; // Slightly long
+      } else {
+        sentenceStructureScore = 20; // Too long/run-on sentences
+      }
       
+      // 2. Filler word score (50 points max): fewer fillers = higher score
+      const fillerRatio = fillerCount / Math.max(1, words.length);
+      let fillerScore = 50;
+      if (fillerRatio <= 0.01) {
+        fillerScore = 50; // Excellent - almost no fillers
+      } else if (fillerRatio <= 0.03) {
+        fillerScore = 40; // Good
+      } else if (fillerRatio <= 0.05) {
+        fillerScore = 30; // Moderate
+      } else if (fillerRatio <= 0.08) {
+        fillerScore = 20; // Needs work
+      } else {
+        fillerScore = 10; // Excessive fillers
+      }
+      
+      // Combine both scores for final clarity (0-100)
+      let clarityScore = sentenceStructureScore + fillerScore;
       clarityScore = Math.min(100, Math.max(0, clarityScore));
       
       console.log('🎤 Voice metrics calculated:', {
