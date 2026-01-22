@@ -24,11 +24,6 @@ import WelcomeMessage from "@/components/WelcomeMessage";
 import ReturningUserWelcome from "@/components/ReturningUserWelcome";
 import { WelcomeDialog } from "@/components/WelcomeDialog";
 import { DailyGoalsDialog } from "@/components/DailyGoalsDialog";
-import AICapabilitiesTest from "@/components/AICapabilitiesTest";
-import MediaPipeTest from "@/components/MediaPipeTest";
-import MediaPipeAnalyticsTest from "@/components/MediaPipeAnalyticsTest";
-
-
 import yappyyLogoPath from '@assets/Y-2-removebg-preview_1753384287580.png';
 
 // Dashboard Performance Tab Component
@@ -268,15 +263,6 @@ export default function Dashboard() {
                 <TabsTrigger value="achievements" className="px-5 py-3 rounded-full h-auto text-base font-semibold tracking-wide text-gray-600 hover:text-gray-900 hover:bg-gray-100/80 hover:shadow-sm transition-colors data-[state=active]:bg-transparent data-[state=active]:hover:bg-gray-100/90 data-[state=active]:yappyy-gradient">
                   Dashboard
                 </TabsTrigger>
-                <TabsTrigger value="ai-test" className="px-5 py-3 rounded-full h-auto text-base font-semibold tracking-wide text-gray-600 hover:text-gray-900 hover:bg-gray-100/80 hover:shadow-sm transition-colors data-[state=active]:bg-transparent data-[state=active]:hover:bg-gray-100/90 data-[state=active]:yappyy-gradient">
-                  AI Test
-                </TabsTrigger>
-                <TabsTrigger value="mediapipe-test" className="px-5 py-3 rounded-full h-auto text-base font-semibold tracking-wide text-gray-600 hover:text-gray-900 hover:bg-gray-100/80 hover:shadow-sm transition-colors data-[state=active]:bg-transparent data-[state=active]:hover:bg-gray-100/90 data-[state=active]:yappyy-gradient">
-                  MediaPipe Test
-                </TabsTrigger>
-                <TabsTrigger value="mediapipe-analytics" className="px-5 py-3 rounded-full h-auto text-base font-semibold tracking-wide text-gray-600 hover:text-gray-900 hover:bg-gray-100/80 hover:shadow-sm transition-colors data-[state=active]:bg-transparent data-[state=active]:hover:bg-gray-100/90 data-[state=active]:yappyy-gradient">
-                  MediaPipe Analytics
-                </TabsTrigger>
               </TabsList>
             </div>
 
@@ -393,18 +379,7 @@ export default function Dashboard() {
               </Tabs>
             </TabsContent>
 
-            <TabsContent value="ai-test" className="space-y-6">
-              <AICapabilitiesTest />
-            </TabsContent>
-
-            <TabsContent value="mediapipe-test" className="space-y-6">
-              <MediaPipeTest />
-            </TabsContent>
-
-            <TabsContent value="mediapipe-analytics" className="space-y-6">
-              <MediaPipeAnalyticsTest />
-            </TabsContent>
-          </div>
+                      </div>
 
       </div>
       </Tabs>
