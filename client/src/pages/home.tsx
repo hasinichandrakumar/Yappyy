@@ -8,7 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import yappyyLogoPath from '@assets/Y-2-removebg-preview_1753384287580.png';
 
 export default function HomePage() {
-  const { isAuthenticated, isLoading, user, logout } = useAuth();
+  const { isAuthenticated, isLoading, user, logout, login } = useAuth();
   
   // Check for OAuth errors in URL params
   const urlParams = new URLSearchParams(window.location.search);
@@ -118,7 +118,7 @@ export default function HomePage() {
               </Button>
               {!isAuthenticated ? (
                 <Button
-                  onClick={() => window.location.href = '/api/auth/google'}
+                  onClick={() => login()}
                 className="bg-white/95 backdrop-blur-sm border-0 text-gray-700 hover:bg-white hover:scale-105 hover:text-gray-800 shadow-lg hover:shadow-xl transition-all duration-300 flex items-center space-x-3 px-6 py-3 h-12"
                 >
                   <svg className="h-5 w-5" viewBox="0 0 24 24">
@@ -174,7 +174,7 @@ export default function HomePage() {
                   if (isAuthenticated) {
                     window.location.href = '/dashboard';
                   } else {
-                    window.location.href = '/api/auth/google';
+                    login();
                   }
                 }}
               >
@@ -217,7 +217,7 @@ export default function HomePage() {
                   if (isAuthenticated) {
                     window.location.href = '/dashboard';
                   } else {
-                    window.location.href = '/api/auth/google';
+                    login();
                   }
                 }}
               >
@@ -656,7 +656,7 @@ export default function HomePage() {
                 ) : (
                   <Button
                     size="lg"
-                    onClick={() => window.location.href = '/api/auth/google'}
+                    onClick={() => login()}
                     className="bg-gradient-to-br from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 px-8 py-4"
                   >
                     Start Building Confidence Today

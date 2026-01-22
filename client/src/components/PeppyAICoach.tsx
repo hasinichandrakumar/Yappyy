@@ -137,7 +137,7 @@ interface PeppyResponse {
 import { useAuth } from '@/hooks/useAuth';
 
 export default function PeppyAICoach() {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading, login } = useAuth();
   const [peppyPersonality, setPeppyPersonality] = useState<PeppyPersonality>({
     adaptiveStyle: 'encouraging',
     userPreferences: {
@@ -448,7 +448,7 @@ export default function PeppyAICoach() {
                 </Button>
                 {user.id === 'demo-user-123' && (
                   <Button
-                    onClick={() => window.location.href = '/api/auth/google'}
+                    onClick={() => login()}
                     className="flex items-center gap-3 bg-gradient-to-r from-blue-600 via-cyan-500 to-sky-400 hover:from-blue-700 hover:via-cyan-600 hover:to-sky-500 text-white px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 font-semibold"
                   >
                     <SiGoogle className="w-5 h-5" />
@@ -463,7 +463,7 @@ export default function PeppyAICoach() {
                   <p className="text-xs text-gray-500">Sign in to save your progress</p>
                 </div>
                 <Button
-                  onClick={() => window.location.href = '/api/auth/google'}
+                  onClick={() => login()}
                   className="flex items-center gap-3 bg-gradient-to-r from-blue-600 via-cyan-500 to-sky-400 hover:from-blue-700 hover:via-cyan-600 hover:to-sky-500 text-white px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 font-semibold"
                 >
                   <SiGoogle className="w-5 h-5" />
