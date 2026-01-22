@@ -390,47 +390,11 @@ export default function AuthenticAnalysisPage({ session: propSession, onClose, o
                 Body Language Analysis
               </CardTitle>
               <CardDescription>
-                Comprehensive posture, gestures, and presence analysis powered by MediaPipe
+                Comprehensive gestures and presence analysis powered by MediaPipe
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
-                {/* Posture Analysis */}
-                {session.bodyLanguageAnalysis.posture && (
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                      <Target className="h-4 w-4 text-blue-600" />
-                      Posture Analysis
-                    </h4>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="text-center p-3 bg-blue-50 rounded-lg">
-                        <div className="text-2xl font-bold text-blue-600">
-                          {session.bodyLanguageAnalysis.posture.confidence || 0}%
-                        </div>
-                        <div className="text-sm text-gray-600">Confidence</div>
-                      </div>
-                      <div className="text-center p-3 bg-green-50 rounded-lg">
-                        <div className="text-2xl font-bold text-green-600">
-                          {session.bodyLanguageAnalysis.posture.spineAlignment || 0}%
-                        </div>
-                        <div className="text-sm text-gray-600">Spine Alignment</div>
-                      </div>
-                      <div className="text-center p-3 bg-purple-50 rounded-lg">
-                        <div className="text-2xl font-bold text-purple-600">
-                          {session.bodyLanguageAnalysis.posture.shoulderPosition || 0}%
-                        </div>
-                        <div className="text-sm text-gray-600">Shoulder Position</div>
-                      </div>
-                      <div className="text-center p-3 bg-orange-50 rounded-lg">
-                        <div className="text-2xl font-bold text-orange-600">
-                          {session.bodyLanguageAnalysis.posture.stability || 0}%
-                        </div>
-                        <div className="text-sm text-gray-600">Stability</div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
                 {/* Gesture Analysis */}
                 {session.bodyLanguageAnalysis.gestures && (
                   <div>
@@ -814,15 +778,20 @@ export default function AuthenticAnalysisPage({ session: propSession, onClose, o
                 {/* Key Insights */}
                 {session.transcriptAnalysis.keyInsights && session.transcriptAnalysis.keyInsights.length > 0 && (
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                      <Lightbulb className="h-4 w-4 text-yellow-600" />
+                    <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                      <Lightbulb className="h-5 w-5 text-amber-500" />
                       Key Insights
                     </h4>
-                    <div className="space-y-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {session.transcriptAnalysis.keyInsights.map((insight, index) => (
-                        <div key={index} className="flex items-start gap-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-                          <Lightbulb className="h-4 w-4 text-yellow-600 mt-0.5 flex-shrink-0" />
-                          <p className="text-sm text-yellow-800">{insight}</p>
+                        <div key={index} className="group relative overflow-hidden p-4 bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl border border-amber-200 shadow-sm hover:shadow-md transition-all duration-300">
+                          <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-amber-200/30 to-transparent rounded-bl-full"></div>
+                          <div className="flex items-start gap-3">
+                            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center shadow-sm">
+                              <span className="text-white font-bold text-sm">{index + 1}</span>
+                            </div>
+                            <p className="text-sm text-gray-700 leading-relaxed pt-1">{insight}</p>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -832,15 +801,20 @@ export default function AuthenticAnalysisPage({ session: propSession, onClose, o
                 {/* Recommendations */}
                 {session.transcriptAnalysis.recommendations && session.transcriptAnalysis.recommendations.length > 0 && (
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                      <Target className="h-4 w-4 text-red-600" />
+                    <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                      <Target className="h-5 w-5 text-blue-600" />
                       AI Recommendations
                     </h4>
-                    <div className="space-y-2">
+                    <div className="grid grid-cols-1 gap-3">
                       {session.transcriptAnalysis.recommendations.map((recommendation, index) => (
-                        <div key={index} className="flex items-start gap-3 p-3 bg-red-50 rounded-lg border border-red-200">
-                          <Target className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
-                          <p className="text-sm text-red-800">{recommendation}</p>
+                        <div key={index} className="group relative overflow-hidden p-4 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-xl border border-blue-200 shadow-sm hover:shadow-md transition-all duration-300">
+                          <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 to-purple-500 rounded-l-xl"></div>
+                          <div className="flex items-start gap-3 pl-2">
+                            <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center mt-0.5">
+                              <CheckCircle className="h-3.5 w-3.5 text-white" />
+                            </div>
+                            <p className="text-sm text-gray-700 leading-relaxed">{recommendation}</p>
+                          </div>
                         </div>
                       ))}
                     </div>

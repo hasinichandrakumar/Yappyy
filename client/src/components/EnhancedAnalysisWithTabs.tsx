@@ -42,11 +42,6 @@ import {
   Line,
   BarChart,
   Bar,
-  RadarChart,
-  Radar,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -469,26 +464,7 @@ export default function EnhancedAnalysisWithTabs() {
                     </CardContent>
                   </Card>
 
-                  {/* Body Language Radar Chart */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Eye className="w-5 h-5 text-purple-500" />
-                        Body Language Metrics
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <ResponsiveContainer width="100%" height={300}>
-                        <RadarChart data={bodyLanguageData}>
-                          <PolarGrid stroke="#E5E7EB" />
-                          <PolarAngleAxis dataKey="metric" tick={{ fontSize: 12 }} />
-                          <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 10 }} />
-                          <Radar name="Score" dataKey="score" stroke="#8B5CF6" fill="#8B5CF6" fillOpacity={0.6} />
-                        </RadarChart>
-                      </ResponsiveContainer>
-                    </CardContent>
-                  </Card>
-                </div>
+                                  </div>
 
                 {/* Key Insights */}
                 {aiInsights?.bodyLanguageAnalysis && (
