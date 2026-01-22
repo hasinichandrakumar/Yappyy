@@ -279,16 +279,13 @@ export default function AuthenticAnalysisPage({ session: propSession, onClose, o
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="text-2xl font-bold text-blue-900">
-                  {session.sessionName} - Authentic Analysis Report
+                  {session.sessionName} - Analysis Report
                 </CardTitle>
                 <CardDescription className="text-blue-700 font-semibold mt-2">
                   Session #{session.sessionNumber} • {session.purpose} • {new Date(session.createdAt).toLocaleDateString()}
                 </CardDescription>
               </div>
-              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-300">
-                Authentic Data Only
-              </Badge>
-            </div>
+                          </div>
           </CardHeader>
         </Card>
 
@@ -949,22 +946,7 @@ export default function AuthenticAnalysisPage({ session: propSession, onClose, o
           </Card>
         )}
 
-        {/* Data Authenticity Notice */}
-        <Card className="border-green-200 bg-green-50">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <CheckCircle className="h-6 w-6 text-green-600" />
-              <div>
-                <h3 className="font-semibold text-green-900">100% Authentic Analysis</h3>
-                <p className="text-sm text-green-700">
-                  All metrics shown are derived from real computer vision analysis, voice processing, and AI evaluation. 
-                  No placeholder or synthetic data is used in this report.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
+        
         {/* Session Media */}
         {authenticMetrics.hasVideo && (
           <Card>
