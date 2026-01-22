@@ -177,20 +177,21 @@ export class DatabaseStorage implements IStorage {
           () => db.select().from(users).where(eq(users.email, userData.email))
         );
         if (userByEmail) {
-          console.log('📧 Found existing user by email, updating ID from', userByEmail.id, 'to', userData.id);
-          // Update the existing user's ID to the new auth provider ID
+          console.log('📧 Found existing user by email with ID:', userByEmail.id);
+          // Just update the profile and return the existing user (keep their ID)
           const [updatedUser] = await resilientQuery(
             () => db
               .update(users)
               .set({
-                id: userData.id,
                 profileImageUrl: userData.profileImageUrl || userByEmail.profileImageUrl,
+                firstName: userData.firstName || userByEmail.firstName,
+                lastName: userData.lastName || userByEmail.lastName,
                 updatedAt: new Date()
               })
               .where(eq(users.email, userData.email))
               .returning()
           );
-          console.log('✅ User ID updated successfully:', updatedUser.email);
+          console.log('✅ Existing user updated, returning with ID:', updatedUser.id);
           return updatedUser;
         }
       }

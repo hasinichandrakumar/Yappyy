@@ -360,37 +360,41 @@ export function setupSimplifiedGoogleAuth(app: Express) {
       const nameParts = userName.split(' ');
       const firstName = nameParts[0] || userName;
       const lastName = nameParts.slice(1).join(' ') || null;
+      
+      let dbUserId = uid; // Default to Firebase UID
       try {
-        await storage.upsertUser({
+        const dbUser = await storage.upsertUser({
           id: uid,
           email,
           firstName,
           lastName,
           profileImageUrl: photoURL || null,
         });
-        console.log('✅ Firebase user created/updated in database:', email);
+        // Use the actual database user ID (may differ from Firebase UID if user existed)
+        dbUserId = dbUser.id;
+        console.log('✅ Firebase user created/updated in database:', email, 'DB ID:', dbUserId);
       } catch (dbError) {
         console.error('⚠️ Failed to save user to database:', dbError);
         // Continue with authentication even if DB fails
       }
 
-      // Store Firebase user in session
+      // Store Firebase user in session - use the DATABASE user ID, not Firebase UID
       req.session.firebase_uid = uid;
-      req.session.user_id = uid;
+      req.session.user_id = dbUserId;
       req.session.firebase_user = {
-        uid,
+        uid: dbUserId, // Use DB ID for consistency
         email,
         displayName,
         photoURL
       };
 
-      console.log('✅ Firebase user authenticated:', email);
+      console.log('✅ Firebase user authenticated:', email, 'Using DB ID:', dbUserId);
       
       res.json({
         success: true,
         isAuthenticated: true,
         user: {
-          id: uid,
+          id: dbUserId,
           email,
           name: userName,
           profileImageUrl: photoURL,
