@@ -16,15 +16,12 @@ import {
   BarChart3,
   MessageSquare,
   Video,
-  Volume2,
   Pause,
   Hash,
   Loader2,
-  Hand,
-  Award,
-  BookOpen,
   Brain,
-  Lightbulb
+  Lightbulb,
+  Sparkles
 } from "lucide-react";
 
 interface AuthenticAnalysisProps {
@@ -334,7 +331,7 @@ export default function AuthenticAnalysisPage({ session: propSession, onClose, o
             </Card>
           )}
 
-          {authenticMetrics.wpm && (
+          {authenticMetrics.wpm && authenticMetrics.wpm > 0 && (
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center space-x-2">
@@ -348,7 +345,7 @@ export default function AuthenticAnalysisPage({ session: propSession, onClose, o
             </Card>
           )}
 
-          {authenticMetrics.confidence && (
+          {authenticMetrics.confidence && authenticMetrics.confidence > 0 && (
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center space-x-2">
@@ -364,11 +361,11 @@ export default function AuthenticAnalysisPage({ session: propSession, onClose, o
             </Card>
           )}
 
-          {authenticMetrics.clarity && (
+          {authenticMetrics.clarity && authenticMetrics.clarity > 0 && (
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center space-x-2">
-                  <Volume2 className="h-5 w-5 text-orange-600" />
+                  <Mic className="h-5 w-5 text-orange-600" />
                   <div>
                     <p className="text-sm font-medium text-gray-600">Voice Clarity</p>
                     <p className={`text-2xl font-bold ${getScoreColor(authenticMetrics.clarity)}`}>
@@ -381,148 +378,18 @@ export default function AuthenticAnalysisPage({ session: propSession, onClose, o
           )}
         </div>
 
-        {/* Combined Delivery Analysis - Body Language & Voice */}
-        {(session?.bodyLanguageAnalysis || session?.voiceAnalysis) && (
-          <Card>
-            <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50">
-              <CardTitle className="flex items-center gap-2">
-                <Activity className="h-5 w-5 text-purple-600" />
-                Delivery Analysis
-              </CardTitle>
-              <CardDescription>
-                Body language and voice performance metrics
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <div className="space-y-6">
-                {/* Body Language Section */}
-                {session?.bodyLanguageAnalysis && (
-                  <>
-                    {/* Gesture Analysis - only show metrics with values */}
-                    {session.bodyLanguageAnalysis.gestures && (session.bodyLanguageAnalysis.gestures.handMovements > 0 || session.bodyLanguageAnalysis.gestures.naturalness > 0 || session.bodyLanguageAnalysis.gestures.effectiveness > 0 || session.bodyLanguageAnalysis.gestures.timing > 0) && (
-                      <div>
-                        <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                          <Hand className="h-4 w-4 text-green-600" />
-                          Gestures
-                        </h4>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                          {session.bodyLanguageAnalysis.gestures.handMovements > 0 && (
-                            <div className="text-center p-3 bg-green-50 rounded-lg border border-green-100">
-                              <div className="text-xl font-bold text-green-600">{session.bodyLanguageAnalysis.gestures.handMovements}%</div>
-                              <div className="text-xs text-gray-600">Hand Movements</div>
-                            </div>
-                          )}
-                          {session.bodyLanguageAnalysis.gestures.naturalness > 0 && (
-                            <div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-100">
-                              <div className="text-xl font-bold text-blue-600">{session.bodyLanguageAnalysis.gestures.naturalness}%</div>
-                              <div className="text-xs text-gray-600">Naturalness</div>
-                            </div>
-                          )}
-                          {session.bodyLanguageAnalysis.gestures.effectiveness > 0 && (
-                            <div className="text-center p-3 bg-purple-50 rounded-lg border border-purple-100">
-                              <div className="text-xl font-bold text-purple-600">{session.bodyLanguageAnalysis.gestures.effectiveness}%</div>
-                              <div className="text-xs text-gray-600">Effectiveness</div>
-                            </div>
-                          )}
-                          {session.bodyLanguageAnalysis.gestures.timing > 0 && (
-                            <div className="text-center p-3 bg-orange-50 rounded-lg border border-orange-100">
-                              <div className="text-xl font-bold text-orange-600">{session.bodyLanguageAnalysis.gestures.timing}%</div>
-                              <div className="text-xs text-gray-600">Timing</div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Presence - only show metrics with values */}
-                    {session.bodyLanguageAnalysis.overall && (session.bodyLanguageAnalysis.overall.presence > 0 || session.bodyLanguageAnalysis.overall.confidence > 0 || session.bodyLanguageAnalysis.overall.professionalism > 0) && (
-                      <div>
-                        <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                          <Award className="h-4 w-4 text-purple-600" />
-                          Presence
-                        </h4>
-                        <div className="grid grid-cols-3 gap-3">
-                          {session.bodyLanguageAnalysis.overall.presence > 0 && (
-                            <div className="text-center p-3 bg-purple-50 rounded-lg border border-purple-100">
-                              <div className="text-2xl font-bold text-purple-600">{session.bodyLanguageAnalysis.overall.presence}%</div>
-                              <div className="text-xs text-gray-600">Presence</div>
-                            </div>
-                          )}
-                          {session.bodyLanguageAnalysis.overall.confidence > 0 && (
-                            <div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-100">
-                              <div className="text-2xl font-bold text-blue-600">{session.bodyLanguageAnalysis.overall.confidence}%</div>
-                              <div className="text-xs text-gray-600">Confidence</div>
-                            </div>
-                          )}
-                          {session.bodyLanguageAnalysis.overall.professionalism > 0 && (
-                            <div className="text-center p-3 bg-green-50 rounded-lg border border-green-100">
-                              <div className="text-2xl font-bold text-green-600">{session.bodyLanguageAnalysis.overall.professionalism}%</div>
-                              <div className="text-xs text-gray-600">Professionalism</div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
-
-                {/* Divider between body and voice */}
-                {session?.bodyLanguageAnalysis && session?.voiceAnalysis && (
-                  <div className="border-t border-gray-200 pt-4"></div>
-                )}
-
-                {/* Voice Section - only show metrics with values */}
-                {session?.voiceAnalysis && (
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                      <Volume2 className="h-4 w-4 text-blue-600" />
-                      Voice
-                    </h4>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                      {session.voiceAnalysis.clarity?.score > 0 && (
-                        <div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-100">
-                          <div className="text-xl font-bold text-blue-600">{session.voiceAnalysis.clarity.score}%</div>
-                          <div className="text-xs text-gray-600">Clarity</div>
-                        </div>
-                      )}
-                      {session.voiceAnalysis.clarity?.volumeConsistency > 0 && (
-                        <div className="text-center p-3 bg-green-50 rounded-lg border border-green-100">
-                          <div className="text-xl font-bold text-green-600">{session.voiceAnalysis.clarity.volumeConsistency}%</div>
-                          <div className="text-xs text-gray-600">Volume</div>
-                        </div>
-                      )}
-                      {session.voiceAnalysis.clarity?.pitchStability > 0 && (
-                        <div className="text-center p-3 bg-purple-50 rounded-lg border border-purple-100">
-                          <div className="text-xl font-bold text-purple-600">{session.voiceAnalysis.clarity.pitchStability}%</div>
-                          <div className="text-xs text-gray-600">Pitch</div>
-                        </div>
-                      )}
-                      {session.voiceAnalysis.intonation?.expressiveness > 0 && (
-                        <div className="text-center p-3 bg-orange-50 rounded-lg border border-orange-100">
-                          <div className="text-xl font-bold text-orange-600">{session.voiceAnalysis.intonation.expressiveness}%</div>
-                          <div className="text-xs text-gray-600">Expression</div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* AI-Powered Transcript Analysis */}
+        {/* AI Summary - Personalized Purpose-Specific Feedback */}
         {session?.transcriptAnalysis && (
           <Card>
             <CardHeader className="bg-gradient-to-r from-purple-50 to-indigo-50">
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="flex items-center gap-2">
-                    <BookOpen className="h-5 w-5 text-purple-600" />
-                    {session.purpose || session.transcriptAnalysis.purpose || 'Speech'} Analysis
+                    <Brain className="h-5 w-5 text-purple-600" />
+                    AI Summary
                   </CardTitle>
                   <CardDescription className="mt-1">
-                    Tailored feedback for your {session.purpose || session.transcriptAnalysis.purpose || 'presentation'} goals
+                    Personalized feedback for your {session.purpose || 'presentation'}
                   </CardDescription>
                 </div>
                 {session.purpose && (
@@ -534,130 +401,134 @@ export default function AuthenticAnalysisPage({ session: propSession, onClose, o
             </CardHeader>
             <CardContent className="pt-6">
               <div className="space-y-6">
-                {/* Purpose Alignment */}
-                {session.transcriptAnalysis.purposeAlignment && (
+                {/* AI Assessment - Main personalized feedback */}
+                {session.transcriptAnalysis.aiAssessment && (
+                  <div className="p-4 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl border border-indigo-200">
+                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <Target className="h-5 w-5 text-indigo-600" />
+                      {session.purpose || 'Speech'} Performance Summary
+                    </h4>
+                    <p className="text-sm text-gray-700 leading-relaxed">
+                      {session.transcriptAnalysis.aiAssessment}
+                    </p>
+                  </div>
+                )}
+
+                {/* Purpose Alignment - only show if score > 0 */}
+                {session.transcriptAnalysis.purposeAlignment && session.transcriptAnalysis.purposeAlignment.score > 0 && (
                   <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
                     <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                       <Target className="h-5 w-5 text-blue-600" />
-                      {session.purpose || session.transcriptAnalysis.purpose || 'Purpose'} Alignment
+                      {session.purpose || 'Purpose'} Alignment
                     </h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="text-center p-3 bg-blue-50 rounded-lg">
                         <div className="text-2xl font-bold text-blue-600">
-                          {session.transcriptAnalysis.purposeAlignment.score || 0}%
+                          {session.transcriptAnalysis.purposeAlignment.score}%
                         </div>
                         <div className="text-sm text-gray-600">Alignment Score</div>
                       </div>
-                      <div className="p-3 bg-green-50 rounded-lg">
-                        <div className="text-sm font-semibold text-green-800 mb-2">Key Strengths</div>
-                        <ul className="text-sm text-green-700 space-y-1">
-                          {session.transcriptAnalysis.purposeAlignment.strengths?.map((strength, index) => (
-                            <li key={index} className="flex items-center gap-2">
-                              <CheckCircle className="h-3 w-3" />
-                              {strength}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
+                      {session.transcriptAnalysis.purposeAlignment.strengths?.length > 0 && (
+                        <div className="p-3 bg-green-50 rounded-lg">
+                          <div className="text-sm font-semibold text-green-800 mb-2">Key Strengths</div>
+                          <ul className="text-sm text-green-700 space-y-1">
+                            {session.transcriptAnalysis.purposeAlignment.strengths.map((strength: string, index: number) => (
+                              <li key={index} className="flex items-center gap-2">
+                                <CheckCircle className="h-3 w-3" />
+                                {strength}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
 
-                {/* Content Structure */}
-                {session.transcriptAnalysis.contentStructure && (
+                {/* Content Structure - only show metrics > 0 */}
+                {session.transcriptAnalysis.contentStructure && (session.transcriptAnalysis.contentStructure.score > 0 || session.transcriptAnalysis.contentStructure.introduction > 0 || session.transcriptAnalysis.contentStructure.body > 0 || session.transcriptAnalysis.contentStructure.conclusion > 0) && (
                   <div>
                     <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                       <BarChart3 className="h-4 w-4 text-green-600" />
                       Content Structure
                     </h4>
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                      <div className="text-center p-3 bg-green-50 rounded-lg">
-                        <div className="text-2xl font-bold text-green-600">
-                          {session.transcriptAnalysis.contentStructure.score || 0}%
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      {session.transcriptAnalysis.contentStructure.score > 0 && (
+                        <div className="text-center p-3 bg-green-50 rounded-lg">
+                          <div className="text-2xl font-bold text-green-600">
+                            {session.transcriptAnalysis.contentStructure.score}%
+                          </div>
+                          <div className="text-sm text-gray-600">Overall</div>
                         </div>
-                        <div className="text-sm text-gray-600">Overall</div>
-                      </div>
-                      <div className="text-center p-3 bg-blue-50 rounded-lg">
-                        <div className="text-2xl font-bold text-blue-600">
-                          {session.transcriptAnalysis.contentStructure.introduction || 0}%
+                      )}
+                      {session.transcriptAnalysis.contentStructure.introduction > 0 && (
+                        <div className="text-center p-3 bg-blue-50 rounded-lg">
+                          <div className="text-2xl font-bold text-blue-600">
+                            {session.transcriptAnalysis.contentStructure.introduction}%
+                          </div>
+                          <div className="text-sm text-gray-600">Introduction</div>
                         </div>
-                        <div className="text-sm text-gray-600">Introduction</div>
-                      </div>
-                      <div className="text-center p-3 bg-purple-50 rounded-lg">
-                        <div className="text-2xl font-bold text-purple-600">
-                          {session.transcriptAnalysis.contentStructure.body || 0}%
+                      )}
+                      {session.transcriptAnalysis.contentStructure.body > 0 && (
+                        <div className="text-center p-3 bg-purple-50 rounded-lg">
+                          <div className="text-2xl font-bold text-purple-600">
+                            {session.transcriptAnalysis.contentStructure.body}%
+                          </div>
+                          <div className="text-sm text-gray-600">Body</div>
                         </div>
-                        <div className="text-sm text-gray-600">Body</div>
-                      </div>
-                      <div className="text-center p-3 bg-orange-50 rounded-lg">
-                        <div className="text-2xl font-bold text-orange-600">
-                          {session.transcriptAnalysis.contentStructure.conclusion || 0}%
+                      )}
+                      {session.transcriptAnalysis.contentStructure.conclusion > 0 && (
+                        <div className="text-center p-3 bg-orange-50 rounded-lg">
+                          <div className="text-2xl font-bold text-orange-600">
+                            {session.transcriptAnalysis.contentStructure.conclusion}%
+                          </div>
+                          <div className="text-sm text-gray-600">Conclusion</div>
                         </div>
-                        <div className="text-sm text-gray-600">Conclusion</div>
-                      </div>
-                      <div className="text-center p-3 bg-red-50 rounded-lg">
-                        <div className="text-2xl font-bold text-red-600">
-                          {session.transcriptAnalysis.contentStructure.transitions || 0}%
-                        </div>
-                        <div className="text-sm text-gray-600">Transitions</div>
-                      </div>
+                      )}
                     </div>
                   </div>
                 )}
 
-                {/* Persuasiveness */}
-                {session.transcriptAnalysis.persuasiveness && (
+                {/* Persuasiveness - only show metrics > 0 */}
+                {session.transcriptAnalysis.persuasiveness && (session.transcriptAnalysis.persuasiveness.score > 0 || session.transcriptAnalysis.persuasiveness.arguments > 0 || session.transcriptAnalysis.persuasiveness.evidence > 0) && (
                   <div>
                     <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                       <TrendingUp className="h-4 w-4 text-purple-600" />
-                      Persuasiveness Analysis
+                      Persuasiveness
                     </h4>
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                      <div className="text-center p-3 bg-purple-50 rounded-lg">
-                        <div className="text-2xl font-bold text-purple-600">
-                          {session.transcriptAnalysis.persuasiveness.score || 0}%
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      {session.transcriptAnalysis.persuasiveness.score > 0 && (
+                        <div className="text-center p-3 bg-purple-50 rounded-lg">
+                          <div className="text-2xl font-bold text-purple-600">
+                            {session.transcriptAnalysis.persuasiveness.score}%
+                          </div>
+                          <div className="text-sm text-gray-600">Overall</div>
                         </div>
-                        <div className="text-sm text-gray-600">Overall</div>
-                      </div>
-                      <div className="text-center p-3 bg-blue-50 rounded-lg">
-                        <div className="text-2xl font-bold text-blue-600">
-                          {session.transcriptAnalysis.persuasiveness.arguments || 0}%
+                      )}
+                      {session.transcriptAnalysis.persuasiveness.arguments > 0 && (
+                        <div className="text-center p-3 bg-blue-50 rounded-lg">
+                          <div className="text-2xl font-bold text-blue-600">
+                            {session.transcriptAnalysis.persuasiveness.arguments}%
+                          </div>
+                          <div className="text-sm text-gray-600">Arguments</div>
                         </div>
-                        <div className="text-sm text-gray-600">Arguments</div>
-                      </div>
-                      <div className="text-center p-3 bg-green-50 rounded-lg">
-                        <div className="text-2xl font-bold text-green-600">
-                          {session.transcriptAnalysis.persuasiveness.evidence || 0}%
+                      )}
+                      {session.transcriptAnalysis.persuasiveness.evidence > 0 && (
+                        <div className="text-center p-3 bg-green-50 rounded-lg">
+                          <div className="text-2xl font-bold text-green-600">
+                            {session.transcriptAnalysis.persuasiveness.evidence}%
+                          </div>
+                          <div className="text-sm text-gray-600">Evidence</div>
                         </div>
-                        <div className="text-sm text-gray-600">Evidence</div>
-                      </div>
-                      <div className="text-center p-3 bg-orange-50 rounded-lg">
-                        <div className="text-2xl font-bold text-orange-600">
-                          {session.transcriptAnalysis.persuasiveness.emotionalAppeals || 0}%
+                      )}
+                      {session.transcriptAnalysis.persuasiveness.callToAction > 0 && (
+                        <div className="text-center p-3 bg-orange-50 rounded-lg">
+                          <div className="text-2xl font-bold text-orange-600">
+                            {session.transcriptAnalysis.persuasiveness.callToAction}%
+                          </div>
+                          <div className="text-sm text-gray-600">Call to Action</div>
                         </div>
-                        <div className="text-sm text-gray-600">Emotional</div>
-                      </div>
-                      <div className="text-center p-3 bg-red-50 rounded-lg">
-                        <div className="text-2xl font-bold text-red-600">
-                          {session.transcriptAnalysis.persuasiveness.callToAction || 0}%
-                        </div>
-                        <div className="text-sm text-gray-600">Call to Action</div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* AI Assessment */}
-                {session.transcriptAnalysis.aiAssessment && (
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                      <Brain className="h-4 w-4 text-indigo-600" />
-                      AI Assessment
-                    </h4>
-                    <div className="p-4 bg-indigo-50 rounded-lg border border-indigo-200">
-                      <p className="text-sm text-indigo-800 leading-relaxed">
-                        {session.transcriptAnalysis.aiAssessment}
-                      </p>
+                      )}
                     </div>
                   </div>
                 )}
