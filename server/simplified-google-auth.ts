@@ -355,6 +355,22 @@ export function setupSimplifiedGoogleAuth(app: Express) {
         return res.status(400).json({ error: 'Missing required fields' });
       }
 
+      // Create or update user in the database
+      const userName = displayName || email.split('@')[0];
+      try {
+        await storage.upsertUser({
+          id: uid,
+          email,
+          username: userName,
+          name: userName,
+          profileImageUrl: photoURL || null,
+        });
+        console.log('✅ Firebase user created/updated in database:', email);
+      } catch (dbError) {
+        console.error('⚠️ Failed to save user to database:', dbError);
+        // Continue with authentication even if DB fails
+      }
+
       // Store Firebase user in session
       req.session.firebase_uid = uid;
       req.session.user_id = uid;
@@ -373,7 +389,7 @@ export function setupSimplifiedGoogleAuth(app: Express) {
         user: {
           id: uid,
           email,
-          name: displayName || email.split('@')[0],
+          name: userName,
           profileImageUrl: photoURL,
           authType: 'firebase'
         }
