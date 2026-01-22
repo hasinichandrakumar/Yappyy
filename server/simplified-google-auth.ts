@@ -357,12 +357,15 @@ export function setupSimplifiedGoogleAuth(app: Express) {
 
       // Create or update user in the database
       const userName = displayName || email.split('@')[0];
+      const nameParts = userName.split(' ');
+      const firstName = nameParts[0] || userName;
+      const lastName = nameParts.slice(1).join(' ') || null;
       try {
         await storage.upsertUser({
           id: uid,
           email,
-          username: userName,
-          name: userName,
+          firstName,
+          lastName,
           profileImageUrl: photoURL || null,
         });
         console.log('✅ Firebase user created/updated in database:', email);

@@ -168,8 +168,33 @@ export class DatabaseStorage implements IStorage {
     console.log('💾 Upserting user:', userData.email);
     
     return withRetry(async () => {
-      // Check if user exists
-      const existingUser = await this.getUser(userData.id);
+      // First check if user exists by ID
+      let existingUser = await this.getUser(userData.id);
+      
+      // If not found by ID, check by email (handles auth provider migration)
+      if (!existingUser && userData.email) {
+        const [userByEmail] = await resilientQuery(
+          () => db.select().from(users).where(eq(users.email, userData.email))
+        );
+        if (userByEmail) {
+          console.log('📧 Found existing user by email, updating ID from', userByEmail.id, 'to', userData.id);
+          // Update the existing user's ID to the new auth provider ID
+          const [updatedUser] = await resilientQuery(
+            () => db
+              .update(users)
+              .set({
+                id: userData.id,
+                profileImageUrl: userData.profileImageUrl || userByEmail.profileImageUrl,
+                updatedAt: new Date()
+              })
+              .where(eq(users.email, userData.email))
+              .returning()
+          );
+          console.log('✅ User ID updated successfully:', updatedUser.email);
+          return updatedUser;
+        }
+      }
+      
       const isNewUser = !existingUser;
       
       const [user] = await resilientQuery(
