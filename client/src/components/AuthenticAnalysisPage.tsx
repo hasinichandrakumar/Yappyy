@@ -381,250 +381,128 @@ export default function AuthenticAnalysisPage({ session: propSession, onClose, o
           )}
         </div>
 
-        {/* Body Language Analysis - MediaPipe Enhanced */}
-        {session?.bodyLanguageAnalysis && (
+        {/* Combined Delivery Analysis - Body Language & Voice */}
+        {(session?.bodyLanguageAnalysis || session?.voiceAnalysis) && (
           <Card>
-            <CardHeader>
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50">
               <CardTitle className="flex items-center gap-2">
                 <Activity className="h-5 w-5 text-purple-600" />
-                Body Language Analysis
+                Delivery Analysis
               </CardTitle>
               <CardDescription>
-                Comprehensive gestures and presence analysis powered by MediaPipe
+                Body language and voice performance metrics
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               <div className="space-y-6">
-                {/* Gesture Analysis */}
-                {session.bodyLanguageAnalysis.gestures && (
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                      <Hand className="h-4 w-4 text-green-600" />
-                      Gesture Analysis
-                    </h4>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="text-center p-3 bg-green-50 rounded-lg">
-                        <div className="text-2xl font-bold text-green-600">
-                          {session.bodyLanguageAnalysis.gestures.handMovements || 0}%
+                {/* Body Language Section */}
+                {session?.bodyLanguageAnalysis && (
+                  <>
+                    {/* Gesture Analysis - only show metrics with values */}
+                    {session.bodyLanguageAnalysis.gestures && (session.bodyLanguageAnalysis.gestures.handMovements > 0 || session.bodyLanguageAnalysis.gestures.naturalness > 0 || session.bodyLanguageAnalysis.gestures.effectiveness > 0 || session.bodyLanguageAnalysis.gestures.timing > 0) && (
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                          <Hand className="h-4 w-4 text-green-600" />
+                          Gestures
+                        </h4>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                          {session.bodyLanguageAnalysis.gestures.handMovements > 0 && (
+                            <div className="text-center p-3 bg-green-50 rounded-lg border border-green-100">
+                              <div className="text-xl font-bold text-green-600">{session.bodyLanguageAnalysis.gestures.handMovements}%</div>
+                              <div className="text-xs text-gray-600">Hand Movements</div>
+                            </div>
+                          )}
+                          {session.bodyLanguageAnalysis.gestures.naturalness > 0 && (
+                            <div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-100">
+                              <div className="text-xl font-bold text-blue-600">{session.bodyLanguageAnalysis.gestures.naturalness}%</div>
+                              <div className="text-xs text-gray-600">Naturalness</div>
+                            </div>
+                          )}
+                          {session.bodyLanguageAnalysis.gestures.effectiveness > 0 && (
+                            <div className="text-center p-3 bg-purple-50 rounded-lg border border-purple-100">
+                              <div className="text-xl font-bold text-purple-600">{session.bodyLanguageAnalysis.gestures.effectiveness}%</div>
+                              <div className="text-xs text-gray-600">Effectiveness</div>
+                            </div>
+                          )}
+                          {session.bodyLanguageAnalysis.gestures.timing > 0 && (
+                            <div className="text-center p-3 bg-orange-50 rounded-lg border border-orange-100">
+                              <div className="text-xl font-bold text-orange-600">{session.bodyLanguageAnalysis.gestures.timing}%</div>
+                              <div className="text-xs text-gray-600">Timing</div>
+                            </div>
+                          )}
                         </div>
-                        <div className="text-sm text-gray-600">Hand Movements</div>
                       </div>
-                      <div className="text-center p-3 bg-blue-50 rounded-lg">
-                        <div className="text-2xl font-bold text-blue-600">
-                          {session.bodyLanguageAnalysis.gestures.naturalness || 0}%
+                    )}
+
+                    {/* Presence - only show metrics with values */}
+                    {session.bodyLanguageAnalysis.overall && (session.bodyLanguageAnalysis.overall.presence > 0 || session.bodyLanguageAnalysis.overall.confidence > 0 || session.bodyLanguageAnalysis.overall.professionalism > 0) && (
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                          <Award className="h-4 w-4 text-purple-600" />
+                          Presence
+                        </h4>
+                        <div className="grid grid-cols-3 gap-3">
+                          {session.bodyLanguageAnalysis.overall.presence > 0 && (
+                            <div className="text-center p-3 bg-purple-50 rounded-lg border border-purple-100">
+                              <div className="text-2xl font-bold text-purple-600">{session.bodyLanguageAnalysis.overall.presence}%</div>
+                              <div className="text-xs text-gray-600">Presence</div>
+                            </div>
+                          )}
+                          {session.bodyLanguageAnalysis.overall.confidence > 0 && (
+                            <div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-100">
+                              <div className="text-2xl font-bold text-blue-600">{session.bodyLanguageAnalysis.overall.confidence}%</div>
+                              <div className="text-xs text-gray-600">Confidence</div>
+                            </div>
+                          )}
+                          {session.bodyLanguageAnalysis.overall.professionalism > 0 && (
+                            <div className="text-center p-3 bg-green-50 rounded-lg border border-green-100">
+                              <div className="text-2xl font-bold text-green-600">{session.bodyLanguageAnalysis.overall.professionalism}%</div>
+                              <div className="text-xs text-gray-600">Professionalism</div>
+                            </div>
+                          )}
                         </div>
-                        <div className="text-sm text-gray-600">Naturalness</div>
                       </div>
-                      <div className="text-center p-3 bg-purple-50 rounded-lg">
-                        <div className="text-2xl font-bold text-purple-600">
-                          {session.bodyLanguageAnalysis.gestures.effectiveness || 0}%
-                        </div>
-                        <div className="text-sm text-gray-600">Effectiveness</div>
-                      </div>
-                      <div className="text-center p-3 bg-orange-50 rounded-lg">
-                        <div className="text-2xl font-bold text-orange-600">
-                          {session.bodyLanguageAnalysis.gestures.timing || 0}%
-                        </div>
-                        <div className="text-sm text-gray-600">Timing</div>
-                      </div>
-                    </div>
-                  </div>
+                    )}
+                  </>
                 )}
 
-                {/* Overall Presence */}
-                {session.bodyLanguageAnalysis.overall && (
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                      <Award className="h-4 w-4 text-purple-600" />
-                      Overall Presence
-                    </h4>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="text-center p-4 bg-purple-50 rounded-lg">
-                        <div className="text-3xl font-bold text-purple-600">
-                          {session.bodyLanguageAnalysis.overall.presence || 0}%
-                        </div>
-                        <div className="text-sm text-gray-600">Presence</div>
-                      </div>
-                      <div className="text-center p-4 bg-blue-50 rounded-lg">
-                        <div className="text-3xl font-bold text-blue-600">
-                          {session.bodyLanguageAnalysis.overall.confidence || 0}%
-                        </div>
-                        <div className="text-sm text-gray-600">Confidence</div>
-                      </div>
-                      <div className="text-center p-4 bg-green-50 rounded-lg">
-                        <div className="text-3xl font-bold text-green-600">
-                          {session.bodyLanguageAnalysis.overall.professionalism || 0}%
-                        </div>
-                        <div className="text-sm text-gray-600">Professionalism</div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Voice Analysis - Comprehensive Audio Metrics */}
-        {session?.voiceAnalysis && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Volume2 className="h-5 w-5 text-blue-600" />
-                Voice Analysis
-              </CardTitle>
-              <CardDescription>
-                Comprehensive voice quality, clarity, and delivery analysis
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                {/* Voice Clarity */}
-                {session.voiceAnalysis.clarity && (
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                      <Mic className="h-4 w-4 text-blue-600" />
-                      Voice Clarity
-                    </h4>
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                      <div className="text-center p-3 bg-blue-50 rounded-lg">
-                        <div className="text-2xl font-bold text-blue-600">
-                          {session.voiceAnalysis.clarity.score || 0}%
-                        </div>
-                        <div className="text-sm text-gray-600">Overall Clarity</div>
-                      </div>
-                      <div className="text-center p-3 bg-green-50 rounded-lg">
-                        <div className="text-2xl font-bold text-green-600">
-                          {session.voiceAnalysis.clarity.volumeConsistency || 0}%
-                        </div>
-                        <div className="text-sm text-gray-600">Volume Consistency</div>
-                      </div>
-                      <div className="text-center p-3 bg-purple-50 rounded-lg">
-                        <div className="text-2xl font-bold text-purple-600">
-                          {session.voiceAnalysis.clarity.pitchStability || 0}%
-                        </div>
-                        <div className="text-sm text-gray-600">Pitch Stability</div>
-                      </div>
-                      <div className="text-center p-3 bg-orange-50 rounded-lg">
-                        <div className="text-2xl font-bold text-orange-600">
-                          {session.voiceAnalysis.clarity.articulation || 0}%
-                        </div>
-                        <div className="text-sm text-gray-600">Articulation</div>
-                      </div>
-                      <div className="text-center p-3 bg-red-50 rounded-lg">
-                        <div className="text-2xl font-bold text-red-600">
-                          {session.voiceAnalysis.clarity.pronunciation || 0}%
-                        </div>
-                        <div className="text-sm text-gray-600">Pronunciation</div>
-                      </div>
-                    </div>
-                  </div>
+                {/* Divider between body and voice */}
+                {session?.bodyLanguageAnalysis && session?.voiceAnalysis && (
+                  <div className="border-t border-gray-200 pt-4"></div>
                 )}
 
-                {/* Volume Analysis */}
-                {session.voiceAnalysis.volume && (
+                {/* Voice Section - only show metrics with values */}
+                {session?.voiceAnalysis && (
                   <div>
                     <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                      <Volume2 className="h-4 w-4 text-green-600" />
-                      Volume Analysis
+                      <Volume2 className="h-4 w-4 text-blue-600" />
+                      Voice
                     </h4>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="text-center p-3 bg-green-50 rounded-lg">
-                        <div className="text-2xl font-bold text-green-600">
-                          {session.voiceAnalysis.volume.averageLevel || 0}%
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {session.voiceAnalysis.clarity?.score > 0 && (
+                        <div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-100">
+                          <div className="text-xl font-bold text-blue-600">{session.voiceAnalysis.clarity.score}%</div>
+                          <div className="text-xs text-gray-600">Clarity</div>
                         </div>
-                        <div className="text-sm text-gray-600">Average Level</div>
-                      </div>
-                      <div className="text-center p-3 bg-blue-50 rounded-lg">
-                        <div className="text-2xl font-bold text-blue-600">
-                          {session.voiceAnalysis.volume.consistency || 0}%
+                      )}
+                      {session.voiceAnalysis.clarity?.volumeConsistency > 0 && (
+                        <div className="text-center p-3 bg-green-50 rounded-lg border border-green-100">
+                          <div className="text-xl font-bold text-green-600">{session.voiceAnalysis.clarity.volumeConsistency}%</div>
+                          <div className="text-xs text-gray-600">Volume</div>
                         </div>
-                        <div className="text-sm text-gray-600">Consistency</div>
-                      </div>
-                      <div className="text-center p-3 bg-purple-50 rounded-lg">
-                        <div className="text-2xl font-bold text-purple-600">
-                          {session.voiceAnalysis.volume.projection || 0}%
+                      )}
+                      {session.voiceAnalysis.clarity?.pitchStability > 0 && (
+                        <div className="text-center p-3 bg-purple-50 rounded-lg border border-purple-100">
+                          <div className="text-xl font-bold text-purple-600">{session.voiceAnalysis.clarity.pitchStability}%</div>
+                          <div className="text-xs text-gray-600">Pitch</div>
                         </div>
-                        <div className="text-sm text-gray-600">Projection</div>
-                      </div>
-                      <div className="text-center p-3 bg-orange-50 rounded-lg">
-                        <div className="text-2xl font-bold text-orange-600">
-                          {session.voiceAnalysis.volume.control || 0}%
+                      )}
+                      {session.voiceAnalysis.intonation?.expressiveness > 0 && (
+                        <div className="text-center p-3 bg-orange-50 rounded-lg border border-orange-100">
+                          <div className="text-xl font-bold text-orange-600">{session.voiceAnalysis.intonation.expressiveness}%</div>
+                          <div className="text-xs text-gray-600">Expression</div>
                         </div>
-                        <div className="text-sm text-gray-600">Control</div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Intonation Analysis */}
-                {session.voiceAnalysis.intonation && (
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                      <TrendingUp className="h-4 w-4 text-purple-600" />
-                      Intonation Analysis
-                    </h4>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="text-center p-3 bg-purple-50 rounded-lg">
-                        <div className="text-2xl font-bold text-purple-600">
-                          {session.voiceAnalysis.intonation.score || 0}%
-                        </div>
-                        <div className="text-sm text-gray-600">Overall Score</div>
-                      </div>
-                      <div className="text-center p-3 bg-blue-50 rounded-lg">
-                        <div className="text-2xl font-bold text-blue-600">
-                          {session.voiceAnalysis.intonation.pitchVariation || 0}%
-                        </div>
-                        <div className="text-sm text-gray-600">Pitch Variation</div>
-                      </div>
-                      <div className="text-center p-3 bg-green-50 rounded-lg">
-                        <div className="text-2xl font-bold text-green-600">
-                          {session.voiceAnalysis.intonation.melodicContour || 0}%
-                        </div>
-                        <div className="text-sm text-gray-600">Melodic Contour</div>
-                      </div>
-                      <div className="text-center p-3 bg-orange-50 rounded-lg">
-                        <div className="text-2xl font-bold text-orange-600">
-                          {session.voiceAnalysis.intonation.expressiveness || 0}%
-                        </div>
-                        <div className="text-sm text-gray-600">Expressiveness</div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Voice Quality */}
-                {session.voiceAnalysis.quality && (
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                      <Award className="h-4 w-4 text-orange-600" />
-                      Voice Quality
-                    </h4>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="text-center p-3 bg-orange-50 rounded-lg">
-                        <div className="text-2xl font-bold text-orange-600">
-                          {session.voiceAnalysis.quality.vocalFry || 0}%
-                        </div>
-                        <div className="text-sm text-gray-600">Vocal Fry</div>
-                      </div>
-                      <div className="text-center p-3 bg-red-50 rounded-lg">
-                        <div className="text-2xl font-bold text-red-600">
-                          {session.voiceAnalysis.quality.uptalk || 0}%
-                        </div>
-                        <div className="text-sm text-gray-600">Uptalk</div>
-                      </div>
-                      <div className="text-center p-3 bg-green-50 rounded-lg">
-                        <div className="text-2xl font-bold text-green-600">
-                          {session.voiceAnalysis.quality.breathControl || 0}%
-                        </div>
-                        <div className="text-sm text-gray-600">Breath Control</div>
-                      </div>
-                      <div className="text-center p-3 bg-blue-50 rounded-lg">
-                        <div className="text-2xl font-bold text-blue-600">
-                          {session.voiceAnalysis.quality.resonance || 0}%
-                        </div>
-                        <div className="text-sm text-gray-600">Resonance</div>
-                      </div>
+                      )}
                     </div>
                   </div>
                 )}
