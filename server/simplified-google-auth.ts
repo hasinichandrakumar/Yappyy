@@ -256,6 +256,21 @@ export function setupSimplifiedGoogleAuth(app: Express) {
   // User info route
   app.get('/api/auth/user', async (req: AuthenticatedRequest, res: Response) => {
     try {
+      // Check for Firebase user first
+      if (req.session.firebase_user) {
+        const fbUser = req.session.firebase_user;
+        return res.json({
+          isAuthenticated: true,
+          user: {
+            id: fbUser.uid,
+            email: fbUser.email,
+            name: fbUser.displayName || fbUser.email?.split('@')[0],
+            profileImageUrl: fbUser.photoURL,
+            authType: 'firebase'
+          }
+        });
+      }
+
       if (!req.session.access_token) {
         return res.json({ 
           isAuthenticated: false, 
@@ -311,10 +326,12 @@ export function setupSimplifiedGoogleAuth(app: Express) {
         }
       }
 
-      // Clear session
+      // Clear session (including Firebase data)
       delete req.session.access_token;
       delete req.session.user_id;
       delete req.session.oauth_state;
+      delete req.session.firebase_uid;
+      delete req.session.firebase_user;
 
       // Destroy session
       req.session.destroy((err) => {
@@ -326,6 +343,44 @@ export function setupSimplifiedGoogleAuth(app: Express) {
     } catch (error) {
       console.error('❌ Logout error:', error);
       res.redirect('/');
+    }
+  });
+
+  // Firebase authentication endpoint
+  app.post('/api/auth/firebase', async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { uid, email, displayName, photoURL } = req.body;
+      
+      if (!uid || !email) {
+        return res.status(400).json({ error: 'Missing required fields' });
+      }
+
+      // Store Firebase user in session
+      req.session.firebase_uid = uid;
+      req.session.user_id = uid;
+      req.session.firebase_user = {
+        uid,
+        email,
+        displayName,
+        photoURL
+      };
+
+      console.log('✅ Firebase user authenticated:', email);
+      
+      res.json({
+        success: true,
+        isAuthenticated: true,
+        user: {
+          id: uid,
+          email,
+          name: displayName || email.split('@')[0],
+          profileImageUrl: photoURL,
+          authType: 'firebase'
+        }
+      });
+    } catch (error) {
+      console.error('❌ Firebase auth error:', error);
+      res.status(500).json({ error: 'Authentication failed' });
     }
   });
 

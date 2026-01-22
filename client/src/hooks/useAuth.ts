@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect, useCallback } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { auth, signInWithGoogle, firebaseSignOut, handleRedirectResult, onAuthChange, User as FirebaseUser } from '@/lib/firebase';
 
 interface User {
   id: string;
@@ -15,17 +16,43 @@ interface User {
 
 export function useAuth() {
   const [isLoggedOut, setIsLoggedOut] = useState(false);
+  const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
+  const [firebaseLoading, setFirebaseLoading] = useState(true);
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    handleRedirectResult().catch(console.error);
+    
+    const unsubscribe = onAuthChange((user) => {
+      setFirebaseUser(user);
+      setFirebaseLoading(false);
+      
+      if (user) {
+        fetch('/api/auth/firebase', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName,
+            photoURL: user.photoURL,
+          })
+        }).then(() => {
+          queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+        }).catch(console.error);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [queryClient]);
   
-  // Handle OAuth token authentication on page load
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const authToken = urlParams.get('auth');
     
     if (authToken) {
-      // Remove token from URL
       window.history.replaceState({}, document.title, window.location.pathname);
       
-      // Authenticate with token
       fetch('/api/auth/token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -33,7 +60,7 @@ export function useAuth() {
       }).then(response => {
         if (response.ok) {
           console.log('✅ Token authentication successful');
-          window.location.reload(); // Reload to get user data
+          window.location.reload();
         } else {
           console.error('Token authentication failed');
         }
@@ -43,37 +70,56 @@ export function useAuth() {
     }
   }, []);
   
-  // Fetch real user data from API - works for both authenticated and guest users
-  const { data: userData, isLoading, error } = useQuery({
+  const { data: userData, isLoading: apiLoading, error } = useQuery({
     queryKey: ['/api/auth/user'],
     enabled: typeof window !== 'undefined' && !isLoggedOut && window.sessionStorage.getItem('loggedOut') !== 'true'
   });
   
-  // Check if user explicitly logged out
   const loggedOut = typeof window !== 'undefined' && 
     (window.sessionStorage.getItem('loggedOut') === 'true' || isLoggedOut);
   
-  const logout = () => {
+  const logout = useCallback(async () => {
     if (typeof window !== 'undefined') {
       window.sessionStorage.setItem('loggedOut', 'true');
       setIsLoggedOut(true);
-      // Call Google OAuth logout endpoint
+      
+      try {
+        await firebaseSignOut();
+      } catch (e) {
+        console.error('Firebase sign out error:', e);
+      }
+      
       fetch('/api/auth/logout', { method: 'GET' }).then(() => {
         window.location.href = '/';
       });
     }
-  };
+  }, []);
 
-  const login = () => {
-    // Redirect to Google OAuth login
+  const login = useCallback(async () => {
     if (typeof window !== 'undefined') {
       window.sessionStorage.removeItem('loggedOut');
-      window.location.href = '/api/auth/google';
+      setIsLoggedOut(false);
+      
+      try {
+        await signInWithGoogle();
+      } catch (error) {
+        console.error('Firebase login error:', error);
+      }
     }
-  };
+  }, []);
 
-  const user = loggedOut ? null : userData as User;
-  const isAuthenticated = !loggedOut && (userData as any)?.isAuthenticated === true;
+  const user = loggedOut ? null : (firebaseUser ? {
+    id: firebaseUser.uid,
+    email: firebaseUser.email || '',
+    name: firebaseUser.displayName || '',
+    username: firebaseUser.email?.split('@')[0] || '',
+    authType: 'firebase',
+    isAuthenticated: true,
+    profileImageUrl: firebaseUser.photoURL || undefined,
+  } : userData as User);
+
+  const isAuthenticated = !loggedOut && (!!firebaseUser || (userData as any)?.isAuthenticated === true);
+  const isLoading = firebaseLoading || apiLoading;
 
   return {
     user,
@@ -81,6 +127,7 @@ export function useAuth() {
     isAuthenticated,
     logout,
     login,
-    error
+    error,
+    firebaseUser,
   };
 }
