@@ -430,52 +430,89 @@ export class RealTimeEyeContact {
   
   /**
    * Get fallback metrics when MediaPipe fails
+   * Measures eye contact by detecting if user's face is centered and looking at camera
    */
   private getFallbackMetrics(): EyeContactMetrics {
-    // Simple canvas-based face detection fallback
     if (this.videoElement && this.canvasElement) {
       try {
         const canvas = this.canvasElement;
         const ctx = canvas.getContext('2d');
-        if (ctx) {
-          // Draw video frame to canvas
+        if (ctx && this.videoElement.videoWidth > 0) {
+          canvas.width = this.videoElement.videoWidth;
+          canvas.height = this.videoElement.videoHeight;
           ctx.drawImage(this.videoElement, 0, 0, canvas.width, canvas.height);
           
-          // Simple face detection using image data analysis
-          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const width = canvas.width;
+          const height = canvas.height;
+          
+          // Analyze face region (upper-center of frame where face typically is when looking at camera)
+          const faceRegionTop = Math.floor(height * 0.1);
+          const faceRegionBottom = Math.floor(height * 0.6);
+          const faceRegionLeft = Math.floor(width * 0.25);
+          const faceRegionRight = Math.floor(width * 0.75);
+          
+          const imageData = ctx.getImageData(faceRegionLeft, faceRegionTop, 
+            faceRegionRight - faceRegionLeft, faceRegionBottom - faceRegionTop);
           const data = imageData.data;
           
-          // Calculate average brightness in center region (simple face detection)
-          const centerX = Math.floor(canvas.width / 2);
-          const centerY = Math.floor(canvas.height / 2);
-          const regionSize = Math.min(canvas.width, canvas.height) / 4;
+          // Detect skin tones to find face position
+          let skinPixelCount = 0;
+          let skinCenterX = 0;
+          let skinCenterY = 0;
+          const regionWidth = faceRegionRight - faceRegionLeft;
+          const regionHeight = faceRegionBottom - faceRegionTop;
           
-          let totalBrightness = 0;
-          let pixelCount = 0;
-          
-          for (let y = centerY - regionSize; y < centerY + regionSize; y++) {
-            for (let x = centerX - regionSize; x < centerX + regionSize; x++) {
-              if (x >= 0 && x < canvas.width && y >= 0 && y < canvas.height) {
-                const index = (y * canvas.width + x) * 4;
-                const brightness = (data[index] + data[index + 1] + data[index + 2]) / 3;
-                totalBrightness += brightness;
-                pixelCount++;
+          for (let y = 0; y < regionHeight; y++) {
+            for (let x = 0; x < regionWidth; x++) {
+              const index = (y * regionWidth + x) * 4;
+              const r = data[index];
+              const g = data[index + 1];
+              const b = data[index + 2];
+              
+              // Simple skin tone detection (works for various skin tones)
+              const isSkinTone = r > 60 && g > 40 && b > 20 &&
+                r > g && r > b &&
+                Math.abs(r - g) > 15 &&
+                r - b > 15;
+              
+              if (isSkinTone) {
+                skinPixelCount++;
+                skinCenterX += x;
+                skinCenterY += y;
               }
             }
           }
           
-          if (pixelCount > 0) {
-            const avgBrightness = totalBrightness / pixelCount;
-            // Simple heuristic: if there's significant brightness in center, assume face is present
-            const fallbackEyeContact = Math.min(100, Math.max(0, (avgBrightness / 255) * 100));
+          if (skinPixelCount > 100) {
+            // Calculate face center position
+            const avgX = skinCenterX / skinPixelCount;
+            const avgY = skinCenterY / skinPixelCount;
+            
+            // Normalize to 0-1 range (0.5 = center = looking at camera)
+            const normalizedX = avgX / regionWidth;
+            const normalizedY = avgY / regionHeight;
+            
+            // Calculate how centered the face is (closer to 0.5, 0.5 = looking at camera)
+            const distanceFromCenter = Math.sqrt(
+              Math.pow(normalizedX - 0.5, 2) + Math.pow(normalizedY - 0.5, 2)
+            );
+            
+            // Convert to eye contact percentage (centered face = high eye contact)
+            // Max distance from center is ~0.7, so we scale accordingly
+            const rawEyeContact = Math.max(0, 100 - (distanceFromCenter * 200));
+            const eyeContactScore = this.eyeContactFilter.update(rawEyeContact);
+            
+            // Determine if actively looking at camera (face centered and sufficient skin detected)
+            const faceCoverage = skinPixelCount / (regionWidth * regionHeight);
+            const isLookingAtCamera = eyeContactScore > 50 && faceCoverage > 0.05;
             
             return {
-              eyeContactPercentage: Math.round(fallbackEyeContact),
-              gazeDirection: { x: 0.5, y: 0.5, z: 0.5 },
-              gazeStability: 50,
+              eyeContactPercentage: Math.round(eyeContactScore),
+              gazeDirection: { x: normalizedX, y: normalizedY, z: 0.5 },
+              gazeStability: this.calculateGazeStability(),
               blinkRate: 0,
-              confidence: 0.3,
-              isLookingAtCamera: fallbackEyeContact > 30,
+              confidence: Math.min(100, Math.round(faceCoverage * 500)),
+              isLookingAtCamera,
               calibrationStatus: this.calibration.isCalibrated ? 'calibrated' : 'uncalibrated'
             };
           }
