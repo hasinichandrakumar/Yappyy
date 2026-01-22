@@ -256,7 +256,7 @@ function parseAIResponse(response: string, club: string): any {
     clubSpecificFeedback,
     nextSteps,
     aiGenerated: true,
-    evaluationSource: `${club} AI Judge powered by Perplexity`
+    evaluationSource: `${club} AI Judge powered by OpenAI`
   };
 }
 

@@ -5070,14 +5070,14 @@ Keep feedback constructive and actionable.`
         return res.status(400).json({ message: "Transcript and metrics are required" });
       }
 
-      const response = await fetch('https://api.perplexity.ai/chat/completions', {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${process.env.PERPLEXITY_API_KEY}`,
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: "llama-3.1-sonar-small-128k-online",
+          model: "gpt-4o",
           messages: [
             {
               role: "system",
@@ -5108,13 +5108,12 @@ Please analyze:
 Provide detailed, actionable feedback focusing on advanced speaking techniques.`
             }
           ],
-          temperature: 0.3,
-          stream: false
+          temperature: 0.3
         })
       });
 
       if (!response.ok) {
-        throw new Error(`Perplexity API error: ${response.status}`);
+        throw new Error(`OpenAI API error: ${response.status}`);
       }
 
       const data = await response.json();
@@ -5194,14 +5193,14 @@ Respond with detailed analysis in JSON format:
   "longTermGoals": ["goal 1", "goal 2"]
 }`;
 
-      const response = await fetch('https://api.perplexity.ai/chat/completions', {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${process.env.PERPLEXITY_API_KEY}`,
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: "llama-3.1-sonar-small-128k-online",
+          model: "gpt-4o",
           messages: [
             {
               role: "system",
@@ -5212,13 +5211,12 @@ Respond with detailed analysis in JSON format:
               content: analysisPrompt
             }
           ],
-          temperature: 0.3,
-          stream: false
+          temperature: 0.3
         })
       });
 
       if (!response.ok) {
-        throw new Error(`Perplexity API error: ${response.status}`);
+        throw new Error(`OpenAI API error: ${response.status}`);
       }
 
       const data = await response.json();

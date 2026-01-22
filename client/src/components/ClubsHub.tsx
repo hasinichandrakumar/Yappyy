@@ -136,7 +136,7 @@ const AICoachingSession = ({ club, event, onClose }: AICoachingSessionProps) => 
     setIsAnalyzing(true);
     
     try {
-      // Call the real Perplexity AI API
+      // Call the OpenAI API via backend
       const response = await fetch('/api/club-coaching', {
         method: 'POST',
         headers: {
@@ -408,7 +408,7 @@ const AICoachingSession = ({ club, event, onClose }: AICoachingSessionProps) => 
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
                   <h3 className="text-xl font-bold mb-2">AI {club} Judge Analyzing Performance</h3>
                   <p className="text-gray-600">Using advanced AI to evaluate against official {club} standards...</p>
-                  <p className="text-sm text-gray-500 mt-2">Powered by Perplexity AI</p>
+                  <p className="text-sm text-gray-500 mt-2">Powered by OpenAI</p>
                 </div>
               ) : feedback && (
                 <div className="space-y-6">

@@ -62,19 +62,16 @@ export function AITemplatePersonalization({ template, onTemplateUpdate, onClose 
         content: msg.content
       }));
 
-      // Call AI API
-      const response = await fetch('https://api.perplexity.ai/chat/completions', {
+      // Call AI API via backend
+      const response = await fetch('/api/speech-coaching-chat', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_PERPLEXITY_API_KEY}`,
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
-          model: "llama-3.1-sonar-small-128k-online",
-          messages: [
-            {
-              role: "system",
-              content: `You are an expert speech and presentation coach helping personalize speech templates.
+          message: userMessage,
+          context: `You are an expert speech and presentation coach helping personalize speech templates.
               Current template:
               ${template}
               
@@ -85,12 +82,8 @@ export function AITemplatePersonalization({ template, onTemplateUpdate, onClose 
               4. Maintain a conversational, helpful tone
               
               If you suggest template changes, format them clearly with [PLACEHOLDERS].
-              Focus on making the template more relevant and impactful for their specific case.`
-            },
-            ...conversationHistory
-          ],
-          temperature: 0.7,
-          stream: false
+              Focus on making the template more relevant and impactful for their specific case.`,
+          conversationHistory
         })
       });
 
@@ -99,7 +92,7 @@ export function AITemplatePersonalization({ template, onTemplateUpdate, onClose 
       }
 
       const data = await response.json();
-      const aiResponse = data.choices[0].message.content;
+      const aiResponse = data.response || data.message || '';
 
       // Check if response contains a template update
       const templateMatch = aiResponse.match(/```(?:\w+)?\n([\s\S]*?)```/);

@@ -1427,26 +1427,19 @@ Adopt their tone, phrasing patterns, signature techniques, and communication app
 
 Template Request: ${aiPrompt}`;
 
-      const response = await fetch('https://api.perplexity.ai/chat/completions', {
+      const response = await fetch('/api/openai/personalize-template', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_PERPLEXITY_API_KEY || process.env.PERPLEXITY_API_KEY}`,
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
-          model: "llama-3.1-sonar-small-128k-online",
-          messages: [
-            {
-              role: "system",
-              content: `You are an expert speechwriter and communication coach. Create professional, engaging speech templates with clear structure and placeholder variables for customization.${useRoleplay && selectedRoleData ? ` When roleplay is requested, fully embody the speaking style and persona of the specified character while maintaining professional template format.` : ''}`
-            },
-            {
-              role: "user",
-              content: prompt
-            }
-          ],
-          temperature: 0.7,
-          stream: false
+          template: prompt,
+          customizations: {
+            useRoleplay,
+            selectedRole: selectedRoleData?.name || null,
+            systemPrompt: `You are an expert speechwriter and communication coach. Create professional, engaging speech templates with clear structure and placeholder variables for customization.${useRoleplay && selectedRoleData ? ` When roleplay is requested, fully embody the speaking style and persona of the specified character while maintaining professional template format.` : ''}`
+          }
         })
       });
 
@@ -1455,7 +1448,7 @@ Template Request: ${aiPrompt}`;
       }
 
       const data = await response.json();
-      const aiGeneratedScript = data.choices[0].message.content;
+      const aiGeneratedScript = data.personalizedContent || data.response || data.message || '';
       
       setGeneratedScript(aiGeneratedScript);
       setSelectedTemplate(null); // Clear any selected template
